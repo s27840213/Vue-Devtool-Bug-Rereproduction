@@ -11,7 +11,11 @@ div(class="settings-account")
       span(v-if="hasAvatar") {{$t('NN0171')}}
       span(v-else) {{$t('NN0309')}}
   div(class="settings-account__info")
-    div(class="settings-account__label my-10") {{$t('NN0172')}}
+    div(class="settings-account__label space-between my-10")
+      span {{$t('NN0172')}}
+      span(v-if="isAdmin"
+        class="text-gray-1"
+        @click="copyText(userId)") {{userId}}
     property-bar(:class="{'input-invalid': !nameValid}")
       input(class="body-2 text-gray-2"
         v-model="inputName" type="text"
@@ -66,6 +70,7 @@ import Avatar from '@/components/Avatar.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
+import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -95,7 +100,9 @@ export default Vue.extend({
       token: 'getToken',
       hasAvatar: 'hasAvatar',
       account: 'getAccount',
-      subscribe: 'getSubscribe'
+      subscribe: 'getSubscribe',
+      isAdmin: 'isAdmin',
+      userId: 'getUserId'
     }),
     currLocale(): string {
       return this.$i18n.locale
@@ -242,6 +249,15 @@ export default Vue.extend({
     onRemoveAvatarClicked() {
       this.showRemovePopup = true
       // uploadUtils.chooseAssets('avatar')
+    },
+    copyText(text: string) {
+      if (text.length === 0) {
+        return
+      }
+      GeneralUtils.copyText(text)
+        .then(() => {
+          this.$notify({ group: 'copy', text: `${text} 已複製` })
+        })
     }
   }
 })
@@ -302,6 +318,10 @@ export default Vue.extend({
   &__label {
     color: setColor(gray-3);
     font-size: 14px;
+    &.space-between {
+      display: flex;
+      justify-content: space-between;
+    }
   }
   &__subscribe {
     display: flex;

@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
+      :style="brushCursorStyles()"
       @mousedown.left="selectStart($event)"
       @wheel="handleWheel"
       @scroll="scrollUpdate()"
@@ -32,14 +33,14 @@
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-        @mousedown.stop="dragStartV($event)"
+        @mousedown.stop="lockGuideline ? null: dragStartV($event)"
         @mouseout.stop="closeGuidelineV()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
           span {{rulerVPos}}
       div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-        @mousedown.stop="dragStartH($event)"
+        @mousedown.stop="lockGuideline ? null : dragStartH($event)"
         @mouseout.stop="closeGuidelineH()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
@@ -65,6 +66,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import layerUtils from '@/utils/layerUtils'
 import mathUtils from '@/utils/mathUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import formatUtils from '@/utils/formatUtils'
 
 export default Vue.extend({
   components: {
@@ -170,7 +172,9 @@ export default Vue.extend({
       getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
       showRuler: 'getShowRuler',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      lockGuideline: 'getLockGuideline',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      hasCopiedFormat: 'getHasCopiedFormat'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -207,6 +211,9 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
+    brushCursorStyles() {
+      return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
@@ -220,6 +227,9 @@ export default Vue.extend({
       }
     },
     selectStart(e: MouseEvent) {
+      if (this.hasCopiedFormat) {
+        formatUtils.clearCopiedFormat()
+      }
       if (this.isTyping) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
@@ -284,7 +294,7 @@ export default Vue.extend({
       })
     },
     handleSelectionData(selectionData: DOMRect) {
-      const layers = [...document.querySelectorAll(`.nu-layer--p${this.getMiddlemostPageIndex}`)]
+      const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
       const layerIndexs: number[] = []
       layers.forEach((layer) => {
         const layerData = layer.getBoundingClientRect()
@@ -293,21 +303,10 @@ export default Vue.extend({
           layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
         }
       })
-      // const selectionAreaInfo = this.mapSelectionRectToPage(selectionData)
-      // const layers = layerUtils.getLayers(this.getMiddlemostPageIndex)
-      // // const layers = [...document.querySelectorAll(`.nu-layer--p${this.getMiddlemostPageIndex}`)]
-      // const layerIndexs: number[] = []
-      // layers.forEach((layer) => {
-      //   mathUtils.getCornerPoints(0, selectionAreaInfo)
-      //   const layerData = layer.getBoundingClientRect()
-      //   if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-      //     (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-      //     layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
-      //   }
-      // })
+
       if (layerIndexs.length > 0) {
         // this.addSelectedLayer(layerIndexs as number[])
-        GroupUtils.select(this.getMiddlemostPageIndex, layerIndexs)
+        GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }
     },
     mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {

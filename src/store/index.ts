@@ -19,6 +19,7 @@ import popup from '@/store/module/popup'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
+import layouts from '@/store/module/layouts'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -75,7 +76,7 @@ const getDefaultState = (): IEditorState => ({
     type: ''
   },
   isColorPickerOpened: false,
-  currSelectedPhotoInfo: {},
+  currSelectedResInfo: {},
   asset: {},
   textInfo: {
     heading: [],
@@ -85,7 +86,9 @@ const getDefaultState = (): IEditorState => ({
   isMoving: false,
   showRuler: false,
   showGuideline: true,
-  themes: []
+  lockGuideline: false,
+  themes: [],
+  hasCopiedFormat: false
 })
 
 const state = getDefaultState()
@@ -139,7 +142,7 @@ const getters: GetterTree<IEditorState, unknown> = {
   getLayer(state: IEditorState) {
     return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
       const page = state.pages[pageIndex]
-      return page?.layers[layerIndex >= 0 ? layerIndex : page.layers.length + layerIndex] ?? {}
+      return page?.layers[layerIndex] ?? {}
     }
   },
   getLayers(state: IEditorState) {
@@ -167,6 +170,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrActivePageIndex(state: IEditorState): number {
     return state.currActivePageIndex
+  },
+  getCurrFocusPageIndex(state: IEditorState): number {
+    const { pageIndex } = state.currSelectedInfo
+    return pageIndex >= 0 ? pageIndex
+      : state.currActivePageIndex >= 0
+        ? state.currActivePageIndex : state.middlemostPageIndex
   },
   getLastSelectedLayerIndex(state: IEditorState): number {
     return state.lastSelectedLayerIndex
@@ -201,8 +210,8 @@ const getters: GetterTree<IEditorState, unknown> = {
   getIsColorPickerOpened(state: IEditorState) {
     return state.isColorPickerOpened
   },
-  getCurrSelectedPhotoInfo(state: IEditorState) {
-    return state.currSelectedPhotoInfo
+  getCurrSelectedResInfo(state: IEditorState) {
+    return state.currSelectedResInfo
   },
   getAsset(state: IEditorState) {
     return (id: string) => state.asset[id]
@@ -216,8 +225,14 @@ const getters: GetterTree<IEditorState, unknown> = {
   getShowGuideline(state: IEditorState) {
     return state.showGuideline
   },
+  getLockGuideline(state: IEditorState) {
+    return state.lockGuideline
+  },
   getThemes(state: IEditorState) {
     return state.themes
+  },
+  getHasCopiedFormat(state: IEditorState) {
+    return state.hasCopiedFormat
   }
 }
 
@@ -267,6 +282,7 @@ const mutations: MutationTree<IEditorState> = {
     state.exportIds = exportIds.join(',')
   },
   SET_groupType(state: IEditorState, groupType: number) {
+    console.log('SET_groupType')
     state.groupType = groupType
   },
   SET_folderInfo(state: IEditorState, folderInfo: { isRoot: boolean, parentFolder: string, path: string }) {
@@ -365,6 +381,9 @@ const mutations: MutationTree<IEditorState> = {
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
+  },
+  SET_hasCopiedFormat(state: IEditorState, value: boolean) {
+    state.hasCopiedFormat = value
   },
   ADD_newLayers(state: IEditorState, updateInfo: { pageIndex: number, layers: Array<IShape | IText | IImage | IGroup> }) {
     updateInfo.layers.forEach(layer => {
@@ -511,7 +530,6 @@ const mutations: MutationTree<IEditorState> = {
         layer.styles[k] = v
       })
     })
-    // state.currSelectedInfo.layers[0].layers = (state.pages[state.middlemostPageIndex].layers[state.currSelectedInfo.index] as IGroup).layers
   },
   UPDATE_selectedLayersStyles(state: IEditorState, updateInfo: { styles: { [key: string]: string | number }, layerIndex?: number }) {
     Object.entries(updateInfo.styles).forEach(([k, v]) => {
@@ -569,8 +587,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
     state.isColorPickerOpened = isOpened
   },
-  SET_currSelectedPhotoInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
-    state.currSelectedPhotoInfo = data
+  SET_currSelectedResInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
+    state.currSelectedResInfo = data
   },
   SET_subLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
@@ -582,12 +600,29 @@ const mutations: MutationTree<IEditorState> = {
     const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
     Object.assign(layers[subLayerIndex].styles, styles)
   },
-  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
+  SET_frameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, styles } = data
+    const layers = state.pages[pageIndex].layers[primaryLayerIndex].clips as IImage[]
+    for (const clip of layers) {
+      Object.assign(clip.styles, generalUtils.deepCopy(styles))
+    }
+  },
+  SET_subFrameLayerStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: any }) {
+    const { pageIndex, primaryLayerIndex, subLayerIndex, targetIndex, styles } = data
+    const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
+    if (groupLayer.type === 'group') {
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
+      Object.assign(clipsLayer[targetIndex].styles, styles)
+    }
+  },
+  SET_subFrameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
     if (groupLayer.type === 'group') {
-      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IFrame[]
-      Object.assign(clipsLayer[0].styles, styles)
+      const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
+      for (const clip of clipsLayer) {
+        Object.assign(clip.styles, generalUtils.deepCopy(styles))
+      }
     }
   },
   SET_assetJson(state: IEditorState, json: { [key: string]: any }) {
@@ -608,8 +643,8 @@ const mutations: MutationTree<IEditorState> = {
         const matchType = type ? type.includes(layer.type) : true
         const matchSubLayerIndex = typeof subLayerIndex === 'undefined' || idx === subLayerIndex
         if (matchType && matchSubLayerIndex) {
-          props && Object.assign(targetLayer.layers[idx], props)
-          styles && Object.assign(targetLayer.layers[idx].styles, styles)
+          props && Object.assign(targetLayer.layers[idx], generalUtils.deepCopy(props))
+          styles && Object.assign(targetLayer.layers[idx].styles, generalUtils.deepCopy(styles))
         }
       })
     } else {
@@ -648,6 +683,11 @@ const mutations: MutationTree<IEditorState> = {
       }
     }
   },
+  SET_guideline(state: IEditorState, { guidelines, pageIndex }) {
+    const { pages } = state
+    const currFocusPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
+    pages[currFocusPageIndex].guidelines = guidelines
+  },
   DELETE_guideline(state: IEditorState, updateInfo: { pageIndex: number, index: number, type: string }) {
     const { pageIndex, index, type } = updateInfo
     const { pages } = state
@@ -665,11 +705,14 @@ const mutations: MutationTree<IEditorState> = {
   SET_showGuideline(state: IEditorState, bool: boolean) {
     state.showGuideline = bool
   },
+  SET_lockGuideline(state: IEditorState, bool: boolean) {
+    state.lockGuideline = bool
+  },
   CLEAR_pagesInfo(state: IEditorState) {
     state.designId = ''
     state.assetId = ''
     state.groupId = ''
-    state.groupType = 0
+    state.groupType = -1
     state.name = ''
     state.exportIds = ''
     Object.assign(state.folderInfo, {
@@ -686,6 +729,10 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_themes(state: IEditorState, themes: Itheme[]) {
     state.themes = themes
+  },
+  UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
+    const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
+    Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   }
 }
 
@@ -708,6 +755,7 @@ export default new Vuex.Store({
     page,
     homeTemplate,
     design,
+    layouts,
     unsplash
   }
 })

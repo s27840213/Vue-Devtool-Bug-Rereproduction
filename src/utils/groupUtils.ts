@@ -12,6 +12,7 @@ import ShapeUtils from './shapeUtils'
 import ImageUtils from './imageUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
+import pageUtils from './pageUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -58,7 +59,6 @@ class GroupUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get getLayer() { return store.getters.getLayer }
   get getCurrLayer() { return store.getters.getLayer(this.pageIndex, this.layerIndex) }
-  get middlemostPageIndex() { return store.getters.getMiddlemostPageIndex }
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
@@ -126,7 +126,6 @@ class GroupUtils {
         layer.styles.zindex = targetLayer.styles.zindex + index
         layer.active = false
       })
-      const tmpLayer = GeneralUtils.deepCopy(targetLayer)
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         type: 'tmp',
         active: true
@@ -137,7 +136,7 @@ class GroupUtils {
       const tmpPageIndex = this.currSelectedInfo.pageIndex
       const tmpIndex = this.currSelectedInfo.index
       this.reset()
-      this.set(tmpPageIndex, tmpIndex, tmpLayer.layers)
+      this.set(tmpPageIndex, tmpIndex, targetLayer.layers)
     }
   }
 
@@ -234,7 +233,7 @@ class GroupUtils {
 
   selectAll() {
     this.deselect()
-    this.select(store.getters.getMiddlemostPageIndex, [...Array(store.getters.getLayersNum(store.getters.getMiddlemostPageIndex)).keys()])
+    this.select(pageUtils.currFocusPageIndex, [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()])
   }
 
   deselect() {
@@ -324,6 +323,10 @@ class GroupUtils {
       layers: [],
       types: new Set<string>()
     })
+    store.commit('SET_currSubSelectedInfo', {
+      index: -1,
+      type: ''
+    })
   }
 
   set(currSelectedPageIndex: number, currSelectedIndex: number, currSelectedLayers: Array<IShape | IText | IImage | IGroup | IFrame>) {
@@ -379,7 +382,8 @@ class GroupUtils {
         layer.styles.imgX *= tmpLayer.styles.scale
         layer.styles.imgY *= tmpLayer.styles.scale
 
-        const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        const ratio = tmpLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -402,7 +406,8 @@ class GroupUtils {
           layer.styles.initHeight = realHeight
           layer.styles.scale = 1
 
-          const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          const ratio = tmpLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -417,7 +422,8 @@ class GroupUtils {
           layer.size = [Math.round(lineWidth * tmpLayer.styles.scale), corRad * tmpLayer.styles.scale]
           layer.styles.scale = 1
 
-          const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+          const ratio = tmpLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -443,7 +449,8 @@ class GroupUtils {
 
       // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {
-        const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
+        const ratio = tmpLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -545,7 +552,8 @@ class GroupUtils {
         layer.styles.imgY *= groupLayer.styles.scale
 
         layer.clipPath = `M0,0h${width}v${height}h${-width}z`
-        const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        const ratio = groupLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX
@@ -568,7 +576,8 @@ class GroupUtils {
           layer.styles.initHeight = realHeight
           layer.styles.scale = 1
 
-          const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          const ratio = groupLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -583,7 +592,8 @@ class GroupUtils {
           layer.size = [Math.round(lineWidth * groupLayer.styles.scale), corRad * groupLayer.styles.scale]
           layer.styles.scale = 1
 
-          const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+          const ratio = groupLayer.styles.scale
           const [x1, y1] = [layer.styles.x, layer.styles.y]
           const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
           layer.styles.x = shiftX
@@ -601,7 +611,8 @@ class GroupUtils {
 
       // calculate the center shift of scaled image
       if (layer.styles.scale !== 1) {
-        const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        // const ratio = groupLayer.styles.width / groupLayer.styles.initWidth
+        const ratio = groupLayer.styles.scale
         const [x1, y1] = [layer.styles.x, layer.styles.y]
         const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
         layer.styles.x = shiftX

@@ -20,6 +20,7 @@ import { SidebarPanelType } from '@/store/types'
 import i18n from '@/i18n'
 import logUtils from './logUtils'
 import listService from '@/apis/list'
+import designApis from '@/apis/design-info'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -81,6 +82,7 @@ class UploadUtils {
   get exportIds(): string { return store.state.exportIds }
   get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
+  get isOutsourcer(): boolean { return store.getters['user/isOutsourcer'] }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
 
   constructor() {
@@ -811,9 +813,18 @@ class UploadUtils {
     }
   }
 
-  updateTemplate() {
+  async updateTemplate() {
     const pageIndex = store.getters.getMiddlemostPageIndex
     const designId = store.getters.getPage(pageIndex).designId
+    if (this.isOutsourcer) {
+      const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
+      const { creator_id: creatorId } = res.data
+      if (creatorId !== this.userId) {
+        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'], '')
+        return
+      }
+    }
 
     const pageJSON = this.default(generalUtils.deepCopy(store.getters.getPage(pageIndex))) as IPage
     for (const [i, layer] of pageJSON.layers.entries()) {
@@ -966,13 +977,13 @@ class UploadUtils {
         return listService.getList({ type: 'group', groupId: designId })
           .then(result => {
             const { content } = result.data.data
+            store.commit('SET_groupType', 1)
             return assetUtils.addGroupTemplate({
               id: '',
               type: 6,
               ver: 0,
               content_ids: content[0].list,
-              group_id: designId,
-              group_type: 1
+              group_id: designId
             })
           })
           .then(() => {

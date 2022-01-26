@@ -2,12 +2,14 @@
   div(class="nu-image"
     :style="styles()"
     draggable="false")
-    nu-adjust-image(v-show="isAdjustImage"
-      class="layer-flip"
-      :src="src"
-      :styles="adjustImgStyles"
-      :style="flipStyles()")
+    template(v-if="isAdjustImage")
+      nu-adjust-image(v-show="isAdjustImage"
+        class="layer-flip"
+        :src="src"
+        :styles="adjustImgStyles"
+        :style="flipStyles()")
     img(v-show="!isAdjustImage"
+      ref="img"
       :style="flipStyles()"
       class="nu-image__picture layer-flip"
       draggable="false"
@@ -23,7 +25,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
@@ -38,7 +40,7 @@ export default Vue.extend({
     isBgImgControl: Boolean
   },
   async created() {
-    const { type } = this.config
+    const { type } = this.config.srcObj
     const { assetId } = this.config.srcObj
     if (type === 'private') {
       const images = store.getters['user/getImages'] as Array<IAssetPhoto>
@@ -47,9 +49,12 @@ export default Vue.extend({
         await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
       }
     }
-    const nextImg = new Image()
-    nextImg.onerror = () => {
-      if ((this.config as IImage).srcObj.type === 'pexels') {
+
+    await this.perviewAsLoading()
+
+    const preImg = new Image()
+    preImg.onerror = () => {
+      if (type === 'pexels') {
         const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
         switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
           case 'group':
@@ -61,30 +66,54 @@ export default Vue.extend({
           default:
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
         }
-        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
+        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
       }
     }
-    nextImg.onload = () => {
-      const preImg = new Image()
-      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+    preImg.onload = () => {
+      const nextImg = new Image()
+      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
     }
-    nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
+    preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
   },
   data() {
     return {
-      isOnError: false
+      isOnError: false,
+      src: ImageUtils.getSrc(this.config)
     }
   },
   watch: {
-    getImgDimension(newVal) {
+    getImgDimension(newVal, oldVal) {
       if (!this.isOnError) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-        const preImg = new Image()
-        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'pre'))
-        const nextImg = new Image()
-        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.sizeMap(newVal), 'next'))
+
+        const preLoadImg = (preLoadType: 'pre' | 'next') => {
+          return new Promise<void>((resolve, reject) => {
+            const img = new Image()
+            img.onload = () => resolve()
+            img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+            img.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType))
+          })
+        }
+
+        const imgElement = this.$refs.img as HTMLImageElement
+        imgElement.onload = async () => {
+          if (newVal > oldVal) {
+            await preLoadImg('next')
+            preLoadImg('pre')
+          } else {
+            await preLoadImg('pre')
+            preLoadImg('next')
+          }
+        }
+        this.src = ImageUtils.getSrc(this.config, newVal)
       }
+    },
+    srcObj: {
+      handler: function() {
+        this.perviewAsLoading()
+      },
+      deep: true
     }
   },
   components: { NuAdjustImage },
@@ -92,21 +121,25 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    ...mapState('user', ['imgSizeMap']),
     getImgDimension(): number {
-      return ImageUtils.getSignificantDimension(this.config.styles.width, this.config.styles.height) * (this.scaleRatio / 100)
+      const { type } = this.config.srcObj
+      const { width, height } = this.config.styles
+      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
     },
-    src(): string {
-      if (this.config.src) {
-        return this.config.src
-      } else {
-        return this.config.previewSrc ?? ImageUtils.getSrc(this.config)
-      }
+    getPreviewSize(): number {
+      const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
+      return ImageUtils
+        .getSrcSize(this.config.srcObj.type, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
       const { styles } = this.config
       return Object
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
+    },
+    srcObj(): any {
+      return (this.config as IImage).srcObj
     },
     adjustImgStyles(): any {
       const styles = generalUtils.deepCopy(this.config.styles)
@@ -139,17 +172,6 @@ export default Vue.extend({
         transform: `scaleX(${styles.scaleX}) scaleY(${styles.scaleY})`
       }
     },
-    sizeMap(width: number) {
-      if (width < 540) {
-        return 540
-      } else if (width < 800) {
-        return 800
-      } else if (width < 1080) {
-        return 1080
-      } else {
-        return 1600
-      }
-    },
     onError() {
       console.log('image on error')
       this.isOnError = true
@@ -162,6 +184,24 @@ export default Vue.extend({
     },
     onLoad() {
       this.isOnError = false
+    },
+    async perviewAsLoading() {
+      return new Promise<void>((resolve, reject) => {
+        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
+        const img = new Image()
+        const src = ImageUtils.getSrc(this.config)
+        img.onload = () => {
+          // If after onload the img, the config.srcObj is the same, set the src.
+          if (ImageUtils.getSrc(this.config) === src) {
+            this.src = src
+          }
+          resolve()
+        }
+        img.onerror = () => {
+          reject(new Error('cannot load the current image'))
+        }
+        img.src = src
+      })
     }
   }
 })

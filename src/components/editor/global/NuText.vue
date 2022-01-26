@@ -76,7 +76,7 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
-    if (this.config.styles.textShape?.name) {
+    if (this.config.styles.textShape?.name === 'curve') {
       return
     }
     if (!this.isDestroyed) {
@@ -167,7 +167,6 @@ export default Vue.extend({
       let prevDiff = Number.MAX_VALUE
       let prevWidthLimit = -1
       while (shouldContinue) {
-        console.log(widthLimit, direction)
         const autoDimension = autoSize[dimension]
         const currDiff = Math.abs(autoDimension - originDimension)
         if (currDiff > prevDiff) {
@@ -205,9 +204,9 @@ export default Vue.extend({
 
 <style lang="scss">
 .nu-text {
-    width: 100%;
-    height: 100%;
-    position: relative;
+  width: 100%;
+  height: 100%;
+  position: relative;
   &__body {
     outline: none;
     padding: 0;
@@ -222,5 +221,4 @@ export default Vue.extend({
     overflow-wrap: break-word;
   }
 }
-
 </style>

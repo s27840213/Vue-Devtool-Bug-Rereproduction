@@ -8,9 +8,9 @@
     router-view
     div(class="popup-area")
       popup
-      photo-info(v-show="currSelectedPhotoInfo.userName"
-        :info="currSelectedPhotoInfo"
-        @blur.native="setCurrSelectedPhotoInfo()"
+      res-info(v-show="currSelectedResInfo.type"
+        :info="currSelectedResInfo"
+        @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
       hint
     div(class="modal-container"
@@ -40,7 +40,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
-import PhotoInfo from '@/components/modal/PhotoInfo.vue'
+import ResInfo from '@/components/modal/ResInfo.vue'
 import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
@@ -50,7 +50,7 @@ export default Vue.extend({
   components: {
     Popup,
     'chrome-picker': Chrome,
-    PhotoInfo,
+    ResInfo,
     ModalCard
   },
   directives: {
@@ -74,8 +74,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
-      currSelectedPhotoInfo: 'getCurrSelectedPhotoInfo',
+      currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen'
     }),
     currLocale(): string {
@@ -89,7 +88,7 @@ export default Vue.extend({
     }),
     ...mapMutations({
       setDropdown: 'popup/SET_STATE',
-      _setCurrSelectedPhotoInfo: 'SET_currSelectedPhotoInfo'
+      _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
     appStyles() {
       if (this.$route.name === 'Preview') {
@@ -112,9 +111,9 @@ export default Vue.extend({
     closeDropdown(type: string) {
       popupUtils.closePopup()
     },
-    setCurrSelectedPhotoInfo() {
+    setCurrSelectedResInfo() {
       this.$nextTick(() => {
-        this._setCurrSelectedPhotoInfo({})
+        this._setCurrSelectedResInfo({})
       })
     },
     vcoConfig(type: string) {

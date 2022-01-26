@@ -3,6 +3,8 @@ import { IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
+import store from '@/store'
+import authToken from '@/apis/auth-token'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -24,7 +26,8 @@ export default function (this: any) {
     preview: '',
     preview2: '',
     locale: '',
-    error: ''
+    error: '',
+    sum: 0
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
@@ -33,7 +36,12 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, categories: [], locale })
       try {
-        const { data } = await this.api({ locale, theme, listAll: 0 })
+        const { data } = await this.api({
+          token: store.getters['user/getToken'],
+          locale,
+          theme,
+          listAll: 0
+        })
         commit(SET_CATEGORIES, data.data)
       } catch (error) {
         captureException(error)
@@ -46,7 +54,15 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
+        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+        const { data } = await this.api({
+          token: needCache ? '1' : store.getters['user/getToken'],
+          locale,
+          keyword,
+          theme,
+          listAll: 1,
+          cache: needCache
+        })
         commit(SET_CONTENT, data.data)
       } catch (error) {
         captureException(error)
@@ -58,7 +74,15 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, theme, locale, content: {} })
       try {
-        const { data } = await this.api({ locale, keyword, theme, listAll: 1 })
+        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
+        const { data } = await this.api({
+          token: needCache ? '1' : store.getters['user/getToken'],
+          locale,
+          keyword,
+          theme,
+          listAll: 1,
+          cache: needCache
+        })
         commit(SET_CONTENT, data.data)
         console.log(data.data)
       } catch (error) {
@@ -72,11 +96,14 @@ export default function (this: any) {
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
+        const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
         const { data } = await this.api({
+          token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           theme,
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
-          listAll: 1
+          listAll: 1,
+          cache: needCache
         })
         commit(SET_CONTENT, data.data)
       } catch (error) {
@@ -104,6 +131,26 @@ export default function (this: any) {
         page: 0,
         nextPage: 0
       })
+    },
+
+    getSum: async ({ commit, state }, params = {}) => {
+      const { theme } = state
+      const { keyword } = params
+      const locale = localeUtils.currLocale()
+      commit(SET_STATE, { pending: true, keyword, locale, content: {} })
+      try {
+        const { data } = await this.api({
+          token: store.getters['user/getToken'],
+          locale,
+          theme,
+          keyword: (keyword.includes('::') ? keyword : `tag::${keyword}`).concat(';;sum::1'),
+          listAll: 1
+        })
+        commit(SET_STATE, { sum: data.data.sum })
+        // commit(SET_CONTENT, data.data)
+      } catch (error) {
+        captureException(error)
+      }
     }
   }
 
@@ -159,12 +206,15 @@ export default function (this: any) {
   const getters: GetterTree<IListModuleState, any> = {
     nextParams (state) {
       const { nextPage, keyword, theme, locale } = state
+      const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
       return {
+        token: needCache ? '1' : store.getters['user/getToken'],
         locale,
         keyword,
         theme,
         listAll: 1,
-        pageIndex: nextPage
+        pageIndex: nextPage,
+        cache: needCache
       }
     },
     hasNextPage (state) {

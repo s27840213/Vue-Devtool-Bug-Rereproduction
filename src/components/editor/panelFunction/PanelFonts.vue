@@ -92,7 +92,6 @@ export default Vue.extend({
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',

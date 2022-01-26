@@ -29,12 +29,15 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
-import AssetUtils from '@/utils/assetUtils'
+import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import ImageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
 import networkUtils from '@/utils/networkUtils'
 import modalUtils from '@/utils/modalUtils'
+import { wrap } from '@sentry/browser/dist/helpers'
+import layerUtils from '@/utils/layerUtils'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -63,7 +66,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
@@ -82,11 +84,12 @@ export default Vue.extend({
     },
     previewSrc(): string {
       const { inFilePanel, photo, vendor } = this
-      if (inFilePanel || photo.urls) return photo.urls.prev || photo.urls.thumb
+      if (inFilePanel || photo.urls) return photo.urls.tiny || photo.urls.thumb
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
-      return ImageUtils.getSrc(data, 200)
+      const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
+      return ImageUtils.getSrc(data, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] || 150)
     },
     fullSrc(): string {
       const { inFilePanel, photo, vendor } = this
@@ -99,7 +102,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      _x: 'SET_currSelectedPhotoInfo',
+      _setCurrSelectedResInfo: 'SET_currSelectedResInfo',
       addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
       deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
       updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS',
@@ -113,39 +116,41 @@ export default Vue.extend({
       if (this.isUploading) {
         e.preventDefault()
       } else {
-        const dataTransfer = e.dataTransfer as DataTransfer
-        dataTransfer.dropEffect = 'move'
-        dataTransfer.effectAllowed = 'move'
-        const width = photo.width / 20
-        const height = photo.height / 20
-        const rect = (e.target as Element).getBoundingClientRect()
+        const pageSize = this.$store.getters.getPageSize(layerUtils.pageIndex)
+        const resizeRatio = RESIZE_RATIO_IMAGE
+        const pageAspectRatio = pageSize.width / pageSize.height
+        const photoAspectRatio = photo.width / photo.height
+        const photoWidth = photoAspectRatio > pageAspectRatio ? pageSize.width * resizeRatio : (pageSize.height * resizeRatio) * photoAspectRatio
+        const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
+
         const src = this.fullSrc
         const type = ImageUtils.getSrcType(this.fullSrc)
-        const data = {
-          type: 'image',
-          // @/assets/img/svg/img-tmp.svg
-          srcObj: {
-            type,
-            userId: ImageUtils.getUserId(src, type),
-            assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
-          },
-          styles: {
-            x: ((e.clientX - rect.x) / rect.width * width) * (this.scaleRatio / 100),
-            y: ((e.clientY - rect.y) / rect.height * height) * (this.scaleRatio / 100),
-            width: width,
-            height: height
-          }
+        const srcObj = {
+          type,
+          userId: ImageUtils.getUserId(src, type),
+          assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
         }
-        dataTransfer.setData('data', JSON.stringify(data))
-        fetch(ImageUtils.getSrc(data as IImage))
-        fetch(ImageUtils.getSrc(data as IImage, ImageUtils.getSrcSize(data.srcObj.type,
-          ImageUtils.getSignificantDimension(data.styles.width, data.styles.height),
-          'next')))
+
+        new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
+          width: photoWidth,
+          height: photoHeight,
+          offsetX: 10,
+          offsetY: 15
+        })
+
+        const significantSize = ImageUtils.getSignificantDimension(photoWidth, photoHeight)
+        const imgPreload = new Image()
+        imgPreload.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize))
+        const imgPreloadPre = new Image()
+        imgPreloadPre.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize, 'pre'))
+        const imgPreloadNext = new Image()
+        imgPreloadNext.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize, 'next'))
+
         this.setCurrDraggedPhoto({
           srcObj: {
-            ...data.srcObj
+            ...srcObj
           },
-          styles: { width, height },
+          styles: { width: photoWidth, height: photoHeight },
           isPreview: this.isUploading
         })
       }
@@ -179,14 +184,15 @@ export default Vue.extend({
     showPhotoInfo(evt: Event) {
       const { vendor } = this
       const { info = {}, tags } = this.photo
-      this._x({
+      this._setCurrSelectedResInfo({
+        type: 'photo',
         userName: info.user?.name ?? '',
         userLink: info.user?.link ?? '',
         vendor,
         tags
       })
       this.$nextTick(() => {
-        const el = document.querySelector('.photo-info') as HTMLElement
+        const el = document.querySelector('.res-info') as HTMLElement
         const { top, left, height } = (evt.target as HTMLElement).getBoundingClientRect()
         el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
         el.focus()
@@ -235,7 +241,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
   }
-  &__photo-info {
+  &__res-info {
     position: absolute;
     top: 0;
     right: 0;

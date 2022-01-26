@@ -174,7 +174,7 @@ const router = new VueRouter({
         if (locale === '' || !locale) {
           locale = to.params.locale
           // without locale param, determine the locale with browser language
-          if (locale === '') {
+          if (locale === '' || !locale) {
             i18n.locale = localeUtils.getBrowserLang()
           } else {
             i18n.locale = locale

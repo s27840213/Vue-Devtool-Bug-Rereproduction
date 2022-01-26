@@ -22,6 +22,7 @@ class RulerUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get showRuler() { return store.getters.getShowRuler }
   get showGuideline() { return store.getters.getShowGuideline }
+  get lockGuideline() { return store.getters.getLockGuideline }
 
   RULER_SIZE = 20
   event: any
@@ -30,6 +31,8 @@ class RulerUtils {
     type1: Array<ITemplateSetting>,
     type2: Array<ITemplateSetting>
   }
+
+  fbCover: { v: Array<number>, h: Array<number> }
 
   splitUnitMap: {
     xxs: number,
@@ -118,6 +121,11 @@ class RulerUtils {
         }
       ]
     }
+
+    this.fbCover = {
+      v: [],
+      h: [120, 573]
+    }
   }
 
   on(type: string, callback: (pagePos: number, pos: number, type: string, from?: number) => void) {
@@ -203,6 +211,10 @@ class RulerUtils {
     store.commit('SET_showGuideline', bool)
   }
 
+  setLockGuideline(bool: boolean) {
+    store.commit('SET_lockGuideline', bool)
+  }
+
   setIsDragging(bool: boolean) {
     this.isDragging = bool
   }
@@ -211,6 +223,13 @@ class RulerUtils {
     store.commit('DELETE_guideline', {
       index,
       type,
+      pageIndex
+    })
+  }
+
+  setGuideline(pageIndex: number, guidelines: { v: Array<number>, h: Array<number> }) {
+    store.commit('SET_guideline', {
+      guidelines,
       pageIndex
     })
   }
@@ -239,6 +258,18 @@ class RulerUtils {
     })
   }
 
+  addToSpecPos(posObj: { v: Array<number>, h: Array<number> }) {
+    this.clearGuidelines()
+    this.setShowGuideline(true)
+    posObj.v.forEach((pos: number) => {
+      this.addGuidelineToPage(pos, 'v')
+    })
+
+    posObj.h.forEach((pos: number) => {
+      this.addGuidelineToPage(pos, 'h')
+    })
+  }
+
   mapSplitUnit() {
     if (this.scaleRatio < 30) {
       return this.splitUnitMap.xxs
@@ -253,6 +284,15 @@ class RulerUtils {
     } else {
       return this.splitUnitMap.xl
     }
+  }
+
+  removeInvalidGuides(pageIndex: number, format: { width: number, height: number }) {
+    const { guidelines } = pageUtils.getPage(pageIndex)
+    const { width, height } = format
+    this.setGuideline(pageIndex, {
+      v: guidelines.v.filter((line) => line <= width),
+      h: guidelines.h.filter((line) => line <= height)
+    })
   }
 }
 
