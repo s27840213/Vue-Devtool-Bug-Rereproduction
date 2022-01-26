@@ -19,6 +19,7 @@ import popup from '@/store/module/popup'
 import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
+import layouts from '@/store/module/layouts'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -754,6 +755,7 @@ export default new Vuex.Store({
     page,
     homeTemplate,
     design,
+    layouts,
     unsplash
   }
 })

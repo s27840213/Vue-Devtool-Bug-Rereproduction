@@ -68,7 +68,7 @@ export default Vue.extend({
       isLogin: 'user/isLogin',
       groupId: 'getGroupId',
       groupType: 'getGroupType',
-      isOutsourcer: 'isOutsourcer'
+      isOutsourcer: 'user/isOutsourcer'
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component

@@ -119,18 +119,25 @@ class DragUtils {
         const { textType, text, locale } = data
         assetUtils.addStanardText(textType, text, locale, pageIndex, { styles })
       } else {
-        const currPage = pageUtils.currFocusPage
-        const aspectRatio = data.match_cover.height / data.match_cover.width
-        const resize = {
-          width: currPage.width,
-          height: currPage.width * aspectRatio
+        if (data.type === 6) {
+          const currPage = pageUtils.currFocusPage
+          const aspectRatio = data.match_cover.height / data.match_cover.width
+          const resize = {
+            width: currPage.width,
+            height: currPage.width * aspectRatio
+          }
+          assetUtils.addAsset(data, {
+            styles,
+            pageIndex,
+            // for template
+            ...(data.type === 6 && resize)
+          })
+        } else {
+          assetUtils.addAsset(data, {
+            styles,
+            pageIndex
+          })
         }
-        assetUtils.addAsset(data, {
-          styles,
-          pageIndex,
-          // for template
-          ...(data.type === 6 && resize)
-        })
       }
     }
   }
