@@ -36,6 +36,7 @@
               :primaryLayerIndex="layerIndex"
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
+              :isMoved="isMoved"
               @drop="onDrop($event)"
               @dragenter="dragEnter($event, index)"
               @dragleave="dragLeave($event, index)"
@@ -198,7 +199,8 @@ export default Vue.extend({
       subControlerIndexs: [],
       hasChangeTextContent: false,
       movingByControlPoint: false,
-      widthLimitSetDuringComposition: false
+      widthLimitSetDuringComposition: false,
+      isMoved: false
     }
   },
   mounted() {
@@ -742,12 +744,16 @@ export default Vue.extend({
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
+          this.isMoved = true
           StepsUtils.record()
-        } else if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
-          if (this.movingByControlPoint) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+        } else {
+          if (this.getLayerType === 'text') {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+            if (this.movingByControlPoint) {
+              LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+            }
           }
+          this.isMoved = false
         }
         this.isControlling = false
         this.setCursorStyle('')
@@ -1334,17 +1340,6 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        // switch (this.getLayerType) {
-        //   case 'image': {
-        //     const config = this.config as IImage
-        //     MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, config.clipPath, config.styles)
-        //     break
-        //   }
-        //   case 'frame':
-        //     return
-        //   default:
-        //     MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-        // }
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         }
@@ -1452,6 +1447,10 @@ export default Vue.extend({
       })
     },
     clickSubController(targetIndex: number, type: string) {
+      if (!this.isActive) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
+        return
+      }
       let updateSubLayerProps = null as any
       let layers = null as any
       switch (this.getLayerType) {
