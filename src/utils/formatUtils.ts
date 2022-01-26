@@ -9,6 +9,7 @@ import controlUtils from './controlUtils'
 import stepsUtils from './stepsUtils'
 import imageAdjustUtil from './imageAdjustUtil'
 import frameUtils from './frameUtils'
+import textShapeUtils from './textShapeUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
@@ -108,8 +109,8 @@ class FormatUtils {
             scale
           }
         })
-        const isNotCurved = !this.isCurveText(textShape)
         for (const targetLayerIndex in layers) {
+          const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
           const targetLayer = layers[targetLayerIndex]
           if (targetLayer.type !== 'text') continue
           const targetTextLayer = targetLayer as any
@@ -117,20 +118,34 @@ class FormatUtils {
           layerUtils.updateSubLayerProps(
             pageIndex,
             layerIndex,
-            subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex,
+            idx,
             { paragraphs }
           )
-          if (isNotCurved) {
+          if (this.isCurveText(textShape)) {
+            layerUtils.updateSubLayerStyles(
+              pageIndex,
+              layerIndex,
+              idx,
+              textShapeUtils.getCurveTextProps(targetTextLayer)
+            )
+            layerUtils.updateSubLayerProps(
+              pageIndex,
+              layerIndex,
+              idx,
+              { widthLimit: -1 }
+            )
+          } else {
             const newSize = textUtils.getTextHW(targetTextLayer, targetTextLayer.styles.widthLimit)
             layerUtils.updateSubLayerStyles(
               pageIndex,
               layerIndex,
-              subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex,
+              idx,
               newSize
             )
           }
         }
         textUtils.updateGroupLayerSize(pageIndex, layerIndex)
+        textUtils.fixGroupCoordinates(pageIndex, layerIndex)
         stepsUtils.record()
       }
       if (type === 'image') {
@@ -180,10 +195,12 @@ class FormatUtils {
             textShape: { ...textShape }
           }
         })
-        if (!this.isCurveText(textShape)) {
-          const text = store.getters.getLayer(pageIndex, layerIndex)
-          const newSize = textUtils.getTextHW(text, text.styles.widthLimit)
-          controlUtils.updateLayerSize(pageIndex, layerIndex, newSize.width, newSize.height, text.styles.scale)
+        const text = store.getters.getLayer(pageIndex, layerIndex)
+        if (this.isCurveText(textShape)) {
+          layerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(text))
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit: -1 })
+        } else {
+          layerUtils.updateLayerStyles(pageIndex, layerIndex, textUtils.getTextHW(text, text.styles.widthLimit))
         }
         stepsUtils.record()
       }

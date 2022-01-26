@@ -62,6 +62,7 @@ class Controller {
     } else { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
+      props.widthLimit = -1
     }
     return { styles, props }
   }
