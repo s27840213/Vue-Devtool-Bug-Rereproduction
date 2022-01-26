@@ -717,7 +717,7 @@ class TextUtils {
     this.updateGroupLayerSize(pageIndex, layerIndex)
   }
 
-  fixGroupXcoordinates(pageIndex: number, layerIndex: number) {
+  fixGroupXCoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
     if (!group.layers) return
@@ -735,7 +735,7 @@ class TextUtils {
     })
   }
 
-  fixGroupYcoordinates(pageIndex: number, layerIndex: number) {
+  fixGroupYCoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minY = Number.MAX_SAFE_INTEGER
     if (!group.layers) return
@@ -751,6 +751,11 @@ class TextUtils {
     LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
       y: group.styles.y + minY
     })
+  }
+
+  fixGroupCoordinates(pageIndex: number, layerIndex: number) {
+    this.fixGroupXCoordinates(pageIndex, layerIndex)
+    this.fixGroupYCoordinates(pageIndex, layerIndex)
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {

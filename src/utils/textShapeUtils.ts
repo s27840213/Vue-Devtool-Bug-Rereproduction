@@ -36,8 +36,7 @@ class Controller {
       width,
       height,
       x,
-      y,
-      scale
+      y
     } = layer.styles
     const props = {} as { [key: string]: any }
     const defaultAttrs = this.shapes[shape]
@@ -104,8 +103,7 @@ class Controller {
           TextUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, +idx, styles.height, heightOri)
         }
       }
-      TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
-      TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+      TextUtils.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
       const heightOri = layers[subLayerIndex].styles.height
       const { styles, props } = this.getTextShapeStyles(
@@ -121,8 +119,7 @@ class Controller {
         props
       })
       TextUtils.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, styles.height, heightOri)
-      TextUtils.fixGroupXcoordinates(pageIndex, layerIndex)
-      TextUtils.fixGroupYcoordinates(pageIndex, layerIndex)
+      TextUtils.fixGroupCoordinates(pageIndex, layerIndex)
     }
   }
 

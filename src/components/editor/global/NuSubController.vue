@@ -399,8 +399,7 @@ export default Vue.extend({
       const curveTextHW = textShapeUtils.getCurveTextHW(text)
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
-      TextUtils.fixGroupXcoordinates(this.pageIndex, this.primaryLayerIndex)
-      TextUtils.fixGroupYcoordinates(this.pageIndex, this.primaryLayerIndex)
+      TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
     },
     onClickEvent(e: MouseEvent) {
       if (this.type === 'tmp') {
