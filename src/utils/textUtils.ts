@@ -901,6 +901,35 @@ class TextUtils {
       })
     }
   }
+
+  async waitUntilAllFontsLoaded(config: IText) {
+    const promises: Array<Promise<void>> = []
+    for (const defaultFont of store.getters['text/getDefaultFontsList']) {
+      promises.push(store.dispatch('text/addFont', defaultFont).catch(e => console.error(e)))
+    }
+
+    for (const p of config.paragraphs) {
+      promises.push(store.dispatch('text/addFont', {
+        type: p.styles.type,
+        face: p.styles.font,
+        url: p.styles.fontUrl,
+        ver: store.getters['user/getVerUni']
+      }).catch(e => console.error(e)))
+      for (const span of p.spans) {
+        const promise = store.dispatch('text/addFont', {
+          type: span.styles.type,
+          face: span.styles.font,
+          url: span.styles.fontUrl,
+          ver: store.getters['user/getVerUni']
+        }).catch(e => console.error(e))
+
+        promises.push(promise)
+      }
+    }
+
+    await Promise
+      .all(promises)
+  }
 }
 
 export default new TextUtils()

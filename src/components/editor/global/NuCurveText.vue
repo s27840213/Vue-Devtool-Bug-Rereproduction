@@ -14,6 +14,8 @@ import { mapGetters, mapState } from 'vuex'
 import TextShapeUtils from '@/utils/textShapeUtils'
 import { ISpan } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
+import LayerUtils from '@/utils/layerUtils'
+import TextUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   props: {
@@ -26,14 +28,30 @@ export default Vue.extend({
     return {
       textWidth: [] as number[],
       textHeight: [] as number[],
-      minHeight: 0
+      minHeight: 0,
+      isDestroyed: false
     }
   },
-  created () {
+  async created () {
+    await TextUtils.waitUntilAllFontsLoaded(this.config)
+
+    if (this.isDestroyed) return
+
+    if (typeof this.subLayerIndex === 'undefined') {
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+    } else {
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+      TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+      TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+    }
+
     const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(this.spans)
     this.textWidth = textWidth
     this.textHeight = textHeight
     this.minHeight = minHeight
+  },
+  destroyed() {
+    this.isDestroyed = true
   },
   computed: {
     ...mapState('text', ['fontStore']),

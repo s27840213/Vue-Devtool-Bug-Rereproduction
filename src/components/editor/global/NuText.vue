@@ -48,54 +48,20 @@ export default Vue.extend({
     if (LayerUtils.getCurrLayer.type === 'tmp') {
       return
     }
-    const promises: Array<Promise<void>> = []
-    for (const defaultFont of this.getDefaultFontsList) {
-      promises.push(this.addFont(defaultFont).catch(e => console.error(e)))
-    }
 
-    for (const p of (this.config as IText).paragraphs) {
-      promises.push(this.addFont({
-        type: p.styles.type,
-        face: p.styles.font,
-        url: p.styles.fontUrl,
-        ver: this.verUni
-      }).catch(e => console.error(e)))
-      for (const span of p.spans) {
-        const promise = this.addFont({
-          type: span.styles.type,
-          face: span.styles.font,
-          url: span.styles.fontUrl,
-          ver: this.verUni
-        }).catch(e => console.error(e))
+    await TextUtils.waitUntilAllFontsLoaded(this.config)
 
-        promises.push(promise)
-      }
-    }
+    if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
 
-    await Promise
-      .all(promises)
-
-    if (!this.isDestroyed) {
-      if (textShapeUtils.isCurvedText(this.config.styles)) {
-        if (typeof this.subLayerIndex === 'undefined') {
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(this.config))
-        } else {
-          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, textShapeUtils.getCurveTextProps(this.config))
-          TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-          TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-        }
-      } else {
-        const widthLimit = this.autoResize()
-        const textHW = TextUtils.getTextHW(this.config, widthLimit)
-        if (typeof this.subLayerIndex === 'undefined') {
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-        } else {
-          const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-          const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
-        }
-      }
+    const widthLimit = this.autoResize()
+    const textHW = TextUtils.getTextHW(this.config, widthLimit)
+    if (typeof this.subLayerIndex === 'undefined') {
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+    } else {
+      const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+      const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
     }
   },
   destroyed() {
