@@ -1439,17 +1439,7 @@ export default Vue.extend({
       })
     },
     curveTextSizeRefresh(text: IText) {
-      const { scale, textShape: { bend = 0 } = {} } = text.styles as any
-      const { textWidth, minHeight } = textShapeUtils.getTextHWs(text)
-      const transforms = textShapeUtils.convertTextShape(textWidth, +bend)
-      const { areaWidth, areaHeight } = textShapeUtils.calcArea(transforms, minHeight, scale, text)
-      const { top, bottom, center } = textShapeUtils.getAnchors(text, minHeight)
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-        width: areaWidth,
-        height: areaHeight,
-        x: center - (areaWidth / 2),
-        y: +bend < 0 ? bottom - areaHeight : top
-      })
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
     },
     onDblClick() {
       if (this.getLayerType !== 'image' || this.isLocked) return

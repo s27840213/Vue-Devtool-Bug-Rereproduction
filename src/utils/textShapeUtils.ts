@@ -62,16 +62,7 @@ class Controller {
       props.widthLimit = -1
     } else { // curve
       const { bend } = styles.textShape as any
-      const { textWidth, minHeight } = this.getTextHWs(layer)
-      const transforms = this.convertTextShape(textWidth, +bend)
-      const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, layer)
-      const { top, bottom, center } = this.getAnchors(layer, minHeight)
-      Object.assign(styles, {
-        width: areaWidth,
-        height: areaHeight,
-        x: center - (areaWidth / 2),
-        y: +bend < 0 ? bottom - areaHeight : top
-      })
+      Object.assign(styles, this.getCurveTextProps(layer, +bend))
     }
     return { styles, props }
   }
@@ -263,6 +254,31 @@ class Controller {
         center
       }
     }
+  }
+
+  getCurveTextHW(config: IText, bend?: number): { areaWidth: number, areaHeight: number, minHeight: number } {
+    bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
+    const scale = config.styles.scale
+    const { textWidth, minHeight } = this.getTextHWs(config)
+    const transforms = this.convertTextShape(textWidth, bend)
+    const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, config)
+    return { areaWidth, areaHeight, minHeight }
+  }
+
+  getCurveTextPropsByHW(config: IText, curveTextHW: {areaWidth: number, areaHeight: number, minHeight: number}, bend?: number): { width: number, height: number, x: number, y: number } {
+    const { areaWidth, areaHeight, minHeight } = curveTextHW
+    bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
+    const { top, bottom, center } = this.getAnchors(config, minHeight)
+    return {
+      width: areaWidth,
+      height: areaHeight,
+      x: center - (areaWidth / 2),
+      y: +bend < 0 ? bottom - areaHeight : top
+    }
+  }
+
+  getCurveTextProps(config: IText, bend?: number): { width: number, height: number, x: number, y: number } {
+    return this.getCurveTextPropsByHW(config, this.getCurveTextHW(config, bend), bend)
   }
 }
 

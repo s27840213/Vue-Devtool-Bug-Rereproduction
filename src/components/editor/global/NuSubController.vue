@@ -395,18 +395,10 @@ export default Vue.extend({
       }
     },
     curveTextSizeRefresh(text: IText) {
-      const { scale, height: heightOri, textShape: { bend = 0 } = {} } = text.styles as any
-      const { textWidth, minHeight } = textShapeUtils.getTextHWs(text)
-      const transforms = textShapeUtils.convertTextShape(textWidth, +bend)
-      const { areaWidth, areaHeight } = textShapeUtils.calcArea(transforms, minHeight, scale, text)
-      const { top, bottom, center } = textShapeUtils.getAnchors(text, minHeight)
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-        width: areaWidth,
-        height: areaHeight,
-        x: center - (areaWidth / 2),
-        y: +bend < 0 ? bottom - areaHeight : top
-      })
-      TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, areaHeight, heightOri)
+      const { height: heightOri } = text.styles
+      const curveTextHW = textShapeUtils.getCurveTextHW(text)
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
+      TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupXcoordinates(this.pageIndex, this.primaryLayerIndex)
       TextUtils.fixGroupYcoordinates(this.pageIndex, this.primaryLayerIndex)
     },
