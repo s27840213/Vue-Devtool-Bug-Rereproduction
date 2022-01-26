@@ -1,20 +1,18 @@
-import Vue from 'vue'
 import store from '@/store'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFrame, IGroup, IImage, ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import TextUtils from './textUtils'
-import { ISelection } from '@/interfaces/text'
 import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
 import frameUtils from './frameUtils'
 import uploadUtils from './uploadUtils'
-import router from '@/router'
 import logUtils from './logUtils'
 import tiptapUtils from './tiptapUtils'
+import pageUtils from './pageUtils'
 
 class ShortcutUtils {
   get currSelectedPageIndex() {
@@ -117,7 +115,9 @@ class ShortcutUtils {
       }
       return layer
     })
-
+    /**
+     * @todo change middlemost to currFocusPageindex
+     */
     const middlemostPageIndex = store.getters.getMiddlemostPageIndex
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
     if (store.getters.getCurrSelectedIndex >= 0 && middlemostPageIndex === store.getters.getCurrSelectedPageIndex) {
@@ -132,19 +132,21 @@ class ShortcutUtils {
         store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
         GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
+      ZindexUtils.reassignZindex(middlemostPageIndex)
     } else {
+      const { currFocusPageIndex } = pageUtils
       if (store.getters.getCurrSelectedIndex >= 0) {
         GroupUtils.deselect()
       }
       if (isTmp) {
-        store.commit('ADD_newLayers', { pageIndex: middlemostPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(middlemostPageIndex, store.getters.getLayersNum(store.getters.getMiddlemostPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
+        store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
+        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
       } else {
-        store.commit('ADD_newLayers', { pageIndex: middlemostPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(middlemostPageIndex, store.getters.getLayersNum(store.getters.getMiddlemostPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
+        store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
+        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
+      ZindexUtils.reassignZindex(currFocusPageIndex)
     }
-    ZindexUtils.reassignZindex(middlemostPageIndex)
   }
 
   textCopy() {

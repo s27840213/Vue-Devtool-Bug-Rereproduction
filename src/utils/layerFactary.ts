@@ -1,5 +1,5 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
 import store from '@/store'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
@@ -10,7 +10,7 @@ import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width, height, initWidth, initHeight, zindex } = config.styles
+    const { width, height, initWidth, initHeight, zindex, opacity } = config.styles
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -46,7 +46,7 @@ class LayerFactary {
         imgWidth: initWidth ?? width,
         imgHeight: initHeight ?? height,
         zindex: zindex ?? -1,
-        opacity: 100,
+        opacity: opacity || 100,
         horizontalFlip: false,
         verticalFlip: false,
         adjust: {}
@@ -171,8 +171,8 @@ class LayerFactary {
       isEdited: false,
       contentEditable: false,
       styles: {
-        x: 0,
-        y: 0,
+        x: config.styles?.x,
+        y: config.styles?.y,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
@@ -224,12 +224,21 @@ class LayerFactary {
      * below fix the wrong part
      */
     if (config.paragraphs) {
-      const paragraphs = config.paragraphs
+      const paragraphs = config.paragraphs as IParagraph[]
       // some paragraphs contain empty spans.
       for (let pidx = 0; pidx < paragraphs.length; pidx++) {
         if (paragraphs[pidx].spans.length === 0) {
           paragraphs.splice(pidx, 1)
           pidx--
+        } else {
+          const _pidx = pidx
+          for (let sidx = 0; sidx < paragraphs[_pidx].spans.length; sidx++) {
+            if (!paragraphs[_pidx].spans[sidx].text) {
+              paragraphs[_pidx].spans.splice(sidx, 1)
+              sidx--
+              pidx = _pidx - 1
+            }
+          }
         }
       }
       config.paragraphs.forEach((p) => {
@@ -266,7 +275,7 @@ class LayerFactary {
         initWidth: config.styles.initWidth ?? config.styles.width,
         initHeight: config.styles.initHeight ?? config.styles.height,
         zindex: -1,
-        opacity: 100,
+        opacity: config.styles.opacity || 1,
         horizontalFlip: config.styles.horizontalFlip as boolean || false,
         verticalFlip: false
       },
@@ -288,16 +297,16 @@ class LayerFactary {
       styles: {
         x: styles.x,
         y: styles.y,
-        scale: 1,
-        scaleX: 1,
-        scaleY: 1,
-        rotate: 0,
+        scale: styles.scale as number || 1,
+        scaleX: styles.scaleX as number || 1,
+        scaleY: styles.scaleY as number || 1,
+        rotate: styles.rotate as number || 0,
         width: styles.width,
         height: styles.height,
         initWidth: styles.width,
         initHeight: styles.height,
         zindex: 0,
-        opacity: 100,
+        opacity: styles.opacity as number || 100,
         horizontalFlip: false,
         verticalFlip: false
       },
@@ -306,7 +315,7 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    const { styles } = config
+    const { styles } = GeneralUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -328,6 +337,7 @@ class LayerFactary {
       moved: false,
       dragging: false,
       designId: '',
+      ...(config.category === 'E' && { filled: false }),
       styles: {
         x: styles.x ?? 0,
         y: styles.y ?? 0,
@@ -340,12 +350,11 @@ class LayerFactary {
         initWidth: styles.initWidth,
         initHeight: styles.initHeight,
         zindex: -1,
-        opacity: 100,
-        horizontalFlip: false,
-        verticalFlip: false
+        opacity: styles.opacity || 100,
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       }
     }
-    Object.assign(basicConfig.styles, config.styles)
     delete config.styles
     return Object.assign(basicConfig, config)
   }
@@ -381,6 +390,7 @@ class LayerFactary {
   }
 
   newByLayerType(config: any): IShape | IText | IImage | IFrame | IGroup | ITmp {
+    this.paramsExaminer(config)
     switch (config.type) {
       case 'shape':
         return this.newShape(config)
@@ -403,6 +413,14 @@ class LayerFactary {
         return this.newTmp(config.styles, config.layers)
       default:
         throw new Error(`Unknown layer type: ${config.type}`)
+    }
+  }
+
+  paramsExaminer(config: ILayer) {
+    const { styles } = config
+    const { opacity } = styles
+    if (typeof opacity !== 'number') {
+      styles.opacity = parseFloat(opacity)
     }
   }
 }

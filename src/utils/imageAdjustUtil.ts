@@ -4,8 +4,63 @@ import {
   IAdjustJsonProps,
   IAdjustProps
 } from '@/interfaces/adjust'
+import i18n from '@/i18n'
 
 class ImageAdjustUtil {
+  getFields() {
+    return [
+      {
+        name: 'brightness',
+        label: `${i18n.t('NN0055')}`,
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'contrast',
+        label: `${i18n.t('NN0056')}`,
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'saturate',
+        label: `${i18n.t('NN0057')}`,
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'hue',
+        label: `${i18n.t('NN0058')}`,
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'blur',
+        label: `${i18n.t('NN0059')}`,
+        max: 100,
+        min: -100
+      },
+      {
+        name: 'halation',
+        label: `${i18n.t('NN0060')}`,
+        max: 100,
+        min: 0
+      },
+      {
+        name: 'warm',
+        label: `${i18n.t('NN0061')}`,
+        max: 100,
+        min: -100
+      }
+    ]
+  }
+
+  getDefaultProps() {
+    return this.getFields().reduce((prev, curr) => {
+      prev[curr.name] = 0
+      return prev
+    }, {} as { [key: string]: number })
+  }
+
   createSvgFilter (element: ISvgFilterTag) {
     const { tag, attrs = {}, child = [] } = element
     return {
@@ -173,7 +228,7 @@ class ImageAdjustUtil {
       layerIndex,
       subLayerIndex,
       styles: { adjust },
-      type: 'image'
+      type: ['image']
     })
   }
 }

@@ -8,14 +8,6 @@ import { IUserModule } from './module/user'
 import { Itheme } from '@/interfaces/theme'
 
 /**
- * @param {number} middlemostPageIndex -> 進行各項操作時，主要使用到的pageIndex
- * @param {number} currActivePageIndex
- *    -> 若使用者點擊 Page 會使該 Page 變為 active 狀態，此刻當 Page 的 focus 因為點 Sidebar 或 Function Panel 的 button 而跑掉時，以此判斷說要重新 focus 的 Page 為何
- *    -> 若為 -1 ， focus 最接近中線的 Page
- *    -> 若不為 -1 ， focus 該 index 的 Page
- */
-
-/**
  * @param designId: for multiple template used (only for admin),
    @param assetId: for user upload asset used,
    @param groupId: for template group used (only for admin),
@@ -68,7 +60,9 @@ export interface IEditorState {
   },
   showRuler: boolean,
   showGuideline: boolean,
-  themes: Itheme[]
+  lockGuideline: boolean,
+  themes: Itheme[],
+  hasCopiedFormat: boolean
 }
 
 export enum SidebarPanelType {

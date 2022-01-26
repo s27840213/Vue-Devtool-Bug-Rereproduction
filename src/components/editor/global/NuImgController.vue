@@ -23,6 +23,7 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -94,7 +95,6 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
     }),
     styles() {
@@ -198,7 +198,6 @@ export default Vue.extend({
       window.addEventListener('mousemove', this.moving)
 
       this.setCursorStyle('move')
-      this.setMiddlemostPageIndex(this.pageIndex)
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
     moving(event: MouseEvent) {

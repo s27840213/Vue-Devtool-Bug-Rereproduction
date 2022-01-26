@@ -31,7 +31,6 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getPage: 'getPage',
-      middlemostPageIndex: 'getMiddlemostPageIndex',
       currActivePageIndex: 'getCurrActivePageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
@@ -39,8 +38,7 @@ export default Vue.extend({
       showPagePanel: 'page/getShowPagePanel'
     }),
     currFocusPage(): IPage {
-      const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.middlemostPageIndex
-      return this.getPage(targetIndex)
+      return pageUtils.currFocusPage
     },
     rulerBodyStyles(): { [index: string]: number | string } {
       return {

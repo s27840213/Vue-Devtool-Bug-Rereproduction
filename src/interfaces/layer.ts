@@ -1,9 +1,10 @@
 import { SrcObj } from './gallery'
 import { ITiptapSelection } from './text'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
 
-export const jsonVer = '1.0.5'
+export const jsonVer = '1.0.6'
 export interface IStyle {
-  [key: string]: number | string | boolean | undefined,
+  [key: string]: number | string | boolean | undefined | { [key: string]: number | string | boolean },
   x: number,
   y: number,
   scale: number
@@ -24,7 +25,8 @@ export interface IImageStyle extends IStyle {
   imgX: number,
   imgY: number,
   imgWidth: number,
-  imgHeight: number
+  imgHeight: number,
+  adjust: IAdjustJsonProps
 }
 
 export interface ILayer<T extends IStyle = IStyle> {

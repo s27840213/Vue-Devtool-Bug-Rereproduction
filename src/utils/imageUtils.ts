@@ -69,7 +69,7 @@ class ImageUtils {
     const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
-      while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
+      while (dimension <= sizeMap[i].size && i < sizeMap.length - 1) {
         i++
       }
       i = Math.max(i - 1, 0)

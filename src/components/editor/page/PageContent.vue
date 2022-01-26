@@ -41,6 +41,7 @@ import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -74,7 +75,6 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       ADD_newLayers: 'ADD_newLayers',
-      setMiddlemostPageIndex: 'SET_middlemostPageIndex',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
@@ -88,7 +88,7 @@ export default Vue.extend({
       }
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
-        mouseUtils.onDrop(e, this.pageIndex)
+        new DragUtils().itemOnDrop(e, this.pageIndex)
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
@@ -120,6 +120,7 @@ export default Vue.extend({
     },
     onRightClick(event: MouseEvent) {
       this.setCurrActivePageIndex(this.pageIndex)
+      groupUtils.deselect()
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {

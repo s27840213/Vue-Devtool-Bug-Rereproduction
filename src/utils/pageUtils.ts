@@ -6,14 +6,15 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
+import resizeUtils from './resizeUtils'
 import uploadUtils from './uploadUtils'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
-  get getPage() { return store.getters.getPage }
+  get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
-  get getPageSize() { return store.getters.getPageSize }
+  get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
@@ -26,15 +27,11 @@ class PageUtils {
   }
 
   get currFocusPageIndex() {
-    const { pageIndex } = this.currSelectedInfo
-    return pageIndex >= 0 ? pageIndex
-      : this.currActivePageIndex >= 0
-        ? this.currActivePageIndex : this.middlemostPageIndex
+    return store.getters.getCurrFocusPageIndex
   }
 
   get currFocusPage(): IPage {
-    const targetIndex = this.currActivePageIndex > 0 ? this.currActivePageIndex : this.middlemostPageIndex
-    return this.getPage(targetIndex)
+    return this.getPage(this.currFocusPageIndex)
   }
 
   get pageRect(): { [index: string]: number } {
@@ -128,6 +125,17 @@ class PageUtils {
   setPagesName(name: string) {
     store.commit('SET_pagesName', name)
     uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+  }
+
+  resizePage(format: { width: number, height: number }) {
+    resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
+    this.updatePageProps({
+      pageIndex: pageUtils.currFocusPageIndex,
+      props: {
+        width: format.width,
+        height: format.height
+      }
+    })
   }
 
   activeMiddlemostPage(): number {

@@ -2,9 +2,10 @@ import LayerUtils from './layerUtils'
 import ImageUtils from './imageUtils'
 import store from '@/store'
 import { SrcObj } from '@/interfaces/gallery'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
+import { IAdjustJsonProps } from '@/interfaces/adjust'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -100,11 +101,19 @@ class FrameUtils {
     store.commit('SET_popupComponent', { layerIndex: -1 })
   }
 
-  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+  updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {
     store.commit('SET_frameLayerStyles', {
       pageIndex,
       primaryLayerIndex,
       subLayerIndex,
+      styles
+    })
+  }
+
+  updateFrameLayerAllClipsStyles(pageIndex: number, primaryLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
+    store.commit('SET_frameLayerAllClipsStyles', {
+      pageIndex,
+      primaryLayerIndex,
       styles
     })
   }
@@ -118,12 +127,31 @@ class FrameUtils {
     })
   }
 
-  updateSubFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number }) {
+  updateSubFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, targetIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
     store.commit('SET_subFrameLayerStyles', {
       pageIndex,
       primaryLayerIndex,
       subLayerIndex,
+      targetIndex,
       styles
+    })
+  }
+
+  updateSubFrameLayerAllClipsStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: { [key: string]: number | IAdjustJsonProps }) {
+    store.commit('SET_subFrameLayerAllClipsStyles', {
+      pageIndex,
+      primaryLayerIndex,
+      subLayerIndex,
+      styles
+    })
+  }
+
+  updateFrameClipSrc(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number }) {
+    store.commit('UPDATE_frameClipSrc', {
+      pageIndex: pageIndex,
+      layerIndex: primaryLayerIndex,
+      subLayerIndex: subLayerIndex,
+      srcObj: { ...srcObj }
     })
   }
 }

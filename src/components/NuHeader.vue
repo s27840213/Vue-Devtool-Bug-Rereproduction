@@ -314,7 +314,7 @@ export default Vue.extend({
     &__options {
       display: flex;
       flex-wrap: wrap;
-      justify-content: start;
+      justify-content: flex-start;
       color: setColor(gray-2);
       > span {
         font-size: 14px;

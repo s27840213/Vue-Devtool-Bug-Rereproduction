@@ -67,16 +67,29 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addTemplate() {
-      const { match_cover: matchCover = {}, height, width } = this.item
+      const { match_cover: matchCover = {} } = this.item
+      let { height, width } = this.item
+
+      // in some cases (single page group template), there is no item.width/item.height (unknown reason), then we get them by match_cover
+      if (width === undefined) {
+        width = this.item.match_cover.width
+        height = this.item.match_cover.width
+      }
+      /*
       const theme = themeUtils
         .getThemesBySize(matchCover.width || width, matchCover.height || height)
         .map(theme => theme.id).join(',')
       const isSameTheme = themeUtils.compareThemesWithPage(theme)
-      const currLayer = pageUtils.getPage(pageUtils.currFocusPageIndex)
+      */
+      const currPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
+      const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
         ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         : (resize?: any) => AssetUtils.addAsset(this.item, resize)
 
+      /**
+       * @todo show the modal if the width,height are not the same in detailed page mode
+       */
       if (this.isDetailPage) {
         const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
         const ratio = (matchCover.width || width) / pageWidth
@@ -84,7 +97,7 @@ export default Vue.extend({
         return cb(resize)
       }
 
-      if (!isSameTheme) {
+      if (!isSameSize) {
         let btnWidth = '120px'
         if (this.$i18n.locale === 'tw') {
           btnWidth = '120px'
@@ -95,7 +108,7 @@ export default Vue.extend({
         }
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(
-          `${this.$t('NN0209')}`,
+          `${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`,
           [],
           '',
           {
@@ -108,13 +121,13 @@ export default Vue.extend({
             class: 'border-blue-1 btn-light-mid',
             style: { width: btnWidth, height: '32px' },
             action: () => {
-              const resize = { width: currLayer.width, height: currLayer.height }
+              const resize = { width: currPage.width, height: currPage.height }
               cb(resize)
             }
           }
         )
       } else {
-        const resize = { width: currLayer.width, height: currLayer.height }
+        const resize = { width: currPage.width, height: currPage.height }
         cb(resize)
       }
     },

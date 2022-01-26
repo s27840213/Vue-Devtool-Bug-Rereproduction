@@ -15,9 +15,11 @@
             iconColor="white"
             iconWidth="20px")
       template(v-slot:default-text="{ list }")
-        div(class="panel-text__text-button-wrapper")
-          btn(v-for="config in list"
+        div(class="panel-text__text-button-wrapper" v-for="config in list"
             :key="config.type"
+            draggable="true"
+            @dragstart="standardTextDrag($event, config)")
+          btn(
             class="panel-text__text-button mb-10"
             :type="`text-${config.type.toLowerCase()}`"
             :fontFamily="localeFont()"
@@ -49,9 +51,9 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import AssetUtils from '@/utils/assetUtils'
-import ShortcutUtils from '@/utils/shortcutUtils'
+import AssetUtils, { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   components: {
@@ -200,6 +202,17 @@ export default Vue.extend({
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
+    },
+    standardTextDrag(e: DragEvent, config: { type: string, text: string }) {
+      const { type: textType, text } = config
+      new DragUtils().itemDragStart(e, 'standardText', {
+        textType: textType.toLowerCase(),
+        text,
+        locale: i18n.locale
+      }, {
+        offsetX: 20,
+        offsetY: 30
+      })
     }
   }
 })

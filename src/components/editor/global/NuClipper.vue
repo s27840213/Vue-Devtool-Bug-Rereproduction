@@ -23,8 +23,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      // shapeWidth: 0,
-      // shapeHeight: 0
     }
   },
   computed: {
@@ -35,34 +33,9 @@ export default Vue.extend({
       return (this.config.vSize?.[1] ?? 0) + (this.config.pDiff?.[1])
     }
   },
-  watch: {
-    // 'config.pDiff': {
-    //   handler: function (newVal) {
-    //     if (this.config.type === 'shape' && newVal && newVal.length > 1) {
-    //       console.warn('pdiff')
-    //       this.shapeWidth = this.config.vSize?.[0] ?? 0 + newVal[0]
-    //       this.shapeHeight = this.config.vSize?.[1] ?? 0 + newVal[1]
-    //     }
-    //   },
-    //   deep: true
-    // },
-    // 'config.vSize': {
-    //   handler: function (newVal) {
-    //     if (this.config.type === 'shape' && newVal && newVal.length > 1) {
-    //       this.shapeWidth = newVal[0] + this.config.pDiff?.[0] ?? 0
-    //       this.shapeHeight = newVal[1] + this.config.pDiff?.[1] ?? 0
-    //     }
-    //     console.warn('vsize')
-    //     console.log(newVal[1])
-    //     console.log(this.config.pDiff?.[1])
-    //     console.warn(this.shapeHeight)
-    //   },
-    //   deep: true
-    // }
-  },
   methods: {
     styles() {
-      const { type } = this.config
+      const { type, imgControl } = this.config
       const { horizontalFlip, verticalFlip } = this.config.styles
       const flip = type === 'image' ? {} : cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
       let { width, height, scale } = this.config.styles
@@ -71,7 +44,7 @@ export default Vue.extend({
 
       if (type === 'image') {
         if (this.config.isFrame) {
-          clipPath = imageUtils.isImgControl() || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+          clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
         } else {
           clipPath = layerPath
         }

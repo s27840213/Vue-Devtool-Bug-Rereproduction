@@ -74,7 +74,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      getMiddlemostPageIndex: 'getMiddlemostPageIndex',
       currSelectedResInfo: 'getCurrSelectedResInfo',
       isModalOpen: 'modal/getModalOpen'
     }),
