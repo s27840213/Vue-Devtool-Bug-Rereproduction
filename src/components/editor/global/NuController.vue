@@ -1447,10 +1447,8 @@ export default Vue.extend({
       })
     },
     clickSubController(targetIndex: number, type: string) {
-      console.log('click subController')
       if (!this.isActive) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
-        console.log('123')
         return
       }
       let updateSubLayerProps = null as any

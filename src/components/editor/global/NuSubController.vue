@@ -308,7 +308,6 @@ export default Vue.extend({
       this.isControlling = true
     },
     onMouseup() {
-      console.log('on mouse up')
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.getPrimaryLayer.styles.y - this.posDiff.y
@@ -320,7 +319,6 @@ export default Vue.extend({
       this.isControlling = false
     },
     positionStyles() {
-      const zindex = (this.config.styles.zindex + 1)
       return {
         transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
