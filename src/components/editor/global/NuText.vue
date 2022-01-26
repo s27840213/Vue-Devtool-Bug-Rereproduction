@@ -21,17 +21,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import CssConveter from '@/utils/cssConverter'
-import ControlUtils from '@/utils/controlUtils'
-import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import generalUtils from '@/utils/generalUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -77,20 +75,26 @@ export default Vue.extend({
     await Promise
       .all(promises)
 
-    if (this.config.styles.textShape?.name === 'curve') {
-      return
-    }
     if (!this.isDestroyed) {
-      // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      const widthLimit = this.autoResize()
-      const textHW = TextUtils.getTextHW(this.config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-      } else if (typeof this.subLayerIndex !== 'undefined') {
-        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
+      if (textShapeUtils.isCurvedText(this.config.styles)) {
+        if (typeof this.subLayerIndex === 'undefined') {
+          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(this.config))
+        } else {
+          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, textShapeUtils.getCurveTextProps(this.config))
+          TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+          TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+        }
+      } else {
+        const widthLimit = this.autoResize()
+        const textHW = TextUtils.getTextHW(this.config, widthLimit)
+        if (typeof this.subLayerIndex === 'undefined') {
+          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+        } else {
+          const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+          LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+          const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+          LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
+        }
       }
     }
   },
