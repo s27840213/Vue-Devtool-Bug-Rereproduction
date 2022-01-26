@@ -330,7 +330,7 @@ export default Vue.extend({
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' ? scale : 1})`,
         outline: this.outlineStyles(),
-        overflow: 'hidden',
+        // overflow: 'hidden',
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
           if (this.config.isFrameImg) {

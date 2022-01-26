@@ -212,7 +212,7 @@ class Controller {
     return this.getTextHWsBySpans(this.flattenSpans(generalUtils.deepCopy(_content)))
   }
 
-  calcArea(transforms: string[], minHeight: number, scale: number, config: IText): {areaWidth: number, areaHeight: number} {
+  calcArea(transforms: string[], minHeight: number, scale: number, config: IText): { areaWidth: number, areaHeight: number } {
     if (transforms.length < 2) {
       const textHW = TextUtils.getTextHW(config, -1)
       return {
