@@ -154,9 +154,6 @@ export default Vue.extend({
           isPreview: this.isUploading
         })
       }
-      this.$store.commit('SET_draggedItemInfo', {
-        type: 'image'
-      })
     },
     dragEnd() {
       this.setCurrDraggedPhoto({

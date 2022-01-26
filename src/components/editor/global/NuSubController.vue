@@ -75,7 +75,8 @@ export default Vue.extend({
     pageIndex: Number,
     primaryLayerIndex: Number,
     snapUtils: Object,
-    type: String
+    type: String,
+    isMoved: Boolean
   },
   components: {
     NuTextEditor
@@ -96,7 +97,8 @@ export default Vue.extend({
         srcObj: { type: string, assetId: string | number, userId: string },
         cached: boolean
       },
-      dragUitls: new DragUtils(this.primaryLayerIndex, this.layerIndex)
+      dragUitls: new DragUtils(this.primaryLayerIndex, this.layerIndex),
+      isPrimaryActive: false
     }
   },
   mounted() {
@@ -284,7 +286,9 @@ export default Vue.extend({
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
-    onMousedown() {
+    onMousedown(e: MouseEvent) {
+      this.isPrimaryActive = this.getPrimaryLayer.active
+
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
@@ -304,6 +308,7 @@ export default Vue.extend({
       this.isControlling = true
     },
     onMouseup() {
+      console.log('on mouse up')
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.getPrimaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.getPrimaryLayer.styles.y - this.posDiff.y
@@ -317,7 +322,7 @@ export default Vue.extend({
     positionStyles() {
       const zindex = (this.config.styles.zindex + 1)
       return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px) rotate(${this.config.styles.rotate}deg) `,
+        transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg) `,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         'pointer-events': 'none'
@@ -394,6 +399,7 @@ export default Vue.extend({
       }
     },
     onClickEvent(e: MouseEvent) {
+      if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
           groupUtils.deselectTargetLayer(this.layerIndex)
