@@ -123,7 +123,7 @@
             template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
-                :config="backImgConfig(getCurrSubSelectedLayerShown)")
+                :config="getCurrSubSelectedLayerShown")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"

@@ -4,14 +4,14 @@
     draggable="false")
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
-        class="layer-flip"
+        :class="{ 'layer-flip': flippedAnimation }"
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
     img(v-show="!isAdjustImage"
       ref="img"
       :style="flipStyles()"
-      class="nu-image__picture layer-flip"
+      :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
       :src="src"
       @error="onError()"
@@ -149,6 +149,14 @@ export default Vue.extend({
         })
       }
       return styles
+    },
+    flippedAnimation(): boolean {
+      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+      if (typeof this.subLayerIndex !== 'undefined' && primaryLayer.type === 'frame') {
+        return false
+      } else {
+        return true
+      }
     }
   },
   methods: {
@@ -166,10 +174,19 @@ export default Vue.extend({
     flipStyles() {
       const { styles } = this.config
       const { horizontalFlip, verticalFlip } = styles
-      styles.scaleX = horizontalFlip ? -1 : 1
-      styles.scaleY = verticalFlip ? -1 : 1
+      let scaleX = horizontalFlip ? -1 : 1
+      let scaleY = verticalFlip ? -1 : 1
+
+      if (typeof this.subLayerIndex !== 'undefined') {
+        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
+          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
+          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
+        }
+      }
+
       return {
-        transform: `scaleX(${styles.scaleX}) scaleY(${styles.scaleY})`
+        transform: `scaleX(${scaleX}) scaleY(${scaleY})`
       }
     },
     onError() {

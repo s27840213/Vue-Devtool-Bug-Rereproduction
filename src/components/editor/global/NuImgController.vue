@@ -428,11 +428,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.nu-img-controller {
-  // z-index: 1000;
-  // transform-style: preserve-3d;
-}
-
 .controller-point {
   pointer-events: auto;
   position: absolute;
@@ -455,9 +450,6 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    // &:hover {
-    //   cursor: pointer;
-    // }
     &__wrapper {
       width: max-content;
       height: max-content;
