@@ -1,6 +1,6 @@
 @mixin header(){
 	font-style: normal;
-  font-weight: bold;
+  font-weight: 700;
   line-height: 140%;
 }
 
@@ -32,6 +32,7 @@
 
 @mixin text-H5 {
   @include header();
+  font-weight: 600;
   font-size: 20px;
 }
 

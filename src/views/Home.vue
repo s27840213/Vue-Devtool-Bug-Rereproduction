@@ -2,7 +2,7 @@
   div(class="home"
     :style="fontStyles()")
     link(v-if="currLocale === 'us'"
-      href='https://fonts.googleapis.com/css?family=Poppins:400,700'
+      href='https://fonts.googleapis.com/css?family=Poppins:400,600,700'
       rel='stylesheet' type='text/css')
     nu-header(:showSearchPage="isShowMobileSearchPage"
       @isShowSearchPage="showMobileSearchPage")
