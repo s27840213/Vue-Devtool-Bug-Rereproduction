@@ -207,12 +207,12 @@ export default Vue.extend({
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
-      if (this.getLayerType === 'text') {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
-        if (editing && !this.config.isEdited) {
-          // ShortcutUtils.textSelectAll(this.layerIndex)
-        }
-      }
+      // if (this.getLayerType === 'text') {
+      //   LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
+      //   if (editing && !this.config.isEdited) {
+      //     // ShortcutUtils.textSelectAll(this.layerIndex)
+      //   }
+      // }
     },
     isComposing(val) {
       if (!val) {
@@ -319,8 +319,10 @@ export default Vue.extend({
       this.isControlling = false
     },
     positionStyles() {
+      const { x, y } = this.config.styles
+
       return {
-        transform: `translate(${this.config.styles.x}px, ${this.config.styles.y}px) rotate(${this.config.styles.rotate}deg) `,
+        transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         'pointer-events': 'none'
@@ -332,7 +334,6 @@ export default Vue.extend({
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' ? scale : 1})`,
         outline: this.outlineStyles(),
-        overflow: 'hidden',
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
           if (this.config.isFrameImg) {
@@ -459,7 +460,9 @@ export default Vue.extend({
               imgX: clips[this.layerIndex].styles.imgX,
               imgY: clips[this.layerIndex].styles.imgY,
               imgWidth: clips[this.layerIndex].styles.imgWidth,
-              imgHeight: clips[this.layerIndex].styles.imgHeight
+              imgHeight: clips[this.layerIndex].styles.imgHeight,
+              horizontalFlip: clips[this.layerIndex].styles.horizontalFlip,
+              verticalFlip: clips[this.layerIndex].styles.verticalFlip
             },
             cached: true
           })
@@ -475,7 +478,9 @@ export default Vue.extend({
             imgWidth,
             imgHeight,
             imgX,
-            imgY
+            imgY,
+            horizontalFlip: false,
+            verticalFlip: false
           })
         }
       }
@@ -539,12 +544,7 @@ export default Vue.extend({
           imgWidth,
           imgHeight,
           imgX,
-          imgY
-        })
-
-        const clipper = document.getElementById(`nu-clipper-${this.primaryLayerIndex}`) as HTMLElement
-        clipper && clipper.classList.remove('layer-flip')
-        LayerUtils.updateLayerStyles(this.pageIndex, this.primaryLayerIndex, {
+          imgY,
           horizontalFlip: currLayer.styles.horizontalFlip,
           verticalFlip: currLayer.styles.verticalFlip
         })
@@ -568,10 +568,6 @@ export default Vue.extend({
           verticalFlip: false
         })
       }
-      setTimeout(() => {
-        const clipper = document.getElementById(`nu-clipper-${this.layerIndex}`) as HTMLElement
-        clipper && clipper.classList.add('layer-flip')
-      }, 0)
     },
     onFrameMouseUp(e: MouseEvent) {
       const currLayer = LayerUtils.getCurrLayer as IImage
@@ -591,9 +587,6 @@ export default Vue.extend({
 .nu-sub-controller {
   transform-style: preserve-3d;
   &__wrapper {
-    // display: flex;
-    // justify-content: center;
-    // align-items: center;
     top: 0;
     left: 0;
     position: absolute;
