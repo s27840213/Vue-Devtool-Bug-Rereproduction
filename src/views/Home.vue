@@ -515,7 +515,7 @@ export default Vue.extend({
         width: 425px;
       }
       @media screen and (max-width: 540px) {
-        width: 50%;
+        width: 80%;
       }
     }
     &-title {
