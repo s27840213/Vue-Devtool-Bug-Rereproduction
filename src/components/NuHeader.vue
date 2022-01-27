@@ -227,7 +227,7 @@ export default Vue.extend({
 .nu-header {
   height: 50px;
   background-size: cover;
-  background-image: url("~@/assets/img/svg/homepage/top-bg.svg");
+  background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   box-sizing: border-box;
   position: sticky;
   top: 0;

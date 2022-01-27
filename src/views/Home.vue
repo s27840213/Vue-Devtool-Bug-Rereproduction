@@ -8,9 +8,8 @@
       @isShowSearchPage="showMobileSearchPage")
     div(class="home-content")
       div(class="home-content__top")
-        img(class="home-content__top-bg"
-          :class="isLogin ? 'login_h' : 'unlogin_h'"
-          :src="require('@/assets/img/svg/homepage/top-bg.svg')")
+        div(class="home-content__top-bg"
+          :class="isLogin ? 'login_h' : 'unlogin_h'")
         div(v-if="!isLogin"
           class="home-content__top-white")
         div(class="home-content__top-region")
@@ -387,6 +386,7 @@ export default Vue.extend({
       width: 100%;
       z-index: -2;
       object-fit: cover;
+      background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
       &.login_h {
         height: 420px;
       }
