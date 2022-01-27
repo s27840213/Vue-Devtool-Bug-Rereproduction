@@ -77,7 +77,10 @@
               class="home-content__feature-title" tag="span")
               template(#newline)
                 br
-            div(class="home-content__feature-subtitle home-content__feature-f2-subtitle") {{$t('NN0376')}}
+            i18n(path="NN0376"
+              class="home-content__feature-subtitle home-content__feature-f2-subtitle" tag="span")
+              template(#newline)
+                br
             div(class="home-content__feature-btn"
               @click="goToTemplateCenterSortBy") {{$t('NN0377')}}
         div(class="home-content__feature home-content__feature-f3")
@@ -86,9 +89,12 @@
               class="home-content__feature-title" tag="span")
               template(#newline)
                 br
-            div(class="home-content__feature-subtitle") {{$t('NN0379')}}
+            i18n(path="NN0379"
+              class="home-content__feature-subtitle" tag="span")
+              template(#newline)
+                br
             div(class="home-content__feature-textbtn"
-              @click="newDesign()") {{$t('NN0274')}}
+              @click="newDesign()") {{$t('NN0391')}}
               svg-icon(class="pl-5"
                 :iconName="'right-arrow'"
                 :iconColor="'blue-1'"
