@@ -5,6 +5,7 @@ import store from '@/store'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
+import mathUtils from './mathUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -266,12 +267,15 @@ class Controller {
   getCurveTextPropsByHW(config: IText, curveTextHW: {areaWidth: number, areaHeight: number, minHeight: number}, bend?: number): { width: number, height: number, x: number, y: number } {
     const { areaWidth, areaHeight, minHeight } = curveTextHW
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
-    const { top, bottom, center } = this.getAnchors(config, minHeight)
+    const { top, center } = this.getAnchors(config, minHeight)
+    const { y, height, rotate } = config.styles
+    const hDiff1 = top !== y ? (height - minHeight) / 2 : (minHeight - height) / 2
+    const hDiff2 = +bend < 0 ? (minHeight - areaHeight) / 2 : (areaHeight - minHeight) / 2
     return {
       width: areaWidth,
       height: areaHeight,
-      x: center - (areaWidth / 2),
-      y: +bend < 0 ? bottom - areaHeight : top
+      x: center - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (areaWidth / 2),
+      y: y + height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (areaHeight / 2)
     }
   }
 
