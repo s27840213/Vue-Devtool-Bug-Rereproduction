@@ -17,8 +17,10 @@
             class="home-content__top-title")
             template(#newline)
               br
-          div(class="home-content__top-subtitle")
-            span {{$t('NN0237')}}
+          i18n(path="NN0390" tag="span"
+            class="home-content__top-subtitle")
+            template(#newline)
+              br
           div(v-if="isLogin")
             search-bar(class="home-content__top-search"
               :placeholder="$t('NN0037')"
