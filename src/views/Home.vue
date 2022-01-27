@@ -313,7 +313,8 @@ export default Vue.extend({
     },
     fontStyles() {
       if (this.currLocale === 'tw' || this.currLocale === 'jp') {
-        return { fontFamily: STANDARD_TEXT_FONT[localeUtils.currLocale()] }
+        // 思源黑體
+        return { fontFamily: STANDARD_TEXT_FONT.tw }
       } else {
         return { fontFamily: 'Poppins' }
       }
