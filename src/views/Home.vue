@@ -28,7 +28,7 @@
             div(class="home-content__top-btn"
               @click="newDesign()") {{$t('NN0274')}}
             img(class="home-content__top-img"
-              :src="require('@/assets/img/svg/homepage/header_img_us.png')")
+              :src="require('@/assets/img/svg/homepage/header_img_' + currLocale+ '.png')")
       div(class="home-content-title"
         :class="!isLogin ? 'top-padding' : ''") {{$t('NN0154')}}
       div(class="home-content__theme")
@@ -70,10 +70,10 @@
             div(class="home-content__feature-btn"
               @click="goToPage('SignUp')") {{$t('NN0374')}}
           img(class="home-content__feature-f1-img"
-            :src="require('@/assets/img/svg/homepage/Feature 1_us.svg')")
+            :src="require('@/assets/img/svg/homepage/Feature 1_' + currLocale+ '.svg')")
         div(class="home-content__feature home-content__feature-f2")
           img(class="home-content__feature-f2-img"
-            :src="require('@/assets/img/svg/homepage/Feature 2_us.png')")
+            :src="require('@/assets/img/svg/homepage/Feature 2_' + currLocale+ '.png')")
           div(class="home-content__feature-text text-f2")
             i18n(path="NN0375"
               class="home-content__feature-title" tag="span")
@@ -96,7 +96,7 @@
                 :iconColor="'blue-1'"
                 :iconWidth="'25px'")
           img(class="home-content__feature-f3-img"
-            :src="require('@/assets/img/svg/homepage/Feature 3_us.svg')")
+            :src="require('@/assets/img/svg/homepage/Feature 3_' + currLocale+ '.svg')")
         div(class="home-content__bottom")
           div(class="home-content__bottom-branch")
             img(v-for="branch in brandList"
@@ -664,7 +664,7 @@ export default Vue.extend({
           padding-left: 5%;
         }
         @media screen and (max-width: 768px) {
-          padding-right: 0;
+          padding-left: 0;
           margin:0 auto;
           width: 95%;
           max-width: unset;
@@ -678,6 +678,9 @@ export default Vue.extend({
     }
     &-title {
       @include text-H2;
+      @media screen and (max-width: 768px) {
+        @include text-H3;
+      }
       @media screen and (max-width: 540px) {
         @include text-H5;
         width: unset;
