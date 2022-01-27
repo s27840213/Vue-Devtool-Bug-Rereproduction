@@ -11,6 +11,7 @@ import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
+import textShapeUtils from './textShapeUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -623,9 +624,10 @@ class TextUtils {
     if (!group.layers) return
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
+      if (config.type !== 'text') throw new Error('updateGroupLayerSize with subLayerIndex argument only accepts text subLayer')
       const originSize = { width: config.styles.width, height: config.styles.height }
       let textHW
-      if ((config.styles as any).textShape?.name === 'curve') {
+      if (textShapeUtils.isCurvedText(config.styles)) {
         textHW = originSize
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
@@ -679,42 +681,61 @@ class TextUtils {
     }
   }
 
-  asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number) {
+  asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number, noPush = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const targetSubLayers = [] as Array<[number, number]>
     const config = group.layers[subLayerIndex]
-    const { y, textShape: { bend = 0 } = {} } = config.styles as any
-    if (+bend >= 0) {
-      const lowLine = y + heightOri
-      group.layers
-        .forEach((l, idx) => {
-          if (l.styles.y >= lowLine && idx !== subLayerIndex) {
-            targetSubLayers.push([idx, l.styles.y])
-          }
-        })
-      targetSubLayers
-        .forEach(data => {
-          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
-            y: data[1] + (height - heightOri)
+    if (config.type !== 'text') throw new Error('asSubLayerSizeRefresh only accepts text subLayer')
+    if (!noPush) {
+      const { y, textShape: { bend = 0 } = {} } = config.styles as any
+      if (+bend >= 0) {
+        const lowLine = y + heightOri
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine && idx !== subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
           })
-        })
-    } else {
-      const highLine = y
-      group.layers
-        .forEach((l, idx) => {
-          if (l.styles.y <= highLine && idx !== subLayerIndex) {
-            targetSubLayers.push([idx, l.styles.y])
-          }
-        })
-      targetSubLayers
-        .forEach(data => {
-          LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
-            y: data[1] - (height - heightOri)
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+              y: data[1] + (height - heightOri)
+            })
           })
-        })
+      } else {
+        const highLine = y
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y <= highLine && idx !== subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+              y: data[1] - (height - heightOri)
+            })
+          })
+      }
     }
     this.updateGroupLayerSize(pageIndex, layerIndex)
+  }
+
+  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (!group.layers) return
+    const config = group.layers[subLayerIndex]
+    if (config.type !== 'text') throw new Error('updateGroupLayerSizeByShape only accepts text subLayer')
+    if (textShapeUtils.isCurvedText(config.styles)) {
+      const heightOri = config.styles.height
+      const textHW = textShapeUtils.getCurveTextProps(config as IText)
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
+      this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri)
+      this.fixGroupCoordinates(pageIndex, layerIndex)
+    } else {
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex)
+    }
   }
 
   fixGroupXCoordinates(pageIndex: number, layerIndex: number) {

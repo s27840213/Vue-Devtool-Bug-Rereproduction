@@ -133,10 +133,10 @@ export default Vue.extend({
             if (subLayerIdx === -1) {
               (layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup).layers.forEach((l, index) => {
                 if (l.type !== 'text') return
-                TextUtils.updateGroupLayerSize(layerUtils.pageIndex, currLayerIndex, index)
+                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index)
               })
             } else {
-              TextUtils.updateGroupLayerSize(layerUtils.pageIndex, currLayerIndex, subLayerIdx)
+              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx)
             }
           })
 
