@@ -197,7 +197,7 @@ export default Vue.extend({
           this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
           this.facebookPage = 'https://www.facebook.com/vivipic' + locale
-          this.igPage = 'https://www.instagram.com/vivipic' + locale
+          this.igPage = 'https://www.instagram.com/vivipic.' + locale
           this.mailtoService = 'mailto:' + locale + '@vivipic.com'
           break
         default:
@@ -207,7 +207,7 @@ export default Vue.extend({
           this.privacyPage = 'https://blog.vivipic.com/us-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/us-terms-of-use/'
           this.facebookPage = 'https://www.facebook.com/vivipic' + locale
-          this.igPage = 'https://www.instagram.com/vivipicus'
+          this.igPage = 'https://www.instagram.com/vivipic.' + locale
           this.mailtoService = 'mailto:service@vivipic.com'
           break
       }
