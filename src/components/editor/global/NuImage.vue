@@ -124,8 +124,8 @@ export default Vue.extend({
     ...mapState('user', ['imgSizeMap']),
     getImgDimension(): number {
       const { type } = this.config.srcObj
-      const { width, height } = this.config.styles
-      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
+      const { imgWidth, imgHeight } = this.config.styles
+      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },
     getPreviewSize(): number {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
@@ -162,12 +162,12 @@ export default Vue.extend({
   methods: {
     ...mapActions('user', ['updateImages']),
     styles() {
+      const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
-      const { styles } = this.config
       return {
-        transform: `translate(${styles.imgX}px, ${styles.imgY}px)`,
-        width: `${styles.imgWidth}px`,
-        height: `${styles.imgHeight}px`,
+        transform: `translate(${imgX}px, ${imgY}px)`,
+        width: `${imgWidth}px`,
+        height: `${imgHeight}px`,
         ...inheritStyle
       }
     },

@@ -83,14 +83,6 @@ export default Vue.extend({
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
-    },
-    getFlipXFactor(): number {
-      const currLayer = LayerUtils.getCurrLayer
-      return currLayer.type === 'frame' ? (currLayer.styles.horizontalFlip ? -1 : 1) : 1
-    },
-    getFlipYFactor(): number {
-      const currLayer = LayerUtils.getCurrLayer
-      return currLayer.type === 'frame' ? (currLayer.styles.verticalFlip ? -1 : 1) : 1
     }
   },
   methods: {
@@ -213,8 +205,8 @@ export default Vue.extend({
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x = this.getFlipXFactor * (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
-      offsetPos.y = this.getFlipYFactor * (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.y = (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
       const currLayer = LayerUtils.getCurrLayer
       if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
         const primaryScale = LayerUtils.getCurrLayer.styles.scale
@@ -236,9 +228,15 @@ export default Vue.extend({
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.angleInRad()
+      let flipFactorX = 1
+      let flipFactorY = 1
+      if (LayerUtils.getCurrLayer.type === 'frame') {
+        flipFactorX = LayerUtils.getCurrLayer.styles.horizontalFlip ? -1 : 1
+        flipFactorY = LayerUtils.getCurrLayer.styles.horizontalFlip ? -1 : 1
+      }
       return {
-        x: offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.imgX,
-        y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
+        x: flipFactorX * (offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad)) + this.initImgPos.imgX,
+        y: flipFactorY * (-offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad)) + this.initImgPos.imgY
       }
     },
     moveEnd(e: MouseEvent) {

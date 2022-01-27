@@ -121,6 +121,11 @@
               class="dim-background"
               :style="styles('control')")
             template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
+              nu-layer(style="opacity: 0.45"
+                :layerIndex="currSubSelectedInfo.index"
+                :pageIndex="pageIndex"
+                :noClip="true"
+                :config="getCurrSubSelectedLayerShown")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
                 :config="getCurrSubSelectedLayerShown")
@@ -128,8 +133,13 @@
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
-                                    :config="Object.assign(backImgConfig(getCurrSubSelectedLayerShown), { pointerEvents: 'none' }, { forRender: true })")
+                                    :config="Object.assign(getCurrSubSelectedLayerShown, { pointerEvents: 'none' }, { forRender: true })")
             template(v-else-if="getCurrLayer.type === 'image'")
+              nu-layer(:style="'opacity: 0.45'"
+                :layerIndex="currSelectedIndex"
+                :pageIndex="pageIndex"
+                :noClip="true"
+                :config="getCurrLayer")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
                 :config="getCurrLayer")
@@ -285,14 +295,22 @@ export default Vue.extend({
       }
       return undefined
     },
-    getCurrSubSelectedLayerShown(): ILayer | undefined {
+    getCurrSubSelectedLayerShown(): IImage | undefined {
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
         return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0] as IImage
       } else if (layer.type === 'frame') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IFrame).clips[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
+        const primaryLayer = this.getCurrLayer as IFrame
+        const image = GeneralUtils.deepCopy(primaryLayer.clips[this.currSubSelectedInfo.index]) as IImage
+        const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
+        if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
+          const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
+          const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
+          image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
+          image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
+        }
+        return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
       }
       return undefined
     },
@@ -408,22 +426,6 @@ export default Vue.extend({
           transform: `translate3d(0,${pos}px,50px)`,
           'pointer-events': isGuideline ? 'auto' : 'none'
         }
-    },
-    backImgConfig(_config: any, isController = false) {
-      const config = GeneralUtils.deepCopy(_config) as IImage
-      const currLayer = layerUtils.getCurrLayer
-      const { styles } = config
-      const { horizontalFlip, verticalFlip } = layerUtils.getCurrLayer.styles
-      const { imgX, imgY, imgWidth, imgHeight } = this.getCurrSubSelectedLayerShown?.styles as IImageStyle
-      styles.horizontalFlip = horizontalFlip
-      styles.verticalFlip = verticalFlip
-      const baseLine = {
-        x: -imgWidth / 2 + currLayer.styles.width / 2,
-        y: -imgHeight / 2 + currLayer.styles.height / 2
-      }
-      styles.imgX += horizontalFlip ? -2 * (imgX - baseLine.x) : 0
-      styles.imgY += verticalFlip ? -2 * (imgY - baseLine.y) : 0
-      return config
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
       this.ADD_newLayers({
