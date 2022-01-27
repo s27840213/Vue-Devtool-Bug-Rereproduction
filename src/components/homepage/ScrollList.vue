@@ -229,7 +229,7 @@ export default Vue.extend({
       width: 100px;
     }
     @media screen and (max-width: 540px) {
-      width: 70px;
+      width: 90px;
     }
     &-title {
       color: setColor(gray-1);
