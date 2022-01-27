@@ -10,6 +10,7 @@ import stepsUtils from './stepsUtils'
 import imageAdjustUtil from './imageAdjustUtil'
 import frameUtils from './frameUtils'
 import textShapeUtils from './textShapeUtils'
+import mathUtils from './mathUtils'
 
 class FormatUtils {
   copiedFormat: IFormat | undefined
@@ -105,9 +106,12 @@ class FormatUtils {
           const targetTextLayer = targetLayer as any
           const wasCurveText = this.isCurveText(targetTextLayer.styles.textShape ?? {})
           const bendOri = targetTextLayer.styles.textShape?.bend
-          let anchors = { top: 0, bottom: 0, center: 0 }
+          let hDiff1 = 0
+          let minHeight = targetTextLayer.styles.height
           if (wasCurveText) {
-            anchors = textShapeUtils.getAnchors(targetTextLayer, textShapeUtils.getCurveTextHW(targetTextLayer).minHeight)
+            minHeight = textShapeUtils.getCurveTextHW(targetTextLayer).minHeight
+            const height = targetTextLayer.styles.height
+            hDiff1 = bendOri < 0 ? (height - minHeight) / 2 : (minHeight - height) / 2
           }
           const paragraphs = this.applyTextStyles(targetTextLayer.paragraphs)
           layerUtils.updateSpecLayerData({
@@ -125,8 +129,12 @@ class FormatUtils {
           if (this.isCurveText(textShape)) {
             const textProps = textShapeUtils.getCurveTextProps(targetTextLayer)
             if (wasCurveText) {
+              const { x, y, width, height, rotate } = targetTextLayer.styles
+              const bend = +targetTextLayer.styles.textShape?.bend
+              const hDiff2 = bend < 0 ? (minHeight - textProps.height) / 2 : (textProps.height - minHeight) / 2
               Object.assign(textProps, {
-                y: +targetTextLayer.styles.textShape?.bend < 0 ? anchors.bottom - textProps.height : anchors.top
+                x: x + width / 2 - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (textProps.width / 2),
+                y: y + height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (textProps.height / 2)
               })
             }
             layerUtils.updateSubLayerStyles(
@@ -143,9 +151,12 @@ class FormatUtils {
             )
           } else {
             const textHW = textUtils.getTextHW(targetTextLayer, targetTextLayer.styles.widthLimit)
-            let y = targetTextLayer.styles.y
+            let hDiff2
+            const { width, height, rotate } = targetTextLayer.styles
             if (wasCurveText) {
-              y = +bendOri < 0 ? anchors.bottom - textHW.height : anchors.top
+              hDiff2 = +bendOri < 0 ? (minHeight - textHW.height) / 2 : (textHW.height - minHeight) / 2
+            } else {
+              hDiff2 = (textHW.height - minHeight) / 2
             }
             layerUtils.updateSubLayerStyles(
               pageIndex,
@@ -153,8 +164,8 @@ class FormatUtils {
               idx,
               {
                 ...textHW,
-                x: targetTextLayer.styles.x + (targetTextLayer.styles.width - textHW.width) / 2,
-                y
+                x: targetTextLayer.styles.x + width / 2 - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (textHW.width / 2),
+                y: targetTextLayer.styles.y + height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (textHW.height / 2)
               }
             )
           }
@@ -200,9 +211,12 @@ class FormatUtils {
       if (type === 'text') {
         const wasCurveText = this.isCurveText(layer.styles.textShape ?? {})
         const bendOri = layer.styles.textShape?.bend
-        let anchors = { top: 0, bottom: 0, center: 0 }
+        let hDiff1 = 0
+        let minHeight = layer.styles.height
         if (wasCurveText) {
-          anchors = textShapeUtils.getAnchors(layer, textShapeUtils.getCurveTextHW(layer).minHeight)
+          minHeight = textShapeUtils.getCurveTextHW(layer).minHeight
+          const height = layer.styles.height
+          hDiff1 = bendOri < 0 ? (height - minHeight) / 2 : (minHeight - height) / 2
         }
         const { scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
         const paragraphs = this.applyTextStyles(layer.paragraphs)
@@ -220,22 +234,29 @@ class FormatUtils {
         if (this.isCurveText(textShape)) {
           const textProps = textShapeUtils.getCurveTextProps(text)
           if (wasCurveText) {
+            const { x, y, width, height, rotate } = text.styles
+            const bend = +text.styles.textShape?.bend
+            const hDiff2 = bend < 0 ? (minHeight - textProps.height) / 2 : (textProps.height - minHeight) / 2
             Object.assign(textProps, {
-              y: +text.styles.textShape?.bend < 0 ? anchors.bottom - textProps.height : anchors.top
+              x: x + width / 2 - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (textProps.width / 2),
+              y: y + height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (textProps.height / 2)
             })
           }
           layerUtils.updateLayerStyles(pageIndex, layerIndex, textProps)
           layerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit: -1 })
         } else {
           const textHW = textUtils.getTextHW(text, text.styles.widthLimit)
-          let y = text.styles.y
+          const { width, height, rotate } = text.styles
+          let hDiff2
           if (wasCurveText) {
-            y = +bendOri < 0 ? anchors.bottom - textHW.height : anchors.top
+            hDiff2 = +bendOri < 0 ? (minHeight - textHW.height) / 2 : (textHW.height - minHeight) / 2
+          } else {
+            hDiff2 = (textHW.height - minHeight) / 2
           }
           layerUtils.updateLayerStyles(pageIndex, layerIndex, {
             ...textHW,
-            x: text.styles.x + (text.styles.width - textHW.width) / 2,
-            y
+            x: text.styles.x + width / 2 - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (textHW.width / 2),
+            y: text.styles.y + height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (textHW.height / 2)
           })
         }
         stepsUtils.record()
