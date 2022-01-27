@@ -61,7 +61,7 @@
               @click="goToTemplateCenterSortBy") {{$t('NN0371')}}
       template(v-if="!isLogin")
         div(class="home-content__feature home-content__feature-f1")
-          div(class="home-content__feature-text")
+          div(class="home-content__feature-text text-f1")
             i18n(path="NN0372"
               class="home-content__feature-title" tag="span")
               template(#newline)
@@ -74,7 +74,7 @@
         div(class="home-content__feature home-content__feature-f2")
           img(class="home-content__feature-f2-img"
             :src="require('@/assets/img/svg/homepage/Feature 2_us.png')")
-          div(class="home-content__feature-text")
+          div(class="home-content__feature-text text-f2")
             i18n(path="NN0375"
               class="home-content__feature-title" tag="span")
               template(#newline)
@@ -83,7 +83,7 @@
             div(class="home-content__feature-btn"
               @click="goToTemplateCenterSortBy") {{$t('NN0377')}}
         div(class="home-content__feature home-content__feature-f3")
-          div(class="home-content__feature-text")
+          div(class="home-content__feature-text text-f3")
             i18n(path="NN0378"
               class="home-content__feature-title" tag="span")
               template(#newline)
@@ -579,6 +579,19 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       text-align: left;
+      &.text-f1 {
+        width: 450px;
+        padding-left: 150px;
+        @media screen and (max-width: 1440px) {
+          padding-left: 5%;
+        }
+      }
+      &.text-f2 {
+        max-width: 500px;
+      }
+      &.text-f3 {
+        max-width: 450px;
+      }
       @media screen and (max-width: 768px) {
         padding: 40px 24px 0 24px;
       }
@@ -586,15 +599,18 @@ export default Vue.extend({
     &-f1 {
       background: #F3F6FA;
       margin-top: 24px;
-      padding: 150px 5%;
+      padding: 150px 0;
       @media screen and (max-width: 768px) {
         flex-direction: column-reverse;
         align-items: flex-start;
         padding: 20px 0 75px 0;
       }
       &-img {
-        width: 50%;
-        max-width: 640px;
+        width: 65%;
+        max-width: 892px;
+        @media screen and (max-width: 1440px) {
+          width: 50%;
+        }
         @media screen and (max-width: 768px) {
           margin:0 auto;
           width: 95%;
@@ -610,9 +626,6 @@ export default Vue.extend({
         flex-direction: column;
         align-items: flex-start;
         padding: 40px 0 0 0;
-      }
-      > div {
-        max-width: 425px;
       }
       &-img {
         width: 45%;
@@ -643,18 +656,12 @@ export default Vue.extend({
         align-items: flex-start;
         padding: 50px 0;
       }
-      > div {
-        max-width: 425px;
-        @media screen and (max-width: 768px) {
-          padding: 40px 45px 0 45px;
-        }
-      }
       &-img {
         width: 45%;
-        max-width: 580px;
-        padding-right: 115px;
+        max-width: 660px;
+        padding-left: 150px;
         @media screen and (max-width: 1440px) {
-          padding-right: 24px;
+          padding-left: 5%;
         }
         @media screen and (max-width: 768px) {
           padding-right: 0;
@@ -670,16 +677,13 @@ export default Vue.extend({
       }
     }
     &-title {
-      // text-align: left;
       @include text-H2;
-      width: 400px;
       @media screen and (max-width: 540px) {
         @include text-H5;
         width: unset;
       }
     }
     &-subtitle {
-      // text-align: left;
       color: setColor(gray-2);
       padding-top: 20px;
       @include body-LG;
@@ -757,7 +761,7 @@ export default Vue.extend({
     }
     &-subtitle {
       color: setColor(gray-2);
-      max-width: 800px;
+      max-width: 900px;
       padding-top: 30px;
       padding-bottom: 10px;
       @include body-LG;
