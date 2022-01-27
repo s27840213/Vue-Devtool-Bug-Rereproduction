@@ -50,38 +50,36 @@ class FrameUtils {
       }
     }
     if (idx !== -1) {
-      const clips = generalUtils.deepCopy(currLayer.clips)
-      const srcObj = {
-        ...clips[idx].srcObj
-      }
-      clips[idx].srcObj = {
-        type: 'frame',
-        userId: '',
-        assetId: ''
-      }
-      const { imgWidth, imgHeight, width, height, adjust } = clips[idx].styles
+      const clip = generalUtils.deepCopy(currLayer.clips[idx])
+      const { imgWidth, imgHeight, width, height, adjust } = clip.styles
       LayerUtils.addLayers(LayerUtils.pageIndex, [layerFactary.newImage({
-        srcObj,
+        srcObj: { ...clip.srcObj },
         styles: {
-          x: currLayer.styles.x + (clips[idx].styles.x + width / 4) * currLayer.styles.scale,
-          y: currLayer.styles.y + (clips[idx].styles.y + height / 4) * currLayer.styles.scale,
+          x: currLayer.styles.x + (clip.styles.x + width / 4) * currLayer.styles.scale,
+          y: currLayer.styles.y + (clip.styles.y + height / 4) * currLayer.styles.scale,
           width: imgWidth * currLayer.styles.scale,
           height: imgHeight * currLayer.styles.scale,
           horizontalFlip: currLayer.styles.horizontalFlip,
           verticalFlip: currLayer.styles.verticalFlip,
-          opacity: clips[idx].styles.opacity,
+          opacity: clip.styles.opacity,
           adjust // inherit adjust to the new layer,
         }
       })])
-      Object.assign(clips[idx].styles, {
-        imgWidth: clips[idx].styles.initWidth,
-        imgHeight: clips[idx].styles.initHeight,
+      this.updateFrameLayerStyles(LayerUtils.pageIndex, layerIndex, idx, {
+        imgWidth: clip.styles.initWidth,
+        imgHeight: clip.styles.initHeight,
         imgX: 0,
         imgY: 0,
         opacity: 100,
         adjust: {}
       })
-      LayerUtils.updateLayerProps(LayerUtils.pageIndex, layerIndex, { clips })
+      this.updateFrameLayerProps(LayerUtils.pageIndex, layerIndex, idx, {
+        srcObj: {
+          type: 'frame',
+          userId: '',
+          assetId: ''
+        }
+      })
 
       const clipper = document.getElementById(`nu-clipper-${layerIndex}`) as HTMLElement
       clipper && clipper.classList.remove('layer-flip')
@@ -119,6 +117,7 @@ class FrameUtils {
   }
 
   updateFrameLayerProps(pageIndex: number, layerIndex: number, targetIndex: number, props: { [index: string]: number | string | boolean | SrcObj }) {
+    if (targetIndex === -1) return
     store.commit('UPDATE_frameLayerProps', {
       pageIndex,
       layerIndex,

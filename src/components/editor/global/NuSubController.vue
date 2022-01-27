@@ -600,9 +600,6 @@ export default Vue.extend({
 .nu-sub-controller {
   transform-style: preserve-3d;
   &__wrapper {
-    // display: flex;
-    // justify-content: center;
-    // align-items: center;
     top: 0;
     left: 0;
     position: absolute;
