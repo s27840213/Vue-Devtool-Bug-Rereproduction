@@ -164,7 +164,6 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss" scoped>
-@import "@/assets/scss/homepageStyle.scss";
 .scroll-list {
   $this: &;
   position: relative;

@@ -1,9 +1,5 @@
 <template lang="pug">
-  div(class="home"
-    :style="fontStyles()")
-    link(v-if="currLocale === 'us'"
-      href='https://fonts.googleapis.com/css?family=Poppins:400,600,700'
-      rel='stylesheet' type='text/css')
+  div(class="home")
     nu-header(:showSearchPage="isShowMobileSearchPage"
       @isShowSearchPage="showMobileSearchPage")
     div(class="home-content")
@@ -132,7 +128,6 @@ import designUtils from '@/utils/designUtils'
 import themeUtils from '@/utils/themeUtils'
 import localeUtils from '@/utils/localeUtils'
 import { ITemplate } from '@/interfaces/template'
-import { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
 
 export default Vue.extend({
   name: 'Home',
@@ -311,22 +306,12 @@ export default Vue.extend({
       if (this.isMobile) {
         this.isShowMobileSearchPage = show
       }
-    },
-    fontStyles() {
-      if (this.currLocale === 'tw' || this.currLocale === 'jp') {
-        // 思源黑體
-        return { fontFamily: STANDARD_TEXT_FONT.tw }
-      } else {
-        return { fontFamily: 'Poppins' }
-      }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/homepageStyle.scss";
-
 .home {
   position: relative;
   width: 100%;

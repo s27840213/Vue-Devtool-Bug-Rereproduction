@@ -106,8 +106,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/homepageStyle.scss";
-
 .design-item {
   display: flex;
   flex-direction: column;
