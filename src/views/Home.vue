@@ -38,9 +38,9 @@
       div(v-if="!isLogin"
         class="home-content__plaque")
         div(class="home-content__plaque-title") {{$t('NN0276')}}
+          div(class="home-content__plaque-bg")
         div(class="home-content__plaque-subtitle"
           class="px-20") {{$t('NN0277')}}
-        div(class="home-content__plaque-bg")
       div(v-if="isLogin")
         div(class="home-content-title")
           span {{$t('NN0080')}}
@@ -500,29 +500,28 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
     padding: 50px 0;
     &-bg {
       position: absolute;
-      top: 75px;
+      bottom: 0;
       width: 675px;
       height: 20px;
       background: setColor(blue-3);
       z-index: -1;
       @media screen and (max-width: 1440px) {
         width: 500px;
-        top: 65px;
       }
       @media screen and (max-width: 768px) {
         width: 425px;
-        top: 62px;
       }
       @media screen and (max-width: 540px) {
         width: 50%;
-        top: 90px;
       }
     }
     &-title {
+      position: relative;
+      display: flex;
+      justify-content: center;
       color: setColor(gray-1);
       @include text-H3;
       @media screen and (max-width: 1440px) {
