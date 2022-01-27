@@ -38,6 +38,7 @@
 
 @mixin text-H6 {
   @include header();
+  font-weight: 600;
   font-size: 16px;
 }
 
