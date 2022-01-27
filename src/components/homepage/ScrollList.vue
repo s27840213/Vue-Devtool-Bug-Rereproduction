@@ -211,7 +211,7 @@ export default Vue.extend({
       padding-top: 10px;
       @include body-SM;
       @media screen and (max-width: 768px) {
-        @include body-XXS;
+        @include body-XS;
       }
     }
   }
@@ -234,7 +234,7 @@ export default Vue.extend({
     &-title {
       color: setColor(gray-1);
       padding-top: 5px;
-      @include body-XXS;
+      @include body-XS;
     }
     &-subtitle {
       color: setColor(gray-2);
