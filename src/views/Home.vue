@@ -34,7 +34,8 @@
           @openPopup="openPopup()")
       div(v-if="!isLogin"
         class="home-content__plaque")
-        div(class="home-content__plaque-title") {{$t('NN0276')}}
+        div(class="home-content__plaque-title"
+          :class="currLocale === 'us' ? 'us' : ''") {{$t('NN0276')}}
           div(class="home-content__plaque-bg")
         div(class="home-content__plaque-subtitle"
           class="px-20") {{$t('NN0277')}}
@@ -86,7 +87,8 @@
         div(class="home-content__feature home-content__feature-f3")
           div(class="home-content__feature-text text-f3")
             i18n(path="NN0378"
-              class="home-content__feature-title" tag="span")
+              class="home-content__feature-title" tag="span"
+              :class="currLocale === 'us' ? 'us' : ''")
               template(#newline)
                 br
             i18n(path="NN0379"
@@ -107,7 +109,8 @@
               class="home-content__bottom-branch-img"
               :src="require('@/assets/img/svg/homepage/' + branch + '.svg')")
           div(class="home-content__bottom-text")
-            div(class="home-content__bottom-title") {{$t('NN0380')}}
+            div(class="home-content__bottom-title"
+              :class="currLocale === 'us' ? 'us' : ''") {{$t('NN0380')}}
             div(class="home-content__bottom-subtitle") {{$t('NN0381')}}
             div(class="home-content__feature-btn"
               @click="newDesign()") {{$t('NN0274')}}
@@ -523,6 +526,9 @@ export default Vue.extend({
       @media screen and (max-width: 768px) {
         @include text-H5;
         max-width: 90%;
+        &.us {
+          width: 300px;
+        }
       }
     }
     &-subtitle {
@@ -676,7 +682,9 @@ export default Vue.extend({
       }
       @media screen and (max-width: 540px) {
         @include text-H5;
-        width: unset;
+        &.us {
+          width: 300px;
+        }
       }
     }
     &-subtitle {
@@ -753,6 +761,9 @@ export default Vue.extend({
       @include text-H2;
       @media screen and (max-width: 540px) {
         @include text-H5;
+        &.us {
+          width: 300px;
+        }
       }
     }
     &-subtitle {
