@@ -190,9 +190,9 @@ export default Vue.extend({
         case 'jp':
           this.blogPage = 'https://blog.vivipic.com/' + locale
           this.toturialPage = 'https://www.facebook.com/vivipic' + locale
-          this.servicePage = 'https://blog.vivipic.com/tw/tw-service-policy/'
-          this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
-          this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
+          this.servicePage = 'https://blog.vivipic.com/jp/terms-of-service/'
+          this.privacyPage = 'https://blog.vivipic.com/jp/jp-privacy-policy/'
+          this.agreementPage = 'https://blog.vivipic.com/jp/jp-terms-of-use/'
           this.facebookPage = 'https://www.facebook.com/vivipic' + locale
           this.igPage = 'https://www.instagram.com/vivipic.' + locale
           this.mailtoService = 'mailto:' + locale + '@vivipic.com'

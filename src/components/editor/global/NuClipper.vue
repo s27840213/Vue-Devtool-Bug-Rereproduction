@@ -10,16 +10,11 @@ import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
-  mounted() {
-    // this.shapeWidth = this.config.vSize?.[0] ?? 0 + this.config.pDiff?.[0] ?? 0
-    // this.shapeHeight = this.config.vSize?.[1] ?? 0 + this.config.pDiff?.[1] ?? 0
-    // console.log(this.config.vSize?.[1])
-    // console.log(this.config.pDiff?.[1])
-  },
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    noClip: Boolean
   },
   data() {
     return {
@@ -61,8 +56,8 @@ export default Vue.extend({
       return {
         width,
         height,
-        clipPath,
         'background-color': '#00000001',
+        ...(!this.noClip && { clipPath }),
         ...flip
       }
     }
@@ -72,9 +67,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-clipper {
-  // position: relative;
   transform-style: preserve-3d;
-  // overflow: hidden;
 }
 
 .layer-flip {

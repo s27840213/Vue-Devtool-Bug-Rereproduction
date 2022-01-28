@@ -1437,8 +1437,18 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
+      /**
+       * If current-selected-layer is exact this layer, record the sub-active-layer.
+       * After deselecting, set it to active
+       */
+      const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
+
       GroupUtils.deselect()
       GroupUtils.select(this.pageIndex, [this.layerIndex])
+
+      if (this.getLayerType === 'frame') {
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+      }
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
