@@ -2,7 +2,7 @@ import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import ControlUtils from '@/utils/controlUtils'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IGroup } from '@/interfaces/layer'
 import frameUtils from './frameUtils'
 
 class FlipUtils {
@@ -31,30 +31,54 @@ class FlipUtils {
   horizontalFlip() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
-    if (layer.type === 'frame' && LayerUtils.subLayerIdx !== -1) {
-      frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-        , LayerUtils.subLayerIdx, {
-          horizontalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.horizontalFlip
+    switch (layer.type) {
+      case 'frame':
+        LayerUtils.subLayerIdx !== -1 && (() => {
+          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
+            , LayerUtils.subLayerIdx, {
+              horizontalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.horizontalFlip
+            })
+        })()
+        break
+      case 'group':
+        LayerUtils.subLayerIdx !== -1 && (() => {
+          LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
+            , {
+              horizontalFlip: !(layer as IGroup).layers[LayerUtils.subLayerIdx].styles.horizontalFlip
+            }, LayerUtils.subLayerIdx)
+        })()
+        break
+      default:
+        this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
+          horizontalFlip: !layer.styles.horizontalFlip
         })
-    } else {
-      this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
-        horizontalFlip: !layer.styles.horizontalFlip
-      })
     }
   }
 
   verticalFlip() {
     const currSelectedInfo = store.getters.getCurrSelectedInfo
     const layer = store.getters.getLayer(currSelectedInfo.pageIndex, currSelectedInfo.index)
-    if (layer.type === 'frame' && LayerUtils.subLayerIdx !== -1) {
-      frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-        , LayerUtils.subLayerIdx, {
-          verticalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.verticalFlip
+    switch (layer.type) {
+      case 'frame':
+        LayerUtils.subLayerIdx !== -1 && (() => {
+          frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
+            , LayerUtils.subLayerIdx, {
+              verticalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.verticalFlip
+            })
+        })()
+        break
+      case 'group':
+        LayerUtils.subLayerIdx !== -1 && (() => {
+          LayerUtils.updateLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
+            , {
+              verticalFlip: !(layer as IGroup).layers[LayerUtils.subLayerIdx].styles.verticalFlip
+            }, LayerUtils.subLayerIdx)
+        })()
+        break
+      default:
+        this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
+          verticalFlip: !layer.styles.verticalFlip
         })
-    } else {
-      this.applyFlip(currSelectedInfo.pageIndex, currSelectedInfo.index, layer, {
-        verticalFlip: !layer.styles.verticalFlip
-      })
     }
   }
 }

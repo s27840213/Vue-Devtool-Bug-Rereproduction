@@ -23,7 +23,6 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -85,14 +84,23 @@ export default Vue.extend({
       return this.config.styles.rotate
     },
     flipFactorX(): number {
-      if (LayerUtils.getCurrLayer.type === 'frame') {
+      if (['frame', 'group'].includes(LayerUtils.getCurrLayer.type)) {
         return LayerUtils.getCurrLayer.styles.horizontalFlip ? -1 : 1
       } else return 1
     },
     flipFactorY(): number {
-      if (LayerUtils.getCurrLayer.type === 'frame') {
+      if (['frame', 'group'].includes(LayerUtils.getCurrLayer.type)) {
         return LayerUtils.getCurrLayer.styles.verticalFlip ? -1 : 1
       } else return 1
+    },
+    angleInRad(): number {
+      const { type, styles: primaryStyles } = LayerUtils.getCurrLayer
+      const { rotate } = this.config.styles
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        return (primaryStyles.rotate + (type === 'group' ? rotate : 0)) * Math.PI / 180
+      } else {
+        return this.getLayerRotate * Math.PI / 180
+      }
     }
   },
   methods: {
@@ -237,7 +245,7 @@ export default Vue.extend({
       })
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
-      const angleInRad = this.angleInRad()
+      const angleInRad = this.angleInRad
       return {
         x: this.flipFactorX * (offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad)) + this.initImgPos.imgX,
         y: this.flipFactorY * (-offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad)) + this.initImgPos.imgY
@@ -268,7 +276,7 @@ export default Vue.extend({
       this.center = ControlUtils.getRectCenter(rect)
 
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
-      const angleInRad = this.angleInRad()
+      const angleInRad = this.angleInRad
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
       const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
@@ -279,21 +287,13 @@ export default Vue.extend({
       window.addEventListener('mousemove', this.scaling, false)
       window.addEventListener('mouseup', this.scaleEnd, false)
     },
-    angleInRad(): number {
-      const currLayer = LayerUtils.getCurrLayer
-      if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'frame') {
-        return currLayer.styles.rotate * Math.PI / 180
-      } else {
-        return this.getLayerRotate * Math.PI / 180
-      }
-    },
     scaling(event: MouseEvent) {
       event.preventDefault()
       let width = this.getImgWidth
       let height = this.getImgHeight
       const currLayer = LayerUtils.getCurrLayer
 
-      const angleInRad = this.angleInRad()
+      const angleInRad = this.angleInRad
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
       const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
       if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
