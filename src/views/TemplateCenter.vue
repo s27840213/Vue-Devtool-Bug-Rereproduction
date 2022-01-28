@@ -566,7 +566,7 @@ body {
     padding-top: 28%;
     background-size: cover;
     background-position: center center;
-    background-image: url("~@/assets/img/jpg/templates/search_background.jpeg");
+    background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   }
   &__search {
     position: absolute;
@@ -585,22 +585,16 @@ body {
       justify-content: center;
       height: 40px;
       > span {
-        font-family: "NotoSansTC";
-        font-weight: 700;
-        font-size: 40px;
-        line-height: 40px;
+        @include text-H2;
         display: block;
-        color: #373f41;
+        color: setColor(nav);
       }
     }
     &__text {
       height: 52px;
       > span {
-        font-family: Mulish;
-        font-weight: 400;
-        font-size: 16px;
-        line-height: 26px;
-        color: white;
+        @include body-SM;
+        color: setColor(gray-2);
       }
     }
     &__searchbar {
@@ -651,7 +645,6 @@ body {
     }
     &__title {
       width: 108px;
-      font-family: Mulish;
       font-weight: 400;
       font-size: 16px;
       line-height: 36px;
@@ -660,7 +653,6 @@ body {
     }
     &__sort {
       width: 113px;
-      font-family: Mulish;
       font-weight: 800;
       font-size: 14px;
       letter-spacing: 2px;
@@ -674,7 +666,6 @@ body {
     }
     &__color-title {
       width: 80px;
-      font-family: Mulish;
       font-weight: 600;
       font-size: 14px;
       line-height: 24px;
@@ -731,7 +722,6 @@ body {
           width: 100%;
           height: 20px;
           background-color: rgba(238, 239, 244, 0.8);
-          font-family: Mulish;
           font-weight: 400;
           font-size: 14px;
           line-height: 20px;
@@ -887,7 +877,6 @@ body {
       height: 20px;
       text-align: left;
       > span {
-        font-family: Mulish;
         font-weight: 400;
         font-size: 14px;
       }
@@ -919,7 +908,6 @@ body {
           height: 20px;
           text-align: left;
           > span {
-            font-family: Mulish;
             font-weight: 400;
             font-size: 12px;
           }
@@ -946,7 +934,6 @@ body {
       text-align: center;
       cursor: pointer;
       > span {
-        font-family: "NotoSansTC";
         font-weight: 700;
         font-size: 12px;
         line-height: 18px;

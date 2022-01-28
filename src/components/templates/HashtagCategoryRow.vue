@@ -93,7 +93,6 @@ export default Vue.extend({
   &__title {
     margin-top: 1px;
     margin-left: 8px;
-    font-family: Mulish;
     font-weight: 700;
     font-size: 18px;
     line-height: 28px;
@@ -117,22 +116,20 @@ export default Vue.extend({
       background: white;
       border: 1px solid setColor(gray-5);
       height: 30px;
-      line-height: 22px;
       box-sizing: border-box;
       border-radius: 100px;
-      font-family: Mulish;
-      font-weight: 400;
-      font-size: 14px;
       color: setColor(gray-2);
       padding: 3px 10px;
       cursor: pointer;
+      @include body-SM;
+      line-height: 20px;
       &.mobile {
         white-space: nowrap;
         padding: 3px 26px;
       }
       &.selected {
-      background: setColor(blue-1);
-      border: 1px solid setColor(blue-1);
+        background: setColor(blue-1);
+        border: 1px solid setColor(blue-1);
         color: white;
       }
     }
