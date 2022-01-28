@@ -111,7 +111,10 @@
           div(class="home-content__bottom-text")
             div(class="home-content__bottom-title"
               :class="currLocale === 'us' ? 'us' : ''") {{$t('NN0380')}}
-            div(class="home-content__bottom-subtitle") {{$t('NN0381')}}
+            i18n(path="NN0381"
+              class="home-content__bottom-subtitle" tag="span")
+              template(#newline)
+                br
             div(class="home-content__feature-btn"
               @click="newDesign()") {{$t('NN0274')}}
       div(v-else
@@ -598,7 +601,7 @@ export default Vue.extend({
     &-f1 {
       background: #F3F6FA;
       margin-top: 24px;
-      padding: 150px 0;
+      padding: 0;
       @media screen and (max-width: 768px) {
         flex-direction: column-reverse;
         align-items: flex-start;
@@ -677,7 +680,7 @@ export default Vue.extend({
     }
     &-title {
       @include text-H2;
-      @media screen and (max-width: 768px) {
+      @media screen and (max-width: 1440px) {
         @include text-H3;
       }
       @media screen and (max-width: 540px) {
