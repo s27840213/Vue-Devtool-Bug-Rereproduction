@@ -32,14 +32,14 @@
           div
           div
       div(class="body-2")
-        div(v-if="!isLogin"
-          style="width: 180px;")
+        div(v-if="!isLogin")
           search-bar(v-if="!noSearchbar"
             class="nu-header__search"
             :placeholder="$t('NN0037')"
             @search="handleSearch")
         div(v-if="!isLogin"
           class="py-5 px-30 text-bold pointer text-blue-1"
+          style="white-space: nowrap;"
           @click="goToPage('Login')") {{$tc('NN0168',2)}}
         div(v-if="!isLogin"
           class="nu-header__btn text-bold"
@@ -228,6 +228,7 @@ export default Vue.extend({
   z-index: setZindex("nu-header");
   &__btn {
     cursor: pointer;
+    white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -243,7 +244,7 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 800px) {
       display: none;
     }
     > div {
@@ -293,7 +294,7 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
-    @media screen and (min-width: 769px) {
+    @media screen and (min-width: 801px) {
       display: none;
     }
     :nth-child(1),
@@ -305,9 +306,16 @@ export default Vue.extend({
     }
   }
   &__search {
+    width: 180px;
     height: 28px;
     background-color: white;
     border-radius: 4px;
+    @media screen and (max-width: 1300px) {
+      width: 120px;
+    }
+    @media screen and (max-width: 1000px) {
+      width: 60px;
+    }
   }
   &__search-mobile {
     position: absolute;
