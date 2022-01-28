@@ -244,7 +244,7 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
-    @media screen and (max-width: 800px) {
+    @media screen and (max-width: 768px) {
       display: none;
     }
     > div {
@@ -294,7 +294,7 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
-    @media screen and (min-width: 801px) {
+    @media screen and (min-width: 769px) {
       display: none;
     }
     :nth-child(1),
