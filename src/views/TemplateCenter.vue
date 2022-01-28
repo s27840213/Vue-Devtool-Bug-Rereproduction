@@ -10,8 +10,7 @@
                 class="template-center__absolute-searchbar"
                 :clear="true"
                 :defaultKeyword="searchbarKeyword"
-                :placeholder="`${$t('NN0037')}`"
-                fontFamily="Mulish"
+                :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
     div(v-if="!isMobile" class="template-center__search-container")
@@ -28,8 +27,7 @@
                   :style="searchbarStyles()"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
-                  :placeholder="`${$t('NN0037')}`"
-                  fontFamily="Mulish"
+                  :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                   @update="handleUpdate"
                   @search="handleSearch")
     div(class="template-center__content"
@@ -39,8 +37,7 @@
                   class="template-center__mobile-search__searchbar"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
-                  :placeholder="`${$t('NN0037')}`"
-                  fontFamily="Mulish"
+                  :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                   @update="handleUpdate"
                   @search="handleSearch")
         div(class="template-center__mobile-search__options"
@@ -555,10 +552,13 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 480px;
-    height: 40px;
+    width: 440px;
+    height: 42px;
     border-radius: 3px;
     z-index: 1000;
+    background: white;
+    box-sizing: border-box;
+    border: 1px solid setColor(gray-4);
   }
   &__search-container {
     position: relative;
@@ -598,9 +598,12 @@ body {
       }
     }
     &__searchbar {
-      width: 480px;
-      height: 40px;
+      width: 440px;
+      height: 42px;
       border-radius: 3px;
+      background: white;
+      box-sizing: border-box;
+      border: 1px solid setColor(gray-4);
     }
   }
   &__content {
