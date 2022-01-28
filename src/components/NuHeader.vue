@@ -1,7 +1,6 @@
 <template lang="pug">
   div(class="nu-header")
-    div(v-if="!isMobile"
-      class="nu-header__container")
+    div(class="nu-header__container")
       div(class="body-2")
         svg-icon(class="pointer"
           :iconName="'logo'"
@@ -10,26 +9,22 @@
           @click.native="goToPage('Home')")
       transition(name="fade" mode="out-in")
         div(v-if="!noNavigation" class="body-2" key="navigation")
-          div
-            btn(@click.native="goToPage('Home')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Home'}") {{$t('NN0144')}}
-          div
-            btn(@click.native="goToPage('TemplateCenter')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") {{$t('NN0145')}}
-          div
-            btn(@click.native="goToPage('Toturial')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Toturial'}") {{$t('NN0146')}}
-          div
-            btn(@click.native="goToPage('Faq')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Faq'}") {{$t('NN0147')}}
-          div(v-if="isLogin")
-            btn(@click.native="goToPage('MyDesign')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'MyDesign'}") {{$t('NN0080')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'Home'}"
+            @click="goToPage('Home')") {{$t('NN0144')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'TemplateCenter'}"
+            @click="goToPage('TemplateCenter')") {{$t('NN0145')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'Toturial'}"
+            @click="goToPage('Toturial')") {{$t('NN0146')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'Faq'}"
+            @click="goToPage('Faq')") {{$t('NN0147')}}
+          div(v-if="isLogin"
+            class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'MyDesign'}"
+            @click="goToPage('MyDesign')") {{$t('NN0080')}}
         div(v-else class="body-2" key="no-navigation")
           div
           div
@@ -37,19 +32,18 @@
           div
           div
       div(class="body-2")
-        div(style="width: 180px;")
+        div(v-if="!isLogin")
           search-bar(v-if="!noSearchbar"
             class="nu-header__search"
             :placeholder="$t('NN0037')"
             @search="handleSearch")
-        div(v-if="!isLogin")
-          btn(@click.native="goToPage('Login')"
-          :type="'icon-mid text-blue-1'"
-          class="rounded" style="padding: 5px 30px;") {{$tc('NN0168',2)}}
-        div(v-if="!isLogin")
-          btn(@click.native="goToPage('SignUp')"
-          :type="'primary-mid'"
-          class="rounded" style="padding: 5px 30px;") {{$tc('NN0169',2)}}
+        div(v-if="!isLogin"
+          class="py-5 px-30 text-bold pointer text-blue-1"
+          style="white-space: nowrap;"
+          @click="goToPage('Login')") {{$tc('NN0168',2)}}
+        div(v-if="!isLogin"
+          class="nu-header__btn text-bold"
+          @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
         //- svg-icon(v-if="isLogin"
         //-   :iconName="`notify`"
         //-   :iconWidth="'20px'")
@@ -61,10 +55,9 @@
           popup-account(v-if="isAccountPopup"
             class="nu-header__account"
             @close="() => (isAccountPopup = false)")
-    div(v-else
-      class="nu-header__container-mobile")
+    div(class="nu-header__container-mobile")
       div(class="pl-15")
-        svg-icon(v-if="!isShowSearchBar"
+        svg-icon(v-if="!isShowSearchPage"
           :iconName="'menu'"
           :iconWidth="'25px'"
           :iconColor="'gray-3'"
@@ -77,27 +70,27 @@
           @click.native="goToPage('Home')")
       div(v-if="noSearchbar")
       div(v-else class="pr-15 relative")
-        svg-icon(v-if="!isShowSearchBar"
+        svg-icon(v-if="!isShowSearchPage"
           :iconName="'search'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
-          @click.native="() => { isShowSearchBar = true }")
+          @click.native="() => { isShowSearchPage = true }")
         svg-icon(v-else
           :iconName="'close'"
           :iconColor="'gray-3'"
           :iconWidth="'25px'"
-          @click.native="() => { isShowSearchBar = false }")
+          @click.native="closeSearchPage")
     slot
     div(v-if="isShowMenu"
         class="nu-header__menu")
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
           v-click-outside="() => { isShowMenu = false }")
-    div(v-if="isShowSearchBar"
+    div(v-if="isShowSearchPage"
       class="nu-header__search-mobile")
       search-bar(class="search"
         :placeholder="$t('NN0037')"
         @search="handleSearch")
-      div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}：
+      div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}:
       div(class="pt-10 nu-header__search-mobile__options")
         span(v-for="key in keys"
           @click="handleSearch(key)") {{key}}
@@ -106,7 +99,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import store from '@/store'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
@@ -126,14 +119,15 @@ export default Vue.extend({
   },
   props: {
     noSearchbar: Boolean,
-    noNavigation: Boolean
+    noNavigation: Boolean,
+    showSearchPage: Boolean
   },
   data() {
     return {
       StepsUtils,
       keys: [] as string[],
       isAccountPopup: false,
-      isShowSearchBar: false,
+      isShowSearchPage: false,
       isShowMenu: false
     }
   },
@@ -144,6 +138,11 @@ export default Vue.extend({
       this.keys = ['Free Shipping', 'New Arrivals', 'Content Marketing', 'Christmas Day']
     } else {
       this.keys = ['送料無料', '新商品', 'コンテンツマーケティング', 'クリスマス']
+    }
+  },
+  watch: {
+    showSearchPage() {
+      this.isShowSearchPage = this.showSearchPage
     }
   },
   computed: {
@@ -199,7 +198,7 @@ export default Vue.extend({
       // ----------------------
     },
     handleSearch(keyword: string) {
-      this.isShowSearchBar = false
+      this.isShowSearchPage = false
       if (this.currentPage === 'TemplateCenter') {
         this.$emit('search', keyword)
       }
@@ -207,6 +206,10 @@ export default Vue.extend({
     },
     openMenu() {
       this.isShowMenu = true
+    },
+    closeSearchPage() {
+      this.isShowSearchPage = false
+      this.$emit('isShowSearchPage', false)
     }
   }
 })
@@ -214,15 +217,26 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: 50px;
-  background-color: #eaf1f6;
-  border: 1px solid #e2e5e6;
+  height: 64px;
+  background-size: cover;
+  background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   box-sizing: border-box;
   position: sticky;
   top: 0;
   left: 0;
   width: 100%;
   z-index: setZindex("nu-header");
+  &__btn {
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: setColor(white);
+    background: setColor(blue-1);
+    border-radius: 4px;
+    padding: 5px 30px;
+  }
   &__container {
     position: relative;
     display: flex;
@@ -230,6 +244,9 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
     > div {
       &:nth-child(1) {
         display: grid;
@@ -277,6 +294,9 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
+    @media screen and (min-width: 769px) {
+      display: none;
+    }
     :nth-child(1),
     :nth-child(3) {
       width: 25px;
@@ -286,9 +306,16 @@ export default Vue.extend({
     }
   }
   &__search {
+    width: 180px;
     height: 28px;
     background-color: white;
     border-radius: 4px;
+    @media screen and (max-width: 1300px) {
+      width: 120px;
+    }
+    @media screen and (max-width: 1000px) {
+      width: 60px;
+    }
   }
   &__search-mobile {
     position: absolute;
