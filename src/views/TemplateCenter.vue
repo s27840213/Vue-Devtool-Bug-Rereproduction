@@ -1,11 +1,10 @@
 <template lang="pug">
   div(ref="body"
       class="template-center"
-      :class="{'mobile': isMobile}"
       @scroll="handleScroll")
-    nu-header(:noSearchbar="true" :noNavigation="snapToTop && !isMobile")
+    nu-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
       transition(name="slide")
-        search-bar(v-if="snapToTop && !isMobile"
+        search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
                 class="template-center__absolute-searchbar"
                 :clear="true"
@@ -13,7 +12,8 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    div(v-if="!isMobile" class="template-center__search-container")
+    nu-header(class="mobile-show" :noSearchbar="true")
+    div(class="template-center__search-container pc-show")
       div(class="template-center__search")
         div(class="template-center__search__title"
             :style="searchTitleStyles()")
@@ -30,11 +30,9 @@
                   :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                   @update="handleUpdate"
                   @search="handleSearch")
-    div(class="template-center__content"
-        :class="{'mobile': isMobile}")
-      div(v-if="isMobile" class="template-center__mobile-search")
-        search-bar(ref="searchbar"
-                  class="template-center__mobile-search__searchbar"
+    div(class="template-center__content")
+      div(class="template-center__mobile-search mobile-show")
+        search-bar(class="template-center__mobile-search__searchbar"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
                   :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
@@ -47,16 +45,19 @@
                   iconWidth="22px"
                   iconHeight="18.36px"
                   iconColor="white")
-      div(class="template-center__filter"
-          :class="{'mobile': isMobile}"
-          :style="{'max-height': isMobile ? (isShowOptions ? `${82 * hashtags.length}px` : '0px') : '100%', 'opacity': isShowOptions || !isMobile ? '1' : '0'}")
+      div(class="template-center__filter pc-show")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
-                            :isMobile="isMobile"
                             @select="handleHashtagSelect")
-      div(v-if="!isMobile" class="template-center__hr")
-      div(v-if="!isMobile" class="template-center__sorter")
+      div(class="template-center__filter mobile-show"
+          :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0'}")
+        hashtag-category-row(v-for="hashtag in hashtags"
+                            :list="hashtag"
+                            :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+                            @select="handleHashtagSelect")
+      div(class="template-center__hr pc-show")
+      div(class="template-center__sorter pc-show")
         div(class="template-center__sorter__left")
           div(class="template-center__sorter__title") {{$t('NN0191')}}:
           div(v-for="sortingCriterium in sortingCriteria"
@@ -69,13 +70,10 @@
           //-   svg-icon(iconName="chevron-down"
           //-           iconWidth="24px"
           //-           iconColor="gray-2")
-      div(class="template-center__waterfall-wrapper"
-          :class="{'mobile': isMobile}")
-        div(class="template-center__waterfall"
-            :class="{'mobile': isMobile}")
-          div(v-for="waterfallTemplate in waterfallTemplates"
-              class="template-center__waterfall__column"
-              :class="{'mobile': isMobile}")
+      div(class="template-center__waterfall-wrapper pc-show")
+        div(class="template-center__waterfall")
+          div(v-for="waterfallTemplate in waterfallTemplatesPC"
+              class="template-center__waterfall__column")
             div(v-for="template in waterfallTemplate"
                 class="template-center__waterfall__column__template"
                 :style="templateStyles(template.aspect_ratio)"
@@ -83,7 +81,6 @@
                 @mouseenter="handleMouseEnter(template.group_id)"
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
-                                          :isMobile="isMobile"
                                           :contentIds="template.content_ids")
               img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
@@ -96,12 +93,36 @@
                   iconWidth="24px"
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                          :target="isMobile ? '.template-center__content' : undefined"
                           @callback="handleLoadMore")
-        div(v-if="isMobile" class="template-center__scroll-space")
-    nu-footer(v-if="!isMobile")
+      div(class="template-center__waterfall-wrapper mobile-show")
+        div(class="template-center__waterfall")
+          div(v-for="waterfallTemplate in waterfallTemplatesMOBILE"
+              class="template-center__waterfall__column")
+            div(v-for="template in waterfallTemplate"
+                class="template-center__waterfall__column__template"
+                :style="templateStyles(template.aspect_ratio)"
+                @click="handleClickWaterfall(template)"
+                @mouseenter="handleMouseEnter(template.group_id)"
+                @mouseleave="handleMouseLeave(template.group_id)")
+              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
+                                          :contentIds="template.content_ids")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+              div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
+                svg-icon(iconName="multiple-file"
+                        iconWidth="24px"
+                        iconColor="gray-7")
+        div(v-if="!isTemplateReady" class="template-center__loading")
+          svg-icon(iconName="loading"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        observer-sentinel(v-if="isTemplateReady && hasNextPage"
+                          :target="'.template-center__content'"
+                          @callback="handleLoadMore")
+        div(class="template-center__scroll-space")
+    nu-footer(class="pc-show")
     transition(name="fade-scale")
-      div(v-if="snapToTop" class="template-center__to-top pointer" @click="scrollToTop")
+      div(v-if="snapToTop" class="template-center__to-top pointer pc-show" @click="scrollToTop")
         img(:src="require('@/assets/img/svg/to_top.svg')")
     transition(name="fade-scale-center")
       div(v-if="modal === 'pages'" class="template-center__multi"
@@ -207,7 +228,8 @@ export default Vue.extend({
       hashtagSelections: {} as { [key: string]: { type: string, selection: string[] } },
       sortingCriteria,
       selectedSorting: sortingCriteria[0].key,
-      waterfallTemplates: [] as ITemplate[][],
+      waterfallTemplatesPC: [] as ITemplate[][],
+      waterfallTemplatesMOBILE: [] as ITemplate[][],
       isTemplateReady: false,
       themes: [] as Itheme[],
       matchedThemes: [] as Itheme[],
@@ -312,10 +334,7 @@ export default Vue.extend({
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
-    }),
-    isMobile(): boolean {
-      return document.body.clientWidth / document.body.clientHeight < 1
-    }
+    })
   },
   methods: {
     ...mapActions('hashtag', {
@@ -325,6 +344,9 @@ export default Vue.extend({
       getTemplates: 'getThemeContent',
       getMoreTemplates: 'getMoreContent'
     }),
+    isMobile(): boolean {
+      return window.matchMedia('screen and (max-width: 768px)').matches
+    },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 5)}px` }
     },
@@ -351,7 +373,6 @@ export default Vue.extend({
       } : {}
     },
     handleScroll() {
-      if (this.isMobile) return
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= 50
       this.searchbarTop = searchbar.getBoundingClientRect().top
@@ -404,7 +425,7 @@ export default Vue.extend({
         window.open(route.href, '_blank')
       } else {
         this.content_ids = template.content_ids
-        if (this.isMobile) {
+        if (this.isMobile()) {
           this.modal = 'mobile-pages'
         } else {
           this.modal = 'pages'
@@ -444,10 +465,12 @@ export default Vue.extend({
         res.push('tag::' + tags.join('&&'))
       }
       res.push('order_by::' + this.selectedSorting)
-      this.waterfallTemplates = []
+      this.waterfallTemplatesPC = []
+      this.waterfallTemplatesMOBILE = []
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
-        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates, this.isMobile ? 2 : 6)
+        this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
         this.isTemplateReady = true
       })
     },
@@ -455,14 +478,15 @@ export default Vue.extend({
       console.log('load more')
       this.isTemplateReady = false
       this.getMoreTemplates().then(() => {
-        this.waterfallTemplates = templateCenterUtils.generateWaterfall(this.templates, this.isMobile ? 2 : 6)
+        this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
         this.isTemplateReady = true
       })
     },
     handleTemplateClick(content: IContentTemplate) {
       if (content.themes.length > 1) {
         this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
-        if (this.isMobile) {
+        if (this.isMobile()) {
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
@@ -544,7 +568,7 @@ body {
   @include size(100%, 100%);
   min-height: 100%;
   overflow-y: auto;
-  &.mobile {
+  @media screen and (max-width: 768px) {
     overflow: unset;
     height: unset;
   }
@@ -566,7 +590,7 @@ body {
     padding-top: 28%;
     background-size: cover;
     background-position: center center;
-    background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+    background: radial-gradient(21.05% 59% at 37.08% 73.01%, rgba(255, 195, 139, 0.2) 47.4%, rgba(255, 242, 230, 0.142) 100%), radial-gradient(32.87% 62.53% at 60.31% 77.79%, rgba(255, 177, 173, 0.2) 56.25%, rgba(202, 159, 153, 0) 92.71%), linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   }
   &__search {
     position: absolute;
@@ -610,7 +634,7 @@ body {
     margin: auto;
     width: 80%;
     min-width: calc(100% - 48px);
-    &.mobile {
+    @media screen and (max-width: 768px) {
       min-height: 100%;
       min-width: calc(100% - 30px);
       width: calc(100% - 30px);
@@ -621,7 +645,7 @@ body {
   }
   &__filter {
     margin-top: 36px;
-    &.mobile {
+    @media screen and (max-width: 768px) {
       margin-top: unset;
       margin-left: 5px;
       transition: 0.2s ease;
@@ -683,7 +707,7 @@ body {
   }
   &__waterfall-wrapper {
     padding-bottom: 80px;
-    &.mobile {
+    @media screen and (max-width: 768px) {
       height: 100vh;
       overflow-y: auto;
       &::-webkit-scrollbar {
@@ -696,7 +720,7 @@ body {
   &__waterfall {
     display: flex;
     gap: 24px;
-    &.mobile {
+    @media screen and (max-width: 768px) {
       gap: 15px;
       padding: 2px;
     }
@@ -705,7 +729,7 @@ body {
       display: flex;
       flex-direction: column;
       gap: 24px;
-      &.mobile {
+      @media screen and (max-width: 768px) {
         gap: 15px;
       }
       &__template {
@@ -1000,6 +1024,18 @@ body {
   &__scroll-space {
     height: 10vh;
     width: 100%;
+  }
+}
+
+.pc-show {
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+}
+
+.mobile-show {
+  @media screen and (min-width: 769px) {
+    display: none;
   }
 }
 

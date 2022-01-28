@@ -1,15 +1,12 @@
 <template lang="pug">
-  div(class="hashtag-row"
-      :class="{'mobile': isMobile}")
-    div(class="hashtag-row__title"
-        :class="{'mobile': isMobile}") {{ list.title }}
-    div(class="hashtag-row__tags"
-        :class="{'mobile': isMobile}")
+  div(class="hashtag-row")
+    div(class="hashtag-row__title") {{ list.title }}
+    div(class="hashtag-row__tags")
       div(class="hashtag-row__tags__tag"
-          :class="{'selected': selected.length === 0, 'mobile': isMobile}"
+          :class="{'selected': selected.length === 0}"
           @click="handleSelectAll") {{ $t('NN0324') }}
       div(v-for="tag in list.list" class="hashtag-row__tags__tag"
-          :class="{'mobile': isMobile, 'selected': checkSelection(tag)}"
+          :class="{'selected': checkSelection(tag)}"
           @click="handleSelect(tag)") {{ tag.name }}
 </template>
 
@@ -19,8 +16,7 @@ import Vue from 'vue'
 export default Vue.extend({
   props: {
     list: Object,
-    defaultSelection: Array,
-    isMobile: Boolean
+    defaultSelection: Array
   },
   mounted() {
     this.selected = this.defaultSelection as string[]
@@ -39,13 +35,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    styles(): {[key: string]: string} {
-      return this.isMobile ? {
-        width: 'fit-content',
-        flexDirection: 'column',
-        alignItems: 'start'
-      } : {}
-    },
     checkSelection(tag: any): boolean {
       const key: string = this.list.type === 'theme' ? tag.id.toString() : tag.name
       return this.selected.includes(key)
@@ -79,7 +68,7 @@ export default Vue.extend({
   display: flex;
   gap: 7px;
   margin-bottom: 16px;
-  &.mobile {
+  @media screen and (max-width: 768px) {
     flex-direction: column;
     align-items: start;
     width: calc(100% - 5px);
@@ -99,7 +88,7 @@ export default Vue.extend({
     text-align: center;
     color: setColor(blue-1);
     white-space: nowrap;
-    &.mobile {
+    @media screen and (max-width: 768px) {
       margin-left: 0;
     }
   }
@@ -108,7 +97,7 @@ export default Vue.extend({
     align-items: center;
     gap: 18px 7px;
     flex-wrap: wrap;
-    &.mobile {
+    @media screen and (max-width: 768px) {
       gap: 8px;
       flex-wrap: nowrap;
     }
@@ -123,7 +112,7 @@ export default Vue.extend({
       cursor: pointer;
       @include body-SM;
       line-height: 20px;
-      &.mobile {
+      @media screen and (max-width: 768px) {
         white-space: nowrap;
         padding: 3px 26px;
       }
