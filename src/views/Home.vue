@@ -266,6 +266,12 @@ export default Vue.extend({
       this.themeList = themeUtils.themes
     })
 
+    if (this.currLocale === 'us') {
+      this.templates = this.templates.filter(value => {
+        return value.theme !== '7'
+      })
+    }
+
     this.templates2 = this.templates.filter((value, idx) => {
       return idx <= 4
     })
