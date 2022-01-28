@@ -39,9 +39,6 @@ export default Vue.extend({
       new DragUtils().itemDragStart(e, 'group', {
         ...this.item
       })
-      this.$store.commit('SET_draggedItemInfo', {
-        type: 'group'
-      })
     },
     addText() {
       AssetUtils.addAsset(this.item)

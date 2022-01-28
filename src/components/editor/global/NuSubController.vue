@@ -207,12 +207,12 @@ export default Vue.extend({
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
-      if (this.getLayerType === 'text') {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
-        if (editing && !this.config.isEdited) {
-          // ShortcutUtils.textSelectAll(this.layerIndex)
-        }
-      }
+      // if (this.getLayerType === 'text') {
+      //   LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
+      //   if (editing && !this.config.isEdited) {
+      //     // ShortcutUtils.textSelectAll(this.layerIndex)
+      //   }
+      // }
     },
     isComposing(val) {
       if (!val) {
