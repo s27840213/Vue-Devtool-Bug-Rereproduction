@@ -956,7 +956,7 @@ body {
           display: flex;
           align-items: center;
           height: 20px;
-          text-align: left;
+          text-align: right;
           > span {
             font-weight: 400;
             font-size: 12px;
@@ -965,11 +965,13 @@ body {
       }
       &__title {
         margin-left: 17px;
-        width: 89px;
       }
       &__description {
-        transform-origin: left;
+        transform-origin: right;
         transform: scale(calc(5 / 6));
+        flex-grow: 1;
+        justify-content: flex-end;
+        padding-right: 15px;
       }
     }
     &__button {
