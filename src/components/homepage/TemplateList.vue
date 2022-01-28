@@ -100,7 +100,6 @@ export default Vue.extend({
     const keyword = 'group::0;;order_by::popular'
     const res = await this.getTagContent({ keyword, theme: this.theme })
     this.list = res.data.content[0].list
-    console.log(this.list[0].match_cover)
   },
   methods: {
     ...mapActions({

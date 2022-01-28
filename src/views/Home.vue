@@ -104,10 +104,10 @@
           img(class="home-content__feature-f3-img"
             :src="require('@/assets/img/svg/homepage/Feature 3_' + currLocale+ '.svg')")
         div(class="home-content__bottom")
-          div(class="home-content__bottom-branch")
-            img(v-for="branch in brandList"
-              class="home-content__bottom-branch-img"
-              :src="require('@/assets/img/svg/homepage/' + branch + '.svg')")
+          div(class="home-content__bottom-brand")
+            img(v-for="brand in brandList"
+              class="home-content__bottom-brand-img"
+              :src="require('@/assets/img/svg/homepage/' + brand + '.svg')")
           div(class="home-content__bottom-text")
             div(class="home-content__bottom-title"
               :class="currLocale === 'us' ? 'us' : ''") {{$t('NN0380')}}
@@ -725,7 +725,7 @@ export default Vue.extend({
     @media screen and (max-width: 768px) {
       padding-bottom: 50px;
     }
-    &-branch {
+    &-brand {
       display: flex;
       flex-wrap: wrap;
       flex-direction: row;
