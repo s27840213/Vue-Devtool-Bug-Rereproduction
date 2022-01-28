@@ -97,9 +97,11 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    const keyword = 'group::0;;order_by::popular'
-    const res = await this.getTagContent({ keyword, theme: this.theme })
-    this.list = res.data.content[0].list
+    if (this.type === 'template') {
+      const keyword = 'group::0;;order_by::popular'
+      const res = await this.getTagContent({ keyword, theme: this.theme, cache: true })
+      this.list = res.data.content[0].list
+    }
   },
   methods: {
     ...mapActions({

@@ -47,7 +47,7 @@
         div(class="home-content__mydesign")
           template-list(:designList="allDesigns" type='design'
             :isLoading="isDesignsLoading")
-      template(v-for="list, idx in (isLogin ? templates : templates2)")
+      template(v-for="list, idx in (isLogin ? templates1 : templates2)")
         div(class="home-content-title")
           span {{list.title}}
           span(class="pointer home-content__more-text"
@@ -158,37 +158,7 @@ export default Vue.extend({
       showSizePopup: false,
       tagString: '',
       tags: [] as string[],
-      templates1: [] as ITemplate[],
-      templates: [
-        {
-          title: i18n.t('NN0368'),
-          theme: '1,2'
-        },
-        {
-          title: i18n.t('NN0026'),
-          theme: '3'
-        },
-        {
-          title: i18n.t('NN0151', { media: 'Facebook' }),
-          theme: '8'
-        },
-        {
-          title: i18n.t('NN0028'),
-          theme: '6'
-        },
-        {
-          title: i18n.t('NN0027'),
-          theme: '5'
-        },
-        {
-          title: i18n.t('NN0369'),
-          theme: '7'
-        },
-        {
-          title: i18n.t('NN0370'),
-          theme: '9'
-        }
-      ] as { title: string; theme: string; }[],
+      templates1: [] as { title: string; theme: string; }[],
       templates2: [] as { title: string; theme: string; }[],
       tagTemplateList: [],
       popularTemplateList: [],
@@ -266,13 +236,46 @@ export default Vue.extend({
       this.themeList = themeUtils.themes
     })
 
+    const templates = [
+      {
+        title: i18n.t('NN0368'),
+        theme: '1,2'
+      },
+      {
+        title: i18n.t('NN0026'),
+        theme: '3'
+      },
+      {
+        title: i18n.t('NN0151', { media: 'Facebook' }),
+        theme: '8'
+      },
+      {
+        title: i18n.t('NN0028'),
+        theme: '6'
+      },
+      {
+        title: i18n.t('NN0027'),
+        theme: '5'
+      },
+      {
+        title: i18n.t('NN0369'),
+        theme: '7'
+      },
+      {
+        title: i18n.t('NN0370'),
+        theme: '9'
+      }
+    ] as { title: string; theme: string; }[]
+
     if (this.currLocale === 'us') {
-      this.templates = this.templates.filter(value => {
+      this.templates1 = templates.filter(value => {
         return value.theme !== '7'
       })
+    } else {
+      this.templates1 = templates
     }
 
-    this.templates2 = this.templates.filter((value, idx) => {
+    this.templates2 = this.templates1.filter((value, idx) => {
       return idx <= 4
     })
   },
