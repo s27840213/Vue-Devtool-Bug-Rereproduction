@@ -27,7 +27,7 @@
             svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
-        template(v-if="!isLoading && list.length === 0")
+        template(v-if="!isLoading && designList.length === 0")
           div(class="pt-20 pointer scroll-list__plus")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="newDesignSquare()")
