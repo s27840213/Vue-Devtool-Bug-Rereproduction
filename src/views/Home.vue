@@ -394,7 +394,7 @@ export default Vue.extend({
         @media screen and (max-width: 976px) {
           height: 650px;
         }
-        @media screen and (max-width: 768px) {
+        @media screen and (max-width: 767px) {
           height: 500px;
         }
       }
@@ -413,7 +413,7 @@ export default Vue.extend({
         top: 450px;
         border-width: 0 0 200px 100vw;
       }
-      @media screen and (max-width: 768px) {
+      @media screen and (max-width: 767px) {
         top: 400px;
         border-width: 0 0 100px 100vw;
       }
@@ -437,7 +437,7 @@ export default Vue.extend({
       @media screen and (max-width: 1440px) {
         @include text-H3;
       }
-      @media screen and (max-width: 768px) {
+      @media screen and (max-width: 767px) {
         @include text-H5;
       }
     }

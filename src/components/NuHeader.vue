@@ -9,26 +9,22 @@
           @click.native="goToPage('Home')")
       transition(name="fade" mode="out-in")
         div(v-if="!noNavigation" class="body-2" key="navigation")
-          div
-            btn(@click.native="goToPage('Home')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Home'}") {{$t('NN0144')}}
-          div
-            btn(@click.native="goToPage('TemplateCenter')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") {{$t('NN0145')}}
-          div
-            btn(@click.native="goToPage('Toturial')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Toturial'}") {{$t('NN0146')}}
-          div
-            btn(@click.native="goToPage('Faq')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Faq'}") {{$t('NN0147')}}
-          div(v-if="isLogin")
-            btn(@click.native="goToPage('MyDesign')"
-              style="padding: 5px;" :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'MyDesign'}") {{$t('NN0080')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'Home'}"
+            @click="goToPage('Home')") {{$t('NN0144')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'TemplateCenter'}"
+            @click="goToPage('TemplateCenter')") {{$t('NN0145')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'Toturial'}"
+            @click="goToPage('Toturial')") {{$t('NN0146')}}
+          div(class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'Faq'}"
+            @click="goToPage('Faq')") {{$t('NN0147')}}
+          div(v-if="isLogin"
+            class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'MyDesign'}"
+            @click="goToPage('MyDesign')") {{$t('NN0080')}}
         div(v-else class="body-2" key="no-navigation")
           div
           div
@@ -36,22 +32,18 @@
           div
           div
       div(class="body-2")
-        div(v-if="!isLogin"
-          style="width: 180px;")
+        div(v-if="!isLogin")
           search-bar(v-if="!noSearchbar"
             class="nu-header__search"
             :placeholder="$t('NN0037')"
             @search="handleSearch")
-        div(v-if="!isLogin")
-          btn(@click.native="goToPage('Login')"
-            :type="'icon-mid text-blue-1'"
-            class="rounded"
-            style="padding: 5px 30px;") {{$tc('NN0168',2)}}
-        div(v-if="!isLogin")
-          btn(@click.native="goToPage('SignUp')"
-            :type="'primary-mid'"
-            class="rounded"
-            style="padding: 5px 30px;") {{$tc('NN0169',2)}}
+        div(v-if="!isLogin"
+          class="py-5 px-30 text-bold pointer text-blue-1"
+          style="white-space: nowrap;"
+          @click="goToPage('Login')") {{$tc('NN0168',2)}}
+        div(v-if="!isLogin"
+          class="nu-header__btn text-bold"
+          @click="goToPage('SignUp')") {{$tc('NN0169',2)}}
         //- svg-icon(v-if="isLogin"
         //-   :iconName="`notify`"
         //-   :iconWidth="'20px'")
@@ -225,7 +217,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: 50px;
+  height: 64px;
   background-size: cover;
   background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   box-sizing: border-box;
@@ -234,6 +226,17 @@ export default Vue.extend({
   left: 0;
   width: 100%;
   z-index: setZindex("nu-header");
+  &__btn {
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: setColor(white);
+    background: setColor(blue-1);
+    border-radius: 4px;
+    padding: 5px 30px;
+  }
   &__container {
     position: relative;
     display: flex;
@@ -303,9 +306,16 @@ export default Vue.extend({
     }
   }
   &__search {
+    width: 180px;
     height: 28px;
     background-color: white;
     border-radius: 4px;
+    @media screen and (max-width: 1300px) {
+      width: 120px;
+    }
+    @media screen and (max-width: 1000px) {
+      width: 60px;
+    }
   }
   &__search-mobile {
     position: absolute;
