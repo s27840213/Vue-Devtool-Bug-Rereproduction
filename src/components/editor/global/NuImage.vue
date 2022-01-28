@@ -4,14 +4,14 @@
     draggable="false")
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
-        class="layer-flip"
+        :class="{ 'layer-flip': flippedAnimation }"
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
     img(v-show="!isAdjustImage"
       ref="img"
       :style="flipStyles()"
-      class="nu-image__picture layer-flip"
+      :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
       :src="src"
       @error="onError()"
@@ -124,8 +124,8 @@ export default Vue.extend({
     ...mapState('user', ['imgSizeMap']),
     getImgDimension(): number {
       const { type } = this.config.srcObj
-      const { width, height } = this.config.styles
-      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
+      const { imgWidth, imgHeight } = this.config.styles
+      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },
     getPreviewSize(): number {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
@@ -149,27 +149,44 @@ export default Vue.extend({
         })
       }
       return styles
+    },
+    flippedAnimation(): boolean {
+      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+      if (typeof this.subLayerIndex !== 'undefined' && primaryLayer.type === 'frame') {
+        return false
+      } else {
+        return true
+      }
     }
   },
   methods: {
     ...mapActions('user', ['updateImages']),
     styles() {
+      const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
-      const { styles } = this.config
       return {
-        transform: `translate(${styles.imgX}px, ${styles.imgY}px)`,
-        width: `${styles.imgWidth}px`,
-        height: `${styles.imgHeight}px`,
+        transform: `translate(${imgX}px, ${imgY}px)`,
+        width: `${imgWidth}px`,
+        height: `${imgHeight}px`,
         ...inheritStyle
       }
     },
     flipStyles() {
       const { styles } = this.config
       const { horizontalFlip, verticalFlip } = styles
-      styles.scaleX = horizontalFlip ? -1 : 1
-      styles.scaleY = verticalFlip ? -1 : 1
+      let scaleX = horizontalFlip ? -1 : 1
+      let scaleY = verticalFlip ? -1 : 1
+
+      if (typeof this.subLayerIndex !== 'undefined') {
+        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
+          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
+          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
+        }
+      }
+
       return {
-        transform: `scaleX(${styles.scaleX}) scaleY(${styles.scaleY})`
+        transform: `scaleX(${scaleX}) scaleY(${scaleY})`
       }
     },
     onError() {

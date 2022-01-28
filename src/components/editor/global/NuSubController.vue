@@ -319,10 +319,23 @@ export default Vue.extend({
       this.isControlling = false
     },
     positionStyles() {
-      const { x, y } = this.config.styles
+      const { horizontalFlip, verticalFlip } = this.getPrimaryLayer.styles
+      let { x, y } = this.config.styles
+
+      if (this.type === 'frame' && horizontalFlip) {
+        const layerCenterline = this.getPrimaryLayer.styles.width / 2
+        const subLayerCenterline = this.getLayerPos.x + this.getLayerWidth / 2
+        x += (layerCenterline - subLayerCenterline) * 2
+      }
+      if (this.type === 'frame' && verticalFlip) {
+        const layerCenterline = this.getPrimaryLayer.styles.height / 2
+        const subLayerCenterline = this.getLayerPos.y + this.getLayerHeight / 2
+        y += (layerCenterline - subLayerCenterline) * 2
+      }
 
       return {
-        transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)`,
+        transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)` +
+        `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         'pointer-events': 'none'
