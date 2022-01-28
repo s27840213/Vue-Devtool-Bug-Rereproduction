@@ -68,7 +68,7 @@ export default Vue.extend({
   display: flex;
   gap: 7px;
   margin-bottom: 16px;
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 767px) {
     flex-direction: column;
     align-items: start;
     width: calc(100% - 5px);
@@ -88,7 +88,7 @@ export default Vue.extend({
     text-align: center;
     color: setColor(blue-1);
     white-space: nowrap;
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 767px) {
       margin-left: 0;
     }
   }
@@ -97,7 +97,7 @@ export default Vue.extend({
     align-items: center;
     gap: 18px 7px;
     flex-wrap: wrap;
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 767px) {
       gap: 8px;
       flex-wrap: nowrap;
     }
@@ -112,7 +112,7 @@ export default Vue.extend({
       cursor: pointer;
       @include body-SM;
       line-height: 20px;
-      @media screen and (max-width: 768px) {
+      @media screen and (max-width: 767px) {
         white-space: nowrap;
         padding: 3px 26px;
       }

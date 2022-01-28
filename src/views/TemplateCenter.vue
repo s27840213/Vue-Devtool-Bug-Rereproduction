@@ -70,7 +70,7 @@
           //-   svg-icon(iconName="chevron-down"
           //-           iconWidth="24px"
           //-           iconColor="gray-2")
-      div(class="template-center__waterfall-wrapper pc-show")
+      div(class="template-center__waterfall-wrapper pc-lg-show")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesPC"
               class="template-center__waterfall__column")
@@ -94,7 +94,31 @@
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
                           @callback="handleLoadMore")
-      div(class="template-center__waterfall-wrapper mobile-show")
+      div(class="template-center__waterfall-wrapper tab-show")
+        div(class="template-center__waterfall")
+          div(v-for="waterfallTemplate in waterfallTemplatesTAB"
+              class="template-center__waterfall__column")
+            div(v-for="template in waterfallTemplate"
+                class="template-center__waterfall__column__template"
+                :style="templateStyles(template.aspect_ratio)"
+                @click="handleClickWaterfall(template)"
+                @mouseenter="handleMouseEnter(template.group_id)"
+                @mouseleave="handleMouseLeave(template.group_id)")
+              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
+                                          :contentIds="template.content_ids")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
+              div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
+                svg-icon(iconName="multiple-file"
+                        iconWidth="24px"
+                        iconColor="gray-7")
+        div(v-if="!isTemplateReady" class="template-center__loading")
+          svg-icon(iconName="loading"
+                  iconWidth="24px"
+                  iconColor="gray-2")
+        observer-sentinel(v-if="isTemplateReady && hasNextPage"
+                          @callback="handleLoadMore")
+      div(class="template-center__waterfall-wrapper non-tab-show")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesMOBILE"
               class="template-center__waterfall__column")
@@ -229,6 +253,7 @@ export default Vue.extend({
       sortingCriteria,
       selectedSorting: sortingCriteria[0].key,
       waterfallTemplatesPC: [] as ITemplate[][],
+      waterfallTemplatesTAB: [] as ITemplate[][],
       waterfallTemplatesMOBILE: [] as ITemplate[][],
       isTemplateReady: false,
       themes: [] as Itheme[],
@@ -345,7 +370,7 @@ export default Vue.extend({
       getMoreTemplates: 'getMoreContent'
     }),
     isMobile(): boolean {
-      return window.matchMedia('screen and (max-width: 768px)').matches
+      return window.matchMedia('screen and (max-width: 767px)').matches
     },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 5)}px` }
@@ -470,6 +495,7 @@ export default Vue.extend({
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
         this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
         this.isTemplateReady = true
       })
@@ -479,6 +505,7 @@ export default Vue.extend({
       this.isTemplateReady = false
       this.getMoreTemplates().then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
+        this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
         this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
         this.isTemplateReady = true
       })
@@ -568,7 +595,7 @@ body {
   @include size(100%, 100%);
   min-height: 100%;
   overflow-y: auto;
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 767px) {
     overflow: unset;
     height: unset;
   }
@@ -585,29 +612,26 @@ body {
     border: 1px solid setColor(gray-4);
   }
   &__search-container {
-    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    padding-top: 28%;
+    height: 376px;
     background-size: cover;
     background-position: center center;
     background: radial-gradient(21.05% 59% at 37.08% 73.01%, rgba(255, 195, 139, 0.2) 47.4%, rgba(255, 242, 230, 0.142) 100%), radial-gradient(32.87% 62.53% at 60.31% 77.79%, rgba(255, 177, 173, 0.2) 56.25%, rgba(202, 159, 153, 0) 92.71%), linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   }
   &__search {
-    position: absolute;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     width: fit-content;
-    height: 55%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    max-width: 90%;
+    gap: 20px;
     &__title {
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 40px;
       > span {
         @include text-H2;
         display: block;
@@ -615,9 +639,8 @@ body {
       }
     }
     &__text {
-      height: 52px;
       > span {
-        @include body-SM;
+        @include body-LG;
         color: setColor(gray-2);
       }
     }
@@ -634,7 +657,7 @@ body {
     margin: auto;
     width: 80%;
     min-width: calc(100% - 48px);
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 767px) {
       min-height: 100%;
       min-width: calc(100% - 30px);
       width: calc(100% - 30px);
@@ -645,7 +668,7 @@ body {
   }
   &__filter {
     margin-top: 36px;
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 767px) {
       margin-top: unset;
       margin-left: 5px;
       transition: 0.2s ease;
@@ -707,7 +730,7 @@ body {
   }
   &__waterfall-wrapper {
     padding-bottom: 80px;
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 767px) {
       height: 100vh;
       overflow-y: auto;
       &::-webkit-scrollbar {
@@ -720,7 +743,7 @@ body {
   &__waterfall {
     display: flex;
     gap: 24px;
-    @media screen and (max-width: 768px) {
+    @media screen and (max-width: 767px) {
       gap: 15px;
       padding: 2px;
     }
@@ -729,7 +752,7 @@ body {
       display: flex;
       flex-direction: column;
       gap: 24px;
-      @media screen and (max-width: 768px) {
+      @media screen and (max-width: 767px) {
         gap: 15px;
       }
       &__template {
@@ -1028,13 +1051,35 @@ body {
 }
 
 .pc-show {
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 767px) {
     display: none;
   }
 }
 
 .mobile-show {
-  @media screen and (min-width: 769px) {
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+}
+
+.pc-lg-show {
+  @media screen and (max-width: 975px) {
+    display: none;
+  }
+}
+
+.tab-show {
+  @media screen and (min-width: 976px) {
+    display: none;
+  }
+
+  @media screen and (max-width: 540px) {
+    display: none;
+  }
+}
+
+.non-tab-show {
+  @media screen and (min-width: 541px) {
     display: none;
   }
 }
