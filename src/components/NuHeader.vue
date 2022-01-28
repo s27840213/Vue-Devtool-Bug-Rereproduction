@@ -217,7 +217,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: 50px;
+  height: 64px;
   background-size: cover;
   background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   box-sizing: border-box;
