@@ -105,7 +105,7 @@ class DragUtils {
     if (data.type === 'image') {
       mouseUtils.onDrop(e, pageIndex)
     } else {
-      const target = e.target as HTMLElement
+      const target = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
       const targetPos = {
         x: target.getBoundingClientRect().x,
         y: target.getBoundingClientRect().y
@@ -119,18 +119,25 @@ class DragUtils {
         const { textType, text, locale } = data
         assetUtils.addStanardText(textType, text, locale, pageIndex, { styles })
       } else {
-        const currPage = pageUtils.currFocusPage
-        const aspectRatio = data.match_cover.height / data.match_cover.width
-        const resize = {
-          width: currPage.width,
-          height: currPage.width * aspectRatio
+        if (data.type === 6) {
+          const currPage = pageUtils.currFocusPage
+          const aspectRatio = data.match_cover.height / data.match_cover.width
+          const resize = {
+            width: currPage.width,
+            height: currPage.width * aspectRatio
+          }
+          assetUtils.addAsset(data, {
+            styles,
+            pageIndex,
+            // for template
+            ...(data.type === 6 && resize)
+          })
+        } else {
+          assetUtils.addAsset(data, {
+            styles,
+            pageIndex
+          })
         }
-        assetUtils.addAsset(data, {
-          styles,
-          pageIndex,
-          // for template
-          ...(data.type === 6 && resize)
-        })
       }
     }
   }

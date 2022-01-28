@@ -18,86 +18,107 @@
       :class="{'items-theme': type === 'theme'}"
       @scroll="handleScroll" ref="items")
       template(v-if="type === 'design'")
-        design-item(v-for="design in list"
-          class="py-20 scroll-list__item"
+        design-item(v-for="design, idx in designList"
+          class="py-20 scroll-list__design"
+          :class="{'padding-start': idx === 0, 'padding-end': idx === designList.length - 1}"
           :key="design.id"
           :config="design")
         div(v-if="isLoading")
-          svg-icon(iconName="loading"
-            iconWidth="50px"
-            iconColor="gray-3")
+            svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
         template(v-if="!isLoading && list.length === 0")
           div(class="pt-20 pointer scroll-list__plus")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="newDesignSquare()")
-            div(class="scroll-list__item-title") {{$t('NN0354')}}
+            div(class="pt-10 scroll-list__item-title") {{$t('NN0354')}}
           div(class="scroll-list__hint") {{$t('NN0355')}}
       template(v-else)
         div(v-if="type === 'theme'"
-          class="pointer scroll-list__plus padding-start")
+          class="pointer scroll-list__plus")
           img(:src="require('@/assets/img/png/plus-origin.png')"
             @click="openPopup()")
-          div(class="scroll-list__plus-title") {{$t('NN0023')}}
-        div(v-for="item, idx in list" class="scroll-list__item"
-          :class="{'padding-end': idx === list.length - 1}")
+          div(class="pt-10 scroll-list__item-title") {{$t('NN0023')}}
+        div(v-for="item, idx in list"
+          class="scroll-list__item pt-10"
+          :style="previewStyle"
+          :class="{'pb-90 item-theme': type === 'theme', 'padding-start': idx === 0, 'padding-end': idx === list.length - 1}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
-            :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
+            :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`)"
             @click="type === 'theme' ? newDesign(item) : newDesignWithTemplate(item)"
             @error="handleNotFound")
           div(v-if="type === 'theme'"
             class="pt-10 scroll-list__item-title") {{item.title}}
           div(v-if="type === 'theme'"
             class="pt-2 scroll-list__item-subtitle") {{item.description}}
-        div(v-if="isLoading || list.length === 0")
+        div(v-if="list.length === 0")
             svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
 </template>
 <script lang="ts">
+import Vue from 'vue'
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import DesignItem from '@/components/homepage/DesignItem.vue'
-import Vue from 'vue'
-import { mapMutations } from 'vuex'
+import { mapActions, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: {
     DesignItem
   },
   props: {
-    list: Array,
     type: String,
+    theme: String,
+    designList: Array,
     isLoading: Boolean
   },
   data() {
     return {
       prevIcon: false,
-      nextIcon: false,
-      fallbackSrc: ''
+      nextIcon: true,
+      fallbackSrc: '',
+      list: [] as any[]
     }
   },
   computed: {
     items() {
       return this.$refs.items as HTMLElement
+    },
+    previewStyle(): any {
+      const { width, height } = this.list[0].match_cover || {}
+      const aspectRatio = width / height
+      if (aspectRatio > 1) {
+        return { width: `${160 * aspectRatio}px`, height: '160px' }
+      } else {
+        return { width: '160px', height: `${160 / aspectRatio}px` }
+      }
     }
   },
-  mounted() {
-    this.initIcon(1)
+  async mounted() {
+    const keyword = 'group::0;;order_by::popular'
+    const res = await this.getTagContent({ keyword, theme: this.theme })
+    this.list = res.data.content[0].list
+    console.log(this.list[0].match_cover)
   },
   methods: {
+    ...mapActions({
+      getTagContent: 'homeTemplate/getTagContent',
+      fetchAllDesigns: 'design/fetchAllDesigns'
+    }),
     ...mapMutations({
       setGroupType: 'SET_groupType'
     }),
-    initIcon(times = 0) {
-      const { scrollWidth, offsetWidth } = this.items
-      if (scrollWidth === offsetWidth && times < 10) {
-        setTimeout(() => {
-          this.initIcon(times + 1)
-        }, 500)
-      }
-      this.nextIcon = scrollWidth > offsetWidth
-    },
+    // initIcon(times = 0) {
+    //   const { scrollWidth, offsetWidth } = this.items
+    //   if (scrollWidth === offsetWidth && times < 10) {
+    //     setTimeout(() => {
+    //       this.initIcon(times + 1)
+    //     }, 500)
+    //   }
+    //   this.nextIcon = scrollWidth > offsetWidth
+    // },
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
@@ -142,7 +163,6 @@ export default Vue.extend({
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items
       this.items.scrollLeft = scrollLeft + (offsetWidth / 2)
-      this.handleIconDisplay(scrollLeft)
     },
     handlePrev() {
       const { scrollLeft, offsetWidth } = this.items
@@ -169,48 +189,41 @@ export default Vue.extend({
   position: relative;
   &__items {
     display: grid;
-    column-gap: 40px;
     grid-template-columns: auto;
     justify-content: start;
+    align-items: center;
     grid-auto-flow: column;
     scroll-behavior: smooth;
     overflow-x: scroll;
     overflow-y: hidden;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    @media screen and (max-width: 768px) {
-      column-gap: 20px;
+    text-align: left;
+    column-gap: 16px;
+    @media (max-width: 768px) {
+      column-gap: 10px;
     }
-    @media screen and (min-width: 1600px) {
-      justify-content: center;
+    &.items-theme {
+      @include layout-mobile {
+        column-gap: 0px;
+      }
     }
     &::-webkit-scrollbar {
       display: none;
     }
   }
   &__plus {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     width: 90px;
-    white-space: nowrap;
-    margin: auto;
+    text-align: center;
     @media screen and (max-width: 768px) {
       width: 56px;
     }
     > img {
-      width: 100%;
+      @include layout-mobile {
+        width: 100%;
+      }
       &:hover {
         transition: all 0.2s ease-in-out;
         box-shadow: 5px 5px 10px 0 rgba(48, 55, 66, 0.15);
         transform: translate(0, -10px);
-      }
-    }
-    &-title {
-      padding-top: 10px;
-      @include body-SM;
-      @media screen and (max-width: 768px) {
-        @include body-XS;
       }
     }
   }
@@ -222,25 +235,34 @@ export default Vue.extend({
     }
   }
   &__item {
-    width: 120px;
-    text-align: center;
-    @media screen and (max-width: 768px) {
-      width: 100px;
-    }
-    @media screen and (max-width: 540px) {
-      width: 90px;
-    }
     &-title {
-      color: setColor(gray-1);
-      padding-top: 5px;
-      @include body-XS;
+      font-size: 16px;
+      line-height: 26px;
+      font-weight: 400;
+      padding-top: 10px;
+      @media (max-width: 976px) {
+        font-size: 14px;
+      }
+      @include layout-mobile {
+        font-size: 12px;
+        line-height: unset;
+        transform: scale(0.9);
+      }
     }
     &-subtitle {
       color: setColor(gray-2);
-      @include body-XXS;
+      font-size: 14px;
+      line-height: 22px;
+      font-weight: 400;
+      @include layout-mobile {
+        font-size: 12px;
+        white-space: nowrap;
+        transform: scale(0.85);
+        padding: 0;
+      }
     }
     &-image {
-      width: 100%;
+      height: 100%;
       &:hover {
         transition: all 0.2s ease-in-out;
         transform: translate(0, -5px);
@@ -249,13 +271,22 @@ export default Vue.extend({
     .square {
       width: 100%;
       object-fit: contain;
-      box-shadow: 0 2px 4px rgb(0 0 0 / 10%), 0 0 4px rgb(0 0 0 / 10%);
       &:hover {
         transition: all 0.2s ease-in-out;
         box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
         transform: translate(0, -5px);
       }
     }
+    &.item-theme {
+      @include layout-mobile {
+        width: 22vw;
+        height: 30vw;
+      }
+    }
+  }
+  &__design {
+    width: 160px;
+    height: 160px;
   }
   &-icon {
     display: flex;

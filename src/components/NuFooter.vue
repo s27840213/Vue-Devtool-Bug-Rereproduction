@@ -14,8 +14,8 @@
               :iconName="featureExpand[0] ? 'minus-origin' : 'plus-origin'"
               :iconColor="'white'"
               :iconWidth="'15px'")
-          div(class="nu-footer__feature-items body-1"
-            :class="isMobile & featureExpand[0] ? 'expand' : ''")
+          div(class="nu-footer__feature-items"
+            :class="featureExpand[0] ? 'expand' : ''")
             a(:href="toturialPage") {{$t('NN0146')}}
             a(:href="blogPage") {{$t('NN0157')}}
         div(class="nu-footer__feature-region")
@@ -27,8 +27,8 @@
               :iconName="featureExpand[1] ? 'minus-origin' : 'plus-origin'"
               :iconColor="'white'"
               :iconWidth="'15px'")
-          div(class="nu-footer__feature-items body-1"
-            :class="isMobile & featureExpand[1] ? 'expand' : ''")
+          div(class="nu-footer__feature-items"
+            :class="featureExpand[1] ? 'expand' : ''")
             a(:href="facebookPage") {{$t('NN0158')}}
             a(href="/templates") {{$t('NN0145')}}
         div(class="nu-footer__feature-region")
@@ -40,8 +40,8 @@
               :iconName="featureExpand[2] ? 'minus-origin' : 'plus-origin'"
               :iconColor="'white'"
               :iconWidth="'15px'")
-          div(class="nu-footer__feature-items body-1"
-            :class="isMobile & featureExpand[2] ? 'expand' : ''")
+          div(class="nu-footer__feature-items"
+            :class="featureExpand[2] ? 'expand' : ''")
             div(v-for="theme in themeList"
               class="pointer"
               @click="newDesign(theme)") {{theme.title}}
@@ -54,8 +54,8 @@
               :iconName="featureExpand[3] ? 'minus-origin' : 'plus-origin'"
               :iconColor="'white'"
               :iconWidth="'15px'")
-          div(class="nu-footer__feature-items body-1"
-            :class="isMobile & featureExpand[3] ? 'expand' : ''")
+          div(class="nu-footer__feature-items"
+            :class="featureExpand[3] ? 'expand' : ''")
             a(:href="servicePage") {{$t('NN0160')}}
             a(:href="privacyPage") {{$t('NN0161')}}
             a(:href="agreementPage") {{$t('NN0162')}}
@@ -150,9 +150,6 @@ export default Vue.extend({
       token: 'getToken',
       isLogin: 'isLogin'
     }),
-    isMobile(): boolean {
-      return document.body.clientWidth / document.body.clientHeight < 1
-    },
     themeList(): Itheme[] {
       return themeUtils.themes
     },
@@ -197,7 +194,7 @@ export default Vue.extend({
           this.privacyPage = 'https://blog.vivipic.com/tw/tw-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/tw/tw-agreement/'
           this.facebookPage = 'https://www.facebook.com/vivipic' + locale
-          this.igPage = 'https://www.instagram.com/vivipic' + locale
+          this.igPage = 'https://www.instagram.com/vivipic.' + locale
           this.mailtoService = 'mailto:' + locale + '@vivipic.com'
           break
         default:
@@ -207,7 +204,7 @@ export default Vue.extend({
           this.privacyPage = 'https://blog.vivipic.com/us-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/us-terms-of-use/'
           this.facebookPage = 'https://www.facebook.com/vivipic' + locale
-          this.igPage = 'https://www.instagram.com/vivipicus'
+          this.igPage = 'https://www.instagram.com/vivipic.' + locale
           this.mailtoService = 'mailto:service@vivipic.com'
           break
       }
@@ -284,6 +281,7 @@ export default Vue.extend({
       row-gap: 10px;
       padding-left: 15px;
       padding-top: 30px;
+      @include body-XS;
       @include layout-mobile {
         display: none;
         row-gap: 0;
@@ -299,10 +297,8 @@ export default Vue.extend({
         color: white;
         text-decoration: none;
         text-align: left;
-        font-weight: 700;
         @include layout-mobile {
           color: setColor(gray-3);
-          font-weight: 400;
           padding-top: 5px;
         }
       }

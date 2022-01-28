@@ -35,7 +35,7 @@ export default Vue.extend({
   },
   methods: {
     styles() {
-      const { type } = this.config
+      const { type, imgControl } = this.config
       const { horizontalFlip, verticalFlip } = this.config.styles
       const flip = type === 'image' ? {} : cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
       let { width, height, scale } = this.config.styles
@@ -44,7 +44,7 @@ export default Vue.extend({
 
       if (type === 'image') {
         if (this.config.isFrame) {
-          clipPath = imageUtils.isImgControl() || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+          clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
         } else {
           clipPath = layerPath
         }
