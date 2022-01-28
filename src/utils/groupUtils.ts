@@ -111,11 +111,17 @@ class GroupUtils {
         if (l.type === 'text') {
           const { width, height, writingMode } = l.styles
           LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
-            widthLimit: (writingMode as string).includes('vertical') ? height : width
+            widthLimit: (writingMode as string).includes('vertical') ? height : width,
+            isTyping: false
+          })
+          LayerUtils.updateSubLayerProps(tmpPageIndex, tmpIndex, idx, {
+            shown: false,
+            moved: false
           })
         }
       })
     stepsUtils.record()
+    // console.log(GeneralUtils.deepCopy(store.state.currSelectedInfo.layers))
   }
 
   ungroup() {

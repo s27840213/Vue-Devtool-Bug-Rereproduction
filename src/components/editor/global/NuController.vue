@@ -516,10 +516,8 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = (() => {
-        // const isFrame = this.getLayerType === 'frame' && (this.imgControl.layerIndex === this.layerIndex || this.isMoving)
         const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
         const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
-        // const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
         }
@@ -613,7 +611,6 @@ export default Vue.extend({
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
-            // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
             if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
