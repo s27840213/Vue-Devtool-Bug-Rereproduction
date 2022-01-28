@@ -373,7 +373,7 @@ export default Vue.extend({
       return window.matchMedia('screen and (max-width: 767px)').matches
     },
     absoluteSearchbarStyles() {
-      return { top: `${Math.max(this.searchbarTop, 5)}px` }
+      return { top: `${Math.max(this.searchbarTop, 11)}px` }
     },
     searchbarStyles() {
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
@@ -399,7 +399,7 @@ export default Vue.extend({
     },
     handleScroll() {
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
-      this.snapToTop = searchbar.getBoundingClientRect().top <= 50
+      this.snapToTop = searchbar.getBoundingClientRect().top <= 64
       this.searchbarTop = searchbar.getBoundingClientRect().top
     },
     handleUpdate(keyword: string) {
