@@ -1,6 +1,6 @@
 <template lang="pug">
   div(id="app" :style="appStyles()")
-    link(v-if="currLocale === 'us'"
+    link(v-if="customFont && currLocale === 'us'"
       href='https://fonts.googleapis.com/css?family=Poppins:400,600,700'
       rel='stylesheet' type='text/css')
     //- div(class="coordinate" ref="coordinate")
@@ -83,6 +83,9 @@ export default Vue.extend({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
+    },
+    customFont(): boolean {
+      return this.$route.name === 'Home' || this.$route.name === 'TemplateCenter'
     }
   },
   methods: {
@@ -104,11 +107,12 @@ export default Vue.extend({
           '-webkit-font-smoothing': 'antialiased',
           transformStyle: 'preserve-3d'
         }
-      } else if (this.currLocale === 'tw' || this.currLocale === 'jp') {
-        // 思源黑體
-        return { fontFamily: STANDARD_TEXT_FONT.tw }
-      } else {
-        return { fontFamily: 'Poppins' }
+      } else if (this.customFont) {
+        if (this.currLocale === 'tw' || this.currLocale === 'jp') {
+          return { fontFamily: STANDARD_TEXT_FONT.tw }
+        } else {
+          return { fontFamily: 'Poppins' }
+        }
       }
     },
     coordinateHandler(e: MouseEvent) {
