@@ -267,15 +267,21 @@ class Controller {
   getCurveTextPropsByHW(config: IText, curveTextHW: {areaWidth: number, areaHeight: number, minHeight: number}, bend?: number): { width: number, height: number, x: number, y: number } {
     const { areaWidth, areaHeight, minHeight } = curveTextHW
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
-    const { top, center } = this.getAnchors(config, minHeight)
-    const { y, height, rotate } = config.styles
-    const hDiff1 = top !== y ? (height - minHeight) / 2 : (minHeight - height) / 2
-    const hDiff2 = +bend < 0 ? (minHeight - areaHeight) / 2 : (areaHeight - minHeight) / 2
+    const { top } = this.getAnchors(config, minHeight)
+    const { x, y, width, height, rotate, scale } = config.styles
+    const hDiff1 = top !== y ? (height - minHeight * scale) / 2 : (minHeight * scale - height) / 2
+    const hDiff2 = +bend < 0 ? (minHeight * scale - areaHeight) / 2 : (areaHeight - minHeight * scale) / 2
     return {
       width: areaWidth,
       height: areaHeight,
-      x: center - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (areaWidth / 2),
-      y: y + height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (areaHeight / 2)
+      ...this.getNewAnchoredPosition(hDiff1, hDiff2, rotate, { x, y }, { width, height }, { width: areaWidth, height: areaHeight })
+    }
+  }
+
+  getNewAnchoredPosition(hDiff1: number, hDiff2: number, rotate: number, oldPos: { x: number, y: number}, oldSize: { width: number, height: number }, newSize: { width: number, height: number}): { x: number, y: number } {
+    return {
+      x: oldPos.x + oldSize.width / 2 - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (newSize.width / 2),
+      y: oldPos.y + oldSize.height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (newSize.height / 2)
     }
   }
 
