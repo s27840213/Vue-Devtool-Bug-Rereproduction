@@ -6,12 +6,13 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
-import { calcTmpProps } from '@/utils/groupUtils'
+import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
 import textShapeUtils from './textShapeUtils'
+import mathUtils from './mathUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -744,7 +745,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minX = Math.min(minX, l.styles.x)
+        minX = Math.min(minX, mathUtils.getBounding(l).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -762,7 +763,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minY = Math.min(minY, l.styles.y)
+        minY = Math.min(minY, mathUtils.getBounding(l).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
