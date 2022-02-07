@@ -520,6 +520,15 @@ const actions: ActionTree<IUserModule, unknown> = {
     } else {
       throw new Error('fail to fetch private image urls')
     }
+  },
+  async removeBg({ state }, { assetIndex }) {
+    try {
+      const { data } = await userApis.removeBg(assetIndex)
+      console.log(data)
+      return data
+    } catch (error) {
+      console.log(error)
+    }
   }
 }
 

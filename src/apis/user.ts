@@ -1,9 +1,17 @@
 /* eslint-disable camelcase */
 import axios from '@/apis'
 import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
+import store from '@/store'
+import apiUtils from '@/utils/apiUtils'
 import { AxiosPromise } from 'axios'
 
 export default {
+  getToken(): string {
+    return store.getters['user/getToken']
+  },
+  getLocale(): string {
+    return store.getters['user/getLocale']
+  },
   getAllAssets: (token: string, attrs = {}): AxiosPromise => axios('/list-asset', {
     method: 'POST',
     data: {
@@ -116,5 +124,15 @@ export default {
       token,
       view_guide
     }
-  })
+  }),
+  async removeBg(assetIndex: number): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
+      method: 'POST',
+      data: {
+        token: this.getToken(),
+        assetIndex,
+        locale: this.getLocale()
+      }
+    }))
+  }
 }
