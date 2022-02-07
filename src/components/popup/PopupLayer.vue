@@ -104,6 +104,7 @@ import GeneralValueSelectorVue from '../GeneralValueSelector.vue'
 import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import assetUtils from '@/utils/assetUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -239,7 +240,7 @@ export default Vue.extend({
           text: this.$t('NN0032'),
           shortcutText: 'Cmd+C',
           action: () => {
-            if (TextUtils.getSelection()) {
+            if (tiptapUtils.isCurrLayerContenteditable()) {
               ShortcutUtils.textCopy()
             } else {
               ShortcutUtils.copy()
@@ -251,7 +252,7 @@ export default Vue.extend({
           text: this.$t('NN0230'),
           shortcutText: 'Cmd+V',
           action: () => {
-            if (TextUtils.getSelection()) {
+            if (tiptapUtils.isCurrLayerContenteditable()) {
               ShortcutUtils.textPaste()
             } else {
               ShortcutUtils.paste()
