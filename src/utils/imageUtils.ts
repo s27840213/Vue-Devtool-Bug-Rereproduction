@@ -5,9 +5,7 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { SrcObj } from '@/interfaces/gallery'
 import { IAssetPhoto } from '@/interfaces/api'
-import uploadUtils from './uploadUtils'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -33,9 +31,10 @@ class ImageUtils {
   getSrc(config: IImage, size?: string | number): string {
     const { type, userId, assetId } = config.srcObj || config.src_obj || {}
     if (typeof size === 'undefined') {
+      const { imgWidth, imgHeight } = config.styles
       size = this.getSrcSize(
         type,
-        config.styles ? this.getSignificantDimension(config.styles.imgWidth, config.styles.imgHeight) * store.getters.getPageScaleRatio / 100 : 0
+        config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio / 100 : 0
       )
     }
     switch (type) {

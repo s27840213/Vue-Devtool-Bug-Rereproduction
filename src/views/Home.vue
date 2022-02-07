@@ -1,115 +1,125 @@
 <template lang="pug">
   div(class="home")
-    nu-header
+    nu-header(:showSearchPage="isShowMobileSearchPage"
+      @isShowSearchPage="showMobileSearchPage")
     div(class="home-content")
-      template(v-if="isMobile")
-        div(class="home-content__top")
-          img(class="home-content__top-img"
-            style="height: 150px;")
-          div(class="home-content__top-title")
-            i18n(path="NN0148" tag="span")
-              template(#newline)
-                br
-          div(class="home-content__top-mobile-subtitle")
-            div
-              i18n(path="NN0235" tag="span")
-                template(#newline)
-                  br
-            div(class="pt-30") *{{$t('NN0236')}}
-      template(v-else)
-        div(class="home-content__top")
-          img(class="home-content__top-img"
-            :style="`height: ${isLogin ? '250px;' : '350px;'}`")
-          div(class="home-content__top-title"
-            :class="isLogin ? 'login' : ''")
-            i18n(path="NN0148" tag="span")
-              template(#newline)
-                br
-          div(v-if="!isLogin"
+      div(class="home-content__top")
+        div(class="home-content__top-bg"
+          :class="isLogin ? 'login_h' : 'unlogin_h'")
+        div(v-if="!isLogin"
+          class="home-content__top-white")
+        div(class="home-content__top-region")
+          i18n(path="NN0148" tag="span"
+            class="home-content__top-title")
+            template(#newline)
+              br
+          i18n(path="NN0390" tag="span"
             class="home-content__top-subtitle")
-            span {{$t('NN0237')}}
-            br
-            span {{$t('NN0238')}}
-          div(v-if="isLogin"
-            class="home-content__top-btns"
-            :class="currLocale === 'us' ? 'us' : ''")
-            div(class="rounded home-btn"
-              @click="goToPage('TemplateCenter')") {{$t('NN0149')}}
-            div(class="rounded home-btn"
-              @click="goToPage('MyDesign')") {{$t('NN0080')}}
-          div(v-else
-            class="home-content__top-btn rounded home-btn"
-            :type="'primary-lg'"
-            @click="newDesign()") {{$t('NN0274')}}
-      div(class="home-content-title label-lg") {{$t('NN0154')}}
+            template(#newline)
+              br
+          div(v-if="isLogin")
+            search-bar(class="home-content__top-search"
+              :placeholder="$t('NN0037')"
+              @search="handleSearch"
+              @click.native="showMobileSearchPage(true)")
+          template(v-else)
+            div(class="home-content__top-btn"
+              @click="newDesign()") {{$t('NN0274')}}
+            img(class="home-content__top-img"
+              :src="require('@/assets/img/svg/homepage/header_img_' + currLocale+ '.png')")
+      div(class="home-content-title"
+        :class="!isLogin ? 'top-padding' : ''") {{$t('NN0154')}}
       div(class="home-content__theme")
         scroll-list(:list="themeList" type='theme'
           @openPopup="openPopup()")
-      div(v-if="!isLogin && !isMobile"
-        class="home-content__plaque")
-        img(:src="require('@/assets/img/jpg/homepage/home-plaque.jpg')")
-        div(class="home-content__plaque-title") {{$t('NN0276')}}
-        div(class="home-content__plaque-subtitle"
-          class="px-20")
-          span(v-if="isMobile") {{$t('NN0237')}}
-          span(v-else) {{$t('NN0277')}}
       div(v-if="!isLogin"
-        class="home-content__feature"
-        :class="isMobile ? 'mt-10' : ''")
-        div(style="width: 100%;")
-          div(class="home-content__feature-items")
-            btn(v-for="item, idx in featureList" :type="'icon-mid'"
-              class="home-content__feature-item"
-              :class="{'selected': featureSelected === idx}"
-              @click.native="featureItemClicked(idx)")
-              svg-icon(v-if="currLocale === 'us' && idx === 3"
-                :iconName="featureSelected === idx ? `feature-icon-us${item.name}-s` : `feature-icon-us${item.name}`"
-                :iconWidth="isMobile ? '20px' : '40px'")
-              svg-icon(v-else
-                :iconName="featureSelected === idx ? `feature-icon${item.name}-s` : `feature-icon${item.name}`"
-                :iconWidth="isMobile ? '20px' : '40px'")
-              div(class="home-content__feature-item-title pt-10 body-2") {{item.title}}
-        div(class="home-content__feature-content")
-          div(class="home-content__feature-img")
-            img(:src="require(`@/assets/img/jpg/homepage/feature_${currLocale}_${featureSelected+1}.jpg`)")
-          div(class="home-content__feature-text")
-            div(class="pb-20 home-content__feature-content-title") {{featureList[featureSelected].title}}
-            div(class="pb-20") {{featureContent}}
-            btn(:type="'primary-mid'" class="rounded"
-              @click.native="newDesign()") {{$t('NN0274')}}
+        class="home-content__plaque")
+        div(class="home-content__plaque-title"
+          :class="currLocale === 'us' ? 'us' : ''") {{$t('NN0276')}}
+          div(class="home-content__plaque-bg")
+        div(class="home-content__plaque-subtitle"
+          class="px-20") {{$t('NN0277')}}
       div(v-if="isLogin")
-        div(class="home-content-title label-lg")
+        div(class="home-content-title")
           span {{$t('NN0080')}}
-          span(class="pointer body-1 more"
+          span(class="pointer home-content__more-text"
           @click="goToPage('MyDesign')") {{$t('NN0082')}}
         div(class="home-content__mydesign")
-          scroll-list(:list="allDesigns" type='design'
+          template-list(:designList="allDesigns" type='design'
             :isLoading="isDesignsLoading")
-      div(class="home-content-title label-lg")
-        div
-          span(v-for="tag in tags"
-            class="pointer mr-10"
-            @click="newDesign(tag)") {{'#' + tag}}
-        span(class="pointer body-1 more"
-          @click="goToTemplateCenterSearch(tagString.replaceAll(',', ' '))") {{$t('NN0082')}}
-      div(class="home-content__template")
-        scroll-list(:list="tagTemplateList" type='template'
-          :isLoading="tagTemplateList.length === 0")
-      div(class="home-content-title label-lg")
-        span {{$t('NN0278')}}
-        span(class="pointer body-1"
-          @click="goToTemplateCenterSortBy('popular')") {{$t('NN0082')}}
-      div(class="home-content__template")
-        scroll-list(:list="popularTemplateList" type='template'
-          :isLoading="popularTemplateList.length === 0")
-      div(class="home-content-title label-lg")
-        span {{$t('NN0279')}}
-        span(class="pointer body-1"
-          @click="goToTemplateCenterSortBy('recent')") {{$t('NN0082')}}
-      div(class="home-content__template")
-        scroll-list(:list="latestTemplateList" type='template'
-          :isLoading="latestTemplateList.length === 0")
-      nu-footer(class="mt-50")
+      template(v-for="list, idx in (isLogin ? templates1 : templates2)")
+        div(class="home-content-title")
+          span {{list.title}}
+          span(class="pointer home-content__more-text"
+            @click="goToTemplateCenterTheme(list.theme)") {{$t('NN0082')}}
+        div(class="home-content__template")
+          template-list(:theme="list.theme" type='template')
+          div(v-if="!isLogin && idx === templates2.length - 1"
+            class="home-content__more")
+            div(class="home-content__more-btn"
+              @click="goToTemplateCenterSortBy") {{$t('NN0371')}}
+      template(v-if="!isLogin")
+        div(class="home-content__feature home-content__feature-f1")
+          div(class="home-content__feature-text text-f1")
+            i18n(path="NN0372"
+              class="home-content__feature-title" tag="span")
+              template(#newline)
+                br
+            div(class="home-content__feature-subtitle") {{$t('NN0373')}}
+            div(class="home-content__feature-btn"
+              @click="goToPage('SignUp')") {{$t('NN0374')}}
+          img(class="home-content__feature-f1-img"
+            :src="require('@/assets/img/svg/homepage/Feature 1_' + currLocale+ '.svg')")
+        div(class="home-content__feature home-content__feature-f2")
+          img(class="home-content__feature-f2-img"
+            :src="require('@/assets/img/svg/homepage/Feature 2_' + currLocale+ '.png')")
+          div(class="home-content__feature-text text-f2")
+            i18n(path="NN0375"
+              class="home-content__feature-title" tag="span")
+              template(#newline)
+                br
+            i18n(path="NN0376"
+              class="home-content__feature-subtitle home-content__feature-f2-subtitle" tag="span")
+              template(#newline)
+                br
+            div(class="home-content__feature-btn"
+              @click="goToTemplateCenterSortBy") {{$t('NN0377')}}
+        div(class="home-content__feature home-content__feature-f3")
+          div(class="home-content__feature-text text-f3")
+            i18n(path="NN0378"
+              class="home-content__feature-title" tag="span"
+              :class="currLocale === 'us' ? 'us' : ''")
+              template(#newline)
+                br
+            i18n(path="NN0379"
+              class="home-content__feature-subtitle" tag="span")
+              template(#newline)
+                br
+            div(class="home-content__feature-textbtn"
+              @click="newDesign()") {{$t('NN0391')}}
+              svg-icon(class="pl-5"
+                :iconName="'right-arrow'"
+                :iconColor="'blue-1'"
+                :iconWidth="'25px'")
+          img(class="home-content__feature-f3-img"
+            :src="require('@/assets/img/svg/homepage/Feature 3_' + currLocale+ '.svg')")
+        div(class="home-content__bottom")
+          div(class="home-content__bottom-brand")
+            img(v-for="brand in brandList"
+              class="home-content__bottom-brand-img"
+              :src="require('@/assets/img/svg/homepage/' + brand + '.svg')")
+          div(class="home-content__bottom-text")
+            div(class="home-content__bottom-title"
+              :class="currLocale === 'us' ? 'us' : ''") {{$t('NN0380')}}
+            i18n(path="NN0381"
+              class="home-content__bottom-subtitle" tag="span")
+              template(#newline)
+                br
+            div(class="home-content__feature-btn"
+              @click="newDesign()") {{$t('NN0274')}}
+      div(v-else
+        class="pb-40")
+      nu-footer
       div(v-if="showSizePopup"
         class="home__size")
         popup-size(@close="closePopup()")
@@ -120,62 +130,39 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapActions, mapGetters } from 'vuex'
 import NuHeader from '@/components/NuHeader.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
+import TemplateList from '@/components/homepage/TemplateList.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import themeUtils from '@/utils/themeUtils'
 import localeUtils from '@/utils/localeUtils'
+import { ITemplate } from '@/interfaces/template'
 
 export default Vue.extend({
   name: 'Home',
   components: {
     NuHeader,
+    SearchBar,
     NuFooter,
     ScrollList,
+    TemplateList,
     PopupSize
   },
   data() {
     return {
+      isShowMobileSearchPage: false,
       themeList: [] as Itheme[],
-      featureList: [
-        {
-          name: '1',
-          title: i18n.t('NN0326'),
-          content: ''
-        },
-        {
-          name: '2',
-          title: i18n.t('NN0327'),
-          content: i18n.t('NN0328')
-        },
-        {
-          name: '3',
-          title: i18n.t('NN0329'),
-          content: i18n.t('NN0330')
-        },
-        {
-          name: '4',
-          title: i18n.t('NN0331'),
-          content: i18n.t('NN0332')
-        },
-        {
-          name: '5',
-          title: i18n.t('NN0333'),
-          content: i18n.t('NN0334')
-        }
-      ],
       showSizePopup: false,
-      featureSelected: 0,
       tagString: '',
       tags: [] as string[],
+      templates1: [] as { title: string; theme: string; }[],
+      templates2: [] as { title: string; theme: string; }[],
       tagTemplateList: [],
       popularTemplateList: [],
-      latestTemplateList: [],
-      isTimerStop: false,
-      AutoPlayTimer: 0 as number,
-      CoolDownTimer: 0 as number
+      latestTemplateList: []
     }
   },
   metaInfo() {
@@ -225,26 +212,22 @@ export default Vue.extend({
     isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     },
-    featureContent(): string {
-      return this.featureList[this.featureSelected].content as string
-    },
     currLocale(): string {
       return localeUtils.currLocale()
+    },
+    brandList(): string[] {
+      if (this.currLocale === 'tw') {
+        return ['Instagram', 'Facebook', 'Youtube', 'Line', 'Google']
+      } else if (this.currLocale === 'jp') {
+        return ['Instagram', 'Facebook', 'Youtube', 'Line', 'Google']
+      } else if (this.currLocale === 'us') {
+        return ['Instagram', 'Facebook', 'Youtube', 'Amazon', 'Google']
+      } else {
+        return ['Instagram', 'Facebook', 'Youtube', 'Line', 'Google']
+      }
     }
   },
   async mounted() {
-    if (!this.isLogin) {
-      this.AutoPlayTimer = setInterval(() => {
-        if (!this.isTimerStop) {
-          if (this.featureSelected === this.featureList.length - 1) {
-            this.featureSelected = 0
-          } else {
-            this.featureSelected++
-          }
-        }
-      }, 4000)
-    }
-
     if (this.isLogin) {
       designUtils.fetchDesigns(this.fetchAllDesigns)
     }
@@ -252,42 +235,49 @@ export default Vue.extend({
     await themeUtils.checkThemeState().then(() => {
       this.themeList = themeUtils.themes
     })
-    const squareTheme = [] as number[]
-    this.themeList.forEach((theme: Itheme) => {
-      if (theme.width / theme.height === 1) {
-        squareTheme.push(theme.id)
+
+    const templates = [
+      {
+        title: i18n.t('NN0368'),
+        theme: '1,2'
+      },
+      {
+        title: i18n.t('NN0026'),
+        theme: '3'
+      },
+      {
+        title: i18n.t('NN0151', { media: 'Facebook' }),
+        theme: '8'
+      },
+      {
+        title: i18n.t('NN0028'),
+        theme: '6'
+      },
+      {
+        title: i18n.t('NN0027'),
+        theme: '5'
+      },
+      {
+        title: i18n.t('NN0369'),
+        theme: '7'
+      },
+      {
+        title: i18n.t('NN0370'),
+        theme: '9'
       }
-    })
-    const theme = squareTheme.join(',')
+    ] as { title: string; theme: string; }[]
 
-    if (this.currLocale === 'tw') {
-      this.tagString = '免運,新品,內容行銷,聖誕節'
-    } else if (this.currLocale === 'us') {
-      this.tagString = 'Free Shipping,New Arrivals,Content Marketing,Christmas Day'
+    if (this.currLocale === 'us') {
+      this.templates1 = templates.filter(value => {
+        return value.theme !== '7'
+      })
     } else {
-      this.tagString = '送料無料,新商品,コンテンツマーケティング,クリスマス'
+      this.templates1 = templates
     }
-    let keyword = this.tagString.replace(/,/gi, ' ')
-    this.tags = this.tagString.split(',')
-    const cache = true
-    const tagTemplate = await this.getTagContent({ keyword, theme, cache })
-    this.tagTemplateList = tagTemplate.data.content[0].list
 
-    keyword = 'group::0;;order_by::popular'
-    const popularTemplate = await this.getTagContent({ keyword, theme, cache })
-    this.popularTemplateList = popularTemplate.data.content[0].list
-
-    keyword = 'group::0;;order_by::time'
-    const latestTemplate = await this.getTagContent({ keyword, theme, cache })
-    this.latestTemplateList = latestTemplate.data.content[0].list
-  },
-  destroyed() {
-    if (this.AutoPlayTimer) {
-      window.clearInterval(this.AutoPlayTimer)
-    }
-    if (this.CoolDownTimer) {
-      window.clearInterval(this.CoolDownTimer)
-    }
+    this.templates2 = this.templates1.filter((value, idx) => {
+      return idx <= 4
+    })
   },
   methods: {
     ...mapActions({
@@ -296,7 +286,9 @@ export default Vue.extend({
     }
     ),
     goToPage(pageName: string, queryString = '') {
-      if (queryString) {
+      if (pageName === 'SignUp') {
+        this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
+      } else if (queryString) {
         this.$router.push({ name: pageName, query: { search: queryString } })
       } else {
         this.$router.push({ name: pageName })
@@ -307,6 +299,9 @@ export default Vue.extend({
     },
     goToTemplateCenterSortBy(sortBy = '') {
       this.$router.push({ name: 'TemplateCenter', query: { sort: sortBy } })
+    },
+    goToTemplateCenterTheme(themes = '') {
+      this.$router.push({ name: 'TemplateCenter', query: { themes: themes } })
     },
     newDesign(search = '') {
       if (search) {
@@ -319,19 +314,19 @@ export default Vue.extend({
         })
       }
     },
-    featureItemClicked(idx: number) {
-      this.isTimerStop = true
-      this.featureSelected = idx
-      window.clearInterval(this.CoolDownTimer) // use the latest cool down time
-      this.CoolDownTimer = setTimeout(() => {
-        this.isTimerStop = false
-      }, 10000)
-    },
     openPopup() {
       this.showSizePopup = true
     },
     closePopup() {
       this.showSizePopup = false
+    },
+    handleSearch(keyword: string) {
+      this.goToPage('TemplateCenter', keyword)
+    },
+    showMobileSearchPage(show: boolean) {
+      if (this.isMobile) {
+        this.isShowMobileSearchPage = show
+      }
     }
   }
 })
@@ -366,10 +361,26 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
     text-align: left;
-    padding: 40px 10vw 20px 10vw;
-    @include layout-mobile {
-      font-size: 18px;
-      padding: 25px 5vw 20px 5vw;
+    @include text-H5;
+    padding: 38px 150px 6px 150px;
+    @media screen and (max-width: 1440px) {
+      padding: 38px 75px 6px 75px;
+    }
+    @media screen and (max-width: 768px) {
+      @include text-H6;
+      padding: 38px 3% 6px 3%;
+    }
+    &.top-padding {
+      margin-top: 240px;
+      @media screen and (max-width: 1080px) {
+        margin-top: 180px;
+      }
+      @media screen and (max-width: 700px) {
+        margin-top: 150px;
+      }
+      @media screen and (max-width: 500px) {
+        margin-top: 80px;
+      }
     }
     .more {
       white-space: nowrap;
@@ -379,47 +390,73 @@ export default Vue.extend({
     position: relative;
     display: flex;
     justify-content: center;
-    @include layout-mobile {
+    &-bg {
       width: 100%;
-      height: 150px;
-    }
-    &-img {
-      width: 100%;
-      background-size: cover;
-      background-image: url("~@/assets/img/jpg/homepage/home-top.jpg");
-      @include layout-mobile {
-        background-image: url("~@/assets/img/jpg/homepage/home-top-mobile.jpg");
+      z-index: -2;
+      object-fit: cover;
+      background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+      &.login_h {
+        height: 420px;
       }
+      &.unlogin_h {
+        height: 750px;
+        @media screen and (max-width: 976px) {
+          height: 650px;
+        }
+        @media screen and (max-width: 767px) {
+          height: 500px;
+        }
+      }
+    }
+    &-white {
+      position: absolute;
+      top: 500px;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-color: white transparent;
+      border-width: 0 0 250px 100vw;
+      border-style: solid;
+      z-index: -1;
+      @media screen and (max-width: 976px) {
+        top: 450px;
+        border-width: 0 0 200px 100vw;
+      }
+      @media screen and (max-width: 767px) {
+        top: 400px;
+        border-width: 0 0 100px 100vw;
+      }
+    }
+    &-region {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      color: setColor(dark-blue);
+      padding-top: 100px;
     }
     &-title {
-      display: flex;
-      align-items: center;
-      height: 100px;
-      position: absolute;
-      top: 55px;
-      color: setColor(dark-blue);
-      font-size: 40px;
-      font-weight: 700;
-      line-height: 1.3;
-      &.login {
-        top: 40px;
+      color: setColor(nav);
+      white-space: nowrap;
+      padding: 0 5%;
+      @include text-H2;
+      @media screen and (max-width: 1440px) {
+        @include text-H3;
       }
-      @media screen and (max-width: 990px) {
-        font-size: 32px;
-      }
-      @include layout-mobile {
-        align-items: flex-start;
-        top: 30px;
-        font-size: 16px;
+      @media screen and (max-width: 767px) {
+        @include text-H5;
       }
     }
     &-subtitle {
-      position: absolute;
-      top: 160px;
-      font-size: 20px;
-      line-height: 2;
-      @media screen and (max-width: 990px) {
-        font-size: 16px;
+      color: setColor(gray-2);
+      padding-top: 20px;
+      @include body-LG;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
+        max-width: 75%;
       }
     }
     &-mobile-subtitle {
@@ -429,190 +466,328 @@ export default Vue.extend({
       top: 75px;
       transform: scale(0.9);
     }
-    &-btns {
-      position: absolute;
-      top: 140px;
-      display: flex;
-      justify-content: space-evenly;
-      width: 500px;
-      &.us {
-        top: 160px;
+    &-btn {
+      width: 240px;
+      margin-top: 20px;
+      @include button-LG;
+      @media screen and (max-width: 1440px) {
+        width: 200px;
       }
     }
-    &-btn {
-      position: absolute;
-      top: 260px;
+    &-search {
+      display: flex;
+      justify-content: center;
+      width: 75vw;
+      max-width: 380px;
+      height: 40px;
+      background-color: white;
+      border-radius: 3px;
+      border: 1px solid setColor(gray-4);
+      box-sizing: border-box;
+      margin: 20px auto;
+    }
+    &-img {
+      width: 80%;
+      max-width: 900px;
+      padding-top: 52px;
     }
   }
   &__theme,
   &__mydesign,
   &__template {
-    padding: 0 10%;
-    @include layout-mobile {
-      padding: 0 5%;
+    position: relative;
+    padding: 0 150px;
+    @media screen and (max-width: 1440px) {
+      padding: 0 75px;
     }
-  }
-  &__feature {
-    padding: 0 10%;
+    @media screen and (max-width: 768px) {
+      padding: 0;
+    }
   }
   &__plaque {
     display: flex;
-    justify-content: center;
-    position: relative;
+    flex-direction: column;
+    align-items: center;
     padding: 50px 0;
-    > img {
-      width: 100%;
-      height: 150px;
+    &-bg {
+      position: absolute;
+      bottom: 0;
+      width: 675px;
+      height: 20px;
+      background: setColor(blue-3);
+      z-index: -1;
+      @media screen and (max-width: 1440px) {
+        width: 500px;
+      }
+      @media screen and (max-width: 768px) {
+        width: 425px;
+      }
+      @media screen and (max-width: 540px) {
+        width: 80%;
+      }
     }
     &-title {
-      position: absolute;
-      top: 95px;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.3;
-      color: setColor(white);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      color: setColor(gray-1);
+      @include text-H3;
+      @media screen and (max-width: 1440px) {
+        @include text-H4;
+      }
+      @media screen and (max-width: 768px) {
+        @include text-H5;
+        max-width: 90%;
+        &.us {
+          width: 300px;
+        }
+      }
     }
     &-subtitle {
-      position: absolute;
-      top: 135px;
-      font-size: 16px;
-      color: setColor(white);
+      color: setColor(gray-2);
+      padding-top: 10px;
+      @include body-MD;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
+      }
+    }
+  }
+  &__more {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    bottom: -25px;
+    width: calc(100% - 300px);
+    height: 128px;
+    background: linear-gradient(0deg, #FFFFFF 70%, rgba(245, 238, 231, 0) 100%);
+    @media screen and (max-width: 1440px) {
+      width: calc(100% - 150px);
+    }
+    @media screen and (max-width: 768px) {
+      width: 100%;
+    }
+    &-btn {
+      width: 280px;
+      @include button-LG;
+      margin-top: 50px;
+      @media screen and (max-width: 768px) {
+        width: 250px;
+      }
+    }
+  }
+  &__more-text {
+    white-space: nowrap;
+    @include body-MD;
+    @media screen and (max-width: 768px) {
+      @include body-SM;
     }
   }
   &__feature {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    position: relative;
-    &-items {
+    justify-content: center;
+    &-text {
       display: flex;
-      justify-content: center;
-      scroll-behavior: smooth;
-      overflow-x: scroll;
-      overflow-y: hidden;
+      flex-direction: column;
       text-align: left;
-      padding-bottom: 50px;
-      @include layout-mobile {
-        justify-content: space-between;
-        padding-bottom: 30px;
+      &.text-f1 {
+        width: 450px;
+        padding-left: 150px;
+        @media screen and (max-width: 1440px) {
+          padding-left: 5%;
+        }
       }
-      &::-webkit-scrollbar {
-        display: none;
+      &.text-f2 {
+        max-width: 500px;
+      }
+      &.text-f3 {
+        max-width: 450px;
+      }
+      @media screen and (max-width: 768px) {
+        padding: 40px 24px 0 24px;
       }
     }
-    &-item {
-      cursor: pointer;
-      width: 180px;
-      height: 125px;
-      border: 1px solid #f4f4f5;
-      border-radius: 8px;
-      padding: 10px !important;
-      margin-right: 50px;
-      @include layout-mobile {
-        width: 12vw;
-        height: unset;
-        margin-right: 0;
+    &-f1 {
+      background: #F3F6FA;
+      margin-top: 24px;
+      padding: 0;
+      @media screen and (max-width: 768px) {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        padding: 20px 0 75px 0;
       }
-      &:hover {
-        background: setColor("gray-5");
-      }
-      &-title {
-        font-size: 14px;
-        padding-top: 10px;
-        @include layout-mobile {
-          display: none;
+      &-img {
+        width: 65%;
+        max-width: 892px;
+        @media screen and (max-width: 1440px) {
+          width: 50%;
+        }
+        @media screen and (max-width: 768px) {
+          margin:0 auto;
+          width: 95%;
+          max-width: unset;
         }
       }
     }
-    &-content {
+    &-f2 {
       display: flex;
       flex-direction: row;
-      justify-content: center;
-      width: 100%;
-      @include layout-mobile {
+      padding: 50px 24px;
+      @media screen and (max-width: 768px) {
         flex-direction: column;
+        align-items: flex-start;
+        padding: 40px 0 0 0;
       }
-      &-title {
-        display: none;
-        color: setColor(dark-blue-2);
-        text-align: center;
-        font-weight: 600;
-        font-size: 18px;
-        line-height: 28px;
-        @include layout-mobile {
-          display: block;
+      &-img {
+        width: 45%;
+        max-width: 580px;
+        padding-right: 115px;
+        @media screen and (max-width: 1440px) {
+          padding-right: 24px;
+        }
+        @media screen and (max-width: 768px) {
+          padding-right: 0;
+          margin:0 auto;
+          width: 95%;
+          max-width: unset;
+        }
+      }
+      &-subtitle {
+        @media screen and (min-width: 768px) {
+          margin-bottom: 30px;
         }
       }
     }
-    &-img {
-      width: 500px;
-      @include layout-mobile {
-        width: 100%;
+    &-f3 {
+      display: flex;
+      flex-direction: row;
+      padding: 50px 24px;
+      @media screen and (max-width: 768px) {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        padding: 50px 0;
+      }
+      &-img {
+        width: 45%;
+        max-width: 660px;
+        padding-left: 150px;
+        @media screen and (max-width: 1440px) {
+          padding-left: 5%;
+        }
+        @media screen and (max-width: 768px) {
+          padding-left: 0;
+          margin:0 auto;
+          width: 95%;
+          max-width: unset;
+        }
+      }
+      &-subtitle {
+        @media screen and (min-width: 768px) {
+          margin-bottom: 30px;
+        }
+      }
+    }
+    &-title {
+      @include text-H2;
+      @media screen and (max-width: 1440px) {
+        @include text-H3;
+      }
+      @media screen and (max-width: 540px) {
+        @include text-H5;
+        &.us {
+          width: 300px;
+        }
+      }
+    }
+    &-subtitle {
+      color: setColor(gray-2);
+      padding-top: 20px;
+      @include body-LG;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
+      }
+    }
+    &-btn {
+      width: 200px;
+      margin-top: 20px;
+      @include button-LG;
+    }
+    &-textbtn {
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      color: setColor(blue-1);
+      @include text-H5;
+      padding-top: 32px;
+      @media screen and (max-width: 768px) {
+        padding-top: 20px;
+      }
+    }
+  }
+  &__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #F3F6FA;
+    padding: 50px 24px 65px 24px;
+    @media screen and (max-width: 768px) {
+      padding-bottom: 50px;
+    }
+    &-brand {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: center;
+      padding-bottom: 30px;
+      @media screen and (max-width: 768px) {
+        padding-bottom: 45px;
       }
       > img {
-        width: 100%;
-        filter: drop-shadow(0px 3px 15px rgba(0, 0, 0, 0.25));
-        border-radius: 8px;
+        padding: 15px 60px;
+        @media screen and (max-width: 1200px) {
+          padding-left: 40px;
+          padding-right: 40px;
+        }
+        @media screen and (max-width: 768px) {
+          padding-top: 20px;
+          padding-bottom: 20px;
+        }
+        @media screen and (max-width: 450px) {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        @media screen and (max-width: 430px) {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
       }
     }
     &-text {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      width: 30%;
-      text-align: left;
-      font-size: 18px;
-      line-height: 40px;
-      font-weight: 400;
-      color: setColor(gray-2);
-      padding-left: 5vw;
-      @media screen and (max-width: 1260px) {
-        width: 45%;
-      }
-      @media screen and (max-width: 990px) {
-        width: 60%;
-      }
-      @include layout-mobile {
-        width: unset;
-        text-align: center;
-        font-size: 14px;
-        line-height: 20px;
-        padding: 20px 10px;
-      }
-      > button {
-        width: 200px;
-        height: 45px;
-        font-size: 20px;
-        padding: 5px 10px;
-        @include layout-mobile {
-          width: 50%;
-          padding: 0;
-          margin: 0 25%;
+      align-items: center;
+      text-align: center;
+    }
+    &-title {
+      @include text-H2;
+      @media screen and (max-width: 540px) {
+        @include text-H5;
+        &.us {
+          width: 300px;
         }
       }
     }
-    .selected {
-      background: #09467e;
-      color: white;
+    &-subtitle {
+      color: setColor(gray-2);
+      max-width: 900px;
+      padding-top: 30px;
+      padding-bottom: 10px;
+      @include body-LG;
+      @media screen and (max-width: 768px) {
+        @include body-SM;
+      }
     }
-  }
-}
-.home-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  width: 200px;
-  height: 40px;
-  font-size: 20px;
-  font-weight: 700;
-  color: setColor(white);
-  background: setColor(blue-1);
-  @media screen and (max-width: 990px) {
-    width: 160px;
-    height: 35px;
-    font-size: 16px;
   }
 }
 </style>

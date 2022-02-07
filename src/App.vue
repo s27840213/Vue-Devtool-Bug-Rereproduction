@@ -1,5 +1,8 @@
 <template lang="pug">
   div(id="app" :style="appStyles()")
+    link(v-if="customFont && currLocale === 'us'"
+      href='https://fonts.googleapis.com/css?family=Poppins:400,600,700'
+      rel='stylesheet' type='text/css')
     //- div(class="coordinate" ref="coordinate")
     //-   div(class="coordinate__val coordinate__width")
     //-     span {{coordinateWidth}}px
@@ -45,6 +48,7 @@ import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
+import { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
 
 export default Vue.extend({
   components: {
@@ -79,6 +83,9 @@ export default Vue.extend({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
+    },
+    customFont(): boolean {
+      return this.$route.name === 'Home' || this.$route.name === 'TemplateCenter'
     }
   },
   methods: {
@@ -99,6 +106,12 @@ export default Vue.extend({
           height: '100vh',
           '-webkit-font-smoothing': 'antialiased',
           transformStyle: 'preserve-3d'
+        }
+      } else if (this.customFont) {
+        if (this.currLocale === 'tw' || this.currLocale === 'jp') {
+          return { fontFamily: STANDARD_TEXT_FONT.tw }
+        } else {
+          return { fontFamily: 'Poppins' }
         }
       }
     },
