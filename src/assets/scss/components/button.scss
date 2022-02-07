@@ -6,6 +6,7 @@ $buttons: (
 	secondary: setColor(blue-2),
 	tertiary: setColor(blue-3),
 	gray: setColor(gray-6),
+	gray-active: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none,
 	light: setColor(white)
@@ -16,6 +17,7 @@ $hoveredColor: (
 	secondary: setColor(blue-2),
 	tertiary: setColor(blue-3),
 	gray: setColor(gray-6),
+	gray-active: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none,
 	light: setColor(white)
@@ -26,6 +28,7 @@ $textColor: (
 	secondary: setColor(blue-1),
 	tertiary: setColor(white),
 	gray: setColor(gray-2),
+	gray-active: setColor(blue-1),
 	inactive: setColor(white),
 	icon: none,
 	light: setColor(blue-1)
@@ -36,6 +39,7 @@ $borderColor: (
 	secondary: none,
 	tertiary: none,
 	gray: none,
+	gray-active: setColor(blue-1),
 	inactive: setColor(white),
 	icon: none,
 	light: setColor(blue-1)
@@ -71,6 +75,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 6px 12px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -81,6 +88,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -91,6 +101,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -101,6 +114,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 15px 30px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -114,6 +130,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 6px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -124,6 +143,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -134,6 +156,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
@@ -144,6 +169,9 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 15px;
+			@if map-get($borderColor, $type) != 'none'{
+				border: 2px solid map-get($borderColor, $type);
+			}
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}

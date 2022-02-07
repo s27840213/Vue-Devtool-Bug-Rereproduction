@@ -1,0 +1,288 @@
+<template lang="pug">
+div(class="bg-remove-area"
+  :style="wrapperStyles"
+      ref="bgRemoveArea")
+    div(class="bg-remove-area__scale-area"
+        :style="areaStyles"
+        :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
+      canvas(class="bg-remove-area" ref="canvas")
+      div(class="bg-remove-area__brush" :style="brushStyle")
+</template>
+
+<script lang="ts">
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { IImage } from '@/interfaces/layer'
+import imageUtils from '@/utils/imageUtils'
+import mouseUtils from '@/utils/mouseUtils'
+import Vue from 'vue'
+import { mapGetters, mapMutations } from 'vuex'
+
+export default Vue.extend({
+  props: {
+    editorView: HTMLElement
+  },
+  data() {
+    return {
+      canvasWidth: 1600,
+      canvasHeight: 1600,
+      canvas: undefined as unknown as HTMLCanvasElement,
+      ctx: undefined as unknown as CanvasRenderingContext2D,
+      tmpCanvas: undefined as unknown as HTMLCanvasElement,
+      tmpCtx: undefined as unknown as CanvasRenderingContext2D,
+      initPos: { x: 0, y: 0 },
+      brushStyle: {
+        top: '0px',
+        left: '0px',
+        backgroundColor: '#fcaea9',
+        width: '16px',
+        height: '16px'
+      },
+      isMouseDown: false,
+      imgSrc: ''
+    }
+  },
+  created() {
+    const { width, height } = (this.currSelectedInfo as ICurrSelectedInfo).layers[0].styles
+    const aspectRatio = width / height
+    this.canvasHeight = 1600 / aspectRatio
+    this.imgSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage)
+  },
+  mounted() {
+    this.initCanvas()
+    this.editorView.addEventListener('mousedown', this.drawStart)
+    window.addEventListener('mousemove', this.brushMoving)
+  },
+  destroyed() {
+    /**
+     * While image is setted to frame, these event-listener should be removed
+     */
+    window.removeEventListener('mouseup', this.drawEnd)
+    window.removeEventListener('mousemove', this.brushMoving)
+  },
+  computed: {
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      brushSize: 'bgRemove/getBrushSize',
+      restoreInitState: 'bgRemove/getRestoreInitState',
+      clearMode: 'bgRemove/getClearMode',
+      showInitImage: 'bgRemove/getShowInitImage'
+    }),
+    size(): { width: number, height: number } {
+      return {
+        width: this.canvasWidth,
+        height: this.canvasHeight
+      }
+    },
+    areaStyles(): { [index: string]: string } {
+      const { width, height } = this.size
+
+      return {
+        width: `${width}px`,
+        height: `${height}px`,
+        transform: `scale(${this.scaleRatio / 100})`
+      }
+    },
+    wrapperStyles(): { [index: string]: string } {
+      const backgroundImage = this.showInitImage ? `url(${this.imgSrc})` : ''
+      const backgroundSize = this.showInitImage ? 'cover' : 'initial'
+      return {
+        width: `${this.size.width * (this.scaleRatio / 100)}px`,
+        height: `${this.size.height * (this.scaleRatio / 100)}px`,
+        ...(this.showInitImage && {
+          backgroundImage,
+          backgroundSize,
+          'background-blend-mode': 'lighten'
+        })
+      }
+    },
+    brushColor(): string {
+      return this.clearMode ? '#fcaea9' : '#fdd033'
+    }
+  },
+  watch: {
+    brushSize(newVal: number) {
+      this.ctx.lineWidth = newVal
+      this.brushStyle.width = `${newVal}px`
+      this.brushStyle.height = `${newVal}px`
+    },
+    restoreInitState(newVal) {
+      if (newVal) {
+        this.drawImage()
+        this.setRestoreInitState(false)
+      }
+    },
+    clearMode(newVal) {
+      if (newVal) {
+        this.ctx.globalCompositeOperation = 'destination-out'
+      } else {
+        this.ctx.globalCompositeOperation = 'source-over'
+      }
+    },
+    brushColor(newVal) {
+      this.brushStyle.backgroundColor = newVal
+    }
+  },
+  methods: {
+    ...mapMutations({
+      setRestoreInitState: 'bgRemove/SET_restoreInitState',
+      _setCanvas: 'bgRemove/SET_canvas'
+    }),
+    initCanvas() {
+      this.canvas = this.$refs.canvas as HTMLCanvasElement
+      this.canvas.width = this.canvasWidth
+      this.canvas.height = this.canvasHeight
+      const ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
+      ctx.strokeStyle = 'red'
+      ctx.lineWidth = this.brushSize
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      this.ctx = ctx
+      // this.ctx.globalCompositeOperation = 'destination-out'
+      this.drawImage()
+    },
+    async createTmpCanvas() {
+      this.tmpCanvas = document.createElement('canvas') as HTMLCanvasElement
+      this.tmpCanvas.width = this.size.width
+      this.tmpCanvas.height = this.size.height
+      const ctx = this.tmpCanvas.getContext('2d') as CanvasRenderingContext2D
+      // set up drawing settings
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineWidth = this.brushSize
+
+      this.tmpCtx = ctx
+
+      await this.drawTmpImage().then((img) => {
+        this.tmpCtx.drawImage(img as HTMLImageElement, 0, 0, this.size.width, this.size.height)
+        this.setCompositeOperationMode('destination-in', this.tmpCtx)
+      })
+    },
+    draw(e: MouseEvent, ctx: CanvasRenderingContext2D) {
+      ctx.beginPath()
+      ctx.moveTo(this.initPos.x, this.initPos.y)
+      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+      ctx.lineTo(x, y)
+      ctx.stroke()
+      Object.assign(this.initPos, {
+        x,
+        y
+      })
+    },
+    async drawStart(e: MouseEvent) {
+      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+      Object.assign(this.initPos, {
+        x,
+        y
+      })
+      if (this.clearMode) {
+        this.draw(e, this.ctx)
+      } else {
+        await this.createTmpCanvas()
+        this.draw(e, this.tmpCtx)
+        this.ctx.drawImage(this.tmpCanvas, 0, 0, this.size.width, this.size.height)
+      }
+      window.addEventListener('mouseup', this.drawEnd)
+      window.addEventListener('mousemove', this.drawing)
+    },
+    async drawing(e: MouseEvent) {
+      if (this.clearMode) {
+        this.draw(e, this.ctx)
+      } else {
+        await this.createTmpCanvas()
+        this.draw(e, this.tmpCtx)
+        this.ctx.drawImage(this.tmpCanvas, 0, 0, this.size.width, this.size.height)
+      }
+    },
+    drawEnd() {
+      window.removeEventListener('mouseup', this.drawEnd)
+      window.removeEventListener('mousemove', this.drawing)
+      this._setCanvas(this.canvas)
+      // this.currentImgsIdx = this.historyImgs.length
+
+      // const base64 = this.canvas.toDataURL()
+      // this.base64 = base64
+      // this.historyImgs.push(base64)
+    },
+    brushMoving(e: MouseEvent) {
+      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+      this.brushStyle.left = `${x - this.brushSize / 2}px`
+      this.brushStyle.top = `${y - this.brushSize / 2}px`
+    },
+    drawImage() {
+      const img = new Image()
+      img.src = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage)
+      img.setAttribute('crossOrigin', 'Anonymous')
+      this.setCompositeOperationMode('source-over')
+      img.onload = () => {
+        this.ctx.drawImage(img, 0, 0, this.size.width, this.size.height)
+        this._setCanvas(this.canvas)
+        if (this.clearMode) {
+          this.setCompositeOperationMode('destination-out')
+        } else {
+          this.setCompositeOperationMode('source-over')
+        }
+      }
+    },
+    drawTmpImage() {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.src = this.imgSrc
+        img.setAttribute('crossOrigin', 'Anonymous')
+        this.setCompositeOperationMode('source-over', this.tmpCtx)
+        img.onload = () => resolve(img)
+      })
+    },
+    setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
+      if (ctx) {
+        ctx.globalCompositeOperation = mode
+      } else {
+        this.ctx.globalCompositeOperation = mode
+      }
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.bg-remove-area {
+  position: relative;
+  box-sizing: content-box;
+  margin: 0px auto;
+  overflow: hidden;
+  &__scale-area {
+    position: relative;
+    box-sizing: border-box;
+    transform-origin: 0 0;
+    background-color: rgba(255, 255, 255, 0.3);
+    &--hideBg {
+      background-image: linear-gradient(
+          45deg,
+          setColor(gray-5) 25%,
+          rgba(0, 0, 0, 0) 25%,
+          rgba(0, 0, 0, 0) 75%,
+          setColor(gray-5) 75%,
+          setColor(gray-5)
+        ),
+        linear-gradient(
+          45deg,
+          setColor(gray-5) 25%,
+          rgba(0, 0, 0, 0) 25%,
+          rgba(0, 0, 0, 0) 75%,
+          setColor(gray-5) 75%,
+          setColor(gray-5)
+        );
+      background-color: rgb(255, 255, 255);
+      background-position: 0px 0px, 40px 40px;
+      background-size: 80px 80px;
+    }
+  }
+
+  &__brush {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+}
+</style>
