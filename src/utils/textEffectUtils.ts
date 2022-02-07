@@ -212,9 +212,11 @@ class Controller {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
+    const subLayerIndex = LayerUtils.subLayerIdx
     const defaultAttrs = this.effects[effect]
 
     for (const idx in layers) {
+      if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
       const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
       if (type === 'text') {
         const textEffect = {} as any
