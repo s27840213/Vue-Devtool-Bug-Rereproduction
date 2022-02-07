@@ -531,7 +531,7 @@ export default Vue.extend({
             (currLayer as IGroup | ITmp).layers
               .forEach((l, idx) => {
                 l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
-                TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, layerIndex, idx)
+                l.type === 'text' && TextUtils.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
               })
           } else {
             tiptapUtils.applyParagraphStyle(prop, value, false)

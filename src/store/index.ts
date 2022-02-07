@@ -8,6 +8,7 @@ import zindexUtils from '@/utils/zindexUtils'
 import photos from '@/store/photos'
 import user, { IUserModule } from '@/store/module/user'
 import color from '@/store/module/color'
+import bgRemove from '@/store/module/bgRemove'
 import text, { ITextState } from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
@@ -756,6 +757,7 @@ export default new Vuex.Store({
     homeTemplate,
     design,
     layouts,
-    unsplash
+    unsplash,
+    bgRemove
   }
 })

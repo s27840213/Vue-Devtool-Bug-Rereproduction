@@ -21,16 +21,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import CssConveter from '@/utils/cssConverter'
-import ControlUtils from '@/utils/controlUtils'
-import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import generalUtils from '@/utils/generalUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -49,48 +48,20 @@ export default Vue.extend({
     if (LayerUtils.getCurrLayer.type === 'tmp') {
       return
     }
-    const promises: Array<Promise<void>> = []
-    for (const defaultFont of this.getDefaultFontsList) {
-      promises.push(this.addFont(defaultFont).catch(e => console.error(e)))
-    }
 
-    for (const p of (this.config as IText).paragraphs) {
-      promises.push(this.addFont({
-        type: p.styles.type,
-        face: p.styles.font,
-        url: p.styles.fontUrl,
-        ver: this.verUni
-      }).catch(e => console.error(e)))
-      for (const span of p.spans) {
-        const promise = this.addFont({
-          type: span.styles.type,
-          face: span.styles.font,
-          url: span.styles.fontUrl,
-          ver: this.verUni
-        }).catch(e => console.error(e))
+    await TextUtils.waitUntilAllFontsLoaded(this.config)
 
-        promises.push(promise)
-      }
-    }
+    if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
 
-    await Promise
-      .all(promises)
-
-    if (this.config.styles.textShape?.name === 'curve') {
-      return
-    }
-    if (!this.isDestroyed) {
-      // const textHW = TextUtils.getTextHW(this.config, this.config.widthLimit)
-      const widthLimit = this.autoResize()
-      const textHW = TextUtils.getTextHW(this.config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-      } else if (typeof this.subLayerIndex !== 'undefined') {
-        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
-      }
+    const widthLimit = this.autoResize()
+    const textHW = TextUtils.getTextHW(this.config, widthLimit)
+    if (typeof this.subLayerIndex === 'undefined') {
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+    } else {
+      const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+      const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
     }
   },
   destroyed() {
@@ -125,7 +96,7 @@ export default Vue.extend({
   methods: {
     ...mapActions('text', ['addFont']),
     styles(styles: any) {
-      return CssConveter.convertFontStyle(styles)
+      return tiptapUtils.textStylesRaw(styles)
     },
     bodyStyles() {
       const isVertical = this.config.styles.writingMode.includes('vertical')

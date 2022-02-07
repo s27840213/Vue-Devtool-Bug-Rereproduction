@@ -2,25 +2,27 @@
   div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
-      @mousedown.left="selectStart($event)"
-      @wheel="handleWheel"
-      @scroll="scrollUpdate()"
-      @mousewheel="handleWheel"
+      @mousedown.left="!inBgRemoveMode ? selectStart($event) : null"
+      @wheel="!inBgRemoveMode ? handleWheel : null"
+      @scroll="!inBgRemoveMode ? scrollUpdate() : null"
+      @mousewheel="!inBgRemoveMode ? handleWheel : null"
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
           @mousedown.left.self="outerClick($event)")
-        nu-page(v-for="(page,index) in pages"
-                :ref="`page-${index}`"
-                :key="`page-${index}`"
-                :pageIndex="index"
-                :editorView="editorView"
-                :style="{'z-index': `${getPageZIndex(index)}`}"
-                :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
-                @stepChange="handleStepChange")
-        div(v-show="isSelecting" class="selection-area" ref="selectionArea"
-          :style="{'z-index': `${pageNum+1}`}")
+        template(v-if="!inBgRemoveMode")
+          nu-page(v-for="(page,index) in pages"
+                  :ref="`page-${index}`"
+                  :key="`page-${index}`"
+                  :pageIndex="index"
+                  :editorView="editorView"
+                  :style="{'z-index': `${getPageZIndex(index)}`}"
+                  :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+                  @stepChange="handleStepChange")
+          div(v-show="isSelecting" class="selection-area" ref="selectionArea"
+            :style="{'z-index': `${pageNum+1}`}")
+        bg-remove-area(v-else :editorView="editorView")
       template(v-if="showRuler")
         ruler-hr(:canvasRect="canvasRect"
           :editorView="editorView"
@@ -29,7 +31,8 @@
           :editorView="editorView"
           @mousedown.native.stop="dragStartV($event)")
         div(class="corner-block")
-    div(class="editor-view__guidelines-area"
+    div(v-if="!inBgRemoveMode"
+        class="editor-view__guidelines-area"
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
@@ -63,16 +66,16 @@ import RulerVr from '@/components/editor/ruler/RulerVr.vue'
 import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
-import layerUtils from '@/utils/layerUtils'
-import mathUtils from '@/utils/mathUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
+import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 
 export default Vue.extend({
   components: {
     EditorHeader,
     RulerHr,
-    RulerVr
+    RulerVr,
+    BgRemoveArea
   },
   data() {
     return {
@@ -174,7 +177,8 @@ export default Vue.extend({
       showRuler: 'getShowRuler',
       lockGuideline: 'getLockGuideline',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      hasCopiedFormat: 'getHasCopiedFormat'
+      hasCopiedFormat: 'getHasCopiedFormat',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -209,7 +213,8 @@ export default Vue.extend({
       addLayer: 'ADD_selectedLayer',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE'
+      _setAdminMode: 'user/SET_ADMIN_MODE',
+      setInBgRemoveMode: 'SET_inBgRemoveMode'
     }),
     brushCursorStyles() {
       return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
@@ -218,12 +223,14 @@ export default Vue.extend({
       this._setAdminMode(!this.adminMode)
     },
     outerClick(e: MouseEvent) {
-      GroupUtils.deselect()
-      this.setCurrActivePageIndex(-1)
-      pageUtils.setBackgroundImageControlDefault()
-      pageUtils.findCentralPageIndexInfo()
-      if (imageUtils.isImgControl()) {
-        ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+      if (!this.inBgRemoveMode) {
+        GroupUtils.deselect()
+        this.setCurrActivePageIndex(-1)
+        pageUtils.setBackgroundImageControlDefault()
+        pageUtils.findCentralPageIndexInfo()
+        if (imageUtils.isImgControl()) {
+          ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
+        }
       }
     },
     selectStart(e: MouseEvent) {
@@ -341,7 +348,11 @@ export default Vue.extend({
     detectBlur(event: Event) {
       // The reason why I used setTimeout event here is to make the callback function being executed after the activeElement has been changed
       // or we just put the function in this callback function, the activeElement will always get 'BODY'
+
       setTimeout(() => {
+        if (this.inBgRemoveMode) {
+          return
+        }
         this.$nextTick(() => {
           if (document.activeElement?.tagName === 'BODY' && !this.isShowPagePreview) {
             this.geCurrActivePageIndex === -1 ? pageUtils.findCentralPageIndexInfo() : pageUtils.activeCurrActivePage()

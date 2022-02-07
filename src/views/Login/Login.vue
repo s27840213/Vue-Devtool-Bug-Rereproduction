@@ -353,7 +353,7 @@ export default Vue.extend({
     async fbLogin(code: string, redirectUri: string, redirect: string) {
       try {
         // code -> access_token
-        const { data } = await userApis.fbLogin(code, redirectUri)
+        const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })
@@ -367,7 +367,7 @@ export default Vue.extend({
     async googleLogin(code: string, redirectUri: string, redirect: string) {
       try {
         // idToken -> token
-        const { data } = await userApis.googleLogin(code, redirectUri)
+        const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })

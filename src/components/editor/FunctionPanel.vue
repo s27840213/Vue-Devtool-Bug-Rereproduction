@@ -25,7 +25,9 @@
         @click.native="openFilePopup")
     //- @Todo -> Simplify codes below ORZ
     div(v-if="!isShowPagePreview")
-      div(v-if="!isGroup" class="p-20")
+      div(v-if="inBgRemoveMode" class="p-20")
+        panel-bg-remove
+      div(v-else-if="!isGroup" class="p-20")
         panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
         panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
           @openFontsPanel="openFontsPanel"
@@ -71,6 +73,7 @@ import PanelPageSetting from '@/components/editor/panelFunction/PanelPageSetting
 import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
+import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
@@ -93,7 +96,8 @@ export default Vue.extend({
     PanelFonts,
     PanelShapeSetting,
     PanelTextEffectSetting,
-    DownloadBtn
+    DownloadBtn,
+    PanelBgRemove
   },
   data() {
     return {
@@ -105,7 +109,8 @@ export default Vue.extend({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      isShowPagePreview: 'page/getIsShowPagePreview'
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     functionPanelStyles(): { [index: string]: string } {
       return this.isShowPagePreview ? {

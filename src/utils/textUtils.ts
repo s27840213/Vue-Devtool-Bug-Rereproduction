@@ -6,11 +6,13 @@ import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
-import { calcTmpProps } from '@/utils/groupUtils'
+import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 import LayerFactary from '@/utils/layerFactary'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
+import textShapeUtils from './textShapeUtils'
+import mathUtils from './mathUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -623,9 +625,10 @@ class TextUtils {
     if (!group.layers) return
     if (subLayerIndex !== -1) {
       const config = group.layers[subLayerIndex] as IText
+      if (config.type !== 'text') throw new Error('updateGroupLayerSize with subLayerIndex argument only accepts text subLayer')
       const originSize = { width: config.styles.width, height: config.styles.height }
       let textHW
-      if ((config.styles as any).textShape?.name === 'curve') {
+      if (textShapeUtils.isCurvedText(config.styles)) {
         textHW = originSize
       } else {
         textHW = this.getTextHW(config, config.widthLimit)
@@ -679,13 +682,70 @@ class TextUtils {
     }
   }
 
-  fixGroupXcoordinates(pageIndex: number, layerIndex: number) {
+  asSubLayerSizeRefresh(pageIndex: number, layerIndex: number, subLayerIndex: number, height: number, heightOri: number, noPush = false) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (!group.layers) return
+    const targetSubLayers = [] as Array<[number, number]>
+    const config = group.layers[subLayerIndex]
+    if (config.type !== 'text') throw new Error('asSubLayerSizeRefresh only accepts text subLayer')
+    if (!noPush) {
+      const { y, textShape: { bend = 0 } = {} } = config.styles as any
+      if (+bend >= 0) {
+        const lowLine = y + heightOri
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y >= lowLine && idx !== subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+              y: data[1] + (height - heightOri)
+            })
+          })
+      } else {
+        const highLine = y
+        group.layers
+          .forEach((l, idx) => {
+            if (l.styles.y <= highLine && idx !== subLayerIndex) {
+              targetSubLayers.push([idx, l.styles.y])
+            }
+          })
+        targetSubLayers
+          .forEach(data => {
+            LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, data[0], {
+              y: data[1] - (height - heightOri)
+            })
+          })
+      }
+    }
+    this.updateGroupLayerSize(pageIndex, layerIndex)
+  }
+
+  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    if (!group.layers) return
+    const config = group.layers[subLayerIndex]
+    if (config.type !== 'text') throw new Error('updateGroupLayerSizeByShape only accepts text subLayer')
+    if (textShapeUtils.isCurvedText(config.styles)) {
+      const heightOri = config.styles.height
+      const textHW = textShapeUtils.getCurveTextProps(config as IText)
+      LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
+      this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri)
+      this.fixGroupCoordinates(pageIndex, layerIndex)
+    } else {
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex)
+    }
+  }
+
+  fixGroupXCoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minX = Math.min(minX, l.styles.x)
+        minX = Math.min(minX, mathUtils.getBounding(l).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -697,13 +757,13 @@ class TextUtils {
     })
   }
 
-  fixGroupYcoordinates(pageIndex: number, layerIndex: number) {
+  fixGroupYCoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minY = Number.MAX_SAFE_INTEGER
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minY = Math.min(minY, l.styles.y)
+        minY = Math.min(minY, mathUtils.getBounding(l).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -713,6 +773,11 @@ class TextUtils {
     LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
       y: group.styles.y + minY
     })
+  }
+
+  fixGroupCoordinates(pageIndex: number, layerIndex: number) {
+    this.fixGroupXCoordinates(pageIndex, layerIndex)
+    this.fixGroupYCoordinates(pageIndex, layerIndex)
   }
 
   getAddPosition(width: number, height: number, pageIndex?: number) {
@@ -857,6 +922,35 @@ class TextUtils {
         }
       })
     }
+  }
+
+  async waitUntilAllFontsLoaded(config: IText) {
+    const promises: Array<Promise<void>> = []
+    for (const defaultFont of store.getters['text/getDefaultFontsList']) {
+      promises.push(store.dispatch('text/addFont', defaultFont).catch(e => console.error(e)))
+    }
+
+    for (const p of config.paragraphs) {
+      promises.push(store.dispatch('text/addFont', {
+        type: p.styles.type,
+        face: p.styles.font,
+        url: p.styles.fontUrl,
+        ver: store.getters['user/getVerUni']
+      }).catch(e => console.error(e)))
+      for (const span of p.spans) {
+        const promise = store.dispatch('text/addFont', {
+          type: span.styles.type,
+          face: span.styles.font,
+          url: span.styles.fontUrl,
+          ver: store.getters['user/getVerUni']
+        }).catch(e => console.error(e))
+
+        promises.push(promise)
+      }
+    }
+
+    await Promise
+      .all(promises)
   }
 }
 
