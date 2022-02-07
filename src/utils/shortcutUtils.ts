@@ -147,6 +147,7 @@ class ShortcutUtils {
       }
       ZindexUtils.reassignZindex(currFocusPageIndex)
     }
+    StepsUtils.record()
   }
 
   textCopy() {
