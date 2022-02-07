@@ -196,8 +196,29 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title || i18n.t('SE0001')
+
   // some pages must render with userInfo,
-  // hence we should guarantee to receive login response before navigate to these pages
+  // hence we should guarantee to receive login response
+  // before navigate to these pages
+  if (to.name === 'Settings' || to.name === 'MyDesign') {
+    // if not login, navigate to login page
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token === '' || !token) {
+        next({ name: 'Login', query: { redirect: to.fullPath } })
+      } else {
+        await store.dispatch('user/login', { token: token })
+      }
+    }
+  } else {
+    if (!store.getters['user/isLogin']) {
+      const token = localStorage.getItem('token')
+      if (token && token.length > 0) {
+        await store.dispatch('user/login', { token: token })
+      }
+    }
+  }
+
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
     const response = await fetch('https://template.vivipic.com/static/app.json')
     const json = await response.json()
@@ -248,32 +269,7 @@ router.beforeEach(async (to, from, next) => {
     logUtils.setLog('=> as non-mobile')
   }
 
-  if (to.name === 'Settings' || to.name === 'MyDesign') {
-    // if not login, navigate to login page
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token === '' || !token) {
-        next({ name: 'Login', query: { redirect: to.fullPath } })
-      } else {
-        const data = await store.dispatch('user/login', { token: token })
-        if (data.flag === 0) {
-          next()
-        } else {
-          next({ name: 'Login', query: { redirect: to.fullPath } })
-        }
-      }
-    } else {
-      next()
-    }
-  } else {
-    if (!store.getters['user/isLogin']) {
-      const token = localStorage.getItem('token')
-      if (token && token.length > 0) {
-        await store.dispatch('user/login', { token: token })
-      }
-    }
-    next()
-  }
+  next()
 })
 
 export default router
