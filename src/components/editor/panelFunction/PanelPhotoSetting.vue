@@ -4,7 +4,7 @@
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="show === btn.show || (btn.name === 'crop' && isCropping) ? 'active' : ''"
+        :class="show === btn.show || (btn.name === 'crop' && isCropping) || (btn.name==='remove-bg' && inBgRemoveMode) ? 'active' : ''"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
@@ -43,8 +43,8 @@ export default Vue.extend({
       btns: [
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
-        // { name: 'remove-bg', label: `${this.$t('NN0043')}`, show: '' }
+        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
+        { name: 'remove-bg', label: `${this.$t('NN0043')}`, show: 'remove-bg' }
       ]
     }
   },
@@ -60,7 +60,8 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      currSelectedLayers: 'getCurrSelectedLayers'
+      currSelectedLayers: 'getCurrSelectedLayers',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -95,7 +96,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      updateLayerStyles: 'UPDATE_layerStyles'
+      updateLayerStyles: 'UPDATE_layerStyles',
+      setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode'
     }),
     handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
@@ -116,6 +118,9 @@ export default Vue.extend({
               break
           }
         }
+        this.show = ''
+      } else if (name === 'remove-bg') {
+        this.setInBgRemoveMode(!this.inBgRemoveMode)
         this.show = ''
       }
     },

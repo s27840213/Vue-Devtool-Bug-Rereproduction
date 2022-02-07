@@ -38,6 +38,15 @@ class MouseUtils {
     return { x, y }
   }
 
+  getMousePosInPage(e: MouseEvent, pageIndex: number): { x: number, y: number } {
+    const target = store.getters['bgRemove/getInBgRemoveMode'] ? document.getElementsByClassName('bg-remove-area')[0] as HTMLElement : document.getElementsByClassName(`nu-page-${pageIndex}`)[0] as HTMLElement
+    const mouseRelPos = this.getMouseRelPoint(e, target)
+    return {
+      x: mouseRelPos.x / (store.getters.getPageScaleRatio / 100),
+      y: mouseRelPos.y / (store.getters.getPageScaleRatio / 100)
+    }
+  }
+
   onDropClipper(e: DragEvent, pageIndex: number, layerIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 },
     clipPath: string | undefined, clipperStyles: IStyle) {
     if (typeof clipPath === 'undefined') {

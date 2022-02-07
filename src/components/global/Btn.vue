@@ -78,7 +78,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .btn {
-  transition: background-color 0.2s ease-out;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
   &__text {
     white-space: nowrap;
   }

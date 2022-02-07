@@ -135,6 +135,13 @@ class GeneralUtils {
     modalUtils.setModalInfo('測試', [`修改過的 templates: ${modifiedPageIndex.join(' ')}`, `數量: ${modifiedPageIndex.length}`], '')
   }
 
+  downloadImage(src: string, name = 'image.png') {
+    const a = document.createElement('a')
+    a.href = src
+    a.download = name
+    a.click()
+  }
+
   // log(params: string, data: any = '') {
   //   if (data) {
   //     console.log(data)

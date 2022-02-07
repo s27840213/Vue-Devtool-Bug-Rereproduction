@@ -27,7 +27,7 @@
             svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
-        template(v-if="!isLoading && list.length === 0")
+        template(v-if="!isLoading && designList.length === 0")
           div(class="pt-20 pointer scroll-list__plus")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="newDesignSquare()")
@@ -97,10 +97,11 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    const keyword = 'group::0;;order_by::popular'
-    const res = await this.getTagContent({ keyword, theme: this.theme })
-    this.list = res.data.content[0].list
-    console.log(this.list[0].match_cover)
+    if (this.type === 'template') {
+      const keyword = 'group::0;;order_by::popular'
+      const res = await this.getTagContent({ keyword, theme: this.theme, cache: true })
+      this.list = res.data.content[0].list
+    }
   },
   methods: {
     ...mapActions({

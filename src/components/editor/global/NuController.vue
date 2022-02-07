@@ -517,10 +517,8 @@ export default Vue.extend({
     },
     styles(type: string) {
       const zindex = (() => {
-        // const isFrame = this.getLayerType === 'frame' && (this.imgControl.layerIndex === this.layerIndex || this.isMoving)
         const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
         const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
-        // const isGroup = (this.getLayerType === 'group' || this.getLayerType === 'tmp') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
           return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
         }
@@ -614,7 +612,6 @@ export default Vue.extend({
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
-            // if (!inSelectionMode && this.currSelectedInfo.index >= 0) {
             if (!inSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
@@ -1444,8 +1441,18 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
+      /**
+       * If current-selected-layer is exact this layer, record the sub-active-layer.
+       * After deselecting, set it to active
+       */
+      const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
+
       GroupUtils.deselect()
       GroupUtils.select(this.pageIndex, [this.layerIndex])
+
+      if (this.getLayerType === 'frame') {
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
+      }
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
