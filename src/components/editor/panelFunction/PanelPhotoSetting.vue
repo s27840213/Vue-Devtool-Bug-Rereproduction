@@ -43,8 +43,8 @@ export default Vue.extend({
       btns: [
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
-        { name: 'remove-bg', label: `${this.$t('NN0043')}`, show: 'remove-bg' }
+        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
+        // { name: 'remove-bg', label: `${this.$t('NN0043')}`, show: 'remove-bg' }
       ]
     }
   },
