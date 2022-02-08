@@ -224,7 +224,10 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      tiptapUtils.agent(editor => editor.setEditable(newVal))
+      tiptapUtils.agent(editor => {
+        editor.setEditable(newVal)
+        editor.commands.blur()
+      })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
     }
   },

@@ -179,33 +179,33 @@ export default Vue.extend({
     },
     undo() {
       shotcutUtils.undo()
-      const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-      if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-        this.$nextTick(() => {
-          tiptapUtils.agent(editor => {
-            const currLayer = LayerUtils.getCurrLayer as IText
-            if (!currLayer.active) return
-            editor.chain().sync().focus().run()
-            tiptapUtils.prevText = tiptapUtils.getText(editor)
-            textPropUtils.updateTextPropsState()
-          })
-        })
-      }
+      // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+      // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+      //   this.$nextTick(() => {
+      //     tiptapUtils.agent(editor => {
+      //       const currLayer = LayerUtils.getCurrLayer as IText
+      //       if (!currLayer.active || currLayer.type !== 'text') return
+      //       editor.chain().sync().focus().run()
+      //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+      //       textPropUtils.updateTextPropsState()
+      //     })
+      //   })
+      // }
     },
     redo() {
       shotcutUtils.redo()
-      const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-      if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-        this.$nextTick(() => {
-          tiptapUtils.agent(editor => {
-            const currLayer = LayerUtils.getCurrLayer as IText
-            if (!currLayer.active) return
-            editor.chain().sync().focus().run()
-            tiptapUtils.prevText = tiptapUtils.getText(editor)
-            textPropUtils.updateTextPropsState()
-          })
-        })
-      }
+      // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+      // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+      //   this.$nextTick(() => {
+      //     tiptapUtils.agent(editor => {
+      //       const currLayer = LayerUtils.getCurrLayer as IText
+      //       if (!currLayer.active || currLayer.type !== 'text') return
+      //       editor.chain().sync().focus().run()
+      //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+      //       textPropUtils.updateTextPropsState()
+      //     })
+      //   })
+      // }
     }
   }
 })

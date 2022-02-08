@@ -349,7 +349,10 @@ export default Vue.extend({
         if (!newVal || !this.config.isEdited) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
-        tiptapUtils.agent(editor => editor.setEditable(newVal))
+        tiptapUtils.agent(editor => {
+          editor.setEditable(newVal)
+          editor.commands.blur()
+        })
         if (newVal) {
           this.$nextTick(() => {
             tiptapUtils.focus({ scrollIntoView: false })
