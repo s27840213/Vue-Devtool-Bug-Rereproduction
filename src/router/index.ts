@@ -245,7 +245,7 @@ router.beforeEach(async (to, from, next) => {
           store.dispatch('text/addFont', font)
           store.commit('text/UPDATE_DEFAULT_FONT', { font })
         })
-    }, 3000)
+    }, 5000)
   }
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     let isMobile = false
