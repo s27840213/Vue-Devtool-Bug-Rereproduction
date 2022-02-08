@@ -351,6 +351,12 @@ class TiptapUtils {
       }
     }
   }
+
+  isCurrLayerContenteditable() {
+    const { subLayerIdx, getCurrLayer } = layerUtils
+    const targetLayer = subLayerIdx === -1 ? getCurrLayer : (getCurrLayer as IGroup).layers[subLayerIdx]
+    return targetLayer.type === 'text' && targetLayer.contentEditable
+  }
 }
 
 export default new TiptapUtils()
