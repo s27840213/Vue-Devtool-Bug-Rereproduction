@@ -33,7 +33,7 @@ export default Vue.extend({
     }
   },
   async created () {
-    await TextUtils.waitUntilAllFontsLoaded(this.config)
+    await TextUtils.waitUntilAllFontsLoaded(this.config, 1)
 
     if (this.isDestroyed) return
 
