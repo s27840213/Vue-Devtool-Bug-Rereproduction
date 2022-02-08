@@ -1446,8 +1446,10 @@ export default Vue.extend({
        */
       const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
 
-      GroupUtils.deselect()
-      GroupUtils.select(this.pageIndex, [this.layerIndex])
+      if (LayerUtils.currSelectedInfo.pageIndex !== this.pageIndex || LayerUtils.currSelectedInfo.index !== this.layerIndex) {
+        GroupUtils.deselect()
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+      }
 
       if (this.getLayerType === 'frame') {
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
