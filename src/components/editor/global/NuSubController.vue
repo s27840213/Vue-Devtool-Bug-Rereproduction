@@ -67,6 +67,7 @@ import DragUtils from '@/utils/dragUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import imageUtils from '@/utils/imageUtils'
 import formatUtils from '@/utils/formatUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
 
 export default Vue.extend({
   props: {
@@ -401,7 +402,7 @@ export default Vue.extend({
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      !this.isCurveText && TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      this.isCurveText ? this.curveTextSizeRefresh(this.config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -409,6 +410,13 @@ export default Vue.extend({
           })
         })
       }
+    },
+    curveTextSizeRefresh(text: IText) {
+      const { height: heightOri } = text.styles
+      const curveTextHW = textShapeUtils.getCurveTextHW(text)
+      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
+      TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
+      TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
     },
     onClickEvent(e: MouseEvent) {
       if (!this.isPrimaryActive || this.isMoved) return

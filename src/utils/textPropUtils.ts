@@ -970,7 +970,7 @@ class TextPropUtils {
       (currLayer as IGroup | ITmp).layers
         .forEach((l, idx) => {
           l.type === 'text' && this.propAppliedAllText(LayerUtils.layerIndex, idx, 'size', step)
-          TextUtils.updateGroupLayerSize(LayerUtils.pageIndex, this.layerIndex, idx)
+          l.type === 'text' && TextUtils.updateGroupLayerSizeByShape(LayerUtils.pageIndex, this.layerIndex, idx)
         })
     }
   }

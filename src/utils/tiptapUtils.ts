@@ -86,12 +86,15 @@ class TiptapUtils {
     }
   }
 
-  textStyles(styles: any): string {
+  textStylesRaw(styles: any): {[key: string]: any} {
     const textStyles = cssConveter.convertFontStyle(styles)
-    const finalStyles = Object.assign(textStyles, {
+    return Object.assign(textStyles, {
       '-webkit-text-decoration-line': textStyles['text-decoration']
     })
-    return Object.entries(finalStyles).map(([k, v]) => `${k}: ${v}`).join('; ')
+  }
+
+  textStyles(styles: any): string {
+    return Object.entries(this.textStylesRaw(styles)).map(([k, v]) => `${k}: ${v}`).join('; ')
   }
 
   toJSON(paragraphs: IParagraph[]): any {
@@ -347,6 +350,12 @@ class TiptapUtils {
         }
       }
     }
+  }
+
+  isCurrLayerContenteditable() {
+    const { subLayerIdx, getCurrLayer } = layerUtils
+    const targetLayer = subLayerIdx === -1 ? getCurrLayer : (getCurrLayer as IGroup).layers[subLayerIdx]
+    return targetLayer.type === 'text' && targetLayer.contentEditable
   }
 }
 

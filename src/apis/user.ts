@@ -104,18 +104,20 @@ export default {
       subscribe
     }
   }),
-  fbLogin: (code: string, redirect_uri: string): AxiosPromise => axios('/fb-login', {
+  fbLogin: (code: string, redirect_uri: string, locale: string): AxiosPromise => axios('/fb-login', {
     method: 'POST',
     data: {
       code,
-      redirect_uri
+      redirect_uri,
+      locale
     }
   }),
-  googleLogin: (code: string, redirect_uri: string): AxiosPromise => axios('/google-login', {
+  googleLogin: (code: string, redirect_uri: string, locale: string): AxiosPromise => axios('/google-login', {
     method: 'POST',
     data: {
       code,
-      redirect_uri
+      redirect_uri,
+      locale
     }
   }),
   updateUserViewGuide: (token: string, view_guide: number): AxiosPromise => axios('/update-user', {
