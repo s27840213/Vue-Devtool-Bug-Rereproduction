@@ -187,7 +187,8 @@ export default Vue.extend({
         if (this.getLayerType === 'text') {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
             editing: false,
-            isTyping: false
+            isTyping: false,
+            contentEditable: false
           })
           this.isControlling = false
 
