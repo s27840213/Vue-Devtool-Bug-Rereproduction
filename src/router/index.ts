@@ -230,17 +230,22 @@ router.beforeEach(async (to, from, next) => {
       imgSizeMap: json.image_size_map
     })
     const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
-    defaultFontsJson
-      .forEach(_font => {
-        const font = {
-          type: 'public',
-          face: _font.id,
-          ver: _font.ver,
-          url: ''
-        }
-        store.dispatch('text/addFont', font)
-        store.commit('text/UPDATE_DEFAULT_FONT', { font })
-      })
+
+    // due to the fonts downloading (addFont) would stock the bandwidth of network,
+    // we set timeout to let view rendering and apis calling execute first
+    setTimeout(() => {
+      defaultFontsJson
+        .forEach(_font => {
+          const font = {
+            type: 'public',
+            face: _font.id,
+            ver: _font.ver,
+            url: ''
+          }
+          store.dispatch('text/addFont', font)
+          store.commit('text/UPDATE_DEFAULT_FONT', { font })
+        })
+    }, 3000)
   }
   if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
     let isMobile = false
