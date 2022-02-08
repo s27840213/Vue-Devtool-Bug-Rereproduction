@@ -24,11 +24,11 @@ class StepsUtils {
   }
 
   get isInFirstStep(): boolean {
-    return (this.currStep === 0) && (this.steps.length > 1)
+    return (this.currStep === 0)
   }
 
   get isInLastStep(): boolean {
-    return (this.currStep === (this.steps.length - 1)) && (this.steps.length > 1)
+    return (this.currStep === (this.steps.length - 1))
   }
 
   timers: { [key: string]: number }

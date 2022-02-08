@@ -104,6 +104,7 @@ import GeneralValueSelectorVue from '../GeneralValueSelector.vue'
 import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import assetUtils from '@/utils/assetUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -114,7 +115,24 @@ export default Vue.extend({
       typeMap: {
         text: '文字',
         shape: 'SVG'
-      } as { [index: string]: string }
+      } as { [index: string]: string },
+      orderSets: [
+        {
+          icon: 'layers-front',
+          text: this.$t('NN0231')
+        },
+        {
+          icon: 'layers-forward',
+          text: this.$t('NN0232')
+        },
+        {
+          icon: 'layers-backward',
+          text: this.$t('NN0233')
+        },
+        {
+          icon: 'layers-back',
+          text: this.$t('NN0234')
+        }]
     }
   },
   computed: {
@@ -239,7 +257,7 @@ export default Vue.extend({
           text: this.$t('NN0032'),
           shortcutText: 'Cmd+C',
           action: () => {
-            if (TextUtils.getSelection()) {
+            if (tiptapUtils.isCurrLayerContenteditable()) {
               ShortcutUtils.textCopy()
             } else {
               ShortcutUtils.copy()
@@ -251,7 +269,7 @@ export default Vue.extend({
           text: this.$t('NN0230'),
           shortcutText: 'Cmd+V',
           action: () => {
-            if (TextUtils.getSelection()) {
+            if (tiptapUtils.isCurrLayerContenteditable()) {
               ShortcutUtils.textPaste()
             } else {
               ShortcutUtils.paste()
@@ -269,35 +287,34 @@ export default Vue.extend({
       ]
     },
     orderMenu() {
-      const icons = this.mappingIcons('order')
       return [
         {
-          icon: icons[0],
-          text: this.$t('NN0231'),
+          icon: this.orderSets[0].icon,
+          text: this.orderSets[0].text,
           shortcutText: '',
           // shortcutText: 'Cmd+Alt+]',
-          action: this.mappingIconAction(icons[0])
+          action: this.mappingIconAction(this.orderSets[0].icon)
         },
         {
-          icon: icons[1],
-          text: this.$t('NN0232'),
+          icon: this.orderSets[1].icon,
+          text: this.orderSets[1].text,
           shortcutText: '',
           // shortcutText: 'Cmd+]',
-          action: this.mappingIconAction(icons[1])
+          action: this.mappingIconAction(this.orderSets[1].icon)
         },
         {
-          icon: icons[2],
-          text: this.$t('NN0233'),
+          icon: this.orderSets[2].icon,
+          text: this.orderSets[2].text,
           shortcutText: '',
           // shortcutText: 'Cmd+[',
-          action: this.mappingIconAction(icons[2])
+          action: this.mappingIconAction(this.orderSets[2].icon)
         },
         {
-          icon: icons[3],
-          text: this.$t('NN0234'),
+          icon: this.orderSets[3].icon,
+          text: this.orderSets[3].text,
           // shortcutText: 'Cmd+Alt+]',
           shortcutText: '',
-          action: this.mappingIconAction(icons[3])
+          action: this.mappingIconAction(this.orderSets[3].icon)
         }
       ]
     },

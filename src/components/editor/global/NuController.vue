@@ -146,7 +146,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -326,11 +326,7 @@ export default Vue.extend({
         this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false })
-          if (!this.isLocked) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-          }
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
         }
         popupUtils.closePopup()
       } else {
@@ -353,7 +349,10 @@ export default Vue.extend({
         if (!newVal || !this.config.isEdited) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
-        tiptapUtils.agent(editor => editor.setEditable(newVal))
+        tiptapUtils.agent(editor => {
+          editor.setEditable(newVal)
+          editor.commands.blur()
+        })
         if (newVal) {
           this.$nextTick(() => {
             tiptapUtils.focus({ scrollIntoView: false })
@@ -520,13 +519,13 @@ export default Vue.extend({
         const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
         const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
-          return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
+          return (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
         }
         if (isFrame || isGroup) {
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'tmp') {
-          return 0
+          return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'text' && this.isActive) {
           return (this.layerIndex + 1) * 99
@@ -1447,8 +1446,10 @@ export default Vue.extend({
        */
       const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
 
-      GroupUtils.deselect()
-      GroupUtils.select(this.pageIndex, [this.layerIndex])
+      if (LayerUtils.currSelectedInfo.pageIndex !== this.pageIndex || LayerUtils.currSelectedInfo.index !== this.layerIndex) {
+        GroupUtils.deselect()
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+      }
 
       if (this.getLayerType === 'frame') {
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
