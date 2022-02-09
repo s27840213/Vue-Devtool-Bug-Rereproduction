@@ -286,7 +286,7 @@ class LayerFactary {
           /* delete the layer */
           if (l.type === LayerType.shape) {
             const shape = l as IShape
-            if (!shape.designId && !shape.svg) {
+            if (!shape.designId && !shape.svg && !['D', 'E'].includes(shape.category)) {
               console.warn('layer in group at index:', idx, 'has no designId and empty svg, it has been removed!')
               return []
             }
@@ -400,7 +400,7 @@ class LayerFactary {
       /* delete the layer */
       if (config.layers[layerIndex].type === LayerType.shape) {
         const shape = config.layers[layerIndex] as IShape
-        if (!shape.designId && !shape.svg) {
+        if (!shape.designId && !shape.svg && !['D', 'E'].includes(shape.category)) {
           config.layers.splice(+layerIndex, 1)
           console.warn('layer:', layerIndex, 'has no designId and empty svg, it has been removed!')
           continue
