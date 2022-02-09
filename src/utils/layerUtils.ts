@@ -367,7 +367,7 @@ class LayerUtils {
         if (!types.includes('text')) continue
       } else if (layer.type !== 'text') continue
       const intersectAreaRatio = this.calculateIntersectAreaRatio(objectLayer, layer)
-      console.log('intersect ratio:', intersectAreaRatio)
+      // console.log('intersect ratio:', intersectAreaRatio)
       if (intersectAreaRatio > 0.8 && i > upmostOverlapTextIndex) {
         upmostOverlapTextIndex = i
       }

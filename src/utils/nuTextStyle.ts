@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { IText } from '@/interfaces/layer'
+import { IGroup, IText } from '@/interfaces/layer'
 import { Extension } from '@tiptap/core'
 import { Editor } from '@tiptap/vue-2'
 import tiptapUtils from './tiptapUtils'
@@ -304,9 +304,21 @@ export default Extension.create({
         return commands.setTextSelection({ from, to })
       },
       sync: () => ({ chain }) => {
-        const currLayer = layerUtils.getCurrLayer as IText
-        const paragraphs = currLayer.paragraphs
-        const selection = currLayer.selection
+        const currLayer = layerUtils.getCurrLayer
+        const subLayerIndex = layerUtils.subLayerIdx
+        let targetLayer: IText
+        if (currLayer.type === 'group') {
+          if (subLayerIndex === -1) return false
+          const subLayer = (currLayer as IGroup).layers[subLayerIndex]
+          if (subLayer.type !== 'text') return false
+          targetLayer = subLayer as IText
+        } else if (currLayer.type === 'text') {
+          targetLayer = currLayer as IText
+        } else {
+          return false
+        }
+        const paragraphs = targetLayer.paragraphs
+        const selection = targetLayer.selection
         return chain().setContent(tiptapUtils.toJSON(paragraphs)).setTextSelection(selection).run()
       }
     }

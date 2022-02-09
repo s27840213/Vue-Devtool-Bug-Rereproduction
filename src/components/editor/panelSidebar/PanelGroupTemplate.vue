@@ -6,7 +6,7 @@
         iconColor="white"
         @click.native="$emit('close')")
       button(class="panel-group-template__apply lead-2"
-        @click="handleApplyGroupTemplate") 加入全部 {{ count }} 個頁面
+        @click="handleApplyGroupTemplate") {{ $t('NN0392', { num: count })}}
       svg-icon(v-if="isAdmin"
         class="my-5 panel-group-template__delete pointer"
         iconName="trash"

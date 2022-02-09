@@ -43,7 +43,8 @@
           class="scroll-list__item pt-10"
           :style="previewStyle"
           :class="{'pb-90 item-theme': type === 'theme', 'padding-start': idx === 0, 'padding-end': idx === list.length - 1}")
-          img(class="pointer scroll-list__item-image"
+          img(loading="lazy"
+            class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`)"
             @click="type === 'theme' ? newDesign(item) : newDesignWithTemplate(item)"

@@ -126,27 +126,23 @@
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, IImageStyle, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IParagraph, IShape, IText } from '@/interfaces/layer'
 import { IControlPoints, IResizer } from '@/interfaces/controller'
-import MathUtils from '@/utils/mathUtils'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
-import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import LayerUtils from '@/utils/layerUtils'
-import GeneralUtils from '@/utils/generalUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import TemplateUtils from '@/utils/templateUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -154,6 +150,8 @@ import formatUtils from '@/utils/formatUtils'
 import DragUtils from '@/utils/dragUtils'
 import pageUtils from '@/utils/pageUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import generalUtils from '@/utils/generalUtils'
+import mathUtils from '@/utils/mathUtils'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -185,6 +183,7 @@ export default Vue.extend({
       hintLength: 0,
       hintAngle: 0,
       initialPos: { x: 0, y: 0 },
+      currentAbsPos: { x: 0, y: 0 },
       initialRotate: 0,
       initTranslate: { x: 0, y: 0 },
       initSize: { width: 0, height: 0 },
@@ -326,11 +325,7 @@ export default Vue.extend({
         this.isControlling = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false })
-          if (!this.isLocked) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: false })
-          }
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
         }
         popupUtils.closePopup()
       } else {
@@ -353,7 +348,10 @@ export default Vue.extend({
         if (!newVal || !this.config.isEdited) {
           tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
         }
-        tiptapUtils.agent(editor => editor.setEditable(newVal))
+        tiptapUtils.agent(editor => {
+          editor.setEditable(newVal)
+          editor.commands.blur()
+        })
         if (newVal) {
           this.$nextTick(() => {
             tiptapUtils.focus({ scrollIntoView: false })
@@ -520,13 +518,13 @@ export default Vue.extend({
         const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
         const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
         if (type === 'control-point') {
-          return (this.layerIndex + 1) * (isFrame || isGroup ? 10000 : 100)
+          return (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
         }
         if (isFrame || isGroup) {
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'tmp') {
-          return 0
+          return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'text' && this.isActive) {
           return (this.layerIndex + 1) * 99
@@ -593,7 +591,7 @@ export default Vue.extend({
     },
     moveStart(e: MouseEvent) {
       this.movingByControlPoint = false
-      const inSelectionMode = GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
+      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
       if (!this.isLocked) {
         e.stopPropagation()
       }
@@ -694,7 +692,7 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
         }
         const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
-        const moveOffset = MathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+        const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
         GroupUtils.movingTmp(
           this.pageIndex,
           {
@@ -792,9 +790,13 @@ export default Vue.extend({
       this.currCursorStyling(event)
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
+      document.documentElement.addEventListener('keyup', this.handleScaleOffset)
+      document.documentElement.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
+      const altPressed = generalUtils.exact([event.altKey])
+
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -803,13 +805,21 @@ export default Vue.extend({
       let height = this.getLayerHeight
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
+
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
 
-      const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
-      const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
-      if (offsetWidth === 0 || offsetHeight === 0) return
+      /**
+       * @param {number} offsetMultiplier - if we press alt, we need to scale from center, and then make offsetWidth and offsetHeight become twice large
+       */
+      const offsetMultiplier = altPressed ? 2 : 1
+      const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier
+      const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
+      if ((offsetWidth === 0 || offsetHeight === 0)) {
+        return
+      }
 
       const initWidth = this.initSize.width
       const initHeight = this.initSize.height
@@ -842,6 +852,7 @@ export default Vue.extend({
         angle: angleInRad
       }
       const trans = ControlUtils.getTranslateCompensation(initData, offsetSize)
+
       const ratio = {
         width: width / (this.getLayerWidth / this.getLayerScale),
         height: height / (this.getLayerHeight / this.getLayerScale)
@@ -924,6 +935,17 @@ export default Vue.extend({
       }
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+      // scale from center
+      if (altPressed) {
+        console.log('calc scale offset')
+        const currCenter = mathUtils.getCenter(this.config.styles)
+        const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
+        const scaleOffset = {
+          x: (initCenter.x - currCenter.x),
+          y: (initCenter.y - currCenter.y)
+        }
+        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x + scaleOffset.x, trans.y + scaleOffset.y)
+      }
     },
     scaleEnd() {
       this.isControlling = false
@@ -934,6 +956,8 @@ export default Vue.extend({
       this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
+      document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
@@ -950,7 +974,7 @@ export default Vue.extend({
 
       const { angle, yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = ((angle / Math.PI * 180 + (1 - markerIndex) * 180) + 360) % 360
       this.hintLength = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
@@ -969,7 +993,7 @@ export default Vue.extend({
       }
 
       const tmp = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      const diff = MathUtils.getActualMoveOffset(tmp.x, tmp.y)
+      const diff = mathUtils.getActualMoveOffset(tmp.x, tmp.y)
       const [dx, dy] = [diff.offsetX, diff.offsetY]
       const markerIndex = this.initMarkerIndex
 
@@ -979,7 +1003,7 @@ export default Vue.extend({
       const { newPoint, lineLength, lineAngle } = this.snapUtils.calLineAngleSnap(markerIndex, copiedPoint, event.shiftKey)
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintLength = lineLength
       this.hintAngle = lineAngle
@@ -1027,7 +1051,8 @@ export default Vue.extend({
 
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
-
+      document.documentElement.addEventListener('keyup', this.handleScaleOffset)
+      document.documentElement.addEventListener('keydown', this.handleScaleOffset)
       switch (this.getLayerType) {
         case 'shape':
           if (this.config.category === 'B') {
@@ -1072,6 +1097,8 @@ export default Vue.extend({
     },
     resizing(event: MouseEvent) {
       event.preventDefault()
+      const altPressed = generalUtils.exact([event.altKey])
+
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -1082,10 +1109,13 @@ export default Vue.extend({
 
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
+      this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
+
       const [dx, dy] = [diff.x / (this.scaleRatio / 100), diff.y / (this.scaleRatio / 100)]
 
-      const offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) : 0
-      const offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
+      const offsetMultiplier = altPressed ? 2 : 1
+      const offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0
+      const offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if (offsetWidth === 0 && offsetHeight === 0) return
 
       width = offsetWidth + initWidth
@@ -1157,6 +1187,15 @@ export default Vue.extend({
 
       ControlUtils.updateLayerSize(this.pageIndex, this.layerIndex, width, height, scale)
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
+      if (altPressed) {
+        const currCenter = mathUtils.getCenter(this.config.styles)
+        const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
+        const scaleOffset = {
+          x: (initCenter.x - currCenter.x),
+          y: (initCenter.y - currCenter.y)
+        }
+        ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x + scaleOffset.x, trans.y + scaleOffset.y)
+      }
     },
     resizeEnd() {
       ImageUtils.imgBuffer = {
@@ -1176,6 +1215,8 @@ export default Vue.extend({
       this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.resizing)
       document.documentElement.removeEventListener('mouseup', this.resizeEnd)
+      document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
+      document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent) {
@@ -1194,7 +1235,7 @@ export default Vue.extend({
       this.initialRotate = this.getLayerRotate
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
@@ -1226,7 +1267,7 @@ export default Vue.extend({
         angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-        const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+        const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
         this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
 
@@ -1259,7 +1300,7 @@ export default Vue.extend({
       this.initialRotate = angle / Math.PI * 180
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-      const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+      const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
@@ -1293,7 +1334,7 @@ export default Vue.extend({
         const { point, dx, dy } = shapeUtils.lineCenterRotate(this.config.point, angle, this.config.size?.[0] ?? 1, false)
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
-        const mouseActualPos = MathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
+        const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
         this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
 
@@ -1416,7 +1457,7 @@ export default Vue.extend({
       if (isVertical && textHW.width < 5) {
         textHW.width = this.getLayerWidth
       } else if (!isVertical && textHW.height < 5) {
-        const config = GeneralUtils.deepCopy(text) as IText
+        const config = generalUtils.deepCopy(text) as IText
         config.paragraphs[0].spans[0].text = '|'
         config.paragraphs.splice(1)
         textHW.height = TextUtils.getTextHW(config).height
@@ -1447,8 +1488,10 @@ export default Vue.extend({
        */
       const subLayerIdx = LayerUtils.layerIndex === this.layerIndex ? LayerUtils.subLayerIdx : -1
 
-      GroupUtils.deselect()
-      GroupUtils.select(this.pageIndex, [this.layerIndex])
+      if (LayerUtils.currSelectedInfo.pageIndex !== this.pageIndex || LayerUtils.currSelectedInfo.index !== this.layerIndex) {
+        GroupUtils.deselect()
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+      }
 
       if (this.getLayerType === 'frame') {
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, subLayerIdx, { active: true })
@@ -1503,12 +1546,12 @@ export default Vue.extend({
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
     },
     frameLayerMapper(_config: any) {
-      const config = GeneralUtils.deepCopy(_config)
+      const config = generalUtils.deepCopy(_config)
       const { x, y, width, height, scale } = config.styles
       return Object.assign(config, {
         styles: {
           ...config.styles,
-          ...MathUtils.multipy(this.getLayerScale, {
+          ...mathUtils.multipy(this.getLayerScale, {
             x,
             y,
             width,
@@ -1523,6 +1566,18 @@ export default Vue.extend({
     },
     dragLeave(e: DragEvent, subLayerIdx = -1) {
       this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
+    },
+    handleScaleOffset(e: KeyboardEvent) {
+      e.preventDefault()
+      if (e.key === 'Alt') {
+        const event = new MouseEvent('mousemove', {
+          clientX: this.currentAbsPos.x,
+          clientY: this.currentAbsPos.y,
+          // custome emit event will not contain the keypress information, so we need to manually append it
+          altKey: e.altKey
+        })
+        document.documentElement.dispatchEvent(event)
+      }
     }
   }
 })

@@ -29,7 +29,8 @@ export interface ITextState {
     layerIndex: number,
     subLayerIndex?: number
   },
-  paragraphs: Array<IParagraph>
+  paragraphs: Array<IParagraph>,
+  firstLoad: boolean
 }
 
 const getDefaultState = (): ITextState => ({
@@ -66,7 +67,8 @@ const getDefaultState = (): ITextState => ({
   pending: '',
   fontStore: [],
   defaultFonts: [],
-  paragraphs: []
+  paragraphs: [],
+  firstLoad: false
 })
 const state = getDefaultState()
 
@@ -137,6 +139,9 @@ const mutations: MutationTree<ITextState> = {
           Object.assign(state.currTextInfo, { [k]: v })
         }
       })
+  },
+  SET_firstLoad(state: ITextState, firstLoad: boolean) {
+    state.firstLoad = firstLoad
   }
 }
 

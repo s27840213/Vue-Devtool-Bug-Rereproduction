@@ -13,7 +13,6 @@
             @dragleave="onDragLeave($event)"
             @mouseenter="onFrameMouseEnter($event)"
             @mouseleave="onFrameMouseLeave($event)"
-            @mouseup="onFrameMouseUp($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -60,7 +59,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import groupUtils from '@/utils/groupUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
-import { FunctionPanelType, PopupSliderEventType } from '@/store/types'
+import { FunctionPanelType, LayerType, PopupSliderEventType } from '@/store/types'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -140,7 +139,7 @@ export default Vue.extend({
       return this.config.locked
     },
     isTextEditing(): boolean {
-      return !this.isControlling
+      return !this.isControlling && this.isActive
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -187,7 +186,8 @@ export default Vue.extend({
         if (this.getLayerType === 'text') {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
             editing: false,
-            isTyping: false
+            isTyping: false,
+            contentEditable: false
           })
           this.isControlling = false
 
@@ -208,12 +208,9 @@ export default Vue.extend({
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
-      // if (this.getLayerType === 'text') {
-      //   LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
-      //   if (editing && !this.config.isEdited) {
-      //     // ShortcutUtils.textSelectAll(this.layerIndex)
-      //   }
-      // }
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
+      }
     },
     isComposing(val) {
       if (!val) {
@@ -224,7 +221,17 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      tiptapUtils.agent(editor => editor.setEditable(newVal))
+      if (this.isActive) {
+        tiptapUtils.agent(editor => {
+          editor.setEditable(newVal)
+          editor.commands.blur()
+        })
+        if (newVal) {
+          this.$nextTick(() => {
+            tiptapUtils.focus({ scrollIntoView: false })
+          })
+        }
+      }
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
     }
   },
@@ -351,7 +358,7 @@ export default Vue.extend({
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
           if (this.config.isFrameImg) {
-            return { clipPath: `path d='M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z'` }
+            return { clipPath: `path("M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z")` }
           } else {
             return { clipPath: `path("${this.config.clipPath}")` }
           }
@@ -529,12 +536,15 @@ export default Vue.extend({
       setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
     },
     onFrameMouseEnter(e: MouseEvent) {
+      if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
+        return
+      }
       e.stopPropagation()
       if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
+      if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { styles, srcObj } = this.config
         Object.assign(this.imgBuff, {
           srcObj: {
@@ -569,12 +579,17 @@ export default Vue.extend({
           horizontalFlip: currLayer.styles.horizontalFlip,
           verticalFlip: currLayer.styles.verticalFlip
         })
+        const controller = this.$refs.body as HTMLElement
+        controller.addEventListener('mouseup', (e) => this.onFrameMouseUp(e))
       }
     },
     onFrameMouseLeave(e: MouseEvent) {
+      if (!this.imgBuff.cached || this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
+        return
+      }
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image' && this.isMoving) {
+      if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
@@ -588,17 +603,23 @@ export default Vue.extend({
           horizontalFlip: false,
           verticalFlip: false
         })
+        this.imgBuff.cached = false
       }
+      const controller = this.$refs.body as HTMLElement
+      controller.removeEventListener('mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       const currLayer = LayerUtils.getCurrLayer as IImage
-      if (currLayer && currLayer.type === 'image') {
+      if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.getPrimaryLayer])
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
         StepsUtils.record()
+        this.imgBuff.cached = true
       }
+      const controller = this.$refs.body as HTMLElement
+      controller.removeEventListener('mouseup', this.onFrameMouseUp)
     }
   }
 })

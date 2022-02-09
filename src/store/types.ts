@@ -105,11 +105,12 @@ export enum PopupSliderEventType {
 }
 
 export enum LayerType {
-  'nu-clipper',
-  'nu-image',
-  'nu-shape',
-  'nu-text',
-  'nu-group'
+  image = 'image',
+  shape = 'shape',
+  text = 'text',
+  group = 'group',
+  frame = 'frame',
+  tmp = 'tmp'
 }
 
 export enum LineTemplatesType {
