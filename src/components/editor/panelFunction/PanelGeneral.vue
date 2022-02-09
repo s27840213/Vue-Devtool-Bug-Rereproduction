@@ -45,7 +45,7 @@
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'"
         @click.native="openAlignPopup") {{$t('NN0044')}}
-      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditable}"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isFlipDisabled}"
         @click.native="openFlipPopup") {{$t('NN0038')}}
 </template>
 
