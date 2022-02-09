@@ -264,7 +264,7 @@ class ShortcutUtils {
     GroupUtils.ungroup()
   }
 
-  undo() {
+  async undo() {
     const currLayer = LayerUtils.getCurrLayer
     if (currLayer) {
       switch (currLayer.type) {
@@ -284,7 +284,7 @@ class ShortcutUtils {
           }
       }
     }
-    StepsUtils.undo()
+    await StepsUtils.undo()
     Vue.nextTick(() => {
       tiptapUtils.agent(editor => {
         const currLayer = LayerUtils.getCurrLayer
@@ -302,8 +302,8 @@ class ShortcutUtils {
     })
   }
 
-  redo() {
-    StepsUtils.redo()
+  async redo() {
+    await StepsUtils.redo()
     Vue.nextTick(() => {
       tiptapUtils.agent(editor => {
         const currLayer = LayerUtils.getCurrLayer

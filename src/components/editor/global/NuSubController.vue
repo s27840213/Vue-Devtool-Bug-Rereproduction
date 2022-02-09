@@ -526,10 +526,11 @@ export default Vue.extend({
       }
     },
     undo() {
-      ShortcutUtils.undo()
-      LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
-      setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
+      ShortcutUtils.undo().then(() => {
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
+        setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
+      })
     },
     onFrameMouseEnter(e: MouseEvent) {
       if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
