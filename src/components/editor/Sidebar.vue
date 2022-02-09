@@ -81,6 +81,7 @@ export default Vue.extend({
       _setShowPagePanel: 'page/SET_showPagePanel'
     }),
     switchNav(index: number): void {
+      // switch to sidebar panel index
       this.setCurrSidebarPanel(index)
       this.$emit('toggleSidebarPanel', true)
       if (this.showPagePanel) {
