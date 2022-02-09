@@ -20,7 +20,7 @@
           div(v-if="isLogin")
             search-bar(class="home-content__top-search"
               :placeholder="$t('NN0037')"
-              @search="handleSearch"
+              @search="goToTemplateCenterSearch"
               @click.native="showMobileSearchPage(true)")
           template(v-else)
             div(class="home-content__top-btn"
@@ -139,7 +139,6 @@ import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import themeUtils from '@/utils/themeUtils'
 import localeUtils from '@/utils/localeUtils'
-import { ITemplate } from '@/interfaces/template'
 
 export default Vue.extend({
   name: 'Home',
@@ -319,9 +318,6 @@ export default Vue.extend({
     },
     closePopup() {
       this.showSizePopup = false
-    },
-    handleSearch(keyword: string) {
-      this.goToPage('TemplateCenter', keyword)
     },
     showMobileSearchPage(show: boolean) {
       if (this.isMobile) {

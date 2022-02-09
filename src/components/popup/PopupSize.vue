@@ -12,7 +12,8 @@
       div(class="popup-size__body__custom")
         property-bar(class="popup-size__body__custom__box"
           :class="widthValid ? '' : 'input-invalid'")
-          input(class="body-3" type="number" min="0"
+          input(id="input-width"
+            class="body-3" type="number" min="0"
             :placeholder="isMobile ? $t('NN0320') : $t('NN0163', {term: $t('NN0320')})"
             :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
             :value="pageWidth"
@@ -25,7 +26,8 @@
           @click.native="toggleLock()")
         property-bar(class="popup-size__body__custom__box"
           :class="heightValid ? '' : 'input-invalid'")
-          input(class="body-3" type="number" min="0"
+          input(id="input-height"
+            class="body-3" type="number" min="0"
             :placeholder="isMobile ? $t('NN0319') : $t('NN0163', {term: $t('NN0319')})"
             :class="selectedFormat === 'custom' ? 'text-black' : 'text-gray-3'"
             :value="pageHeight"
@@ -128,6 +130,8 @@ export default Vue.extend({
   },
   mounted() {
     this.fetchLayouts()
+    const inputWidth = document.getElementById('input-width') as HTMLElement
+    inputWidth.focus()
   },
   methods: {
     ...mapGetters({
