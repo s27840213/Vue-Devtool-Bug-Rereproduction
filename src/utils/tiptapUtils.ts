@@ -21,7 +21,7 @@ class TiptapUtils {
     this.eventHandler = undefined
   }
 
-  init(content: string) {
+  init(content: string, editable: boolean) {
     this.editor = new Editor({
       content: content ?? '',
       extensions: [
@@ -36,6 +36,7 @@ class TiptapUtils {
           class: 'non-selectable'
         }
       },
+      editable,
       onCreate: ({ editor }) => {
         this.prevText = this.getText(editor as Editor)
         editor.commands.selectAll()

@@ -186,7 +186,8 @@ export default Vue.extend({
         if (this.getLayerType === 'text') {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
             editing: false,
-            isTyping: false
+            isTyping: false,
+            contentEditable: false
           })
           this.isControlling = false
 
@@ -223,7 +224,10 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      tiptapUtils.agent(editor => editor.setEditable(newVal))
+      tiptapUtils.agent(editor => {
+        editor.setEditable(newVal)
+        editor.commands.blur()
+      })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
     }
   },
