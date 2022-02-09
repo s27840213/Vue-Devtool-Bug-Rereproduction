@@ -22,7 +22,7 @@
             :iconColor="'white'"
             :iconWidth="'24px'"
             @click.native="deleteAssets()")
-        span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`消取所有選取(${checkedAssets.length})`}}
+        span(class="text-blue-1 pointer" @click="clearCheckedAssets()") {{`${$t('NN0130')}(${checkedAssets.length})`}}
 </template>
 
 <script lang="ts">
