@@ -931,12 +931,19 @@ class TextUtils {
       因此，需確保預設字型載入會晚於取得template list的api呼叫
       (剛進入編輯器時，左側欄會顯示在模板的panel)
     */
-    if (!((store.state as any).templates.categories.length > 0) && times < 10) {
-      setTimeout(() => {
-        this.waitUntilAllFontsLoaded(config, times + 1)
-      }, 3000)
-      return
+
+    // 僅剛進入editor需要判斷
+    if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
+      if (!((store.state as any).templates.categories.length > 0) && times < 5) {
+        setTimeout(() => {
+          this.waitUntilAllFontsLoaded(config, times + 1)
+        }, 3000)
+        return
+      }
+      // 第一次載入的等待結束，firstLoad -> true
+      store.commit('text/SET_firstLoad', true)
     }
+
     const promises: Array<Promise<void>> = []
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
       promises.push(store.dispatch('text/addFont', defaultFont).catch(e => console.error(e)))
