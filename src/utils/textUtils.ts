@@ -924,7 +924,26 @@ class TextUtils {
     }
   }
 
-  async waitUntilAllFontsLoaded(config: IText) {
+  async waitUntilAllFontsLoaded(config: IText, times: number) {
+    /*
+      Gary: 因為預設字型檔案較大，剛進入畫面時的下載過程可能會佔用網路頻寬，
+      造成後續api呼叫及圖片載入等等被卡住而有畫面延遲。
+      因此，需確保預設字型載入會晚於取得template list的api呼叫
+      (剛進入編輯器時，左側欄會顯示在模板的panel)
+    */
+
+    // 僅剛進入editor需要判斷
+    if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
+      if (!((store.state as any).templates.categories.length > 0) && times < 5) {
+        setTimeout(() => {
+          this.waitUntilAllFontsLoaded(config, times + 1)
+        }, 3000)
+        return
+      }
+      // 第一次載入的等待結束，firstLoad -> true
+      store.commit('text/SET_firstLoad', true)
+    }
+
     const promises: Array<Promise<void>> = []
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
       promises.push(store.dispatch('text/addFont', defaultFont).catch(e => console.error(e)))

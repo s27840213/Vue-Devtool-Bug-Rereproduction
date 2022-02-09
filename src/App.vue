@@ -1,8 +1,9 @@
 <template lang="pug">
   div(id="app" :style="appStyles()")
-    link(v-if="customFont && currLocale === 'us'"
-      href='https://fonts.googleapis.com/css?family=Poppins:400,600,700'
-      rel='stylesheet' type='text/css')
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
+    link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
     //- div(class="coordinate" ref="coordinate")
     //-   div(class="coordinate__val coordinate__width")
     //-     span {{coordinateWidth}}px
@@ -109,7 +110,7 @@ export default Vue.extend({
         }
       } else if (this.customFont) {
         if (this.currLocale === 'tw' || this.currLocale === 'jp') {
-          return { fontFamily: STANDARD_TEXT_FONT.tw }
+          return { fontFamily: 'NOTO SANS TC' }
         } else {
           return { fontFamily: 'Poppins' }
         }
