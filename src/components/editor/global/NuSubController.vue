@@ -139,7 +139,7 @@ export default Vue.extend({
       return this.config.locked
     },
     isTextEditing(): boolean {
-      return !this.isControlling
+      return !this.isControlling && this.isActive
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -208,12 +208,9 @@ export default Vue.extend({
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
-      // if (this.getLayerType === 'text') {
-      //   LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
-      //   if (editing && !this.config.isEdited) {
-      //     // ShortcutUtils.textSelectAll(this.layerIndex)
-      //   }
-      // }
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
+      }
     },
     isComposing(val) {
       if (!val) {
@@ -224,10 +221,17 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      tiptapUtils.agent(editor => {
-        editor.setEditable(newVal)
-        editor.commands.blur()
-      })
+      if (this.isActive) {
+        tiptapUtils.agent(editor => {
+          editor.setEditable(newVal)
+          editor.commands.blur()
+        })
+        if (newVal) {
+          this.$nextTick(() => {
+            tiptapUtils.focus({ scrollIntoView: false })
+          })
+        }
+      }
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
     }
   },

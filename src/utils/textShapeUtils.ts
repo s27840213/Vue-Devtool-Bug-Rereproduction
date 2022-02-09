@@ -6,6 +6,7 @@ import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import tiptapUtils from './tiptapUtils'
 import mathUtils from './mathUtils'
+import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -274,11 +275,54 @@ class Controller {
     return {
       width: areaWidth,
       height: areaHeight,
-      ...this.getNewAnchoredPosition(hDiff1, hDiff2, rotate, { x, y }, { width, height }, { width: areaWidth, height: areaHeight })
+      ...this.getNewAnchoredPosition({
+        hDiff1,
+        hDiff2,
+        rotate,
+        oldPos: { x, y },
+        oldSize: { width, height },
+        newSize: { width: areaWidth, height: areaHeight }
+      })
     }
   }
 
-  getNewAnchoredPosition(hDiff1: number, hDiff2: number, rotate: number, oldPos: { x: number, y: number}, oldSize: { width: number, height: number }, newSize: { width: number, height: number}): { x: number, y: number } {
+  getPreParams(config: IText): ICurveTextPreParams {
+    const bendOri: number = +((config.styles as any).textShape?.bend ?? 0)
+    const { scale, height } = config.styles
+    const wasCurveText = this.isCurvedText(config.styles)
+    let minHeight = height
+    let hDiff1 = (minHeight * scale - height) / 2
+    if (wasCurveText) {
+      minHeight = this.getCurveTextHW(config).minHeight
+      hDiff1 = bendOri < 0 ? (height - minHeight * scale) / 2 : (minHeight * scale - height) / 2
+    }
+    return { wasCurveText, bendOri, hDiff1, minHeight }
+  }
+
+  getPostParams(config: IText, preParams: ICurveTextPreParams, newSize: { width: number, height: number }): ICurveTextPostParams {
+    const { wasCurveText, bendOri, hDiff1, minHeight } = preParams
+    const { x, y, width, height, rotate, scale } = config.styles
+    if (this.isCurvedText(config.styles)) {
+      const bend = +(config.styles as any).textShape?.bend
+      const hDiff2 = bend < 0 ? (minHeight * scale - newSize.height) / 2 : (newSize.height - minHeight * scale) / 2
+      return {
+        hDiff1, hDiff2, rotate, oldPos: { x, y }, oldSize: { width, height }, newSize
+      }
+    } else {
+      let hDiff2
+      if (wasCurveText) {
+        hDiff2 = +bendOri < 0 ? (minHeight * scale - newSize.height) / 2 : (newSize.height - minHeight * scale) / 2
+      } else {
+        hDiff2 = (newSize.height - minHeight * scale) / 2
+      }
+      return {
+        hDiff1, hDiff2, rotate, oldPos: { x, y }, oldSize: { width, height }, newSize
+      }
+    }
+  }
+
+  getNewAnchoredPosition(postParams: ICurveTextPostParams): { x: number, y: number } {
+    const { hDiff1, hDiff2, rotate, oldPos, oldSize, newSize } = postParams
     return {
       x: oldPos.x + oldSize.width / 2 - (hDiff1 + hDiff2) * mathUtils.sin(rotate) - (newSize.width / 2),
       y: oldPos.y + oldSize.height / 2 + (hDiff1 + hDiff2) * mathUtils.cos(rotate) - (newSize.height / 2)
