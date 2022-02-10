@@ -33,6 +33,7 @@
           @openFontsPanel="openFontsPanel"
           v-on="$listeners")
         panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
+        panel-photo-shadow(v-if="layerType.targetLayerType === 'image' && !isLocked")
         panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
         panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
         panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -74,6 +75,7 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
@@ -84,6 +86,7 @@ import shotcutUtils from '@/utils/shortcutUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textPropUtils from '@/utils/textPropUtils'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -97,7 +100,8 @@ export default Vue.extend({
     PanelShapeSetting,
     PanelTextEffectSetting,
     DownloadBtn,
-    PanelBgRemove
+    PanelBgRemove,
+    PanelPhotoShadow
   },
   data() {
     return {
@@ -156,6 +160,19 @@ export default Vue.extend({
       const { index } = this.currSubSelectedInfo
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
+    },
+    layerType(): { [key: string]: string } {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      return {
+        currLayerType: currLayer.type,
+        targetLayerType: (() => {
+          if (subLayerIdx !== -1) {
+            return currLayer.type === LayerType.group
+              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+          }
+          return currLayer.type
+        })()
+      }
     }
   },
   watch: {

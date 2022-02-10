@@ -1,25 +1,25 @@
 <template lang="pug">
-  div(class="text-effect-setting mt-25")
+  div(class="photo-effect-setting mt-25")
     div(class="action-bar")
-      div(class="flex-between text-effect-setting__options mb-10")
+      div(class="flex-between photo-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
           :key="`shadow-${icon}`"
-          :iconName="`text-effect-${icon}`"
+          :iconName="`photo-shadow-${icon}`"
           @click.native="onEffectClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
+          class="photo-effect-setting__option pointer"
+          :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
           v-hint="hintMap[`shadow-${icon}`]"
         )
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
-        class="w-full text-effect-setting__form")
+        class="w-full photo-effect-setting__form")
         div(v-for="field in shadowFields"
           :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input"
-            :value="currentStyle.textEffect[field]"
+          class="photo-effect-setting__field")
+          div(class="photo-effect-setting__field-name") {{field}}
+          input(class="photo-effect-setting__range-input"
+            :value="currentStyle.shadow[currentEffect][field]"
             :max="fieldRange[field].max"
             :min="fieldRange[field].min"
             :name="field"
@@ -27,42 +27,42 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textEffect[field]"
+          input(class="photo-effect-setting__value-input"
+            :value="currentStyle.shadow[currentEffect][field]"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
             type="number")
         div(v-if="canChangeColor"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="text-effect-setting__value-input"
+          class="photo-effect-setting__field")
+          div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
+          div(class="photo-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.textEffect.color }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
-            class="text-effect-setting__color-picker"
+            class="photo-effect-setting__color-picker"
             v-click-outside="handleColorModal"
             :currentColor="currentStyle.textEffect.color"
             @update="handleColorUpdate")
-      div(class="flex-between text-effect-setting__options mb-10")
+      div(class="flex-between photo-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
           :key="`shadow-${icon}`"
-          :iconName="`text-effect-${icon}`"
+          :iconName="`photo-shadow-${icon}`"
           @click.native="onEffectClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
+          class="photo-effect-setting__option pointer"
+          :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
           v-hint="hintMap[`shadow-${icon}`]"
         )
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
-        class="w-full text-effect-setting__form")
+        class="w-full photo-effect-setting__form")
         div(v-for="field in shadowFields"
           :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
-          input(class="text-effect-setting__range-input"
-            :value="currentStyle.textEffect[field]"
+          class="photo-effect-setting__field")
+          div(class="photo-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
+          input(class="photo-effect-setting__range-input"
+            :value="currentStyle.shadow[currentEffect][field]"
             :max="fieldRange[field].max"
             :min="fieldRange[field].min"
             :name="field"
@@ -70,56 +70,23 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-          input(class="text-effect-setting__value-input"
+          input(class="photo-effect-setting__value-input"
             :value="currentStyle.textEffect[field]"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
             type="number")
         div(v-if="canChangeColor"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="text-effect-setting__value-input"
+          class="photo-effect-setting__field")
+          div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
+          div(class="photo-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.textEffect.color }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
-            class="text-effect-setting__color-picker"
+            class="photo-effect-setting__color-picker"
             v-click-outside="handleColorModal"
             :currentColor="currentStyle.textEffect.color"
             @update="handleColorUpdate")
-      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{$t('NN0070')}}
-      div(class="flex-start text-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shapeOption"
-          :key="`shape-${icon}`"
-          :iconName="`text-shape-${icon}`"
-          @click.native="onShapeClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
-          iconWidth="60px"
-          iconColor="gray-2"
-          v-hint="hintMap[`shape-${icon}`]"
-        )
-      div(class="w-full text-effect-setting__form")
-        div(v-for="field in shapeFields"
-          :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input"
-            :value="currentStyle.textShape[field]"
-            :max="fieldRange[field].max"
-            :min="fieldRange[field].min"
-            :name="field"
-            @input="handleShapeUpdate"
-            @mousedown="handleShapeStatus(true)"
-            @mouseup="handleShapeStatus(false)"
-            v-ratio-change
-            type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textShape[field]"
-            :name="field"
-            @change="handleShapeUpdate"
-            @blur="recordChange"
-            type="number")
 </template>
 
 <script lang="ts">
@@ -132,7 +99,11 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
+import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
+import { IShadowEffect, IShadowProps } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   components: {
@@ -147,11 +118,11 @@ export default Vue.extend({
       openColorPicker: false,
       effects: {
         none: [],
-        shadow: ['distance', 'angle', 'blur', 'opacity', 'color'],
-        lift: ['spread'],
-        hollow: ['stroke'],
-        splice: ['stroke', 'distance', 'angle', 'color'],
-        echo: ['distance', 'angle', 'color']
+        shadow: [...Object.keys(imageShadowUtils.getDefaultEffect('shadow').shadow as IShadowEffect)],
+        halo: ['spread'],
+        frame: ['stroke'],
+        projection: ['stroke', 'distance', 'angle', 'color'],
+        blur: ['distance', 'angle', 'color']
       } as { [key: string]: string[] },
       effectI18nMap: {
         distance: 'NN0063',
@@ -169,6 +140,9 @@ export default Vue.extend({
         curve: ['bend']
       } as { [key: string]: string[] },
       fieldRange: {
+        x: { max: 100, min: 0 },
+        y: { max: 100, min: 0 },
+        radius: { max: 20, min: 0 },
         distance: { max: 100, min: 0 },
         angle: { max: 180, min: -180 },
         blur: { max: 100, min: 0 },
@@ -193,34 +167,21 @@ export default Vue.extend({
     shadowOption(): string[] {
       return Object.keys(this.effects)
     },
-    shapeOption(): string[] {
-      return Object.keys(this.shapes)
-    },
     shadowFields(): string[] {
       const { effects, currentEffect } = this
       return effects[currentEffect].filter(field => field !== 'color')
-    },
-    shapeFields(): string[] {
-      const { shapes, currentShape } = this
-      return shapes[currentShape]
     },
     canChangeColor(): boolean {
       const { effects, currentEffect } = this
       return effects[currentEffect].includes('color')
     },
-    currentStyle(): any {
-      // const { styles } = TextEffectUtils.getCurrentLayer()
-      const { styles } = layerUtils.getCurrConfig
+    currentStyle(): IImageStyle {
+      const { styles } = layerUtils.getCurrConfig as IImage
       return styles || {}
     },
     currentEffect(): string {
-      const { textEffect = {} } = this.currentStyle
-      console.log(textEffect.name)
-      return textEffect.name || 'none'
-    },
-    currentShape(): string {
-      const { textShape = {} } = this.currentStyle
-      return textShape.name || 'none'
+      const { shadow = {} } = this.currentStyle as any
+      return shadow.currentEffect || 'none'
     }
   },
   mounted() {
@@ -239,37 +200,32 @@ export default Vue.extend({
     handleColorModal() {
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
-      colorUtils.setCurrColor(this.currentStyle.textEffect.color)
+      // colorUtils.setCurrColor(this.currentStyle.textEffect.color)
     },
     onEffectClick(effectName: string): void {
-      TextEffectUtils.setTextEffect(effectName, { ver: 'v1' })
-      this.recordChange()
-    },
-    onShapeClick(shapeName: string): void {
-      TextShapeUtils.setTextShape(shapeName)
-      TextPropUtils.updateTextPropsState()
+      const alreadySetEffect = effectName in this.currentStyle.shadow
+      imageShadowUtils.setEffect(effectName, {
+        ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
+      })
       this.recordChange()
     },
     handleEffectUpdate(event: Event): void {
+      // const { currentEffect, fieldRange } = this
+      // const { name, value } = event.target as HTMLInputElement
+      // const { max, min } = (fieldRange as any)[name]
+      // TextEffectUtils.setTextEffect(currentEffect, {
+      //   [name]: value > max ? max : (value < min ? min : value)
+      // })
       const { currentEffect, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[name]
-      TextEffectUtils.setTextEffect(currentEffect, {
-        [name]: value > max ? max : (value < min ? min : value)
+      const oldEffect = generalUtils
+        .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow[currentEffect]) as IShadowProps
+      imageShadowUtils.setEffect(currentEffect, {
+        [currentEffect]: Object.assign(oldEffect, {
+          [name]: value > max ? max : (value < min ? min : value)
+        })
       })
-    },
-    handleShapeUpdate(event: Event): void {
-      const { currentShape, fieldRange } = this
-      const { name, value } = event.target as HTMLInputElement
-      const { max, min } = (fieldRange as any)[name]
-      TextShapeUtils.setTextShape(currentShape, {
-        [name]: value > max ? max : (value < min ? min : value)
-      })
-    },
-    handleShapeStatus(focus: boolean): void {
-      const { currentShape } = this
-      TextShapeUtils.setTextShape(currentShape, { focus })
-      !focus && this.recordChange()
     },
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
@@ -284,7 +240,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.text-effect-setting {
+.photo-effect-setting {
   font-size: 14px;
   &__form {
     background: #fff;
@@ -372,7 +328,7 @@ export default Vue.extend({
   margin-left: 16px;
   margin-right: 16px;
 }
-.text-shape-title {
+.photo-shape-title {
   font-size: 16px;
   font-weight: bold;
 }

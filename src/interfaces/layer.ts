@@ -1,10 +1,11 @@
 import { SrcObj } from './gallery'
 import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
+import { IShadowProps } from './imgShadow'
 
-export const jsonVer = '1.0.6'
+export const jsonVer = '1.0.7'
 export interface IStyle {
-  [key: string]: number | string | boolean | undefined | { [key: string]: number | string | boolean },
+  [key: string]: number | string | boolean | undefined | { [key: string]: number | string | boolean } | IShadowProps,
   x: number,
   y: number,
   scale: number
@@ -26,7 +27,8 @@ export interface IImageStyle extends IStyle {
   imgY: number,
   imgWidth: number,
   imgHeight: number,
-  adjust: IAdjustJsonProps
+  adjust: IAdjustJsonProps,
+  shadow: IShadowProps
 }
 
 export interface ILayer<T extends IStyle = IStyle> {

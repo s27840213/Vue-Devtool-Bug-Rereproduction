@@ -49,7 +49,9 @@ class LayerFactary {
         opacity: opacity || 100,
         horizontalFlip: false,
         verticalFlip: false,
-        adjust: {}
+        adjust: {},
+        shadow: {},
+        name: ''
       }
     }
     Object.assign(basicConfig.styles, config.styles)
