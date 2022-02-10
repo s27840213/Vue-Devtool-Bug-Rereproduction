@@ -48,10 +48,10 @@ class StepsUtils {
   filterForShapes(layer: ILayer): any {
     let typedLayer
     let newLayers
-    let needFetch = false
     switch (layer.type) {
       case 'shape':
         typedLayer = layer as IShape
+        if ((!typedLayer.designId || typedLayer.designId === '') && !['D', 'E'].includes(typedLayer.category)) return typedLayer
         typedLayer.svg = ''
         return typedLayer
       case 'tmp':
@@ -62,15 +62,13 @@ class StepsUtils {
         return typedLayer
       case 'frame':
         typedLayer = layer as any
+        if (!typedLayer.designId || typedLayer.designId === '') return typedLayer
         if (typedLayer.decoration) {
-          typedLayer.decoration = { color: typedLayer.decoration.color }
-          needFetch = true
+          typedLayer.decoration.svg = ''
         }
         if (typedLayer.decorationTop) {
-          typedLayer.decorationTop = { color: typedLayer.decorationTop.color }
-          needFetch = true
+          typedLayer.decorationTop.svg = ''
         }
-        typedLayer.needFetch = needFetch
         return typedLayer
       default:
         return layer
@@ -78,37 +76,33 @@ class StepsUtils {
   }
 
   async refetchForShape(layer: IShape): Promise<any> {
-    const svgs = []
+    let shape
     switch (layer.category) {
       case 'D':
-        for (const markerId of layer.markerId ?? ['none', 'none']) {
-          if (markerId === 'none') {
-            svgs.push('')
-          } else {
-            const marker: IListServiceContentDataItem = {
-              id: markerId,
-              type: 9,
-              ver: store.getters['user/getVerUni']
-            }
-            const markerContent = (await assetUtils.get(marker)).jsonData as IMarker
-            svgs.push(markerContent.svg)
-          }
-        }
-        layer.svg = shapeUtils.genLineSvgTemplate(svgs[0], svgs[1])
-        console.log(layer.svg)
+        await shapeUtils.addComputableInfo(layer)
         return layer
       case 'E':
-        layer.svg = shapeUtils.genBasicShapeSvgTemplate(layer.shapeType ?? '')
+        await shapeUtils.addComputableInfo(layer)
         return layer
       default:
         if (layer.designId && layer.designId !== '') {
-          layer.svg = (await shapeUtils.fetchSvg(layer)).svg
+          shape = await shapeUtils.fetchSvg(layer) as any
+          layer.color && layer.color.length && (shape.color = layer.color)
+          !layer.className && (layer.className = shapeUtils.classGenerator())
+          const vSize = shape.vSize as number[]
+          delete shape.styles
+          Object.assign(layer, shape)
+          Object.assign(layer.styles, {
+            initWidth: vSize[0],
+            initHeight: vSize[1]
+          })
         }
         return layer
     }
   }
 
   async refetchForFrame(layer: any): Promise<any> {
+    if (!layer.designId || layer.designId === '') return layer
     const asset = {
       type: 8,
       id: layer.designId,
@@ -117,7 +111,13 @@ class StepsUtils {
 
     const res = await assetUtils.get(asset)
     const json = res.jsonData as IFrame
-    layer.clips = GeneralUtils.deepCopy(layer.clips)
+
+    (layer.clips as IImage[]).forEach((img, idx) => {
+      if (json.clips[idx]) {
+        img.clipPath = json.clips[idx].clipPath
+      }
+    })
+
     if (layer.decoration && json.decoration) {
       json.decoration.color = [...layer.decoration.color] as [string]
       layer.decoration = layerFactary.newShape({
@@ -144,7 +144,6 @@ class StepsUtils {
         }
       })
     }
-    layer.needFetch = false
     return layer
   }
 
