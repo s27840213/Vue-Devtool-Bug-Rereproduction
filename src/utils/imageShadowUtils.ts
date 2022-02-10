@@ -4,6 +4,7 @@ import { LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import store from '@/store'
+import mathUtils from './mathUtils'
 
 class ImageShadowUtils {
   setEffect (effect: string, attrs = {}): void {
@@ -28,11 +29,13 @@ class ImageShadowUtils {
     console.log((layerUtils.getCurrConfig as IImage).styles)
   }
 
-  converShadowEffect(shadow: IShadowProps): { [key: string]: string } {
+  converShadowEffect(styles: IImageStyle): { [key: string]: string } {
+    const { shadow, scale } = styles
     const effect = shadow[shadow.currentEffect]
     switch (shadow.currentEffect) {
       case ShadowEffectType.shadow: {
-        const { x, y, radius, spread, opacity } = effect as IShadowEffect
+        const { x, y, radius, spread, opacity } = mathUtils
+          .multipy(scale, effect as IShadowEffect, ['opacity']) as IShadowEffect
         return {
           boxShadow: `${x}px ${y}px ${radius}px ${spread}px rgba(0, 0, 0, ${opacity / 100})`
         }

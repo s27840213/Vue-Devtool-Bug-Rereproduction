@@ -21,6 +21,7 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import { IGroup } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   props: {
@@ -78,7 +79,6 @@ export default Vue.extend({
         CssConveter.convertDefaultStyle(this.config.styles),
         { 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial' }
       )
-
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
@@ -91,9 +91,16 @@ export default Vue.extend({
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
             }
           )
-        }
           break
-        case LayerType.image:
+        }
+        case LayerType.image: {
+          const shadowEffect = imageShadowUtils.converShadowEffect(this.config.styles)
+          console.log(shadowEffect)
+          Object.assign(
+            styles,
+            shadowEffect
+          )
+        }
       }
       return styles
     },
@@ -101,19 +108,20 @@ export default Vue.extend({
       let { width, height } = this.config.styles
       const { scale, scaleX, scaleY, zindex } = this.config.styles
       const { type } = this.config
-      width /= scale
-      height /= scale
+      width /= (type === LayerType.image ? 1 : scale)
+      height /= (type === LayerType.image ? 1 : scale)
 
       /**
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
        * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
        */
-      return {
+      const styles = {
         width: this.config.type === 'shape' ? '' : `${width}px`,
         height: this.config.type === 'shape' ? '' : `${height}px`,
         transform: type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
         'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
+      return styles
     },
     flipStyles() {
       const { horizontalFlip, verticalFlip } = this.config.styles

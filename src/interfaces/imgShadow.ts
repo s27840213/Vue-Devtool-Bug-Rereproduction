@@ -1,4 +1,5 @@
 export interface IShadowEffect {
+  [key: string]: string | number
   x: number,
   y: number,
   radius: number,

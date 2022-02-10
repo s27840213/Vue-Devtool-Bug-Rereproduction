@@ -210,12 +210,6 @@ export default Vue.extend({
       this.recordChange()
     },
     handleEffectUpdate(event: Event): void {
-      // const { currentEffect, fieldRange } = this
-      // const { name, value } = event.target as HTMLInputElement
-      // const { max, min } = (fieldRange as any)[name]
-      // TextEffectUtils.setTextEffect(currentEffect, {
-      //   [name]: value > max ? max : (value < min ? min : value)
-      // })
       const { currentEffect, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[name]
@@ -223,7 +217,7 @@ export default Vue.extend({
         .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow[currentEffect]) as IShadowProps
       imageShadowUtils.setEffect(currentEffect, {
         [currentEffect]: Object.assign(oldEffect, {
-          [name]: value > max ? max : (value < min ? min : value)
+          [name]: +value > max ? max : (+value < min ? min : +value)
         })
       })
     },
