@@ -95,7 +95,6 @@ export default Vue.extend({
       RulerUtils,
       rulerVPos: 0,
       rulerHPos: 0,
-      scrollListener: null as unknown,
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
@@ -243,9 +242,9 @@ export default Vue.extend({
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
-      document.documentElement.addEventListener('mousemove', this.selecting)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.selectEnd)
+      window.addEventListener('mousemove', this.selecting)
+      window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      window.addEventListener('mouseup', this.selectEnd)
     },
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
@@ -266,7 +265,7 @@ export default Vue.extend({
           clientX: this.currentAbsPos.x,
           clientY: this.currentAbsPos.y
         })
-        document.documentElement.dispatchEvent(event)
+        window.dispatchEvent(event)
       }
 
       if (this.isShowGuidelineV && !RulerUtils.isDragging) {
@@ -290,9 +289,9 @@ export default Vue.extend({
        * Use nextTick to trigger the following function after DOM updating
        */
       this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.selecting)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate, { capture: true })
-        document.documentElement.removeEventListener('mouseup', this.selectEnd)
+        window.removeEventListener('mousemove', this.selecting)
+        window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        window.removeEventListener('mouseup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement
@@ -374,9 +373,9 @@ export default Vue.extend({
       RulerUtils.setIsDragging(true)
       this.isShowGuidelineV = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      document.documentElement.addEventListener('mousemove', this.draggingV)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.dragEndV)
+      window.addEventListener('mousemove', this.draggingV)
+      window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      window.addEventListener('mouseup', this.dragEndV)
     },
     draggingV(e: MouseEvent) {
       this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
@@ -391,9 +390,9 @@ export default Vue.extend({
         StepsUtils.record()
       }
       this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.draggingV)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
-        document.documentElement.removeEventListener('mouseup', this.dragEndV)
+        window.removeEventListener('mousemove', this.draggingV)
+        window.removeEventListener('scroll', this.scrollUpdate)
+        window.removeEventListener('mouseup', this.dragEndV)
       })
     },
     renderGuidelineV(pos: { x: number, y: number }) {
@@ -415,9 +414,9 @@ export default Vue.extend({
       RulerUtils.setIsDragging(true)
       this.isShowGuidelineH = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      document.documentElement.addEventListener('mousemove', this.draggingH)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.dragEndH)
+      window.addEventListener('mousemove', this.draggingH)
+      window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      window.addEventListener('mouseup', this.dragEndH)
     },
     draggingH(e: MouseEvent) {
       this.rulerHPos = Math.trunc(this.mapGuidelineToPage('h').pos)
@@ -432,9 +431,9 @@ export default Vue.extend({
         StepsUtils.record()
       }
       this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.draggingH)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
-        document.documentElement.removeEventListener('mouseup', this.dragEndH)
+        window.removeEventListener('mousemove', this.draggingH)
+        window.removeEventListener('scroll', this.scrollUpdate)
+        window.removeEventListener('mouseup', this.dragEndH)
       })
     },
     renderGuidelineH(pos: { x: number, y: number }) {

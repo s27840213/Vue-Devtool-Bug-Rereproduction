@@ -212,6 +212,7 @@ export default Vue.extend({
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
+    // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -626,6 +627,7 @@ export default Vue.extend({
               this.initialPos = MouseUtils.getMouseAbsPoint(e)
               window.addEventListener('mouseup', this.moveEnd)
               window.addEventListener('mousemove', this.moving)
+              // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
             }
             return
           }
@@ -647,6 +649,7 @@ export default Vue.extend({
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
         window.addEventListener('mouseup', this.moveEnd)
         window.addEventListener('mousemove', this.moving)
+        // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -680,11 +683,11 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent) {
-      console.log(this.currHoveredPageIndex, LayerUtils.isOutOfBoundary())
       this.isControlling = true
       if (this.isImgControl) {
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
+        // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         return
       }
       if (this.isActive) {
@@ -743,7 +746,24 @@ export default Vue.extend({
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
           this.isMoved = true
-          StepsUtils.record()
+          // dragging to another page
+          if (LayerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+            const layerTmp = generalUtils.deepCopy(LayerUtils.getCurrLayer)
+
+            const { top, left } = (this.$refs.body as HTMLElement).getBoundingClientRect()
+            const targetPageRect = (document.querySelector(`.nu-page-${this.currHoveredPageIndex}`) as HTMLLIElement)?.getBoundingClientRect()
+            const newX = (left - targetPageRect.left) * (100 / this.scaleRatio)
+            const newY = (top - targetPageRect.top) * (100 / this.scaleRatio)
+
+            layerTmp.styles.x = newX
+            layerTmp.styles.y = newY
+
+            LayerUtils.deleteSelectedLayer(false)
+            LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
+          } else {
+            // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
+            StepsUtils.record()
+          }
         } else {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
@@ -757,10 +777,12 @@ export default Vue.extend({
         this.setCursorStyle('')
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
+        // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
+
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -1581,6 +1603,13 @@ export default Vue.extend({
         document.documentElement.dispatchEvent(event)
       }
     }
+    // scrollUpdate() {
+    //   const event = new MouseEvent('mousemove', {
+    //     clientX: this.initialPos.x,
+    //     clientY: this.initialPos.y
+    //   })
+    //   window.dispatchEvent(event)
+    // }
   }
 })
 </script>

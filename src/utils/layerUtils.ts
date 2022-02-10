@@ -122,11 +122,19 @@ class LayerUtils {
    * If not, DON'T use this function or it will create an extra record point or affect the layer order. Just use the function deleteLayer()
    */
 
-  deleteSelectedLayer() {
+  deleteSelectedLayer(record = true) {
     store.commit('DELETE_selectedLayer')
     ZindexUtils.reassignZindex(this.currSelectedInfo.pageIndex)
     TemplateUtils.updateTextInfoTarget()
-    stepsUtils.record()
+
+    /**
+     * Some kind of situation we don't want to record the step when delete layer
+     * ex: when we drag layer from one page to another, we will delete layer and then add this layer to page
+     * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
+     */
+    if (record) {
+      stepsUtils.record()
+    }
   }
 
   deleteLayer(index: number) {
