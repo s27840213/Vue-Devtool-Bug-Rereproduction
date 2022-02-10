@@ -390,7 +390,8 @@ export default Vue.extend({
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page',
       setPanelType: 'SET_currFunctionPanelType',
-      setSidebarType: 'SET_currSidebarPanelType'
+      setSidebarType: 'SET_currSidebarPanelType',
+      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -435,6 +436,7 @@ export default Vue.extend({
     },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
+      this.setCurrHoveredPageIndex(isHover ? this.pageIndex : -1)
     },
     toggleResizerHint(isHover: boolean): void {
       this.isShownResizerHint = isHover

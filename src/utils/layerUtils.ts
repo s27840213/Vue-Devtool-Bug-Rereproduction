@@ -198,7 +198,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle> | { [key: string]: number | boolean | string}) {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle> | { [key: string]: number | boolean | string }) {
     store.commit('SET_subLayerStyles', {
       pageIndex,
       primaryLayerIndex,
@@ -243,14 +243,16 @@ class LayerUtils {
     })
   }
 
-  isOutOfBoundary() {
+  isOutOfBoundary(): boolean {
     const pageInfo = store.getters.getPage(this.currSelectedInfo.pageIndex) as IPage
     const targetLayer = this.getTmpLayer()
 
     if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {
-      console.log('Is out of bound!')
+      return true
     }
+
+    return false
   }
 
   isClickOutOfPagePart(event: MouseEvent, targetLayer: HTMLElement, config: ILayer): boolean {

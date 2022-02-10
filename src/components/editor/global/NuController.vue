@@ -221,7 +221,8 @@ export default Vue.extend({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      currSubSelectedInfo: 'getCurrSubSelectedInfo'
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currHoveredPageIndex: 'getCurrHoveredPageIndex'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -679,6 +680,7 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent) {
+      console.log(this.currHoveredPageIndex, LayerUtils.isOutOfBoundary())
       this.isControlling = true
       if (this.isImgControl) {
         window.removeEventListener('mouseup', this.moveEnd)
