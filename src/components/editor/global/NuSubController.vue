@@ -276,7 +276,7 @@ export default Vue.extend({
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
     },
     textStyles(styles: any) {
