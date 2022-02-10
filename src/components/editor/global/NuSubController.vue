@@ -276,7 +276,7 @@ export default Vue.extend({
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
     },
     textStyles(styles: any) {
@@ -530,10 +530,11 @@ export default Vue.extend({
       }
     },
     undo() {
-      ShortcutUtils.undo()
-      LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
-      setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
+      ShortcutUtils.undo().then(() => {
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true })
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
+        setTimeout(() => TextUtils.focus({ pIndex: 0, sIndex: 0, offset: 0 }, TextUtils.getNullSel(), this.layerIndex), 0)
+      })
     },
     onFrameMouseEnter(e: MouseEvent) {
       if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {

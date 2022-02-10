@@ -64,6 +64,10 @@ class LayerFactary {
     initWidth = initWidth || width
     initHeight = initHeight || height
 
+    if (!decoration && !decorationTop && (!designId || designId === '') && clips.length === 1 && !clips[0].clipPath) {
+      clips[0].isFrameImg = true
+    }
+
     if (clips.length && !clips[0].isFrameImg) {
       clips.forEach((img, i) => {
         img.styles.zindex = i

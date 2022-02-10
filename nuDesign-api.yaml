@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  version: "20220103"
+  version: "20220210"
   title: apiTemplate
 host: api.vivipic.com
 schemes:
@@ -133,6 +133,60 @@ paths:
             Access-Control-Allow-Origin:
               type: string
   /list-design:
+    get:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          type: string
+        - name: theme
+          in: query
+          required: false
+          type: string
+        - name: list_all
+          in: query
+          required: false
+          type: string
+        - name: token
+          in: query
+          required: true
+          type: string
+        - name: type
+          in: query
+          required: true
+          type: string
+        - name: group_id
+          in: query
+          required: false
+          type: string
+        - name: font_list
+          in: query
+          required: false
+          type: string
+        - name: page_index
+          in: query
+          required: false
+          type: string
+        - name: locale
+          in: query
+          required: true
+          type: string
+        - name: all_theme
+          in: query
+          required: false
+          type: string
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
     post:
       description: 取得各種設計(background/font/svg/template/text)列表
       consumes:
@@ -179,6 +233,26 @@ paths:
       description: 進入app時呼叫，取得上傳/下載之url
       consumes:
         - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: loginInput
+          required: true
+          schema:
+            $ref: "#/definitions/loginInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/loginOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+  /login2:
+    post:
+      consumes:
+        - text/plain
       produces:
         - application/json
       parameters:
@@ -384,15 +458,22 @@ definitions:
       - $ref: "#/definitions/apiCommonInput"
       - type: object
         required:
-          - asset_index
           - locale
+          - src_obj
+          - team_id
         properties:
-          asset_index:
-            type: number
-            description: asset index (for image only)
+          src_obj:
+            type: string
+            description: json string for srcObj
           locale:
             type: string
             description: locale
+          team_id:
+            type: string
+            description: user team id
+          aspect:
+            type: number
+            description: aspect ratio for 3rd party images (0 for w >= h, 1 for w < h)
   uploadMap:
     type: object
     properties:
@@ -870,6 +951,9 @@ definitions:
       redirect_uri:
         type: string
         description: google redirect url
+      locale:
+        type: string
+        description: user locale
   listLibPhotoInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -952,6 +1036,10 @@ definitions:
             type: string
             description: limit theme_id(s) for return templaytes (separated by comma for
               multiple theme ids)
+          all_theme:
+            type: number
+            description: 0 (default) for return theme with hidden = 0, 1 for return all
+              themes with corresponding hidden flag
   addDesignInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"
@@ -1034,6 +1122,9 @@ definitions:
       redirect_uri:
         type: string
         description: fb redirect url
+      locale:
+        type: string
+        description: user locale
   listAssetInput:
     allOf:
       - $ref: "#/definitions/apiCommonInput"

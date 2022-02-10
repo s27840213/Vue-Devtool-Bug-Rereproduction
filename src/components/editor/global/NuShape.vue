@@ -76,7 +76,7 @@ export default Vue.extend({
       handler: function (newVal) {
         if (this.config.color && this.config.color.length) {
           const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
-          this.styleNode.textContent = styleText
+          this.updateStyleNode(styleText)
         }
       },
       deep: true
@@ -84,12 +84,12 @@ export default Vue.extend({
     'config.pDiff': {
       handler: function (newVal) {
         if (this.config.category === 'C') {
-          const styleText = shapeUtils.transFormatter(this.className, this.config.transArray ?? [], {
+          const transText = shapeUtils.transFormatter(this.className, this.config.transArray ?? [], {
             cSize: this.config.cSize,
             pSize: this.config.pSize,
             pDiff: newVal
           })
-          this.transNode.textContent = styleText
+          this.updateTransNode(transText)
         }
       },
       deep: true
@@ -97,8 +97,8 @@ export default Vue.extend({
     'config.point': {
       handler: function (newVal) {
         if (this.config.category === 'D') {
-          const styleText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], this.config.size, newVal, this.config.markerWidth)
-          this.transNode.textContent = styleText
+          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], this.config.size, newVal, this.config.markerWidth)
+          this.updateTransNode(transText)
 
           Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, this.config.size[0], this.config.styles))
         }
@@ -109,44 +109,44 @@ export default Vue.extend({
       handler: function (newVal) {
         if (this.config.category === 'D') {
           const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], newVal, this.config.point, this.config.markerWidth)
-          this.transNode.textContent = transText
+          this.updateTransNode(transText)
 
           Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, newVal[0], this.config.styles))
         }
 
         const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, newVal, this.config.dasharray, this.config.linecap, this.config.filled)
-        this.styleNode.textContent = styleText
+        this.updateStyleNode(styleText)
       },
       deep: true
     },
     'config.dasharray': {
       handler: function (newVal) {
         const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, newVal, this.config.linecap, this.config.filled)
-        this.styleNode.textContent = styleText
+        this.updateStyleNode(styleText)
       },
       deep: true
     },
     'config.linecap': {
       handler: function (newVal) {
         const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, newVal, this.config.filled)
-        this.styleNode.textContent = styleText
+        this.updateStyleNode(styleText)
       }
     },
     'config.filled': {
       handler: function (newVal) {
         const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, newVal)
-        this.styleNode.textContent = styleText
+        this.updateStyleNode(styleText)
       }
     },
     'config.markerId': {
       handler: function (newVal) {
         if (this.config.category === 'D') {
-          const styleText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], this.config.size, this.config.point, this.config.markerWidth)
-          this.transNode.textContent = styleText
+          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], this.config.size, this.config.point, this.config.markerWidth)
+          this.updateTransNode(transText)
         }
 
         const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
-        this.styleNode.textContent = styleText
+        this.updateStyleNode(styleText)
       },
       deep: true
     },
@@ -293,6 +293,20 @@ export default Vue.extend({
         }
       }
     },
+    updateStyleNode(styleText: string) {
+      if (this.styleNode) {
+        this.styleNode.textContent = styleText
+      } else {
+        this.styleNode = shapeUtils.addStyleTag(styleText)
+      }
+    },
+    updateTransNode(transText: string) {
+      if (this.transNode) {
+        this.transNode.textContent = transText
+      } else {
+        this.transNode = shapeUtils.addStyleTag(transText)
+      }
+    },
     async checkAndFetchSvg(useConfig = true) {
       const svg = useConfig ? this.config.svg : undefined
       switch (this.config.category) {
@@ -313,11 +327,7 @@ export default Vue.extend({
             pSize: this.config.pSize,
             pDiff: this.config.pDiff
           })
-          if (this.transNode) {
-            this.transNode.textContent = transText
-          } else {
-            this.transNode = shapeUtils.addStyleTag(transText)
-          }
+          this.updateTransNode(transText)
           this.filterTemplate = this.getFilterTemplate()
           break
         }
@@ -326,11 +336,7 @@ export default Vue.extend({
             await shapeUtils.addComputableInfo(this.config)
           }
           const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
-          if (this.transNode) {
-            this.transNode.textContent = transText
-          } else {
-            this.transNode = shapeUtils.addStyleTag(transText)
-          }
+          this.updateTransNode(transText)
           break
         }
         case 'E': {
@@ -365,11 +371,7 @@ export default Vue.extend({
         }
       }
       const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
-      if (this.styleNode) {
-        this.styleNode.textContent = styleText
-      } else {
-        this.styleNode = shapeUtils.addStyleTag(styleText)
-      }
+      this.updateStyleNode(styleText)
       this.paramsReady = true
     },
     getFilterTemplate(): string {

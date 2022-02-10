@@ -9,7 +9,12 @@ import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
 import uploadUtils from './uploadUtils'
 import { IPage } from '@/interfaces/page'
-import { IFrame, IGroup, ILayer, IShape, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
+import shapeUtils from './shapeUtils'
+import { IListServiceContentDataItem } from '@/interfaces/api'
+import { IMarker } from '@/interfaces/shape'
+import assetUtils from './assetUtils'
+import layerFactary from './layerFactary'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -43,10 +48,10 @@ class StepsUtils {
   filterForShapes(layer: ILayer): any {
     let typedLayer
     let newLayers
-    let needFetch = false
     switch (layer.type) {
       case 'shape':
         typedLayer = layer as IShape
+        if ((!typedLayer.designId || typedLayer.designId === '') && !['D', 'E'].includes(typedLayer.category)) return typedLayer
         typedLayer.svg = ''
         return typedLayer
       case 'tmp':
@@ -57,16 +62,109 @@ class StepsUtils {
         return typedLayer
       case 'frame':
         typedLayer = layer as any
+        if (!typedLayer.designId || typedLayer.designId === '') return typedLayer
         if (typedLayer.decoration) {
-          typedLayer.decoration = { color: typedLayer.decoration.color }
-          needFetch = true
+          typedLayer.decoration.svg = ''
         }
         if (typedLayer.decorationTop) {
-          typedLayer.decorationTop = { color: typedLayer.decorationTop.color }
-          needFetch = true
+          typedLayer.decorationTop.svg = ''
         }
-        typedLayer.needFetch = needFetch
         return typedLayer
+      default:
+        return layer
+    }
+  }
+
+  async refetchForShape(layer: IShape): Promise<any> {
+    let shape
+    switch (layer.category) {
+      case 'D':
+        await shapeUtils.addComputableInfo(layer)
+        return layer
+      case 'E':
+        await shapeUtils.addComputableInfo(layer)
+        return layer
+      default:
+        if (layer.designId && layer.designId !== '') {
+          shape = await shapeUtils.fetchSvg(layer) as any
+          layer.color && layer.color.length && (shape.color = layer.color)
+          !layer.className && (layer.className = shapeUtils.classGenerator())
+          const vSize = shape.vSize as number[]
+          delete shape.styles
+          Object.assign(layer, shape)
+          Object.assign(layer.styles, {
+            initWidth: vSize[0],
+            initHeight: vSize[1]
+          })
+        }
+        return layer
+    }
+  }
+
+  async refetchForFrame(layer: any): Promise<any> {
+    if (!layer.designId || layer.designId === '') return layer
+    const asset = {
+      type: 8,
+      id: layer.designId,
+      ver: store.getters['user/getVerUni']
+    } as IListServiceContentDataItem
+
+    const res = await assetUtils.get(asset)
+    const json = res.jsonData as IFrame
+
+    (layer.clips as IImage[]).forEach((img, idx) => {
+      if (json.clips[idx]) {
+        img.clipPath = json.clips[idx].clipPath
+      }
+    })
+
+    if (layer.decoration && json.decoration) {
+      json.decoration.color = [...layer.decoration.color] as [string]
+      layer.decoration = layerFactary.newShape({
+        ...json.decoration,
+        vSize: [layer.styles.initWidth, layer.styles.initHeight],
+        styles: {
+          width: layer.styles.initWidth,
+          height: layer.styles.initHeight,
+          initWidth: layer.styles.initWidth,
+          initHeight: layer.styles.initHeight
+        }
+      })
+    }
+    if (layer.decorationTop && json.decorationTop) {
+      json.decorationTop.color = [...layer.decorationTop.color] as [string]
+      layer.decorationTop = layerFactary.newShape({
+        ...json.decorationTop,
+        vSize: [layer.styles.initWidth, layer.styles.initHeight],
+        styles: {
+          width: layer.styles.initWidth,
+          height: layer.styles.initHeight,
+          initWidth: layer.styles.initWidth,
+          initHeight: layer.styles.initHeight
+        }
+      })
+    }
+    return layer
+  }
+
+  async refetchForShapes(layer: ILayer): Promise<any> {
+    let typedLayer
+    const newLayers = []
+    switch (layer.type) {
+      case 'shape':
+        typedLayer = layer as IShape
+        return await this.refetchForShape(typedLayer)
+      case 'tmp':
+      case 'group':
+        typedLayer = layer as IGroup
+        for (const subLayer of typedLayer.layers) {
+          newLayers.push(await this.refetchForShapes(subLayer))
+        }
+        typedLayer.layers = newLayers
+        return typedLayer
+      case 'frame':
+        typedLayer = layer as any
+        return await this.refetchForFrame(typedLayer)
       default:
         return layer
     }
@@ -75,6 +173,17 @@ class StepsUtils {
   filterForShapesInPages(pages: IPage[]): IPage[] {
     for (const page of pages) {
       const newLayers = page.layers.map(layer => this.filterForShapes(layer))
+      page.layers = newLayers
+    }
+    return pages
+  }
+
+  async refetchForShapesInPages(pages: IPage[]): Promise<IPage[]> {
+    for (const page of pages) {
+      const newLayers = []
+      for (const layer of page.layers) {
+        newLayers.push(await this.refetchForShapes(layer))
+      }
       page.layers = newLayers
     }
     return pages
@@ -113,7 +222,7 @@ class StepsUtils {
     }
   }
 
-  undo() {
+  async undo() {
     if (this.steps.length === 0 || this.currStep === 0) {
       return
     }
@@ -121,16 +230,16 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
-    const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
+    const pages = await this.refetchForShapesInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-    let layers
+    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
     if (pages[pageIndex]) {
       const selectedLayer = pages[pageIndex].layers[index]
       if (selectedLayer) {
         if (selectedLayer.type === 'tmp') {
-          layers = selectedLayer.layers
+          layers = (selectedLayer as ITmp).layers
         } else {
           layers = [selectedLayer]
         }
@@ -167,7 +276,7 @@ class StepsUtils {
     }, interval)
   }
 
-  redo() {
+  async redo() {
     if (this.currStep === this.steps.length - 1) {
       return
     }
@@ -175,16 +284,16 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep++
-    const pages = GeneralUtils.deepCopy(this.steps[this.currStep].pages)
+    const pages = await this.refetchForShapesInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-    let layers
+    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
     if (pages[pageIndex]) {
       const selectedLayer = pages[pageIndex].layers[index]
       if (selectedLayer) {
         if (selectedLayer.type === 'tmp') {
-          layers = selectedLayer.layers
+          layers = (selectedLayer as ITmp).layers
         } else {
           layers = [selectedLayer]
         }

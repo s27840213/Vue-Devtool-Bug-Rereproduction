@@ -11,7 +11,7 @@ class FrameUtils {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
   }
 
-  frameClipFormatter(path: string) {
+  frameClipFormatter(path: string | undefined) {
     return "<path d='" + path ?? '' + "'></path>"
   }
 
