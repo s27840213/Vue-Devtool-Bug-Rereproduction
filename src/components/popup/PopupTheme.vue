@@ -63,7 +63,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      themes: 'getThemes'
+      themes: 'getEditThemes'
     }),
     isConfirmDisabled(): boolean {
       return !(Object.values(this.selected).some(Boolean))

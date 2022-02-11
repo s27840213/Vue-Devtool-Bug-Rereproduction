@@ -4,7 +4,9 @@ export interface Itheme {
     height: number,
     title: string,
     description: string,
-    url: string
+    url: string,
+    mainHidden: number,
+    editHidden: number
 }
 
 /* eslint-disable camelcase */
