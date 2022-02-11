@@ -1,3 +1,11 @@
+export enum ShadowEffectType {
+  none = 'none',
+  shadow = 'shadow',
+  halo = 'halo',
+  frame = 'frame',
+  projection = 'projection',
+  blur = 'blur',
+}
 export interface IShadowEffect {
   [key: string]: string | number
   x: number,
@@ -30,18 +38,9 @@ export interface IProjectionEffect {
 
 export interface IShadowProps {
   [key: string]: string | number | { [key: string]: string | number } | IShadowEffect | undefined
-  currentEffect: string,
+  currentEffect: ShadowEffectType,
   color: string
   shadow?: IShadowEffect,
   blur?: IBlurEffect,
   frame?: IFrameEffect
-}
-
-export enum ShadowEffectType {
-  none = 'none',
-  shadow = 'shadow',
-  halo = 'halo',
-  frame = 'frame',
-  projection = 'projection',
-  blur = 'blur'
 }

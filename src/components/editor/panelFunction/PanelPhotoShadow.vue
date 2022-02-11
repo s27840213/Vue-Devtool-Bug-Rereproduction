@@ -60,7 +60,7 @@
         div(v-for="field in shadowFields"
           :key="field"
           class="photo-effect-setting__field")
-          div(class="photo-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
+          div(class="photo-effect-setting__field-name") {{ field }}
           input(class="photo-effect-setting__range-input"
             :value="currentStyle.shadow[currentEffect][field]"
             :max="fieldRange[currentEffect][field].max"
@@ -71,16 +71,16 @@
             v-ratio-change
             type="range")
           input(class="photo-effect-setting__value-input"
-            :value="currentStyle.textEffect[field]"
+            :value="currentStyle.shadow[currentEffect][field]"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
             type="number")
-        div(v-if="canChangeColor"
+        div(v-if="currentEffect !== 'none'"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.textEffect.color }"
+            :style="{ backgroundColor: currentStyle.shadow.color }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
             class="photo-effect-setting__color-picker"
@@ -101,7 +101,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
-import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   components: {
@@ -116,11 +116,11 @@ export default Vue.extend({
       openColorPicker: false,
       effects: {
         none: [],
-        shadow: imageShadowUtils.getKeysOf('shadow'),
-        blur: imageShadowUtils.getKeysOf('blur'),
-        halo: imageShadowUtils.getKeysOf('halo'),
-        frame: imageShadowUtils.getKeysOf('frame'),
-        projection: imageShadowUtils.getKeysOf('projection')
+        shadow: imageShadowUtils.getKeysOf(ShadowEffectType.shadow),
+        blur: imageShadowUtils.getKeysOf(ShadowEffectType.blur),
+        halo: imageShadowUtils.getKeysOf(ShadowEffectType.halo),
+        frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
+        projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
       } as { [key: string]: string[] },
       effectI18nMap: {
         distance: 'NN0063',
@@ -149,6 +149,15 @@ export default Vue.extend({
           radius: { max: 120, min: 0 },
           spread: { max: 50, min: 0 },
           opacity: { max: 100, min: 0 }
+        },
+        halo: {
+          radius: { max: 120, min: 0 },
+          spread: { max: 50, min: 0 },
+          opacity: { max: 100, min: 0 }
+        },
+        frame: {
+          width: { max: 100, min: 0 },
+          opacity: { max: 100, min: 0 }
         }
       },
       hintMap: {
@@ -175,7 +184,7 @@ export default Vue.extend({
       const { styles } = layerUtils.getCurrConfig as IImage
       return styles || {}
     },
-    currentEffect(): string {
+    currentEffect(): ShadowEffectType {
       const { shadow = {} } = this.currentStyle as any
       return shadow.currentEffect || 'none'
     }
@@ -198,8 +207,10 @@ export default Vue.extend({
       colorUtils.setCurrEvent(ColorEventType.photoShadow)
       colorUtils.setCurrColor(this.currentStyle.shadow.color)
     },
-    onEffectClick(effectName: string): void {
+    onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName in this.currentStyle.shadow
+      console.log(alreadySetEffect)
+      console.log(effectName)
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })

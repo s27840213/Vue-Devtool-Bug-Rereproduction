@@ -7,7 +7,7 @@ import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 class ImageShadowUtils {
-  setEffect (effect: string, attrs = {}): void {
+  setEffect (effect: ShadowEffectType, attrs = {}): void {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
     if (subLayerIdx === -1 && currLayer.type === LayerType.group) {
       for (const i in (currLayer as IGroup).layers) {
@@ -31,6 +31,7 @@ class ImageShadowUtils {
     const { shadow, scale } = styles
     const { color = '#000000' } = shadow
     const effect = shadow[shadow.currentEffect]
+
     switch (shadow.currentEffect) {
       case ShadowEffectType.blur:
       case ShadowEffectType.shadow: {
@@ -44,18 +45,23 @@ class ImageShadowUtils {
         const { width, opacity } = mathUtils
           .multipy(scale, effect as IShadowEffect, ['opacity']) as IShadowEffect
         return {
-          boxShadow: `0px 0px 0px ${width}px rgba(0, 0, 0, ${color + this.convertToAlpha(opacity)})`
+          boxShadow: `0px 0px 0px ${width}px ${color + this.convertToAlpha(opacity)}`
         }
       }
+      case ShadowEffectType.halo:
+      case ShadowEffectType.projection:
+      case ShadowEffectType.none:
+        return {}
+      default:
+        return this.assertUnreachable(shadow.currentEffect)
     }
-    return {}
   }
 
   convertToAlpha(percent: number): string {
     return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
   }
 
-  getDefaultEffect(effectName: string): Partial<IShadowProps> {
+  getDefaultEffect(effectName: ShadowEffectType): Partial<IShadowProps> {
     let effect = {} as unknown
     switch (effectName) {
       case ShadowEffectType.shadow:
@@ -67,12 +73,25 @@ class ImageShadowUtils {
           opacity: 70
         }
         break
+      case ShadowEffectType.halo:
+      case ShadowEffectType.projection:
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
           radius: 50,
           spread: 0,
           opacity: 70
         }
+        break
+      case ShadowEffectType.frame:
+        (effect as IFrameEffect) = {
+          width: 50,
+          opacity: 70
+        }
+        break
+      case ShadowEffectType.none:
+        return {}
+      default:
+        return this.assertUnreachable(effectName)
     }
     return {
       [effectName]: effect,
@@ -84,12 +103,16 @@ class ImageShadowUtils {
     } as Partial<IShadowProps>
   }
 
-  getKeysOf(effect: string): Array<string> {
+  getKeysOf(effect: ShadowEffectType): Array<string> {
     type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
     return [
       ...Object.keys(
         this.getDefaultEffect(effect)[effect] as ShadowEffects)
     ]
+  }
+
+  assertUnreachable(_: never): never {
+    throw new Error("Didn't expect to get here")
   }
 }
 
