@@ -97,11 +97,11 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
+import imageShadowUtils, { HALO_SPREAD_LIMIT } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
-import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   components: {
@@ -151,8 +151,8 @@ export default Vue.extend({
           opacity: { max: 100, min: 0 }
         },
         halo: {
-          radius: { max: 120, min: 0 },
-          spread: { max: 50, min: 0 },
+          radius: { max: 120, min: 50 },
+          spread: { max: HALO_SPREAD_LIMIT, min: 30 },
           opacity: { max: 100, min: 0 }
         },
         frame: {

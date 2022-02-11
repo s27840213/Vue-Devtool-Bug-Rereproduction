@@ -6,6 +6,10 @@ import store from '@/store'
 import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
+type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
+
+const HALO_Y_OFFSET = 70 as const
+export const HALO_SPREAD_LIMIT = 80 as const
 class ImageShadowUtils {
   setEffect (effect: ShadowEffectType, attrs = {}): void {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
@@ -36,19 +40,33 @@ class ImageShadowUtils {
       case ShadowEffectType.blur:
       case ShadowEffectType.shadow: {
         const { x = 0, y = 0, radius, spread, opacity } = mathUtils
-          .multipy(scale, effect as IShadowEffect, ['opacity']) as IShadowEffect
+          .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
         return {
-          boxShadow: `${x}px ${y}px ${radius}px ${spread}px ${color + this.convertToAlpha(opacity)}`
+          boxShadow:
+            `${x}px ${y}px ` +
+            `${radius}px ` +
+            `${spread}px ` +
+            `${color + this.convertToAlpha(opacity)}`
         }
       }
       case ShadowEffectType.frame: {
         const { width, opacity } = mathUtils
-          .multipy(scale, effect as IShadowEffect, ['opacity']) as IShadowEffect
+          .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
         return {
-          boxShadow: `0px 0px 0px ${width}px ${color + this.convertToAlpha(opacity)}`
+          boxShadow: `0 0 ${width}px ${color + this.convertToAlpha(opacity)}`
         }
       }
-      case ShadowEffectType.halo:
+      case ShadowEffectType.halo: {
+        const { radius, spread, opacity } = mathUtils
+          .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
+        return {
+          boxShadow:
+          `0px ${HALO_Y_OFFSET * scale}px ` +
+          `${radius}px ` +
+          `${spread - HALO_SPREAD_LIMIT * scale}px ` +
+          `${color + this.convertToAlpha(opacity)}`
+        }
+      }
       case ShadowEffectType.projection:
       case ShadowEffectType.none:
         return {}
@@ -73,7 +91,6 @@ class ImageShadowUtils {
           opacity: 70
         }
         break
-      case ShadowEffectType.halo:
       case ShadowEffectType.projection:
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
@@ -85,6 +102,13 @@ class ImageShadowUtils {
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
           width: 50,
+          opacity: 70
+        }
+        break
+      case ShadowEffectType.halo:
+        (effect as IHaloEffect) = {
+          radius: 50,
+          spread: 50,
           opacity: 70
         }
         break
@@ -104,7 +128,6 @@ class ImageShadowUtils {
   }
 
   getKeysOf(effect: ShadowEffectType): Array<string> {
-    type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
     return [
       ...Object.keys(
         this.getDefaultEffect(effect)[effect] as ShadowEffects)
