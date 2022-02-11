@@ -1,15 +1,14 @@
-import { IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import store from '@/store'
 import mathUtils from './mathUtils'
+import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 class ImageShadowUtils {
   setEffect (effect: string, attrs = {}): void {
-    const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
-    const { shadow } = currLayer.styles
+    const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
     if (subLayerIdx === -1 && currLayer.type === LayerType.group) {
       for (const i in (currLayer as IGroup).layers) {
         // const shadow = generalUtils.deepCopy((currLayer as IGroup).layers[+i]) as IShadowProps
@@ -17,6 +16,7 @@ class ImageShadowUtils {
         // layerUtils.updateLayerStyles
       }
     } else {
+      const { shadow } = (currLayer as IImage).styles
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         shadow: {
           ...(shadow && (shadow as IShadowProps)),
@@ -25,23 +25,34 @@ class ImageShadowUtils {
         }
       }, subLayerIdx)
     }
-    console.log(generalUtils.deepCopy(attrs))
-    console.log((layerUtils.getCurrConfig as IImage).styles)
   }
 
-  converShadowEffect(styles: IImageStyle): { [key: string]: string } {
+  convertShadowEffect(styles: IImageStyle): { [key: string]: string } {
     const { shadow, scale } = styles
+    const { color = '#000000' } = shadow
     const effect = shadow[shadow.currentEffect]
     switch (shadow.currentEffect) {
+      case ShadowEffectType.blur:
       case ShadowEffectType.shadow: {
-        const { x, y, radius, spread, opacity } = mathUtils
+        const { x = 0, y = 0, radius, spread, opacity } = mathUtils
           .multipy(scale, effect as IShadowEffect, ['opacity']) as IShadowEffect
         return {
-          boxShadow: `${x}px ${y}px ${radius}px ${spread}px rgba(0, 0, 0, ${opacity / 100})`
+          boxShadow: `${x}px ${y}px ${radius}px ${spread}px ${color + this.convertToAlpha(opacity)}`
+        }
+      }
+      case ShadowEffectType.frame: {
+        const { width, opacity } = mathUtils
+          .multipy(scale, effect as IShadowEffect, ['opacity']) as IShadowEffect
+        return {
+          boxShadow: `0px 0px 0px ${width}px rgba(0, 0, 0, ${color + this.convertToAlpha(opacity)})`
         }
       }
     }
     return {}
+  }
+
+  convertToAlpha(percent: number): string {
+    return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
   }
 
   getDefaultEffect(effectName: string): Partial<IShadowProps> {
@@ -49,16 +60,36 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          x: 12,
-          y: 12,
-          radius: 0,
+          x: 40,
+          y: 40,
+          radius: 18,
+          spread: 0,
+          opacity: 70
+        }
+        break
+      case ShadowEffectType.blur:
+        (effect as IBlurEffect) = {
+          radius: 50,
           spread: 0,
           opacity: 70
         }
     }
     return {
-      [effectName]: effect
+      [effectName]: effect,
+      ...((() => {
+        const { type } = layerUtils.getCurrConfig
+        const { color } = (layerUtils.getCurrConfig as IImage).styles.shadow
+        return type === LayerType.image && !color
+      })() && { color: '#000000' })
     } as Partial<IShadowProps>
+  }
+
+  getKeysOf(effect: string): Array<string> {
+    type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
+    return [
+      ...Object.keys(
+        this.getDefaultEffect(effect)[effect] as ShadowEffects)
+    ]
   }
 }
 

@@ -94,8 +94,7 @@ export default Vue.extend({
           break
         }
         case LayerType.image: {
-          const shadowEffect = imageShadowUtils.converShadowEffect(this.config.styles)
-          console.log(shadowEffect)
+          const shadowEffect = imageShadowUtils.convertShadowEffect(this.config.styles)
           Object.assign(
             styles,
             shadowEffect

@@ -6,11 +6,35 @@ export interface IShadowEffect {
   spread: number,
   opacity: number
 }
+export interface IBlurEffect {
+  [key: string]: string | number
+  radius: number,
+  spread: number,
+  opacity: number
+}
+export interface IFrameEffect {
+  [key: string]: string | number
+  width: number,
+  opacity: number
+}
+export interface IHaloEffect {
+  [key: string]: string | number
+  width: number,
+  opacity: number
+}
+export interface IProjectionEffect {
+  [key: string]: string | number
+  width: number,
+  opacity: number
+}
 
 export interface IShadowProps {
   [key: string]: string | number | { [key: string]: string | number } | IShadowEffect | undefined
   currentEffect: string,
-  shadow?: IShadowEffect
+  color: string
+  shadow?: IShadowEffect,
+  blur?: IBlurEffect,
+  frame?: IFrameEffect
 }
 
 export enum ShadowEffectType {

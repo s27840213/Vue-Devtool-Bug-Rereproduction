@@ -92,7 +92,8 @@ export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
   shape = 'setShapeColor',
-  background = 'setBackgroundColor'
+  background = 'setBackgroundColor',
+  photoShadow = 'setPhotoEffectColor'
 }
 
 export enum PopupSliderEventType {
