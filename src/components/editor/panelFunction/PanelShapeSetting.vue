@@ -298,7 +298,7 @@ export default Vue.extend({
       colorUtils.setCurrEvent(ColorEventType.shape)
       colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
       this.initilizeRecord()
-      this.getCategories().then(async () => {
+      this.fetchMarkers().then(async () => {
         const markerList = (this.categories[0] as IListServiceContentData).list
         this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
         for (const marker of markerList) {
@@ -319,12 +319,6 @@ export default Vue.extend({
         this.setLineWidth(value)
       })
     }
-  },
-  beforeCreate() {
-    this.$store.registerModule('markers', markers)
-  },
-  beforeDestroy() {
-    this.$store.unregisterModule('markers')
   },
   computed: {
     ...mapGetters({
@@ -761,6 +755,10 @@ export default Vue.extend({
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.isLoading = false
+    },
+    async fetchMarkers() {
+      if (this.categories && this.categories.length > 0) return
+      await this.getCategories()
     }
   }
 })
