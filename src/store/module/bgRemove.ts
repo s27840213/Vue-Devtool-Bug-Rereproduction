@@ -59,10 +59,17 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
 const mutations: MutationTree<IBgRemoveState> = {
   SET_inBgRemoveMode(state: IBgRemoveState, bool: boolean) {
     if (!bool) {
-      state.brushSize = 16
-      state.clearMode = true
-      state.showInitImage = false
-      state.restoreInitState = false
+      Object.assign(state, {
+        inBgRemoveMode: false,
+        brushSize: 16,
+        showInitImage: false,
+        clearMode: true,
+        restoreInitState: false,
+        canvas: null as unknown as HTMLCanvasElement,
+        autoRemoveResult: null as unknown as IBgRemoveInfo,
+        modifiedFlag: false,
+        loading: false
+      })
     }
     state.inBgRemoveMode = bool
   },
@@ -89,19 +96,6 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_loading(state: IBgRemoveState, bool: boolean) {
     state.loading = bool
-  },
-  CLEAR_bgRemoveInfo(state: IBgRemoveState) {
-    Object.assign(state, {
-      inBgRemoveMode: false,
-      brushSize: 16,
-      showInitImage: false,
-      clearMode: true,
-      restoreInitState: false,
-      canvas: null as unknown as HTMLCanvasElement,
-      autoRemoveResult: null as unknown as IBgRemoveInfo,
-      modifiedFlag: false,
-      loading: false
-    })
   }
 }
 

@@ -45,9 +45,10 @@ export default Vue.extend({
       isMouseDown: false,
       initImgSrc: '',
       imgSrc: '',
-      currStep: 0,
+      currStep: -1,
       steps: [] as Array<string>,
-      MAX_STEP_COUNT: 20
+      MAX_STEP_COUNT: 20,
+      blurPx: 5
     }
   },
   created() {
@@ -130,15 +131,27 @@ export default Vue.extend({
       this.ctx.lineWidth = newVal
       this.brushStyle.width = `${newVal}px`
       this.brushStyle.height = `${newVal}px`
+      if (this.clearMode) {
+        if (newVal > 25) {
+          this.blurPx = 5
+          this.ctx.filter = `blur(${this.blurPx}px)`
+        } else {
+          this.blurPx = 0
+          this.ctx.filter = `blur(${this.blurPx}px)`
+        }
+      }
     },
     restoreInitState(newVal) {
       if (newVal) {
         this.clearCtx()
         this.ctx.filter = 'none'
         this.drawImageToCtx()
-        this.ctx.filter = 'blur(5px)'
+        this.ctx.filter = `blur(${this.blurPx}px)`
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
+        this.steps = []
+        this.currStep = -1
+        this.pushStep()
       }
     },
     clearMode(newVal) {
@@ -171,7 +184,7 @@ export default Vue.extend({
       // this.ctx.globalCompositeOperation = 'destination-out'
 
       this.drawImageToCtx()
-      this.ctx.filter = 'blur(5px)'
+      this.ctx.filter = `blur(${this.blurPx}px)`
       this.pushStep()
     },
     createTmpCanvas() {
@@ -266,6 +279,7 @@ export default Vue.extend({
       }
     },
     pushStep() {
+      console.log(this.steps)
       const base64 = this.canvas.toDataURL()
       this.steps.length = this.currStep + 1
       if (this.steps.length === this.MAX_STEP_COUNT) {
@@ -275,26 +289,33 @@ export default Vue.extend({
       this.currStep = this.steps.length - 1
     },
     handleKeydown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+      if (!e.repeat && (e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        console.log('undo')
         this.currStep--
         this.currStep = Math.max(this.currStep, 0)
         const img = new Image()
         img.src = this.steps[this.currStep]
-
+        console.log(this.steps, this.currStep)
         img.onload = () => {
           this.clearCtx()
+          this.ctx.filter = 'none'
           this.drawImageToCtx(img)
+          this.ctx.filter = `blur(${this.blurPx}px)`
         }
       }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+      if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+        console.log('redo')
         this.currStep++
         this.currStep = Math.min(this.currStep, this.steps.length - 1)
         const img = new Image()
         img.src = this.steps[this.currStep]
+        console.log(this.steps, this.currStep)
 
         img.onload = () => {
           this.clearCtx()
+          this.ctx.filter = 'none'
           this.drawImageToCtx(img)
+          this.ctx.filter = `blur(${this.blurPx}px)`
         }
       }
     }
