@@ -157,8 +157,10 @@ export default Vue.extend({
     clearMode(newVal) {
       if (newVal) {
         this.ctx.globalCompositeOperation = 'destination-out'
+        this.ctx.filter = `blur(${this.blurPx}px)`
       } else {
         this.ctx.globalCompositeOperation = 'source-over'
+        this.ctx.filter = 'none'
       }
     },
     brushColor(newVal) {
@@ -279,7 +281,6 @@ export default Vue.extend({
       }
     },
     pushStep() {
-      console.log(this.steps)
       const base64 = this.canvas.toDataURL()
       this.steps.length = this.currStep + 1
       if (this.steps.length === this.MAX_STEP_COUNT) {
@@ -290,12 +291,10 @@ export default Vue.extend({
     },
     handleKeydown(e: KeyboardEvent) {
       if (!e.repeat && (e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-        console.log('undo')
         this.currStep--
         this.currStep = Math.max(this.currStep, 0)
         const img = new Image()
         img.src = this.steps[this.currStep]
-        console.log(this.steps, this.currStep)
         img.onload = () => {
           this.clearCtx()
           this.ctx.filter = 'none'
@@ -304,12 +303,10 @@ export default Vue.extend({
         }
       }
       if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-        console.log('redo')
         this.currStep++
         this.currStep = Math.min(this.currStep, this.steps.length - 1)
         const img = new Image()
         img.src = this.steps[this.currStep]
-        console.log(this.steps, this.currStep)
 
         img.onload = () => {
           this.clearCtx()
