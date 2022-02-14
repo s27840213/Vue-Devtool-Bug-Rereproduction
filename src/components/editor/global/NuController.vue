@@ -487,7 +487,7 @@ export default Vue.extend({
         width: '100%',
         height: '100%',
         userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
       return !this.isCurveText ? textstyles
         : {
@@ -496,7 +496,7 @@ export default Vue.extend({
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: this.isTextEditing ? (this.isCurveText && !this.contentEditable ? 0 : 1) : 0
+          opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
         }
     },
     groupControllerStyle() {

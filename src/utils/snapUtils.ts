@@ -48,10 +48,24 @@ class SnapUtils {
     const layers = store.getters.getLayers(this.pageIndex)
     layers.forEach((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (!layer.active) {
-        const rect = MathUtils.getBounding(layer)
+        if (layer.type === 'shape' && layer.category === 'D') {
+          // svg line snaps to the line edges not the whole layer.
+          const { point, size } = layer as IShape
+          const { x, y, width, initWidth } = layer.styles
+          const scale = (size ?? [1])[0]
+          const { width: rawWidth, height: rawHeight, baseDegree } = shapeUtils.lineDimension(point ?? [])
+          const ratio = width / initWidth
+          const dx = 2 * scale * Math.sin(baseDegree) * ratio
+          const dy = 2 * scale * Math.cos(baseDegree) * ratio
 
-        v.push(...[rect.x, rect.x + rect.width / 2, rect.x + rect.width])
-        h.push(...[rect.y, rect.y + rect.height / 2, rect.y + rect.height])
+          v.push(...[x + dx, x + dx + rawWidth * ratio / 2, x + dx + rawWidth * ratio])
+          h.push(...[y + dy, y + dy + rawHeight * ratio / 2, y + dy + rawHeight * ratio])
+        } else {
+          const rect = MathUtils.getBounding(layer)
+
+          v.push(...[rect.x, rect.x + rect.width / 2, rect.x + rect.width])
+          h.push(...[rect.y, rect.y + rect.height / 2, rect.y + rect.height])
+        }
       }
     })
     return {
@@ -66,6 +80,48 @@ class SnapUtils {
   getLayerSnappingPos(layer: IShape | IText | IImage | IGroup | ITmp, type: string): ISnaplineInfo {
     const layerBounding = MathUtils.getBounding(layer)
     const { x, y } = layer.styles
+
+    if (type === 'move' && layer.type === 'shape' && layer.category === 'D') {
+      // svg line snaps to the line edges not the whole layer.
+      const { point, size } = layer as IShape
+      const { width, initWidth } = layer.styles
+      const scale = (size ?? [1])[0]
+      const { width: rawWidth, height: rawHeight, baseDegree } = shapeUtils.lineDimension(point ?? [])
+      const ratio = width / initWidth
+      const dx = 2 * scale * Math.sin(baseDegree) * ratio
+      const dy = 2 * scale * Math.cos(baseDegree) * ratio
+
+      return {
+        v: [
+          {
+            pos: x + dx,
+            offset: -dx
+          },
+          {
+            pos: x + dx + rawWidth * ratio / 2,
+            offset: -dx - rawWidth * ratio / 2
+          },
+          {
+            pos: x + dx + rawWidth * ratio,
+            offset: -dx - rawWidth * ratio
+          }
+        ],
+        h: [
+          {
+            pos: y + dy,
+            offset: -dy
+          },
+          {
+            pos: y + dy + rawHeight * ratio / 2,
+            offset: -dy - rawHeight * ratio / 2
+          },
+          {
+            pos: y + dy + rawHeight * ratio,
+            offset: -dy - rawHeight * ratio
+          }
+        ]
+      }
+    }
 
     return type === 'move' ? {
       v: [

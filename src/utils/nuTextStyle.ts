@@ -253,24 +253,26 @@ export default Extension.create({
   addKeyboardShortcuts() {
     return {
       'Mod-z': ({ editor }) => {
-        stepsUtils.undo()
-        Vue.nextTick(() => {
-          const currLayer = layerUtils.getCurrLayer as IText
-          if (!currLayer.active) return
-          editor.commands.sync()
-          tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
-          textPropUtils.updateTextPropsState()
+        stepsUtils.undo().then(() => {
+          Vue.nextTick(() => {
+            const currLayer = layerUtils.getCurrLayer as IText
+            if (!currLayer.active) return
+            editor.commands.sync()
+            tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+            textPropUtils.updateTextPropsState()
+          })
         })
         return true
       },
       'Shift-Mod-z': ({ editor }) => {
-        stepsUtils.redo()
-        Vue.nextTick(() => {
-          const currLayer = layerUtils.getCurrLayer as IText
-          if (!currLayer.active) return
-          editor.commands.sync()
-          tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
-          textPropUtils.updateTextPropsState()
+        stepsUtils.redo().then(() => {
+          Vue.nextTick(() => {
+            const currLayer = layerUtils.getCurrLayer as IText
+            if (!currLayer.active) return
+            editor.commands.sync()
+            tiptapUtils.prevText = tiptapUtils.getText(editor as Editor)
+            textPropUtils.updateTextPropsState()
+          })
         })
         return true
       },
