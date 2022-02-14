@@ -38,6 +38,8 @@ class ThemeUtils {
   }
 
   refreshTemplateState(pageIndex?: number, newDesignType?: number) {
+    // Refresh template in sidebar panel. If pageIndex give, use its width and height to sort template.
+    // If newDesignType give, it should be the first priority template result.
     this.setTemplateThemes([])
     return this.checkThemeState().then(() => {
       this.setPageThemes(pageIndex, undefined, newDesignType)
