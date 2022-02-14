@@ -153,6 +153,7 @@ import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
 import localeUtils from '@/utils/localeUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -437,6 +438,7 @@ export default Vue.extend({
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       if (data.flag === 0) {
+        generalUtils.fbq('track', 'CompleteRegistration')
         await store.dispatch('user/login', { token: data.token })
         this.$router.push({ path: this.redirect || '/' })
         this.currentPageIndex = 0
