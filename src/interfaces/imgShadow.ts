@@ -38,8 +38,9 @@ export interface IProjectionEffect {
 }
 
 export interface IShadowProps {
-  [key: string]: string | number | { [key: string]: string | number } | IShadowEffect | undefined
+  [key: string]: string | number | boolean | { [key: string]: string | number } | IShadowEffect | undefined
   currentEffect: ShadowEffectType,
+  isTransparentBG?: boolean,
   color: string
   shadow?: IShadowEffect,
   blur?: IBlurEffect,

@@ -5,13 +5,14 @@ import layerUtils from './layerUtils'
 import store from '@/store'
 import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import imageUtils from './imageUtils'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80 as const
 class ImageShadowUtils {
-  setEffect (effect: ShadowEffectType, attrs = {}): void {
+  async setEffect (effect: ShadowEffectType, attrs = {}): Promise<void> {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
     if (subLayerIdx === -1 && currLayer.type === LayerType.group) {
       for (const i in (currLayer as IGroup).layers) {
@@ -21,14 +22,49 @@ class ImageShadowUtils {
       }
     } else {
       const { shadow } = (currLayer as IImage).styles
+      let isTransparentBG
+      if (!('isTransparentBG' in shadow)) {
+        isTransparentBG = await this.isTransparentBG(currLayer as IImage)
+      } else {
+        isTransparentBG = shadow.isTransparentBG
+      }
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         shadow: {
           ...(shadow && (shadow as IShadowProps)),
           ...attrs,
+          isTransparentBG,
           currentEffect: effect
         }
       }, subLayerIdx)
+      console.log(generalUtils.deepCopy(currLayer.styles.shadow))
     }
+  }
+
+  isTransparentBG(config: IImage): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.src = imageUtils.getSrc(config)
+      console.log(imageUtils.getSrc(config))
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        const { width: imgWidth, height: imgHeight } = img
+        const canvas = (document.createElement('canvas') as HTMLCanvasElement)
+        const c = canvas.getContext('2d')
+        canvas.width = imgWidth
+        canvas.height = imgHeight
+        if (c) {
+          c.drawImage(img, 0, 0)
+          const imgData = c.getImageData(0, 0, imgWidth, imgHeight).data
+          for (let i = 3; i < imgData.length; i += 4) {
+            if (imgData[i] < 255) {
+              resolve(true)
+            }
+          }
+        }
+        resolve(false)
+      }
+      img.onerror = () => reject(new Error('cannot load image'))
+    })
   }
 
   convertShadowEffect(styles: IImageStyle): { [key: string]: string } {
