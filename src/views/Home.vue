@@ -139,6 +139,7 @@ import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import themeUtils from '@/utils/themeUtils'
 import localeUtils from '@/utils/localeUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'Home',
@@ -277,6 +278,8 @@ export default Vue.extend({
     this.templates2 = this.templates1.filter((value, idx) => {
       return idx <= 4
     })
+
+    generalUtils.fbq('track', 'ViewContent')
   },
   methods: {
     ...mapActions({
@@ -390,7 +393,13 @@ export default Vue.extend({
       width: 100%;
       z-index: -2;
       object-fit: cover;
-      background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+      background: linear-gradient(
+        90deg,
+        #cce9ff 0%,
+        #f5fbff 37.1%,
+        #f8fcff 69.6%,
+        #eaf4ff 100%
+      );
       &.login_h {
         height: 420px;
       }
@@ -555,7 +564,7 @@ export default Vue.extend({
     bottom: -25px;
     width: calc(100% - 300px);
     height: 128px;
-    background: linear-gradient(0deg, #FFFFFF 70%, rgba(245, 238, 231, 0) 100%);
+    background: linear-gradient(0deg, #ffffff 70%, rgba(245, 238, 231, 0) 100%);
     @media screen and (max-width: 1440px) {
       width: calc(100% - 150px);
     }
@@ -604,7 +613,7 @@ export default Vue.extend({
       }
     }
     &-f1 {
-      background: #F3F6FA;
+      background: #f3f6fa;
       margin-top: 24px;
       padding: 0;
       @media screen and (max-width: 768px) {
@@ -619,7 +628,7 @@ export default Vue.extend({
           width: 50%;
         }
         @media screen and (max-width: 768px) {
-          margin:0 auto;
+          margin: 0 auto;
           width: 95%;
           max-width: unset;
         }
@@ -643,7 +652,7 @@ export default Vue.extend({
         }
         @media screen and (max-width: 768px) {
           padding-right: 0;
-          margin:0 auto;
+          margin: 0 auto;
           width: 95%;
           max-width: unset;
         }
@@ -672,7 +681,7 @@ export default Vue.extend({
         }
         @media screen and (max-width: 768px) {
           padding-left: 0;
-          margin:0 auto;
+          margin: 0 auto;
           width: 95%;
           max-width: unset;
         }
@@ -725,7 +734,7 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: #F3F6FA;
+    background: #f3f6fa;
     padding: 50px 24px 65px 24px;
     @media screen and (max-width: 768px) {
       padding-bottom: 50px;

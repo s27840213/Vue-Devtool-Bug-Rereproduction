@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import modalUtils from './modalUtils'
@@ -140,6 +141,10 @@ class GeneralUtils {
     a.href = src
     a.download = name
     a.click()
+  }
+
+  fbq(type: string, action: string, params?: { [index: string]: any }) {
+    params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }
 
   // log(params: string, data: any = '') {
