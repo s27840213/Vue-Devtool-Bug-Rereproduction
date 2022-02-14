@@ -20,20 +20,28 @@ import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
 
 class MouseUtils {
-  getMouseAbsPoint(e: MouseEvent) {
-    return { x: e.clientX, y: e.clientY }
+  getMouseAbsPoint(e: MouseEvent | TouchEvent) {
+    const type = generalUtils.getEventType(e)
+    return {
+      x: type === 'mouse' ? (e as MouseEvent).clientX : (e as TouchEvent).touches[0].clientX,
+      y: type === 'mouse' ? (e as MouseEvent).clientY : (e as TouchEvent).touches[0].clientY
+    }
   }
 
-  getMouseRelPoint(e: MouseEvent, target: HTMLElement | { x: number, y: number }) {
+  getMouseRelPoint(e: MouseEvent | TouchEvent, target: HTMLElement | { x: number, y: number }) {
     let x: number
     let y: number
+    const type = generalUtils.getEventType(e)
+
+    const clientX = (type === 'mouse' ? (e as MouseEvent).clientX : (e as TouchEvent).touches[0].clientX)
+    const clientY = (type === 'mouse' ? (e as MouseEvent).clientY : (e as TouchEvent).touches[0].clientY)
     if (target instanceof HTMLElement) {
       const rect = target.getBoundingClientRect()
-      x = e.clientX + target.scrollLeft - rect.left
-      y = e.clientY + target.scrollTop - rect.top
+      x = clientX + target.scrollLeft - rect.left
+      y = clientY + target.scrollTop - rect.top
     } else {
-      x = e.clientX - target.x
-      y = e.clientY - target.y
+      x = clientX - target.x
+      y = clientY - target.y
     }
     return { x, y }
   }

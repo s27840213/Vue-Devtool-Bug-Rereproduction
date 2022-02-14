@@ -17,9 +17,10 @@
         @dragenter="dragEnter($event)"
         @dragleave="dragLeave($event)"
         @dragover.prevent
-        @click.right.stop="onRightClick"
+        @click.right.stop="!isMobile() && onRightClick"
         @contextmenu.prevent
         @mousedown.left="moveStart"
+        @touchstart="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
@@ -83,7 +84,8 @@
             class="control-point scaler"
             :key="index"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
-            @mousedown.left.stop="scaleStart")
+            @mousedown.left.stop="scaleStart"
+            @touchstart.stop="scaleStart")
         div(v-for="(resizer, index) in resizer(controlPoints)"
             @mousedown.left.stop="resizeStart($event)")
           div(class="control-point__resize-bar"
@@ -92,7 +94,8 @@
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
         div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-            @mousedown.left.stop="moveStart($event)")
+            @mousedown.left.stop="moveStart($event)"
+            @touchstart.stop="moveStart($event)")
           div(class="control-point__resize-bar control-point__move-bar"
               :key="index"
               :style="resizerBarStyles(resizer.styles)")
@@ -107,7 +110,8 @@
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
-            @mousedown.left.stop="moveStart")
+            @mousedown.left.stop="moveStart"
+            @touchstart.stop="moveStart")
         template(v-else)
           div(class="control-point__controller-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
@@ -115,12 +119,14 @@
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
               :style='controlPointStyles()'
-              @mousedown.native.left.stop="rotateStart")
+              @mousedown.native.left.stop="rotateStart"
+              @touchstart.native.stop="rotateStart")
             img(class="control-point__mover"
               v-if="config.type !== 'text' || !contentEditable"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
-              @mousedown.left.stop="moveStart")
+              @mousedown.left.stop="moveStart"
+              @touchstartx.stop="moveStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -365,8 +371,13 @@ export default Vue.extend({
     /**
      * While image is setted to frame, these event-listener should be removed
      */
-    window.removeEventListener('mouseup', this.moveEnd)
-    window.removeEventListener('mousemove', this.moving)
+    if (generalUtils.isMobile()) {
+      window.removeEventListener('touchmove', this.moveEnd)
+      window.removeEventListener('touchend', this.moving)
+    } else {
+      window.removeEventListener('mouseup', this.moveEnd)
+      window.removeEventListener('mousemove', this.moving)
+    }
     this.isControlling = false
     this.setCursorStyle('')
     this.setMoving(false)
@@ -378,6 +389,9 @@ export default Vue.extend({
       setMoving: 'SET_moving',
       setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
+    isMobile(): boolean {
+      return generalUtils.isMobile()
+    },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
       const HW = {
@@ -623,8 +637,13 @@ export default Vue.extend({
             if (!this.config.locked) {
               this.isControlling = true
               this.initialPos = MouseUtils.getMouseAbsPoint(e)
-              window.addEventListener('mouseup', this.moveEnd)
-              window.addEventListener('mousemove', this.moving)
+              if (generalUtils.isMobile()) {
+                window.addEventListener('touchend', this.moveEnd, false)
+                window.addEventListener('touchmove', this.moving, false)
+              } else {
+                window.addEventListener('mouseup', this.moveEnd)
+                window.addEventListener('mousemove', this.moving)
+              }
             }
             return
           }
@@ -644,8 +663,13 @@ export default Vue.extend({
       }
       if (!this.config.locked && !inSelectionMode) {
         this.initialPos = MouseUtils.getMouseAbsPoint(e)
-        window.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
+        if (generalUtils.isMobile()) {
+          window.addEventListener('touchend', this.moveEnd, false)
+          window.addEventListener('touchmove', this.moving, false)
+        } else {
+          window.addEventListener('mouseup', this.moveEnd)
+          window.addEventListener('mousemove', this.moving)
+        }
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -678,15 +702,22 @@ export default Vue.extend({
         }
       }
     },
-    moving(e: MouseEvent) {
+    moving(e: MouseEvent | TouchEvent) {
       this.isControlling = true
       if (this.isImgControl) {
-        window.removeEventListener('mouseup', this.moveEnd)
-        window.removeEventListener('mousemove', this.moving)
+        if (generalUtils.isMobile()) {
+          window.removeEventListener('touchmove', this.moveEnd)
+          window.removeEventListener('touchend', this.moving)
+        } else {
+          window.removeEventListener('mouseup', this.moveEnd)
+          window.removeEventListener('mousemove', this.moving)
+        }
         return
       }
       if (this.isActive) {
-        e.preventDefault()
+        if (generalUtils.getEventType(e) !== 'touch') {
+          e.preventDefault()
+        }
         this.setCursorStyle('move')
         if (!this.config.moved) {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
@@ -721,7 +752,7 @@ export default Vue.extend({
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
-    moveEnd(e: MouseEvent) {
+    moveEnd(e: MouseEvent | TouchEvent) {
       if (this.getLayerType === 'image') {
         this.setMoving(false)
       }
@@ -753,8 +784,13 @@ export default Vue.extend({
         }
         this.isControlling = false
         this.setCursorStyle('')
-        window.removeEventListener('mouseup', this.moveEnd)
-        window.removeEventListener('mousemove', this.moving)
+        if (generalUtils.isMobile()) {
+          window.removeEventListener('touchmove', this.moveEnd)
+          window.removeEventListener('touchend', this.moving)
+        } else {
+          window.removeEventListener('mouseup', this.moveEnd)
+          window.removeEventListener('mousemove', this.moving)
+        }
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
@@ -788,13 +824,22 @@ export default Vue.extend({
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
       this.currCursorStyling(event)
+      if (generalUtils.isMobile()) {
+        document.documentElement.addEventListener('touchmove', this.scaling, false)
+        document.documentElement.addEventListener('touchend', this.scaleEnd, false)
+      } else {
+        document.documentElement.addEventListener('mousemove', this.scaling, false)
+        document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
+      }
       document.documentElement.addEventListener('mousemove', this.scaling, false)
       document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
       document.documentElement.addEventListener('keyup', this.handleScaleOffset)
       document.documentElement.addEventListener('keydown', this.handleScaleOffset)
     },
-    scaling(event: MouseEvent) {
-      event.preventDefault()
+    scaling(event: MouseEvent | TouchEvent) {
+      if (generalUtils.getEventType(event) !== 'touch') {
+        event.preventDefault()
+      }
       const altPressed = generalUtils.exact([event.altKey])
 
       if (!this.config.moved) {
@@ -954,8 +999,13 @@ export default Vue.extend({
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.scaling, false)
-      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      if (generalUtils.isMobile()) {
+        document.documentElement.removeEventListener('touchmove', this.scaling, false)
+        document.documentElement.removeEventListener('touchend', this.scaleEnd, false)
+      } else {
+        document.documentElement.removeEventListener('mousemove', this.scaling, false)
+        document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
+      }
       document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
       document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
@@ -1630,6 +1680,7 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
     transform-style: preserve-3d;
+    touch-action: none;
   }
   &__ctrl-points {
     display: flex;
@@ -1641,6 +1692,7 @@ export default Vue.extend({
       cursor: pointer;
     }
     pointer-events: "none";
+    touch-action: none;
   }
 
   &__lock-icon {
