@@ -68,6 +68,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
@@ -173,7 +174,7 @@ export default Vue.extend({
     },
     emptyResultMessage(): string {
       const { keyword, pending, listResult } = this
-      return !pending && !listResult.length ? (keyword ? `Sorry, we couldn't find any templates for "${this.keyword}".` : 'Sorry, we couldn\'t find any templates') : ''
+      return !pending && !listResult.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword })}` : `${i18n.t('NN0394')}`) : ''
     },
     currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()
