@@ -144,9 +144,13 @@ export default Vue.extend({
     restoreInitState(newVal) {
       if (newVal) {
         this.clearCtx()
-        this.ctx.filter = 'none'
-        this.drawImageToCtx()
-        this.ctx.filter = `blur(${this.blurPx}px)`
+        if (this.clearMode) {
+          this.ctx.filter = 'none'
+          this.ctx.filter = `blur(${this.blurPx}px)`
+        } else {
+          this.ctx.filter = 'none'
+          this.drawImageToCtx()
+        }
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
         this.steps = []
