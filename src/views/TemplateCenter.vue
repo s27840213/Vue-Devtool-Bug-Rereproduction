@@ -344,6 +344,10 @@ export default Vue.extend({
     themeUtils.checkThemeState().then(() => {
       this.themes = themeUtils.themes
     })
+
+    generalUtils.fbq('track', 'ViewContent', {
+      content_type: 'TemplateCenter'
+    })
   },
   beforeCreate() {
     this.$store.registerModule('hashtag', hashtag)
@@ -428,6 +432,9 @@ export default Vue.extend({
           }
         })
         window.open(route.href, '_blank')
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.group_id]
+        })
         return
       }
       if (template.content_ids.length === 1) {
@@ -449,6 +456,9 @@ export default Vue.extend({
           }
         })
         window.open(route.href, '_blank')
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.id]
+        })
       } else {
         this.content_ids = template.content_ids
         if (this.isMobile()) {
@@ -500,7 +510,9 @@ export default Vue.extend({
         this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
         this.isTemplateReady = true
       })
-      generalUtils.fbq('track', 'Search')
+      generalUtils.fbq('track', 'Search', {
+        search_string: this.searchbarKeyword
+      })
     },
     handleLoadMore() {
       this.isTemplateReady = false
@@ -525,6 +537,9 @@ export default Vue.extend({
             }
           })
           window.open(route.href, '_blank')
+          generalUtils.fbq('track', 'AddToWishlist', {
+            content_ids: [content.id]
+          })
           return
         }
         this.modal = 'template'
@@ -549,6 +564,9 @@ export default Vue.extend({
           }
         })
         window.open(route.href, '_blank')
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [content.id]
+        })
       }
     },
     handleThemeSelect(theme: Itheme) {
@@ -566,6 +584,9 @@ export default Vue.extend({
         }
       })
       window.open(route.href, '_blank')
+      generalUtils.fbq('track', 'AddToWishlist', {
+        content_ids: [this.contentBuffer.id]
+      })
     },
     getPrevUrl(content: IContentTemplate): string {
       return templateCenterUtils.getPrevUrl(content)

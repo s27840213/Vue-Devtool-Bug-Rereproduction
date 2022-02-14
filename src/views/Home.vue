@@ -279,7 +279,9 @@ export default Vue.extend({
       return idx <= 4
     })
 
-    generalUtils.fbq('track', 'ViewContent')
+    generalUtils.fbq('track', 'ViewContent', {
+      content_type: 'Home'
+    })
   },
   methods: {
     ...mapActions({
