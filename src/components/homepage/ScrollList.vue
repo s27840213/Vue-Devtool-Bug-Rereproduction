@@ -127,9 +127,9 @@ export default Vue.extend({
     newDesign(item: Itheme) {
       this.$router.push({ name: 'Editor' }).then(() => {
         if (item.height !== 0) {
-          designUtils.newDesign(item.width, item.height)
-        } else {
-          designUtils.newDesign(item.width, item.width)
+          designUtils.newDesign(item.width, item.height, item.id)
+        } else { // for 電商詳情頁
+          designUtils.newDesign(item.width, item.width, item.id)
           this.setGroupType(1)
         }
       })
