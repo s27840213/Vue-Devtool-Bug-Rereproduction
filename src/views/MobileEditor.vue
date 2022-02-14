@@ -70,8 +70,8 @@ export default Vue.extend({
   data() {
     return {
       FunctionPanelType,
-      isColorPanelOpen: false,
-      isSidebarPanelOpen: false
+      isColorPanelOpen: false
+      // isSidebarPanelOpen: false
     }
   },
   watch: {
@@ -97,7 +97,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      isSidebarPanelOpen: 'getMobileSidebarPanelOpen'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -173,6 +174,7 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
+      setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
     setAdminMode() {
@@ -185,7 +187,7 @@ export default Vue.extend({
       this.isColorPanelOpen = bool
     },
     toggleSidebarPanel(bool: boolean) {
-      this.isSidebarPanelOpen = bool
+      this.setMobileSidebarPanelOpen(bool)
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')

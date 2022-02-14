@@ -48,6 +48,7 @@ const getDefaultState = (): IEditorState => ({
   },
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
+  mobileSidebarPanelOpen: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
   middlemostPageIndex: 0,
@@ -134,6 +135,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSidebarPanelType(state: IEditorState): number {
     return state.currSidebarPanelType
+  },
+  getMobileSidebarPanelOpen(state: IEditorState): boolean {
+    return state.mobileSidebarPanelOpen
   },
   getCurrFunctionPanelType(state: IEditorState): number {
     return state.currFunctionPanelType
@@ -306,6 +310,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currSidebarPanelType(state: IEditorState, type: SidebarPanelType) {
     state.currSidebarPanelType = type
+  },
+  SET_mobileSidebarPanelOpen(state: IEditorState, value: boolean) {
+    state.mobileSidebarPanelOpen = value
   },
   SET_currFunctionPanelType(state: IEditorState, type: FunctionPanelType) {
     state.currFunctionPanelType = type

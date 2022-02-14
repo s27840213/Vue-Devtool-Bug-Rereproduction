@@ -26,6 +26,7 @@ export interface IEditorState {
     path: string
   },
   currSidebarPanelType: number,
+  mobileSidebarPanelOpen: boolean,
   currFunctionPanelType: number,
   pageScaleRatio: number,
   middlemostPageIndex: number,

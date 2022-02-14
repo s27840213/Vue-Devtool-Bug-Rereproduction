@@ -114,6 +114,7 @@ export default Vue.extend({
   grid-template-columns: 1fr;
   // box-shadow: 2px 0px 5px setColor(gray-4);
   z-index: setZindex(sidebar);
+  -webkit-tap-highlight-color: transparent;
   &__chevron {
     @include flexCenter;
     padding: 10px;

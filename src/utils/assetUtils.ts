@@ -474,6 +474,7 @@ class AssetUtils {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
+    store.commit('SET_mobileSidebarPanelOpen', false)
     // store.commit('SET_groupType', groupType)
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
@@ -529,6 +530,7 @@ class AssetUtils {
 
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
+      store.commit('SET_mobileSidebarPanelOpen', false)
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 1:
