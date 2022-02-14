@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="mobile-editor")
-    //- sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
+  div(class="editor")
+    mobile-sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
       @toggleSidebarPanel="toggleSidebarPanel")
     section(style="height: 100%;")
       div(class="content")
-        //- sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
+        sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
         div(class="content__main")
           div(class="content__editor")
             //- div(class="header-container")
@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import Sidebar from '@/components/editor/Sidebar.vue'
+import MobileSidebar from '@/components/editor/MobileSidebar.vue'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
@@ -57,7 +57,7 @@ import networkUtils from '@/utils/networkUtils'
 export default Vue.extend({
   name: 'MobileEditor',
   components: {
-    Sidebar,
+    MobileSidebar,
     EditorHeader,
     SidebarPanel,
     MobileEditorView,
@@ -71,7 +71,7 @@ export default Vue.extend({
     return {
       FunctionPanelType,
       isColorPanelOpen: false,
-      isSidebarPanelOpen: true
+      isSidebarPanelOpen: false
     }
   },
   watch: {
@@ -195,23 +195,23 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.mobile-editor {
+.editor {
   @include size(100%, 100%);
   max-height: 100%;
-  // display: grid;
-  // grid-template-rows: minmax(0, 1fr);
-  // grid-template-columns: auto 1fr;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: auto 1fr;
   > section:nth-child(2) {
-    // display: grid;
-    // grid-template-rows: minmax(0, 1fr);
-    // grid-template-columns: 1fr;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
 .content {
-  // display: grid;
-  // grid-template-rows: minmax(0, 1fr);
-  // grid-template-columns: auto 1fr auto;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: auto 1fr auto;
   height: 100%;
   &__main {
     // display: grid;

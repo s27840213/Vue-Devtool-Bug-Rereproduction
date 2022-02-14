@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="scrollbar-gray mobile-editor-view"
+  div(class="scrollbar-gray editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @mousedown.left="!inBgRemoveMode ? selectStart($event) : null"
@@ -7,8 +7,8 @@
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
       ref="editorView")
-    div(class="mobile-editor-view__grid")
-      div(class="mobile-editor-view__canvas"
+    div(class="editor-view__grid")
+      div(class="editor-view__canvas"
           ref="canvas"
           @mousedown.left.self="outerClick($event)")
         template(v-if="!inBgRemoveMode")
@@ -32,7 +32,7 @@
           @mousedown.native.stop="dragStartV($event)")
         div(class="corner-block")
     div(v-if="!inBgRemoveMode"
-        class="mobile-editor-view__guidelines-area"
+        class="editor-view__guidelines-area"
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
@@ -485,7 +485,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 $REULER_SIZE: 20px;
 
-.mobile-editor-view {
+.editor-view {
   overflow: scroll;
   position: relative;
   z-index: setZindex("editor-view");
