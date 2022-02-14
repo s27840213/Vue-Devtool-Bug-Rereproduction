@@ -21,6 +21,7 @@ import page from '@/store/module/page'
 import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
 import layouts from '@/store/module/layouts'
+import markers from '@/store/module/markers'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -764,6 +765,7 @@ export default new Vuex.Store({
     homeTemplate,
     design,
     layouts,
+    markers,
     unsplash,
     bgRemove
   }
