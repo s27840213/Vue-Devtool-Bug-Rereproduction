@@ -1,19 +1,21 @@
 <template lang="pug">
 div(class="bg-remove-area"
-  :style="wrapperStyles"
+      :style="wrapperStyles"
       ref="bgRemoveArea")
-    div(class="bg-remove-area__scale-area"
-        :style="areaStyles"
-        :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
-      canvas(class="bg-remove-area" ref="canvas")
-      div(class="bg-remove-area__brush" :style="brushStyle")
+  div(class="bg-remove-area__scale-area"
+      :style="areaStyles"
+      :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
+    canvas(class="bg-remove-area" ref="canvas")
+    div(class="bg-remove-area__brush" :style="brushStyle")
+  div(v-if="loading" class="bg-remove-area__loading")
+    svg-icon(class="spiner"
+      :iconName="'spiner'"
+      :iconColor="'white'"
+      :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IImage } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
-import imageUtils from '@/utils/imageUtils'
+import { IBgRemoveInfo } from '@/interfaces/image'
 import mouseUtils from '@/utils/mouseUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -30,6 +32,7 @@ export default Vue.extend({
       ctx: undefined as unknown as CanvasRenderingContext2D,
       tmpCanvas: undefined as unknown as HTMLCanvasElement,
       tmpCtx: undefined as unknown as CanvasRenderingContext2D,
+      initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
       brushStyle: {
@@ -40,6 +43,7 @@ export default Vue.extend({
         height: '16px'
       },
       isMouseDown: false,
+      initImgSrc: '',
       imgSrc: '',
       currStep: 0,
       steps: [] as Array<string>,
@@ -47,16 +51,24 @@ export default Vue.extend({
     }
   },
   created() {
-    const { width, height } = (this.currSelectedInfo as ICurrSelectedInfo).layers[0].styles
+    const { width, height } = (this.autoRemoveResult as IBgRemoveInfo)
     const aspectRatio = width / height
     this.canvasHeight = 1600 / aspectRatio
-    this.imgSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage)
+    this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
+    this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.full
   },
   mounted() {
     this.imageElement = new Image()
     this.imageElement.src = this.imgSrc
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     this.imageElement.onload = () => {
+      this.initCanvas()
+    }
+
+    this.initImageElement = new Image()
+    this.initImageElement.src = this.initImgSrc
+    this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
+    this.initImageElement.onload = () => {
       this.initCanvas()
     }
     this.editorView.addEventListener('mousedown', this.drawStart)
@@ -76,7 +88,10 @@ export default Vue.extend({
       brushSize: 'bgRemove/getBrushSize',
       restoreInitState: 'bgRemove/getRestoreInitState',
       clearMode: 'bgRemove/getClearMode',
-      showInitImage: 'bgRemove/getShowInitImage'
+      showInitImage: 'bgRemove/getShowInitImage',
+      autoRemoveResult: 'bgRemove/getAutoRemoveResult',
+      modifiedFlag: 'bgRemove/getModifiedFlag',
+      loading: 'bgRemove/getLoading'
     }),
     size(): { width: number, height: number } {
       return {
@@ -94,7 +109,7 @@ export default Vue.extend({
       }
     },
     wrapperStyles(): { [index: string]: string } {
-      const backgroundImage = this.showInitImage ? `url(${this.imgSrc})` : ''
+      const backgroundImage = this.showInitImage ? `url(${this.initImgSrc})` : ''
       const backgroundSize = this.showInitImage ? 'cover' : 'initial'
       return {
         width: `${this.size.width * (this.scaleRatio / 100)}px`,
@@ -118,8 +133,12 @@ export default Vue.extend({
     },
     restoreInitState(newVal) {
       if (newVal) {
-        this.drawImage()
+        this.clearCtx()
+        this.ctx.filter = 'none'
+        this.drawImageToCtx()
+        this.ctx.filter = 'blur(5px)'
         this.setRestoreInitState(false)
+        this.setModifiedFlag(false)
       }
     },
     clearMode(newVal) {
@@ -136,7 +155,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
-      _setCanvas: 'bgRemove/SET_canvas'
+      _setCanvas: 'bgRemove/SET_canvas',
+      setModifiedFlag: 'bgRemove/SET_modifiedFlag'
     }),
     initCanvas() {
       this.canvas = this.$refs.canvas as HTMLCanvasElement
@@ -150,7 +170,8 @@ export default Vue.extend({
       this.ctx = ctx
       // this.ctx.globalCompositeOperation = 'destination-out'
 
-      this.drawImage()
+      this.drawImageToCtx()
+      this.ctx.filter = 'blur(5px)'
       this.pushStep()
     },
     createTmpCanvas() {
@@ -164,7 +185,7 @@ export default Vue.extend({
       ctx.lineWidth = this.brushSize
 
       this.tmpCtx = ctx
-      this.drawTmpImage()
+      this.drawImageToTmpCtx()
     },
     draw(e: MouseEvent, ctx: CanvasRenderingContext2D) {
       ctx.beginPath()
@@ -176,6 +197,10 @@ export default Vue.extend({
         x,
         y
       })
+
+      if (!this.modifiedFlag) {
+        this.setModifiedFlag(true)
+      }
     },
     drawStart(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInPage(e, -1)
@@ -214,7 +239,7 @@ export default Vue.extend({
       this.brushStyle.left = `${x - this.brushSize / 2}px`
       this.brushStyle.top = `${y - this.brushSize / 2}px`
     },
-    drawImage(img?: HTMLImageElement) {
+    drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
       this.ctx.drawImage(img ?? this.imageElement, 0, 0, this.size.width, this.size.height)
       this._setCanvas(this.canvas)
@@ -229,8 +254,8 @@ export default Vue.extend({
 
       targetCtx.clearRect(0, 0, this.size.width, this.size.height)
     },
-    drawTmpImage() {
-      this.tmpCtx.drawImage(this.imageElement as HTMLImageElement, 0, 0, this.size.width, this.size.height)
+    drawImageToTmpCtx() {
+      this.tmpCtx.drawImage(this.initImageElement as HTMLImageElement, 0, 0, this.size.width, this.size.height)
       this.setCompositeOperationMode('destination-in', this.tmpCtx)
     },
     setCompositeOperationMode(mode: string, ctx?: CanvasRenderingContext2D) {
@@ -258,7 +283,7 @@ export default Vue.extend({
 
         img.onload = () => {
           this.clearCtx()
-          this.drawImage(img)
+          this.drawImageToCtx(img)
         }
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
@@ -269,7 +294,7 @@ export default Vue.extend({
 
         img.onload = () => {
           this.clearCtx()
-          this.drawImage(img)
+          this.drawImageToCtx(img)
         }
       }
     }
@@ -316,6 +341,32 @@ export default Vue.extend({
     pointer-events: none;
     border-radius: 50%;
     opacity: 0.6;
+  }
+
+  &__loading {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: setColor(gray-1, 0.3);
+  }
+}
+
+.spiner {
+  animation: rotation 0.5s infinite linear;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
   }
 }
 </style>

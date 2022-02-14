@@ -45,7 +45,7 @@
       btn( class="full-width"
         type="primary-mid"
         ref="btn"
-        @click.native="exportCanvas()") {{ $tc('NN0133',1) }}
+        @click.native="save()") {{ $tc('NN0133',1) }}
 </template>
 
 <script lang="ts">
@@ -53,7 +53,12 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
-import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { IImage } from '@/interfaces/layer'
+import { IBgRemoveInfo } from '@/interfaces/image'
+import uploadUtils from '@/utils/uploadUtils'
+import { IUploadAssetResponse } from '@/interfaces/upload'
 
 export default Vue.extend({
   data() {
@@ -69,7 +74,11 @@ export default Vue.extend({
     ...mapGetters({
       clearMode: 'bgRemove/getClearMode',
       showInitImage: 'bgRemove/getShowInitImage',
-      canvas: 'bgRemove/getCanvas'
+      canvas: 'bgRemove/getCanvas',
+      modifiedFlag: 'bgRemove/getModifiedFlag',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      autoRemoveResult: 'bgRemove/getAutoRemoveResult',
+      isAdmin: 'user/isAdmin'
     }),
     brushSize: {
       get: () => {
@@ -90,7 +99,8 @@ export default Vue.extend({
       setBrushSize: 'bgRemove/SET_brushSize',
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
       setClearMode: 'bgRemove/SET_clearMode',
-      setShowInitImage: 'bgRemove/SET_showInitImage'
+      setShowInitImage: 'bgRemove/SET_showInitImage',
+      setLoading: 'bgRemove/SET_loading'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -98,9 +108,34 @@ export default Vue.extend({
     restoreInitState() {
       this.setRestoreInitState(true)
     },
-    exportCanvas() {
-      const src = this.canvas.toDataURL('image/png;base64')
-      generalUtils.downloadImage(src)
+    save() {
+      const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
+      if (!this.modifiedFlag) {
+        const { srcObj } = layers[0] as IImage
+        layerUtils.updateLayerProps(pageIndex, index, {
+          srcObj: {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
+            assetId: this.isAdmin ? (this.autoRemoveResult as IBgRemoveInfo).id : (this.autoRemoveResult as IBgRemoveInfo).assetIndex
+          },
+          trace: 1
+        })
+        this.setInBgRemoveMode(false)
+      } else {
+        this.setLoading(true)
+        uploadUtils.uploadAsset('image', [this.canvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
+          layerUtils.updateLayerProps(pageIndex, index, {
+            srcObj: {
+              type: this.isAdmin ? 'public' : 'private',
+              userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
+              assetId: this.isAdmin ? json.data.id : json.data.asset_index
+            },
+            trace: 1
+          })
+          this.setLoading(false)
+          this.setInBgRemoveMode(false)
+        })
+      }
     }
   }
 })

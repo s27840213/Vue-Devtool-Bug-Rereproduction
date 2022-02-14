@@ -6,7 +6,7 @@
           @toggleColorPanel="toggleColorPanel"
           :alignLeft="false")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
-      component(v-show="isSidebarPanelOpen && !isShowPagePreview"
+      component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
         class="p-10 border-box"
         :style="panelStyles()"
         @toggleColorPanel="toggleColorPanel"
@@ -72,7 +72,8 @@ export default Vue.extend({
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      showPagePanel: 'page/getShowPagePanel'
+      showPagePanel: 'page/getShowPagePanel',
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     })
   },
   methods: {

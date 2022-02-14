@@ -200,7 +200,7 @@ const mutations: MutationTree<IUserModule> = {
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, teamId, userId } = state
     const isAdmin = state.role === 0
-    const images = userAssets.image.content.map((image: IUserImageContentData) => {
+    const images = userAssets.image.content.filter((image: IUserImageContentData) => { return image.hidden === 0 }).map((image: IUserImageContentData) => {
       const aspectRatio = image.width / image.height
       const prevW = image.width > image.height ? image.width : 384 * aspectRatio
       const prevH = image.height > image.width ? image.height : 384 / aspectRatio
@@ -259,7 +259,6 @@ const mutations: MutationTree<IUserModule> = {
   },
   [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex, type = 'private' }) {
     const { images, teamId, userId } = state
-    console.log(type)
     const isAdmin = type === 'public'
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
@@ -521,10 +520,10 @@ const actions: ActionTree<IUserModule, unknown> = {
       throw new Error('fail to fetch private image urls')
     }
   },
-  async removeBg({ state }, { assetIndex }) {
+  async removeBg({ state }, { srcObj, aspect }) {
     try {
-      const { data } = await userApis.removeBg(assetIndex)
-      console.log(data)
+      srcObj = JSON.stringify(srcObj)
+      const { data } = await userApis.removeBg(srcObj, aspect)
       return data
     } catch (error) {
       console.log(error)

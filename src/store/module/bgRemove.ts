@@ -1,3 +1,4 @@
+import { IBgRemoveInfo } from '@/interfaces/image'
 import { GetterTree, MutationTree } from 'vuex'
 
 interface IBgRemoveState {
@@ -6,7 +7,10 @@ interface IBgRemoveState {
   showInitImage: boolean,
   clearMode: boolean,
   restoreInitState: boolean,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
+  autoRemoveResult: IBgRemoveInfo,
+  modifiedFlag: boolean,
+  loading: boolean
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -15,7 +19,10 @@ const getDefaultState = (): IBgRemoveState => ({
   showInitImage: false,
   clearMode: true,
   restoreInitState: false,
-  canvas: null as unknown as HTMLCanvasElement
+  canvas: null as unknown as HTMLCanvasElement,
+  autoRemoveResult: null as unknown as IBgRemoveInfo,
+  modifiedFlag: false,
+  loading: false
 })
 
 const state = getDefaultState()
@@ -37,6 +44,15 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getCanvas() {
     return state.canvas
+  },
+  getAutoRemoveResult() {
+    return state.autoRemoveResult
+  },
+  getModifiedFlag() {
+    return state.modifiedFlag
+  },
+  getLoading() {
+    return state.loading
   }
 }
 
@@ -64,6 +80,28 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_canvas(state: IBgRemoveState, canvas: HTMLCanvasElement) {
     state.canvas = canvas
+  },
+  SET_autoRemoveResult(state: IBgRemoveState, result: IBgRemoveInfo) {
+    state.autoRemoveResult = result
+  },
+  SET_modifiedFlag(state: IBgRemoveState, flag: boolean) {
+    state.modifiedFlag = flag
+  },
+  SET_loading(state: IBgRemoveState, bool: boolean) {
+    state.loading = bool
+  },
+  CLEAR_bgRemoveInfo(state: IBgRemoveState) {
+    Object.assign(state, {
+      inBgRemoveMode: false,
+      brushSize: 16,
+      showInitImage: false,
+      clearMode: true,
+      restoreInitState: false,
+      canvas: null as unknown as HTMLCanvasElement,
+      autoRemoveResult: null as unknown as IBgRemoveInfo,
+      modifiedFlag: false,
+      loading: false
+    })
   }
 }
 

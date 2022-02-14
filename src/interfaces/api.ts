@@ -231,6 +231,7 @@ export interface IUserImageContentData {
   id: string
   team_id: string
   ver: number,
+  hidden: number,
   // Only for private asset
   signed_url?: {
     full: string,

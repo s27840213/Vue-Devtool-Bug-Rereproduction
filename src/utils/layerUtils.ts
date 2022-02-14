@@ -366,6 +366,12 @@ class LayerUtils {
     return -1
   }
 
+  getLayerIndexById(pageIndex: number, id: string) {
+    return this.getLayers(pageIndex).findIndex((layer: ILayer) => {
+      return layer.id === id
+    })
+  }
+
   getObjectInsertionLayerIndex(layers: ILayer[], objectLayer: any) {
     const startIndex = this.getUpmostNonTextLayerIndex(layers)
     let upmostOverlapTextIndex = startIndex
