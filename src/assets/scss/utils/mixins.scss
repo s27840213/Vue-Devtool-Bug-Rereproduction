@@ -12,3 +12,10 @@
         @content;
     }
 }
+@mixin no-scrollbar {
+    &::-webkit-scrollbar {
+        display: none !important;
+    }
+    -ms-overflow-style: none !important; /* IE and Edge */
+    scrollbar-width: none !important; /* Firefox */
+}

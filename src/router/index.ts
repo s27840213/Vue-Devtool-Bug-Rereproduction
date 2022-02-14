@@ -10,6 +10,7 @@ import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
+import MobileEditor from '../views/MobileEditor.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -53,6 +54,13 @@ const routes: Array<RouteConfig> = [
     path: 'editor',
     name: 'Editor',
     component: Editor,
+    // eslint-disable-next-line space-before-function-paren
+    beforeEnter: editorRouteHandler
+  },
+  {
+    path: 'mobile-editor',
+    name: 'MobileEditor',
+    component: MobileEditor,
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: editorRouteHandler
   },
