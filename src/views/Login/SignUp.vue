@@ -313,6 +313,9 @@ export default Vue.extend({
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
+          if (data.data.new_user) {
+            generalUtils.fbq('track', 'CompleteRegistration')
+          }
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
@@ -327,6 +330,9 @@ export default Vue.extend({
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
+          if (data.data.new_user) {
+            generalUtils.fbq('track', 'CompleteRegistration')
+          }
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
