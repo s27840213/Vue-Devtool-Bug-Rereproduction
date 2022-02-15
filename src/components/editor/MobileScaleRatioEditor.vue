@@ -74,7 +74,7 @@ export default Vue.extend({
     openResizePopup() {
       popupUtils.openPopup('page-scale', {
         posX: 'right',
-        posY: 'top'
+        posY: 'bottom'
       })
     },
     deleteLayer() {
