@@ -13,6 +13,9 @@
       svg-icon(class="pointer"
         :class="[{'rotate-hr': isPageScalePopupOpen}]"
         :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
+    svg-icon(class="hover-effect pointer"
+      @click.native="deleteLayer"
+      :iconName="'trash'" :iconColor="'gray-2'" iconWidth="20px")
 </template>
 
 <script lang="ts">
@@ -20,6 +23,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 
 export default Vue.extend({
   data() {
@@ -72,6 +76,9 @@ export default Vue.extend({
         posX: 'right',
         posY: 'top'
       })
+    },
+    deleteLayer() {
+      shortcutUtils.del()
     }
   }
 })
@@ -81,16 +88,16 @@ export default Vue.extend({
 .scale-ratio-editor {
   display: grid;
   grid-template-rows: auto;
-  grid-template-columns: auto auto auto auto auto;
+  grid-template-columns: repeat(3, auto);
   background-color: setColor(white);
   align-items: center;
   box-shadow: 0px 0px 5px setColor(gray-2, 0.3);
-  padding: 7px 14px;
-  border-radius: 7px 7px 0 0;
+  padding: 2px;
+  border-radius: 0 0 7px 7px;
   column-gap: 5px;
   &__input {
     background: setColor(gray-6);
-    width: 180px;
+    width: min(180px, 35vw);
     &:focus {
       outline: none;
     }

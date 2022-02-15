@@ -372,8 +372,8 @@ export default Vue.extend({
      * While image is setted to frame, these event-listener should be removed
      */
     if (generalUtils.isMobile()) {
-      window.removeEventListener('touchmove', this.moveEnd)
-      window.removeEventListener('touchend', this.moving)
+      window.removeEventListener('touchmove', this.moving)
+      window.removeEventListener('touchend', this.moveEnd)
     } else {
       window.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
@@ -706,8 +706,8 @@ export default Vue.extend({
       this.isControlling = true
       if (this.isImgControl) {
         if (generalUtils.isMobile()) {
-          window.removeEventListener('touchmove', this.moveEnd)
-          window.removeEventListener('touchend', this.moving)
+          window.removeEventListener('touchmove', this.moving)
+          window.removeEventListener('touchend', this.moveEnd)
         } else {
           window.removeEventListener('mouseup', this.moveEnd)
           window.removeEventListener('mousemove', this.moving)
@@ -785,8 +785,8 @@ export default Vue.extend({
         this.isControlling = false
         this.setCursorStyle('')
         if (generalUtils.isMobile()) {
-          window.removeEventListener('touchmove', this.moveEnd)
-          window.removeEventListener('touchend', this.moving)
+          window.removeEventListener('touchmove', this.moving)
+          window.removeEventListener('touchend', this.moveEnd)
         } else {
           window.removeEventListener('mouseup', this.moveEnd)
           window.removeEventListener('mousemove', this.moving)

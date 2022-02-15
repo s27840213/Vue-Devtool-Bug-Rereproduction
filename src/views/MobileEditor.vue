@@ -111,7 +111,7 @@ export default Vue.extend({
         right: '2rem'
       } : {
         left: '50%',
-        transform: 'translateX(-50%) scale(.5)'
+        transform: 'translateX(-50%)'
       }
     },
     contentPanelStyles(): { [index: string]: string } {
@@ -284,7 +284,7 @@ export default Vue.extend({
 
 .scale-ratio-editor::v-deep {
   position: absolute;
-  bottom: 0px;
+  top: 0px;
   z-index: setZindex("scale-ratio-editor");
 }
 </style>
