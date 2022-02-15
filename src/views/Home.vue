@@ -233,7 +233,9 @@ export default Vue.extend({
     }
 
     await themeUtils.checkThemeState().then(() => {
-      this.themeList = themeUtils.themes
+      this.themeList = themeUtils.themes.filter(theme => {
+        return theme.mainHidden === 0
+      })
     })
 
     const templates = [

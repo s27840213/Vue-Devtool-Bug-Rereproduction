@@ -3,6 +3,7 @@ import store from '@/store'
 import PageUtils from '@/utils/pageUtils'
 import listService from '@/apis/list'
 import i18n from '@/i18n'
+import _ from 'lodash'
 
 class ThemeUtils {
   get themes() { return store.state.themes }
@@ -36,10 +37,12 @@ class ThemeUtils {
     // this.getContent()
   }
 
-  refreshTemplateState(pageIndex?: number) {
+  refreshTemplateState(pageIndex?: number, newDesignType?: number) {
+    // Refresh template in sidebar panel. If pageIndex give, use its width and height to sort template.
+    // If newDesignType give, it should be the first priority template result.
     this.setTemplateThemes([])
     return this.checkThemeState().then(() => {
-      this.setPageThemes(pageIndex)
+      this.setPageThemes(pageIndex, undefined, newDesignType)
       this.fetchTemplateContent()
     })
   }
@@ -56,21 +59,32 @@ class ThemeUtils {
     return Promise.resolve()
   }
 
-  setPageThemes(pageIndex?: number, themes?: Itheme[]) {
+  setPageThemes(pageIndex?: number, themes?: Itheme[], newDesignType?: number) {
     const pageSize = this.getFocusPageSize(pageIndex)
-    const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height))
+    const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
     this.setTemplateThemes(pageThemes)
   }
 
-  getThemesBySize(width: number, height: number) {
+  getThemesBySize(width: number, height: number, newDesignType?: number) {
     const { themes, groupType } = this
 
     if (groupType === 1) return themes.filter(theme => theme.id === 7)
-    const ratio = width / height
-    const recommendation = themes.filter(theme => {
-      const themeRatio = theme.width / theme.height
-      return this.isSimilarSize(themeRatio, ratio, 0.2)
-    })
+
+    // Sort themes by difference and filter low difference themes.
+    const currPageRatio = width / height
+    let recommendation: Itheme[] = _.sortBy(themes, [
+      (theme: Itheme) => this.themeRatioDifference(theme, currPageRatio),
+      (theme: Itheme) => Math.abs(theme.width - width)
+    ])
+    recommendation = recommendation.filter(
+      theme => this.themeRatioDifference(theme, currPageRatio) < 0.2
+    )
+
+    // Pick new design type to the top.
+    if (newDesignType) {
+      recommendation = recommendation.filter((item) => item.id === newDesignType).concat(
+        recommendation.filter((item) => item.id !== newDesignType))
+    }
     return recommendation.length ? recommendation : [...themes]
   }
 
@@ -87,6 +101,11 @@ class ThemeUtils {
 
   private isSimilarSize(targetRatio: number, ratio: number, range: number) {
     return targetRatio * (1 + range) >= ratio && targetRatio * (1 - range) <= ratio
+  }
+
+  private themeRatioDifference(theme: Itheme, baselineRatio: number) {
+    const themeRatio = theme.width / theme.height
+    return Math.abs(themeRatio - baselineRatio) / baselineRatio
   }
 }
 

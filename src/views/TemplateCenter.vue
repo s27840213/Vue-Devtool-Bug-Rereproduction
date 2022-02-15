@@ -342,7 +342,9 @@ export default Vue.extend({
       this.composeKeyword()
     })
     themeUtils.checkThemeState().then(() => {
-      this.themes = themeUtils.themes
+      this.themes = themeUtils.themes.filter(theme => {
+        return theme.mainHidden === 0
+      })
     })
 
     generalUtils.fbq('track', 'ViewContent', {

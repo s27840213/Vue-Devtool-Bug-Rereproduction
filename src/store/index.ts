@@ -233,6 +233,11 @@ const getters: GetterTree<IEditorState, unknown> = {
   getThemes(state: IEditorState) {
     return state.themes
   },
+  getEditThemes(state: IEditorState) {
+    return state.themes.filter(theme => {
+      return theme.editHidden === 0
+    })
+  },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
   }
