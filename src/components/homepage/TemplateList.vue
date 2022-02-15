@@ -64,6 +64,7 @@ import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import { mapActions, mapMutations } from 'vuex'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -141,7 +142,9 @@ export default Vue.extend({
         query
       })
       window.open(route.href, '_blank')
-
+      generalUtils.fbq('track', 'AddToWishlist', {
+        content_ids: [template.match_cover.id]
+      })
       // // trigger newDesign method to reset the template themes. [Giambi 12/03]
       // this.$router.push({ name: pageName }).then(() => {
       //   designUtils.newDesign()
