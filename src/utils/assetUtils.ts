@@ -392,6 +392,7 @@ class AssetUtils {
   }
 
   addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
+    store.commit('SET_mobileSidebarPanelOpen', false)
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {

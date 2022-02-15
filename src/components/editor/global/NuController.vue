@@ -831,8 +831,8 @@ export default Vue.extend({
         document.documentElement.addEventListener('mousemove', this.scaling, false)
         document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
       }
-      document.documentElement.addEventListener('mousemove', this.scaling, false)
-      document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
+      // document.documentElement.addEventListener('mousemove', this.scaling, false)
+      // document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
       document.documentElement.addEventListener('keyup', this.handleScaleOffset)
       document.documentElement.addEventListener('keydown', this.handleScaleOffset)
     },

@@ -157,7 +157,7 @@ export default Vue.extend({
       })
     },
     screenHeight() {
-      pageUtils.findCentralPageIndexInfo()
+      pageUtils.findCentralPageIndexInfo(true)
     }
   },
   computed: {
