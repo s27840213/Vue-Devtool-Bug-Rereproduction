@@ -280,7 +280,7 @@ export default Vue.extend({
        * The following function sets focus on the page, which will break the functionality of a text editor (e.g. composition).
        * So prevent changing focus when a text editor is focused.
        */
-      // pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
+      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
     },
     selectEnd() {
       if (this.isSelecting) {
