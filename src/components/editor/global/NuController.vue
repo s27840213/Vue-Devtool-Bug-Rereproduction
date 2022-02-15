@@ -20,7 +20,7 @@
         @click.right.stop="!isMobile() && onRightClick"
         @contextmenu.prevent
         @mousedown.left="moveStart"
-        @touchstart="moveStart"
+        @touchstart.prevent="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
@@ -79,13 +79,14 @@
             :key="index"
             :marker-index="index"
             :style="Object.assign(end, {'cursor': 'pointer'})"
-            @mousedown.left.stop="lineEndMoveStart")
+            @mousedown.left.stop="lineEndMoveStart"
+            @touchstart.prevent.stop="lineEndMoveStart")
         div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
             @mousedown.left.stop="scaleStart"
-            @touchstart.stop="scaleStart")
+            @touchstart.prevent.stop="scaleStart")
         div(v-for="(resizer, index) in resizer(controlPoints)"
             @mousedown.left.stop="resizeStart($event)")
           div(class="control-point__resize-bar"
@@ -95,7 +96,7 @@
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
         div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
             @mousedown.left.stop="moveStart($event)"
-            @touchstart.stop="moveStart($event)")
+            @touchstart.prevent.stop="moveStart($event)")
           div(class="control-point__resize-bar control-point__move-bar"
               :key="index"
               :style="resizerBarStyles(resizer.styles)")
@@ -106,12 +107,13 @@
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
             :style='lineControlPointStyles()'
-            @mousedown.native.left.stop="lineRotateStart")
+            @mousedown.native.left.stop="lineRotateStart"
+            @touchstart.native.prevent.stop="lineRotateStart")
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
             @mousedown.left.stop="moveStart"
-            @touchstart.stop="moveStart")
+            @touchstart.prevent.stop="moveStart")
         template(v-else)
           div(class="control-point__controller-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
@@ -120,13 +122,13 @@
               :src="require('@/assets/img/svg/rotate.svg')"
               :style='controlPointStyles()'
               @mousedown.native.left.stop="rotateStart"
-              @touchstart.native.stop="rotateStart")
+              @touchstart.native.prevent.stop="rotateStart")
             img(class="control-point__mover"
               v-if="config.type !== 'text' || !contentEditable"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
               @mousedown.left.stop="moveStart"
-              @touchstartx.stop="moveStart")
+              @touchstart.prevent.stop="moveStart")
 </template>
 <script lang="ts">
 import Vue from 'vue'
