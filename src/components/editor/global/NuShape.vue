@@ -16,8 +16,6 @@ import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
-import generalUtils from '@/utils/generalUtils'
-import controlUtils from '@/utils/controlUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'

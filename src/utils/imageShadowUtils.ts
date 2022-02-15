@@ -25,6 +25,7 @@ class ImageShadowUtils {
       let isTransparentBG
       if (!('isTransparentBG' in shadow)) {
         isTransparentBG = await this.isTransparentBG(currLayer as IImage)
+        // isTransparentBG = true
       } else {
         isTransparentBG = shadow.isTransparentBG
       }
@@ -36,15 +37,13 @@ class ImageShadowUtils {
           currentEffect: effect
         }
       }, subLayerIdx)
-      console.log(generalUtils.deepCopy(currLayer.styles.shadow))
     }
+    console.log(generalUtils.deepCopy(currLayer.styles.shadow))
   }
 
   isTransparentBG(config: IImage): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const img = new Image()
-      img.src = imageUtils.getSrc(config)
-      console.log(imageUtils.getSrc(config))
       img.crossOrigin = 'anonymous'
       img.onload = () => {
         const { width: imgWidth, height: imgHeight } = img
@@ -60,16 +59,18 @@ class ImageShadowUtils {
               resolve(true)
             }
           }
+          resolve(false)
         }
         resolve(false)
       }
       img.onerror = () => reject(new Error('cannot load image'))
+      img.src = imageUtils.getSrc(config) + '?' + new Date().getTime()
     })
   }
 
   convertShadowEffect(styles: IImageStyle): { [key: string]: string } {
     const { shadow, scale } = styles
-    const { color = '#000000' } = shadow
+    const { color = '#000000', isTransparentBG } = shadow
     const effect = shadow[shadow.currentEffect]
 
     switch (shadow.currentEffect) {
@@ -77,7 +78,13 @@ class ImageShadowUtils {
       case ShadowEffectType.shadow: {
         const { x = 0, y = 0, radius, spread, opacity } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
-        return {
+        return isTransparentBG ? {
+          filter:
+            'drop-shadow(' +
+              `${x}px ${y}px ` +
+              `${radius}px ` +
+              `${color + this.convertToAlpha(opacity)})`
+        } : {
           boxShadow:
             `${x}px ${y}px ` +
             `${radius}px ` +
@@ -86,10 +93,20 @@ class ImageShadowUtils {
         }
       }
       case ShadowEffectType.frame: {
-        const { width, opacity } = mathUtils
+        const { width, blur, opacity } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
-        return {
-          boxShadow: `0 0 ${width}px ${color + this.convertToAlpha(opacity)}`
+        return isTransparentBG ? {
+          filter:
+            `drop-shadow(${width}px 0 0 ${color + this.convertToAlpha(opacity)})` +
+            `drop-shadow(0 ${-width}px 0 ${color + this.convertToAlpha(opacity)})` +
+            `drop-shadow(0 ${width}px 0 ${color + this.convertToAlpha(opacity)})` +
+            `drop-shadow(${-width}px 0 0 ${color + this.convertToAlpha(opacity)})`
+            // `drop-shadow(${width}px ${width}px 0 ${color + this.convertToAlpha(opacity)})` +
+            // `drop-shadow(${width}px ${-width}px 0 ${color + this.convertToAlpha(opacity)})` +
+            // `drop-shadow(${-width}px ${width}px 0 ${color + this.convertToAlpha(opacity)})` +
+            // `drop-shadow(${-width}px ${-width}px 0 ${color + this.convertToAlpha(opacity)})`
+        } : {
+          boxShadow: `0 0 ${blur}px ${width}px ${color + this.convertToAlpha(opacity)}`
         }
       }
       case ShadowEffectType.halo: {
@@ -138,6 +155,7 @@ class ImageShadowUtils {
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
           width: 50,
+          blur: 10,
           opacity: 70
         }
         break

@@ -11,6 +11,7 @@ export interface IShadowEffect {
   x: number,
   y: number,
   radius: number,
+  /** Note: Only the non-transparent-background-image get the spread property */
   spread: number,
   opacity: number
 }
@@ -23,6 +24,7 @@ export interface IBlurEffect {
 export interface IFrameEffect {
   [key: string]: number
   width: number,
+  blur: number,
   opacity: number
 }
 export interface IHaloEffect {

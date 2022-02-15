@@ -99,7 +99,7 @@ import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import imageShadowUtils, { HALO_SPREAD_LIMIT } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
@@ -114,14 +114,6 @@ export default Vue.extend({
     return {
       openModal: false,
       openColorPicker: false,
-      effects: {
-        none: [],
-        shadow: imageShadowUtils.getKeysOf(ShadowEffectType.shadow),
-        blur: imageShadowUtils.getKeysOf(ShadowEffectType.blur),
-        halo: imageShadowUtils.getKeysOf(ShadowEffectType.halo),
-        frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
-        projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
-      } as { [key: string]: string[] },
       effectI18nMap: {
         distance: 'NN0063',
         angle: 'NN0064',
@@ -132,33 +124,6 @@ export default Vue.extend({
         stroke: 'NN0069',
         shape: 'NN0070',
         bend: 'NN0071'
-      },
-      shapes: {
-        none: [],
-        curve: ['bend']
-      } as { [key: string]: string[] },
-      fieldRange: {
-        shadow: {
-          x: { max: 100, min: -100 },
-          y: { max: 100, min: -100 },
-          radius: { max: 50, min: 0 },
-          spread: { max: 50, min: 0 },
-          opacity: { max: 100, min: 0 }
-        },
-        blur: {
-          radius: { max: 120, min: 0 },
-          spread: { max: 50, min: 0 },
-          opacity: { max: 100, min: 0 }
-        },
-        halo: {
-          radius: { max: 120, min: 50 },
-          spread: { max: HALO_SPREAD_LIMIT, min: 30 },
-          opacity: { max: 100, min: 0 }
-        },
-        frame: {
-          width: { max: 100, min: 0 },
-          opacity: { max: 100, min: 0 }
-        }
       },
       hintMap: {
         'shadow-none': `${this.$t('NN0111')}`,
@@ -187,6 +152,49 @@ export default Vue.extend({
     currentEffect(): ShadowEffectType {
       const { shadow = {} } = this.currentStyle as any
       return shadow.currentEffect || 'none'
+    },
+    isTransparentBG(): boolean {
+      const currLayer = layerUtils.getCurrConfig as IImage
+      return currLayer.styles.shadow.isTransparentBG || false
+    },
+    effects(): { [key: string]: string[] } {
+      return {
+        none: [],
+        shadow: (() => {
+          return imageShadowUtils.getKeysOf(ShadowEffectType.shadow)
+            .flatMap(k => !this.isTransparentBG ? [k] : (k !== 'spread' ? [k] : []))
+        })(),
+        blur: imageShadowUtils.getKeysOf(ShadowEffectType.blur),
+        halo: imageShadowUtils.getKeysOf(ShadowEffectType.halo),
+        frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
+        projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
+      }
+    },
+    fieldRange(): any {
+      return {
+        shadow: {
+          x: { max: 100, min: -100 },
+          y: { max: 100, min: -100 },
+          radius: { max: 50, min: 0 },
+          opacity: { max: 100, min: 0 },
+          ...(!this.isTransparentBG && { spread: { max: 50, min: 0 } })
+        },
+        blur: {
+          radius: { max: 120, min: 0 },
+          spread: { max: 50, min: 0 },
+          opacity: { max: 100, min: 0 }
+        },
+        halo: {
+          radius: { max: 120, min: 50 },
+          spread: { max: HALO_SPREAD_LIMIT, min: 30 },
+          opacity: { max: 100, min: 0 }
+        },
+        frame: {
+          width: { max: 100, min: 0 },
+          opacity: { max: 100, min: 0 },
+          blur: { max: 100, min: 0 }
+        }
+      }
     }
   },
   mounted() {
@@ -209,8 +217,6 @@ export default Vue.extend({
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName in this.currentStyle.shadow
-      console.log(alreadySetEffect)
-      console.log(effectName)
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
