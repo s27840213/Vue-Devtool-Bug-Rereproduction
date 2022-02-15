@@ -21,7 +21,7 @@
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
             mobile-editor-view
-            //- scale-ratio-editor(:style="scaleRatioEditorPos"
+            mobile-scale-ratio-editor(:style="scaleRatioEditorPos"
               @toggleSidebarPanel="toggleSidebarPanel")
         //- div(class="content__panel"
             :style="contentPanelStyles")
@@ -42,7 +42,7 @@ import SidebarPanel from '@/components/editor/SidebarPanel.vue'
 import FunctionPanel from '@/components/editor/FunctionPanel.vue'
 import ColorPanel from '@/components/editor/ColorPanel.vue'
 import MobileEditorView from '@/components/editor/MobileEditorView.vue'
-import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
+import MobileScaleRatioEditor from '@/components/editor/MobileScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -61,7 +61,7 @@ export default Vue.extend({
     EditorHeader,
     SidebarPanel,
     MobileEditorView,
-    ScaleRatioEditor,
+    MobileScaleRatioEditor,
     FunctionPanel,
     ColorPanel,
     PagePreview,
@@ -111,7 +111,7 @@ export default Vue.extend({
         right: '2rem'
       } : {
         left: '50%',
-        transform: 'translateX(-50%)'
+        transform: 'translateX(-50%) scale(.5)'
       }
     },
     contentPanelStyles(): { [index: string]: string } {
