@@ -56,7 +56,7 @@ export default Vue.extend({
     const aspectRatio = width / height
     this.canvasHeight = 1600 / aspectRatio
     this.initImgSrc = (this.autoRemoveResult as IBgRemoveInfo).initSrc
-    this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.full
+    this.imgSrc = (this.autoRemoveResult as IBgRemoveInfo).urls.larg
   },
   mounted() {
     this.imageElement = new Image()

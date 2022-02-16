@@ -54,6 +54,8 @@ export default Vue.extend({
     await this.perviewAsLoading()
 
     const preImg = new Image()
+    preImg.setAttribute('crossOrigin', 'Anonymous')
+
     preImg.onerror = () => {
       if (type === 'pexels') {
         const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
@@ -72,6 +74,7 @@ export default Vue.extend({
     }
     preImg.onload = () => {
       const nextImg = new Image()
+      nextImg.setAttribute('crossOrigin', 'Anonymous')
       nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
     }
     preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
@@ -91,6 +94,8 @@ export default Vue.extend({
         const preLoadImg = (preLoadType: 'pre' | 'next') => {
           return new Promise<void>((resolve, reject) => {
             const img = new Image()
+            img.setAttribute('crossOrigin', 'Anonymous')
+
             img.onload = () => resolve()
             img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
             img.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType))
@@ -207,6 +212,8 @@ export default Vue.extend({
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const img = new Image()
+        img.setAttribute('crossOrigin', 'Anonymous')
+
         const src = ImageUtils.getSrc(this.config)
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
