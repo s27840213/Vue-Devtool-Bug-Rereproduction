@@ -13,6 +13,7 @@
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
+      crossOrigin="Anonymous"
       :src="src"
       @error="onError()"
       @load="onLoad()")
@@ -110,7 +111,7 @@ export default Vue.extend({
       }
     },
     srcObj: {
-      handler: function() {
+      handler: function () {
         this.perviewAsLoading()
       },
       deep: true

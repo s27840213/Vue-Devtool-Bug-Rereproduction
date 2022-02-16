@@ -135,8 +135,11 @@ export default Vue.extend({
         if (newVal > 25) {
           this.blurPx = 5
           this.ctx.filter = `blur(${this.blurPx}px)`
+        } else if (newVal <= 25 && newVal >= 3) {
+          this.blurPx = 2
+          this.ctx.filter = `blur(${this.blurPx}px)`
         } else {
-          this.blurPx = 0
+          this.blurPx = 1
           this.ctx.filter = `blur(${this.blurPx}px)`
         }
       }
