@@ -77,6 +77,9 @@ export default Vue.extend({
     RulerVr,
     BgRemoveArea
   },
+  props: {
+    isConfigPanelOpen: Boolean
+  },
   data() {
     return {
       isSelecting: false,
@@ -217,7 +220,10 @@ export default Vue.extend({
       setInBgRemoveMode: 'SET_inBgRemoveMode'
     }),
     brushCursorStyles() {
-      return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
+      const styles = {}
+      if (this.isConfigPanelOpen) Object.assign(styles, { height: 'calc(100% - 200px)' })
+      if (this.hasCopiedFormat) Object.assign(styles, { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` })
+      return styles
     },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)

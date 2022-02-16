@@ -4,27 +4,27 @@
     //- span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
     div(class="text-setting__btn-row")
       div(class="text-setting__btn")
-        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        svg-icon(iconName="text" iconWidth="24px" iconColor="gray-4")
         span 字型
       div(class="text-setting__btn" @click="openPanel('size')")
-        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        svg-icon(iconName="vertical" iconWidth="24px" iconColor="gray-4")
         span 大小
       div(class="text-setting__btn")
-        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        svg-icon(iconName="test" iconWidth="24px" iconColor="gray-4")
         span 顏色
       div(class="text-setting__btn")
-        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        svg-icon(iconName="font-spacing" iconWidth="24px" iconColor="gray-4")
         span 空白
       div(class="text-setting__btn")
-        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        svg-icon(iconName="bold" iconWidth="24px" iconColor="gray-4")
         span 格式
       div(class="text-setting__btn")
-        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        svg-icon(iconName="text-align-left" iconWidth="24px" iconColor="gray-4")
         span 對齊
     transition(name="slide")
       div(v-if="openedPanel!==''" class="text-setting__config-panel")
         div(class="text-setting__config-panel__close" @click="closePanel")
-          svg-icon(iconName="close" iconWidth="30px" iconColor="white")
+          svg-icon(iconName="close" iconWidth="24px" iconColor="white")
         div(v-if="openedPanel==='size'" class="text-setting__config-panel__size")
     //- div(class="text-setting__row1")
     //-   div(class="property-bar pointer record-selection" @click="openFontsPanel")
@@ -175,6 +175,7 @@ export default Vue.extend({
   },
   destroyed() {
     this.setCurrFunctionPanel(FunctionPanelType.none)
+    this.$emit('toggleConfigPanel', false)
     if (!this.isOpenFontPanel) {
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     }
@@ -251,9 +252,10 @@ export default Vue.extend({
     },
     openPanel(panelType: string) {
       this.openedPanel = panelType
+      this.$emit('toggleConfigPanel', panelType !== '')
     },
     closePanel() {
-      this.openedPanel = ''
+      this.openPanel('')
     },
     inputColor(input: Event) {
       const target = input.target as HTMLInputElement
@@ -660,13 +662,14 @@ export default Vue.extend({
     height: 60px;
     display: flex;
     flex-direction: column;
+    gap: 3px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     background-color: #414d70;
     border-radius: 5px;
     & > span {
-      font-size: 14px;
+      font-size: 12px;
       color: setColor(gray-4);
     }
   }
@@ -680,12 +683,10 @@ export default Vue.extend({
     background: white;
     border-radius: 5px 5px 0px 0px;
     box-sizing: border-box;
-    border-top: 5px solid setColor(gray-3);
-    border-left: 5px solid setColor(gray-3);
-    border-right: 5px solid setColor(gray-3);
+    box-shadow: 1px 3px 10px 0px;
     &__close {
-      width: 30px;
-      height: 30px;
+      width: 24px;
+      height: 24px;
       float: right;
       background-color: setColor(gray-3);
       border-radius: 50%;

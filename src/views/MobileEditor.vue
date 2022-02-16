@@ -20,12 +20,12 @@
                   :iconWidth="'20px'"
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
-            mobile-editor-view
+            mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
             mobile-scale-ratio-editor(:style="scaleRatioEditorPos"
               @toggleSidebarPanel="toggleSidebarPanel")
             //- currSelectedInfo.types.has('text')"
-            div(class="content__panel")
-              mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel")
+            div(class="content__panel" :style="panelStyles()")
+              mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
         //- div(class="content__panel")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
@@ -76,7 +76,8 @@ export default Vue.extend({
   data() {
     return {
       FunctionPanelType,
-      isColorPanelOpen: false
+      isColorPanelOpen: false,
+      isConfigPanelOpen: false
       // isSidebarPanelOpen: false
     }
   },
@@ -210,6 +211,9 @@ export default Vue.extend({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
+    panelStyles() {
+      return this.isConfigPanelOpen ? { height: '200px' } : { height: '75px' }
+    },
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
     },
@@ -221,6 +225,9 @@ export default Vue.extend({
     },
     toggleSidebarPanel(bool: boolean) {
       this.setMobileSidebarPanelOpen(bool)
+    },
+    toggleConfigPanel(bool: boolean) {
+      this.isConfigPanelOpen = bool
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
@@ -265,7 +272,6 @@ export default Vue.extend({
 
   &__panel {
     position: relative;
-    height: 75px;
     background-color: setColor(gray-1-5);
     // display: grid;
     // grid-template-columns: 1fr;
