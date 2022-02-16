@@ -146,6 +146,7 @@ export default Vue.extend({
         this.clearCtx()
         if (this.clearMode) {
           this.ctx.filter = 'none'
+          this.drawImageToCtx()
           this.ctx.filter = `blur(${this.blurPx}px)`
         } else {
           this.ctx.filter = 'none'

@@ -488,8 +488,6 @@ class UploadUtils {
       return newPage
     })
 
-    console.log(pagesJSON)
-
     const resultJSON = {
       name: pageUtils.pagesName,
       pages: pagesJSON,
