@@ -23,8 +23,10 @@
             mobile-editor-view
             mobile-scale-ratio-editor(:style="scaleRatioEditorPos"
               @toggleSidebarPanel="toggleSidebarPanel")
-        //- div(class="content__panel"
-            :style="contentPanelStyles")
+            //- currSelectedInfo.types.has('text')"
+            div(class="content__panel")
+              mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel")
+        //- div(class="content__panel")
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
             color-panel(v-if="isColorPanelOpen"
@@ -45,6 +47,7 @@ import MobileEditorView from '@/components/editor/MobileEditorView.vue'
 import MobileScaleRatioEditor from '@/components/editor/MobileScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
+import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
@@ -53,6 +56,8 @@ import rulerUtils from '@/utils/rulerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
 import networkUtils from '@/utils/networkUtils'
+import layerUtils from '@/utils/layerUtils'
+import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -65,7 +70,8 @@ export default Vue.extend({
     FunctionPanel,
     ColorPanel,
     PagePreview,
-    TourGuide
+    TourGuide,
+    MobilePanelTextSetting
   },
   data() {
     return {
@@ -95,6 +101,7 @@ export default Vue.extend({
     ...mapGetters({
       groupId: 'getGroupId',
       currSelectedInfo: 'getCurrSelectedInfo',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
@@ -150,6 +157,32 @@ export default Vue.extend({
     },
     showEditorGuide(): boolean {
       return this.viewGuide === 0
+    },
+    isLocked(): boolean {
+      return layerUtils.getTmpLayer().locked
+    },
+    groupTypes(): Set<string> {
+      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
+      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+        return layer.type
+      })
+      return new Set(types)
+    },
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
+    },
+    showTextSetting(): boolean {
+      return this.isGroup ? (
+        this.hasSubSelectedLayer ? (
+          this.subLayerType === 'text' && !this.isLocked
+        ) : (this.groupTypes.has('text') && !this.isLocked)
+      ) : (this.currSelectedInfo.types.has('text'))
     }
   },
   beforeRouteLeave(to, from, next) {
@@ -233,7 +266,8 @@ export default Vue.extend({
   &__panel {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 75px;
+    background-color: setColor(gray-1-5);
     // display: grid;
     // grid-template-columns: 1fr;
   }
