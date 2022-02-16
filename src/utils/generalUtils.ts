@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import modalUtils from './modalUtils'
@@ -153,6 +154,10 @@ class GeneralUtils {
       u8arr[n] = bstr.charCodeAt(n)
     }
     return new Blob([u8arr], { type: mime })
+  }
+
+  fbq(type: string, action: string, params?: { [index: string]: any }) {
+    params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }
 
   // log(params: string, data: any = '') {

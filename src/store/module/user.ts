@@ -9,6 +9,7 @@ import Vue from 'vue'
 import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
 import apiUtils from '@/utils/apiUtils'
+import generalUtils from '@/utils/generalUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -427,6 +428,7 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
+      generalUtils.fbq('track', 'StartTrial')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()
