@@ -490,6 +490,7 @@ $REULER_SIZE: 20px;
   position: relative;
   z-index: setZindex("editor-view");
   height: calc(100% - 75px);
+  width: calc(100vw - 75px);
   // height: 100%;
   // @include no-scrollbar;
   &__grid {

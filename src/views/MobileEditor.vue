@@ -265,7 +265,6 @@ export default Vue.extend({
 
   &__panel {
     position: relative;
-    width: 100%;
     height: 75px;
     background-color: setColor(gray-1-5);
     // display: grid;

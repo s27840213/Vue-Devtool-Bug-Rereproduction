@@ -1,7 +1,31 @@
 <template lang="pug">
   div(class="text-setting" ref='body'
       @mousedown.capture="textInfoRecorder()")
-    span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+    //- span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
+    div(class="text-setting__btn-row")
+      div(class="text-setting__btn")
+        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        span 字型
+      div(class="text-setting__btn" @click="openPanel('size')")
+        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        span 大小
+      div(class="text-setting__btn")
+        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        span 顏色
+      div(class="text-setting__btn")
+        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        span 空白
+      div(class="text-setting__btn")
+        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        span 格式
+      div(class="text-setting__btn")
+        svg-icon(iconName="text" iconWidth="30px" iconColor="gray-4")
+        span 對齊
+    transition(name="slide")
+      div(v-if="openedPanel!==''" class="text-setting__config-panel")
+        div(class="text-setting__config-panel__close" @click="closePanel")
+          svg-icon(iconName="close" iconWidth="30px" iconColor="white")
+        div(v-if="openedPanel==='size'" class="text-setting__config-panel__size")
     //- div(class="text-setting__row1")
     //-   div(class="property-bar pointer record-selection" @click="openFontsPanel")
     //-     img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="getFontPrev")
@@ -124,7 +148,8 @@ export default Vue.extend({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      }
+      },
+      openedPanel: ''
     }
   },
   mounted() {
@@ -223,6 +248,12 @@ export default Vue.extend({
     openFontsPanel() {
       this.isOpenFontPanel = true
       this.$emit('openFontsPanel')
+    },
+    openPanel(panelType: string) {
+      this.openedPanel = panelType
+    },
+    closePanel() {
+      this.openedPanel = ''
     },
     inputColor(input: Event) {
       const target = input.target as HTMLInputElement
@@ -602,18 +633,64 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .text-setting {
-  @include size(100%, 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  height: 100%;
+  width: calc(100vw - 75px);
   &__title {
     // margin-bottom: 30px;
     height: 30px;
   }
-  > div {
-    margin-top: 15px;
-    &:nth-child(1) {
-      margin-top: 0px;
+  // > div {
+  //   margin-top: 15px;
+  //   &:nth-child(1) {
+  //     margin-top: 0px;
+  //   }
+  // }
+  &__btn-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: calc(100vw - 105px);
+    height: 75px;
+    overflow-x: scroll;
+    padding: 0 15px;
+  }
+  &__btn {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background-color: #414d70;
+    border-radius: 5px;
+    & > span {
+      font-size: 14px;
+      color: setColor(gray-4);
+    }
+  }
+  &__config-panel {
+    position: absolute;
+    z-index: 100;
+    height: 200px;
+    width: calc(100vw - 75px);
+    bottom: 0;
+    left: 0;
+    background: white;
+    border-radius: 5px 5px 0px 0px;
+    box-sizing: border-box;
+    border-top: 5px solid setColor(gray-3);
+    border-left: 5px solid setColor(gray-3);
+    border-right: 5px solid setColor(gray-3);
+    &__close {
+      width: 30px;
+      height: 30px;
+      float: right;
+      background-color: setColor(gray-3);
+      border-radius: 50%;
+      margin-top: 5px;
+      margin-right: 5px;
     }
   }
   &__row1 {
@@ -756,5 +833,17 @@ export default Vue.extend({
 
 .relative {
   position: relative;
+}
+
+.slide {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.1s ease;
+  }
+
+  &-enter,
+  &-leave-to {
+    bottom: -200px;
+  }
 }
 </style>
