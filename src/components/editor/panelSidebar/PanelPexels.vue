@@ -4,7 +4,7 @@
       :placeholder="$t('NN0092', {target: 'Pexels'})"
       @search="handleSearch")
     div(v-if="!pending && !list.length"
-      class="text-white") {{$t('NN0393', {keyword: keyword, target: "Pexels"})}}
+      class="text-white") {{$t('NN0393', {keyword: query, target: "Pexels"})}}
     tmp-images(v-else
       @loadMore="handleLoadMore")
 </template>
