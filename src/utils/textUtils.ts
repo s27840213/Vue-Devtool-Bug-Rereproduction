@@ -933,7 +933,7 @@ class TextUtils {
     */
 
     // 僅剛進入editor需要判斷
-    if (!(store.state as any).text.firstLoad && ['/editor', '/mobile-editor'].includes(window.location.pathname)) {
+    if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
       if (!((store.state as any).templates.categories.length > 0) && times < 5) {
         return new Promise<void>(resolve => {
           setTimeout(async () => {
