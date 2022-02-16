@@ -477,7 +477,12 @@ class AssetUtils {
     const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
     store.commit('SET_mobileSidebarPanelOpen', false)
-    // store.commit('SET_groupType', groupType)
+    // groupType: -1 normal/0 group/1 detail
+    // if detail, no updates; if not, do not update to detail
+    // -> update when {old, new} !== detail
+    if (currGroupType !== 1 && groupType !== 1) {
+      store.commit('SET_groupType', groupType)
+    }
     const promises = contents?.filter(content => childId ? content.id === childId : true)
       .map(content => this.get({ ...content, type }))
     this.addAssetToRecentlyUsed(item as any)

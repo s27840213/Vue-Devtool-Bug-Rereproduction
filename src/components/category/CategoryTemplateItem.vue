@@ -18,7 +18,6 @@ import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import themeUtils from '@/utils/themeUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 
@@ -84,8 +83,15 @@ export default Vue.extend({
       const currPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
       const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
-        ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
-        : (resize?: any) => AssetUtils.addAsset(this.item, resize)
+        ? (resize?: any) => {
+          AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
+        }
+        : (resize?: any) => {
+          AssetUtils.addAsset(this.item, resize)
+          GeneralUtils.fbq('track', 'AddToWishlist', {
+            content_ids: [this.item.id]
+          })
+        }
 
       /**
        * @todo show the modal if the width,height are not the same in detailed page mode

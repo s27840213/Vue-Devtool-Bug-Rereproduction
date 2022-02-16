@@ -935,10 +935,12 @@ class TextUtils {
     // 僅剛進入editor需要判斷
     if (!(store.state as any).text.firstLoad && ['/editor', '/mobile-editor'].includes(window.location.pathname)) {
       if (!((store.state as any).templates.categories.length > 0) && times < 5) {
-        setTimeout(() => {
-          this.waitUntilAllFontsLoaded(config, times + 1)
-        }, 3000)
-        return
+        return new Promise<void>(resolve => {
+          setTimeout(async () => {
+            await this.waitUntilAllFontsLoaded(config, times + 1)
+            resolve()
+          }, 3000)
+        })
       }
       // 第一次載入的等待結束，firstLoad -> true
       store.commit('text/SET_firstLoad', true)
