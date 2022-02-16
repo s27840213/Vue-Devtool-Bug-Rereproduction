@@ -153,6 +153,7 @@ import store from '@/store'
 import userApis from '@/apis/user'
 import Facebook from '@/utils/facebook'
 import localeUtils from '@/utils/localeUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -312,6 +313,9 @@ export default Vue.extend({
         // code -> access_token
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
+          if (data.data.new_user) {
+            generalUtils.fbq('track', 'CompleteRegistration')
+          }
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
@@ -326,6 +330,9 @@ export default Vue.extend({
         // idToken -> token
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
+          if (data.data.new_user) {
+            generalUtils.fbq('track', 'CompleteRegistration')
+          }
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })
         } else {
@@ -437,6 +444,7 @@ export default Vue.extend({
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       if (data.flag === 0) {
+        generalUtils.fbq('track', 'CompleteRegistration')
         await store.dispatch('user/login', { token: data.token })
         this.$router.push({ path: this.redirect || '/' })
         this.currentPageIndex = 0
