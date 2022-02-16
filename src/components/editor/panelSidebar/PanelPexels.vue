@@ -1,10 +1,10 @@
 <template lang="pug">
   div(class="panel-photo")
     search-bar(class="mb-15"
-      placeholder="input keywords..."
+      :placeholder="$t('NN0092', {target: 'Pexels'})"
       @search="handleSearch")
     div(v-if="!pending && !list.length"
-      class="text-white") Sorry, we couldn't find any photos for "{{ query }}".
+      class="text-white") {{$t('NN0393', {keyword: keyword, target: "Pexels"})}}
     tmp-images(v-else
       @loadMore="handleLoadMore")
 </template>

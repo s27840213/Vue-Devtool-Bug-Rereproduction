@@ -15,7 +15,7 @@
     div
       div(class="panel-template__search")
         search-bar(class="mb-15"
-          :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+          :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
           clear
           :defaultKeyword="keyword"
           @search="handleSearch")
@@ -174,7 +174,7 @@ export default Vue.extend({
     },
     emptyResultMessage(): string {
       const { keyword, pending, listResult } = this
-      return !pending && !listResult.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword })}` : `${i18n.t('NN0394')}`) : ''
+      return !pending && !listResult.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
     },
     currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()

@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-bg")
     search-bar(class="mb-15"
-      :placeholder="`${$t('NN0092', {target: $tc('NN0004',1)})}`"
+      :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
@@ -61,6 +61,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -156,7 +157,7 @@ export default Vue.extend({
       return backgroundImage && backgroundImage.config.locked
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any background for "${this.keyword}".` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0004', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0004', 1) })}`
     }
   },
   async mounted() {
