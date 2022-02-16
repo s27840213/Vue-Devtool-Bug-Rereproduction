@@ -6,7 +6,7 @@
       @dragenter.prevent)
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
-      nu-clipper(:config="config" :layerIndex="layerIndex" v-bind="$attrs")
+      nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
 </template>
@@ -29,7 +29,8 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number,
     subLayerIndex: Number,
-    flip: Object
+    flip: Object,
+    imgControl: Boolean
   },
   data() {
     return {
@@ -59,18 +60,6 @@ export default Vue.extend({
     },
     getCos(): number {
       return MathUtils.cos(this.config.styles.rotate)
-    },
-    isImgControl(): boolean {
-      const { type } = this.config
-      if (type === 'image') {
-        return this.config.imgControl
-      } else if (type === 'group' || type === 'tmp') {
-        return (this.config as IGroup).layers
-          .some(layer => {
-            return layer.type === 'image' && layer.imgControl
-          })
-      }
-      return false
     }
   },
   methods: {
@@ -97,7 +86,8 @@ export default Vue.extend({
           const shadowEffect = imageShadowUtils.convertShadowEffect(this.config.styles)
           Object.assign(
             styles,
-            shadowEffect
+            // shadowEffect
+            { ...(!this.imgControl && { filter: 'url(#test-filter)' }) }
           )
         }
       }

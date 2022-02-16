@@ -8,6 +8,13 @@ import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffec
 import imageUtils from './imageUtils'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
+type Filter = {
+  tag: string,
+  attrs: {
+    [key: string]: string | number
+  },
+  child?: Array<Filter>
+}
 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80 as const
@@ -21,22 +28,24 @@ class ImageShadowUtils {
         // layerUtils.updateLayerStyles
       }
     } else {
-      const { shadow } = (currLayer as IImage).styles
-      let isTransparentBG
-      if (!('isTransparentBG' in shadow)) {
-        isTransparentBG = await this.isTransparentBG(currLayer as IImage)
-        // isTransparentBG = true
-      } else {
-        isTransparentBG = shadow.isTransparentBG
-      }
-      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-        shadow: {
-          ...(shadow && (shadow as IShadowProps)),
-          ...attrs,
-          isTransparentBG,
-          currentEffect: effect
-        }
-      }, subLayerIdx)
+      // const { shadow } = (currLayer as IImage).styles
+      // let isTransparentBG
+      // if (!('isTransparentBG' in shadow)) {
+      //   // isTransparentBG = await this.isTransparentBG(currLayer as IImage)
+      //   isTransparentBG = true
+      // } else {
+      //   isTransparentBG = shadow.isTransparentBG
+      // }
+      // layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      //   shadow: {
+      //     ...(shadow && (shadow as IShadowProps)),
+      //     ...attrs,
+      //     isTransparentBG,
+      //     currentEffect: effect
+      //   }
+      // }, subLayerIdx)
+      const filters = this.getFilterAttrs()
+      this.addFilter(filters)
     }
     console.log(generalUtils.deepCopy(currLayer.styles.shadow))
   }
@@ -66,6 +75,121 @@ class ImageShadowUtils {
       img.onerror = () => reject(new Error('cannot load image'))
       img.src = imageUtils.getSrc(config) + '?' + new Date().getTime()
     })
+  }
+
+  addFilter(filters: Array<Filter>): string {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    const id = 'test-filter' || this.fitlerIdGenerator()
+    svg.setAttribute('viewBox', '0 0 5000 5000')
+    this.append(svg, [{
+      tag: 'filter',
+      attrs: {
+        id: `${id}`,
+        x: '-100%',
+        y: '-100%',
+        width: '300%',
+        height: '300%',
+        filterUnits: 'userSpaceOnUse',
+        'color-interpolation-filters': 'sRGB'
+      },
+      child: filters
+    }])
+    document.body.appendChild(svg)
+    return id
+  }
+
+  getFilterAttrs(): Array<Filter> {
+    return [
+      {
+        tag: 'feFlood',
+        attrs: {
+          result: 'flood',
+          'flood-opacity': '1',
+          'flood-color': 'yellow'
+        }
+      },
+      {
+        tag: 'feComposite',
+        attrs: {
+          in: 'flood',
+          in2: 'SourceAlpha',
+          operator: 'atop',
+          result: 'color'
+        }
+      },
+      {
+        tag: 'feMorphology',
+        attrs: {
+          operator: 'dilate',
+          radius: 10,
+          result: 'spread',
+          in: 'color'
+        }
+      },
+      {
+        tag: 'feGaussianBlur',
+        attrs: {
+          stdDeviation: 5,
+          in: 'spread',
+          result: 'shadow'
+        }
+      },
+      {
+        tag: 'feOffset',
+        attrs: {
+          dx: 20,
+          dy: 20,
+          in: 'shadow',
+          result: 'offset'
+        }
+      },
+      {
+        tag: 'feMerge',
+        attrs: {
+          result: 'merge'
+        },
+        child: [
+          {
+            tag: 'feMergeNode',
+            attrs: {
+              in: 'offset'
+            }
+          },
+          {
+            tag: 'feMergeNode',
+            attrs: {
+              in: 'SourceGraphic'
+            }
+          }
+        ]
+      }
+    ]
+  }
+
+  append(parent: HTMLElement | SVGElement, filters: Array<Filter>) {
+    filters
+      .forEach(f => {
+        const filter = document.createElementNS('http://www.w3.org/2000/svg', f.tag)
+        Object.entries(f.attrs)
+          .forEach(([k, v]) => {
+            filter.setAttribute(k, v.toString())
+          })
+        if (f.child && f.child.length) {
+          this.append(filter, f.child)
+        }
+        parent.appendChild(filter)
+      })
+  }
+
+  fitlerIdGenerator(): string {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const charLength = chars.length
+    let id = 'f'
+    for (let i = 0; i < 7; i++) {
+      const rand = Math.floor(Math.random() * charLength)
+      id += chars[rand]
+    }
+    return id
   }
 
   convertShadowEffect(styles: IImageStyle): { [key: string]: string } {

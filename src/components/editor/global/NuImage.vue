@@ -1,21 +1,4 @@
 <template lang="pug">
-  //- div(class="nu-image"
-  //-   :style="styles()"
-  //-   draggable="false")
-  //-   template(v-if="isAdjustImage")
-  //-     nu-adjust-image(v-show="isAdjustImage"
-  //-       :class="{ 'layer-flip': flippedAnimation }"
-  //-       :src="src"
-  //-       :styles="adjustImgStyles"
-  //-       :style="flipStyles()")
-  //-   img(v-show="!isAdjustImage"
-  //-     ref="img"
-  //-     :style="flipStyles()"
-  //-     :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
-  //-     draggable="false"
-  //-     :src="src"
-  //-     @error="onError()"
-  //-     @load="onLoad()")
   div(class="nu-image"
     :style="styles()"
     draggable="false")
@@ -25,40 +8,14 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
-    svg(:viewbox="svgViewBox"
-      :width="config.styles.imgWidth"
-      :height="config.styles.imgHeight"
-      preserveAspectRatio="none")
-      defs
-        filter(id="test-filter"
-          color-interpolation-filters="sRGB")
-          component(v-for="(elm, idx) in svgFilterElms"
-            :key="`svgFilter${idx}`"
-            :is="elm.tag"
-            v-bind="elm.attrs")
-            component(v-for="child in elm.child"
-              :key="child.tag"
-              :is="child.tag"
-              v-bind="child.attrs")
-      image(ref="img"
-        :style="flipStyles()"
-        :width="config.styles.imgWidth"
-        :height="config.styles.imgHeight"
-        :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
-        draggable="false"
-        :href="src"
-        filter="url(#test-filter)"
-        @error="onError()"
-        @load="onLoad()")
-      image(ref="img"
-        :style="flipStyles()"
-        :width="config.styles.imgWidth"
-        :height="config.styles.imgHeight"
-        :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
-        draggable="false"
-        :href="src"
-        @error="onError()"
-        @load="onLoad()")
+    img(v-show="!isAdjustImage"
+      ref="img"
+      :style="flipStyles()"
+      :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
+      draggable="false"
+      :src="src"
+      @error="onError()"
+      @load="onLoad()")
 </template>
 
 <script lang="ts">
@@ -121,47 +78,7 @@ export default Vue.extend({
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.getSrc(this.config),
-      svgFilterElms: [
-        {
-          tag: 'feFlood',
-          attrs: {
-            result: 'flood',
-            'flood-opacity': '1',
-            'flood-color': 'yellow'
-          }
-        },
-        {
-          tag: 'feComposite',
-          attrs: {
-            in: 'flood',
-            in2: 'SourceAlpha',
-            operator: 'atop',
-            result: 'color'
-          }
-        },
-        {
-          tag: 'feMorphology',
-          attrs: {
-            operator: 'dilate',
-            radius: 10,
-            result: 'spread',
-            in: 'color'
-          }
-        },
-        {
-          tag: 'feOffset',
-          attrs: {
-            dx: 0,
-            dy: 0,
-            in: 'shadow',
-            result: 'offset'
-          }
-        }
-        // <feComposite in2="SourceAlpha" in="flood" operator="atop" result="color" />
-        // <feMorphology operator="dilate" radius="${ spread_radius}" result="spread" in="color"/>
-        // <feOffset dx="${ offset_x }" dy="${ offset_y }" in="shadow" result="offset"/>
-      ]
+      src: ImageUtils.getSrc(this.config)
     }
   },
   watch: {
@@ -205,10 +122,6 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio'
     }),
     ...mapState('user', ['imgSizeMap']),
-    svgViewBox(): string {
-      const { styles } = this.config as IImage
-      return `0 0 ${styles.imgWidth} ${styles.imgHeight}`
-    },
     getImgDimension(): number {
       const { type } = this.config.srcObj
       const { imgWidth, imgHeight } = this.config.styles
@@ -319,8 +232,8 @@ export default Vue.extend({
   &__picture {
     object-fit: cover;
     // object-fit: fill;
-    // width: 100%;
-    // height: 100%;
+    width: 100%;
+    height: 100%;
   }
 }
 

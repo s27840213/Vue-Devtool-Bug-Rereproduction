@@ -124,7 +124,7 @@
               nu-layer(style="opacity: 0.45"
                 :layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
-                :noClip="true"
+                :imgControl="true"
                 :config="getCurrSubSelectedLayerShown")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
@@ -138,7 +138,7 @@
               nu-layer(:style="'opacity: 0.45'"
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
-                :noClip="true"
+                :imgControl="true"
                 :config="getCurrLayer")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
