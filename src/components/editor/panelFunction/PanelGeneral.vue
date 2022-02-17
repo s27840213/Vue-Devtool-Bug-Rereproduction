@@ -184,6 +184,7 @@ export default Vue.extend({
       MappingUtils.mappingIconAction(icon)
     },
     openOrderPopup() {
+      if (this.isLocked) return
       popupUtils.openPopup('order')
     },
     openAlignPopup() {
@@ -194,6 +195,7 @@ export default Vue.extend({
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {
+      if (this.isLocked) return
       popupUtils.setCurrEvent(PopupSliderEventType.opacity)
       popupUtils.setSliderConfig(Object.assign({ value: this.opacity, noText: false }, MappingUtils.mappingMinMax('opacity')))
       popupUtils.openPopup('slider', {
