@@ -188,6 +188,7 @@ export default Vue.extend({
       popupUtils.openPopup('order')
     },
     openAlignPopup() {
+      if (this.isLocked) return
       popupUtils.openPopup('align')
     },
     openFlipPopup() {
