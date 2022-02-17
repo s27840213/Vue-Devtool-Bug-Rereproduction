@@ -153,17 +153,10 @@ export default Vue.extend({
       const { shadow = {} } = this.currentStyle as any
       return shadow.currentEffect || 'none'
     },
-    isTransparentBG(): boolean {
-      const currLayer = layerUtils.getCurrConfig as IImage
-      return currLayer.styles.shadow.isTransparentBG || false
-    },
     effects(): { [key: string]: string[] } {
       return {
         none: [],
-        shadow: (() => {
-          return imageShadowUtils.getKeysOf(ShadowEffectType.shadow)
-            .flatMap(k => !this.isTransparentBG ? [k] : (k !== 'spread' ? [k] : []))
-        })(),
+        shadow: imageShadowUtils.getKeysOf(ShadowEffectType.shadow),
         blur: imageShadowUtils.getKeysOf(ShadowEffectType.blur),
         halo: imageShadowUtils.getKeysOf(ShadowEffectType.halo),
         frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
@@ -177,7 +170,7 @@ export default Vue.extend({
           y: { max: 100, min: -100 },
           radius: { max: 50, min: 0 },
           opacity: { max: 100, min: 0 },
-          ...(!this.isTransparentBG && { spread: { max: 50, min: 0 } })
+          spread: { max: 50, min: 0 }
         },
         blur: {
           radius: { max: 120, min: 0 },
@@ -213,10 +206,10 @@ export default Vue.extend({
     handleColorModal() {
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.photoShadow)
-      colorUtils.setCurrColor(this.currentStyle.shadow.color)
+      colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     },
     onEffectClick(effectName: ShadowEffectType): void {
-      const alreadySetEffect = effectName in this.currentStyle.shadow
+      const alreadySetEffect = effectName in this.currentStyle.shadow.effects
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
@@ -226,13 +219,15 @@ export default Vue.extend({
       const { currentEffect, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[this.currentEffect][name]
-      const oldEffect = generalUtils
-        .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow[currentEffect]) as IShadowProps
-      imageShadowUtils.setEffect(currentEffect, {
-        [currentEffect]: Object.assign(oldEffect, {
-          [name]: +value > max ? max : (+value < min ? min : +value)
+      if (currentEffect !== ShadowEffectType.none) {
+        const oldEffect = generalUtils
+          .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
+        imageShadowUtils.setEffect(currentEffect, {
+          [currentEffect]: Object.assign(oldEffect, {
+            [name]: +value > max ? max : (+value < min ? min : +value)
+          })
         })
-      })
+      }
     },
     handleColorUpdate(color: string): void {
       const { currentEffect } = this

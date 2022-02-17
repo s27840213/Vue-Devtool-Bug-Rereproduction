@@ -4,8 +4,7 @@ import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import store from '@/store'
 import mathUtils from './mathUtils'
-import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import imageUtils from './imageUtils'
+import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
 type Filter = {
@@ -28,63 +27,25 @@ class ImageShadowUtils {
         // layerUtils.updateLayerStyles
       }
     } else {
-      // const { shadow } = (currLayer as IImage).styles
-      // let isTransparentBG
-      // if (!('isTransparentBG' in shadow)) {
-      //   // isTransparentBG = await this.isTransparentBG(currLayer as IImage)
-      //   isTransparentBG = true
-      // } else {
-      //   isTransparentBG = shadow.isTransparentBG
-      // }
-      // layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-      //   shadow: {
-      //     ...(shadow && (shadow as IShadowProps)),
-      //     ...attrs,
-      //     isTransparentBG,
-      //     currentEffect: effect
-      //   }
-      // }, subLayerIdx)
-      const filters = this.getFilterAttrs()
-      this.addFilter(filters)
-    }
-    console.log(generalUtils.deepCopy(currLayer.styles.shadow))
-  }
-
-  isTransparentBG(config: IImage): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        const { width: imgWidth, height: imgHeight } = img
-        const canvas = (document.createElement('canvas') as HTMLCanvasElement)
-        const c = canvas.getContext('2d')
-        canvas.width = imgWidth
-        canvas.height = imgHeight
-        if (c) {
-          c.drawImage(img, 0, 0)
-          const imgData = c.getImageData(0, 0, imgWidth, imgHeight).data
-          for (let i = 3; i < imgData.length; i += 4) {
-            if (imgData[i] < 255) {
-              resolve(true)
-            }
-          }
-          resolve(false)
+      const { shadow } = (currLayer as IImage).styles
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        shadow: {
+          ...(shadow && (shadow as IShadowProps)),
+          ...attrs,
+          currentEffect: effect
         }
-        resolve(false)
-      }
-      img.onerror = () => reject(new Error('cannot load image'))
-      img.src = imageUtils.getSrc(config) + '?' + new Date().getTime()
-    })
+      }, subLayerIdx)
+    }
+    // console.log(generalUtils.deepCopy(currLayer.styles.shadow))
   }
 
-  addFilter(filters: Array<Filter>): string {
+  addFilter(filterId: string, filters: Array<Filter>) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    const id = 'test-filter' || this.fitlerIdGenerator()
     svg.setAttribute('viewBox', '0 0 5000 5000')
     this.append(svg, [{
       tag: 'filter',
       attrs: {
-        id: `${id}`,
+        id: `${filterId}`,
         x: '-100%',
         y: '-100%',
         width: '300%',
@@ -95,10 +56,10 @@ class ImageShadowUtils {
       child: filters
     }])
     document.body.appendChild(svg)
-    return id
+    return svg.firstChild
   }
 
-  getFilterAttrs(): Array<Filter> {
+  attrFormat(shadow: IShadowProps): Array<Filter> {
     return [
       {
         tag: 'feFlood',
@@ -185,7 +146,7 @@ class ImageShadowUtils {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     const charLength = chars.length
     let id = 'f'
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 8; i++) {
       const rand = Math.floor(Math.random() * charLength)
       id += chars[rand]
     }
@@ -194,21 +155,16 @@ class ImageShadowUtils {
 
   convertShadowEffect(styles: IImageStyle): { [key: string]: string } {
     const { shadow, scale } = styles
-    const { color = '#000000', isTransparentBG } = shadow
-    const effect = shadow[shadow.currentEffect]
+    const { color = '#000000' } = shadow.effects
+    const effect = shadow.currentEffect !== ShadowEffectType.none
+      ? shadow.effects[shadow.currentEffect] : {}
 
     switch (shadow.currentEffect) {
       case ShadowEffectType.blur:
       case ShadowEffectType.shadow: {
         const { x = 0, y = 0, radius, spread, opacity } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
-        return isTransparentBG ? {
-          filter:
-            'drop-shadow(' +
-              `${x}px ${y}px ` +
-              `${radius}px ` +
-              `${color + this.convertToAlpha(opacity)})`
-        } : {
+        return {
           boxShadow:
             `${x}px ${y}px ` +
             `${radius}px ` +
@@ -219,17 +175,7 @@ class ImageShadowUtils {
       case ShadowEffectType.frame: {
         const { width, blur, opacity } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
-        return isTransparentBG ? {
-          filter:
-            `drop-shadow(${width}px 0 0 ${color + this.convertToAlpha(opacity)})` +
-            `drop-shadow(0 ${-width}px 0 ${color + this.convertToAlpha(opacity)})` +
-            `drop-shadow(0 ${width}px 0 ${color + this.convertToAlpha(opacity)})` +
-            `drop-shadow(${-width}px 0 0 ${color + this.convertToAlpha(opacity)})`
-            // `drop-shadow(${width}px ${width}px 0 ${color + this.convertToAlpha(opacity)})` +
-            // `drop-shadow(${width}px ${-width}px 0 ${color + this.convertToAlpha(opacity)})` +
-            // `drop-shadow(${-width}px ${width}px 0 ${color + this.convertToAlpha(opacity)})` +
-            // `drop-shadow(${-width}px ${-width}px 0 ${color + this.convertToAlpha(opacity)})`
-        } : {
+        return {
           boxShadow: `0 0 ${blur}px ${width}px ${color + this.convertToAlpha(opacity)}`
         }
       }
@@ -256,7 +202,7 @@ class ImageShadowUtils {
     return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
   }
 
-  getDefaultEffect(effectName: ShadowEffectType): Partial<IShadowProps> {
+  getDefaultEffect(effectName: ShadowEffectType): Partial<IShadowEffects> {
     let effect = {} as unknown
     switch (effectName) {
       case ShadowEffectType.shadow:
@@ -295,26 +241,50 @@ class ImageShadowUtils {
       default:
         return this.assertUnreachable(effectName)
     }
+    const { color = '#000000' } = (layerUtils.getCurrConfig as IImage).styles.shadow.effects
     return {
       [effectName]: effect,
-      ...((() => {
-        const { type } = layerUtils.getCurrConfig
-        const { color } = (layerUtils.getCurrConfig as IImage).styles.shadow
-        return type === LayerType.image && !color
-      })() && { color: '#000000' })
-    } as Partial<IShadowProps>
+      color
+    } as IShadowEffects
   }
 
   getKeysOf(effect: ShadowEffectType): Array<string> {
     return [
       ...Object.keys(
-        this.getDefaultEffect(effect)[effect] as ShadowEffects)
+        effect === ShadowEffectType.none ? {} : this.getDefaultEffect(effect)[effect] as ShadowEffects)
     ]
   }
 
   assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here")
   }
+
+  // isTransparentBG(config: IImage): Promise<boolean> {
+  //   return new Promise((resolve, reject) => {
+  //     const img = new Image()
+  //     img.crossOrigin = 'anonymous'
+  //     img.onload = () => {
+  //       const { width: imgWidth, height: imgHeight } = img
+  //       const canvas = (document.createElement('canvas') as HTMLCanvasElement)
+  //       const c = canvas.getContext('2d')
+  //       canvas.width = imgWidth
+  //       canvas.height = imgHeight
+  //       if (c) {
+  //         c.drawImage(img, 0, 0)
+  //         const imgData = c.getImageData(0, 0, imgWidth, imgHeight).data
+  //         for (let i = 3; i < imgData.length; i += 4) {
+  //           if (imgData[i] < 255) {
+  //             resolve(true)
+  //           }
+  //         }
+  //         resolve(false)
+  //       }
+  //       resolve(false)
+  //     }
+  //     img.onerror = () => reject(new Error('cannot load image'))
+  //     img.src = imageUtils.getSrc(config) + '?' + new Date().getTime()
+  //   })
+  // }
 }
 
 export default new ImageShadowUtils()

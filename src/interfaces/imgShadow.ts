@@ -11,7 +11,6 @@ export interface IShadowEffect {
   x: number,
   y: number,
   radius: number,
-  /** Note: Only the non-transparent-background-image get the spread property */
   spread: number,
   opacity: number
 }
@@ -39,14 +38,16 @@ export interface IProjectionEffect {
   opacity: number
 }
 
-export interface IShadowProps {
-  [key: string]: string | number | boolean | { [key: string]: string | number } | IShadowEffect | undefined
-  currentEffect: ShadowEffectType,
-  isTransparentBG?: boolean,
+export interface IShadowEffects {
   color: string
   shadow?: IShadowEffect,
   blur?: IBlurEffect,
   frame?: IFrameEffect,
   halo?: IHaloEffect,
   projection?: IProjectionEffect
+}
+export interface IShadowProps {
+  currentEffect: ShadowEffectType,
+  filterId?: string,
+  effects: IShadowEffects
 }

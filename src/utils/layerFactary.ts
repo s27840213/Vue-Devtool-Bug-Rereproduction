@@ -50,7 +50,7 @@ class LayerFactary {
         horizontalFlip: false,
         verticalFlip: false,
         adjust: {},
-        shadow: { currentEffect: 'none' }
+        shadow: { currentEffect: 'none', effects: {} }
       }
     }
     Object.assign(basicConfig.styles, config.styles)

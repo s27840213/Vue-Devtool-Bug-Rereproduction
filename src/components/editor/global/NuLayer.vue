@@ -83,11 +83,10 @@ export default Vue.extend({
           break
         }
         case LayerType.image: {
-          const shadowEffect = imageShadowUtils.convertShadowEffect(this.config.styles)
+          const { filterId } = this.config.styles.shadow
           Object.assign(
             styles,
-            // shadowEffect
-            { ...(!this.imgControl && { filter: 'url(#test-filter)' }) }
+            { ...((!this.imgControl && filterId) && { filter: `url(#${filterId})` }) }
           )
         }
       }

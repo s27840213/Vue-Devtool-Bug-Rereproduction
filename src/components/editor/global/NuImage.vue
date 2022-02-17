@@ -29,6 +29,8 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
+import imgShadowUtils from '@/utils/imageShadowUtils'
+import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   props: {
@@ -40,45 +42,20 @@ export default Vue.extend({
     isBgImgControl: Boolean
   },
   async created() {
-    const { type } = this.config.srcObj
-    const { assetId } = this.config.srcObj
-    if (type === 'private') {
-      const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-      const img = images.find(img => img.assetIndex === assetId)
-      if (!img) {
-        await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
-      }
+    this.handleInitLoad()
+    this.handleShadowEffect()
+  },
+  destroyed() {
+    if (this.filter) {
+      const svg = this.filter.parentElement
+      svg && svg.remove()
     }
-
-    await this.perviewAsLoading()
-
-    const preImg = new Image()
-    preImg.onerror = () => {
-      if (type === 'pexels') {
-        const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
-        switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
-          case 'group':
-            layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
-            break
-          case 'frame':
-            frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
-            break
-          default:
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
-        }
-        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
-      }
-    }
-    preImg.onload = () => {
-      const nextImg = new Image()
-      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
-    }
-    preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
   },
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.getSrc(this.config)
+      src: ImageUtils.getSrc(this.config),
+      filter: undefined as unknown as HTMLElement
     }
   },
   watch: {
@@ -114,6 +91,13 @@ export default Vue.extend({
         this.perviewAsLoading()
       },
       deep: true
+    },
+    shadowEffects() {
+      console.log('update shadow effect ')
+      this.handleShadowEffect()
+    },
+    currentShadowEffect() {
+      console.log('change curremt shadow effect')
     }
   },
   components: { NuAdjustImage },
@@ -157,6 +141,15 @@ export default Vue.extend({
       } else {
         return true
       }
+    },
+    shadow(): IShadowProps {
+      return (this.config as IImage).styles.shadow
+    },
+    shadowEffects(): IShadowEffects {
+      return this.shadow.effects
+    },
+    currentShadowEffect(): string {
+      return this.shadow.currentEffect
     }
   },
   methods: {
@@ -219,6 +212,55 @@ export default Vue.extend({
         }
         img.src = src
       })
+    },
+    async handleInitLoad() {
+      const { type } = this.config.srcObj
+      const { assetId } = this.config.srcObj
+      if (type === 'private') {
+        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
+        const img = images.find(img => img.assetIndex === assetId)
+        if (!img) {
+          await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+        }
+      }
+
+      await this.perviewAsLoading()
+
+      const preImg = new Image()
+      preImg.onerror = () => {
+        if (type === 'pexels') {
+          const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
+          switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
+            case 'group':
+              layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
+              break
+            case 'frame':
+              frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
+              break
+            default:
+              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
+          }
+          preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+        }
+      }
+      preImg.onload = () => {
+        const nextImg = new Image()
+        nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
+      }
+      preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+    },
+    handleShadowEffect() {
+      const { filterId, currentEffect } = this.shadow
+      if (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
+        const newFilterId = imgShadowUtils.fitlerIdGenerator()
+        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.attrFormat(this.shadow)) as HTMLElement
+        layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          shadow: {
+            filterId: newFilterId,
+            ...this.shadow
+          }
+        })
+      }
     }
   }
 })
