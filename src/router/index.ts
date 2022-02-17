@@ -10,6 +10,7 @@ import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
+import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -151,6 +152,11 @@ const routes: Array<RouteConfig> = [
     path: 'mobilewarning',
     name: 'MobileWarning',
     component: MobileWarning
+  },
+  {
+    path: 'brandkit',
+    name: 'BrandKit',
+    component: BrandKit
   }
 ]
 
@@ -200,7 +206,7 @@ router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response
   // before navigate to these pages
-  if (to.name === 'Settings' || to.name === 'MyDesign') {
+  if (to.name === 'Settings' || to.name === 'MyDesign' || to.name === 'BrandKit') {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
@@ -209,6 +215,8 @@ router.beforeEach(async (to, from, next) => {
       } else {
         await store.dispatch('user/login', { token: token })
       }
+    } else if (to.name === 'BrandKit' && !store.getters['user/isAdmin']) {
+      next({ name: 'Home' })
     }
   } else {
     if (!store.getters['user/isLogin']) {

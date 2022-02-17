@@ -25,7 +25,12 @@
             class="p-5 pointer"
             :class="{'text-blue-1': currentPage === 'MyDesign'}"
             @click="goToPage('MyDesign')") {{$t('NN0080')}}
+          div(v-if="isLogin && isAdmin"
+            class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'BrandKit'}"
+            @click="goToPage('BrandKit')") {{$t('NN0007')}}
         div(v-else class="body-2" key="no-navigation")
+          div
           div
           div
           div
@@ -183,7 +188,7 @@ export default Vue.extend({
         } else if (this.currLocale === 'us' || this.currLocale === 'jp') {
           window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
         }
-      } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
+      } else if (['Home', 'Pricing', 'MyDesign', 'BrandKit'].includes(pageName)) {
         this.$router.push({ name: pageName })
       } else if (pageName === 'TemplateCenter') {
         if (queryString.length > 0) {
@@ -217,7 +222,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: 64px;
+  height: $header-height;
   background-size: cover;
   background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   box-sizing: border-box;

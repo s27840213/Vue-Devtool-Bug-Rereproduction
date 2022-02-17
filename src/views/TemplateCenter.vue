@@ -1,6 +1,6 @@
 <template lang="pug">
   div(ref="body"
-      class="template-center"
+      class="template-center scrollbar-gray"
       @scroll="handleScroll")
     nu-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
       transition(name="slide")
@@ -1042,7 +1042,7 @@ body {
   }
   &__mobile-multi {
     position: fixed;
-    top: 50px;
+    top: $header-height;
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -1063,7 +1063,7 @@ body {
     &__content {
       overflow-y: auto;
       width: 100%;
-      height: calc(100vh - 50px);
+      height: calc(100vh - #{$header-height});
     }
     &__gallery {
       display: grid;
