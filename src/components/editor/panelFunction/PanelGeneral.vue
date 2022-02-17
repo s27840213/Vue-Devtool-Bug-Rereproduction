@@ -26,7 +26,7 @@
       )
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
-        :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
         v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
       )
@@ -43,9 +43,9 @@
         v-hint="$t('NN0035')"
       )
     div(class="panel-group__adjust")
-      btn(class="btn-align full-width" :type="'gray-mid'"
+      btn(class="btn-align full-width" :type="'gray-mid'" :disabled="isLocked"
         @click.native="openAlignPopup") {{$t('NN0044')}}
-      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isFlipDisabled}"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :disabled="isLocked || isFlipDisabled"
         @click.native="openFlipPopup") {{$t('NN0038')}}
 </template>
 
@@ -299,12 +299,6 @@ export default Vue.extend({
     row-gap: 10px;
     column-gap: 20px;
   }
-}
-
-.btn-flip.disabled {
-  color: map-get($colors, gray-3);
-  pointer-events: none;
-  cursor: not-allowed;
 }
 
 .action-bar {
