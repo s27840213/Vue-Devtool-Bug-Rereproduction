@@ -8,7 +8,7 @@
       div(class="border-gray-4 p-5 btn-opacity"
         v-hint="$t('NN0030')"
       )
-        svg-icon(class="pointer"
+        svg-icon(:class="{'pointer': !isLocked}"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
     div(class="action-bar flex-between")
