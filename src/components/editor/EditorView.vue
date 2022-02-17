@@ -145,15 +145,26 @@ export default Vue.extend({
   },
   watch: {
     pageScaleRatio() {
-      const editor = this.$refs.editorView as HTMLElement
-      const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
-      const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
-      const oldScrollWidth = editor.scrollWidth
-      const oldScrollHeight = editor.scrollHeight
-      this.$nextTick(() => {
-        editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
-        editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
-      })
+      if (!this.inBgRemoveMode) {
+        const editor = this.$refs.editorView as HTMLElement
+        if (this.prevScrollPos.top !== -1) {
+          const { top, left } = this.prevScrollPos
+          this.$nextTick(() => {
+            editor.scrollLeft = left
+            editor.scrollTop = top
+            this.clearBgRemoveState()
+          })
+        } else {
+          const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
+          const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
+          const oldScrollWidth = editor.scrollWidth
+          const oldScrollHeight = editor.scrollHeight
+          this.$nextTick(() => {
+            editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
+            editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
+          })
+        }
+      }
     },
     screenHeight() {
       pageUtils.findCentralPageIndexInfo()
@@ -177,7 +188,8 @@ export default Vue.extend({
       lockGuideline: 'getLockGuideline',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      prevScrollPos: 'bgRemove/getPrevScrollPos'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -213,7 +225,9 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      setInBgRemoveMode: 'SET_inBgRemoveMode'
+      setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
+      setInBgRemoveMode: 'SET_inBgRemoveMode',
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
     brushCursorStyles() {
       return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}

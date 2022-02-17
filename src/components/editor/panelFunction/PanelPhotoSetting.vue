@@ -108,7 +108,8 @@ export default Vue.extend({
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles',
       setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
-      setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult'
+      setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
+      setPrevScrollPos: 'bgRemove/SET_prevScrollPos'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -154,8 +155,16 @@ export default Vue.extend({
                 layerUtils.updateLayerProps(pageIndex, index, {
                   inProcess: false
                 })
+                const editorView = document.querySelector('.editor-view')
+                const { scrollTop, scrollLeft } = editorView as HTMLElement
+
+                this.setPrevScrollPos({
+                  top: scrollTop,
+                  left: scrollLeft
+                })
+
                 this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
-                this.setInBgRemoveMode(!this.inBgRemoveMode)
+                this.setInBgRemoveMode(true)
                 return true
               }
               if (json.flag === 1) {

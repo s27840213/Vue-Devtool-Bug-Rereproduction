@@ -390,6 +390,14 @@ class ImageUtils {
       initSrc
     }
   }
+
+  appendOriginQuery(src: string) {
+    if (src.includes('?')) {
+      return `${src}&origin=true`
+    } else {
+      return `${src}?origin=true`
+    }
+  }
 }
 
 export default new ImageUtils()

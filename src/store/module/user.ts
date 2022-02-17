@@ -201,7 +201,7 @@ const mutations: MutationTree<IUserModule> = {
   [SET_IMAGES](state: IUserModule) {
     const { userAssets, teamId, userId } = state
     const isAdmin = state.role === 0
-    const images = userAssets.image.content.filter((image: IUserImageContentData) => { return image.hidden === 0 }).map((image: IUserImageContentData) => {
+    const images = userAssets.image.content.map((image: IUserImageContentData) => {
       const aspectRatio = image.width / image.height
       const prevW = image.width > image.height ? image.width : 384 * aspectRatio
       const prevH = image.height > image.width ? image.height : 384 / aspectRatio

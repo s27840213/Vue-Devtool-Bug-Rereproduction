@@ -12,10 +12,10 @@
           @click="switchNav(index)")
           svg-icon(class="nav-item__icon"
             :iconName="item.icon"
-            :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
+            :iconColor="(currPanel === index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
             :iconWidth="'24px'")
           div(class="nav-item-text body-3"
-            :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
+            :class="(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
     div(class="sidebar__chevron pointer"
         :class="[{'rotate-hr': isSidebarPanelOpen}]"
         @click="toggleSidebarPanel")
@@ -55,7 +55,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
@@ -81,25 +82,31 @@ export default Vue.extend({
       _setShowPagePanel: 'page/SET_showPagePanel'
     }),
     switchNav(index: number): void {
-      // switch to sidebar panel index
-      this.setCurrSidebarPanel(index)
-      this.$emit('toggleSidebarPanel', true)
-      if (this.showPagePanel) {
-        this._setShowPagePanel(false)
-      }
-      if (this.isShowPagePreview) {
-        this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
+      if (!this.inBgRemoveMode) {
+        // switch to sidebar panel index
+        this.setCurrSidebarPanel(index)
+        this.$emit('toggleSidebarPanel', true)
+        if (this.showPagePanel) {
+          this._setShowPagePanel(false)
+        }
+        if (this.isShowPagePreview) {
+          this._setIsShowPagePreview(false)
+          pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
+        }
       }
     },
     goToPage(pageName: string) {
-      this.$router.push({ name: pageName })
+      if (!this.inBgRemoveMode) {
+        this.$router.push({ name: pageName })
+      }
     },
     toggleSidebarPanel() {
-      if (this.showPagePanel) {
-        this._setShowPagePanel(false)
+      if (!this.inBgRemoveMode) {
+        if (this.showPagePanel) {
+          this._setShowPagePanel(false)
+        }
+        this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
       }
-      this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
     }
   }
 })

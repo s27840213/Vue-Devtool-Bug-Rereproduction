@@ -69,15 +69,15 @@ export default Vue.extend({
           default:
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
         }
-        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
       }
     }
     preImg.onload = () => {
       const nextImg = new Image()
       nextImg.setAttribute('crossOrigin', 'Anonymous')
-      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
+      nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
     }
-    preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+    preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
   },
   data() {
     return {
@@ -98,7 +98,7 @@ export default Vue.extend({
 
             img.onload = () => resolve()
             img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-            img.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType))
+            img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType)))
           })
         }
 
@@ -214,7 +214,7 @@ export default Vue.extend({
         const img = new Image()
         img.setAttribute('crossOrigin', 'Anonymous')
 
-        const src = ImageUtils.getSrc(this.config)
+        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
           if (ImageUtils.getSrc(this.config) === src) {

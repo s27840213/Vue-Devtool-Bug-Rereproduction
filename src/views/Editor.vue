@@ -7,7 +7,7 @@
         sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
         div(class="content__main")
           div(class="content__editor")
-            div(class="header-container")
+            div(v-if="!inBgRemoveMode" class="header-container")
               editor-header
             div(v-if="isAdmin" class="admin-options")
               div(class="admin-options__sticky-container"
@@ -97,7 +97,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
-      groupType: 'getGroupType'
+      groupType: 'getGroupType',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1

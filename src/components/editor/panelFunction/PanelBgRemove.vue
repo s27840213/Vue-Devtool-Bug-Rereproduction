@@ -41,7 +41,7 @@
       btn( class="full-width"
         type="gray-mid"
         ref="btn"
-        @click.native="setInBgRemoveMode(false)") {{ $t('NN0203') }}
+        @click.native="cancel()") {{ $t('NN0203') }}
       btn( class="full-width"
         type="primary-mid"
         ref="btn"
@@ -59,6 +59,8 @@ import { IImage } from '@/interfaces/layer'
 import { IBgRemoveInfo } from '@/interfaces/image'
 import uploadUtils from '@/utils/uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
+import pageUtils from '@/utils/pageUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data() {
@@ -78,7 +80,8 @@ export default Vue.extend({
       modifiedFlag: 'bgRemove/getModifiedFlag',
       currSelectedInfo: 'getCurrSelectedInfo',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      prevPageScaleRatio: 'bgRemove/getPrevPageScaleRatio'
     }),
     brushSize: {
       get: () => {
@@ -91,10 +94,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      addLayer: 'ADD_selectedLayer',
-      setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
-      _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
       setBrushSize: 'bgRemove/SET_brushSize',
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
@@ -121,6 +121,8 @@ export default Vue.extend({
           trace: 1
         })
         this.setInBgRemoveMode(false)
+        this.setPageScaleRatio(this.prevPageScaleRatio)
+        stepsUtils.record()
       } else {
         this.setLoading(true)
         uploadUtils.uploadAsset('image', [this.canvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
@@ -134,8 +136,14 @@ export default Vue.extend({
           })
           this.setLoading(false)
           this.setInBgRemoveMode(false)
+          this.setPageScaleRatio(this.prevPageScaleRatio)
+          stepsUtils.record()
         })
       }
+    },
+    cancel() {
+      this.setInBgRemoveMode(false)
+      this.setPageScaleRatio(this.prevPageScaleRatio)
     }
   }
 })
