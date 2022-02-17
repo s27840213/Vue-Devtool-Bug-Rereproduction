@@ -35,11 +35,11 @@ export default Vue.extend({
   methods: {
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items
-      this.items.scrollLeft = scrollLeft + offsetWidth
+      this.items.scrollLeft = scrollLeft + offsetWidth + 10
     },
     handlePrev() {
       const { scrollLeft, offsetWidth } = this.items
-      this.items.scrollLeft = scrollLeft - offsetWidth
+      this.items.scrollLeft = scrollLeft - offsetWidth - 10
     },
     handleScroll(event: Event) {
       const { scrollLeft } = event.target as HTMLElement
