@@ -36,6 +36,8 @@ export default Vue.extend({
       ctx: undefined as unknown as CanvasRenderingContext2D,
       initImgCanvas: undefined as unknown as HTMLCanvasElement,
       initImgCtx: undefined as unknown as CanvasRenderingContext2D,
+      blurCanvas: undefined as unknown as HTMLCanvasElement,
+      blurCtx: undefined as unknown as CanvasRenderingContext2D,
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
@@ -65,14 +67,15 @@ export default Vue.extend({
     this.imageElement.setAttribute('crossOrigin', 'Anonymous')
     this.imageElement.onload = () => {
       this.initCanvas()
+      this.initBlurCanvas()
     }
 
     this.initImageElement = new Image()
     this.initImageElement.src = this.initImgSrc
     this.initImageElement.setAttribute('crossOrigin', 'Anonymous')
-    // this.initImageElement.onload = () => {
-    //   this.initCanvas()
-    // }
+    this.initImageElement.onload = () => {
+      this.createInitImageCtx()
+    }
     this.editorView.addEventListener('mousedown', this.drawStart)
     window.addEventListener('mousemove', this.brushMoving)
     window.addEventListener('keydown', this.handleKeydown)
@@ -139,6 +142,7 @@ export default Vue.extend({
   watch: {
     brushSize(newVal: number) {
       this.ctx.lineWidth = newVal
+      this.blurCtx.lineWidth = newVal
       this.brushStyle.width = `${newVal}px`
       this.brushStyle.height = `${newVal}px`
       if (this.clearMode) {
@@ -208,6 +212,19 @@ export default Vue.extend({
       this.ctx.filter = `blur(${this.blurPx}px)`
       this.pushStep()
     },
+    initBlurCanvas() {
+      this.blurCanvas = document.createElement('canvas') as HTMLCanvasElement
+      this.blurCanvas.width = this.size.width
+      this.blurCanvas.height = this.size.height
+      const ctx = this.blurCanvas.getContext('2d') as CanvasRenderingContext2D
+      // set up drawing settings
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineWidth = this.brushSize
+      ctx.filter = `blur(${this.blurPx}px)`
+
+      this.blurCtx = ctx
+    },
     createInitImageCtx() {
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
@@ -245,9 +262,7 @@ export default Vue.extend({
       if (this.clearMode) {
         this.drawLine(e, this.ctx)
       } else {
-        this.createInitImageCtx()
-        this.drawLine(e, this.initImgCtx)
-        this.ctx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
+        this.drawInResotreMode(e)
       }
       window.addEventListener('mouseup', this.drawEnd)
       window.addEventListener('mousemove', this.drawing)
@@ -256,9 +271,7 @@ export default Vue.extend({
       if (this.clearMode) {
         this.drawLine(e, this.ctx)
       } else {
-        this.createInitImageCtx()
-        this.drawLine(e, this.initImgCtx)
-        this.ctx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
+        this.drawInResotreMode(e)
       }
     },
     drawEnd() {
@@ -282,6 +295,17 @@ export default Vue.extend({
       } else {
         this.setCompositeOperationMode('source-over')
       }
+    },
+    drawInResotreMode(e: MouseEvent) {
+      this.clearCtx(this.blurCtx)
+      this.drawLine(e, this.blurCtx)
+      this.setCompositeOperationMode('source-in', this.blurCtx)
+      this.blurCtx.filter = 'none'
+      this.blurCtx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
+
+      this.setCompositeOperationMode('source-over', this.blurCtx)
+      this.blurCtx.filter = `blur(${this.blurPx}px)`
+      this.ctx.drawImage(this.blurCanvas, 0, 0, this.size.width, this.size.height)
     },
     clearCtx(ctx?: CanvasRenderingContext2D) {
       const targetCtx = ctx ?? this.ctx
