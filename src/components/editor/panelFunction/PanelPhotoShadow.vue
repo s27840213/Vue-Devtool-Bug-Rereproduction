@@ -19,7 +19,7 @@
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{field}}
           input(class="photo-effect-setting__range-input"
-            :value="currentStyle.shadow[currentEffect][field]"
+            :value="getFieldValue(field)"
             :max="fieldRange[currentEffect][field].max"
             :min="fieldRange[currentEffect][field].min"
             :name="field"
@@ -28,7 +28,7 @@
             v-ratio-change
             type="range")
           input(class="photo-effect-setting__value-input"
-            :value="currentStyle.shadow[currentEffect][field]"
+            :value="getFieldValue(field)"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
@@ -37,12 +37,12 @@
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.color }"
+            :style="{ backgroundColor: currentStyle.shadow.effects.color }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
             class="photo-effect-setting__color-picker"
             v-click-outside="handleColorModal"
-            :currentColor="currentStyle.textEffect.color"
+            :currentColor="currentStyle.shadow.effects.color"
             @update="handleColorUpdate")
       div(class="flex-between photo-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
@@ -62,7 +62,7 @@
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{ field }}
           input(class="photo-effect-setting__range-input"
-            :value="currentStyle.shadow[currentEffect][field]"
+            :value="getFieldValue(field)"
             :max="fieldRange[currentEffect][field].max"
             :min="fieldRange[currentEffect][field].min"
             :name="field"
@@ -71,7 +71,7 @@
             v-ratio-change
             type="range")
           input(class="photo-effect-setting__value-input"
-            :value="currentStyle.shadow[currentEffect][field]"
+            :value="getFieldValue(field)"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
@@ -80,7 +80,7 @@
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.color }"
+            :style="{ backgroundColor: currentStyle.shadow.effects.color }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
             class="photo-effect-setting__color-picker"
@@ -150,7 +150,7 @@ export default Vue.extend({
       return styles || {}
     },
     currentEffect(): ShadowEffectType {
-      const { shadow = {} } = this.currentStyle as any
+      const { shadow } = this.currentStyle as IImageStyle
       return shadow.currentEffect || 'none'
     },
     effects(): { [key: string]: string[] } {
@@ -236,6 +236,9 @@ export default Vue.extend({
     },
     recordChange() {
       stepsUtils.record()
+    },
+    getFieldValue(field: string): number {
+      return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     }
   }
 })

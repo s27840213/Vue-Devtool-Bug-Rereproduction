@@ -25,7 +25,7 @@ import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
@@ -43,7 +43,7 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    this.handleShadowEffect()
+    this.handleNewShadowEffect()
   },
   destroyed() {
     if (this.filter) {
@@ -92,12 +92,13 @@ export default Vue.extend({
       },
       deep: true
     },
-    shadowEffects() {
+    shadowEffects(newVal) {
       console.log('update shadow effect ')
-      this.handleShadowEffect()
+      this.updateShadowEffect(newVal)
     },
     currentShadowEffect() {
       console.log('change curremt shadow effect')
+      this.handleNewShadowEffect()
     }
   },
   components: { NuAdjustImage },
@@ -154,6 +155,10 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('user', ['updateImages']),
+    ...mapMutations({
+      UPDATE_shadowEffect: 'UPDATE_shadowEffect',
+      UPDATE_shadowEffectState: 'UPDATE_shadowEffectState'
+    }),
     styles() {
       const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
@@ -249,18 +254,34 @@ export default Vue.extend({
       }
       preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
     },
-    handleShadowEffect() {
+    handleNewShadowEffect() {
       const { filterId, currentEffect } = this.shadow
       if (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
         this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.attrFormat(this.shadow)) as HTMLElement
-        layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-          shadow: {
-            filterId: newFilterId,
-            ...this.shadow
+
+        const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
+        const layerInfo = { layerIndex, pageIndex, subLayerIdx }
+        this.UPDATE_shadowEffectState({
+          layerInfo,
+          payload: {
+            filterId: newFilterId
           }
         })
       }
+    },
+    updateShadowEffect(effects: IShadowEffects) {
+      const { pageIndex, layerIndex, subLayerIndex } = this
+      const layerInfo = { pageIndex, layerIndex, subLayerIndex }
+      window.requestAnimationFrame(() => {
+        this.UPDATE_shadowEffect({
+          layerInfo,
+          payload: {
+            ...effects
+          }
+        })
+        this.filter && imgShadowUtils.updateFilter(this.filter, this.shadow)
+      })
     }
   }
 })

@@ -114,6 +114,12 @@ export enum LayerType {
   tmp = 'tmp'
 }
 
+export interface ILayerInfo {
+  pageIndex: number,
+  layerIndex: number,
+  subLayerIdx: number
+}
+
 export enum LineTemplatesType {
   type1 = 'type1',
   type2 = 'type2'

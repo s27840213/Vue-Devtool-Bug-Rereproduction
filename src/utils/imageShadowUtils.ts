@@ -15,6 +15,34 @@ type Filter = {
   child?: Array<Filter>
 }
 
+const SVG = 'http://www.w3.org/2000/svg'
+const FilterTable = {
+  opacity: {
+    tag: 'feComponentTransfer',
+    child: {
+      tag: 'feFuncA',
+      prop: 'slope',
+      weighting: 0.01
+    }
+  },
+  spread: {
+    tag: 'feMorphology',
+    prop: 'radius'
+  },
+  radius: {
+    tag: 'feGaussianBlur',
+    prop: 'stdDeviation'
+  },
+  x: {
+    tag: 'feOffset',
+    prop: 'dx'
+  },
+  y: {
+    tag: 'feOffset',
+    prop: 'dy'
+  }
+} as any
+
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80 as const
 class ImageShadowUtils {
@@ -28,11 +56,15 @@ class ImageShadowUtils {
       }
     } else {
       const { shadow } = (currLayer as IImage).styles
+      const { effects, filterId } = shadow
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         shadow: {
-          ...(shadow && (shadow as IShadowProps)),
-          ...attrs,
-          currentEffect: effect
+          currentEffect: effect,
+          filterId,
+          effects: {
+            ...effects,
+            ...attrs
+          }
         }
       }, subLayerIdx)
     }
@@ -40,7 +72,7 @@ class ImageShadowUtils {
   }
 
   addFilter(filterId: string, filters: Array<Filter>) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    const svg = document.createElementNS(SVG, 'svg')
     svg.setAttribute('viewBox', '0 0 5000 5000')
     this.append(svg, [{
       tag: 'filter',
@@ -79,12 +111,29 @@ class ImageShadowUtils {
         }
       },
       {
+        tag: 'feComponentTransfer',
+        attrs: {
+          in: 'color',
+          result: 'opacity'
+        },
+        child: [
+          {
+            tag: 'feFuncA',
+            attrs: {
+              type: 'linear',
+              intercept: '0',
+              slope: '1'
+            }
+          }
+        ]
+      },
+      {
         tag: 'feMorphology',
         attrs: {
           operator: 'dilate',
           radius: 10,
           result: 'spread',
-          in: 'color'
+          in: 'opacity'
         }
       },
       {
@@ -130,7 +179,7 @@ class ImageShadowUtils {
   append(parent: HTMLElement | SVGElement, filters: Array<Filter>) {
     filters
       .forEach(f => {
-        const filter = document.createElementNS('http://www.w3.org/2000/svg', f.tag)
+        const filter = document.createElementNS(SVG, f.tag)
         Object.entries(f.attrs)
           .forEach(([k, v]) => {
             filter.setAttribute(k, v.toString())
@@ -257,6 +306,35 @@ class ImageShadowUtils {
 
   assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here")
+  }
+
+  updateFilter(filter: HTMLElement, shadow: IShadowProps) {
+    const { effects, currentEffect } = shadow
+    const effect = currentEffect !== ShadowEffectType.none ? effects[currentEffect] : {}
+    switch (currentEffect) {
+      case ShadowEffectType.shadow: {
+        Object.entries(effect as IShadowEffect)
+          .forEach(([k, v]) => {
+            this.setAttrs(filter, { ...FilterTable[k], k, v })
+          })
+      }
+    }
+  }
+
+  setAttrs(filter: SVGElement | HTMLElement, data: any) {
+    const { prop, weighting, child, tag, k, v } = data
+    const subFilter = filter.getElementsByTagNameNS(SVG, tag)[0]
+    if (child) {
+      this.setAttrs(subFilter, { ...child, k, v })
+    } else {
+      const val = weighting ? v * weighting : v
+      if (k !== 'spread') {
+        subFilter.setAttribute(prop as string, val.toString())
+      } else {
+        subFilter.setAttribute('operator', val < 0 ? 'erode' : 'dilate')
+        subFilter.setAttribute(prop as string, Math.abs(val).toString())
+      }
+    }
   }
 
   // isTransparentBG(config: IImage): Promise<boolean> {
