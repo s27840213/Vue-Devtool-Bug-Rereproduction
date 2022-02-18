@@ -22,8 +22,8 @@ export interface IBlurEffect {
 }
 export interface IFrameEffect {
   [key: string]: number
-  width: number,
-  blur: number,
+  radius: number,
+  spread: number,
   opacity: number
 }
 export interface IHaloEffect {
@@ -34,7 +34,9 @@ export interface IHaloEffect {
 }
 export interface IProjectionEffect {
   [key: string]: number
-  width: number,
+  spread: number,
+  radius: number,
+  y: number,
   opacity: number
 }
 

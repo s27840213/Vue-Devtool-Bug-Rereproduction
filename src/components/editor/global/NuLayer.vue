@@ -18,10 +18,12 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import { IGroup } from '@/interfaces/layer'
+import { IGroup, IImage } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -83,11 +85,23 @@ export default Vue.extend({
           break
         }
         case LayerType.image: {
-          const { filterId } = this.config.styles.shadow
-          Object.assign(
-            styles,
-            { ...((!this.imgControl && filterId) && { filter: `url(#${filterId})` }) }
-          )
+          const { filterId, currentEffect } = (this.config as IImage).styles.shadow
+          switch (currentEffect) {
+            case ShadowEffectType.shadow:
+            case ShadowEffectType.blur:
+            case ShadowEffectType.frame:
+              Object.assign(
+                styles,
+                { ...((!this.imgControl && filterId) && { filter: `url(#${filterId})` }) }
+              )
+              break
+            case ShadowEffectType.none:
+            case ShadowEffectType.halo:
+            case ShadowEffectType.projection:
+              break
+            default:
+              return generalUtils.assertUnreachable(currentEffect)
+          }
         }
       }
       return styles

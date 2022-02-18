@@ -40,6 +40,10 @@ const FilterTable = {
   y: {
     tag: 'feOffset',
     prop: 'dy'
+  },
+  color: {
+    tag: 'feFlood',
+    prop: 'flood-color'
   }
 } as any
 
@@ -89,91 +93,6 @@ class ImageShadowUtils {
     }])
     document.body.appendChild(svg)
     return svg.firstChild
-  }
-
-  attrFormat(shadow: IShadowProps): Array<Filter> {
-    return [
-      {
-        tag: 'feFlood',
-        attrs: {
-          result: 'flood',
-          'flood-opacity': '1',
-          'flood-color': 'yellow'
-        }
-      },
-      {
-        tag: 'feComposite',
-        attrs: {
-          in: 'flood',
-          in2: 'SourceAlpha',
-          operator: 'atop',
-          result: 'color'
-        }
-      },
-      {
-        tag: 'feComponentTransfer',
-        attrs: {
-          in: 'color',
-          result: 'opacity'
-        },
-        child: [
-          {
-            tag: 'feFuncA',
-            attrs: {
-              type: 'linear',
-              intercept: '0',
-              slope: '1'
-            }
-          }
-        ]
-      },
-      {
-        tag: 'feMorphology',
-        attrs: {
-          operator: 'dilate',
-          radius: 10,
-          result: 'spread',
-          in: 'opacity'
-        }
-      },
-      {
-        tag: 'feGaussianBlur',
-        attrs: {
-          stdDeviation: 5,
-          in: 'spread',
-          result: 'shadow'
-        }
-      },
-      {
-        tag: 'feOffset',
-        attrs: {
-          dx: 20,
-          dy: 20,
-          in: 'shadow',
-          result: 'offset'
-        }
-      },
-      {
-        tag: 'feMerge',
-        attrs: {
-          result: 'merge'
-        },
-        child: [
-          {
-            tag: 'feMergeNode',
-            attrs: {
-              in: 'offset'
-            }
-          },
-          {
-            tag: 'feMergeNode',
-            attrs: {
-              in: 'SourceGraphic'
-            }
-          }
-        ]
-      }
-    ]
   }
 
   append(parent: HTMLElement | SVGElement, filters: Array<Filter>) {
@@ -235,7 +154,7 @@ class ImageShadowUtils {
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
           `${radius}px ` +
-          `${spread - HALO_SPREAD_LIMIT * scale}px ` +
+          `${spread as number - HALO_SPREAD_LIMIT * scale}px ` +
           `${color + this.convertToAlpha(opacity)}`
         }
       }
@@ -243,7 +162,7 @@ class ImageShadowUtils {
       case ShadowEffectType.none:
         return {}
       default:
-        return this.assertUnreachable(shadow.currentEffect)
+        return generalUtils.assertUnreachable(shadow.currentEffect)
     }
   }
 
@@ -273,8 +192,8 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
-          width: 50,
-          blur: 10,
+          spread: 50,
+          radius: 0,
           opacity: 70
         }
         break
@@ -288,7 +207,7 @@ class ImageShadowUtils {
       case ShadowEffectType.none:
         return {}
       default:
-        return this.assertUnreachable(effectName)
+        return generalUtils.assertUnreachable(effectName)
     }
     const { color = '#000000' } = (layerUtils.getCurrConfig as IImage).styles.shadow.effects
     return {
@@ -304,19 +223,26 @@ class ImageShadowUtils {
     ]
   }
 
-  assertUnreachable(_: never): never {
-    throw new Error("Didn't expect to get here")
-  }
-
   updateFilter(filter: HTMLElement, shadow: IShadowProps) {
     const { effects, currentEffect } = shadow
-    const effect = currentEffect !== ShadowEffectType.none ? effects[currentEffect] : {}
+    if (currentEffect === ShadowEffectType.none) return
+
+    const allProps = this.getDefaultEffect(ShadowEffectType.shadow).shadow
+    const effect = effects[currentEffect]
     switch (currentEffect) {
-      case ShadowEffectType.shadow: {
-        Object.entries(effect as IShadowEffect)
-          .forEach(([k, v]) => {
-            this.setAttrs(filter, { ...FilterTable[k], k, v })
+      case ShadowEffectType.shadow:
+      case ShadowEffectType.frame:
+      case ShadowEffectType.blur: {
+        Object.keys(allProps as IShadowEffect)
+          .forEach(k => {
+            if (effect && k in effect) {
+              this.setAttrs(filter, { ...FilterTable[k], k, v: effect[k] })
+            } else {
+              this.setAttrs(filter, { ...FilterTable[k], k, v: 0 })
+            }
           })
+        const subFilter = filter.getElementsByTagNameNS(SVG, FilterTable.color.tag)[0]
+        subFilter.setAttribute(FilterTable.color.prop, effects.color)
       }
     }
   }
@@ -335,6 +261,91 @@ class ImageShadowUtils {
         subFilter.setAttribute(prop as string, Math.abs(val).toString())
       }
     }
+  }
+
+  getDefaultAttrs(): Array<Filter> {
+    return [
+      {
+        tag: 'feFlood',
+        attrs: {
+          result: 'flood',
+          'flood-opacity': '1',
+          'flood-color': 'yellow'
+        }
+      },
+      {
+        tag: 'feComposite',
+        attrs: {
+          in: 'flood',
+          in2: 'SourceAlpha',
+          operator: 'atop',
+          result: 'color'
+        }
+      },
+      {
+        tag: 'feComponentTransfer',
+        attrs: {
+          in: 'color',
+          result: 'opacity'
+        },
+        child: [
+          {
+            tag: 'feFuncA',
+            attrs: {
+              type: 'linear',
+              intercept: '0',
+              slope: '1'
+            }
+          }
+        ]
+      },
+      {
+        tag: 'feMorphology',
+        attrs: {
+          operator: 'dilate',
+          radius: 10,
+          result: 'spread',
+          in: 'opacity'
+        }
+      },
+      {
+        tag: 'feGaussianBlur',
+        attrs: {
+          stdDeviation: 5,
+          in: 'spread',
+          result: 'shadow'
+        }
+      },
+      {
+        tag: 'feOffset',
+        attrs: {
+          in: 'shadow',
+          result: 'offset',
+          dx: 20,
+          dy: 20
+        }
+      },
+      {
+        tag: 'feMerge',
+        attrs: {
+          result: 'merge'
+        },
+        child: [
+          {
+            tag: 'feMergeNode',
+            attrs: {
+              in: 'offset'
+            }
+          },
+          {
+            tag: 'feMergeNode',
+            attrs: {
+              in: 'SourceGraphic'
+            }
+          }
+        ]
+      }
+    ]
   }
 
   // isTransparentBG(config: IImage): Promise<boolean> {

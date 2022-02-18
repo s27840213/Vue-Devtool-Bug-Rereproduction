@@ -183,9 +183,9 @@ export default Vue.extend({
           opacity: { max: 100, min: 0 }
         },
         frame: {
-          width: { max: 100, min: 0 },
+          spread: { max: 72, min: 0 },
           opacity: { max: 100, min: 0 },
-          blur: { max: 100, min: 0 }
+          radius: { max: 100, min: 0 }
         }
       }
     }

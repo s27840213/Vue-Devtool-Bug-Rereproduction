@@ -258,7 +258,8 @@ export default Vue.extend({
       const { filterId, currentEffect } = this.shadow
       if (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
-        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.attrFormat(this.shadow)) as HTMLElement
+        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.getDefaultAttrs()) as HTMLElement
+        this.updateShadowEffect(this.shadowEffects)
 
         const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
         const layerInfo = { layerIndex, pageIndex, subLayerIdx }

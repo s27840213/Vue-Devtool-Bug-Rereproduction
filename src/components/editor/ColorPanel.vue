@@ -145,8 +145,10 @@ export default Vue.extend({
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
     },
     handleDragUpdate(color: string) {
-      colorUtils.event.emit(colorUtils.currEvent, color)
-      colorUtils.setCurrColor(color)
+      window.requestAnimationFrame(() => {
+        colorUtils.event.emit(colorUtils.currEvent, color)
+        colorUtils.setCurrColor(color)
+      })
     },
     handleColorModal(): void {
       colorUtils.setIsColorPickerOpen(!colorUtils.isColorPickerOpen)

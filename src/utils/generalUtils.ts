@@ -142,6 +142,9 @@ class GeneralUtils {
     a.click()
   }
 
+  assertUnreachable(_: never): never {
+    throw new Error("Didn't expect to get here")
+  }
   // log(params: string, data: any = '') {
   //   if (data) {
   //     console.log(data)
