@@ -34,12 +34,16 @@ export default Vue.extend({
   },
   methods: {
     handleNext() {
-      const { scrollLeft, offsetWidth } = this.items
-      this.items.scrollLeft = scrollLeft + offsetWidth + 10
+      const { scrollLeft } = this.items
+      const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
+      const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
+      this.items.scrollLeft = scrollLeft + (itemWidth + gridGap) * 2
     },
     handlePrev() {
-      const { scrollLeft, offsetWidth } = this.items
-      this.items.scrollLeft = scrollLeft - offsetWidth - 10
+      const { scrollLeft } = this.items
+      const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
+      const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
+      this.items.scrollLeft = scrollLeft - (itemWidth + gridGap) * 2
     },
     handleScroll(event: Event) {
       const { scrollLeft } = event.target as HTMLElement

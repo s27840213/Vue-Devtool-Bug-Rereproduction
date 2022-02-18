@@ -49,7 +49,7 @@ export default Vue.extend({
   }
   .category-list {
     margin-right: -10px;
-    // padding-right: 10px;
+    padding-right: 10px;
     overflow-y: overlay;
     overflow-x: hidden;
     scrollbar-width: thin;
