@@ -43,7 +43,7 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    this.handleNewShadowEffect()
+    this.handleNewShadowEffect(true)
   },
   destroyed() {
     if (this.filter) {
@@ -91,6 +91,9 @@ export default Vue.extend({
         this.perviewAsLoading()
       },
       deep: true
+    },
+    scale() {
+      this.updateShadowEffect(this.shadowEffects)
     },
     shadowEffects(newVal) {
       console.log('update shadow effect ')
@@ -151,6 +154,9 @@ export default Vue.extend({
     },
     currentShadowEffect(): string {
       return this.shadow.currentEffect
+    },
+    scale(): number {
+      return this.config.styles.scale
     }
   },
   methods: {
@@ -254,9 +260,9 @@ export default Vue.extend({
       }
       preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
     },
-    handleNewShadowEffect() {
+    handleNewShadowEffect(isInit = false) {
       const { filterId, currentEffect } = this.shadow
-      if (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
+      if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
         this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.getDefaultAttrs()) as HTMLElement
         this.updateShadowEffect(this.shadowEffects)
@@ -272,8 +278,8 @@ export default Vue.extend({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
-      const { pageIndex, layerIndex, subLayerIndex } = this
-      const layerInfo = { pageIndex, layerIndex, subLayerIndex }
+      const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
+      const layerInfo = { pageIndex, layerIndex, subLayerIdx }
       window.requestAnimationFrame(() => {
         this.UPDATE_shadowEffect({
           layerInfo,
@@ -281,7 +287,7 @@ export default Vue.extend({
             ...effects
           }
         })
-        this.filter && imgShadowUtils.updateFilter(this.filter, this.shadow)
+        this.filter && imgShadowUtils.updateFilter(this.filter, this.config.styles)
       })
     }
   }

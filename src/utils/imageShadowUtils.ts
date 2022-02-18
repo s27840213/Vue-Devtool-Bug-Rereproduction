@@ -192,7 +192,7 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
-          spread: 50,
+          spread: 12,
           radius: 0,
           opacity: 70
         }
@@ -209,7 +209,10 @@ class ImageShadowUtils {
       default:
         return generalUtils.assertUnreachable(effectName)
     }
-    const { color = '#000000' } = (layerUtils.getCurrConfig as IImage).styles.shadow.effects
+    const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
+    console.log(subLayerIdx)
+    const color = currLayer.type === LayerType.image
+      ? (currLayer as IImage).styles.shadow.effects : '#000000'
     return {
       [effectName]: effect,
       color
@@ -223,7 +226,8 @@ class ImageShadowUtils {
     ]
   }
 
-  updateFilter(filter: HTMLElement, shadow: IShadowProps) {
+  updateFilter(filter: HTMLElement, sytles: IImageStyle) {
+    const { shadow, scale } = sytles
     const { effects, currentEffect } = shadow
     if (currentEffect === ShadowEffectType.none) return
 
@@ -236,7 +240,7 @@ class ImageShadowUtils {
         Object.keys(allProps as IShadowEffect)
           .forEach(k => {
             if (effect && k in effect) {
-              this.setAttrs(filter, { ...FilterTable[k], k, v: effect[k] })
+              this.setAttrs(filter, { ...FilterTable[k], scale, k, v: effect[k] })
             } else {
               this.setAttrs(filter, { ...FilterTable[k], k, v: 0 })
             }
@@ -248,17 +252,22 @@ class ImageShadowUtils {
   }
 
   setAttrs(filter: SVGElement | HTMLElement, data: any) {
-    const { prop, weighting, child, tag, k, v } = data
+    const { prop, weighting, child, tag, scale, k, v } = data
     const subFilter = filter.getElementsByTagNameNS(SVG, tag)[0]
     if (child) {
-      this.setAttrs(subFilter, { ...child, k, v })
+      this.setAttrs(subFilter, { ...child, scale, k, v })
     } else {
-      const val = weighting ? v * weighting : v
-      if (k !== 'spread') {
-        subFilter.setAttribute(prop as string, val.toString())
-      } else {
-        subFilter.setAttribute('operator', val < 0 ? 'erode' : 'dilate')
-        subFilter.setAttribute(prop as string, Math.abs(val).toString())
+      let val = weighting ? v * weighting : v
+
+      switch (k) {
+        case 'spread':
+          val *= scale
+          val = val > 72 ? 72 : val
+          subFilter.setAttribute('operator', val < 0 ? 'erode' : 'dilate')
+          subFilter.setAttribute(prop as string, Math.abs(val).toString())
+          break
+        default:
+          subFilter.setAttribute(prop as string, val.toString())
       }
     }
   }
