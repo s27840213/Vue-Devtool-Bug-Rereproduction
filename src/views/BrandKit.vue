@@ -1,7 +1,11 @@
 <template lang="pug">
   div(class="brand-kit scrollbar-gray")
     nu-header
-    div(class="brand-kit__main")
+    div(v-if="isBrandsLoading" class="brand-kit__main")
+      svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+    div(v-else class="brand-kit__main")
       div(class="brand-kit__header")
         div(class="brand-kit__selector")
           brand-selector
@@ -17,6 +21,8 @@ import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
+import brandkitUtils from '@/utils/brandkitUtils'
+import { mapActions, mapGetters } from 'vuex'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -26,11 +32,22 @@ export default Vue.extend({
     BrandSelector,
     BrandKitTab
   },
+  mounted() {
+    brandkitUtils.fetchBrands(this.fetchBrands)
+  },
   data() {
     return {
     }
   },
+  computed: {
+    ...mapGetters('brandkit', {
+      isBrandsLoading: 'getIsBrandsLoading'
+    })
+  },
   methods: {
+    ...mapActions('brandkit', {
+      fetchBrands: 'fetchBrands'
+    })
   }
 })
 </script>

@@ -45,6 +45,16 @@ class BrandKitUtils {
   setBrandName(id: string, name: string) {
     store.commit('brandkit/SET_brandName', { id, name })
   }
+
+  fetchBrands(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_brands', [])
+    }
+    store.commit('brandkit/SET_isBrandsLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isBrandsLoading', false)
+    })
+  }
 }
 
 export default new BrandKitUtils()
