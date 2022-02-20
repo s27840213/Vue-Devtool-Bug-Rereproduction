@@ -12,6 +12,9 @@ interface IBrandKitState {
 }
 
 const DEFAULT_BRAND = brandkitUtils.createDefaultBrand()
+const showNetworkError = () => {
+  Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
+}
 
 const getDefaultState = (): IBrandKitState => ({
   brands: [],
@@ -45,7 +48,18 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }, () => {
       brand.name = oldName
     }, () => {
-      Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
+      showNetworkError()
+    })
+  },
+  async createBrand({ commit }) {
+    const brand = brandkitUtils.createDefaultBrand()
+    brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_addBrand', brand)
+      commit('SET_currentBrand', brand)
+    }, () => {
+      commit('UPDATE_deleteBrand', brand)
+    }, () => {
+      showNetworkError()
     })
   }
 }
@@ -59,6 +73,18 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
+  },
+  UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
+    state.brands.push(brand)
+  },
+  UPDATE_deleteBrand(state: IBrandKitState, brand: IBrand) {
+    const index = state.brands.findIndex(brand_ => brand_.id === brand.id)
+    if (index >= 0) {
+      state.brands.splice(index, 1)
+      if (state.currentBrandId === brand.id) {
+        state.currentBrandId = state.brands[0].id
+      }
+    }
   }
 }
 

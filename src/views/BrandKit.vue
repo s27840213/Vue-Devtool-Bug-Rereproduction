@@ -53,7 +53,7 @@ export default Vue.extend({
       fetchBrands: 'fetchBrands'
     }),
     addNewBrand() {
-      // brandkitUtils.addNewBrand()
+      brandkitUtils.addNewBrand()
     }
   }
 })

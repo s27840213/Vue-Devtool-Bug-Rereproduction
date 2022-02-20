@@ -34,6 +34,10 @@ class BrandKitUtils {
     store.dispatch('brandkit/setBrandName', { brand, newName })
   }
 
+  addNewBrand() {
+    store.dispatch('brandkit/createBrand')
+  }
+
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
     if (clear) {
       store.commit('brandkit/SET_brands', [])
