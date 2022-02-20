@@ -19,10 +19,22 @@
         v-click-outside="() => { isBrandListOpen = false }"
         class="brand-selector__brand-list")
         div(v-for="brand in brands"
-          class="brand-selector__brand-list__item pointer"
+          class="brand-selector__brand-list__item pointer relative"
           :class="{'selected': checkSelected(brand)}"
+          @mouseenter="handleMouseEnter(brand)"
+          @mouseleave="handleMouseLeave()"
           @click="handleSetCurrentBrand(brand)")
           span {{ getDisplayedBrandName(brand) }}
+          div(class="brand-selector__brand-list__item-menu-icon pointer" @click.stop="handleBrandMenu(brand)")
+            svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
+          div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
+          div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
+            div(class="brand-selector__brand-list__item-menu-row pointer")
+              svg-icon(iconName="copy" iconWidth="20px" iconColor="gray-2")
+              span {{ $t('NN0251') }}
+            div(class="brand-selector__brand-list__item-menu-row pointer")
+              svg-icon(iconName="trash" iconWidth="20px" iconColor="gray-2")
+              span {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">
@@ -37,7 +49,9 @@ export default Vue.extend({
     return {
       isNameEditing: false,
       editableName: '',
-      isBrandListOpen: false
+      isBrandListOpen: false,
+      currentHoverBrandId: '',
+      currentBrandMenuId: ''
     }
   },
   directives: {
@@ -50,6 +64,19 @@ export default Vue.extend({
     }),
     brandName(): string {
       return this.getDisplayedBrandName(this.currentBrand)
+    }
+  },
+  watch: {
+    currentHoverBrandId(newVal) {
+      if (this.currentBrandMenuId !== '' && this.currentBrandMenuId !== newVal) {
+        this.currentBrandMenuId = ''
+      }
+    },
+    isBrandListOpen(newVal) {
+      if (!newVal) {
+        this.currentHoverBrandId = ''
+        this.currentBrandMenuId = ''
+      }
     }
   },
   methods: {
@@ -79,6 +106,15 @@ export default Vue.extend({
       this.isBrandListOpen = false
       this.setCurrentBrand(brand)
     },
+    handleBrandMenu(brand: IBrand) {
+      this.currentBrandMenuId = brand.id
+    },
+    handleMouseEnter(brand: IBrand) {
+      this.currentHoverBrandId = brand.id
+    },
+    handleMouseLeave() {
+      this.currentHoverBrandId = ''
+    },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.brandName) {
         this.handleNameEditEnd()
@@ -87,6 +123,9 @@ export default Vue.extend({
     },
     checkSelected(brand: IBrand): boolean {
       return this.currentBrand.id === brand.id
+    },
+    checkBrandMenuShowing(brand: IBrand): boolean {
+      return this.currentBrandMenuId === brand.id
     },
     getDisplayedBrandName(brand: IBrand): string {
       return brand.name === '' ? `${this.$t('NN0397')}` : brand.name
@@ -154,6 +193,10 @@ export default Vue.extend({
     &__item {
       text-align: left;
       padding: 10px;
+      padding-right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       & > span {
         @include body-SM;
       }
@@ -162,6 +205,58 @@ export default Vue.extend({
       }
       &:not(.selected):hover {
         background: setColor(gray-5);
+      }
+      &:hover {
+        & > .brand-selector__brand-list__item-menu-icon {
+          display: block;
+        }
+      }
+    }
+    &__item-menu {
+      width: 146px;
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      left: calc(100% + 4px);
+      top: 0;
+      background: white;
+      box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
+      border-radius: 5px;
+      &-icon {
+        width: 24px;
+        height: 24px;
+        display: none;
+        &:hover {
+          & > .brand-selector__brand-list__item-menu {
+            display: block;
+          }
+        }
+      }
+      &-bridge {
+        position: absolute;
+        left: 100%;
+        top: 0;
+        width: 4px;
+        height: 100%;
+      }
+      &-row {
+        padding: 4px 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        &:hover {
+          background: setColor(gray-5);
+        }
+        & > span {
+          @include body-SM;
+          color: setColor(gray-1);
+        }
+        &:nth-child(1) {
+          padding-top: 8px;
+        }
+        &:nth-last-child(1) {
+          padding-bottom: 8px;
+        }
       }
     }
   }
