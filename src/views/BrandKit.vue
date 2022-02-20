@@ -9,7 +9,11 @@
       div(class="brand-kit__header")
         div(class="brand-kit__selector")
           brand-selector
-        div(class="brand-kit__add")
+        div(class="brand-kit__add pointer" @click="addNewBrand")
+          svg-icon(iconName="plus-origin"
+                  iconWidth="16px"
+                  iconColor="gray-1")
+          span(class="brand-kit__add__text") {{ $t('NN0396') }}
       div(class="brand-kit__tab")
         brand-kit-tab
     nu-footer
@@ -47,7 +51,10 @@ export default Vue.extend({
   methods: {
     ...mapActions('brandkit', {
       fetchBrands: 'fetchBrands'
-    })
+    }),
+    addNewBrand() {
+      // brandkitUtils.addNewBrand()
+    }
   }
 })
 </script>
@@ -67,6 +74,23 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  &__add {
+    border: 1px solid setColor(gray-3);
+    box-sizing: border-box;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    height: 43px;
+    padding: 20px;
+    gap: 12px;
+    &:hover {
+      background-color: setColor(gray-5);
+    }
+    &__text {
+      @include body-MD;
+      line-height: 16px;
+    }
   }
 }
 </style>

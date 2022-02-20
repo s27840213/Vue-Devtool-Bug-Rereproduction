@@ -1,7 +1,7 @@
 import axios from '@/apis'
 import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
-import { IBrand } from '@/interfaces/brandkit'
+import { IBrand, IBrandParams } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 
 export default {
@@ -36,7 +36,7 @@ export default {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)
     })
   },
-  async updateBrands(token: string, locale: string, teamId: string, updateType: string, srcAsset: string | null, srcFolder: string | null, target: string): Promise<any> {
+  async updateBrands(token: string, locale: string, teamId: string): Promise<any> {
     // TODO: integrate API
     // return await apiUtils.requestWithRetry(() => {
     //   const payload: any = {
@@ -54,5 +54,20 @@ export default {
     //   if (srcFolder != null) payload.data.src_folder = srcFolder
     //   return axios('/update-asset', payload)
     // })
+    return { data: { flag: 0 } }
+  },
+  updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void) {
+    this.updateBrands(this.getToken(), this.getLocale(), this.getUserId())
+      .then((response) => {
+        if (response.data.flag !== 0) {
+          fallbacker()
+          errorShower()
+        }
+      }).catch((error) => {
+        console.error(error)
+        fallbacker()
+        errorShower()
+      })
+    updater()
   }
 }

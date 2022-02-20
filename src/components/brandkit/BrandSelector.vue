@@ -9,7 +9,7 @@
         @keyup="checkNameEnter")
       span(v-else
         @click="handleNameClick") {{ brandName }}
-    div(class="brand-selector__dropdown"
+    div(class="brand-selector__dropdown pointer"
       @click="isBrandListOpen = true")
       svg-icon(iconName="chevron-down"
         :style="dropdownStyles()"
@@ -73,7 +73,7 @@ export default Vue.extend({
       this.isNameEditing = false
       if (this.editableName === '' || this.editableName === this.brandName) return
       // this.checkNameLength()
-      brandkitUtils.setBrandName(this.currentBrand.id, this.editableName)
+      brandkitUtils.setBrandName(this.currentBrand, this.editableName)
     },
     handleSetCurrentBrand(brand: IBrand) {
       this.isBrandListOpen = false
@@ -89,7 +89,7 @@ export default Vue.extend({
       return this.currentBrand.id === brand.id
     },
     getDisplayedBrandName(brand: IBrand): string {
-      return brandkitUtils.isDefaultBrand(brand) ? `${this.$t('NN0397')}` : brand.name
+      return brand.name === '' ? `${this.$t('NN0397')}` : brand.name
     }
   }
 })

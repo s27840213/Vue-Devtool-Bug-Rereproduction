@@ -38,3 +38,7 @@ export interface IBrandFont {
   namePrevUrl: string,
   textPrevUrl: string
 }
+
+export interface IBrandParams {
+  
+}

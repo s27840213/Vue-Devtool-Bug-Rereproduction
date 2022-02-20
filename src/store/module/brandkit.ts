@@ -2,6 +2,8 @@ import { GetterTree, ActionTree, MutationTree } from 'vuex'
 import { IBrand } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
+import Vue from 'vue'
+import i18n from '@/i18n'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -34,6 +36,17 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async fetchBrands({ commit }) {
     const brands = await brandkitApi.getTestingBrands(brandkitApi.getToken())
     commit('SET_brands', brands)
+  },
+  async setBrandName({ commit }, updateInfo: { brand: IBrand, newName: string }) {
+    const { brand, newName } = updateInfo
+    const oldName = brand.name
+    brandkitApi.updateBrandsWrapper({}, () => {
+      brand.name = newName
+    }, () => {
+      brand.name = oldName
+    }, () => {
+      Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
+    })
   }
 }
 
@@ -46,15 +59,6 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
-  },
-  SET_brandName(state: IBrandKitState, updateInfo: { id: string, name: string}) {
-    const brand = brandkitUtils.findBrand(state.brands, updateInfo.id)
-    if (brand) {
-      if (brandkitUtils.checkDefaultModified(brand) && state.currentBrandId === updateInfo.id) {
-        state.currentBrandId = brand.id
-      }
-      brand.name = updateInfo.name
-    }
   }
 }
 

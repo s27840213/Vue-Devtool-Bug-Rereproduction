@@ -5,7 +5,7 @@ import generalUtils from './generalUtils'
 class BrandKitUtils {
   createDefaultBrand(): IBrand {
     return {
-      id: 'DEF_' + generalUtils.generateAssetId(),
+      id: generalUtils.generateAssetId(),
       name: '',
       logos: [],
       textStyleSetting: {
@@ -26,24 +26,12 @@ class BrandKitUtils {
     }
   }
 
-  isDefaultBrand(brand: IBrand): boolean {
-    return brand.id.startsWith('DEF_')
-  }
-
-  checkDefaultModified(brand: IBrand) {
-    if (this.isDefaultBrand(brand)) {
-      brand.id = brand.id.substring(4)
-      return true
-    }
-    return false
-  }
-
   findBrand(brands: IBrand[], id: string): IBrand | undefined {
     return brands.find(brand => brand.id === id)
   }
 
-  setBrandName(id: string, name: string) {
-    store.commit('brandkit/SET_brandName', { id, name })
+  setBrandName(brand: IBrand, newName: string) {
+    store.dispatch('brandkit/setBrandName', { brand, newName })
   }
 
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
