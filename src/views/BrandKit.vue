@@ -3,8 +3,11 @@
     nu-header
     div(class="brand-kit__main")
       div(class="brand-kit__header")
+        div(class="brand-kit__selector")
+          brand-selector
+        div(class="brand-kit__add")
       div(class="brand-kit__tab")
-      div(class="brand-kit__content")
+        brand-kit-tab
     nu-footer
 </template>
 
@@ -12,12 +15,16 @@
 import Vue from 'vue'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 
 export default Vue.extend({
   name: 'BrandKit',
   components: {
     NuHeader,
-    NuFooter
+    NuFooter,
+    BrandSelector,
+    BrandKitTab
   },
   data() {
     return {
@@ -34,6 +41,15 @@ export default Vue.extend({
   overflow-y: auto;
   &__main {
     height: calc(100vh - #{$header-height});
+    padding-top: 100px;
+    padding-left: 148px;
+    padding-right: 148px;
+  }
+  &__header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 </style>
