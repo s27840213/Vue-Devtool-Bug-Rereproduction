@@ -8,7 +8,7 @@
       div(class="border-gray-4 p-5 btn-opacity"
         v-hint="$t('NN0030')"
       )
-        svg-icon(class="pointer"
+        svg-icon(:class="{'pointer': !isLocked}"
           :iconName="'transparency'" :iconWidth="'24px'" :iconColor="'gray-2'"
           @click.native="openSliderPopup()")
     div(class="action-bar flex-between")
@@ -26,7 +26,7 @@
       )
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
-        :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
         @click.native="iconAction('unlock')"
         v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
       )
@@ -43,9 +43,9 @@
         v-hint="$t('NN0035')"
       )
     div(class="panel-group__adjust")
-      btn(class="btn-align full-width" :type="'gray-mid'"
+      btn(class="btn-align full-width" :type="'gray-mid'" :disabled="isLocked"
         @click.native="openAlignPopup") {{$t('NN0044')}}
-      btn(class="btn-flip full-width" :type="'gray-mid'" :class="{disabled: isTextEditable}"
+      btn(class="btn-flip full-width" :type="'gray-mid'" :disabled="isLocked || isFlipDisabled"
         @click.native="openFlipPopup") {{$t('NN0038')}}
 </template>
 
@@ -184,9 +184,11 @@ export default Vue.extend({
       MappingUtils.mappingIconAction(icon)
     },
     openOrderPopup() {
+      if (this.isLocked) return
       popupUtils.openPopup('order')
     },
     openAlignPopup() {
+      if (this.isLocked) return
       popupUtils.openPopup('align')
     },
     openFlipPopup() {
@@ -194,6 +196,7 @@ export default Vue.extend({
       popupUtils.openPopup('flip')
     },
     openSliderPopup() {
+      if (this.isLocked) return
       popupUtils.setCurrEvent(PopupSliderEventType.opacity)
       popupUtils.setSliderConfig(Object.assign({ value: this.opacity, noText: false }, MappingUtils.mappingMinMax('opacity')))
       popupUtils.openPopup('slider', {
@@ -299,12 +302,6 @@ export default Vue.extend({
     row-gap: 10px;
     column-gap: 20px;
   }
-}
-
-.btn-flip.disabled {
-  color: map-get($colors, gray-3);
-  pointer-events: none;
-  cursor: not-allowed;
 }
 
 .action-bar {

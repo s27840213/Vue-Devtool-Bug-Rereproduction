@@ -206,3 +206,7 @@ $padding: (
 		padding-bottom: 10px;
 	}
 }
+
+.btn[class*="btn-inactive"] {
+	pointer-events: none;
+}

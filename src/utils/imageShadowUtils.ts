@@ -166,6 +166,26 @@ class ImageShadowUtils {
     }
   }
 
+  handleShadowStyles(config: IImage, styles: unknown, imgControl: boolean) {
+    const { filterId, currentEffect } = config.styles.shadow
+    switch (currentEffect) {
+      case ShadowEffectType.shadow:
+      case ShadowEffectType.blur:
+      case ShadowEffectType.frame:
+        Object.assign(
+          styles,
+          { ...((!imgControl && filterId) && { filter: `url(#${filterId})` }) }
+        )
+        break
+      case ShadowEffectType.none:
+      case ShadowEffectType.halo:
+      case ShadowEffectType.projection:
+        break
+      default:
+        return generalUtils.assertUnreachable(currentEffect)
+    }
+  }
+
   convertToAlpha(percent: number): string {
     return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
   }
@@ -210,7 +230,6 @@ class ImageShadowUtils {
         return generalUtils.assertUnreachable(effectName)
     }
     const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
-    console.log(subLayerIdx)
     const color = currLayer.type === LayerType.image
       ? (currLayer as IImage).styles.shadow.effects : '#000000'
     return {
@@ -356,33 +375,6 @@ class ImageShadowUtils {
       }
     ]
   }
-
-  // isTransparentBG(config: IImage): Promise<boolean> {
-  //   return new Promise((resolve, reject) => {
-  //     const img = new Image()
-  //     img.crossOrigin = 'anonymous'
-  //     img.onload = () => {
-  //       const { width: imgWidth, height: imgHeight } = img
-  //       const canvas = (document.createElement('canvas') as HTMLCanvasElement)
-  //       const c = canvas.getContext('2d')
-  //       canvas.width = imgWidth
-  //       canvas.height = imgHeight
-  //       if (c) {
-  //         c.drawImage(img, 0, 0)
-  //         const imgData = c.getImageData(0, 0, imgWidth, imgHeight).data
-  //         for (let i = 3; i < imgData.length; i += 4) {
-  //           if (imgData[i] < 255) {
-  //             resolve(true)
-  //           }
-  //         }
-  //         resolve(false)
-  //       }
-  //       resolve(false)
-  //     }
-  //     img.onerror = () => reject(new Error('cannot load image'))
-  //     img.src = imageUtils.getSrc(config) + '?' + new Date().getTime()
-  //   })
-  // }
 }
 
 export default new ImageShadowUtils()

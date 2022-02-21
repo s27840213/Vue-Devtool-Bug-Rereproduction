@@ -49,7 +49,7 @@ export default Vue.extend({
       return
     }
 
-    await TextUtils.waitUntilAllFontsLoaded(this.config)
+    await TextUtils.waitUntilAllFontsLoaded(this.config, 1)
 
     if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
 
@@ -109,7 +109,7 @@ export default Vue.extend({
     wrapperStyles() {
       const { editing, contentEditable } = this.config
       const { isCurveText, isFlipped } = this
-      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : (isCurveText ? 1 : (isFlipped ? 0.2 : 0))) : 1
+      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
       return {
         writingMode: this.config.styles.writingMode,
         opacity

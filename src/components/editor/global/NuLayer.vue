@@ -85,23 +85,7 @@ export default Vue.extend({
           break
         }
         case LayerType.image: {
-          const { filterId, currentEffect } = (this.config as IImage).styles.shadow
-          switch (currentEffect) {
-            case ShadowEffectType.shadow:
-            case ShadowEffectType.blur:
-            case ShadowEffectType.frame:
-              Object.assign(
-                styles,
-                { ...((!this.imgControl && filterId) && { filter: `url(#${filterId})` }) }
-              )
-              break
-            case ShadowEffectType.none:
-            case ShadowEffectType.halo:
-            case ShadowEffectType.projection:
-              break
-            default:
-              return generalUtils.assertUnreachable(currentEffect)
-          }
+          imageShadowUtils.handleShadowStyles(this.config, styles, this.imgControl)
         }
       }
       return styles

@@ -51,7 +51,9 @@ export default Vue.extend({
       subLayerIdx: this.subLayerIndex
     }
 
-    tiptapUtils.init(this.initText)
+    const contentEditable = this.subLayerIndex === -1 ? (this.layerInfo.currLayer as IText).contentEditable : ((this.layerInfo.currLayer as IGroup).layers[this.subLayerIndex] as IText).contentEditable
+
+    tiptapUtils.init(this.initText, contentEditable)
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
       this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))

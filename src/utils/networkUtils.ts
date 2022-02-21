@@ -18,6 +18,7 @@ class NetworkUtils {
 
   onNetworkChange(callback: (online: boolean) => void) {
     if (this.eventHash.networkChange) {
+      this.offNetworkCahnge()
       delete this.eventHash.networkChange
     }
     this.event.on('networkChange', callback)

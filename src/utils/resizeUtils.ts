@@ -124,10 +124,16 @@ class ResizeUtils {
     controlUtils.updateLayerPos(pageIndex, layerIndex, trans.x, trans.y)
   }
 
+  scaleAndMoveGuideLines(guidelines: {v: number[], h: number[]}, scale: number, xOffset: number, yOffset: number) {
+    guidelines.v = guidelines.v.map(vl => vl * scale + xOffset)
+    guidelines.h = guidelines.h.map(hl => hl * scale + yOffset)
+  }
+
   scaleAndMoveLayers(pageIndex: number, page: IPage, scale: number, xOffset: number, yOffset: number): IPage {
     page.layers.forEach((layer, index) => {
       this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset)
     })
+    this.scaleAndMoveGuideLines(page.guidelines, scale, xOffset, yOffset)
     return page
   }
 

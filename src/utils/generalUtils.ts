@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import modalUtils from './modalUtils'
@@ -145,6 +146,11 @@ class GeneralUtils {
   assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here")
   }
+
+  fbq(type: string, action: string, params?: { [index: string]: any }) {
+    params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
+  }
+
   // log(params: string, data: any = '') {
   //   if (data) {
   //     console.log(data)

@@ -15,7 +15,7 @@ class MathUtils {
     return Math.sin(angleInRad)
   }
 
-  getCenter(styles: IStyle | ITextStyle) {
+  getCenter(styles: IStyle | ITextStyle | { x: number, y: number, width: number, height: number }) {
     return {
       x: styles.x + ((styles.width as number) / 2),
       y: styles.y + ((styles.height as number) / 2)
@@ -181,7 +181,7 @@ class MathUtils {
     return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result
   }
 
-  generatePolygon(styles: {x: number, y: number, width: number, height: number, scale: number, rotate: number}): Flatten.Polygon {
+  generatePolygon(styles: { x: number, y: number, width: number, height: number, scale: number, rotate: number }): Flatten.Polygon {
     const { x, y, width, height, scale = 1, rotate = 0 } = styles
     const angle = rotate / 180 * Math.PI
     const object = new Flatten.Polygon([

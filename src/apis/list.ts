@@ -19,8 +19,9 @@ class ListService {
       theme: params.theme,
       group_id: params.groupId,
       cache: params.cache,
-      platform: params.cache ? window.location.host : null
-      // [2022.01.19] uncached: font, theme, marker, hashtag
+      platform: params.cache ? window.location.host : null,
+      // [2022.01.19] uncached: font, marker, hashtag
+      all_theme: params.all_theme
     }
 
     return axios.request<IListServiceResponse>({
@@ -87,6 +88,7 @@ class ListService {
     params.type = 'theme'
     params.locale = localeUtils.currLocale()
     params.token = '1'
+    params.all_theme = 1
     params.cache = true
     return this.getList(params)
   }

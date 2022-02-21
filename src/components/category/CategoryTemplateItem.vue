@@ -18,9 +18,9 @@ import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
-import themeUtils from '@/utils/themeUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
+import page from '@/store/module/page'
 
 export default Vue.extend({
   components: { ImageCarousel },
@@ -84,15 +84,22 @@ export default Vue.extend({
       const currPage = pageUtils.getPage(pageUtils.currFocusPageIndex)
       const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
-        ? (resize?: any) => AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
-        : (resize?: any) => AssetUtils.addAsset(this.item, resize)
+        ? (resize?: any) => {
+          AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
+        }
+        : (resize?: any) => {
+          AssetUtils.addAsset(this.item, resize)
+          GeneralUtils.fbq('track', 'AddToWishlist', {
+            content_ids: [this.item.id]
+          })
+        }
 
       /**
        * @todo show the modal if the width,height are not the same in detailed page mode
        */
       if (this.isDetailPage) {
         const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
-        const ratio = (matchCover.width || width) / pageWidth
+        const ratio = pageWidth / (matchCover.width || width)
         const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
         return cb(resize)
       }

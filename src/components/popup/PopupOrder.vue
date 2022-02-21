@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="popup-order")
-    div(v-for="(data,index) in popupDatas('order')"
+    div(v-for="(data,index) in popupDatas()"
         :key="`popup-order-${index}`"
         class="popup-order__item"
         @click="data.action")
@@ -32,42 +32,35 @@ export default Vue.extend({
   },
   data() {
     return {
+      orderSets: [
+        {
+          icon: 'layers-forward',
+          text: this.$t('NN0232')
+        },
+        {
+          icon: 'layers-front',
+          text: this.$t('NN0231')
+        },
+        {
+          icon: 'layers-backward',
+          text: this.$t('NN0233')
+        },
+        {
+          icon: 'layers-back',
+          text: this.$t('NN0234')
+        }]
     }
   },
   methods: {
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
     },
-    mappingText(type: string): string[] {
-      switch (type) {
-        case 'order': {
-          return [
-            `${this.$t('NN0232')}`,
-            `${this.$t('NN0231')}`,
-            `${this.$t('NN0233')}`,
-            `${this.$t('NN0234')}`
-          ]
-        }
-        case 'layer': {
-          return [
-            'Copy',
-            'Paste',
-            'Delete'
-          ]
-        }
-        default: {
-          return []
-        }
-      }
-    },
-    popupDatas(type: string) {
-      const icons = this.mappingIcons(type)
-      const texts = this.mappingText(type)
-      return icons.map((icon: string, index: number) => {
+    popupDatas() {
+      return this.orderSets.map((set) => {
         return {
-          icon: icon,
-          text: texts[index],
-          action: MappingUtils.mappingIconAction(icon)
+          icon: set.icon,
+          text: set.text,
+          action: MappingUtils.mappingIconAction(set.icon)
         }
       })
     }

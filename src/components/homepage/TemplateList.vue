@@ -43,7 +43,8 @@
           class="scroll-list__item pt-10"
           :style="previewStyle"
           :class="{'pb-90 item-theme': type === 'theme', 'padding-start': idx === 0, 'padding-end': idx === list.length - 1}")
-          img(class="pointer scroll-list__item-image"
+          img(loading="lazy"
+            class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
             :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`)"
             @click="type === 'theme' ? newDesign(item) : newDesignWithTemplate(item)"
@@ -63,6 +64,7 @@ import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import { mapActions, mapMutations } from 'vuex'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -140,7 +142,9 @@ export default Vue.extend({
         query
       })
       window.open(route.href, '_blank')
-
+      generalUtils.fbq('track', 'AddToWishlist', {
+        content_ids: [template.match_cover.id]
+      })
       // // trigger newDesign method to reset the template themes. [Giambi 12/03]
       // this.$router.push({ name: pageName }).then(() => {
       //   designUtils.newDesign()

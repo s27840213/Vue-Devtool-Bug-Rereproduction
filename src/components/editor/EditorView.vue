@@ -3,9 +3,9 @@
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @mousedown.left="!inBgRemoveMode ? selectStart($event) : null"
-      @wheel="!inBgRemoveMode ? handleWheel : null"
+      @wheel="handleWheel"
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
-      @mousewheel="!inBgRemoveMode ? handleWheel : null"
+      @mousewheel="handleWheel"
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"

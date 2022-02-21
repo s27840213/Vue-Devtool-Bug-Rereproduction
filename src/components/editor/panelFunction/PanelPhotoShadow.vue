@@ -127,12 +127,10 @@ export default Vue.extend({
       hintMap: {
         'shadow-none': `${this.$t('NN0111')}`,
         'shadow-shadow': `${this.$t('NN0112')}`,
-        'shadow-lift': `${this.$t('NN0113')}`,
-        'shadow-hollow': `${this.$t('NN0114')}`,
-        'shadow-splice': `${this.$t('NN0115')}`,
-        'shadow-echo': `${this.$t('NN0116')}`,
-        'shape-none': `${this.$t('NN0117')}`,
-        'shape-curve': `${this.$t('NN0118')}`
+        'shadow-blur': 'blur',
+        'shadow-halo': 'halo',
+        'shadow-projection': 'projection',
+        'shadow-frame': 'frame'
       }
     }
   },

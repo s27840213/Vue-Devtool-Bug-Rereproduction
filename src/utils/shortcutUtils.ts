@@ -1,4 +1,5 @@
 import store from '@/store'
+import Vue from 'vue'
 import GroupUtils from '@/utils/groupUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
@@ -147,6 +148,9 @@ class ShortcutUtils {
       }
       ZindexUtils.reassignZindex(currFocusPageIndex)
     }
+    Vue.nextTick(() => {
+      StepsUtils.record()
+    })
   }
 
   textCopy() {
@@ -260,7 +264,7 @@ class ShortcutUtils {
     GroupUtils.ungroup()
   }
 
-  undo() {
+  async undo() {
     const currLayer = LayerUtils.getCurrLayer
     if (currLayer) {
       switch (currLayer.type) {
@@ -280,11 +284,41 @@ class ShortcutUtils {
           }
       }
     }
-    StepsUtils.undo()
+    await StepsUtils.undo()
+    Vue.nextTick(() => {
+      tiptapUtils.agent(editor => {
+        const currLayer = LayerUtils.getCurrLayer
+        if (!currLayer.active) return
+        if (currLayer.type === 'group') {
+          const subLayerIndex = LayerUtils.subLayerIdx
+          if (subLayerIndex === -1) return
+          const subLayer = (currLayer as IGroup).layers[subLayerIndex]
+          if (!subLayer.active || subLayer.type !== 'text') return
+        } else if (currLayer.type !== 'text') return
+        editor.chain().sync().focus().run()
+        tiptapUtils.prevText = tiptapUtils.getText(editor)
+        TextPropUtils.updateTextPropsState()
+      })
+    })
   }
 
-  redo() {
-    StepsUtils.redo()
+  async redo() {
+    await StepsUtils.redo()
+    Vue.nextTick(() => {
+      tiptapUtils.agent(editor => {
+        const currLayer = LayerUtils.getCurrLayer
+        if (!currLayer.active) return
+        if (currLayer.type === 'group') {
+          const subLayerIndex = LayerUtils.subLayerIdx
+          if (subLayerIndex === -1) return
+          const subLayer = (currLayer as IGroup).layers[subLayerIndex]
+          if (!subLayer.active || subLayer.type !== 'text') return
+        } else if (currLayer.type !== 'text') return
+        editor.chain().sync().focus().run()
+        tiptapUtils.prevText = tiptapUtils.getText(editor)
+        TextPropUtils.updateTextPropsState()
+      })
+    })
   }
 
   zoomIn() {

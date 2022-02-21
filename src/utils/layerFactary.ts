@@ -1,6 +1,7 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
 import store from '@/store'
+import { LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
@@ -63,6 +64,10 @@ class LayerFactary {
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
+
+    if (!decoration && !decorationTop && (!designId || designId === '') && clips.length === 1 && !clips[0].clipPath) {
+      clips[0].isFrameImg = true
+    }
 
     if (clips.length && !clips[0].isFrameImg) {
       clips.forEach((img, i) => {
@@ -281,7 +286,19 @@ class LayerFactary {
         verticalFlip: false
       },
       layers: layers
-        .map(l => this.newByLayerType(l) as IShape | IText | IImage)
+        .flatMap((l, idx) => {
+          /* If the designId and the svg is empty,
+          /* delete the layer */
+          if (l.type === LayerType.shape) {
+            const shape = l as IShape
+            if (!shape.designId && !shape.svg && !['D', 'E'].includes(shape.category)) {
+              console.warn('layer in group at index:', idx, 'has no designId and empty svg, it has been removed!')
+              return []
+            }
+            !shape.designId && console.warn('layer in group at index:', idx, 'has no designId!')
+          }
+          return [this.newByLayerType(l) as IShape | IText | IImage]
+        })
     }
   }
 
@@ -319,7 +336,7 @@ class LayerFactary {
     const { styles } = GeneralUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
-      id: config.id || GeneralUtils.generateRandomString(8),
+      id: GeneralUtils.generateRandomString(8),
       active: false,
       shown: false,
       path: '',
@@ -337,7 +354,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       dragging: false,
-      designId: '',
+      designId: config.designId || '',
       ...(config.category === 'E' && { filled: false }),
       styles: {
         x: styles.x ?? 0,
@@ -357,6 +374,7 @@ class LayerFactary {
       }
     }
     delete config.styles
+    delete config.id
     return Object.assign(basicConfig, config)
   }
 
@@ -382,6 +400,19 @@ class LayerFactary {
 
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
+
+      /* If the designId and the svg is empty,
+      /* delete the layer */
+      if (config.layers[layerIndex].type === LayerType.shape) {
+        const shape = config.layers[layerIndex] as IShape
+        if (!shape.designId && !shape.svg && !['D', 'E'].includes(shape.category)) {
+          config.layers.splice(+layerIndex, 1)
+          console.warn('layer:', layerIndex, 'has no designId and empty svg, it has been removed!')
+          continue
+        }
+        !shape.designId && console.warn('layer:', layerIndex, 'has no designId!')
+      }
+
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
@@ -402,9 +433,6 @@ class LayerFactary {
       case 'frame':
         return this.newFrame(config)
       case 'group':
-        for (const layerIndex in config.layers) {
-          config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
-        }
         return this.newGroup(config, config.layers)
       case 'tmp':
         for (const layerIndex in config.layers) {

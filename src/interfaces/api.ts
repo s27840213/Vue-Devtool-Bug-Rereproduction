@@ -118,6 +118,7 @@ export interface IListServiceParams {
   groupId?: string
   cache?: boolean
   platform?: string
+  all_theme?: number
 }
 
 export interface IGroupDesignInputParams {

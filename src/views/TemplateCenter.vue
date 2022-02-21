@@ -220,6 +220,7 @@ import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'TemplateCenter',
@@ -341,7 +342,13 @@ export default Vue.extend({
       this.composeKeyword()
     })
     themeUtils.checkThemeState().then(() => {
-      this.themes = themeUtils.themes
+      this.themes = themeUtils.themes.filter(theme => {
+        return theme.mainHidden === 0
+      })
+    })
+
+    generalUtils.fbq('track', 'ViewContent', {
+      content_type: 'TemplateCenter'
     })
   },
   beforeCreate() {
@@ -427,6 +434,9 @@ export default Vue.extend({
           }
         })
         window.open(route.href, '_blank')
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.group_id]
+        })
         return
       }
       if (template.content_ids.length === 1) {
@@ -448,6 +458,9 @@ export default Vue.extend({
           }
         })
         window.open(route.href, '_blank')
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [template.id]
+        })
       } else {
         this.content_ids = template.content_ids
         if (this.isMobile()) {
@@ -499,9 +512,11 @@ export default Vue.extend({
         this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
         this.isTemplateReady = true
       })
+      generalUtils.fbq('track', 'Search', {
+        search_string: this.searchbarKeyword
+      })
     },
     handleLoadMore() {
-      console.log('load more')
       this.isTemplateReady = false
       this.getMoreTemplates().then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
@@ -524,6 +539,9 @@ export default Vue.extend({
             }
           })
           window.open(route.href, '_blank')
+          generalUtils.fbq('track', 'AddToWishlist', {
+            content_ids: [content.id]
+          })
           return
         }
         this.modal = 'template'
@@ -548,6 +566,9 @@ export default Vue.extend({
           }
         })
         window.open(route.href, '_blank')
+        generalUtils.fbq('track', 'AddToWishlist', {
+          content_ids: [content.id]
+        })
       }
     },
     handleThemeSelect(theme: Itheme) {
@@ -565,6 +586,9 @@ export default Vue.extend({
         }
       })
       window.open(route.href, '_blank')
+      generalUtils.fbq('track', 'AddToWishlist', {
+        content_ids: [this.contentBuffer.id]
+      })
     },
     getPrevUrl(content: IContentTemplate): string {
       return templateCenterUtils.getPrevUrl(content)
@@ -619,7 +643,23 @@ body {
     height: 376px;
     background-size: cover;
     background-position: center center;
-    background: radial-gradient(21.05% 59% at 37.08% 73.01%, rgba(255, 195, 139, 0.2) 47.4%, rgba(255, 242, 230, 0.142) 100%), radial-gradient(32.87% 62.53% at 60.31% 77.79%, rgba(255, 177, 173, 0.2) 56.25%, rgba(202, 159, 153, 0) 92.71%), linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+    background: radial-gradient(
+        21.05% 59% at 37.08% 73.01%,
+        rgba(255, 195, 139, 0.2) 47.4%,
+        rgba(255, 242, 230, 0.142) 100%
+      ),
+      radial-gradient(
+        32.87% 62.53% at 60.31% 77.79%,
+        rgba(255, 177, 173, 0.2) 56.25%,
+        rgba(202, 159, 153, 0) 92.71%
+      ),
+      linear-gradient(
+        90deg,
+        #cce9ff 0%,
+        #f5fbff 37.1%,
+        #f8fcff 69.6%,
+        #eaf4ff 100%
+      );
   }
   &__search {
     display: flex;

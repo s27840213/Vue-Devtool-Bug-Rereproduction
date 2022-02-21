@@ -21,7 +21,6 @@ const imgShadowMutations = {
   UPDATE_shadowEffectState(state: IEditorState, data: { layerInfo: ILayerInfo, payload: { filterId?: string, currentEffect?: string }}) {
     const { layerInfo, payload } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
-    console.log(subLayerIdx)
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       Object
         .assign(((state.pages[pageIndex].layers[layerIndex] as IGroup)
