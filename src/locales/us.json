@@ -399,5 +399,6 @@
   "NN0391": "Get started",
   "NN0392": "Add all pages ({num} pages)",
   "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\".",
-  "NN0394": "Sorry, we couldn't find any {target}"
+  "NN0394": "Sorry, we couldn't find any {target}",
+  "NN0406": "Sorry, the bowser you use didn't support this function. Try Chrome to use it."
 }

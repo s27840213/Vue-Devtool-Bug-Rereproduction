@@ -10,7 +10,17 @@
       :disableAlpha="true")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
-        span(class="body-1" @click="eyeDropper") Hex
+        svg-icon(class="pointer"
+          :iconName="'color-picker'"
+          :iconWidth="'20px'"
+          :iconColor="'gray-2'"
+          @click.native="eyeDropper")
+        svg-icon(class="pointer"
+          :iconName="'eye-dropper'"
+          :iconWidth="'20px'"
+          :iconColor="'gray-2'"
+          @click.native="eyeDropper")
+        span(class="body-1") Hex
         div(class="color-picker__input")
           div(:style="{'background-color': convertedHex}")
           input(
@@ -19,8 +29,6 @@
             spellcheck="false"
             v-model="color"
             maxlength="7")
-        //- svg-icon(class="pointer"
-        //- :iconName="'color-picker'" :iconWidth="'20px'" :iconColor="'gray-2'")
       template(v-if="showColorSlip")
         div(class="color-picker__colors")
           div(class="text-left")
@@ -57,6 +65,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -176,15 +185,14 @@ export default Vue.extend({
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
-        console.log('Your browser does not support the EyeDropper API')
+        Vue.notify({ group: 'error', text: `${i18n.t('NN0406')}` })
         return
       }
 
       const eyeDropper = new (window as any).EyeDropper()
       if (eyeDropper !== undefined) {
         eyeDropper.open().then((result: {sRGBHex: string}) => {
-          console.log('eye', this.convertedHex, typeof this.convertedHex, result.sRGBHex, typeof result.sRGBHex)
-          this.color = result.sRGBHex.toUpperCase()
+          this.color = result.sRGBHex
         })
       }
     }
