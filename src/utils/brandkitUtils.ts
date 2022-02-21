@@ -13,7 +13,25 @@ class BrandKitUtils {
     return {
       id: generalUtils.generateAssetId(),
       name: '',
-      logos: [],
+      logos: [{
+        name: 'logo-horizontal.png',
+        id: generalUtils.generateAssetId(),
+        url: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+        width: 171,
+        height: 132
+      }, {
+        name: 'logo-square.png',
+        id: generalUtils.generateAssetId(),
+        url: require('@/assets/img/png/brandkit/logo-square.png'),
+        width: 131,
+        height: 131
+      }, {
+        name: 'logo-vertical.png',
+        id: generalUtils.generateAssetId(),
+        url: require('@/assets/img/png/brandkit/logo-vertical.png'),
+        width: 75,
+        height: 171
+      }],
       textStyleSetting: {
         headingStyle: this.createDefaultTextStyle(),
         subheadingStyle: this.createDefaultTextStyle(),

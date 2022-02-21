@@ -8,6 +8,7 @@ export interface IBrand {
 }
 
 export interface IBrandLogo {
+  name: string,
   id: string,
   url: string,
   width: number,
@@ -40,5 +41,5 @@ export interface IBrandFont {
 }
 
 export interface IBrandParams {
-  
+
 }
