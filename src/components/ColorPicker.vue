@@ -10,7 +10,7 @@
       :disableAlpha="true")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
-        span(class="body-1") Hex
+        span(class="body-1" @click="eyeDropper") Hex
         div(class="color-picker__input")
           div(:style="{'background-color': convertedHex}")
           input(
@@ -173,6 +173,20 @@ export default Vue.extend({
     },
     onmouseup() {
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
+    },
+    eyeDropper() {
+      if (!(window as any).EyeDropper) {
+        console.log('Your browser does not support the EyeDropper API')
+        return
+      }
+
+      const eyeDropper = new (window as any).EyeDropper()
+      if (eyeDropper !== undefined) {
+        eyeDropper.open().then((result: {sRGBHex: string}) => {
+          console.log('eye', this.convertedHex, typeof this.convertedHex, result.sRGBHex, typeof result.sRGBHex)
+          this.color = result.sRGBHex.toUpperCase()
+        })
+      }
     }
   }
 })
