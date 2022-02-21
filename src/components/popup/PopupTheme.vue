@@ -10,7 +10,7 @@
       download-check-button(class="popup-theme__checkbox body-3 text-gray-2 pl-5"
         type="checkbox"
         iconSize="12px"
-        label="All"
+        :label="$t('NN0324')"
         value="all"
         :default-checked="all"
         @change="handleAllCheck")
