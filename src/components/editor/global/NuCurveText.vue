@@ -33,6 +33,8 @@ export default Vue.extend({
     }
   },
   async created () {
+    this.computeDimensions(this.spans)
+
     await TextUtils.waitUntilAllFontsLoaded(this.config, 1)
 
     if (this.isDestroyed) return
@@ -45,10 +47,7 @@ export default Vue.extend({
       TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
     }
 
-    const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(this.spans)
-    this.textWidth = textWidth
-    this.textHeight = textHeight
-    this.minHeight = minHeight
+    this.computeDimensions(this.spans)
   },
   destroyed() {
     this.isDestroyed = true
@@ -111,10 +110,7 @@ export default Vue.extend({
   },
   watch: {
     spans(newSpans) {
-      const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(newSpans)
-      this.textWidth = textWidth
-      this.textHeight = textHeight
-      this.minHeight = minHeight
+      this.computeDimensions(newSpans)
     }
   },
   methods: {
@@ -128,6 +124,12 @@ export default Vue.extend({
         { transform: transforms[idx] || 'none' },
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
+    },
+    computeDimensions(spans: ISpan[]) {
+      const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(spans)
+      this.textWidth = textWidth
+      this.textHeight = textHeight
+      this.minHeight = minHeight
     }
   }
 })

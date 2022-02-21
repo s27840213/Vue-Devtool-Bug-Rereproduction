@@ -2,12 +2,12 @@
   div(class="panel-photo")
     search-bar(class="mb-15"
       :style="searchBarStyle()"
-      placeholder="input keywords..."
+      :placeholder="$t('NN0092', {target: $tc('NN0002',1)})"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
     div(v-if="!pending && !list.length"
-      class="text-white") Sorry, we couldn't find any photos for "{{ keyword }}".
+      class="text-white") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
     image-gallery(v-else
       ref="gallery"
       :images="list"

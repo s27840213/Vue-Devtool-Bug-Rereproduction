@@ -15,7 +15,7 @@
     div
       div(class="panel-template__search")
         search-bar(class="mb-15"
-          :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+          :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
           clear
           :defaultKeyword="keyword"
           @search="handleSearch")
@@ -139,7 +139,7 @@ export default Vue.extend({
       const { keyword, theme } = this
       let galleryUtils = null
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      if (['3', '7'].includes(theme)) {
+      if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
         galleryUtils = new GalleryUtils(300, 200, 10)
       } else {
@@ -174,7 +174,7 @@ export default Vue.extend({
     },
     emptyResultMessage(): string {
       const { keyword, pending, listResult } = this
-      return !pending && !listResult.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword })}` : `${i18n.t('NN0394')}`) : ''
+      return !pending && !listResult.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
     },
     currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()
@@ -263,6 +263,9 @@ export default Vue.extend({
       if (this.showPrompt) {
         this.handleClosePrompt()
       }
+    },
+    isSubsetOf(set: Array<unknown>, subset: Array<unknown>) {
+      return new Set([...set, ...subset]).size === set.length
     }
   }
 })
