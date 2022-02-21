@@ -23,13 +23,13 @@ div(class="settings-account")
     div(v-if="!nameValid"
       class="invalid-message")
       span {{ $t('NN0163', {term: $t('NN0172')}) }}
-    div(class="settings-account__label my-10") {{$t('NN0173')}}
+    div(class="settings-account__label my-10") {{$tc('NN0173', 1)}}
     property-bar(:class="{'input-invalid': !mailValid}")
       input(class="body-2 text-gray-2"
         v-model="inputAccount"
         @input="onUpdate"
         type="email" name="email"
-        :placeholder="$t('NN0163', {term: $t('NN0173')})")
+        :placeholder="$t('NN0163', {term: $tc('NN0173', 2)})")
     div(v-if="!mailValid"
       class="invalid-message")
       span {{ accountErrorMessage }}
@@ -161,7 +161,7 @@ export default Vue.extend({
       this.isConfirmClicked = true
       if (!this.mailValid) {
         if (this.inputAccount.length === 0) {
-          this.accountErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
+          this.accountErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
         } else {
           this.accountErrorMessage = i18n.t('NN0297') as string
         }
