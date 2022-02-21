@@ -9,6 +9,7 @@
           :subLayerIndex="subLayerIndex")
         p(v-else
           v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+          :class="`nu-text__p-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
           :key="p.id",
           :style="styles(p.styles)")
           template(v-for="(span, sIndex) in p.spans")
@@ -41,36 +42,64 @@ export default Vue.extend({
   },
   data() {
     return {
-      isDestroyed: false
+      isDestroyed: false,
+      resizeObserver: undefined as ResizeObserver | undefined
     }
   },
-  async created() {
-    if (LayerUtils.getCurrLayer.type === 'tmp') {
-      return
-    }
+  created() {
+    // if (LayerUtils.getCurrLayer.type === 'tmp') {
+    //   return
+    // }
 
-    await TextUtils.waitUntilAllFontsLoaded(this.config, 1)
+    TextUtils.waitUntilAllFontsLoaded(this.config, 1)
 
-    if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
+    // if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
 
-    const widthLimit = this.autoResize()
-    const textHW = TextUtils.getTextHW(this.config, widthLimit)
-    if (typeof this.subLayerIndex === 'undefined') {
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-    } else {
-      const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-      const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
-    }
+    // const widthLimit = this.autoResize()
+    // const textHW = TextUtils.getTextHW(this.config, widthLimit)
+    // if (typeof this.subLayerIndex === 'undefined') {
+    //   LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+    // } else {
+    //   const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+    //   LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+    //   const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+    //   LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
+    // }
   },
   destroyed() {
     this.isDestroyed = true
+    this.resizeObserver && this.resizeObserver.disconnect()
+    this.resizeObserver = undefined
   },
   mounted() {
     if (this.currSelectedInfo.layers >= 1) {
       TextPropUtils.updateTextPropsState()
     }
+
+    if (LayerUtils.getCurrLayer.type === 'tmp') {
+      return
+    }
+
+    this.resizeObserver = new (window as any).ResizeObserver(() => {
+      if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
+
+      console.log('resize')
+
+      const widthLimit = this.autoResize()
+      const textHW = TextUtils.getTextHW(this.config, widthLimit)
+      if (typeof this.subLayerIndex === 'undefined') {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+      } else {
+        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
+      }
+    })
+    const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
+    ps.forEach(p => {
+      this.resizeObserver && this.resizeObserver.observe(p as Element)
+    })
   },
   computed: {
     ...mapState('text', ['fontStore']),
