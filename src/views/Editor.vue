@@ -20,6 +20,9 @@
                   :iconWidth="'20px'"
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
+                btn(id="start-button"
+                  @click.native="eyeDropper") Open the eyedropper
+                span(id="result")
             editor-view
             scale-ratio-editor(:style="scaleRatioEditorPos"
               @toggleSidebarPanel="toggleSidebarPanel")
@@ -177,6 +180,22 @@ export default Vue.extend({
     }),
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
+    },
+    eyeDropper() {
+      if (!(window as any).EyeDropper) {
+        console.log('Your browser does not support the EyeDropper API')
+        return
+      }
+
+      const eyeDropper = new (window as any).EyeDropper()
+      const resultElement = document.getElementById('result') as HTMLElement
+
+      if (eyeDropper !== undefined) {
+        eyeDropper.open().then((result: {sRGBHex: string}) => {
+          resultElement.textContent = result.sRGBHex
+          resultElement.style.backgroundColor = result.sRGBHex
+        })
+      }
     },
     setPanelType(type: number) {
       this.setCurrFunctionPanel(type)
