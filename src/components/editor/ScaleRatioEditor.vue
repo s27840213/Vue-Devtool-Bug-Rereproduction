@@ -16,11 +16,10 @@
     svg-icon(class="hover-effect pointer"
       @click.native="setIsShowPagePreview(!isShowPagePreview)"
       :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
-    svg-icon(:class="{'hover-effect': !isShowPagePreview}"
+    svg-icon(class="hover-effect pointer"
       :iconName="'navPage'"
-      :iconColor="isShowPagePreview ? 'gray-4' :'gray-2'"
+      :iconColor="'gray-2'"
       :iconWidth="'24px'"
-      :disabled="isShowPagePreview"
       @click.native="setShowPagePanel(!showPagePanel)")
 </template>
 
@@ -70,8 +69,13 @@ export default Vue.extend({
       }
     },
     setShowPagePanel(show: boolean) {
-      this.toggleSidebarPanel(show)
-      this._setShowPagePanel(show)
+      if (this.isShowPagePreview) {
+        this.setIsShowPagePreview(false)
+        this._setShowPagePanel(true)
+      } else {
+        this.toggleSidebarPanel(show)
+        this._setShowPagePanel(show)
+      }
     },
     toggleSidebarPanel(open: boolean) {
       this.$emit('toggleSidebarPanel', open)
