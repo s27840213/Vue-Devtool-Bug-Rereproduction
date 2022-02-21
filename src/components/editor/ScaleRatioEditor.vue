@@ -74,8 +74,13 @@ export default Vue.extend({
       }
     },
     setShowPagePanel(show: boolean) {
-      this.toggleSidebarPanel(show)
-      this._setShowPagePanel(show)
+      if (this.isShowPagePreview) {
+        this.setIsShowPagePreview(false)
+        this._setShowPagePanel(true)
+      } else {
+        this.toggleSidebarPanel(show)
+        this._setShowPagePanel(show)
+      }
     },
     toggleSidebarPanel(open: boolean) {
       this.$emit('toggleSidebarPanel', open)
