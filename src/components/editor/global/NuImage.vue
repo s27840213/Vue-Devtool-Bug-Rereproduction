@@ -82,7 +82,7 @@ export default Vue.extend({
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.getSrc(this.config)
+      src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
     }
   },
   watch: {
