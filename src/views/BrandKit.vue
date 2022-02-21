@@ -64,7 +64,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   overflow-y: auto;
   &__main {
-    height: calc(100vh - #{$header-height});
+    min-height: calc(100vh - #{$header-height});
     padding-top: 100px;
     padding-left: 148px;
     padding-right: 148px;
@@ -91,6 +91,9 @@ export default Vue.extend({
       @include body-MD;
       line-height: 16px;
     }
+  }
+  &__tab {
+    margin: 28px 0px;
   }
 }
 </style>

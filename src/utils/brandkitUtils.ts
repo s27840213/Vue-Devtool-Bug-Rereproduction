@@ -2,6 +2,12 @@ import { IBrand, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import generalUtils from './generalUtils'
 
+const TAB_NAMES = {
+  logo: 'NN0399',
+  text: 'NN0400',
+  color: 'NN0401'
+}
+
 class BrandKitUtils {
   createDefaultBrand(): IBrand {
     return {
@@ -24,6 +30,14 @@ class BrandKitUtils {
       size: -1,
       isDefault: true
     }
+  }
+
+  getTabNames(): { [key: string]: string } {
+    return TAB_NAMES
+  }
+
+  getTabKeys(): string[] {
+    return Object.keys(TAB_NAMES)
   }
 
   findBrand(brands: IBrand[], id: string): IBrand | undefined {
