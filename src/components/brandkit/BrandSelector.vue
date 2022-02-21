@@ -30,10 +30,10 @@
           div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
           div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
             div(class="brand-selector__brand-list__item-menu-row pointer")
-              svg-icon(iconName="copy" iconWidth="20px" iconColor="gray-2")
+              svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
               span {{ $t('NN0251') }}
             div(class="brand-selector__brand-list__item-menu-row pointer")
-              svg-icon(iconName="trash" iconWidth="20px" iconColor="gray-2")
+              svg-icon(iconName="trash" iconWidth="24px" iconColor="gray-2")
               span {{ $t('NN0034') }}
 </template>
 
@@ -219,6 +219,8 @@ export default Vue.extend({
       position: absolute;
       left: calc(100% + 4px);
       top: 0;
+      padding: 8px 0px;
+      gap: 8px;
       background: white;
       box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
       border-radius: 5px;
@@ -240,10 +242,10 @@ export default Vue.extend({
         height: 100%;
       }
       &-row {
-        padding: 4px 8px;
+        padding: 3.5px 10px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         &:hover {
           background: setColor(gray-5);
         }
@@ -251,12 +253,12 @@ export default Vue.extend({
           @include body-SM;
           color: setColor(gray-1);
         }
-        &:nth-child(1) {
-          padding-top: 8px;
-        }
-        &:nth-last-child(1) {
-          padding-bottom: 8px;
-        }
+        // &:nth-child(1) {
+        //   padding-top: 8px;
+        // }
+        // &:nth-last-child(1) {
+        //   padding-bottom: 8px;
+        // }
       }
     }
   }
