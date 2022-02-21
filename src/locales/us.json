@@ -399,5 +399,6 @@
   "NN0391": "Get started",
   "NN0392": "Add all pages ({num} pages)",
   "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\".",
-  "NN0394": "Sorry, we couldn't find any {target}"
+  "NN0394": "Sorry, we couldn't find any {target}",
+  "NN0398": "{html}Set Design Size as all{html} to find more templates."
 }

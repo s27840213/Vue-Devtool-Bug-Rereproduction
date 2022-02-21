@@ -54,7 +54,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      all: false,
       selected: {} as { [key: string]: boolean }
     }
   },
@@ -67,6 +66,9 @@ export default Vue.extend({
     }),
     isConfirmDisabled(): boolean {
       return !(Object.values(this.selected).some(Boolean))
+    },
+    all(): boolean {
+      return Object.values(this.selected).every(Boolean)
     }
   },
   methods: {
@@ -78,7 +80,6 @@ export default Vue.extend({
       }, {})
     },
     handleAllCheck(event: { value: string, checked: boolean }) {
-      this.all = event.checked
       Object.keys(this.selected)
         .forEach((id: string) => {
           this.selected[id] = event.checked

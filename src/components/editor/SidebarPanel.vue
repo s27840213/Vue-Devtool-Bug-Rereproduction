@@ -1,9 +1,9 @@
 <template lang="pug">
   div(class="panel")
-    div(class="panel__color-panel")
-      transition(name="panel-up")
-        color-panel(v-if="isColorPanelOpen"
-          @toggleColorPanel="toggleColorPanel"
+    transition(name="panel-up")
+      div(v-if="isColorPanelOpen"
+      class="panel__color-panel")
+        color-panel(@toggleColorPanel="toggleColorPanel"
           :alignLeft="false")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
       component(v-show="isSidebarPanelOpen && !isShowPagePreview"
@@ -104,6 +104,7 @@ export default Vue.extend({
     position: absolute;
     bottom: 0;
     left: 0;
+    z-index: setZindex('color-panel');
   }
 }
 </style>

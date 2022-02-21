@@ -64,6 +64,11 @@
             :item="item"
             :key="item.group_id"
             @click="handleShowGroup")
+    div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
+      class="text-white")
+      span {{resultTooLess[0]}}
+      span(class="set-all-templatebtn-btn" @click="setAllTemplate") {{resultTooLess[1]}}
+      span {{resultTooLess[2]}}
 </template>
 
 <script lang="ts">
@@ -80,6 +85,8 @@ import PanelGroupTemplate from '@/components/editor/panelSidebar/PanelGroupTempl
 import CategoryGroupTemplateItem from '@/components/category/CategoryGroupTemplateItem.vue'
 import themeUtils from '@/utils/themeUtils'
 import GalleryUtils from '@/utils/galleryUtils'
+import { Itheme } from '@/interfaces/theme'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -114,6 +121,7 @@ export default Vue.extend({
       ]
     ),
     ...mapState('user', ['userId', 'role', 'adminMode']),
+    ...mapState(['themes']),
     ...mapGetters({
       currActivePageIndex: 'getCurrActivePageIndex'
     }),
@@ -169,6 +177,9 @@ export default Vue.extend({
       }
       return result
     },
+    resultGroupCounter(): number {
+      return this.content.list?.length || 0
+    },
     list(): any[] {
       return this.listCategories.concat(this.listResult)
     },
@@ -181,6 +192,13 @@ export default Vue.extend({
       return themeUtils
         .getThemesBySize(pageSize.width, pageSize.height)
         .map(theme => theme.id)
+    },
+    resultTooLess(): string[] {
+      return (i18n.t('NN0398') as string).split('{html}')
+    },
+    allThemesChecked():boolean {
+      const allThemeString = _.sortBy(this.themes.map((item: Itheme) => item.id)).join(',')
+      return allThemeString === this.theme
     }
   },
   activated() {
@@ -235,6 +253,13 @@ export default Vue.extend({
     },
     handleShowGroup(group: any) {
       this.currentGroup = group
+    },
+    setAllTemplate(): void {
+      const allTheme: {[key: string]: boolean} = {}
+      this.themes.forEach((theme: Itheme) => {
+        allTheme[theme.id] = true
+      })
+      this.handleTheme(allTheme)
     },
     handleTheme(selected: { [key: string]: boolean }) {
       const { keyword } = this
@@ -347,5 +372,10 @@ export default Vue.extend({
       border-color: transparent setColor(gray-4) transparent transparent;
     }
   }
+}
+
+.set-all-templatebtn-btn {
+  color: setColor('blue-1');
+  text-decoration: underline;
 }
 </style>
