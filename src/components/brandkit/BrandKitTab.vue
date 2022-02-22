@@ -47,7 +47,6 @@ export default Vue.extend({
   &__header {
     display: flex;
     gap: 20px;
-    height: 54px;
   }
   &__tab-block {
     border-radius: 4px;
@@ -68,11 +67,10 @@ export default Vue.extend({
     margin: 10px;
     margin-bottom: 0px;
     padding-bottom: 10px;
-    transition: 0.3s ease;
     &-text {
       @include text-H5;
       color: setColor(gray-3);
-      transition: 0.2s ease;
+      transition: 0.3s ease;
     }
   }
   &__content {
