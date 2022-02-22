@@ -21,7 +21,7 @@ div(style="position:relative;")
         img(:src="require('@/assets/img/png/google.png')")
         span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div
-        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $t('NN0173')})}}
+        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
       div
         span {{$t('NN0304')}}
         btn(:type="'icon'"
@@ -51,22 +51,22 @@ div(style="position:relative;")
           div(v-if="!nameValid" class="invalid-message")
             span {{$t('NN0163', {term: $t('NN0172')})}}
         div
-          span(class="label-mid") {{$t('NN0173')}}
+          span(class="label-mid") {{$tc('NN0173', 1)}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2"
               v-model="email" type="email" name="email"
-              :placeholder="$t('NN0163', {term: $t('NN0173')})")
+              :placeholder="$t('NN0163', {term: $tc('NN0173', 2)})")
           div(v-if="!mailValid"
             class="invalid-message")
             span {{ mailErrorMessage }}
         div
-          span(class="label-mid") {{$t('NN0180')}}
+          span(class="label-mid") {{$tc('NN0180', 1)}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
               v-model="password" type="number"
-              :placeholder="$t('NN0163', {term: $t('NN0180')})"
+              :placeholder="$t('NN0163', {term: $tc('NN0180', 2)})"
               :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
@@ -250,7 +250,7 @@ export default Vue.extend({
     },
     mailErrorMessage(): string {
       if (this.email.length === 0) {
-        return i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
+        return i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
       } else {
         return i18n.t('NN0297') as string
       }
