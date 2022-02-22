@@ -9,7 +9,7 @@
         ref="btn"
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="selectedLayersNum === 1"
+      btn(v-if="selectedLayersNum === 1 && isAdmin"
         class="full-width"
         type="gray-mid"
         ref="btn"
@@ -68,7 +68,8 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isAdmin: 'user/isAdmin'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()

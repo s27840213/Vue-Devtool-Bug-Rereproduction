@@ -330,9 +330,10 @@ export default Vue.extend({
     handleKeydown(e: KeyboardEvent) {
       if (!e.repeat && (e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
         this.undo()
-      }
-      if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+      } else if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
         this.redo()
+      } else if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+
       }
     },
     undo() {
@@ -343,7 +344,9 @@ export default Vue.extend({
         this.clearCtx()
         this.ctx.filter = 'none'
         this.drawImageToCtx(img)
-        this.ctx.filter = `blur(${this.blurPx}px)`
+        if (this.clearMode) {
+          this.ctx.filter = `blur(${this.blurPx}px)`
+        }
       }
     },
     redo() {
@@ -355,7 +358,9 @@ export default Vue.extend({
         this.clearCtx()
         this.ctx.filter = 'none'
         this.drawImageToCtx(img)
-        this.ctx.filter = `blur(${this.blurPx}px)`
+        if (this.clearMode) {
+          this.ctx.filter = `blur(${this.blurPx}px)`
+        }
       }
     }
   }
