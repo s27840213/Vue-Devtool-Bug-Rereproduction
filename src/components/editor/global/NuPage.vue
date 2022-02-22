@@ -133,7 +133,9 @@
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
-                                    :config="Object.assign(getCurrSubSelectedLayerShown, { pointerEvents: 'none' }, { forRender: true })")
+                                    :forRender="true"
+                                    :pointerEvents="'none'"
+                                    :config="getCurrSubSelectedLayerShown")
             template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:style="'opacity: 0.45'"
                 :layerIndex="currSelectedIndex"

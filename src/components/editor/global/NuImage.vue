@@ -32,6 +32,7 @@ import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
 import imgShadowUtils from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -44,8 +45,10 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
+    const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
+      (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
     if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
-      .includes(this.config.styles.shadow.currentEffect)) {
+      .includes(this.config.styles.shadow.currentEffect) && !isPrimaryLayerFrame) {
       this.handleNewShadowEffect(true)
     }
   },
@@ -101,10 +104,15 @@ export default Vue.extend({
     scale() {
       this.updateShadowEffect(this.shadowEffects)
     },
-    shadowEffects(newVal) {
-      this.updateShadowEffect(newVal)
+    shadowEffects: {
+      deep: true,
+      handler: function(val) {
+        console.log(val)
+        this.updateShadowEffect(val)
+      }
     },
-    currentShadowEffect() {
+    currentShadowEffect(val) {
+      console.log(val)
       this.handleNewShadowEffect()
     }
   },
@@ -161,6 +169,10 @@ export default Vue.extend({
     },
     scale(): number {
       return this.config.styles.scale
+    },
+    primaryLayerType(): string {
+      const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+      return primaryLayer.type
     }
   },
   methods: {
@@ -269,6 +281,9 @@ export default Vue.extend({
       preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
     },
     handleNewShadowEffect(isInit = false) {
+      // todo: handle frame relative
+      if (this.primaryLayerType === 'frame') return
+
       const { filterId, currentEffect } = this.shadow
       if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
@@ -286,6 +301,9 @@ export default Vue.extend({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
+      // todo: handle frame relative
+      if (this.primaryLayerType === 'frame') return
+
       const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
       window.requestAnimationFrame(() => {

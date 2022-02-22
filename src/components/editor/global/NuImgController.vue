@@ -9,7 +9,7 @@
       div(v-for="(scaler, index)  in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), pointerEvents())"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents } )"
           @mousedown.stop="scaleStart")
 </template>
 
@@ -29,7 +29,15 @@ export default Vue.extend({
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
-    primaryLayerIndex: Number
+    primaryLayerIndex: Number,
+    forRender: {
+      type: Boolean,
+      default: false
+    },
+    pointerEvents: {
+      type: String,
+      default: 'initial'
+    }
   },
   data() {
     return {
@@ -101,6 +109,14 @@ export default Vue.extend({
       } else {
         return this.getLayerRotate * Math.PI / 180
       }
+    },
+    primaryScale(): number {
+      const currLayer = LayerUtils.getCurrLayer
+      if (typeof this.primaryLayerIndex !== 'undefined' && ['group', 'frame'].includes(currLayer.type)) {
+        return LayerUtils.getCurrLayer.styles.scale
+      } else {
+        return 1
+      }
     }
   },
   methods: {
@@ -112,10 +128,10 @@ export default Vue.extend({
       const pos = this.imgControllerPosHandler()
       return {
         transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth}px`,
-        height: `${this.config.styles.imgHeight}px`,
+        width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
+        height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
         outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
-        'pointer-events': this.config.pointerEvents ?? 'initial'
+        'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -153,7 +169,7 @@ export default Vue.extend({
        * if the frame layer is set the flip prop, do following mapping modification
        */
       const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'frame' && !this.config.forRender) {
+      if (currLayer.type === 'frame' && !this.forRender) {
         const baseLine = {
           x: -w / 2 + currLayer.styles.width / 2,
           y: -h / 2 + currLayer.styles.height / 2
@@ -214,17 +230,17 @@ export default Vue.extend({
       this.setCursorStyle('move')
       event.preventDefault()
       const baseLine = {
-        x: -this.getImgWidth / 2 + (this.config.styles.width) / 2,
-        y: -this.getImgHeight / 2 + (this.config.styles.height) / 2
+        x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
+        y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.config.styles.width) / 2,
-        height: (this.getImgHeight - this.config.styles.height) / 2
+        width: (this.getImgWidth - this.config.styles.width / this.getLayerScale) / 2,
+        height: (this.getImgHeight - this.config.styles.height / this.getLayerScale) / 2
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x = (offsetPos.x) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.y = (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
       const currLayer = LayerUtils.getCurrLayer
       if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
         const primaryScale = LayerUtils.getCurrLayer.styles.scale
@@ -234,10 +250,10 @@ export default Vue.extend({
 
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width - this.getImgWidth
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height - this.getImgHeight
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
       }
       this.updateLayerStyles({
         imgX: imgPos.x,
@@ -326,12 +342,12 @@ export default Vue.extend({
         y: this.control.ySign < 0 ? -offsetSize.height + this.initImgPos.imgY : this.initImgPos.imgY
       }
       const baseLine = {
-        x: -width / 2 + (this.config.styles.width) / 2,
-        y: -height / 2 + (this.config.styles.height) / 2
+        x: -width / 2 + (this.config.styles.width / this.getLayerScale) / 2,
+        y: -height / 2 + (this.config.styles.height / this.getLayerScale) / 2
       }
       const translateLimit = {
-        width: (width - this.config.styles.width) / 2,
-        height: (height - this.config.styles.height) / 2
+        width: (width - this.config.styles.width / this.getLayerScale) / 2,
+        height: (height - this.config.styles.height / this.getLayerScale) / 2
       }
 
       const ratio = width / height
@@ -358,10 +374,10 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
 
-        baseLine.x = -width / 2 + (this.config.styles.width) / 2
-        baseLine.y = -height / 2 + (this.config.styles.height) / 2
-        translateLimit.width = (width - this.config.styles.width) / 2
-        translateLimit.height = (height - this.config.styles.height) / 2
+        baseLine.x = -width / 2 + (this.config.styles.width / this.getLayerScale) / 2
+        baseLine.y = -height / 2 + (this.config.styles.height / this.getLayerScale) / 2
+        translateLimit.width = (width - this.config.styles.width / this.getLayerScale) / 2
+        translateLimit.height = (height - this.config.styles.height / this.getLayerScale) / 2
       }
       if (offsetSize.height < 0 && Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         if (this.control.ySign < 0) {
@@ -406,11 +422,6 @@ export default Vue.extend({
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
-    },
-    pointerEvents() {
-      return {
-        'pointer-events': this.config.pointerEvents ?? 'initial'
-      }
     },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
