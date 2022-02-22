@@ -9,11 +9,13 @@
       div(class="brand-kit__header")
         div(class="brand-kit__selector")
           brand-selector
-        div(class="brand-kit__add pointer" @click="addNewBrand")
-          svg-icon(iconName="plus-origin"
-                  iconWidth="16px"
-                  iconColor="gray-1")
-          span(class="brand-kit__add__text") {{ $t('NN0396') }}
+        //- div(class="brand-kit__add pointer" @click="addNewBrand")
+        //-   svg-icon(iconName="plus-origin"
+        //-           iconWidth="16px"
+        //-           iconColor="gray-1")
+        //-   span(class="brand-kit__add__text") {{ $t('NN0396') }}
+        brand-kit-add-btn(:text="`${$t('NN0396')}`"
+                          @click.native="addNewBrand")
       div(class="brand-kit__tab")
         brand-kit-tab
     nu-footer
@@ -25,6 +27,7 @@ import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
+import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 
@@ -34,7 +37,8 @@ export default Vue.extend({
     NuHeader,
     NuFooter,
     BrandSelector,
-    BrandKitTab
+    BrandKitTab,
+    BrandKitAddBtn
   },
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
@@ -75,23 +79,23 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
   }
-  &__add {
-    border: 1px solid setColor(gray-3);
-    box-sizing: border-box;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    height: 43px;
-    padding: 20px;
-    gap: 12px;
-    &:hover {
-      background-color: setColor(gray-5);
-    }
-    &__text {
-      @include body-MD;
-      line-height: 16px;
-    }
-  }
+  // &__add {
+  //   border: 1px solid setColor(gray-3);
+  //   box-sizing: border-box;
+  //   border-radius: 4px;
+  //   display: flex;
+  //   align-items: center;
+  //   height: 43px;
+  //   padding: 20px;
+  //   gap: 12px;
+  //   &:hover {
+  //     background-color: setColor(gray-5);
+  //   }
+  //   &__text {
+  //     @include body-MD;
+  //     line-height: 16px;
+  //   }
+  // }
   &__tab {
     margin: 28px 0px;
   }
