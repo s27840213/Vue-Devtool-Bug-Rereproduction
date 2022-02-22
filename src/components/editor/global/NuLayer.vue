@@ -9,6 +9,7 @@
       nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+    div(v-if="appendShadowEffect" class="img-shadow-effect" :style="shadowStyles()")
 </template>
 
 <script lang="ts">
@@ -62,13 +63,20 @@ export default Vue.extend({
     },
     getCos(): number {
       return MathUtils.cos(this.config.styles.rotate)
+    },
+    appendShadowEffect(): boolean {
+      if (this.config.type !== LayerType.image) return false
+      const config = this.config as IImage
+      return [ShadowEffectType.projection, ShadowEffectType.halo].includes(config.styles.shadow.currentEffect)
     }
   },
   methods: {
     styles() {
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles),
-        { 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial' }
+        {
+          'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+        }
       )
       switch (this.config.type) {
         case LayerType.text: {
@@ -89,6 +97,9 @@ export default Vue.extend({
         }
       }
       return styles
+    },
+    shadowStyles() {
+      return imageShadowUtils.convertShadowEffect(this.config)
     },
     scaleStyles() {
       let { width, height } = this.config.styles
@@ -145,11 +156,12 @@ export default Vue.extend({
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }
-  // &:hover {
-  //   cursor: pointer;
-  // }
-  &__layer-scale {
-  }
+}
+
+.img-shadow-effect {
+  position: absolute;;
+  display: block;
+  border-radius: 100px/50px;
 }
 
 .shape {

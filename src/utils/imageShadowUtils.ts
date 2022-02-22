@@ -5,6 +5,7 @@ import layerUtils from './layerUtils'
 import store from '@/store'
 import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import imageUtils from './imageUtils'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
 type Filter = {
@@ -50,7 +51,7 @@ const FilterTable = {
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80 as const
 class ImageShadowUtils {
-  async setEffect (effect: ShadowEffectType, attrs = {}): Promise<void> {
+  setEffect (effect: ShadowEffectType, attrs = {}): void {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
     if (subLayerIdx === -1 && currLayer.type === LayerType.group) {
       for (const i in (currLayer as IGroup).layers) {
@@ -72,7 +73,6 @@ class ImageShadowUtils {
         }
       }, subLayerIdx)
     }
-    // console.log(generalUtils.deepCopy(currLayer.styles.shadow))
   }
 
   addFilter(filterId: string, filters: Array<Filter>) {
@@ -121,45 +121,48 @@ class ImageShadowUtils {
     return id
   }
 
-  convertShadowEffect(styles: IImageStyle): { [key: string]: string } {
-    const { shadow, scale } = styles
+  /** Only used for blur and projection effects */
+  convertShadowEffect(config: IImage): { [key: string]: string | number } {
+    const { shadow, scale } = config.styles
     const { color = '#000000' } = shadow.effects
     const effect = shadow.currentEffect !== ShadowEffectType.none
       ? shadow.effects[shadow.currentEffect] : {}
 
     switch (shadow.currentEffect) {
-      case ShadowEffectType.blur:
-      case ShadowEffectType.shadow: {
-        const { x = 0, y = 0, radius, spread, opacity } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
-        return {
-          boxShadow:
-            `${x}px ${y}px ` +
-            `${radius}px ` +
-            `${spread}px ` +
-            `${color + this.convertToAlpha(opacity)}`
-        }
-      }
-      case ShadowEffectType.frame: {
-        const { width, blur, opacity } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
-        return {
-          boxShadow: `0 0 ${blur}px ${width}px ${color + this.convertToAlpha(opacity)}`
-        }
-      }
       case ShadowEffectType.halo: {
-        const { radius, spread, opacity } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity']) as ShadowEffects
+        const { imgWidth, imgHeight } = config.styles
+        const { blur, y, width } = mathUtils
+          .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
+        const imgRatio = imgHeight / imgWidth
         return {
+          backgroundImage: `url(${imageUtils.getSrc(config)})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          zIndex: -1,
+          width: `${width}%`,
+          height: '100%',
+          bottom: `${-(imgRatio > 1 ? y / 2 : y) - 5}%`,
+          filter: `blur(${blur}px)`
+        }
+      }
+      case ShadowEffectType.projection: {
+        const { radius, spread, opacity, y, width } = mathUtils
+          .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
+        return {
+          width: `${width}%`,
+          bottom: `${-y - 10}px`,
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
           `${radius}px ` +
-          `${spread as number - HALO_SPREAD_LIMIT * scale}px ` +
+          `${spread}px ` +
           `${color + this.convertToAlpha(opacity)}`
         }
       }
-      case ShadowEffectType.projection:
       case ShadowEffectType.none:
+      case ShadowEffectType.blur:
+      case ShadowEffectType.shadow:
+      case ShadowEffectType.frame:
         return {}
       default:
         return generalUtils.assertUnreachable(shadow.currentEffect)
@@ -202,7 +205,16 @@ class ImageShadowUtils {
           opacity: 70
         }
         break
-      case ShadowEffectType.projection:
+      case ShadowEffectType.projection: {
+        (effect as IProjectionEffect) = {
+          radius: 50,
+          spread: 50,
+          opacity: 70,
+          width: 80,
+          y: 0
+        }
+        break
+      }
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
           radius: 50,
@@ -219,9 +231,9 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.halo:
         (effect as IHaloEffect) = {
-          radius: 50,
-          spread: 50,
-          opacity: 70
+          width: 95,
+          blur: 15,
+          y: 0
         }
         break
       case ShadowEffectType.none:
@@ -231,7 +243,7 @@ class ImageShadowUtils {
     }
     const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
     const color = currLayer.type === LayerType.image
-      ? (currLayer as IImage).styles.shadow.effects : '#000000'
+      ? (currLayer as IImage).styles.shadow.effects.color : '#000000'
     return {
       [effectName]: effect,
       color
@@ -264,6 +276,7 @@ class ImageShadowUtils {
               this.setAttrs(filter, { ...FilterTable[k], k, v: 0 })
             }
           })
+        /** setting color */
         const subFilter = filter.getElementsByTagNameNS(SVG, FilterTable.color.tag)[0]
         subFilter.setAttribute(FilterTable.color.prop, effects.color)
       }
@@ -291,7 +304,7 @@ class ImageShadowUtils {
     }
   }
 
-  getDefaultAttrs(): Array<Filter> {
+  getDefaultFilterAttrs(): Array<Filter> {
     return [
       {
         tag: 'feFlood',

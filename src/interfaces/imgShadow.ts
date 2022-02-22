@@ -28,16 +28,20 @@ export interface IFrameEffect {
 }
 export interface IHaloEffect {
   [key: string]: number
-  radius: number,
-  spread: number,
-  opacity: number
+  // radius: number,
+  // spread: number,
+  // opacity: number
+  width: number,
+  y: number,
+  blur: number
 }
 export interface IProjectionEffect {
   [key: string]: number
   spread: number,
   radius: number,
   y: number,
-  opacity: number
+  opacity: number,
+  width: number
 }
 
 export interface IShadowEffects {

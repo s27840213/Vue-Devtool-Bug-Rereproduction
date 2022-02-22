@@ -76,7 +76,7 @@
             @change="handleEffectUpdate"
             @blur="recordChange"
             type="number")
-        div(v-if="currentEffect !== 'none'"
+        div(v-if="!['none', 'halo'].includes(currentEffect)"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
@@ -175,14 +175,24 @@ export default Vue.extend({
           opacity: { max: 100, min: 0 }
         },
         halo: {
-          radius: { max: 120, min: 50 },
-          spread: { max: HALO_SPREAD_LIMIT, min: 30 },
-          opacity: { max: 100, min: 0 }
+          // radius: { max: 120, min: 50 },
+          // spread: { max: HALO_SPREAD_LIMIT, min: 30 },
+          // opacity: { max: 100, min: 0 }
+          width: { max: 100, min: 80 },
+          blur: { max: 50, min: 15 },
+          y: { max: 15, min: -5 }
         },
         frame: {
           spread: { max: 72, min: 0 },
           opacity: { max: 100, min: 0 },
           radius: { max: 100, min: 0 }
+        },
+        projection: {
+          spread: { max: 72, min: 0 },
+          opacity: { max: 100, min: 0 },
+          radius: { max: 100, min: 30 },
+          width: { max: 100, min: 10 },
+          y: { max: 50, min: -200 }
         }
       }
     }

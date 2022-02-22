@@ -43,7 +43,11 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    this.handleNewShadowEffect(true)
+
+    if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
+      .includes(this.config.styles.shadow.currentEffect)) {
+      this.handleNewShadowEffect(true)
+    }
   },
   destroyed() {
     if (this.filter) {
@@ -96,11 +100,9 @@ export default Vue.extend({
       this.updateShadowEffect(this.shadowEffects)
     },
     shadowEffects(newVal) {
-      console.log('update shadow effect ')
       this.updateShadowEffect(newVal)
     },
     currentShadowEffect() {
-      console.log('change curremt shadow effect')
       this.handleNewShadowEffect()
     }
   },
@@ -264,7 +266,7 @@ export default Vue.extend({
       const { filterId, currentEffect } = this.shadow
       if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
-        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.getDefaultAttrs()) as HTMLElement
+        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.getDefaultFilterAttrs()) as HTMLElement
         this.updateShadowEffect(this.shadowEffects)
 
         const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
