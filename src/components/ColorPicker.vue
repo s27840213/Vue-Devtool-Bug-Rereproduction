@@ -11,12 +11,7 @@
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
         svg-icon(class="pointer"
-          :iconName="'color-picker'"
-          :iconWidth="'20px'"
-          :iconColor="'gray-2'"
-          @click.native="eyeDropper")
-        svg-icon(class="pointer"
-          :iconName="'eye-dropper'"
+          iconName="eye-dropper"
           :iconWidth="'20px'"
           :iconColor="'gray-2'"
           @click.native="eyeDropper")
@@ -100,37 +95,20 @@ export default Vue.extend({
       let result = ''
       const len = hex.length
       switch (len) {
-        case 0: {
+        case 0:
           result = '000000'
           break
-        }
-        case 1: {
+        case 1:
+        case 2:
+        case 3:
           hex = hex.map((val: string) => val + val)
           result = this.paddingRight(hex.join(''), 6)
           break
-        }
-        case 2: {
-          hex = hex.map((val: string) => val + val)
+        case 4:
+        case 5:
+        case 6:
           result = this.paddingRight(hex.join(''), 6)
           break
-        }
-        case 3: {
-          hex = hex.map((val: string) => val + val)
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
-        case 4: {
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
-        case 5: {
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
-        case 6: {
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
       }
       this.$emit('update', `#${result}`)
       return `#${result}`
