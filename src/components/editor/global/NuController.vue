@@ -718,7 +718,7 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) && this.getLayerType === 'image') {
+        if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.setMoving(true)
         }
       }
@@ -727,9 +727,7 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      if (this.getLayerType === 'image') {
-        this.setMoving(false)
-      }
+      this.setMoving(false)
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
