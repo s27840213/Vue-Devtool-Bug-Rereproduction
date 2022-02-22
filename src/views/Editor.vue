@@ -20,6 +20,9 @@
                   :iconWidth="'20px'"
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
+                div(class="flex flex-column mr-10")
+                  select(class="locale-select" v-model="inputLocale")
+                    option(v-for="locale in localeOptions" :value="locale") {{locale}}
             editor-view
             scale-ratio-editor(:style="scaleRatioEditorPos"
               @toggleSidebarPanel="toggleSidebarPanel")
@@ -32,6 +35,7 @@
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
+    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -52,7 +56,7 @@ import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
-import networkUtils from '@/utils/networkUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   name: 'Editor',
@@ -71,12 +75,24 @@ export default Vue.extend({
     return {
       FunctionPanelType,
       isColorPanelOpen: false,
-      isSidebarPanelOpen: true
+      isSidebarPanelOpen: true,
+      inputLocale: i18n.locale,
+      isLoading: false
     }
   },
   watch: {
     isShowPagePreview() {
       this.toggleSidebarPanel = this.isShowPagePreview
+    },
+    async inputLocale() {
+      this.isLoading = true
+      const updateValue: {[key: string]: string} = {}
+      updateValue.token = this.token
+      updateValue.locale = this.inputLocale
+
+      const data = await store.dispatch('user/updateUser', updateValue)
+      localStorage.setItem('locale', data.locale)
+      this.$router.go(0)
     }
   },
   mounted() {
@@ -98,6 +114,9 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType'
+    }),
+    ...mapGetters('user', {
+      token: 'getToken'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -149,6 +168,9 @@ export default Vue.extend({
     },
     showEditorGuide(): boolean {
       return this.viewGuide === 0
+    },
+    localeOptions(): string[] {
+      return i18n.availableLocales
     }
   },
   beforeRouteLeave(to, from, next) {
