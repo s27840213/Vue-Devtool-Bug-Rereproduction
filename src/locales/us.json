@@ -170,14 +170,14 @@
   "NN0170": "Remove photo",
   "NN0171": "Change photo",
   "NN0172": "Name",
-  "NN0173": "Email address",
+  "NN0173": "Email address|email address",
   "NN0174": "Language",
   "NN0175": "I agree to receive emails with tips about Vivipic, the most popular templates, eCommerce trends, and special offers. ",
   "NN0176": "Apply and save",
   "NN0177": "You're logged in with a Google/Facebook account, so you'll need to change your password through Google/Facebook.",
   "NN0178": "Log in with {media}",
   "NN0179": "or",
-  "NN0180": "Password",
+  "NN0180": "Password|password",
   "NN0181": "Forgot password",
   "NN0182": "Don't have an account?",
   "NN0183": "Sign up here",
@@ -400,5 +400,6 @@
   "NN0392": "Add all pages ({num} pages)",
   "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\". Please try a different search term.",
   "NN0394": "Sorry, we couldn't find any matches for {target}. Please try a different search term.",
+  "NN0395": "If you log in with a Google/Facebook account, you cannot reset your password here. Please reset your password via Google/Facebook.",
   "NN0398": "Try {html}selecting all{html} to see more results."
 }

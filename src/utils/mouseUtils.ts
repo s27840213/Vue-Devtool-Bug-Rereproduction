@@ -69,7 +69,6 @@ class MouseUtils {
   }
 
   onDrop(e: DragEvent, pageIndex: number, targetOffset: ICoordinate = { x: 0, y: 0 }) {
-    console.log(pageIndex)
     const layer = this.onDropHandler(e, pageIndex, targetOffset)
     if (layer) {
       groupUtils.deselect()
