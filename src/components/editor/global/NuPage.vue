@@ -302,7 +302,7 @@ export default Vue.extend({
           [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0] as IImage
       } else if (layer.type === 'frame') {
         const primaryLayer = this.getCurrLayer as IFrame
-        const image = GeneralUtils.deepCopy(primaryLayer.clips[this.currSubSelectedInfo.index]) as IImage
+        const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
         const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
         if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
           const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
