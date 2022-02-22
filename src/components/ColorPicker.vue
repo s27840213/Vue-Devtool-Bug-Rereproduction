@@ -14,7 +14,8 @@
           iconName="eye-dropper"
           :iconWidth="'20px'"
           :iconColor="'gray-2'"
-          @click.native="eyeDropper")
+          @click.native="eyeDropper"
+          v-hint="$t('NN0407')")
         span(class="body-1") Hex
         div(class="color-picker__input")
           div(:style="{'background-color': convertedHex}")

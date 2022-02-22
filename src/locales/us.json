@@ -400,5 +400,6 @@
   "NN0392": "Add all pages ({num} pages)",
   "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\".",
   "NN0394": "Sorry, we couldn't find any {target}",
-  "NN0406": "Sorry, the bowser you use didn't support this function. Try Chrome to use it."
+  "NN0406": "To use the Eyedropper tool, please switch to a supported browser (Edge, Google Chrome, Opera) on Desktop and upgrade to the latest version of it.",
+  "NN0407": "Eyedropper"
 }
