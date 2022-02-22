@@ -266,6 +266,7 @@ export default Vue.extend({
     })
   },
   computed: {
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -390,7 +391,8 @@ export default Vue.extend({
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page',
       setPanelType: 'SET_currFunctionPanelType',
-      setSidebarType: 'SET_currSidebarPanelType'
+      setSidebarType: 'SET_currSidebarPanelType',
+      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
     styles(type: string) {
       return type === 'content' ? {
@@ -418,13 +420,13 @@ export default Vue.extend({
         height: '100%',
         width: '1px',
         transform: `translate3d(${pos}px,0,50px)`,
-        'pointer-events': isGuideline ? 'auto' : 'none'
+        'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
       }
         : {
           width: '100%',
           height: '1px',
           transform: `translate3d(0,${pos}px,50px)`,
-          'pointer-events': isGuideline ? 'auto' : 'none'
+          'pointer-events': isGuideline && !this.isMoving ? 'auto' : 'none'
         }
     },
     addNewLayer(pageIndex: number, layer: IShape | IText | IImage | IGroup): void {
@@ -435,6 +437,7 @@ export default Vue.extend({
     },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
+      this.setCurrHoveredPageIndex(isHover ? this.pageIndex : -1)
     },
     toggleResizerHint(isHover: boolean): void {
       this.isShownResizerHint = isHover

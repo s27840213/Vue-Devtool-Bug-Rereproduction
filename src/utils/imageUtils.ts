@@ -5,7 +5,7 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { IAssetPhoto } from '@/interfaces/api'
+import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -366,6 +366,37 @@ class ImageUtils {
     const posX = (targetSize.width - width) / 2
     const posY = (targetSize.height - height) / 2
     return { width, height, posX, posY }
+  }
+
+  getBgRemoveInfo(image: IUserImageContentData, initSrc: string) {
+    const isAdmin = store.getters['user/isAdmin']
+    const teamId = image.team_id ?? store.getters['user/getTeamId']
+    const userId = store.getters['user/getTeamId']
+    return {
+      width: image.width,
+      height: image.height,
+      id: image.id,
+      assetIndex: image.asset_index,
+      teamId: image.team_id,
+      urls: {
+        prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev` : image.signed_url?.prev ?? '',
+        full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full` : image.signed_url?.full ?? '',
+        larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg` : image.signed_url?.larg ?? '',
+        original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? '',
+        midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
+        smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
+        tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
+      },
+      initSrc
+    }
+  }
+
+  appendOriginQuery(src: string) {
+    if (src.includes('?')) {
+      return `${src}&origin=true`
+    } else {
+      return `${src}?origin=true`
+    }
   }
 }
 

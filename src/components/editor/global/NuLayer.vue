@@ -9,6 +9,11 @@
       nu-clipper(:config="config" :layerIndex="layerIndex" v-bind="$attrs")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+    div(v-if="config.inProcess" class="nu-layer__inProcess")
+      svg-icon(class="spiner"
+        :iconName="'spiner'"
+        :iconColor="'white'"
+        :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
@@ -146,10 +151,16 @@ export default Vue.extend({
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }
-  // &:hover {
-  //   cursor: pointer;
-  // }
-  &__layer-scale {
+  &__inProcess {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: setColor(gray-1, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -186,5 +197,19 @@ export default Vue.extend({
   z-index: 100;
   display: flex;
   flex-direction: column;
+}
+
+.spiner {
+  animation: rotation 0.5s infinite linear;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
