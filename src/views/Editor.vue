@@ -16,11 +16,12 @@
                   span(class="ml-10 text-bold text-orange") {{templateText}}
                   span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
                 svg-icon(v-if="isAdmin"
+                  class="mr-10"
                   :iconName="`user-admin${getAdminModeText}`"
                   :iconWidth="'20px'"
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
-                div(class="flex flex-column mr-10")
+                div(class="flex flex-column")
                   select(class="locale-select" v-model="inputLocale")
                     option(v-for="locale in localeOptions" :value="locale") {{locale}}
             editor-view
@@ -90,9 +91,17 @@ export default Vue.extend({
       updateValue.token = this.token
       updateValue.locale = this.inputLocale
 
-      const data = await store.dispatch('user/updateUser', updateValue)
-      localStorage.setItem('locale', data.locale)
-      this.$router.go(0)
+      await store.dispatch('user/updateUser', updateValue)
+        .then((value) => {
+          if (!value.data.flag) {
+            localStorage.setItem('locale', value.data.locale)
+            this.$router.go(0)
+          } else {
+            this.networkError()
+          }
+        }, () => {
+          this.networkError()
+        })
     }
   },
   mounted() {
@@ -211,6 +220,10 @@ export default Vue.extend({
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
+    },
+    networkError(): void {
+      Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+      this.isLoading = false
     }
   }
 })
