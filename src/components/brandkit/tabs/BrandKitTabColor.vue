@@ -15,7 +15,8 @@
             svg-icon(iconName="plus-small" iconWidth="16px" iconColor="gray-2")
       div(class="brand-kit-tab-color__palette__colors")
         div(v-for="(color, index) in colorPalette.colors"
-          class="brand-kit-tab-color__palette__colors__color-wrapper relative")
+          class="brand-kit-tab-color__palette__colors__color-wrapper relative"
+          :class="{ selected: checkSelected(colorPalette.id, index) }")
           div(class="brand-kit-tab-color__palette__colors__color pointer"
             :style="backgroundColorStyles(color)"
             @click="handleSelectColor(colorPalette.id, index)")
@@ -165,20 +166,25 @@ export default Vue.extend({
       gap: 20px 10px;
       &__color-wrapper {
         width: 100%;
-        border: 2px solid setColor(gray-7);
-        box-sizing: border-box;
-        border-radius: 8px;
         aspect-ratio: 1;
+        box-sizing: border-box;
+        border-radius: 10%;
         &:hover {
           border-color: white;
           & > .brand-kit-tab-color__palette__colors__color-close {
             display: flex;
           }
         }
+        &.selected {
+          border: 1px solid setColor(blue-1);
+        }
       }
       &__color {
         width: 100%;
         height: 100%;
+        border: 2px solid setColor(gray-7);
+        box-sizing: border-box;
+        border-radius: 10%;
         &-close {
           position: absolute;
           top: -5px;
@@ -191,9 +197,10 @@ export default Vue.extend({
           display: none;
           align-items: center;
           justify-content: center;
-          transition: 0.3s ease;
+          transition: transform 0.2s ease;
           transform-origin: top right;
           &.selected {
+            display: flex;
             transform: scale(0.75);
           }
         }
