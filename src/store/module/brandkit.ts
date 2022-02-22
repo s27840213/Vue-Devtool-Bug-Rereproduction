@@ -1,5 +1,5 @@
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
-import { IBrand } from '@/interfaces/brandkit'
+import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
@@ -39,6 +39,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async fetchBrands({ commit }) {
     const brands = await brandkitApi.getTestingBrands(brandkitApi.getToken())
     commit('SET_brands', brands)
+    commit('SET_currentBrand', brands[0])
   },
   async setBrandName({ commit }, updateInfo: { brand: IBrand, newName: string }) {
     const { brand, newName } = updateInfo
@@ -58,6 +59,15 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('SET_currentBrand', brand)
     }, () => {
       commit('UPDATE_deleteBrand', brand)
+    }, () => {
+      showNetworkError()
+    })
+  },
+  async removeLogo({ commit }, logo: IBrandLogo) {
+    brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_deleteLogo', logo)
+    }, () => {
+      commit('UPDATE_addLogo', logo)
     }, () => {
       showNetworkError()
     })
@@ -83,6 +93,21 @@ const mutations: MutationTree<IBrandKitState> = {
       state.brands.splice(index, 1)
       if (state.currentBrandId === brand.id) {
         state.currentBrandId = state.brands[0].id
+      }
+    }
+  },
+  UPDATE_addLogo(state: IBrandKitState, logo: IBrandLogo) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (currentBrand) {
+      currentBrand.logos.push(logo)
+    }
+  },
+  UPDATE_deleteLogo(state: IBrandKitState, logo: IBrandLogo) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (currentBrand) {
+      const index = currentBrand.logos.findIndex(logo_ => logo_.id === logo.id)
+      if (index >= 0) {
+        currentBrand.logos.splice(index, 1)
       }
     }
   }

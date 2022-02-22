@@ -1,4 +1,4 @@
-import { IBrand, IBrandTextStyle } from '@/interfaces/brandkit'
+import { IBrand, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import generalUtils from './generalUtils'
 
@@ -68,6 +68,10 @@ class BrandKitUtils {
 
   addNewBrand() {
     store.dispatch('brandkit/createBrand')
+  }
+
+  removeLogo(logo: IBrandLogo) {
+    store.dispatch('brandkit/removeLogo', logo)
   }
 
   fetchBrands(fetcher: () => Promise<void>, clear = true) {

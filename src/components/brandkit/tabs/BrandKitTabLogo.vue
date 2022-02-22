@@ -1,10 +1,12 @@
 <template lang="pug">
   div(class="brand-kit-tab-logo")
-    div(class="brand-kit-tab-logo__item add pointer")
+    div(class="brand-kit-tab-logo__item add pointer"
+      @click="handleUploadLogo")
       svg-icon(iconName="plus-origin"
               iconWidth="26.67px"
               iconColor="gray-2")
     div(v-for="logo in logos" class="brand-kit-tab-logo__item relative"
+      :key="logo.id"
       :class="{hovered: checkMenuOpen(logo)}")
       img(:src="logo.url" class="brand-kit-tab-logo__item__img")
       div(class="brand-kit-tab-logo__item__more pointer"
@@ -24,7 +26,8 @@
                       iconWidth="24px"
                       iconColor="gray-2")
               span {{ $t('NN0010') }}
-            div(class="brand-kit-tab-logo__item__menu__row pointer")
+            div(class="brand-kit-tab-logo__item__menu__row pointer"
+              @click="handleDeleteLogo(logo)")
               svg-icon(iconName="trash"
                       iconWidth="24px"
                       iconColor="gray-2")
@@ -37,6 +40,7 @@ import { mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
@@ -70,6 +74,13 @@ export default Vue.extend({
       } else {
         this.menuOpenLogoId = logo.id
       }
+    },
+    handleUploadLogo() {
+      uploadUtils.chooseAssets('logo')
+    },
+    handleDeleteLogo(logo: IBrandLogo) {
+      this.menuOpenLogoId = ''
+      brandkitUtils.removeLogo(logo)
     }
   }
 })
