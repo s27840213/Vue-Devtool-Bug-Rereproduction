@@ -398,7 +398,7 @@
   "NN0390": "A huge selection of free and designer-made templates are all at your fingertips.",
   "NN0391": "Get started",
   "NN0392": "Add all pages ({num} pages)",
-  "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\".",
-  "NN0394": "Sorry, we couldn't find any {target}",
+  "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\". Please try a different search term.",
+  "NN0394": "Sorry, we couldn't find any matches for {target}. Please try a different search term.",
   "NN0398": "Try {html}selecting all{html} to see more results."
 }
