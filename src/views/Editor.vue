@@ -16,10 +16,14 @@
                   span(class="ml-10 text-bold text-orange") {{templateText}}
                   span(class="ml-10 pointer text-orange" @click="copyText(groupId)") {{groupId}}
                 svg-icon(v-if="isAdmin"
+                  class="mr-10"
                   :iconName="`user-admin${getAdminModeText}`"
                   :iconWidth="'20px'"
                   :iconColor="'gray-2'"
                   @click.native="setAdminMode()")
+                div(class="flex flex-column")
+                  select(class="locale-select" v-model="inputLocale")
+                    option(v-for="locale in localeOptions" :value="locale") {{locale}}
             editor-view
             scale-ratio-editor(:style="scaleRatioEditorPos"
               @toggleSidebarPanel="toggleSidebarPanel")
@@ -32,6 +36,7 @@
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
+    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -52,7 +57,7 @@ import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
-import networkUtils from '@/utils/networkUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   name: 'Editor',
@@ -71,12 +76,32 @@ export default Vue.extend({
     return {
       FunctionPanelType,
       isColorPanelOpen: false,
-      isSidebarPanelOpen: true
+      isSidebarPanelOpen: true,
+      inputLocale: i18n.locale,
+      isLoading: false
     }
   },
   watch: {
     isShowPagePreview() {
       this.toggleSidebarPanel = this.isShowPagePreview
+    },
+    async inputLocale() {
+      this.isLoading = true
+      const updateValue: {[key: string]: string} = {}
+      updateValue.token = this.token
+      updateValue.locale = this.inputLocale
+
+      await store.dispatch('user/updateUser', updateValue)
+        .then((value) => {
+          if (!value.data.flag) {
+            localStorage.setItem('locale', value.data.locale)
+            this.$router.go(0)
+          } else {
+            this.networkError()
+          }
+        }, () => {
+          this.networkError()
+        })
     }
   },
   mounted() {
@@ -99,6 +124,9 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+    }),
+    ...mapGetters('user', {
+      token: 'getToken'
     }),
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
@@ -150,6 +178,9 @@ export default Vue.extend({
     },
     showEditorGuide(): boolean {
       return this.viewGuide === 0
+    },
+    localeOptions(): string[] {
+      return i18n.availableLocales
     }
   },
   beforeRouteLeave(to, from, next) {
@@ -190,6 +221,10 @@ export default Vue.extend({
     },
     confirmLeave() {
       return window.confirm('Do you really want to leave? you have unsaved changes!')
+    },
+    networkError(): void {
+      Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
+      this.isLoading = false
     }
   }
 })
