@@ -5,21 +5,22 @@
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
         :iconWidth="'20px'"
-        :iconColor="!isInFirstStep ? 'gray-2' : 'gray-4'"
+        :iconColor="(!inBgRemoveMode && !isInFirstStep) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
         @click.native="undo"
         v-hint="$t('NN0119')"
       )
       svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
-        :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
+        :iconColor="(!inBgRemoveMode && !isInLastStep) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
         @click.native="redo"
         v-hint="$t('NN0120')")
       download-btn
       btn(:hasIcon="true"
         :iconName="'menu'"
         :iconWidth="'25px'"
-        :type="'primary-sm'"
+        :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
+        :disabled="inBgRemoveMode"
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
@@ -33,7 +34,7 @@
           @openFontsPanel="openFontsPanel"
           v-on="$listeners")
         panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
-        panel-photo-shadow(v-if="layerType.targetLayerType === 'image' && !isLocked" v-on="$listeners")
+        panel-photo-shadow(v-if="layerType.currLayerType === 'image' && !isLocked" v-on="$listeners")
         panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
         panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
         panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -83,9 +84,6 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textPropUtils from '@/utils/textPropUtils'
 import { LayerType } from '@/store/types'
 
 export default Vue.extend({
@@ -114,7 +112,9 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
     functionPanelStyles(): { [index: string]: string } {
       return this.isShowPagePreview ? {
@@ -195,34 +195,57 @@ export default Vue.extend({
       })
     },
     undo() {
-      shotcutUtils.undo()
-      // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-      // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-      //   this.$nextTick(() => {
-      //     tiptapUtils.agent(editor => {
-      //       const currLayer = LayerUtils.getCurrLayer as IText
-      //       if (!currLayer.active || currLayer.type !== 'text') return
-      //       editor.chain().sync().focus().run()
-      //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-      //       textPropUtils.updateTextPropsState()
-      //     })
-      //   })
-      // }
+      if (this.inBgRemoveMode) {
+        // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: false,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shotcutUtils.undo()
+        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        //   this.$nextTick(() => {
+        //     tiptapUtils.agent(editor => {
+        //       const currLayer = LayerUtils.getCurrLayer as IText
+        //       if (!currLayer.active || currLayer.type !== 'text') return
+        //       editor.chain().sync().focus().run()
+        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+        //       textPropUtils.updateTextPropsState()
+        //     })
+        //   })
+        // }
+      }
     },
     redo() {
-      shotcutUtils.redo()
-      // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-      // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-      //   this.$nextTick(() => {
-      //     tiptapUtils.agent(editor => {
-      //       const currLayer = LayerUtils.getCurrLayer as IText
-      //       if (!currLayer.active || currLayer.type !== 'text') return
-      //       editor.chain().sync().focus().run()
-      //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-      //       textPropUtils.updateTextPropsState()
-      //     })
-      //   })
-      // }
+      if (this.inBgRemoveMode) {
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: true,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shotcutUtils.redo()
+        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        //   this.$nextTick(() => {
+        //     tiptapUtils.agent(editor => {
+        //       const currLayer = LayerUtils.getCurrLayer as IText
+        //       if (!currLayer.active || currLayer.type !== 'text') return
+        //       editor.chain().sync().focus().run()
+        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+        //       textPropUtils.updateTextPropsState()
+        //     })
+        //   })
+        // }
+      }
     }
   }
 })

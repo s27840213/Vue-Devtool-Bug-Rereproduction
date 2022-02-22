@@ -125,7 +125,9 @@ export interface IImage extends ILayer<IImageStyle> {
   clipPath: string,
   isClipper: boolean,
   isFrame?: boolean,
-  imgControl: boolean
+  imgControl: boolean,
+  inProcess: boolean,
+  trace?: number
 }
 export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

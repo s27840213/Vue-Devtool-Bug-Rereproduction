@@ -53,6 +53,7 @@ const getDefaultState = (): IEditorState => ({
   pageScaleRatio: 100,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
+  currHoveredPageIndex: -1,
   lastSelectedLayerIndex: -1,
   clipboard: [],
   currSelectedInfo: {
@@ -179,6 +180,9 @@ const getters: GetterTree<IEditorState, unknown> = {
     return pageIndex >= 0 ? pageIndex
       : state.currActivePageIndex >= 0
         ? state.currActivePageIndex : state.middlemostPageIndex
+  },
+  getCurrHoveredPageIndex(state: IEditorState): number {
+    return state.currHoveredPageIndex
   },
   getLastSelectedLayerIndex(state: IEditorState): number {
     return state.lastSelectedLayerIndex
@@ -327,6 +331,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
     state.lastSelectedLayerIndex = index
+  },
+  SET_currHoveredPageIndex(state: IEditorState, index: number) {
+    state.currHoveredPageIndex = index
   },
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color

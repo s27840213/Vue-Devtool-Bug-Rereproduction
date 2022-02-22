@@ -540,10 +540,13 @@ export default Vue.extend({
       if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
-      e.stopPropagation()
       if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
+      if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked) {
+        return
+      }
+      e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { styles, srcObj } = this.config
