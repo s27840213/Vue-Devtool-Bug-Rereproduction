@@ -112,7 +112,7 @@ export default Vue.extend({
             preLoadImg('next')
           }
         }
-        this.src = ImageUtils.getSrc(this.config, newVal)
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
     },
     srcObj: {
@@ -210,14 +210,14 @@ export default Vue.extend({
     },
     async perviewAsLoading() {
       return new Promise<void>((resolve, reject) => {
-        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
         const img = new Image()
         img.setAttribute('crossOrigin', 'Anonymous')
 
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
-          if (ImageUtils.getSrc(this.config) === src) {
+          if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
             this.src = src
           }
           resolve()
