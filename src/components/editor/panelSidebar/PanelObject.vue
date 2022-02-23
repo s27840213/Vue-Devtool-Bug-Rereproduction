@@ -5,7 +5,7 @@
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")

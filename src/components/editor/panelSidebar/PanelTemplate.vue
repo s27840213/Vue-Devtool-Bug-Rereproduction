@@ -31,7 +31,7 @@
           @change="handleTheme"
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
-    div(v-if="theme && emptyResultMessage" class="text-white") {{ emptyResultMessage }}
+    div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     div(v-if="showTemplateId && keyword && !pending && !emptyResultMessage"
       class="text-white text-left pb-10")
       span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total
@@ -65,7 +65,7 @@
             :key="item.group_id"
             @click="handleShowGroup")
     div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
-      class="text-white")
+      class="text-white text-left")
       span {{resultTooLess[0]}}
       span(class="set-all-templatebtn-btn" @click="setAllTemplate") {{resultTooLess[1]}}
       span {{resultTooLess[2]}}
