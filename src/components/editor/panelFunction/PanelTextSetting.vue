@@ -42,28 +42,27 @@
                 iconColor="gray-4"
                 @click.native="copyColor")
       div(class="action-bar action-bar--small flex-evenly")
-        svg-icon(class="pointer record-selection btn-lh"
+        svg-icon(class="pointer record-selection btn-lh feature-button"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
           v-hint="$t('NN0109')")
-        svg-icon(class="pointer record-selection btn-ls"
+        svg-icon(class="pointer record-selection btn-ls feature-button"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
           v-hint="$t('NN0110')")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="record-selection"
-        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText }"
+        class="record-selection feature-button"
+        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText, active: iconIsActived(icon) }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
-        :style="propsBtnStyles(icon)"
         v-hint="hintMap[icon]"
         :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-        class="pointer"
+        class="pointer feature-button"
+        :class="{ active: iconIsActived(icon) }"
         :key="`gp-action-icon-${index}`"
-        :style="propsBtnStyles(icon)"
         v-hint="hintMap[icon]"
         :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'" @mousedown.native="onParaPropsClick(icon)")
 </template>
@@ -290,35 +289,34 @@ export default Vue.extend({
         input.select()
       }
     },
-    propsBtnStyles(iconName: string) {
-      const origin = { 'background-color': '', 'border-radius': '' }
-      const hitStyle = { 'background-color': '#c2d6ff', 'border-radius': '2.5px' }
+    iconIsActived(iconName: string): boolean {
       switch (iconName) {
         case 'bold':
-          if (this.props.weight === 'bold') return hitStyle
+          if (this.props.weight === 'bold') return true
           break
         case 'underline':
-          if (this.props.decoration === 'underline') return hitStyle
+          if (this.props.decoration === 'underline') return true
           break
         case 'italic':
-          if (this.props.style === 'italic') return hitStyle
+          if (this.props.style === 'italic') return true
           break
         case 'font-vertical':
-          if (this.props.isVertical) return hitStyle
+          if (this.props.isVertical) return true
           break
         case 'text-align-left':
-          if (this.props.textAlign === 'left') return hitStyle
+          if (this.props.textAlign === 'left') return true
           break
         case 'text-align-center':
-          if (this.props.textAlign === 'center') return hitStyle
+          if (this.props.textAlign === 'center') return true
           break
         case 'text-align-right':
-          if (this.props.textAlign === 'right') return hitStyle
+          if (this.props.textAlign === 'right') return true
           break
         case 'text-align-justify':
-          if (this.props.textAlign === 'justify') return hitStyle
+          if (this.props.textAlign === 'justify') return true
+          break
       }
-      return origin
+      return false
     },
     textInfoRecorder() {
       const currLayer = LayerUtils.getCurrLayer
