@@ -190,6 +190,7 @@ export default Vue.extend({
     border-radius: 4px;
     display: flex;
     flex-direction: column;
+    z-index: 2;
     &__item {
       text-align: left;
       padding: 10px;
