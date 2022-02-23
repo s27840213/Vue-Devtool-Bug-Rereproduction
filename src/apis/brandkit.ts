@@ -55,6 +55,9 @@ export default {
     //   return axios('/update-asset', payload)
     // })
     return { data: { flag: 0 } }
+    // return new Promise<any>(resolve => {
+    //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
+    // })
   },
   updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void) {
     this.updateBrands(this.getToken(), this.getLocale(), this.getUserId())

@@ -14,28 +14,29 @@ interface Item {
 
 class BrandKitUtils {
   createDefaultBrand(): IBrand {
+    const initTime = Date.now()
     return {
       id: generalUtils.generateAssetId(),
-      createTime: (new Date()).toISOString(),
+      createTime: (new Date(initTime)).toISOString(),
       name: '',
       logos: [{
         name: 'logo-horizontal.png',
         id: generalUtils.generateAssetId(),
-        createTime: (new Date()).toISOString(),
+        createTime: (new Date(initTime + 10)).toISOString(),
         url: require('@/assets/img/png/brandkit/logo-horizontal.png'),
         width: 171,
         height: 132
       }, {
         name: 'logo-square.png',
         id: generalUtils.generateAssetId(),
-        createTime: (new Date()).toISOString(),
+        createTime: (new Date(initTime + 20)).toISOString(),
         url: require('@/assets/img/png/brandkit/logo-square.png'),
         width: 131,
         height: 131
       }, {
         name: 'logo-vertical.png',
         id: generalUtils.generateAssetId(),
-        createTime: (new Date()).toISOString(),
+        createTime: (new Date(initTime + 30)).toISOString(),
         url: require('@/assets/img/png/brandkit/logo-vertical.png'),
         width: 75,
         height: 171
@@ -47,7 +48,7 @@ class BrandKitUtils {
       },
       colorPalettes: [{
         id: generalUtils.generateAssetId(),
-        createTime: (new Date()).toISOString(),
+        createTime: (new Date(initTime + 40)).toISOString(),
         name: '',
         colors: this.generateBrandColors([
           '#3C64B1', '#276AEA', '#19C84A', '#FE7565', '#FECD56',
@@ -58,7 +59,7 @@ class BrandKitUtils {
         ])
       }, {
         id: generalUtils.generateAssetId(),
-        createTime: (new Date()).toISOString(),
+        createTime: (new Date(initTime + 50)).toISOString(),
         name: '',
         colors: this.generateBrandColors([
           '#3C64B1', '#276AEA', '#19C84A', '#FE7565', '#FECD56',
@@ -98,9 +99,10 @@ class BrandKitUtils {
   }
 
   generateBrandColors(colorHexes: string[]): IBrandColor[] {
-    return colorHexes.map(colorHex => ({
+    const initTime = Date.now()
+    return colorHexes.map((colorHex, index) => ({
       id: generalUtils.generateAssetId(),
-      createTime: (new Date()).toISOString(),
+      createTime: (new Date(initTime + 10 * index)).toISOString(),
       color: colorHex
     }))
   }
