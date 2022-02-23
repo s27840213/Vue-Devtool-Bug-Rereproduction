@@ -4,8 +4,8 @@ import generalUtils from './generalUtils'
 
 const TAB_NAMES = {
   logo: 'NN0399',
-  text: 'NN0400',
-  color: 'NN0401'
+  color: 'NN0401',
+  text: 'NN0400'
 }
 
 class BrandKitUtils {

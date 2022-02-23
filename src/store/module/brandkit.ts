@@ -113,8 +113,10 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async createColor({ state, commit }, paletteId: string) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
+    const palette = brandkitUtils.getColorPalette(currentBrand.colorPalettes, paletteId)
+    if (!palette) return
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_addColor', { id: paletteId, index: -1, color: brandkitUtils.createDefaultColor() })
+      commit('UPDATE_addColor', { id: paletteId, index: -1, color: palette.colors[palette.colors.length - 1] })
     }, () => {
       commit('UPDATE_deleteColor', { id: paletteId, index: -1 })
     }, () => {
