@@ -75,7 +75,12 @@ class BrandKitUtils {
 
   createDefaultTextStyle(): IBrandTextStyle {
     return {
-      font: '',
+      font: {
+        id: '',
+        name: '',
+        type: '',
+        ver: 0
+      },
       size: -1,
       isDefault: true
     }
@@ -180,6 +185,10 @@ class BrandKitUtils {
 
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
     return { ...colors[colors.length - 1], id: generalUtils.generateAssetId() }
+  }
+
+  composeSettingText(textStyle: IBrandTextStyle, type: string): string {
+    return `${type},${textStyle.font.name},${textStyle.size}`
   }
 }
 

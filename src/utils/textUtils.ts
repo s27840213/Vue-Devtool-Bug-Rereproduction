@@ -924,6 +924,12 @@ class TextUtils {
     }
   }
 
+  loadDefaultFonts() {
+    for (const defaultFont of store.getters['text/getDefaultFontsList']) {
+      store.dispatch('text/addFont', defaultFont).catch(e => console.error(e))
+    }
+  }
+
   async waitUntilAllFontsLoaded(config: IText, times: number) {
     /*
       Gary: 因為預設字型檔案較大，剛進入畫面時的下載過程可能會佔用網路頻寬，

@@ -24,9 +24,16 @@ export interface IBrandTextStyleSetting {
 }
 
 export interface IBrandTextStyle {
-  font: string,
+  font: IBrandTextFont,
   size: number,
   isDefault: boolean
+}
+
+export interface IBrandTextFont {
+  id: string,
+  name: string,
+  type: string,
+  ver: number
 }
 
 export interface IBrandColorPalette {
@@ -43,9 +50,11 @@ export interface IBrandColor {
 }
 
 export interface IBrandFont {
+  type: string,
   id: string,
   createTime: string,
   name: string,
+  ver: number,
   namePrevUrl: string,
   textPrevUrl: string
 }
