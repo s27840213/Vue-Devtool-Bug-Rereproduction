@@ -2,7 +2,6 @@ import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
-import store from '@/store'
 import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import imageUtils from './imageUtils'
@@ -130,32 +129,35 @@ class ImageShadowUtils {
 
     switch (shadow.currentEffect) {
       case ShadowEffectType.halo: {
-        const { imgWidth, imgHeight } = config.styles
-        const { blur, y, width } = mathUtils
+        const { blur, x, y, width, opacity } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
-        const imgRatio = imgHeight / imgWidth
         return {
           backgroundImage: `url(${imageUtils.getSrc(config)})`,
+          backgroundColor: `rgba(255, 255, 255, ${1 - opacity / 100})`,
+          backgroundBlendMode: 'overlay',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           zIndex: -1,
           width: `${width}%`,
           height: '100%',
-          bottom: `${-(imgRatio > 1 ? y / 2 : y) - 5}%`,
+          bottom: `${-y}%`,
+          left: `${x - (width - 100) / 2}%`,
           filter: `blur(${blur}px)`
         }
       }
       case ShadowEffectType.projection: {
-        const { radius, spread, opacity, y, width, zIndex } = mathUtils
+        const { radius, spread, opacity, x, y, width, zIndex } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
+        const { height: layerHeight, width: layerWidth } = config.styles
         return {
           width: `${width}%`,
-          bottom: `${-y - 10}px`,
+          left: `${x * fieldRange.projection.x.weighting * layerWidth + (1 - width / 100) / 2 * layerWidth}px`,
+          bottom: `${-y * fieldRange.projection.y.weighting * layerHeight}px`,
           zIndex,
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
-          `${radius}px ` +
+          `${radius * fieldRange.projection.radius.weighting}px ` +
           `${spread}px ` +
           `${color + this.convertToAlpha(opacity)}`
         }
@@ -208,11 +210,12 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.projection: {
         (effect as IProjectionEffect) = {
+          x: 0,
+          y: 0,
           radius: 50,
           spread: 50,
-          opacity: 70,
           width: 80,
-          y: 0,
+          opacity: 70,
           zIndex: -1
         }
         break
@@ -226,16 +229,18 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
-          spread: 12,
           radius: 0,
+          spread: 12,
           opacity: 70
         }
         break
       case ShadowEffectType.halo:
         (effect as IHaloEffect) = {
-          width: 95,
+          x: 0,
+          y: 5,
           blur: 15,
-          y: 0
+          width: 100,
+          opacity: 70
         }
         break
       case ShadowEffectType.none:
@@ -273,9 +278,9 @@ class ImageShadowUtils {
         Object.keys(allProps as IShadowEffect)
           .forEach(k => {
             if (effect && k in effect) {
-              this.setAttrs(filter, { ...FilterTable[k], scale, k, v: effect[k] })
+              this.setAttrs(filter, { ...FilterTable[k], currentEffect, scale, k, v: effect[k] })
             } else {
-              this.setAttrs(filter, { ...FilterTable[k], k, v: 0 })
+              this.setAttrs(filter, { ...FilterTable[k], currentEffect, k, v: 0 })
             }
           })
         /** setting color */
@@ -286,12 +291,15 @@ class ImageShadowUtils {
   }
 
   setAttrs(filter: SVGElement | HTMLElement, data: any) {
-    const { prop, weighting, child, tag, scale, k, v } = data
+    const { prop, child, tag, scale, currentEffect, k, v } = data
     const subFilter = filter.getElementsByTagNameNS(SVG, tag)[0]
     if (child) {
-      this.setAttrs(subFilter, { ...child, scale, k, v })
+      this.setAttrs(subFilter, { ...child, currentEffect, scale, k, v })
     } else {
-      let val = weighting ? v * weighting : v
+      let val = v
+      if (fieldRange[currentEffect][k] && fieldRange[currentEffect][k].weighting) {
+        val *= fieldRange[currentEffect][k].weighting
+      }
 
       switch (k) {
         case 'spread':
@@ -391,5 +399,85 @@ class ImageShadowUtils {
     ]
   }
 }
+
+export const shadowPropI18nMap = {
+  none: {
+    _effectName: 'NN0426'
+  },
+  shadow: {
+    x: 'NN0416',
+    y: 'NN0417',
+    radius: 'NN0418',
+    spread: 'NN0419',
+    opacity: 'NN0425',
+    _effectName: 'NN0411'
+  },
+  blur: {
+    radius: 'NN0418',
+    spread: 'NN0419',
+    opacity: 'NN0425',
+    _effectName: 'NN0412'
+  },
+  halo: {
+    x: 'NN0416',
+    y: 'NN0417',
+    width: 'NN0420',
+    blur: 'NN0418',
+    opacity: 'NN0425',
+    _effectName: 'NN0413'
+  },
+  frame: {
+    radius: 'NN0418',
+    spread: 'NN0421',
+    opacity: 'NN0425',
+    _effectName: 'NN0414'
+  },
+  projection: {
+    x: 'NN0423',
+    y: 'NN0422',
+    radius: 'NN0418',
+    spread: 'NN0419',
+    opacity: 'NN0425',
+    width: 'NN0420',
+    zIndex: 'NN0424',
+    _effectName: 'NN0415'
+  }
+}
+
+export const fieldRange = {
+  shadow: {
+    x: { max: 180, min: -180 },
+    y: { max: 180, min: -180 },
+    radius: { max: 100, min: 0, weighting: 2 },
+    opacity: { max: 100, min: 0, weighting: 0.01 },
+    spread: { max: 100, min: 0, weighting: 0.72 }
+  },
+  blur: {
+    radius: { max: 100, min: 0, weighting: 2 },
+    spread: { max: 100, min: 0, weighting: 0.72 },
+    opacity: { max: 100, min: 0, weighting: 0.01 }
+  },
+  halo: {
+    width: { max: 200, min: 50, weighting: 0.01 },
+    blur: { max: 100, min: 0, weighting: 2 },
+    x: { max: 100, min: -100, weighting: 0.5 },
+    y: { max: 100, min: -100, weighting: 0.5 },
+    opacity: { max: 100, min: 0, weighting: 0.01 }
+  },
+  frame: {
+    spread: { max: 100, min: 0, weighting: 0.72 },
+    opacity: { max: 100, min: 0, weighting: 0.01 },
+    radius: { max: 100, min: 0, weighting: 2 }
+  },
+  projection: {
+    spread: { max: 100, min: 0, weighting: 0.5 },
+    opacity: { max: 100, min: 0, weighting: 0.01 },
+    radius: { max: 100, min: 0, weighting: 1.5 },
+    width: { max: 200, min: 50 },
+    x: { max: 100, min: -100, weighting: 0.005 },
+    y: { max: 100, min: -100, weighting: 0.005 },
+    zIndex: { max: 0, min: -1 }
+  }
+} as any
 
 export default new ImageShadowUtils()

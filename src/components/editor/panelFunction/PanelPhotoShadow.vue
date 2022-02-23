@@ -10,18 +10,18 @@
           :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shadow-${icon}`]"
+          v-hint="$t(shadowPropI18nMap[icon]._effectName)"
         )
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
         class="w-full photo-effect-setting__form")
         div(v-for="field in shadowFields"
           :key="field"
           class="photo-effect-setting__field")
-          div(class="photo-effect-setting__field-name") {{field}}
+          div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
           input(class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
-            :max="getFieldValue.max"
-            :min="getFieldValue.min"
+            :max="fieldRange[currentEffect][field].max"
+            :min="fieldRange[currentEffect][field].min"
             :name="field"
             @input="handleEffectUpdate"
             @mouseup="recordChange"
@@ -53,14 +53,14 @@
           :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="hintMap[`shadow-${icon}`]"
+          v-hint="$t(shadowPropI18nMap[icon]._effectName)"
         )
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
         class="w-full photo-effect-setting__form")
         div(v-for="field in shadowFields"
           :key="field"
           class="photo-effect-setting__field")
-          div(class="photo-effect-setting__field-name") {{ field }}
+          div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
           input(v-if="field !== 'zIndex'"
             class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
@@ -97,7 +97,7 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils, { HALO_SPREAD_LIMIT } from '@/utils/imageShadowUtils'
+import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
@@ -114,25 +114,8 @@ export default Vue.extend({
     return {
       openModal: false,
       openColorPicker: false,
-      effectI18nMap: {
-        distance: 'NN0063',
-        angle: 'NN0064',
-        blur: 'NN0065',
-        opacity: 'NN0066',
-        color: 'NN0067',
-        spread: 'NN0068',
-        stroke: 'NN0069',
-        shape: 'NN0070',
-        bend: 'NN0071'
-      },
-      hintMap: {
-        'shadow-none': `${this.$t('NN0111')}`,
-        'shadow-shadow': `${this.$t('NN0112')}`,
-        'shadow-blur': 'blur',
-        'shadow-halo': 'halo',
-        'shadow-projection': 'projection',
-        'shadow-frame': 'frame'
-      }
+      shadowPropI18nMap,
+      fieldRange
     }
   },
   computed: {
@@ -159,40 +142,6 @@ export default Vue.extend({
         halo: imageShadowUtils.getKeysOf(ShadowEffectType.halo),
         frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
         projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
-      }
-    },
-    fieldRange(): any {
-      return {
-        shadow: {
-          x: { max: 100, min: -100 },
-          y: { max: 100, min: -100 },
-          radius: { max: 50, min: 0 },
-          opacity: { max: 100, min: 0 },
-          spread: { max: 50, min: 0 }
-        },
-        blur: {
-          radius: { max: 120, min: 0 },
-          spread: { max: 50, min: 0 },
-          opacity: { max: 100, min: 0 }
-        },
-        halo: {
-          width: { max: 100, min: 80 },
-          blur: { max: 50, min: 15 },
-          y: { max: 15, min: -5 }
-        },
-        frame: {
-          spread: { max: 72, min: 0 },
-          opacity: { max: 100, min: 0 },
-          radius: { max: 100, min: 0 }
-        },
-        projection: {
-          spread: { max: 72, min: 0 },
-          opacity: { max: 100, min: 0 },
-          radius: { max: 100, min: 30 },
-          width: { max: 100, min: 10 },
-          y: { max: 50, min: -200 },
-          zIndex: { max: 0, min: -1 }
-        }
       }
     }
   },
@@ -294,7 +243,8 @@ export default Vue.extend({
     white-space: nowrap;
   }
   &__range-input {
-    width: 90px;
+    // width: 90px;
+    margin-left: 10px;
     appearance: none;
     outline: none;
     background: none;
