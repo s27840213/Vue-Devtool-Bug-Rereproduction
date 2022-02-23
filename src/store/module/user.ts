@@ -260,7 +260,6 @@ const mutations: MutationTree<IUserModule> = {
   },
   [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex, type = 'private' }) {
     const { images, teamId, userId } = state
-    console.log(type)
     const isAdmin = type === 'public'
     const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
@@ -521,6 +520,15 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
     } else {
       throw new Error('fail to fetch private image urls')
+    }
+  },
+  async removeBg({ state }, { srcObj, aspect }) {
+    try {
+      srcObj = JSON.stringify(srcObj)
+      const { data } = await userApis.removeBg(srcObj, aspect)
+      return data
+    } catch (error) {
+      console.log(error)
     }
   }
 }
