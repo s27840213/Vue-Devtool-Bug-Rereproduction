@@ -151,7 +151,7 @@ export default Vue.extend({
       cursor: text;
       border-radius: 4px;
       &:hover {
-        background: setColor(gray-5);
+        background: setColor(blue-4);
       }
     }
     & > input {
@@ -172,7 +172,7 @@ export default Vue.extend({
     align-items: center;
     border-radius: 4px;
     &:hover {
-      background: setColor(gray-5);
+      background: setColor(blue-4);
     }
     & > svg {
       transition: 0.2s ease;
@@ -204,7 +204,7 @@ export default Vue.extend({
         background: setColor(blue-3);
       }
       &:not(.selected):hover {
-        background: setColor(gray-5);
+        background: setColor(blue-4);
       }
       &:hover {
         & > .brand-selector__brand-list__item-menu-icon {
@@ -247,7 +247,7 @@ export default Vue.extend({
         align-items: center;
         gap: 4px;
         &:hover {
-          background: setColor(gray-5);
+          background: setColor(blue-4);
         }
         & > span {
           @include body-SM;

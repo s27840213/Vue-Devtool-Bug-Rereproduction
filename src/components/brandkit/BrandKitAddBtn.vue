@@ -28,7 +28,7 @@ export default Vue.extend({
   padding: 20px;
   gap: 12px;
   &:hover {
-    background-color: setColor(gray-5);
+    background-color: setColor(blue-4);
   }
   &__text {
     @include body-MD;

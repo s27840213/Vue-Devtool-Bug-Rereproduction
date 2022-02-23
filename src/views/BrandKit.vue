@@ -79,23 +79,6 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
   }
-  // &__add {
-  //   border: 1px solid setColor(gray-3);
-  //   box-sizing: border-box;
-  //   border-radius: 4px;
-  //   display: flex;
-  //   align-items: center;
-  //   height: 43px;
-  //   padding: 20px;
-  //   gap: 12px;
-  //   &:hover {
-  //     background-color: setColor(gray-5);
-  //   }
-  //   &__text {
-  //     @include body-MD;
-  //     line-height: 16px;
-  //   }
-  // }
   &__tab {
     margin: 28px 0px;
   }

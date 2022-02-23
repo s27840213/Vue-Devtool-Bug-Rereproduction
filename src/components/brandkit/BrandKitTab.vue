@@ -52,7 +52,7 @@ export default Vue.extend({
     border-radius: 4px;
     height: fit-content;
     &:not(.selected):hover {
-      background-color: setColor(gray-6);
+      background-color: setColor(blue-4);
     }
     &.selected {
       .brand-kit-tab__tab-name {
