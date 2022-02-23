@@ -13,6 +13,7 @@
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
+      crossOrigin="Anonymous"
       :src="src"
       @error="onError()"
       @load="onLoad()")
@@ -53,6 +54,8 @@ export default Vue.extend({
     await this.perviewAsLoading()
 
     const preImg = new Image()
+    preImg.setAttribute('crossOrigin', 'Anonymous')
+
     preImg.onerror = () => {
       if (type === 'pexels') {
         const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
@@ -66,19 +69,20 @@ export default Vue.extend({
           default:
             layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
         }
-        preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
       }
     }
     preImg.onload = () => {
       const nextImg = new Image()
-      nextImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next'))
+      nextImg.setAttribute('crossOrigin', 'Anonymous')
+      nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
     }
-    preImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre'))
+    preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
   },
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.getSrc(this.config)
+      src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
     }
   },
   watch: {
@@ -90,9 +94,11 @@ export default Vue.extend({
         const preLoadImg = (preLoadType: 'pre' | 'next') => {
           return new Promise<void>((resolve, reject) => {
             const img = new Image()
+            img.setAttribute('crossOrigin', 'Anonymous')
+
             img.onload = () => resolve()
             img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-            img.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType))
+            img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType)))
           })
         }
 
@@ -106,11 +112,11 @@ export default Vue.extend({
             preLoadImg('next')
           }
         }
-        this.src = ImageUtils.getSrc(this.config, newVal)
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
     },
     srcObj: {
-      handler: function() {
+      handler: function () {
         this.perviewAsLoading()
       },
       deep: true
@@ -204,12 +210,14 @@ export default Vue.extend({
     },
     async perviewAsLoading() {
       return new Promise<void>((resolve, reject) => {
-        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
         const img = new Image()
-        const src = ImageUtils.getSrc(this.config)
+        img.setAttribute('crossOrigin', 'Anonymous')
+
+        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
-          if (ImageUtils.getSrc(this.config) === src) {
+          if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
             this.src = src
           }
           resolve()

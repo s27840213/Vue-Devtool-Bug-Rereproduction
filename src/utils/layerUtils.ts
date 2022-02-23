@@ -122,11 +122,19 @@ class LayerUtils {
    * If not, DON'T use this function or it will create an extra record point or affect the layer order. Just use the function deleteLayer()
    */
 
-  deleteSelectedLayer() {
+  deleteSelectedLayer(record = true) {
     store.commit('DELETE_selectedLayer')
     ZindexUtils.reassignZindex(this.currSelectedInfo.pageIndex)
     TemplateUtils.updateTextInfoTarget()
-    stepsUtils.record()
+
+    /**
+     * Some kind of situation we don't want to record the step when delete layer
+     * ex: when we drag layer from one page to another, we will delete layer and then add this layer to page
+     * The action of adding layer will trigger record function; so if we also record delete step, we will record two steps at once.
+     */
+    if (record) {
+      stepsUtils.record()
+    }
   }
 
   deleteLayer(index: number) {
@@ -198,7 +206,7 @@ class LayerUtils {
     })
   }
 
-  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle> | { [key: string]: number | boolean | string}) {
+  updateSubLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle> | { [key: string]: number | boolean | string }) {
     store.commit('SET_subLayerStyles', {
       pageIndex,
       primaryLayerIndex,
@@ -243,14 +251,16 @@ class LayerUtils {
     })
   }
 
-  isOutOfBoundary() {
+  isOutOfBoundary(): boolean {
     const pageInfo = store.getters.getPage(this.currSelectedInfo.pageIndex) as IPage
     const targetLayer = this.getTmpLayer()
 
     if (targetLayer.styles.x > pageInfo.width || targetLayer.styles.y > pageInfo.height ||
       (targetLayer.styles.x + targetLayer.styles.width) < 0 || (targetLayer.styles.y + targetLayer.styles.height) < 0) {
-      console.log('Is out of bound!')
+      return true
     }
+
+    return false
   }
 
   isClickOutOfPagePart(event: MouseEvent, targetLayer: HTMLElement, config: ILayer): boolean {
@@ -354,6 +364,12 @@ class LayerUtils {
       return i
     }
     return -1
+  }
+
+  getLayerIndexById(pageIndex: number, id: string) {
+    return this.getLayers(pageIndex).findIndex((layer: ILayer) => {
+      return layer.id === id
+    })
   }
 
   getObjectInsertionLayerIndex(layers: ILayer[], objectLayer: any) {
