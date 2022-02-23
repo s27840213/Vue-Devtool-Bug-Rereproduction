@@ -16,6 +16,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitTabLogo from '@/components/brandkit/tabs/BrandKitTabLogo.vue'
 import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
 import BrandKitTabColor from '@/components/brandkit/tabs/BrandKitTabColor.vue'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: {
@@ -27,16 +28,23 @@ export default Vue.extend({
     const tabs = brandkitUtils.getTabKeys()
     return {
       tabs,
-      tabNames: brandkitUtils.getTabNames(),
-      selectedTab: tabs[0]
+      tabNames: brandkitUtils.getTabNames()
     }
   },
+  computed: {
+    ...mapGetters('brandkit', {
+      selectedTab: 'getSelectedTab'
+    })
+  },
   methods: {
+    ...mapMutations('brandkit', {
+      setSelectedTab: 'SET_selectedTab'
+    }),
     checkSelected(tabKey: string) {
       return this.selectedTab === tabKey
     },
     handleSelectTab(tabKey: string) {
-      this.selectedTab = tabKey
+      this.setSelectedTab(tabKey)
     }
   }
 })

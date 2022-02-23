@@ -1,5 +1,9 @@
 <template lang="pug">
-  div(class="brand-kit scrollbar-gray")
+  div(class="brand-kit scrollbar-gray relative"
+    @dragover.prevent.stop="handleDragEnter"
+    @dragenter.prevent.stop="handleDragEnter"
+    @dragleave.prevent.stop="handleDragLeave"
+    @drop.prevent.stop="handleDrop")
     nu-header
     div(v-if="isBrandsLoading" class="brand-kit__main")
       svg-icon(iconName="loading"
@@ -9,16 +13,17 @@
       div(class="brand-kit__header")
         div(class="brand-kit__selector")
           brand-selector
-        //- div(class="brand-kit__add pointer" @click="addNewBrand")
-        //-   svg-icon(iconName="plus-origin"
-        //-           iconWidth="16px"
-        //-           iconColor="gray-1")
-        //-   span(class="brand-kit__add__text") {{ $t('NN0396') }}
         brand-kit-add-btn(:text="`${$t('NN0396')}`"
                           @click.native="addNewBrand")
       div(class="brand-kit__tab")
         brand-kit-tab
     nu-footer
+    div(v-if="isDraggedOver" class="dim-background")
+      div(class="upload-large")
+        svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
+        span {{ $t(hintText) }}
+      div(class="upload-small")
+          span {{ `・${$t('NN0415', { element: $t(elementType) })}： ${fileTypesString}` }}
 </template>
 
 <script lang="ts">
@@ -45,12 +50,35 @@ export default Vue.extend({
   },
   data() {
     return {
+      isDraggedOver: false,
+      uploadHint: {
+        logo: {
+          text: 'NN0413',
+          fileTypes: ['jpg', 'png'],
+          elementTypeText: 'NN0416'
+        },
+        text: {
+          text: 'NN0414',
+          fileTypes: ['otf', 'otc', 'ttf', 'ttc'],
+          elementTypeText: 'NN0417'
+        }
+      }
     }
   },
   computed: {
     ...mapGetters('brandkit', {
-      isBrandsLoading: 'getIsBrandsLoading'
-    })
+      isBrandsLoading: 'getIsBrandsLoading',
+      selectedTab: 'getSelectedTab'
+    }),
+    hintText(): string {
+      return this.uploadHint[this.selectedTab as 'logo' | 'text']?.text ?? ''
+    },
+    fileTypesString(): string {
+      return (this.uploadHint[this.selectedTab as 'logo' | 'text']?.fileTypes ?? []).join('、')
+    },
+    elementType(): string {
+      return this.uploadHint[this.selectedTab as 'logo' | 'text']?.elementTypeText ?? ''
+    }
   },
   methods: {
     ...mapActions('brandkit', {
@@ -58,6 +86,21 @@ export default Vue.extend({
     }),
     addNewBrand() {
       brandkitUtils.addNewBrand()
+    },
+    isDragDropValid(): boolean {
+      return Object.keys(this.uploadHint).includes(this.selectedTab)
+    },
+    handleDragEnter() {
+      if (!this.isDragDropValid()) return
+      this.isDraggedOver = true
+    },
+    handleDragLeave() {
+      this.isDraggedOver = false
+    },
+    handleDrop(e: DragEvent) {
+      this.isDraggedOver = false
+      if (!this.isDragDropValid()) return
+      console.log(e.dataTransfer?.files)
     }
   }
 })
@@ -81,6 +124,49 @@ export default Vue.extend({
   }
   &__tab {
     margin: 28px 0px;
+  }
+}
+
+.dim-background {
+  @include size(100%, 100%);
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  transform-style: preserve-3d;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 45px;
+}
+
+.upload-large {
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  & > span {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 40px;
+    line-height: 40px;
+    color: white;
+  }
+}
+
+.upload-small {
+  & > span {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 28px;
+    color: white;
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   }
 }
 </style>

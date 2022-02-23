@@ -8,7 +8,8 @@ import i18n from '@/i18n'
 interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
-  isBrandsLoading: boolean
+  isBrandsLoading: boolean,
+  selectedTab: string
 }
 
 const DEFAULT_BRAND = brandkitUtils.createDefaultBrand()
@@ -19,7 +20,8 @@ const showNetworkError = () => {
 const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
-  isBrandsLoading: false
+  isBrandsLoading: false,
+  selectedTab: brandkitUtils.getTabKeys()[0]
 })
 
 const state = getDefaultState()
@@ -32,6 +34,9 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
+  },
+  getSelectedTab(state: IBrandKitState): string {
+    return state.selectedTab
   }
 }
 
@@ -148,6 +153,9 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
+  },
+  SET_selectedTab(state: IBrandKitState, selectedTab: string) {
+    state.selectedTab = selectedTab
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand)
