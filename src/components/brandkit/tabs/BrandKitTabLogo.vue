@@ -174,7 +174,7 @@ export default Vue.extend({
         gap: 4px;
         padding: 4px 0px 4px 10px;
         &:hover {
-          background-color: setColor(gray-5);
+          background-color: setColor(blue-4);
         }
         & > span {
           @include body-SM;
