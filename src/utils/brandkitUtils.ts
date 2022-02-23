@@ -1,4 +1,4 @@
-import { IBrand, IBrandColorPalette, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import generalUtils from './generalUtils'
 
@@ -40,23 +40,23 @@ class BrandKitUtils {
       colorPalettes: [{
         id: generalUtils.generateAssetId(),
         name: '',
-        colors: [
+        colors: this.generateBrandColors([
           '#3C64B1', '#276AEA', '#19C84A', '#FE7565', '#FECD56',
           '#FFCECE', '#C9DBFF', '#6B798B', '#50A2D8', '#409CB5',
           '#00A0E9', '#40A95E', '#969BAB', '#C3CBCD', '#C3CBCD',
           '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
           '#68B82B'
-        ]
+        ])
       }, {
         id: generalUtils.generateAssetId(),
         name: '',
-        colors: [
+        colors: this.generateBrandColors([
           '#3C64B1', '#276AEA', '#19C84A', '#FE7565', '#FECD56',
           '#FFCECE', '#C9DBFF', '#6B798B', '#50A2D8', '#409CB5',
           '#00A0E9', '#40A95E', '#969BAB', '#C3CBCD', '#C3CBCD',
           '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
           '#68B82B', '#F84343', '#EA273E', '#55400C'
-        ]
+        ])
       }],
       fonts: []
     }
@@ -78,8 +78,12 @@ class BrandKitUtils {
     }
   }
 
-  createDefaultColor(): string {
-    return '#4EABE6'
+  createDefaultColor(): IBrandColor {
+    return { id: generalUtils.generateAssetId(), color: '#4EABE6' }
+  }
+
+  generateBrandColors(colorHexes: string[]): IBrandColor[] {
+    return colorHexes.map(colorHex => ({ id: generalUtils.generateAssetId(), color: colorHex }))
   }
 
   getTabNames(): { [key: string]: string } {
@@ -114,12 +118,12 @@ class BrandKitUtils {
     return await store.dispatch('brandkit/createPalette')
   }
 
-  removeColor(paletteId: string, index: number) {
-    store.dispatch('brandkit/removeColor', { id: paletteId, index })
+  removeColor(paletteId: string, color: IBrandColor) {
+    store.dispatch('brandkit/removeColor', { paletteId, color })
   }
 
-  updateColor(paletteId: string, index: number, color: string) {
-    store.dispatch('brandkit/updateColor', { id: paletteId, index, color })
+  updateColor(paletteId: string, id: string, color: string) {
+    store.dispatch('brandkit/updateColor', { paletteId, id, color })
   }
 
   createColor(paletteId: string) {
@@ -136,14 +140,18 @@ class BrandKitUtils {
     })
   }
 
-  getColor(brand: IBrand, info: { id: string, index: number }): string {
-    const colorPalette = brand.colorPalettes.find(palette => palette.id === info.id)
-    if (!colorPalette) return '#FFFFFF'
-    return colorPalette.colors[info.index]
+  getColor(brand: IBrand, info: { paletteId: string, id: string }): IBrandColor | undefined {
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === info.paletteId)
+    if (!colorPalette) return undefined
+    return colorPalette.colors.find(color => color.id === info.id)
   }
 
   getColorPalette(colorPalettes: IBrandColorPalette[], paletteId: string): IBrandColorPalette | undefined {
     return colorPalettes.find(palette => palette.id === paletteId)
+  }
+
+  duplicateEnd(colors: IBrandColor[]): IBrandColor {
+    return { ...colors[colors.length - 1], id: generalUtils.generateAssetId() }
   }
 }
 

@@ -1,5 +1,5 @@
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
-import { IBrand, IBrandColorPalette, IBrandLogo } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandLogo } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
@@ -98,14 +98,13 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     })
     return palette.id
   },
-  async removeColor({ state, commit }, updateInfo: { id: string, index: number }) {
+  async removeColor({ state, commit }, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const color = brandkitUtils.getColor(currentBrand, updateInfo)
     brandkitApi.updateBrandsWrapper({}, () => {
       commit('UPDATE_deleteColor', updateInfo)
     }, () => {
-      commit('UPDATE_addColor', { ...updateInfo, color })
+      commit('UPDATE_addColor', updateInfo)
     }, () => {
       showNetworkError()
     })
@@ -115,22 +114,25 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     if (!currentBrand) return
     const palette = brandkitUtils.getColorPalette(currentBrand.colorPalettes, paletteId)
     if (!palette) return
+    const newColor = brandkitUtils.duplicateEnd(palette.colors)
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_addColor', { id: paletteId, index: -1, color: palette.colors[palette.colors.length - 1] })
+      commit('UPDATE_addColor', { paletteId, color: newColor })
     }, () => {
-      commit('UPDATE_deleteColor', { id: paletteId, index: -1 })
+      commit('UPDATE_deleteColor', { paletteId, color: newColor })
     }, () => {
       showNetworkError()
     })
   },
-  async updateColor({ state, commit }, updateInfo: { id: string, index: number, color: string }) {
+  async updateColor({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     const oldColor = brandkitUtils.getColor(currentBrand, updateInfo)
+    if (!oldColor) return
+    const oldColorHex = oldColor.color
     brandkitApi.updateBrandsWrapper({}, () => {
       commit('UPDATE_setColor', updateInfo)
     }, () => {
-      commit('UPDATE_setColor', { ...updateInfo, color: oldColor })
+      commit('UPDATE_setColor', { ...updateInfo, color: oldColorHex })
     }, () => {
       showNetworkError()
     })
@@ -182,34 +184,31 @@ const mutations: MutationTree<IBrandKitState> = {
     if (index < 0) return
     currentBrand.colorPalettes.splice(index, 1)
   },
-  UPDATE_addColor(state: IBrandKitState, updateInfo: { id: string, index: number, color: string }) {
+  UPDATE_addColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.id)
+    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
-    if (updateInfo.index === -1) {
-      colorPalette.colors.push(updateInfo.color)
-    } else {
-      colorPalette.colors.splice(updateInfo.index, 0, updateInfo.color)
-    }
+    colorPalette.colors.push(updateInfo.color)
   },
-  UPDATE_deleteColor(state: IBrandKitState, updateInfo: { id: string, index: number }) {
+  UPDATE_deleteColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.id)
+    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
-    if (updateInfo.index === -1) {
-      colorPalette.colors.pop()
-    } else {
-      colorPalette.colors.splice(updateInfo.index, 1)
-    }
+    const index = colorPalette.colors.findIndex(color => color.id === updateInfo.color.id)
+    if (index < 0) return
+    colorPalette.colors.splice(index, 1)
   },
-  UPDATE_setColor(state: IBrandKitState, updateInfo: { id: string, index: number, color: string }) {
+  UPDATE_setColor(state: IBrandKitState, updateInfo: { paletteId: string, id: string, color: string }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.id)
+    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
-    colorPalette.colors.splice(updateInfo.index, 1, updateInfo.color)
+    const index = colorPalette.colors.findIndex(color => color.id === updateInfo.id)
+    if (index < 0) return
+    const oldColor = colorPalette.colors[index]
+    colorPalette.colors.splice(index, 1, { ...oldColor, color: updateInfo.color })
   }
 }
 

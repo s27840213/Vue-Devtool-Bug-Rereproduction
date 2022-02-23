@@ -30,7 +30,12 @@ export interface IBrandTextStyle {
 export interface IBrandColorPalette {
   id: string,
   name: string,
-  colors: string[]
+  colors: IBrandColor[]
+}
+
+export interface IBrandColor {
+  id: string,
+  color: string
 }
 
 export interface IBrandFont {

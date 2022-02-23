@@ -16,18 +16,18 @@
       div(class="brand-kit-tab-color__palette__colors")
         div(v-for="(color, index) in colorPalette.colors"
           class="brand-kit-tab-color__palette__colors__color-wrapper relative"
-          :class="{ selected: checkSelected(colorPalette.id, index) }")
+          :class="{ selected: checkSelected(colorPalette.id, color) }")
           div(class="brand-kit-tab-color__palette__colors__color pointer"
-            :style="backgroundColorStyles(color)"
-            @click="handleSelectColor(colorPalette.id, index)")
+            :style="backgroundColorStyles(color.color)"
+            @click="handleSelectColor(colorPalette.id, color)")
           div(class="brand-kit-tab-color__palette__colors__color-close pointer"
-            :class="{ selected: checkSelected(colorPalette.id, index) }"
-            @click.stop="handleDeleteColor(colorPalette.id, index)")
+            :class="{ selected: checkSelected(colorPalette.id, color) }"
+            @click.stop="handleDeleteColor(colorPalette.id, color)")
             svg-icon(iconName="close" iconWidth="16px" iconColor="gray-2")
-          color-picker(v-if="checkSelected(colorPalette.id, index)"
+          color-picker(v-if="checkSelected(colorPalette.id, color)"
                       class="color-picker"
                       v-click-outside="handleDeSelectColor"
-                      :currentColor="color"
+                      :currentColor="color.color"
                       @update="handleDragUpdate")
 </template>
 
@@ -38,14 +38,14 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
 
 export default Vue.extend({
   data() {
     return {
       selectedColor: {
         paletteId: '',
-        colorIndex: -1
+        colorId: ''
       }
     }
   },
@@ -71,8 +71,8 @@ export default Vue.extend({
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return colorPalette.name === '' ? `${this.$t('NN0405')}` : colorPalette.name
     },
-    checkSelected(id: string, index: number): boolean {
-      return this.selectedColor.paletteId === id && this.selectedColor.colorIndex === index
+    checkSelected(paletteId: string, color: IBrandColor): boolean {
+      return this.selectedColor.paletteId === paletteId && this.selectedColor.colorId === color.id
     },
     handleCreatePalette() {
       brandkitUtils.createPalette().then(id => {
@@ -81,7 +81,7 @@ export default Vue.extend({
           if (!colorPalette) return
           this.selectedColor = {
             paletteId: id,
-            colorIndex: colorPalette.colors.length - 1
+            colorId: colorPalette.colors[0].id
           }
         })
       })
@@ -89,28 +89,28 @@ export default Vue.extend({
     handleDeletePalette(palette: IBrandColorPalette) {
       brandkitUtils.removePalette(palette)
     },
-    handleSelectColor(id: string, index: number) {
-      if (this.checkSelected(id, index)) {
+    handleSelectColor(paletteId: string, color: IBrandColor) {
+      if (this.checkSelected(paletteId, color)) {
         this.handleDeSelectColor()
       } else {
         this.selectedColor = {
-          paletteId: id,
-          colorIndex: index
+          paletteId,
+          colorId: color.id
         }
       }
     },
     handleDeSelectColor() {
       this.selectedColor = {
         paletteId: '',
-        colorIndex: -1
+        colorId: ''
       }
     },
-    handleDeleteColor(id: string, index: number) {
+    handleDeleteColor(paletteId: string, color: IBrandColor) {
       this.handleDeSelectColor()
-      brandkitUtils.removeColor(id, index)
+      brandkitUtils.removeColor(paletteId, color)
     },
     handleDragUpdate(color: string) {
-      brandkitUtils.updateColor(this.selectedColor.paletteId, this.selectedColor.colorIndex, color)
+      brandkitUtils.updateColor(this.selectedColor.paletteId, this.selectedColor.colorId, color)
     },
     handleAddColor(id: string) {
       brandkitUtils.createColor(id)
@@ -119,7 +119,7 @@ export default Vue.extend({
         if (!colorPalette) return
         this.selectedColor = {
           paletteId: id,
-          colorIndex: colorPalette.colors.length - 1
+          colorId: colorPalette.colors[colorPalette.colors.length - 1].id
         }
       })
     }
