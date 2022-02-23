@@ -225,7 +225,7 @@
   "NN0225": "See more",
   "NN0226": "You can't use more than 64 characters. Please reduce the number of characters",
   "NN0227": "Hot Searches",
-  "NN0228": "Choose your design size",
+  "NN0228": "Choose your template size",
   "NN0229": "Use this template",
   "NN0230": "Paste",
   "NN0231": "Bring to front",
@@ -317,7 +317,7 @@
   "NN0318": "Once your account is deleted, you cannot access any of your designs or log into Vivipic.",
   "NN0319": "Height",
   "NN0320": "Width",
-  "NN0321": "Design size",
+  "NN0321": "Template size",
   "NN0322": "Auto recommendation",
   "NN0323": "To download your design, Sign Up or Log In.",
   "NN0324": "All",
@@ -398,7 +398,8 @@
   "NN0390": "A huge selection of free and designer-made templates are all at your fingertips.",
   "NN0391": "Get started",
   "NN0392": "Add all pages ({num} pages)",
-  "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\".",
-  "NN0394": "Sorry, we couldn't find any {target}",
-  "NN0395": "If you log in with a Google/Facebook account, you cannot reset your password here. Please reset your password via Google/Facebook."
+  "NN0393": "Sorry, we couldn't find any {target} for \"{keyword}\". Please try a different search term.",
+  "NN0394": "Sorry, we couldn't find any matches for {target}. Please try a different search term.",
+  "NN0395": "If you log in with a Google/Facebook account, you cannot reset your password here. Please reset your password via Google/Facebook.",
+  "NN0398": "Try {html}selecting all template sizes{html} to see more results."
 }
