@@ -1,9 +1,14 @@
 <template lang="pug">
   div(class="brand-kit-tab-logo")
-    div(class="brand-kit-tab-logo__item add pointer"
+    div(class="brand-kit-tab-logo__item add pointer relative"
       @click="handleUploadLogo")
-      svg-icon(iconName="plus-origin"
-              iconWidth="26.67px"
+      span(class="primary") {{ $t('NN0411') }}
+      i18n(class="secondary" path="NN0412" tag="span")
+        template(#newline)
+          br
+      svg-icon(class="hover"
+              iconName="plus-origin"
+              iconWidth="16px"
               iconColor="gray-2")
     div(v-for="logo in logos" class="brand-kit-tab-logo__item relative"
       :key="logo.id"
@@ -102,10 +107,36 @@ export default Vue.extend({
     box-sizing: border-box;
     border-radius: 4px;
     &.add {
-      width: 100px;
+      // width: 100px;
+      display: flex;
+      flex-direction: column;
+      padding: 25px 30px;
+      border: 1px dashed setColor(gray-4);
+      & > .hover {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        z-index: 1;
+      }
       &:hover {
-        background-color: setColor(gray-5);
-        border: 1px solid setColor(gray-5);
+        background-color: setColor(blue-4);
+        border: 1px solid setColor(blue-4);
+        & > span.primary, & > span.secondary {
+          color: setColor(blue-4);
+        }
+        & > .hover {
+          display: block;
+        }
+      }
+      & > span.primary {
+        @include body-SM;
+        color: setColor(gray-2);
+      }
+      & > span.secondary {
+        @include body-XS;
+        color: setColor(gray-3);
       }
     }
     &__img {
