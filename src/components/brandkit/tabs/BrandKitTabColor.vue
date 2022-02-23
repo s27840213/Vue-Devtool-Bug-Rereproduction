@@ -10,7 +10,7 @@
           div(class="brand-kit-tab-color__palette__trash pointer"
               @click="handleDeletePalette(colorPalette)")
             svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
-          div(class="brand-kit-tab-color__palette__add pointer"
+          //- div(class="brand-kit-tab-color__palette__add pointer"
               @click="handleAddColor(colorPalette.id)")
             svg-icon(iconName="plus-small" iconWidth="16px" iconColor="gray-2")
       div(class="brand-kit-tab-color__palette__colors")
@@ -29,6 +29,9 @@
                       v-click-outside="handleDeSelectColor"
                       :currentColor="color.color"
                       @update="handleDragUpdate")
+        div(class="brand-kit-tab-color__palette__colors__color-add pointer"
+          @click="handleAddColor(colorPalette.id)")
+          svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
 </template>
 
 <script lang="ts">
@@ -178,6 +181,19 @@ export default Vue.extend({
         }
         &.selected {
           border: 1px solid setColor(blue-1);
+        }
+      }
+      &__color-add {
+        width: 100%;
+        aspect-ratio: 1;
+        box-sizing: border-box;
+        border-radius: 10%;
+        border: 1px solid setColor(gray-3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+          background-color: setColor(blue-4);
         }
       }
       &__color {
