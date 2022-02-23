@@ -67,7 +67,7 @@
     div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
       class="text-white text-left")
       span {{resultTooLess[0]}}
-      span(class="set-all-templatebtn-btn" @click="setAllTemplate") {{resultTooLess[1]}}
+      span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooLess[1]}}
       span {{resultTooLess[2]}}
 </template>
 
