@@ -41,6 +41,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -61,7 +62,7 @@ export default Vue.extend({
       currentBrand: 'getCurrentBrand'
     }),
     logos(): IBrandLogo[] {
-      return (this.currentBrand as IBrand).logos
+      return generalUtils.deepCopy((this.currentBrand as IBrand).logos).reverse()
     }
   },
   methods: {

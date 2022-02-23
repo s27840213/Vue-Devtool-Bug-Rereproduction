@@ -150,7 +150,8 @@ const mutations: MutationTree<IBrandKitState> = {
     state.isBrandsLoading = isBrandsLoading
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
-    state.brands.push(brand)
+    const index = brandkitUtils.findInsertIndex(state.brands, brand)
+    state.brands.splice(index, 0, brand)
   },
   UPDATE_deleteBrand(state: IBrandKitState, brand: IBrand) {
     const index = state.brands.findIndex(brand_ => brand_.id === brand.id)
@@ -163,7 +164,8 @@ const mutations: MutationTree<IBrandKitState> = {
   UPDATE_addLogo(state: IBrandKitState, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    currentBrand.logos.push(logo)
+    const index = brandkitUtils.findInsertIndex(currentBrand.logos, logo)
+    currentBrand.logos.splice(index, 0, logo)
   },
   UPDATE_deleteLogo(state: IBrandKitState, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -175,7 +177,8 @@ const mutations: MutationTree<IBrandKitState> = {
   UPDATE_addPalette(state: IBrandKitState, palette: IBrandColorPalette) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    currentBrand.colorPalettes.push(palette)
+    const index = brandkitUtils.findInsertIndex(currentBrand.colorPalettes, palette)
+    currentBrand.colorPalettes.splice(index, 0, palette)
   },
   UPDATE_deletePalette(state: IBrandKitState, palette: IBrandColorPalette) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -189,7 +192,8 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!currentBrand) return
     const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
-    colorPalette.colors.push(updateInfo.color)
+    const index = brandkitUtils.findInsertIndex(colorPalette.colors, updateInfo.color)
+    colorPalette.colors.splice(index, 0, updateInfo.color)
   },
   UPDATE_deleteColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)

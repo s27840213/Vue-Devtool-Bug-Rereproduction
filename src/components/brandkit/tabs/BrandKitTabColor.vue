@@ -39,6 +39,7 @@ import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -61,7 +62,7 @@ export default Vue.extend({
       currentBrand: 'getCurrentBrand'
     }),
     colorPalettes(): IBrandColorPalette[] {
-      return (this.currentBrand as IBrand).colorPalettes
+      return generalUtils.deepCopy((this.currentBrand as IBrand).colorPalettes).reverse()
     }
   },
   methods: {
