@@ -313,6 +313,7 @@ export default Vue.extend({
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
           image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
         }
+        Object.assign(image, { forRender: true })
         return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
       }
       return undefined

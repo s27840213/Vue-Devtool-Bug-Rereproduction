@@ -41,7 +41,8 @@ export interface IProjectionEffect {
   radius: number,
   y: number,
   opacity: number,
-  width: number
+  width: number,
+  zIndex: number
 }
 
 export interface IShadowEffects {

@@ -20,8 +20,8 @@
           div(class="photo-effect-setting__field-name") {{field}}
           input(class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
-            :max="fieldRange[currentEffect][field].max"
-            :min="fieldRange[currentEffect][field].min"
+            :max="getFieldValue.max"
+            :min="getFieldValue.min"
             :name="field"
             @input="handleEffectUpdate"
             @mouseup="recordChange"
@@ -61,7 +61,8 @@
           :key="field"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{ field }}
-          input(class="photo-effect-setting__range-input"
+          input(v-if="field !== 'zIndex'"
+            class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
             :max="fieldRange[currentEffect][field].max"
             :min="fieldRange[currentEffect][field].min"
@@ -70,12 +71,12 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-          input(class="photo-effect-setting__value-input"
+          input(:class="['photo-effect-setting__value-input', field === 'zIndex' ? 'checkbox' : '']"
             :value="getFieldValue(field)"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
-            type="number")
+            :type="field === 'zIndex' ? 'checkbox' : 'number'")
         div(v-if="!['none', 'halo'].includes(currentEffect)"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
@@ -175,9 +176,6 @@ export default Vue.extend({
           opacity: { max: 100, min: 0 }
         },
         halo: {
-          // radius: { max: 120, min: 50 },
-          // spread: { max: HALO_SPREAD_LIMIT, min: 30 },
-          // opacity: { max: 100, min: 0 }
           width: { max: 100, min: 80 },
           blur: { max: 50, min: 15 },
           y: { max: 15, min: -5 }
@@ -192,7 +190,8 @@ export default Vue.extend({
           opacity: { max: 100, min: 0 },
           radius: { max: 100, min: 30 },
           width: { max: 100, min: 10 },
-          y: { max: 50, min: -200 }
+          y: { max: 50, min: -200 },
+          zIndex: { max: 0, min: -1 }
         }
       }
     }
@@ -230,9 +229,9 @@ export default Vue.extend({
         const oldEffect = generalUtils
           .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
         imageShadowUtils.setEffect(currentEffect, {
-          [currentEffect]: Object.assign(oldEffect, {
-            [name]: +value > max ? max : (+value < min ? min : +value)
-          })
+          [currentEffect]: name === 'zIndex'
+            ? Object.assign(oldEffect, { [name]: (oldEffect as any)[name] === 0 ? -1 : 0 })
+            : Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
         })
       }
     },
@@ -244,7 +243,10 @@ export default Vue.extend({
     recordChange() {
       stepsUtils.record()
     },
-    getFieldValue(field: string): number {
+    getFieldValue(field: string): number | boolean {
+      if (field === 'zIndex') {
+        return !(this.currentStyle.shadow.effects as any)[this.currentEffect][field]
+      }
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     }
   }
@@ -327,6 +329,9 @@ export default Vue.extend({
     right: 0px;
     bottom: 0px;
   }
+}
+.checkbox {
+  margin: 0
 }
 .action-bar {
   padding: 10px;

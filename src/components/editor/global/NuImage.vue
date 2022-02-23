@@ -102,18 +102,13 @@ export default Vue.extend({
       deep: true
     },
     scale() {
-      this.updateShadowEffect(this.shadowEffects)
+      !this.forRender && this.updateShadowEffect(this.shadowEffects)
     },
-    shadowEffects: {
-      deep: true,
-      handler: function(val) {
-        console.log(val)
-        this.updateShadowEffect(val)
-      }
+    shadowEffects(val) {
+      !this.forRender && this.updateShadowEffect(val)
     },
-    currentShadowEffect(val) {
-      console.log(val)
-      this.handleNewShadowEffect()
+    currentShadowEffect() {
+      !this.forRender && this.handleNewShadowEffect()
     }
   },
   components: { NuAdjustImage },
@@ -173,6 +168,11 @@ export default Vue.extend({
     primaryLayerType(): string {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
+    },
+    /** This prop is used to present if this image-component is
+     *  only used for rendering as image controlling */
+    forRender(): boolean {
+      return this.config.forRender ?? false
     }
   },
   methods: {
@@ -281,9 +281,6 @@ export default Vue.extend({
       preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
     },
     handleNewShadowEffect(isInit = false) {
-      // todo: handle frame relative
-      if (this.primaryLayerType === 'frame') return
-
       const { filterId, currentEffect } = this.shadow
       if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
@@ -301,9 +298,6 @@ export default Vue.extend({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
-      // todo: handle frame relative
-      if (this.primaryLayerType === 'frame') return
-
       const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
       window.requestAnimationFrame(() => {

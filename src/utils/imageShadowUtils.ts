@@ -147,11 +147,12 @@ class ImageShadowUtils {
         }
       }
       case ShadowEffectType.projection: {
-        const { radius, spread, opacity, y, width } = mathUtils
+        const { radius, spread, opacity, y, width, zIndex } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
         return {
           width: `${width}%`,
           bottom: `${-y - 10}px`,
+          zIndex,
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
           `${radius}px ` +
@@ -211,7 +212,8 @@ class ImageShadowUtils {
           spread: 50,
           opacity: 70,
           width: 80,
-          y: 0
+          y: 0,
+          zIndex: -1
         }
         break
       }
