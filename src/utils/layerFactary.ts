@@ -28,6 +28,8 @@ class LayerFactary {
       locked: false,
       moved: false,
       imgControl: false,
+      inProcess: false,
+      trace: config.trace ?? 0,
       isClipper: true,
       dragging: false,
       designId: '',
@@ -250,7 +252,7 @@ class LayerFactary {
         for (let i = 0; i < p.spans.length; i++) {
           if (!p.spans[i].styles.font) {
             Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-            (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+              (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
           }
         }
       })

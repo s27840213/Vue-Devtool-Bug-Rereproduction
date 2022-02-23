@@ -4,7 +4,7 @@
       :iconName="'download'"
       :iconWidth="'18px'"
       :type="'primary-sm'"
-      :disabled="inprogress"
+      :disabled="inprogress || inBgRemoveMode"
       class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
       span(v-if="!inprogress") {{$t('NN0010')}}
@@ -34,7 +34,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       middlemostPageIndex: 'getMiddlemostPageIndex',
-      isLogin: 'user/isLogin'
+      isLogin: 'user/isLogin',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     })
   },
   methods: {

@@ -6,20 +6,24 @@
       :disabled="isShowPagePreview"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
       v-ratio-change)
-    div(class="px-5 flex items-center  btn-page-resize hover-effect"
+    div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
         @click="openResizePopup()")
       div(class="scale-ratio-editor__percentage lead-2")
         span(class="text-gray-2") {{pageScaleRatio}}%
       svg-icon(class="pointer"
         :class="[{'rotate-hr': isPageScalePopupOpen}]"
         :iconName="'chevron-down'" :iconColor="'gray-2'" iconWidth="16px")
-    svg-icon(class="hover-effect pointer"
+    svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
       @click.native="setIsShowPagePreview(!isShowPagePreview)"
-      :iconName="'grid'" :iconColor="'gray-2'" iconWidth="24px")
-    svg-icon(class="hover-effect pointer"
+      :iconName="'grid'"
+      :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
+      :disabled="inBgRemoveMode"
+      :iconWidth="'24px'")
+    svg-icon(:class="{'hover-effect': !(isShowPagePreview || inBgRemoveMode), 'click-disabled': (inBgRemoveMode)}"
       :iconName="'navPage'"
-      :iconColor="'gray-2'"
+      :iconColor="(isShowPagePreview || inBgRemoveMode) ? 'gray-4' :'gray-2'"
       :iconWidth="'24px'"
+      :disabled="(isShowPagePreview || inBgRemoveMode)"
       @click.native="setShowPagePanel(!showPagePanel)")
 </template>
 
@@ -38,7 +42,8 @@ export default Vue.extend({
     ...mapGetters({
       pageScaleRatio: 'getPageScaleRatio',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      showPagePanel: 'page/getShowPagePanel'
+      showPagePanel: 'page/getShowPagePanel',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     isPageScalePopupOpen(): boolean {
       return popupUtils.isPopupOpen && popupUtils.currPopupType === 'page-scale'
@@ -116,6 +121,7 @@ export default Vue.extend({
 
 .hover-effect {
   border-radius: 4px;
+  cursor: pointer;
   &:hover {
     background-color: setColor(gray-5);
   }

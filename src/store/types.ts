@@ -30,6 +30,7 @@ export interface IEditorState {
   pageScaleRatio: number,
   middlemostPageIndex: number,
   currActivePageIndex: number,
+  currHoveredPageIndex: number,
   lastSelectedLayerIndex: number,
   clipboard: Array<ITmp>,
   currSelectedInfo: ICurrSelectedInfo,

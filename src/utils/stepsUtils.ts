@@ -208,6 +208,7 @@ class StepsUtils {
       // this.pageSteps.push(middlemostPageIndex)
       this.currStep++
     } else {
+      // if step isn't in last step and we record new step, we need to remove all steps larger than curr step
       this.steps.length = this.currStep + 1
       if (this.steps.length === this.MAX_STORAGE_COUNT) {
         this.steps.shift()

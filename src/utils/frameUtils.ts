@@ -12,7 +12,7 @@ class FrameUtils {
   }
 
   frameClipFormatter(path: string | undefined) {
-    return "<path d='" + path ?? '' + "'></path>"
+    return "<path d='" + (path ?? '') + "'></path>"
   }
 
   frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {

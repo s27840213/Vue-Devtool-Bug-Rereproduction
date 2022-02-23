@@ -27,23 +27,6 @@ describe('Text Layer Control:', () => {
           .and('match', RegExp(`height: ${size.height}px`))
       })
 
-      it('add background', () => {
-        cy.intercept('POST', '/list-design').as('listApi')
-        cy.get('.nav-item-text').contains('Background').click()
-        cy.wait('@listApi')
-        cy.get('.panel-bg__item').eq(0).click()
-      })
-
-      it('add heading', () => {
-        cy.intercept('POST', '/list-design').as('listApi')
-        cy.contains('Text').click()
-        cy.wait('@listApi')
-        cy.get('.btn-text-heading').click()
-        cy.wait(500)
-        cy.get('.text__body')
-          .type('{selectall}{backspace}我最愛Vivipic1')
-      })
-
       it('add heading', () => {
         cy.get('.btn-text-heading').click()
         cy.wait(500)
