@@ -18,15 +18,6 @@
       v-click-outside="handleOutside"
       :imageAdjust="currLayerAdjust"
       @update="handleAdjust")
-    //- property-bar
-    //-   input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
-    //-   svg-icon(class="pointer"
-    //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-    //- action-bar(class="flex-evenly")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
-    //-     :key="`gp-action-icon-${index}`"
-    //-     class="pointer"
-    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 
 <script lang="ts">
