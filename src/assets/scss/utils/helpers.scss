@@ -187,3 +187,7 @@ $spacer: 5;
 .visible-hidden {
     visibility:hidden;
 }
+
+.click-disabled {
+    pointer-events: none;
+}
