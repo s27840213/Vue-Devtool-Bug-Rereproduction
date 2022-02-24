@@ -1,14 +1,15 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
+    //- Line shape setting
     div(class="action-bar flex-around line-actions" style="padding: 8px 0"
               v-if="isLine")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer"
+        svg-icon(class="pointer feature-button"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
                 @click.native="openLineSliderPopup")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer"
+        svg-icon(class="pointer feature-button"
                 iconName="line-dash" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleValueModal('line-dash')")
         general-value-selector(v-if="openValueSelector === 'line-dash'"
@@ -30,7 +31,7 @@
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
       div(class="vertical-rule")
-      div(class="shape-setting__line-action-wrapper pointer"
+      div(class="shape-setting__line-action-wrapper pointer feature-button"
           @click="handleValueModal('start-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[startMarker].styleArray[0]"
@@ -62,7 +63,7 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-      div(class="shape-setting__line-action-wrapper pointer"
+      div(class="shape-setting__line-action-wrapper pointer feature-button"
           @click="handleValueModal('end-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[endMarker].styleArray[0]"
@@ -96,18 +97,19 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+    //- Other shape setting
     div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
       div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer"
+          svg-icon(class="pointer feature-button"
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
                   @click.native="openBasicShapeSliderPopup")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer"
+          svg-icon(class="pointer feature-button"
                   v-if="filled"
                   iconName="filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
-          svg-icon(class="pointer"
+          svg-icon(class="pointer feature-button"
                   v-else
                   iconName="non-filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
@@ -133,6 +135,7 @@
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
             div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
+    //- Shape color setting
     div(class="shape-setting__colors")
       div(v-if="inGrouped"
         class="shape-setting__color"
