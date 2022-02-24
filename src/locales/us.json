@@ -247,7 +247,7 @@
   "NN0248": "Network error. Please check your connection and try again.",
   "NN0249": "Unnamed folder",
   "NN0250": "{item} moved to {folder}",
-  "NN0251": "Make a copy",
+  "NN0251": "Duplicate",
   "NN0252": "Design | Designs",
   "NN0253": "Folder | Folders",
   "NN0254": "{selectedNum} selected",
@@ -415,5 +415,12 @@
   "NN0407": "Eyedropper",
   "NN0408": "heading",
   "NN0409": "subheading",
-  "NN0410": "body"
+  "NN0410": "body",
+  "NN0411": "Click to Upload",
+  "NN0412": "or{newline}Drag&drop photos here",
+  "NN0413": "Drag photo here",
+  "NN0414": "{element} Applicable File",
+  "NN0415": "Drag file here",
+  "NN0416": "Photo",
+  "NN0417": "Font"
 }
