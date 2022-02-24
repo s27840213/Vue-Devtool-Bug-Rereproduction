@@ -9,7 +9,7 @@
         ref="btn"
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="selectedLayersNum === 1 && isAdmin"
+      btn(v-if="isImage && isAdmin && !isFrame"
         class="full-width"
         type="gray-mid"
         ref="btn"
@@ -73,6 +73,14 @@ export default Vue.extend({
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
+    },
+    isFrame(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('frame') && layers.length === 1
+    },
+    isImage(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('image') && layers.length === 1
     },
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]

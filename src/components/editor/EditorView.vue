@@ -150,6 +150,7 @@ export default Vue.extend({
       const editor = this.$refs.editorView as HTMLElement
       if (!this.inBgRemoveMode && this.prevScrollPos.top !== -1) {
         const { top, left } = this.prevScrollPos
+        // Restore original scroll position
         this.$nextTick(() => {
           editor.scrollLeft = left
           editor.scrollTop = top
