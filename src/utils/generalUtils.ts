@@ -5,6 +5,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
+  get isSuperUser() { return (store.state as any).user.role === 0 }
 
   isJsonString(str: string) {
     try {

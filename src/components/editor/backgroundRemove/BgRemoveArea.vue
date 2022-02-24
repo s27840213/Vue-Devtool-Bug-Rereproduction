@@ -21,12 +21,13 @@ div(class="bg-remove-area"
 import { IBgRemoveInfo } from '@/interfaces/image'
 import mouseUtils from '@/utils/mouseUtils'
 import pageUtils from '@/utils/pageUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   props: {
-    editorView: HTMLElement
+    editorViewCanvas: HTMLElement
   },
   data() {
     return {
@@ -51,7 +52,7 @@ export default Vue.extend({
       isMouseDown: false,
       initImgSrc: '',
       imgSrc: '',
-      blurPx: 5
+      blurPx: 1
     }
   },
   created() {
@@ -76,7 +77,7 @@ export default Vue.extend({
     this.initImageElement.onload = () => {
       this.createInitImageCtx()
     }
-    this.editorView.addEventListener('mousedown', this.drawStart)
+    this.editorViewCanvas.addEventListener('mousedown', this.drawStart)
     window.addEventListener('mousemove', this.brushMoving)
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
@@ -85,7 +86,7 @@ export default Vue.extend({
   destroyed() {
     window.removeEventListener('mouseup', this.drawEnd)
     window.removeEventListener('mousemove', this.brushMoving)
-    this.editorView.removeEventListener('mousedown', this.drawStart)
+    this.editorViewCanvas.removeEventListener('mousedown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
   computed: {
@@ -143,19 +144,11 @@ export default Vue.extend({
     brushSize(newVal: number) {
       this.ctx.lineWidth = newVal
       this.blurCtx.lineWidth = newVal
-      this.brushStyle.width = `${newVal}px`
-      this.brushStyle.height = `${newVal}px`
+      this.brushStyle.width = `${newVal + this.blurPx}px`
+      this.brushStyle.height = `${newVal + this.blurPx}px`
       if (this.clearMode) {
-        if (newVal > 25) {
-          this.blurPx = 5
-          this.ctx.filter = `blur(${this.blurPx}px)`
-        } else if (newVal <= 25 && newVal >= 3) {
-          this.blurPx = 2
-          this.ctx.filter = `blur(${this.blurPx}px)`
-        } else {
-          this.blurPx = 1
-          this.ctx.filter = `blur(${this.blurPx}px)`
-        }
+        this.blurPx = 1
+        this.ctx.filter = `blur(${this.blurPx}px)`
       }
     },
     restoreInitState(newVal) {
@@ -249,9 +242,7 @@ export default Vue.extend({
         y
       })
 
-      if (!this.modifiedFlag) {
-        this.setModifiedFlag(true)
-      }
+      this.setModifiedFlag(true)
     },
     drawStart(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInPage(e, -1)
@@ -283,8 +274,8 @@ export default Vue.extend({
     },
     brushMoving(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInPage(e, -1)
-      this.brushStyle.left = `${x - this.brushSize / 2}px`
-      this.brushStyle.top = `${y - this.brushSize / 2}px`
+      this.brushStyle.left = `${x - (this.brushSize + this.blurPx) / 2}px`
+      this.brushStyle.top = `${y - (this.brushSize + this.blurPx) / 2}px`
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
@@ -328,12 +319,24 @@ export default Vue.extend({
       this.addStep(base64)
     },
     handleKeydown(e: KeyboardEvent) {
-      if (!e.repeat && (e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-        this.undo()
-      } else if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-        this.redo()
-      } else if (!e.repeat && (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
-
+      if (!e.repeat) {
+        if ((e.ctrlKey || e.metaKey)) {
+          if (e.shiftKey) {
+            if ((e.key === 'z' || e.key === 'Z')) {
+              e.preventDefault()
+              this.redo()
+            }
+          } else if ((e.key === 'z' || e.key === 'Z')) {
+            e.preventDefault()
+            this.undo()
+          } else if (e.key === '=') {
+            e.preventDefault()
+            shortcutUtils.zoomIn()
+          } else if (e.key === '-') {
+            e.preventDefault()
+            shortcutUtils.zoomOut()
+          }
+        }
       }
     },
     undo() {
@@ -412,6 +415,7 @@ export default Vue.extend({
     pointer-events: none;
     border-radius: 50%;
     opacity: 0.6;
+    will-change: left, top;
   }
 
   &__loading {

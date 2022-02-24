@@ -37,7 +37,7 @@
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color }"
+            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
             class="photo-effect-setting__color-picker"
@@ -71,17 +71,17 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-          input(:class="['photo-effect-setting__value-input', field === 'zIndex' ? 'checkbox' : '']"
+          input(:class="['photo-effect-setting__value-input']"
             :value="getFieldValue(field)"
             :name="field"
             @change="handleEffectUpdate"
             @blur="recordChange"
-            :type="field === 'zIndex' ? 'checkbox' : 'number'")
+            type='number')
         div(v-if="!['none', 'halo'].includes(currentEffect)"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color }"
+            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
             @click="handleColorModal")
           color-picker(v-if="openColorPicker"
             class="photo-effect-setting__color-picker"
@@ -178,9 +178,8 @@ export default Vue.extend({
         const oldEffect = generalUtils
           .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
         imageShadowUtils.setEffect(currentEffect, {
-          [currentEffect]: name === 'zIndex'
-            ? Object.assign(oldEffect, { [name]: (oldEffect as any)[name] === 0 ? -1 : 0 })
-            : Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
+          [currentEffect]:
+            Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
         })
       }
     },
@@ -193,9 +192,6 @@ export default Vue.extend({
       stepsUtils.record()
     },
     getFieldValue(field: string): number | boolean {
-      if (field === 'zIndex') {
-        return !(this.currentStyle.shadow.effects as any)[this.currentEffect][field]
-      }
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     }
   }
@@ -279,9 +275,6 @@ export default Vue.extend({
     right: 0px;
     bottom: 0px;
   }
-}
-.checkbox {
-  margin: 0
 }
 .action-bar {
   padding: 10px;

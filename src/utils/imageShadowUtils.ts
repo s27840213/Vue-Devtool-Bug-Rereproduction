@@ -52,13 +52,7 @@ export const HALO_SPREAD_LIMIT = 80 as const
 class ImageShadowUtils {
   setEffect (effect: ShadowEffectType, attrs = {}): void {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
-    if (subLayerIdx === -1 && currLayer.type === LayerType.group) {
-      for (const i in (currLayer as IGroup).layers) {
-        // const shadow = generalUtils.deepCopy((currLayer as IGroup).layers[+i]) as IShadowProps
-        // Object.assign()
-        // layerUtils.updateLayerStyles
-      }
-    } else {
+    if (subLayerIdx !== -1 || currLayer.type === LayerType.image) {
       const { shadow } = (currLayer as IImage).styles
       const { effects, filterId } = shadow
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
@@ -155,7 +149,7 @@ class ImageShadowUtils {
           width: `${size}%`,
           left: `${x * fieldRange.projection.x.weighting + (100 - size) / 2}%`,
           bottom: `${-y * fieldRange.projection.y.weighting}%`,
-          zIndex,
+          zIndex: -1,
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
           `${(radius + 30) * fieldRange.projection.radius.weighting}px ` +
@@ -216,8 +210,7 @@ class ImageShadowUtils {
           radius: 50,
           spread: 50,
           size: 80,
-          opacity: 70,
-          zIndex: -1
+          opacity: 70
         }
         break
       }
@@ -249,9 +242,9 @@ class ImageShadowUtils {
       default:
         return generalUtils.assertUnreachable(effectName)
     }
-    const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
+    const { getCurrLayer: currLayer } = layerUtils
     const color = currLayer.type === LayerType.image
-      ? (currLayer as IImage).styles.shadow.effects.color : '#000000'
+      ? (currLayer as IImage).styles.shadow.effects.color || '#000000' : '#000000'
     return {
       [effectName]: effect,
       color
@@ -270,8 +263,8 @@ class ImageShadowUtils {
     const { effects, currentEffect } = shadow
     if (currentEffect === ShadowEffectType.none) return
 
-    const effect = effects[currentEffect]
-    const update = (props: Array<string>) => {
+    const currEffect = effects[currentEffect]
+    const update = (props: Array<string>, effect: ShadowEffects) => {
       props
         .forEach(k => {
           if (effect && k in effect) {
@@ -296,20 +289,25 @@ class ImageShadowUtils {
 
     switch (currentEffect) {
       case ShadowEffectType.shadow:
-        update(Object.keys(this.getDefaultEffect(ShadowEffectType.shadow).shadow || {}))
+        update(Object.keys(this.getDefaultEffect(ShadowEffectType.shadow).shadow || {}), mathUtils
+          .multipy(scale, currEffect as IShadowEffect, ['opacity', 'size', 'angle']) as ShadowEffects)
         break
       case ShadowEffectType.frame:
         update(Object.keys(this.getDefaultEffect(ShadowEffectType.frame).frame || {})
-          .concat(...['x', 'y']))
+          .concat(...['x', 'y']),
+          mathUtils
+            .multipy(scale, currEffect as IFrameEffect, ['opacity']) as ShadowEffects)
         break
       case ShadowEffectType.blur:
         update(Object.keys(this.getDefaultEffect(ShadowEffectType.blur).blur || {})
-          .concat(...['x', 'y']))
+          .concat(...['x', 'y']),
+          mathUtils
+            .multipy(scale, currEffect as IBlurEffect, ['opacity']) as ShadowEffects)
     }
   }
 
   setAttrs(filter: SVGElement | HTMLElement, data: any) {
-    const { prop, child, tag, scale, currentEffect, weighting, k, v } = data
+    const { prop, child, tag, currentEffect, scale, weighting, k, v } = data
     const subFilter = filter.getElementsByTagNameNS(SVG, tag)[0]
     let val = v * (weighting || 1)
     if (child) {
@@ -416,45 +414,44 @@ class ImageShadowUtils {
 
 export const shadowPropI18nMap = {
   none: {
-    _effectName: 'NN0426'
+    _effectName: 'NN0428'
   },
   shadow: {
-    distance: 'NN0416',
-    angle: 'NN0417',
-    radius: 'NN0418',
-    spread: 'NN0419',
-    opacity: 'NN0425',
-    _effectName: 'NN0411'
+    distance: 'NN0431',
+    angle: 'NN0432',
+    radius: 'NN0426',
+    spread: 'NN0421',
+    opacity: 'NN0427',
+    _effectName: 'NN0429'
   },
   blur: {
-    radius: 'NN0418',
-    spread: 'NN0419',
-    opacity: 'NN0425',
-    _effectName: 'NN0412'
+    radius: 'NN0426',
+    spread: 'NN0421',
+    opacity: 'NN0427',
+    _effectName: 'NN0418'
   },
   halo: {
-    distance: 'NN0416',
-    angle: 'NN0417',
-    size: 'NN0420',
-    radius: 'NN0418',
-    opacity: 'NN0425',
-    _effectName: 'NN0413'
+    distance: 'NN0431',
+    angle: 'NN0432',
+    size: 'NN0422',
+    radius: 'NN0426',
+    opacity: 'NN0427',
+    _effectName: 'NN0419'
   },
   frame: {
-    radius: 'NN0418',
+    radius: 'NN0426',
     spread: 'NN0421',
-    opacity: 'NN0425',
-    _effectName: 'NN0414'
+    opacity: 'NN0427',
+    _effectName: 'NN0430'
   },
   projection: {
-    x: 'NN0423',
-    y: 'NN0422',
-    radius: 'NN0418',
-    spread: 'NN0419',
-    opacity: 'NN0425',
-    size: 'NN0420',
-    zIndex: 'NN0424',
-    _effectName: 'NN0415'
+    x: 'NN0425',
+    y: 'NN0424',
+    radius: 'NN0426',
+    spread: 'NN0421',
+    opacity: 'NN0427',
+    size: 'NN0422',
+    _effectName: 'NN0420'
   }
 }
 
@@ -489,8 +486,7 @@ export const fieldRange = {
     radius: { max: 100, min: 0, weighting: 1.2 },
     size: { max: 200, min: 50 },
     x: { max: 100, min: -100, weighting: 0.5 },
-    y: { max: 100, min: -100, weighting: 0.5 },
-    zIndex: { max: 0, min: -1 }
+    y: { max: 100, min: -100, weighting: 0.5 }
   }
 } as any
 

@@ -118,10 +118,6 @@ const mutations: MutationTree<IBgRemoveState> = {
     state.clearMode = bool
   },
   SET_restoreInitState(state: IBgRemoveState, bool: boolean) {
-    if (bool) {
-      state.steps = []
-      state.currStep = -1
-    }
     state.restoreInitState = bool
   },
   SET_canvas(state: IBgRemoveState, canvas: HTMLCanvasElement) {

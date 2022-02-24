@@ -22,7 +22,7 @@
                   @stepChange="handleStepChange")
           div(v-show="isSelecting" class="selection-area" ref="selectionArea"
             :style="{'z-index': `${pageNum+1}`}")
-        bg-remove-area(v-else :editorView="editorView")
+        bg-remove-area(v-else :editorViewCanvas="editorViewCanvas")
       template(v-if="showRuler")
         ruler-hr(:canvasRect="canvasRect"
           :editorView="editorView"
@@ -87,6 +87,7 @@ export default Vue.extend({
       currentAbsPos: { x: 0, y: 0 },
       currentRelPos: { x: 0, y: 0 },
       editorView: null as unknown as HTMLElement,
+      editorViewCanvas: null as unknown as HTMLElement,
       guidelinesArea: null as unknown as HTMLElement,
       pageIndex: -1,
       backgroundControllingPageIndex: -1,
@@ -104,6 +105,7 @@ export default Vue.extend({
   mounted() {
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
+    this.editorViewCanvas = this.$refs.canvas as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
     pageUtils.fitPage()
@@ -145,25 +147,24 @@ export default Vue.extend({
   },
   watch: {
     pageScaleRatio() {
-      if (!this.inBgRemoveMode) {
-        const editor = this.$refs.editorView as HTMLElement
-        if (this.prevScrollPos.top !== -1) {
-          const { top, left } = this.prevScrollPos
-          this.$nextTick(() => {
-            editor.scrollLeft = left
-            editor.scrollTop = top
-            this.clearBgRemoveState()
-          })
-        } else {
-          const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
-          const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
-          const oldScrollWidth = editor.scrollWidth
-          const oldScrollHeight = editor.scrollHeight
-          this.$nextTick(() => {
-            editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
-            editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
-          })
-        }
+      const editor = this.$refs.editorView as HTMLElement
+      if (!this.inBgRemoveMode && this.prevScrollPos.top !== -1) {
+        const { top, left } = this.prevScrollPos
+        // Restore original scroll position
+        this.$nextTick(() => {
+          editor.scrollLeft = left
+          editor.scrollTop = top
+          this.clearBgRemoveState()
+        })
+      } else {
+        const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
+        const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
+        const oldScrollWidth = editor.scrollWidth
+        const oldScrollHeight = editor.scrollHeight
+        this.$nextTick(() => {
+          editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
+          editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
+        })
       }
     },
     screenHeight() {
