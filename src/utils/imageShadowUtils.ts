@@ -158,7 +158,7 @@ class ImageShadowUtils {
           zIndex,
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
-          `${radius * fieldRange.projection.radius.weighting}px ` +
+          `${(radius + 30) * fieldRange.projection.radius.weighting}px ` +
           `${spread}px ` +
           `${color + this.convertToAlpha(opacity)}`
         }
@@ -202,9 +202,9 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          distance: 40,
+          distance: 50,
           angle: 45,
-          radius: 18,
+          radius: 15,
           spread: 0,
           opacity: 70
         }
@@ -231,7 +231,7 @@ class ImageShadowUtils {
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
           radius: 0,
-          spread: 12,
+          spread: 20,
           opacity: 70
         }
         break
@@ -463,7 +463,7 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 180, min: -180 },
+    distance: { max: 100, min: 0 },
     angle: { max: 180, min: -180 },
     radius: { max: 100, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
@@ -475,7 +475,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   halo: {
-    distance: { max: 100, min: -100, weighting: 0.5 },
+    distance: { max: 100, min: 0 },
     angle: { max: 180, min: -180, weighting: 0.5 },
     size: { max: 200, min: 50, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 2 },
@@ -489,7 +489,7 @@ export const fieldRange = {
   projection: {
     spread: { max: 100, min: 0, weighting: 0.5 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    radius: { max: 100, min: 0, weighting: 1.5 },
+    radius: { max: 100, min: 0, weighting: 1.2 },
     size: { max: 200, min: 50 },
     x: { max: 100, min: -100, weighting: 0.5 },
     y: { max: 100, min: -100, weighting: 0.5 },
