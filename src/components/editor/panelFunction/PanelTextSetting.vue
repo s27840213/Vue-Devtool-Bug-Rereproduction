@@ -689,30 +689,6 @@ export default Vue.extend({
     border: 1px solid #d9dbe1;
     border-radius: 3px;
   }
-  &__range-input {
-    display: block;
-    margin: auto;
-    width: 120px;
-    height: 35px;
-    appearance: none;
-    outline: none;
-    background: none;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: #d9dbe1;
-    }
-    &::-webkit-slider-thumb {
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background-color: #ffffff;
-      border: 2px solid #3c64b1;
-      transition: 0.2s;
-      margin-top: -6.5px;
-      position: relative;
-    }
-  }
   &__range-input-button {
     width: fit-content;
   }

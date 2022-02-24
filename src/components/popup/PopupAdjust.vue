@@ -5,7 +5,7 @@
       :key="field.name")
       div(class="popup-adjust__label")
         div {{ field.label }}
-        input(class="popup-adjust__range-input"
+        input(class="popup-adjust__range-input input__slider--range"
           :value="adjustTmp[field.name] || 0"
           :max="field.max"
           :min="field.min"
@@ -92,27 +92,11 @@ export default Vue.extend({
   }
 
   &__range-input {
-    display: block;
-    appearance: none;
-    outline: none;
-    background: none;
     width: 100%;
     height: 20px;
     margin: 0;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: #d9dbe1;
-    }
     &::-webkit-slider-thumb {
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background-color: #ffffff;
       border: 2px solid #4eabe6;
-      transition: 0.2s;
-      margin-top: -6.5px;
-      position: relative;
     }
   }
 }

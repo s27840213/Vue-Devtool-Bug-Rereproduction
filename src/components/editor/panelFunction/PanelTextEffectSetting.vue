@@ -18,7 +18,7 @@
           :key="field"
           class="text-effect-setting__field")
           div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input"
+          input(class="text-effect-setting__range-input input__slider--range"
             :value="currentStyle.textEffect[field]"
             :max="fieldRange[field].max"
             :min="fieldRange[field].min"
@@ -61,7 +61,7 @@
           :key="field"
           class="text-effect-setting__field")
           div(class="text-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
-          input(class="text-effect-setting__range-input"
+          input(class="text-effect-setting__range-input input__slider--range"
             :value="currentStyle.textEffect[field]"
             :max="fieldRange[field].max"
             :min="fieldRange[field].min"
@@ -104,7 +104,7 @@
           :key="field"
           class="text-effect-setting__field")
           div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input"
+          input(class="text-effect-setting__range-input input__slider--range"
             :value="currentStyle.textShape[field]"
             :max="fieldRange[field].max"
             :min="fieldRange[field].min"
@@ -322,23 +322,12 @@ export default Vue.extend({
   }
   &__range-input {
     width: 90px;
-    appearance: none;
-    outline: none;
-    background: none;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: #d9dbe1;
-    }
+    margin: 0;
     &::-webkit-slider-thumb {
-      appearance: none;
       width: 12px;
       height: 12px;
-      border-radius: 50%;
-      background-color: #ffffff;
       border: 2px solid setColor(blue-1);
-      transition: 0.2s;
       margin-top: -5px;
-      position: relative;
     }
   }
   &__value-input {
