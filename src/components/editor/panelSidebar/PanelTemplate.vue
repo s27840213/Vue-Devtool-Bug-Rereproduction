@@ -194,7 +194,7 @@ export default Vue.extend({
         .map(theme => theme.id)
     },
     resultTooLess(): string[] {
-      return (i18n.t('NN0398') as string).split('{html}')
+      return (i18n.t('NN0398') as string).split('<html>')
     },
     allThemesChecked():boolean {
       const allThemeString = _.sortBy(this.themes.map((item: Itheme) => item.id)).join(',')
