@@ -5,6 +5,7 @@ import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
+  get isSuperUser() { return (store.state as any).user.role === 0 }
 
   isJsonString(str: string) {
     try {
@@ -141,6 +142,10 @@ class GeneralUtils {
     a.href = src
     a.download = name
     a.click()
+  }
+
+  assertUnreachable(_: never): never {
+    throw new Error("Didn't expect to get here")
   }
 
   dataURLtoBlob(dataurl: string) {

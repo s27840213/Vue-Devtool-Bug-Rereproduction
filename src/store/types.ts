@@ -93,7 +93,8 @@ export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
   shape = 'setShapeColor',
-  background = 'setBackgroundColor'
+  background = 'setBackgroundColor',
+  photoShadow = 'setPhotoEffectColor'
 }
 
 export enum PopupSliderEventType {
@@ -112,6 +113,12 @@ export enum LayerType {
   group = 'group',
   frame = 'frame',
   tmp = 'tmp'
+}
+
+export interface ILayerInfo {
+  pageIndex: number,
+  layerIndex: number,
+  subLayerIdx: number
 }
 
 export enum LineTemplatesType {

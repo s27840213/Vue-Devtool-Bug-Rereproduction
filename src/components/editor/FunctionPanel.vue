@@ -34,6 +34,7 @@
           @openFontsPanel="openFontsPanel"
           v-on="$listeners")
         panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
+        panel-photo-shadow(v-if="isSuperUser && layerType.currLayerType === 'image' && !isLocked" v-on="$listeners")
         panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
         panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
         panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
@@ -46,6 +47,7 @@
           panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
             @openFontsPanel="openFontsPanel"
             v-on="$listeners")
+
           panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
           panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
           panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
@@ -59,6 +61,7 @@
               v-on="$listeners")
             panel-text-effect-setting(v-on="$listeners")
           panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
+          panel-photo-shadow(v-if="isSuperUser && layerType.targetLayerType === 'image' && !isLocked" v-on="$listeners")
           panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
           panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
 </template>
@@ -75,6 +78,7 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
@@ -82,6 +86,8 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import { LayerType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -95,7 +101,8 @@ export default Vue.extend({
     PanelShapeSetting,
     PanelTextEffectSetting,
     DownloadBtn,
-    PanelBgRemove
+    PanelBgRemove,
+    PanelPhotoShadow
   },
   data() {
     return {
@@ -156,6 +163,22 @@ export default Vue.extend({
       const { index } = this.currSubSelectedInfo
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
+    },
+    isSuperUser(): boolean {
+      return generalUtils.isSuperUser
+    },
+    layerType(): { [key: string]: string } {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      return {
+        currLayerType: currLayer.type,
+        targetLayerType: (() => {
+          if (subLayerIdx !== -1) {
+            return currLayer.type === LayerType.group
+              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+          }
+          return currLayer.type
+        })()
+      }
     }
   },
   watch: {

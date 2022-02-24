@@ -31,6 +31,7 @@ import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
+import imgShadowMutations from '@/store/utils/imgShadow'
 
 Vue.use(Vuex)
 
@@ -747,7 +748,8 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
-  }
+  },
+  ...imgShadowMutations
 }
 
 export default new Vuex.Store({
