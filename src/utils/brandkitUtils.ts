@@ -1,4 +1,4 @@
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import generalUtils from './generalUtils'
 
@@ -69,7 +69,15 @@ class BrandKitUtils {
           '#68B82B'
         ])
       }],
-      fonts: []
+      fonts: [{
+        type: 'public',
+        id: generalUtils.generateAssetId(),
+        createTime: (new Date(initTime + 60)).toISOString(),
+        name: 'Angkor',
+        ver: 0,
+        namePrevUrl: require('@/assets/img/png/brandkit/font1.png'),
+        textPrevUrl: require('@/assets/img/png/brandkit/font1_prev.png')
+      }]
     }
   }
 
@@ -134,6 +142,10 @@ class BrandKitUtils {
 
   removePalette(palette: IBrandColorPalette) {
     store.dispatch('brandkit/removePalette', palette)
+  }
+
+  removeFont(font: IBrandFont) {
+    store.dispatch('brandkit/removeFont', font)
   }
 
   async createPalette() {

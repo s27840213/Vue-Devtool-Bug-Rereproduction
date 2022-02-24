@@ -4,9 +4,16 @@
       div(class="brand-kit-tab-text__font-column__item add pointer")
         div(class="brand-kit-tab-text__font-column__upload-icon")
           svg-icon(iconName="cloud-upload" iconWidth="32px" iconColor="gray-1")
-        div(class="brand-kit-tab-text__font-column__upload-hint")
+        div(class="brand-kit-tab-text__font-column__upload-hint" @click="handleUploadFont")
           span {{ $t('NN0402') }}
-      //- div(class="brand-kit-tab-text__font-column__item")
+      div(v-for="font in fonts" class="brand-kit-tab-text__font-column__item pointer relative")
+        div(class="brand-kit-tab-text__font-column__font-img")
+          img(:src="font.namePrevUrl")
+        div(class="brand-kit-tab-text__font-column__font-img")
+          img(:src="font.textPrevUrl")
+        svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
+                iconName="trash" iconWidth="24px" iconColor="gray-2"
+                @click.native="handleDeleteFont(font)")
     div(class="brand-kit-tab-text__style-column")
       div(class="brand-kit-tab-text__style-column__item heading")
         span(:style="getHeadingFont()") {{ getDisplayedHeadingText() }}
@@ -23,8 +30,9 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import defaultHeading from '@/assets/json/heading.json'
 import defaultSubheading from '@/assets/json/subheading.json'
 import defaultBody from '@/assets/json/body.json'
-import { IBrand, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import textUtils from '@/utils/textUtils'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
@@ -40,6 +48,9 @@ export default Vue.extend({
     }),
     textStyleSetting(): IBrandTextStyleSetting {
       return (this.currentBrand as IBrand).textStyleSetting
+    },
+    fonts(): IBrandFont[] {
+      return (this.currentBrand as IBrand).fonts
     }
   },
   methods: {
@@ -87,6 +98,12 @@ export default Vue.extend({
           fontFamily: this.textStyleSetting.bodyStyle.font.id
         }
       }
+    },
+    handleUploadFont() {
+      uploadUtils.chooseAssets('font')
+    },
+    handleDeleteFont(font: IBrandFont) {
+      brandkitUtils.removeFont(font)
     }
   }
 })
@@ -120,13 +137,30 @@ export default Vue.extend({
       border: 1px solid setColor(gray-3);
       box-sizing: border-box;
       border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      &:hover {
+        background-color: setColor(blue-4);
+        & > .brand-kit-tab-text__font-column__trash-icon {
+          display: inline-block;
+        }
+      }
       &.add {
         height: fit-content;
         padding: 11px 33px;
-        display: flex;
         gap: 19px;
-        align-items: center;
       }
+    }
+    &__font-img {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__trash-icon {
+      position: absolute;
+      display: none;
+      right: 10px;
     }
   }
   &__style-column {

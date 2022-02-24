@@ -147,7 +147,7 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        if (type !== 'logo') {
+        if (type !== 'logo' && type !== 'font') {
           this.uploadAsset(type, files as FileList)
         } else {
           console.log(files)

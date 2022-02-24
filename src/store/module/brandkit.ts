@@ -1,5 +1,5 @@
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandLogo } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
@@ -141,6 +141,17 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }, () => {
       showNetworkError()
     })
+  },
+  async removeFont({ state, commit }, font: IBrandFont) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (!currentBrand) return
+    brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_deleteFont', font)
+    }, () => {
+      commit('UPDATE_addFont', font)
+    }, () => {
+      showNetworkError()
+    })
   }
 }
 
@@ -221,6 +232,19 @@ const mutations: MutationTree<IBrandKitState> = {
     if (index < 0) return
     const oldColor = colorPalette.colors[index]
     colorPalette.colors.splice(index, 1, { ...oldColor, color: updateInfo.color })
+  },
+  UPDATE_deleteFont(state: IBrandKitState, font: IBrandFont) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (!currentBrand) return
+    const index = currentBrand.fonts.findIndex(font_ => font_.id === font.id)
+    if (index < 0) return
+    currentBrand.fonts.splice(index, 1)
+  },
+  UPDATE_addFont(state: IBrandKitState, font: IBrandFont) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (!currentBrand) return
+    const index = brandkitUtils.findInsertIndex(currentBrand.fonts, font)
+    currentBrand.fonts.splice(index, 0, font)
   }
 }
 
