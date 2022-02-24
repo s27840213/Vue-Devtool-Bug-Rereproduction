@@ -111,7 +111,6 @@ export default Vue.extend({
     save() {
       const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
       if (!this.modifiedFlag) {
-        const { srcObj } = layers[0] as IImage
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {
             type: this.isAdmin ? 'public' : 'private',

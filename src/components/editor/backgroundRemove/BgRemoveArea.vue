@@ -144,8 +144,8 @@ export default Vue.extend({
     brushSize(newVal: number) {
       this.ctx.lineWidth = newVal
       this.blurCtx.lineWidth = newVal
-      this.brushStyle.width = `${newVal}px`
-      this.brushStyle.height = `${newVal}px`
+      this.brushStyle.width = `${newVal + this.blurPx}px`
+      this.brushStyle.height = `${newVal + this.blurPx}px`
       if (this.clearMode) {
         this.blurPx = 1
         this.ctx.filter = `blur(${this.blurPx}px)`
@@ -242,9 +242,7 @@ export default Vue.extend({
         y
       })
 
-      if (!this.modifiedFlag) {
-        this.setModifiedFlag(true)
-      }
+      this.setModifiedFlag(true)
     },
     drawStart(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInPage(e, -1)
@@ -276,8 +274,8 @@ export default Vue.extend({
     },
     brushMoving(e: MouseEvent) {
       const { x, y } = mouseUtils.getMousePosInPage(e, -1)
-      this.brushStyle.left = `${x - this.brushSize / 2}px`
-      this.brushStyle.top = `${y - this.brushSize / 2}px`
+      this.brushStyle.left = `${x - (this.brushSize + this.blurPx) / 2}px`
+      this.brushStyle.top = `${y - (this.brushSize + this.blurPx) / 2}px`
     },
     drawImageToCtx(img?: HTMLImageElement) {
       this.setCompositeOperationMode('source-over')
@@ -417,6 +415,7 @@ export default Vue.extend({
     pointer-events: none;
     border-radius: 50%;
     opacity: 0.6;
+    will-change: left, top;
   }
 
   &__loading {
