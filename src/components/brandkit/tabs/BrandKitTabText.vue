@@ -15,21 +15,19 @@
                 iconName="trash" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleDeleteFont(font)")
     div(class="brand-kit-tab-text__style-column")
-      div(class="brand-kit-tab-text__style-column__item heading")
-        span(:style="getHeadingFont()") {{ getDisplayedHeadingText() }}
-      div(class="brand-kit-tab-text__style-column__item subheading")
-        span(:style="getSubheadingFont()") {{ getDisplayedSubheadingText() }}
-      div(class="brand-kit-tab-text__style-column__item body")
-        span(:style="getBodyFont()") {{ getDisplayedBodyText() }}
+      brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
+                            type="heading" :textStyleSetting="textStyleSetting")
+      brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
+                            type="subheading" :textStyleSetting="textStyleSetting")
+      brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
+                            type="body" :textStyleSetting="textStyleSetting")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import BrandKitTextSetting from '@/components/brandkit/BrandKitTextSetting.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
-import defaultHeading from '@/assets/json/heading.json'
-import defaultSubheading from '@/assets/json/subheading.json'
-import defaultBody from '@/assets/json/body.json'
 import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
@@ -41,6 +39,9 @@ export default Vue.extend({
   },
   created() {
     textUtils.loadDefaultFonts()
+  },
+  components: {
+    BrandKitTextSetting
   },
   computed: {
     ...mapGetters('brandkit', {
@@ -54,51 +55,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    getDisplayedHeadingText(): string {
-      const textType = `${this.$t('NN0408')}`
-      return this.textStyleSetting.headingStyle.isDefault ? `${this.$t('NN0403', { textType })}` : brandkitUtils.composeSettingText(this.textStyleSetting.headingStyle, textType)
-    },
-    getDisplayedSubheadingText(): string {
-      const textType = `${this.$t('NN0409')}`
-      return this.textStyleSetting.subheadingStyle.isDefault ? `${this.$t('NN0403', { textType })}` : brandkitUtils.composeSettingText(this.textStyleSetting.subheadingStyle, textType)
-    },
-    getDisplayedBodyText(): string {
-      const textType = `${this.$t('NN0410')}`
-      return this.textStyleSetting.bodyStyle.isDefault ? `${this.$t('NN0403', { textType })}` : brandkitUtils.composeSettingText(this.textStyleSetting.bodyStyle, textType)
-    },
-    getHeadingFont() {
-      if (this.textStyleSetting.headingStyle.isDefault) {
-        return {
-          fontFamily: defaultHeading.paragraphs[0].spans[0].styles.font
-        }
-      } else {
-        return {
-          fontFamily: this.textStyleSetting.headingStyle.font.id
-        }
-      }
-    },
-    getSubheadingFont() {
-      if (this.textStyleSetting.subheadingStyle.isDefault) {
-        return {
-          fontFamily: defaultSubheading.paragraphs[0].spans[0].styles.font
-        }
-      } else {
-        return {
-          fontFamily: this.textStyleSetting.subheadingStyle.font.id
-        }
-      }
-    },
-    getBodyFont() {
-      if (this.textStyleSetting.bodyStyle.isDefault) {
-        return {
-          fontFamily: defaultBody.paragraphs[0].spans[0].styles.font
-        }
-      } else {
-        return {
-          fontFamily: this.textStyleSetting.bodyStyle.font.id
-        }
-      }
-    },
     handleUploadFont() {
       uploadUtils.chooseAssets('font')
     },
@@ -169,22 +125,6 @@ export default Vue.extend({
     gap: 16px;
     &__item {
       width: 680px;
-      background: #F3F6FA;
-      border-radius: 4px;
-      padding: 8px 0px;
-      & > span {
-        font-style: normal;
-        font-weight: normal;
-      }
-      &.heading > span {
-        font-size: 28px;
-      }
-      &.subheading > span {
-        font-size: 18px;
-      }
-      &.body > span {
-        font-size: 14px;
-      }
     }
   }
 }

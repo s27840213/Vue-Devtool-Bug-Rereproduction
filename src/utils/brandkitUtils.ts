@@ -97,6 +97,9 @@ class BrandKitUtils {
         type: '',
         ver: 0
       },
+      bold: false,
+      underline: false,
+      italic: false,
       size: -1,
       isDefault: true
     }

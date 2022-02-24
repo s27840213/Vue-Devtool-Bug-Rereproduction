@@ -26,6 +26,9 @@ export interface IBrandTextStyleSetting {
 export interface IBrandTextStyle {
   font: IBrandTextFont,
   size: number,
+  bold: boolean,
+  underline: boolean,
+  italic: boolean,
   isDefault: boolean
 }
 
