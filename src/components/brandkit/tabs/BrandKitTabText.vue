@@ -1,10 +1,10 @@
 <template lang="pug">
   div(class="brand-kit-tab-text")
     div(class="brand-kit-tab-text__font-column")
-      div(class="brand-kit-tab-text__font-column__item add")
+      div(class="brand-kit-tab-text__font-column__item add pointer")
         div(class="brand-kit-tab-text__font-column__upload-icon")
           svg-icon(iconName="cloud-upload" iconWidth="32px" iconColor="gray-1")
-        div(class="brand-kit-tab-text__font-column__upload-hint pointer")
+        div(class="brand-kit-tab-text__font-column__upload-hint")
           span {{ $t('NN0402') }}
       //- div(class="brand-kit-tab-text__font-column__item")
     div(class="brand-kit-tab-text__style-column")
