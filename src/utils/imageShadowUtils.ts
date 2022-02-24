@@ -275,14 +275,15 @@ class ImageShadowUtils {
       props
         .forEach(k => {
           if (effect && k in effect) {
+            const weighting = fieldRange[currentEffect][k].weighting
             if (['distance', 'angle'].includes(k)) {
               const { distance, angle } = effect
               const x = distance * mathUtils.cos(angle)
               const y = distance * mathUtils.sin(angle)
-              this.setAttrs(filter, { ...FilterTable.x, currentEffect, scale, k: 'x', v: x })
-              this.setAttrs(filter, { ...FilterTable.y, currentEffect, scale, k: 'y', v: y })
+              this.setAttrs(filter, { ...FilterTable.x, currentEffect, scale, weighting, k: 'x', v: x })
+              this.setAttrs(filter, { ...FilterTable.y, currentEffect, scale, weighting, k: 'y', v: y })
             } else {
-              this.setAttrs(filter, { ...FilterTable[k], currentEffect, scale, k, v: effect[k] })
+              this.setAttrs(filter, { ...FilterTable[k], currentEffect, scale, weighting, k, v: effect[k] })
             }
           } else {
             this.setAttrs(filter, { ...FilterTable[k], currentEffect, k, v: 0 })
@@ -308,16 +309,12 @@ class ImageShadowUtils {
   }
 
   setAttrs(filter: SVGElement | HTMLElement, data: any) {
-    const { prop, child, tag, scale, currentEffect, k, v } = data
+    const { prop, child, tag, scale, currentEffect, weighting, k, v } = data
     const subFilter = filter.getElementsByTagNameNS(SVG, tag)[0]
+    let val = v * (weighting || 1)
     if (child) {
-      this.setAttrs(subFilter, { ...child, currentEffect, scale, k, v })
+      this.setAttrs(subFilter, { ...child, currentEffect, weighting, scale, k, v })
     } else {
-      let val = v
-      if (fieldRange[currentEffect][k] && fieldRange[currentEffect][k].weighting) {
-        val *= fieldRange[currentEffect][k].weighting
-      }
-
       switch (k) {
         case 'spread':
           val *= scale
@@ -463,8 +460,8 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0 },
-    angle: { max: 180, min: -180 },
+    distance: { max: 100, min: 0, weighting: 2 },
+    angle: { max: 180, min: -180, weighting: 2 },
     radius: { max: 100, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     spread: { max: 100, min: 0, weighting: 0.72 }
@@ -475,8 +472,8 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   halo: {
-    distance: { max: 100, min: 0 },
-    angle: { max: 180, min: -180, weighting: 0.5 },
+    distance: { max: 100, min: 0, weighting: 2 },
+    angle: { max: 180, min: -180, weighting: 2 },
     size: { max: 200, min: 50, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
