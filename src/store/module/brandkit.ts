@@ -211,7 +211,7 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!currentBrand) return
     const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
-    const index = brandkitUtils.findInsertIndex(colorPalette.colors, updateInfo.color)
+    const index = brandkitUtils.findInsertIndex(colorPalette.colors, updateInfo.color, true)
     colorPalette.colors.splice(index, 0, updateInfo.color)
   },
   UPDATE_deleteColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {

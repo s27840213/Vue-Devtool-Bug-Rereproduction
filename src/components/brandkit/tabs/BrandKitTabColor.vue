@@ -10,9 +10,6 @@
           div(class="brand-kit-tab-color__palette__trash pointer"
               @click="handleDeletePalette(colorPalette)")
             svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
-          //- div(class="brand-kit-tab-color__palette__add pointer"
-              @click="handleAddColor(colorPalette.id)")
-            svg-icon(iconName="plus-small" iconWidth="16px" iconColor="gray-2")
       div(class="brand-kit-tab-color__palette__colors")
         div(v-for="(color, index) in colorPalette.colors"
           class="brand-kit-tab-color__palette__colors__color-wrapper relative"
@@ -65,7 +62,7 @@ export default Vue.extend({
       currentBrand: 'getCurrentBrand'
     }),
     colorPalettes(): IBrandColorPalette[] {
-      return generalUtils.deepCopy((this.currentBrand as IBrand).colorPalettes).reverse()
+      return (this.currentBrand as IBrand).colorPalettes
     }
   },
   methods: {

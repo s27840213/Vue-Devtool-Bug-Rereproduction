@@ -22,7 +22,7 @@ class BrandKitUtils {
       logos: [{
         name: 'logo-horizontal.png',
         id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 10)).toISOString(),
+        createTime: (new Date(initTime + 30)).toISOString(),
         url: require('@/assets/img/png/brandkit/logo-horizontal.png'),
         width: 171,
         height: 132
@@ -36,7 +36,7 @@ class BrandKitUtils {
       }, {
         name: 'logo-vertical.png',
         id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 30)).toISOString(),
+        createTime: (new Date(initTime + 10)).toISOString(),
         url: require('@/assets/img/png/brandkit/logo-vertical.png'),
         width: 75,
         height: 171
@@ -48,17 +48,6 @@ class BrandKitUtils {
       },
       colorPalettes: [{
         id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 40)).toISOString(),
-        name: '',
-        colors: this.generateBrandColors([
-          '#3C64B1', '#276AEA', '#19C84A', '#FE7565', '#FECD56',
-          '#FFCECE', '#C9DBFF', '#6B798B', '#50A2D8', '#409CB5',
-          '#00A0E9', '#40A95E', '#969BAB', '#C3CBCD', '#C3CBCD',
-          '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
-          '#68B82B', '#F84343', '#EA273E', '#55400C'
-        ])
-      }, {
-        id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 50)).toISOString(),
         name: '',
         colors: this.generateBrandColors([
@@ -67,6 +56,17 @@ class BrandKitUtils {
           '#00A0E9', '#40A95E', '#969BAB', '#C3CBCD', '#C3CBCD',
           '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
           '#68B82B'
+        ])
+      }, {
+        id: generalUtils.generateAssetId(),
+        createTime: (new Date(initTime + 40)).toISOString(),
+        name: '',
+        colors: this.generateBrandColors([
+          '#3C64B1', '#276AEA', '#19C84A', '#FE7565', '#FECD56',
+          '#FFCECE', '#C9DBFF', '#6B798B', '#50A2D8', '#409CB5',
+          '#00A0E9', '#40A95E', '#969BAB', '#C3CBCD', '#C3CBCD',
+          '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
+          '#68B82B', '#F84343', '#EA273E', '#55400C'
         ])
       }],
       fonts: [{
@@ -77,6 +77,14 @@ class BrandKitUtils {
         ver: 0,
         namePrevUrl: require('@/assets/img/png/brandkit/font1.png'),
         textPrevUrl: require('@/assets/img/png/brandkit/font1_prev.png')
+      }, {
+        type: 'public',
+        id: generalUtils.generateAssetId(),
+        createTime: (new Date(initTime + 50)).toISOString(),
+        name: 'Arial Hebrew School',
+        ver: 0,
+        namePrevUrl: require('@/assets/img/png/brandkit/font2.png'),
+        textPrevUrl: require('@/assets/img/png/brandkit/font2_prev.png')
       }]
     }
   }
@@ -174,9 +182,9 @@ class BrandKitUtils {
     })
   }
 
-  findInsertIndex<T extends Item>(items: T[], item: T): number {
+  findInsertIndex<T extends Item>(items: T[], item: T, ascending = false): number {
     const index = items.findIndex(i => {
-      return Date.parse(i.createTime) > Date.parse(item.createTime)
+      return ascending !== (Date.parse(i.createTime) < Date.parse(item.createTime))
     })
     return index === -1 ? items.length : index
   }

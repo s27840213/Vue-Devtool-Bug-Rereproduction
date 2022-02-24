@@ -67,7 +67,7 @@ export default Vue.extend({
       currentBrand: 'getCurrentBrand'
     }),
     logos(): IBrandLogo[] {
-      return generalUtils.deepCopy((this.currentBrand as IBrand).logos).reverse()
+      return (this.currentBrand as IBrand).logos
     }
   },
   methods: {
