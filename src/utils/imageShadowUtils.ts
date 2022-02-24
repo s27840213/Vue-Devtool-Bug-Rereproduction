@@ -7,12 +7,12 @@ import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffec
 import imageUtils from './imageUtils'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
-type Filter = {
+type FilterNode = {
   tag: string,
   attrs: {
     [key: string]: string | number
   },
-  child?: Array<Filter>
+  child?: Array<FilterNode>
 }
 
 const SVG = 'http://www.w3.org/2000/svg'
@@ -74,7 +74,7 @@ class ImageShadowUtils {
     }
   }
 
-  addFilter(filterId: string, filters: Array<Filter>) {
+  addFilter(filterId: string, filters: Array<FilterNode>) {
     const svg = document.createElementNS(SVG, 'svg')
     svg.setAttribute('viewBox', '0 0 5000 5000')
     this.append(svg, [{
@@ -94,7 +94,7 @@ class ImageShadowUtils {
     return svg.firstChild
   }
 
-  append(parent: HTMLElement | SVGElement, filters: Array<Filter>) {
+  append(parent: HTMLElement | SVGElement, filters: Array<FilterNode>) {
     filters
       .forEach(f => {
         const filter = document.createElementNS(SVG, f.tag)
@@ -129,8 +129,10 @@ class ImageShadowUtils {
 
     switch (shadow.currentEffect) {
       case ShadowEffectType.halo: {
-        const { blur, x, y, width, opacity } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
+        const { radius, distance, angle, size, opacity } = mathUtils
+          .multipy(scale, effect as ShadowEffects, ['opacity', 'size', 'radius', 'angle']) as ShadowEffects
+        const x = distance * mathUtils.cos(angle)
+        const y = distance * mathUtils.sin(angle)
         return {
           backgroundImage: `url(${imageUtils.getSrc(config)})`,
           backgroundColor: `rgba(255, 255, 255, ${1 - opacity / 100})`,
@@ -139,21 +141,20 @@ class ImageShadowUtils {
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           zIndex: -1,
-          width: `${width}%`,
-          height: '100%',
+          width: `${size}%`,
+          height: `${size}%`,
           bottom: `${-y}%`,
-          left: `${x - (width - 100) / 2}%`,
-          filter: `blur(${blur}px)`
+          left: `${x - (size - 100) / 2}%`,
+          filter: `blur(${radius}px)`
         }
       }
       case ShadowEffectType.projection: {
-        const { radius, spread, opacity, x, y, width, zIndex } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity', 'width']) as ShadowEffects
-        const { height: layerHeight, width: layerWidth } = config.styles
+        const { radius, spread, opacity, x, y, size, zIndex } = mathUtils
+          .multipy(scale, effect as ShadowEffects, ['opacity', 'size']) as ShadowEffects
         return {
-          width: `${width}%`,
-          left: `${x * fieldRange.projection.x.weighting * layerWidth + (1 - width / 100) / 2 * layerWidth}px`,
-          bottom: `${-y * fieldRange.projection.y.weighting * layerHeight}px`,
+          width: `${size}%`,
+          left: `${x * fieldRange.projection.x.weighting + (100 - size) / 2}%`,
+          bottom: `${-y * fieldRange.projection.y.weighting}%`,
           zIndex,
           boxShadow:
           `0px ${HALO_Y_OFFSET * scale}px ` +
@@ -201,8 +202,8 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          x: 40,
-          y: 40,
+          distance: 40,
+          angle: 45,
           radius: 18,
           spread: 0,
           opacity: 70
@@ -214,7 +215,7 @@ class ImageShadowUtils {
           y: 0,
           radius: 50,
           spread: 50,
-          width: 80,
+          size: 80,
           opacity: 70,
           zIndex: -1
         }
@@ -236,10 +237,10 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.halo:
         (effect as IHaloEffect) = {
-          x: 0,
-          y: 5,
-          blur: 15,
-          width: 100,
+          distance: 10,
+          angle: 90,
+          radius: 15,
+          size: 100,
           opacity: 70
         }
         break
@@ -269,24 +270,40 @@ class ImageShadowUtils {
     const { effects, currentEffect } = shadow
     if (currentEffect === ShadowEffectType.none) return
 
-    const allProps = this.getDefaultEffect(ShadowEffectType.shadow).shadow
     const effect = effects[currentEffect]
+    const update = (props: Array<string>) => {
+      props
+        .forEach(k => {
+          if (effect && k in effect) {
+            if (['distance', 'angle'].includes(k)) {
+              const { distance, angle } = effect
+              const x = distance * mathUtils.cos(angle)
+              const y = distance * mathUtils.sin(angle)
+              this.setAttrs(filter, { ...FilterTable.x, currentEffect, scale, k: 'x', v: x })
+              this.setAttrs(filter, { ...FilterTable.y, currentEffect, scale, k: 'y', v: y })
+            } else {
+              this.setAttrs(filter, { ...FilterTable[k], currentEffect, scale, k, v: effect[k] })
+            }
+          } else {
+            this.setAttrs(filter, { ...FilterTable[k], currentEffect, k, v: 0 })
+          }
+        })
+      /** setting color */
+      const subFilter = filter.getElementsByTagNameNS(SVG, FilterTable.color.tag)[0]
+      subFilter.setAttribute(FilterTable.color.prop, effects.color)
+    }
+
     switch (currentEffect) {
       case ShadowEffectType.shadow:
+        update(Object.keys(this.getDefaultEffect(ShadowEffectType.shadow).shadow || {}))
+        break
       case ShadowEffectType.frame:
-      case ShadowEffectType.blur: {
-        Object.keys(allProps as IShadowEffect)
-          .forEach(k => {
-            if (effect && k in effect) {
-              this.setAttrs(filter, { ...FilterTable[k], currentEffect, scale, k, v: effect[k] })
-            } else {
-              this.setAttrs(filter, { ...FilterTable[k], currentEffect, k, v: 0 })
-            }
-          })
-        /** setting color */
-        const subFilter = filter.getElementsByTagNameNS(SVG, FilterTable.color.tag)[0]
-        subFilter.setAttribute(FilterTable.color.prop, effects.color)
-      }
+        update(Object.keys(this.getDefaultEffect(ShadowEffectType.frame).frame || {})
+          .concat(...['x', 'y']))
+        break
+      case ShadowEffectType.blur:
+        update(Object.keys(this.getDefaultEffect(ShadowEffectType.blur).blur || {})
+          .concat(...['x', 'y']))
     }
   }
 
@@ -314,7 +331,7 @@ class ImageShadowUtils {
     }
   }
 
-  getDefaultFilterAttrs(): Array<Filter> {
+  getDefaultFilterAttrs(): Array<FilterNode> {
     return [
       {
         tag: 'feFlood',
@@ -405,8 +422,8 @@ export const shadowPropI18nMap = {
     _effectName: 'NN0426'
   },
   shadow: {
-    x: 'NN0416',
-    y: 'NN0417',
+    distance: 'NN0416',
+    angle: 'NN0417',
     radius: 'NN0418',
     spread: 'NN0419',
     opacity: 'NN0425',
@@ -419,10 +436,10 @@ export const shadowPropI18nMap = {
     _effectName: 'NN0412'
   },
   halo: {
-    x: 'NN0416',
-    y: 'NN0417',
-    width: 'NN0420',
-    blur: 'NN0418',
+    distance: 'NN0416',
+    angle: 'NN0417',
+    size: 'NN0420',
+    radius: 'NN0418',
     opacity: 'NN0425',
     _effectName: 'NN0413'
   },
@@ -438,7 +455,7 @@ export const shadowPropI18nMap = {
     radius: 'NN0418',
     spread: 'NN0419',
     opacity: 'NN0425',
-    width: 'NN0420',
+    size: 'NN0420',
     zIndex: 'NN0424',
     _effectName: 'NN0415'
   }
@@ -446,8 +463,8 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    x: { max: 180, min: -180 },
-    y: { max: 180, min: -180 },
+    distance: { max: 180, min: -180 },
+    angle: { max: 180, min: -180 },
     radius: { max: 100, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     spread: { max: 100, min: 0, weighting: 0.72 }
@@ -458,10 +475,10 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   halo: {
-    width: { max: 200, min: 50, weighting: 0.01 },
-    blur: { max: 100, min: 0, weighting: 2 },
-    x: { max: 100, min: -100, weighting: 0.5 },
-    y: { max: 100, min: -100, weighting: 0.5 },
+    distance: { max: 100, min: -100, weighting: 0.5 },
+    angle: { max: 180, min: -180, weighting: 0.5 },
+    size: { max: 200, min: 50, weighting: 0.01 },
+    radius: { max: 100, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
@@ -473,9 +490,9 @@ export const fieldRange = {
     spread: { max: 100, min: 0, weighting: 0.5 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 1.5 },
-    width: { max: 200, min: 50 },
-    x: { max: 100, min: -100, weighting: 0.005 },
-    y: { max: 100, min: -100, weighting: 0.005 },
+    size: { max: 200, min: 50 },
+    x: { max: 100, min: -100, weighting: 0.5 },
+    y: { max: 100, min: -100, weighting: 0.5 },
     zIndex: { max: 0, min: -1 }
   }
 } as any

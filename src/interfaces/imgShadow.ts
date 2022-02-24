@@ -7,9 +7,9 @@ export enum ShadowEffectType {
   blur = 'blur',
 }
 export interface IShadowEffect {
-  [key: string]: number
-  x: number,
-  y: number,
+  [key: string]: number,
+  distance: number,
+  angle: number,
   radius: number,
   spread: number,
   opacity: number
@@ -28,10 +28,10 @@ export interface IFrameEffect {
 }
 export interface IHaloEffect {
   [key: string]: number
-  width: number,
-  x: number,
-  y: number,
-  blur: number,
+  size: number,
+  distance: number,
+  angle: number,
+  radius: number,
   opacity: number
 }
 export interface IProjectionEffect {
@@ -41,7 +41,7 @@ export interface IProjectionEffect {
   x: number,
   y: number,
   opacity: number,
-  width: number,
+  size: number,
   zIndex: number
 }
 
