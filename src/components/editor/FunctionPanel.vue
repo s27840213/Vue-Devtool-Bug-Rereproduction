@@ -24,46 +24,17 @@
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
-    //- @Todo -> Simplify codes below ORZ
-    div(v-if="!isShowPagePreview")
-      div(v-if="inBgRemoveMode" class="p-20")
-        panel-bg-remove
-      div(v-else-if="!isGroup" class="p-20")
-        panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-        panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
-          @openFontsPanel="openFontsPanel"
-          v-on="$listeners")
-        panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
-        panel-photo-shadow(v-if="isSuperUser && layerType.currLayerType === 'image' && !isLocked" v-on="$listeners")
-        panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
-        panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-        panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-        panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked" v-on="$listeners")
-        panel-background-setting(v-if="selectedLayerNum===0" v-on="$listeners")
-      //- case for Group layer for handle the sub selected layer
-      div(v-else class="function-panel p-20")
-        template(v-if="!hasSubSelectedLayer")
-          panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-          panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
-            @openFontsPanel="openFontsPanel"
-            v-on="$listeners")
-
-          panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
-          panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
-          panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-          panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked" v-on="$listeners")
-        template(v-else)
-          panel-general
-          template(v-if="!isFontsPanelOpened && subLayerType === 'text' && !isLocked")
-            panel-text-setting(
-              @openFontsPanel="openFontsPanel()"
-              v-on="$listeners")
-            panel-text-effect-setting(v-on="$listeners")
-          panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
-          panel-photo-shadow(v-if="isSuperUser && layerType.targetLayerType === 'image' && !isLocked" v-on="$listeners")
-          panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+    div(v-if="!isShowPagePreview" class="p-20")
+      panel-bg-remove(v-if="showBgRemove")
+      panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
+      panel-general(v-if="showGeneral")
+      panel-page-setting(v-if="showPageSetting")
+      panel-background-setting(v-if="showPageSetting" v-on="$listeners")
+      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
+      panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
+      panel-photo-setting(v-if="showPhotoSetting")
+      panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
+      panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
 
 <script lang="ts">
@@ -164,6 +135,41 @@ export default Vue.extend({
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
     },
+    showBgRemove(): boolean {
+      return this.inBgRemoveMode
+    },
+    showFont(): boolean {
+      return !this.inBgRemoveMode &&
+        this.isFontsPanelOpened
+    },
+    showGeneral(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum !== 0
+    },
+    showPageSetting(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum === 0
+    },
+    showTextSetting(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('text')
+    },
+    showPhotoSetting(): boolean {
+      console.log('photo', this.targetIs('image'))
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('image') && this.singleTargetType()
+    },
+    showPhotoShadow(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.isSuperUser &&
+        this.targetIs('image') && this.selectedLayerNum === 1 && // for non group
+        (!this.isGroup || this.hasSubSelectedLayer) && // for group and has sub selected layer
+        !this.currSelectedInfo.types.has('frame') // for frame
+    },
+    showShapeSetting(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('shape') && this.singleTargetType()
+    },
     isSuperUser(): boolean {
       return generalUtils.isSuperUser
     },
@@ -189,6 +195,31 @@ export default Vue.extend({
     }
   },
   methods: {
+    targetIs(type: string): boolean {
+      if (this.isGroup) {
+        if (this.hasSubSelectedLayer) {
+          return this.subLayerType === type
+        } else {
+          return this.groupTypes.has(type)
+        }
+      } else {
+        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
+          return this.isFrameImage
+        }
+        return this.currSelectedInfo.types.has(type)
+      }
+    },
+    singleTargetType(): boolean {
+      if (this.isGroup) {
+        if (this.hasSubSelectedLayer) {
+          return true
+        } else {
+          return this.groupTypes.size === 1
+        }
+      } else {
+        return this.currSelectedInfo.types.size === 1
+      }
+    },
     openFontsPanel() {
       this.isFontsPanelOpened = true
     },
