@@ -198,7 +198,7 @@ export default Vue.extend({
           break
         default:
           this.blogPage = 'https://blog.vivipic.com/'
-          this.toturialPage = 'https://www.facebook.com/vivipic' + locale
+          this.toturialPage = 'https://blog.vivipic.com/us-tutorial/'
           this.servicePage = 'https://blog.vivipic.com/us-terms-of-service/'
           this.privacyPage = 'https://blog.vivipic.com/us-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/us-terms-of-use/'
