@@ -9,7 +9,7 @@
         ref="btn"
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="selectedLayersNum === 1 && isAdmin"
+      btn(v-if="isImage && isAdmin && !isFrame"
         class="full-width"
         type="gray-mid"
         ref="btn"
@@ -18,15 +18,6 @@
       v-click-outside="handleOutside"
       :imageAdjust="currLayerAdjust"
       @update="handleAdjust")
-    //- property-bar
-    //-   input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
-    //-   svg-icon(class="pointer"
-    //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-    //- action-bar(class="flex-evenly")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
-    //-     :key="`gp-action-icon-${index}`"
-    //-     class="pointer"
-    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 
 <script lang="ts">
@@ -73,6 +64,14 @@ export default Vue.extend({
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
+    },
+    isFrame(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('frame') && layers.length === 1
+    },
+    isImage(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('image') && layers.length === 1
     },
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]

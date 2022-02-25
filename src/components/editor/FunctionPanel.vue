@@ -33,6 +33,7 @@
       panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
       panel-photo-setting(v-if="showPhotoSetting")
+      panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
       panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
 
@@ -48,6 +49,7 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
@@ -55,6 +57,8 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import { LayerType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -68,7 +72,8 @@ export default Vue.extend({
     PanelShapeSetting,
     PanelTextEffectSetting,
     DownloadBtn,
-    PanelBgRemove
+    PanelBgRemove,
+    PanelPhotoShadow
   },
   data() {
     return {
@@ -150,12 +155,36 @@ export default Vue.extend({
         this.targetIs('text')
     },
     showPhotoSetting(): boolean {
+      console.log('photo', this.targetIs('image'))
       return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
-        this.targetIs('image') && this.singleTargetType() && this.isFrameImage
+        this.targetIs('image') && this.singleTargetType()
+    },
+    showPhotoShadow(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.isSuperUser &&
+        this.targetIs('image') && this.selectedLayerNum === 1 && // for non group
+        (!this.isGroup || this.hasSubSelectedLayer) && // for group and has sub selected layer
+        !this.currSelectedInfo.types.has('frame') // for frame
     },
     showShapeSetting(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
         this.targetIs('shape') && this.singleTargetType()
+    },
+    isSuperUser(): boolean {
+      return generalUtils.isSuperUser
+    },
+    layerType(): { [key: string]: string } {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      return {
+        currLayerType: currLayer.type,
+        targetLayerType: (() => {
+          if (subLayerIdx !== -1) {
+            return currLayer.type === LayerType.group
+              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+          }
+          return currLayer.type
+        })()
+      }
     }
   },
   watch: {

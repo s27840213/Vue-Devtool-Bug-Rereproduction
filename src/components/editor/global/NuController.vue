@@ -884,9 +884,9 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-          scale = 1
+          const scaleForImg = Math.max(width / this.getLayerWidth, height / this.getLayerHeight)
+          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scaleForImg, imgHeight * scaleForImg)
+          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scaleForImg, imgY * scaleForImg)
           break
         }
         case 'text':

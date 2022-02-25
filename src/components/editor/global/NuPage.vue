@@ -124,7 +124,7 @@
               nu-layer(style="opacity: 0.45"
                 :layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
-                :noClip="true"
+                :imgControl="true"
                 :config="getCurrSubSelectedLayerShown")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
@@ -133,12 +133,14 @@
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
-                                    :config="Object.assign(getCurrSubSelectedLayerShown, { pointerEvents: 'none' }, { forRender: true })")
+                                    :forRender="true"
+                                    :pointerEvents="'none'"
+                                    :config="getCurrSubSelectedLayerShown")
             template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:style="'opacity: 0.45'"
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
-                :noClip="true"
+                :imgControl="true"
                 :config="getCurrLayer")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
@@ -311,6 +313,7 @@ export default Vue.extend({
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
           image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
         }
+        Object.assign(image, { forRender: true })
         return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
       }
       return undefined

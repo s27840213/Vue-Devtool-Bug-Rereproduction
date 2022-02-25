@@ -132,6 +132,7 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {
@@ -208,11 +209,13 @@ export default Vue.extend({
       return effects[currentEffect].includes('color')
     },
     currentStyle(): any {
-      const { styles } = TextEffectUtils.getCurrentLayer()
+      // const { styles } = TextEffectUtils.getCurrentLayer()
+      const { styles } = layerUtils.getCurrConfig
       return styles || {}
     },
     currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
+      console.log(textEffect.name)
       return textEffect.name || 'none'
     },
     currentShape(): string {
