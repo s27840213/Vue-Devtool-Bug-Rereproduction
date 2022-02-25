@@ -18,12 +18,29 @@
       div(class="brand-kit__tab")
         brand-kit-tab
     nu-footer
-    div(v-if="isDraggedOver" class="dim-background")
-      div(class="upload-large")
-        svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
-        span {{ $t(hintText) }}
-      div(class="upload-small")
-          span {{ `・${$t('NN0415', { element: $t(elementType) })}： ${fileTypesString}` }}
+    div(v-if="isOverlayed" class="dim-background")
+      template(v-if="isDraggedOver")
+        div(class="upload-large")
+          svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
+          span {{ $t(hintText) }}
+        div(class="upload-small")
+            span {{ `・${$t('NN0415', { element: $t(elementType) })}： ${fileTypesString}` }}
+      div(v-if="isMessageShowing" class="delete-confirm")
+        div(class="delete-confirm__title")
+          span {{ $t('NN0433') }}
+        div(class="delete-confirm__description")
+          i18n(path="NN0434" tag="span")
+            template(#itemName)
+              span(class="delete-confirm__item-name") {{ deleteBuffer ? deleteBuffer.name : '' }}
+        div(class="delete-confirm__description")
+          span {{ $t('NN0435') }}
+        div(class="delete-confirm__description")
+          span {{ $t('NN0436') }}
+        div(class="delete-confirm__buttons")
+          div(class="delete-confirm__buttons__cancel pointer")
+            span {{ $t('NN0203') }}
+          div(class="delete-confirm__buttons__confirm pointer")
+            span {{ $t('NN0437') }}
 </template>
 
 <script lang="ts">
@@ -35,6 +52,7 @@ import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
+import { IBrandColorPalette, IBrandLogo } from '@/interfaces/brandkit'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -51,6 +69,8 @@ export default Vue.extend({
   data() {
     return {
       isDraggedOver: false,
+      isMessageShowing: false,
+      deleteBuffer: undefined as IBrandLogo | IBrandColorPalette | undefined,
       uploadHint: {
         logo: {
           text: 'NN0413',
@@ -78,6 +98,9 @@ export default Vue.extend({
     },
     elementType(): string {
       return this.uploadHint[this.selectedTab as 'logo' | 'text']?.elementTypeText ?? ''
+    },
+    isOverlayed(): boolean {
+      return this.isDraggedOver || this.isMessageShowing
     }
   },
   methods: {
@@ -133,7 +156,6 @@ export default Vue.extend({
   top: 0px;
   left: 0px;
   background: rgba(0, 0, 0, 0.3);
-  pointer-events: none;
   transform-style: preserve-3d;
   z-index: 1000;
   display: flex;
@@ -167,6 +189,52 @@ export default Vue.extend({
     line-height: 28px;
     color: white;
     text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.delete-confirm {
+  background: #FFFFFF;
+  box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
+  border-radius: 6px;
+  padding: 20px;
+  &__title {
+    @include text-H6;
+    color: setColor(gray-2);
+    margin-bottom: 20px;
+  }
+  &__description {
+    @include body-SM;
+    color: setColor(gray-2);
+    text-align: left;
+  }
+  &__item-name {
+    @include overline-LG;
+    color: setColor(gray-2);
+  }
+  &__buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    justify-content: center;
+    &__cancel {
+      background: setColor(gray-4);
+      border-radius: 5px;
+      padding: 4px 23px;
+      & > span {
+        @include btn-SM;
+        color: setColor(gray-2);
+      }
+    }
+    &__confirm {
+      background: #EC5858;
+      border-radius: 5px;
+      padding: 4px 23px;
+      & > span {
+        @include btn-SM;
+        color: setColor(gray-7);
+      }
+    }
   }
 }
 </style>
