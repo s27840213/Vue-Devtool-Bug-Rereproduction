@@ -219,6 +219,10 @@ class BrandKitUtils {
     return `${type},${textStyle.font.name},${textStyle.size}`
   }
 
+  getDownloadUrl(logo: IBrandLogo): string {
+    return logo.url
+  }
+
   getDisplayedBrandName(brand: IBrand): string {
     return brand.name === '' ? `${i18n.t('NN0397')}` : brand.name
   }

@@ -26,7 +26,8 @@
             div(class="brand-kit-tab-logo__item__menu__name")
               span {{ logo.name }}
             div(class="brand-kit-tab-logo__item__menu__hr")
-            div(class="brand-kit-tab-logo__item__menu__row pointer")
+            div(class="brand-kit-tab-logo__item__menu__row pointer"
+              @click="handleDownload(logo)")
               svg-icon(iconName="download"
                       iconWidth="24px"
                       iconColor="gray-2")
@@ -82,6 +83,13 @@ export default Vue.extend({
     },
     handleUploadLogo() {
       uploadUtils.chooseAssets('logo')
+    },
+    handleDownload(logo: IBrandLogo) {
+      const url = brandkitUtils.getDownloadUrl(logo)
+      const a = document.createElement('a')
+      a.setAttribute('href', url)
+      a.setAttribute('download', logo.name)
+      a.click()
     },
     handleDeleteLogo(logo: IBrandLogo) {
       this.menuOpenLogoId = ''
