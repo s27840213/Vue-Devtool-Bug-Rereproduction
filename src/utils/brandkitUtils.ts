@@ -199,6 +199,10 @@ class BrandKitUtils {
     store.dispatch('brandkit/createColor', paletteId)
   }
 
+  updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
+    store.dispatch('brandkit/updateTextStyle', { type, style })
+  }
+
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
     if (clear) {
       store.commit('brandkit/SET_brands', [])
@@ -232,6 +236,22 @@ class BrandKitUtils {
 
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
     return { ...colors[colors.length - 1], id: generalUtils.generateAssetId() }
+  }
+
+  getCurrentValues(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }): {[key: string]: any} {
+    const textStyle = (brand.textStyleSetting)[`${info.type}Style`] as any
+    if (!textStyle) return {}
+    const res = {} as {[key: string]: any}
+    for (const k of Object.keys(info.style)) {
+      res[k] = textStyle[k]
+    }
+    return res
+  }
+
+  getTextIsDefault(brand: any, type: string): boolean {
+    const textStyle = (brand.textStyleSetting)[`${type}Style`] as any
+    if (!textStyle) return false
+    return textStyle.isDefault
   }
 
   composeSettingText(textStyle: IBrandTextStyle, type: string): string {

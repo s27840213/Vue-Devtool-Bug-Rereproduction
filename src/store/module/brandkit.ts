@@ -1,5 +1,5 @@
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
@@ -174,6 +174,24 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }, () => {
       showNetworkError()
     })
+  },
+  async updateTextStyle({ state, commit }, updateInfo: { type: string, style: Partial<IBrandTextStyle> }) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (!currentBrand) return
+    const isDefaultBeforeUpdate = brandkitUtils.getTextIsDefault(currentBrand, updateInfo.type)
+    brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_updateTextStyle', updateInfo)
+      if (isDefaultBeforeUpdate) {
+        commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: { isDefault: false } })
+      }
+    }, () => {
+      commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: brandkitUtils.getCurrentValues(currentBrand, updateInfo) })
+      if (isDefaultBeforeUpdate) {
+        commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: { isDefault: true } })
+      }
+    }, () => {
+      showNetworkError()
+    })
   }
 }
 
@@ -270,6 +288,15 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!currentBrand) return
     const index = brandkitUtils.findInsertIndex(currentBrand.fonts, font)
     currentBrand.fonts.splice(index, 0, font)
+  },
+  UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { type: string, style: any }) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (!currentBrand) return
+    const textStyle = (currentBrand.textStyleSetting as any)[`${updateInfo.type}Style`]
+    if (!textStyle) return
+    for (const [key, value] of Object.entries(updateInfo.style)) {
+      textStyle[key] = value
+    }
   }
 }
 

@@ -139,7 +139,7 @@ export default Vue.extend({
       }
     },
     handleValueUpdate(value: number) {
-      console.log(value)
+      brandkitUtils.updateTextStyle(this.type, { size: value })
     },
     isValidFloat(value: string) {
       return value.match(/[+-]?\d+(\.\d+)?/)
@@ -153,7 +153,7 @@ export default Vue.extend({
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), 6, 800)
-        console.log(value)
+        brandkitUtils.updateTextStyle(this.type, { size: parseInt(value) })
       }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
@@ -161,7 +161,7 @@ export default Vue.extend({
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
-            console.log(step)
+            brandkitUtils.updateTextStyle(this.type, { size: this.fontSize + step })
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -173,7 +173,7 @@ export default Vue.extend({
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
         if (new Date().getTime() - startTime < 500) {
-          console.log(step)
+          brandkitUtils.updateTextStyle(this.type, { size: this.fontSize + step })
         }
         clearInterval(interval)
       }
@@ -183,13 +183,13 @@ export default Vue.extend({
     onPropertyClick(iconName: string) {
       switch (iconName) {
         case 'bold':
-          console.log(this.textStyle.bold)
+          brandkitUtils.updateTextStyle(this.type, { bold: !this.textStyle.bold })
           break
         case 'underline':
-          console.log(this.textStyle.underline)
+          brandkitUtils.updateTextStyle(this.type, { underline: !this.textStyle.underline })
           break
         case 'italic':
-          console.log(this.textStyle.italic)
+          brandkitUtils.updateTextStyle(this.type, { italic: !this.textStyle.italic })
           break
       }
     }
