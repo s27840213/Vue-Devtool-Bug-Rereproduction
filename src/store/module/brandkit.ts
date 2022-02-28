@@ -169,7 +169,7 @@ const mutations: MutationTree<IBrandKitState> = {
     state.selectedTab = selectedTab
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
-    const index = brandkitUtils.findInsertIndex(state.brands, brand)
+    const index = brandkitUtils.findInsertIndex(state.brands, brand, true)
     state.brands.splice(index, 0, brand)
   },
   UPDATE_deleteBrand(state: IBrandKitState, brand: IBrand) {
