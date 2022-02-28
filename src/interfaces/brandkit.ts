@@ -62,6 +62,11 @@ export interface IBrandFont {
   textPrevUrl: string
 }
 
+export interface IDeletingItem {
+  type: string,
+  content: IBrandLogo | IBrandColorPalette | IBrand | IBrandFont
+}
+
 export interface IBrandParams {
 
 }

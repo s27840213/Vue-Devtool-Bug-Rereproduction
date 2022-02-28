@@ -12,11 +12,11 @@
     div(v-else class="brand-kit__main")
       div(class="brand-kit__header")
         div(class="brand-kit__selector")
-          brand-selector
+          brand-selector(@deleteItem="handleDeleteItem")
         brand-kit-add-btn(:text="`${$t('NN0396')}`"
                           @click.native="addNewBrand")
       div(class="brand-kit__tab")
-        brand-kit-tab
+        brand-kit-tab(@deleteItem="handleDeleteItem")
     nu-footer
     div(v-if="isOverlayed" class="dim-background")
       template(v-if="isDraggedOver")
@@ -31,15 +31,17 @@
         div(class="delete-confirm__description")
           i18n(path="NN0434" tag="span")
             template(#itemName)
-              span(class="delete-confirm__item-name") {{ deleteBuffer ? deleteBuffer.name : '' }}
+              span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
         div(class="delete-confirm__description")
           span {{ $t('NN0435') }}
         div(class="delete-confirm__description")
           span {{ $t('NN0436') }}
         div(class="delete-confirm__buttons")
-          div(class="delete-confirm__buttons__cancel pointer")
+          div(class="delete-confirm__buttons__cancel pointer"
+            @click="handleClearDeletion")
             span {{ $t('NN0203') }}
-          div(class="delete-confirm__buttons__confirm pointer")
+          div(class="delete-confirm__buttons__confirm pointer"
+            @click="handleConfirmDeletion")
             span {{ $t('NN0437') }}
 </template>
 
@@ -52,7 +54,7 @@ import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
-import { IBrandColorPalette, IBrandLogo } from '@/interfaces/brandkit'
+import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -70,7 +72,7 @@ export default Vue.extend({
     return {
       isDraggedOver: false,
       isMessageShowing: false,
-      deleteBuffer: undefined as IBrandLogo | IBrandColorPalette | undefined,
+      deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {
           text: 'NN0413',
@@ -113,6 +115,9 @@ export default Vue.extend({
     isDragDropValid(): boolean {
       return Object.keys(this.uploadHint).includes(this.selectedTab)
     },
+    getDisplayedName(item: IDeletingItem): string {
+      return brandkitUtils.getDisplayedName(item.type, item.content)
+    },
     handleDragEnter() {
       if (!this.isDragDropValid()) return
       this.isDraggedOver = true
@@ -124,6 +129,32 @@ export default Vue.extend({
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
       console.log(e.dataTransfer?.files)
+    },
+    handleDeleteItem(item: IDeletingItem) {
+      this.deleteBuffer = item
+      this.isMessageShowing = true
+    },
+    handleClearDeletion() {
+      this.deleteBuffer = undefined
+      this.isMessageShowing = false
+    },
+    handleConfirmDeletion() {
+      if (!this.deleteBuffer) return
+      switch (this.deleteBuffer.type) {
+        case 'logo':
+          brandkitUtils.removeLogo(this.deleteBuffer.content as IBrandLogo)
+          break
+        case 'palette':
+          brandkitUtils.removePalette(this.deleteBuffer.content as IBrandColorPalette)
+          break
+        case 'brand':
+          brandkitUtils.removeBrand(this.deleteBuffer.content as IBrand)
+          break
+        case 'font':
+          brandkitUtils.removeFont(this.deleteBuffer.content as IBrandFont)
+          break
+      }
+      this.handleClearDeletion()
     }
   }
 })

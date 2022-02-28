@@ -32,7 +32,8 @@
             div(class="brand-selector__brand-list__item-menu-row pointer")
               svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
               span {{ $t('NN0251') }}
-            div(class="brand-selector__brand-list__item-menu-row pointer")
+            div(class="brand-selector__brand-list__item-menu-row pointer"
+              @click="handleDeleteBrand(brand)")
               svg-icon(iconName="trash" iconWidth="24px" iconColor="gray-2")
               span {{ $t('NN0034') }}
 </template>
@@ -63,7 +64,7 @@ export default Vue.extend({
       currentBrand: 'getCurrentBrand'
     }),
     brandName(): string {
-      return this.getDisplayedBrandName(this.currentBrand)
+      return brandkitUtils.getDisplayedBrandName(this.currentBrand)
     }
   },
   watch: {
@@ -115,6 +116,12 @@ export default Vue.extend({
     handleMouseLeave() {
       this.currentHoverBrandId = ''
     },
+    handleDeleteBrand(brand: IBrand) {
+      this.$emit('deleteItem', {
+        type: 'brand',
+        content: brand
+      })
+    },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.brandName) {
         this.handleNameEditEnd()
@@ -128,7 +135,7 @@ export default Vue.extend({
       return this.currentBrandMenuId === brand.id
     },
     getDisplayedBrandName(brand: IBrand): string {
-      return brand.name === '' ? `${this.$t('NN0397')}` : brand.name
+      return brandkitUtils.getDisplayedBrandName(brand)
     }
   }
 })

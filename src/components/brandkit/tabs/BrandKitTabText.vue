@@ -59,7 +59,10 @@ export default Vue.extend({
       uploadUtils.chooseAssets('font')
     },
     handleDeleteFont(font: IBrandFont) {
-      brandkitUtils.removeFont(font)
+      this.$emit('deleteItem', {
+        type: 'font',
+        content: font
+      })
     }
   }
 })

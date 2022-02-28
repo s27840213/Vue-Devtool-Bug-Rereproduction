@@ -68,6 +68,15 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       showNetworkError()
     })
   },
+  async removeBrand({ commit }, brand: IBrand) {
+    brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_deleteBrand', brand)
+    }, () => {
+      commit('UPDATE_addBrand', brand)
+    }, () => {
+      showNetworkError()
+    })
+  },
   async removeLogo({ commit }, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
@@ -176,6 +185,9 @@ const mutations: MutationTree<IBrandKitState> = {
     const index = state.brands.findIndex(brand_ => brand_.id === brand.id)
     if (index < 0) return
     state.brands.splice(index, 1)
+    if (state.brands.length === 0) {
+      state.brands = [brandkitUtils.createDefaultBrand()]
+    }
     if (state.currentBrandId === brand.id) {
       state.currentBrandId = state.brands[0].id
     }

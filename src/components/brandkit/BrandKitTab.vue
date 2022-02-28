@@ -7,7 +7,7 @@
         div(class="brand-kit-tab__tab-name")
           span(class="brand-kit-tab__tab-name-text") {{ $t(tabNames[tab]) }}
     div(class="brand-kit-tab__content")
-      component(:is="`brand-kit-tab-${selectedTab}`")
+      component(:is="`brand-kit-tab-${selectedTab}`" @deleteItem="handleDeleteItem")
 </template>
 
 <script lang="ts">
@@ -17,6 +17,7 @@ import BrandKitTabLogo from '@/components/brandkit/tabs/BrandKitTabLogo.vue'
 import BrandKitTabText from '@/components/brandkit/tabs/BrandKitTabText.vue'
 import BrandKitTabColor from '@/components/brandkit/tabs/BrandKitTabColor.vue'
 import { mapGetters, mapMutations } from 'vuex'
+import { IDeletingItem } from '@/interfaces/brandkit'
 
 export default Vue.extend({
   components: {
@@ -45,6 +46,9 @@ export default Vue.extend({
     },
     handleSelectTab(tabKey: string) {
       this.setSelectedTab(tabKey)
+    },
+    handleDeleteItem(item: IDeletingItem) {
+      this.$emit('deleteItem', item)
     }
   }
 })

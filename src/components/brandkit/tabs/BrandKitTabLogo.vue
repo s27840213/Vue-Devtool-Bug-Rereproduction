@@ -46,7 +46,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -86,7 +85,10 @@ export default Vue.extend({
     },
     handleDeleteLogo(logo: IBrandLogo) {
       this.menuOpenLogoId = ''
-      brandkitUtils.removeLogo(logo)
+      this.$emit('deleteItem', {
+        type: 'logo',
+        content: logo
+      })
     }
   }
 })

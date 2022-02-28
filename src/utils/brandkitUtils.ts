@@ -1,3 +1,4 @@
+import i18n from '@/i18n'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import generalUtils from './generalUtils'
@@ -147,6 +148,10 @@ class BrandKitUtils {
     store.dispatch('brandkit/createBrand')
   }
 
+  removeBrand(brand: IBrand) {
+    store.dispatch('brandkit/removeBrand', brand)
+  }
+
   removeLogo(logo: IBrandLogo) {
     store.dispatch('brandkit/removeLogo', logo)
   }
@@ -212,6 +217,25 @@ class BrandKitUtils {
 
   composeSettingText(textStyle: IBrandTextStyle, type: string): string {
     return `${type},${textStyle.font.name},${textStyle.size}`
+  }
+
+  getDisplayedBrandName(brand: IBrand): string {
+    return brand.name === '' ? `${i18n.t('NN0397')}` : brand.name
+  }
+
+  getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
+    return colorPalette.name === '' ? `${i18n.t('NN0405')}` : colorPalette.name
+  }
+
+  getDisplayedName(type: string, content: any) {
+    switch (type) {
+      case 'brand':
+        return this.getDisplayedBrandName(content as IBrand)
+      case 'palette':
+        return this.getDisplayedPaletteName(content as IBrandColorPalette)
+      default:
+        return content.name
+    }
   }
 }
 

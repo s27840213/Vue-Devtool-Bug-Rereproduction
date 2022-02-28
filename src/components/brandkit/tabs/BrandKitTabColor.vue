@@ -39,7 +39,6 @@ import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
@@ -70,7 +69,7 @@ export default Vue.extend({
       return { backgroundColor: color }
     },
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
-      return colorPalette.name === '' ? `${this.$t('NN0405')}` : colorPalette.name
+      return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
     checkSelected(paletteId: string, color: IBrandColor): boolean {
       return this.selectedColor.paletteId === paletteId && this.selectedColor.colorId === color.id
@@ -88,7 +87,10 @@ export default Vue.extend({
       })
     },
     handleDeletePalette(palette: IBrandColorPalette) {
-      brandkitUtils.removePalette(palette)
+      this.$emit('deleteItem', {
+        type: 'palette',
+        content: palette
+      })
     },
     handleSelectColor(paletteId: string, color: IBrandColor) {
       if (this.checkSelected(paletteId, color)) {
