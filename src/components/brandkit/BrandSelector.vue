@@ -29,7 +29,8 @@
             svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
           div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
           div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
-            div(class="brand-selector__brand-list__item-menu-row pointer")
+            div(class="brand-selector__brand-list__item-menu-row pointer"
+              @click="handleCopyBrand(brand)")
               svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
               span {{ $t('NN0251') }}
             div(class="brand-selector__brand-list__item-menu-row pointer"
@@ -115,6 +116,9 @@ export default Vue.extend({
     },
     handleMouseLeave() {
       this.currentHoverBrandId = ''
+    },
+    handleCopyBrand(brand: IBrand) {
+      brandkitUtils.copyBrand(brand)
     },
     handleDeleteBrand(brand: IBrand) {
       this.$emit('deleteItem', {

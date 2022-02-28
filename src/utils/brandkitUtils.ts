@@ -148,6 +148,10 @@ class BrandKitUtils {
     store.dispatch('brandkit/createBrand')
   }
 
+  copyBrand(brand: IBrand) {
+    store.dispatch('brandkit/copyBrand', brand)
+  }
+
   removeBrand(brand: IBrand) {
     store.dispatch('brandkit/removeBrand', brand)
   }

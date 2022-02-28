@@ -4,6 +4,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -64,6 +65,18 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('SET_currentBrand', brand)
     }, () => {
       commit('UPDATE_deleteBrand', brand)
+    }, () => {
+      showNetworkError()
+    })
+  },
+  async copyBrand({ commit }, brand: IBrand) {
+    const newBrand = generalUtils.deepCopy(brand)
+    newBrand.id = generalUtils.generateAssetId()
+    brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_addBrand', newBrand)
+      commit('SET_currentBrand', newBrand)
+    }, () => {
+      commit('UPDATE_deleteBrand', newBrand)
     }, () => {
       showNetworkError()
     })
