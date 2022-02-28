@@ -43,9 +43,9 @@ class BrandKitUtils {
         height: 171
       }],
       textStyleSetting: {
-        headingStyle: this.createDefaultTextStyle(),
-        subheadingStyle: this.createDefaultTextStyle(),
-        bodyStyle: this.createDefaultTextStyle()
+        headingStyle: this.createDefaultTextStyle('heading'),
+        subheadingStyle: this.createDefaultTextStyle('subheading'),
+        bodyStyle: this.createDefaultTextStyle('body')
       },
       colorPalettes: [{
         id: generalUtils.generateAssetId(),
@@ -90,13 +90,16 @@ class BrandKitUtils {
     }
   }
 
-  createDefaultTextStyle(): IBrandTextStyle {
-    return {
+  createDefaultTextStyle(type: string): IBrandTextStyle {
+    const res = {
       font: {
         id: '',
         name: '',
         type: '',
-        ver: 0
+        ver: 0,
+        textPrevUrl: '',
+        namePrevUrl: '',
+        createTime: ''
       },
       bold: false,
       underline: false,
@@ -104,6 +107,18 @@ class BrandKitUtils {
       size: -1,
       isDefault: true
     }
+    switch (type) {
+      case 'heading':
+        res.size = 60
+        break
+      case 'subheading':
+        res.size = 34
+        break
+      case 'body':
+        res.size = 24
+        break
+    }
+    return res
   }
 
   createDefaultPalette(): IBrandColorPalette {

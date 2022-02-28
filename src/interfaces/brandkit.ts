@@ -24,19 +24,12 @@ export interface IBrandTextStyleSetting {
 }
 
 export interface IBrandTextStyle {
-  font: IBrandTextFont,
+  font: IBrandFont,
   size: number,
   bold: boolean,
   underline: boolean,
   italic: boolean,
   isDefault: boolean
-}
-
-export interface IBrandTextFont {
-  id: string,
-  name: string,
-  type: string,
-  ver: number
 }
 
 export interface IBrandColorPalette {
