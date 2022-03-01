@@ -34,7 +34,7 @@
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
       panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
       //- panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
-      //- panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
+      panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
 
 <script lang="ts">
