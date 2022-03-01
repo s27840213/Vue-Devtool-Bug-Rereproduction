@@ -1135,12 +1135,14 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
+        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,
           imgY: styles.imgY,
           imgWidth: styles.imgWidth,
           imgHeight: styles.imgHeight,
+          shadow: styles.shadow,
           ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
         }
       case 'text':

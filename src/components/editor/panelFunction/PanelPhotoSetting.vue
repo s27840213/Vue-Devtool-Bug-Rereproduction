@@ -4,7 +4,7 @@
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="show === btn.show || (btn.name === 'crop' && isCropping) || (btn.name==='remove-bg' && inBgRemoveMode) ? 'active' : ''"
+        :class="activeBtn(btn) ? 'active' : ''"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
@@ -33,6 +33,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 
 export default Vue.extend({
   data() {
@@ -41,7 +42,8 @@ export default Vue.extend({
       btns: [
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
+        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
+        { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow' }
       ],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
@@ -50,7 +52,8 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   components: {
-    PopupAdjust
+    PopupAdjust,
+    PanelPhotoShadow
   },
   computed: {
     ...mapGetters({
@@ -114,6 +117,12 @@ export default Vue.extend({
     ...mapActions({
       removeBg: 'user/removeBg'
     }),
+    activeBtn(btn: { [key: string]: string }): boolean {
+      if (this.show === btn.show) return true
+      if (btn.name === 'crop' && this.isCropping) return true
+      if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
+      return false
+    },
     handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
