@@ -139,7 +139,8 @@ export default {
         locale: this.getLocale(),
         src_obj: srcObj,
         team_id: this.getTeamId(),
-        ...(aspect !== undefined && { aspect })
+        ...(aspect !== undefined && { aspect }),
+        debug: 1
       }
     }))
   }

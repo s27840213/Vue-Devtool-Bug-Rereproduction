@@ -541,7 +541,7 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        'pointer-events': this.isImgControl || (this.getLayerType === 'image' && this.isMoving) ? 'none' : 'initial',
+        'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
