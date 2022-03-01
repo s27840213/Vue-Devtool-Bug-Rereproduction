@@ -4,7 +4,7 @@
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="activeBtn(btn) ? 'active' : ''"
+        :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0 && btn.name === 'shadow' ? 'displayNone' : '']"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
@@ -17,12 +17,12 @@
     component(:is="show || 'div'"
       v-click-outside="handleOutside"
       :imageAdjust="currLayerAdjust"
-      @update="handleAdjust")
+      @update="handleAdjust" v-on="$listeners")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -64,6 +64,9 @@ export default Vue.extend({
       currSelectedLayers: 'getCurrSelectedLayers',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isAdmin: 'user/isAdmin'
+    }),
+    ...mapState('user', {
+      isSuperUser: 'role'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
@@ -257,6 +260,9 @@ export default Vue.extend({
         border: 2px solid setColor(blue-1);
         color: setColor(blue-1);
         padding: 8px 20px;
+      }
+      &.displayNone {
+        display: none;
       }
     }
   }
