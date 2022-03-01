@@ -123,8 +123,7 @@ class ImageShadowUtils {
 
     switch (shadow.currentEffect) {
       case ShadowEffectType.halo: {
-        const { radius, distance, angle, size, opacity } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity', 'size', 'radius', 'angle']) as ShadowEffects
+        const { radius, distance, angle, size, opacity } = effect as ShadowEffects
         const x = distance * mathUtils.cos(angle)
         const y = distance * mathUtils.sin(angle)
         return {
@@ -139,11 +138,11 @@ class ImageShadowUtils {
           height: `${size}%`,
           bottom: `${-y}%`,
           left: `${x - (size - 100) / 2}%`,
-          filter: `blur(${radius}px)`
+          filter: `blur(${radius * scale}px)`
         }
       }
       case ShadowEffectType.projection: {
-        const { radius, spread, opacity, x, y, size, zIndex } = mathUtils
+        const { radius, spread, opacity, x, y, size } = mathUtils
           .multipy(scale, effect as ShadowEffects, ['opacity', 'size']) as ShadowEffects
         return {
           width: `${size}%`,
@@ -440,7 +439,7 @@ export const shadowPropI18nMap = {
   },
   frame: {
     radius: 'NN0426',
-    spread: 'NN0421',
+    spread: 'NN0423',
     opacity: 'NN0427',
     _effectName: 'NN0430'
   },

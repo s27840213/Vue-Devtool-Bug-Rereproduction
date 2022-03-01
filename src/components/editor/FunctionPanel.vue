@@ -33,7 +33,7 @@
       panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
       panel-photo-setting(v-if="showPhotoSetting")
-      panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
+      //- panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
       panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
 

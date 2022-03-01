@@ -176,6 +176,7 @@ export default Vue.extend({
 
 .img-shadow-effect {
   position: absolute;;
+  pointer-events: none;
   display: block;
   border-radius: 100px/50px;
 }

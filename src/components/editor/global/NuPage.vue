@@ -141,10 +141,10 @@
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
                 :imgControl="true"
-                :config="getCurrLayer")
+                :config="Object.assign(getCurrLayer, { forRender: true })")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
-                :config="getCurrLayer")
+                :config="Object.assign(getCurrLayer, { forRender: true })")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSelectedIndex"
                                     :pageIndex="pageIndex"
@@ -285,7 +285,7 @@ export default Vue.extend({
     }),
     ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
-      return this.getLayer(this.pageIndex, this.currSelectedIndex)
+      return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },
     getCurrSubSelectedLayer(): ILayer | undefined {
       const layer = this.getCurrLayer

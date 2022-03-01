@@ -47,7 +47,7 @@ export default Vue.extend({
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
       (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
-    if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
+    if (!this.config.forRender && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
       .includes(this.config.styles.shadow.currentEffect) && !isPrimaryLayerFrame) {
       this.handleNewShadowEffect(true)
     }
