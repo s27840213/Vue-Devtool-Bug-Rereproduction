@@ -25,7 +25,7 @@
           svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
           span {{ $t(hintText) }}
         div(class="upload-small")
-            span {{ `・${$t('NN0415', { element: $t(elementType) })}： ${fileTypesString}` }}
+            span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
       div(v-if="isMessageShowing" class="delete-confirm")
         div(class="delete-confirm__title")
           span {{ $t('NN0433') }}
@@ -81,7 +81,7 @@ export default Vue.extend({
           elementTypeText: 'NN0416'
         },
         text: {
-          text: 'NN0414',
+          text: 'NN0415',
           fileTypes: ['otf', 'otc', 'ttf', 'ttc'],
           elementTypeText: 'NN0417'
         }
