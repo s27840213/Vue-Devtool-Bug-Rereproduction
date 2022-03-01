@@ -10,6 +10,12 @@
       :disableAlpha="true")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
+        svg-icon(class="pointer"
+          iconName="eye-dropper"
+          :iconWidth="'20px'"
+          :iconColor="'gray-2'"
+          @click.native="eyeDropper"
+          v-hint="$t('NN0407')")
         span(class="body-1") Hex
         div(class="color-picker__input")
           div(:style="{'background-color': convertedHex}")
@@ -19,8 +25,6 @@
             spellcheck="false"
             v-model="color"
             maxlength="7")
-        //- svg-icon(class="pointer"
-        //- :iconName="'color-picker'" :iconWidth="'20px'" :iconColor="'gray-2'")
       template(v-if="showColorSlip")
         div(class="color-picker__colors")
           div(class="text-left")
@@ -57,6 +61,7 @@ import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -91,37 +96,20 @@ export default Vue.extend({
       let result = ''
       const len = hex.length
       switch (len) {
-        case 0: {
+        case 0:
           result = '000000'
           break
-        }
-        case 1: {
+        case 1:
+        case 2:
+        case 3:
           hex = hex.map((val: string) => val + val)
           result = this.paddingRight(hex.join(''), 6)
           break
-        }
-        case 2: {
-          hex = hex.map((val: string) => val + val)
+        case 4:
+        case 5:
+        case 6:
           result = this.paddingRight(hex.join(''), 6)
           break
-        }
-        case 3: {
-          hex = hex.map((val: string) => val + val)
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
-        case 4: {
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
-        case 5: {
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
-        case 6: {
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        }
       }
       this.$emit('update', `#${result}`)
       return `#${result}`
@@ -173,6 +161,19 @@ export default Vue.extend({
     },
     onmouseup() {
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
+    },
+    eyeDropper() {
+      if (!(window as any).EyeDropper) {
+        Vue.notify({ group: 'error', text: `${i18n.t('NN0406')}` })
+        return
+      }
+
+      const eyeDropper = new (window as any).EyeDropper()
+      if (eyeDropper !== undefined) {
+        eyeDropper.open().then((result: {sRGBHex: string}) => {
+          this.color = result.sRGBHex
+        })
+      }
     }
   }
 })

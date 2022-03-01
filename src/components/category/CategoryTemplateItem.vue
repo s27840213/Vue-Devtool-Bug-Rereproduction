@@ -20,6 +20,7 @@ import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
+import page from '@/store/module/page'
 
 export default Vue.extend({
   components: { ImageCarousel },
@@ -98,7 +99,7 @@ export default Vue.extend({
        */
       if (this.isDetailPage) {
         const { width: pageWidth = 1000 } = pageUtils.getPageWidth()
-        const ratio = (matchCover.width || width) / pageWidth
+        const ratio = pageWidth / (matchCover.width || width)
         const resize = { width: pageWidth, height: (matchCover.height || height) * ratio }
         return cb(resize)
       }

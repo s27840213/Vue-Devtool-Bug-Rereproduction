@@ -183,9 +183,24 @@ export default Vue.extend({
         vmid: 'og:image'
       },
       {
-        property: 'og:description',
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      },
+      {
+        property: 'twitter:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'twitter:title'
+      },
+      {
+        property: 'twitter:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'twitter:image'
+      },
+      {
+        property: 'twitter:description',
         content: `${this.$t('OG0002')}`,
-        vmid: 'og:description'
+        vmid: 'twitter:description'
       },
       {
         property: 'og:url',
@@ -193,6 +208,7 @@ export default Vue.extend({
         vmid: 'og:url'
       }
     ]
+
     const title = `${this.$t('SE0001')}`
     // const htmlAttrs = {
     //   lang: `${this.$t('SE0003')}`

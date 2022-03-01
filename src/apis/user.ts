@@ -1,9 +1,21 @@
 /* eslint-disable camelcase */
 import axios from '@/apis'
 import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
+import { SrcObj } from '@/interfaces/gallery'
+import store from '@/store'
+import apiUtils from '@/utils/apiUtils'
 import { AxiosPromise } from 'axios'
 
 export default {
+  getToken(): string {
+    return store.getters['user/getToken']
+  },
+  getLocale(): string {
+    return store.getters['user/getLocale']
+  },
+  getTeamId(): string {
+    return store.getters['user/getTeamId']
+  },
   getAllAssets: (token: string, attrs = {}): AxiosPromise => axios('/list-asset', {
     method: 'POST',
     data: {
@@ -118,5 +130,18 @@ export default {
       token,
       view_guide
     }
-  })
+  }),
+  async removeBg(srcObj: SrcObj, aspect?: number): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/remove-bg', {
+      method: 'POST',
+      data: {
+        token: this.getToken(),
+        locale: this.getLocale(),
+        src_obj: srcObj,
+        team_id: this.getTeamId(),
+        ...(aspect !== undefined && { aspect }),
+        debug: 1
+      }
+    }))
+  }
 }

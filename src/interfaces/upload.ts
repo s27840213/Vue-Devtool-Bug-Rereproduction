@@ -14,9 +14,11 @@ export interface IUploadAssetResponse {
     file_name: string,
     height: number,
     name: string,
+    id: string,
+    team_id: string,
     rbg_auto: number,
     rbg_manual: number,
-    signed_url: {
+    signed_url?: {
       [index: string]: string
     },
     update_time: string,

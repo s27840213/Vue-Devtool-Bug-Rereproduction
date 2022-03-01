@@ -9,7 +9,7 @@
       div(v-for="(scaler, index)  in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), pointerEvents())"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents } )"
           @mousedown.stop="scaleStart")
 </template>
 
@@ -29,7 +29,15 @@ export default Vue.extend({
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
-    primaryLayerIndex: Number
+    primaryLayerIndex: Number,
+    forRender: {
+      type: Boolean,
+      default: false
+    },
+    pointerEvents: {
+      type: String,
+      default: 'initial'
+    }
   },
   data() {
     return {
@@ -101,6 +109,14 @@ export default Vue.extend({
       } else {
         return this.getLayerRotate * Math.PI / 180
       }
+    },
+    primaryScale(): number {
+      const currLayer = LayerUtils.getCurrLayer
+      if (typeof this.primaryLayerIndex !== 'undefined' && ['group', 'frame'].includes(currLayer.type)) {
+        return LayerUtils.getCurrLayer.styles.scale
+      } else {
+        return 1
+      }
     }
   },
   methods: {
@@ -115,7 +131,7 @@ export default Vue.extend({
         width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
         height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
         outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
-        'pointer-events': this.config.pointerEvents ?? 'initial'
+        'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -153,7 +169,7 @@ export default Vue.extend({
        * if the frame layer is set the flip prop, do following mapping modification
        */
       const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'frame' && !this.config.forRender) {
+      if (currLayer.type === 'frame' && !this.forRender) {
         const baseLine = {
           x: -w / 2 + currLayer.styles.width / 2,
           y: -h / 2 + currLayer.styles.height / 2
@@ -406,11 +422,6 @@ export default Vue.extend({
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
-    },
-    pointerEvents() {
-      return {
-        'pointer-events': this.config.pointerEvents ?? 'initial'
-      }
     },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
