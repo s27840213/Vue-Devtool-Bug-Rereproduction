@@ -4,37 +4,36 @@
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="show === btn.show || (btn.name === 'crop' && isCropping) || (btn.name==='remove-bg' && inBgRemoveMode) ? 'active' : ''"
+        :class="activeBtn(btn) ? 'active' : ''"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
+      btn(v-if="isImage && isAdmin && !isFrame"
+        class="full-width"
+        type="gray-mid"
+        ref="btn"
+        @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
       v-click-outside="handleOutside"
       :imageAdjust="currLayerAdjust"
       @update="handleAdjust")
-    //- property-bar
-    //-   input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
-    //-   svg-icon(class="pointer"
-    //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-    //- action-bar(class="flex-evenly")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
-    //-     :key="`gp-action-icon-${index}`"
-    //-     class="pointer"
-    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
-import { IFrame } from '@/interfaces/layer'
+import { IFrame, IImage } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import uploadUtils from '@/utils/uploadUtils'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 
 export default Vue.extend({
   data() {
@@ -43,16 +42,18 @@ export default Vue.extend({
       btns: [
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
-        // { name: 'remove-bg', label: `${this.$t('NN0043')}`, show: 'remove-bg' }
-      ]
+        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
+        { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow' }
+      ],
+      bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
   components: {
-    PopupAdjust
+    PopupAdjust,
+    PanelPhotoShadow
   },
   computed: {
     ...mapGetters({
@@ -61,10 +62,19 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isAdmin: 'user/isAdmin'
     }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
+    },
+    isFrame(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('frame') && layers.length === 1
+    },
+    isImage(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('image') && layers.length === 1
     },
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
@@ -92,13 +102,27 @@ export default Vue.extend({
     },
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
+    },
+    selectedLayersNum(): number {
+      return this.currSelectedInfo.layers.length
     }
   },
   methods: {
     ...mapMutations({
       updateLayerStyles: 'UPDATE_layerStyles',
-      setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode'
+      setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
+      setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
+      setPrevScrollPos: 'bgRemove/SET_prevScrollPos'
     }),
+    ...mapActions({
+      removeBg: 'user/removeBg'
+    }),
+    activeBtn(btn: { [key: string]: string }): boolean {
+      if (this.show === btn.show) return true
+      if (btn.name === 'crop' && this.isCropping) return true
+      if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
+      return false
+    },
     handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
@@ -120,7 +144,46 @@ export default Vue.extend({
         }
         this.show = ''
       } else if (name === 'remove-bg') {
-        this.setInBgRemoveMode(!this.inBgRemoveMode)
+        const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
+
+        layerUtils.updateLayerProps(pageIndex, index, {
+          inProcess: true
+        })
+
+        const targetLayer = layers[0] as IImage
+        const type = targetLayer.srcObj.type
+
+        const { imgWidth, imgHeight } = targetLayer.styles
+        const aspect = imgWidth >= imgHeight ? 0 : 1
+        const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
+        const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg')
+        this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+          if (data.flag === 0) {
+            uploadUtils.polling(data.url, (json: any) => {
+              if (json.flag === 0 && json.data) {
+                layerUtils.updateLayerProps(pageIndex, index, {
+                  inProcess: false
+                })
+                const editorView = document.querySelector('.editor-view')
+                const { scrollTop, scrollLeft } = editorView as HTMLElement
+
+                this.setPrevScrollPos({
+                  top: scrollTop,
+                  left: scrollLeft
+                })
+
+                this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
+                this.setInBgRemoveMode(true)
+                return true
+              }
+              if (json.flag === 1) {
+                return true
+              }
+
+              return false
+            })
+          }
+        })
         this.show = ''
       }
     },

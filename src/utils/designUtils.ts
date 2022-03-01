@@ -516,7 +516,8 @@ class DesignUtils {
       const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
       return previewUrl
     } else {
-      if (signedUrl) return scale === 2 ? signedUrl['0_prev_2x'] : signedUrl['0_prev']
+      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
+      if (signedUrl) return (scale === 2 ? signedUrl['0_prev_2x'] : signedUrl['0_prev']) + `&ver=${verstring}`
       return '' // theoretically never reach here because either assestId or signedUrl will be non-undefined
     }
   }

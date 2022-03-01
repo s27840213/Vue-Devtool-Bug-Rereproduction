@@ -2,42 +2,38 @@
   div(class="mobile-menu")
     div(class="nav mobile-menu__top")
         div(class="nav__option")
-          btn(@click.native="goToPage('Home')"
-            :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'Home'}") {{$t('NN0144')}}
+          div(:class="{'text-blue-1': currentPage === 'Home'}")
+            router-link(to="/"
+              class="mobile-menu__link") {{$t('NN0144')}}
         div(class="nav__option")
-          btn(@click.native="goToPage('TemplateCenter')"
-              :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'TemplateCenter'}") {{$t('NN0145')}}
+          div(:class="{'text-blue-1': currentPage === 'TemplateCenter'}")
+            router-link(to="/templates"
+              class="mobile-menu__link") {{$t('NN0145')}}
         div(class="nav__option")
-          btn(@click.native="goToPage('Toturial')"
-              :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Toturial'}") {{$t('NN0146')}}
+          a(:href="tutorialPage"
+            class="mobile-menu__link") {{$t('NN0146')}}
         div(class="nav__option")
-          btn(@click.native="goToPage('Faq')"
-              :type="'icon-mid-body'"
-              :class="{'text-blue-1': currentPage === 'Faq'}") {{$t('NN0147')}}
+          a(:href="faqPage"
+            class="mobile-menu__link") {{$t('NN0147')}}
     div(class="nav mobile-menu__bottom")
       template(v-if="!isLogin")
         div(class="nav__option")
-          btn(@click.native="goToPage('Login')"
-            :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'Login'}") {{$tc('NN0168', 1)}}
+          router-link(:to="{ path: '/login', query: { redirect: currPath }}"
+            class="mobile-menu__link") {{$tc('NN0168', 1)}}
         div(class="nav__option")
-          btn(@click.native="goToPage('SignUp')"
-            :type="'icon-mid-body'"
-            :class="{'text-blue-1': currentPage === 'SignUp'}") {{$tc('NN0169', 1)}}
+          router-link(:to="{ path: '/signup', query: { redirect: currPath }}"
+            class="mobile-menu__link") {{$tc('NN0169', 1)}}
       template(v-else)
         div(class="mobile-menu__bottom__profile")
           avatar(class="mr-10"
             :textSize="14"
             :avatarSize="35")
-        div(class="nav__option"
-          @click="goToPageByPath('/settings/account')")
-          span {{$tc('NN0165', 1)}}
-        div(class="nav__option"
-          @click="goToPageByPath('/settings/security')")
-          span {{$tc('NN0166', 1)}}
+        div(class="nav__option")
+          router-link(to="/settings/account"
+            class="mobile-menu__link") {{$tc('NN0165', 1)}}
+        div(class="nav__option")
+          router-link(to="/settings/security"
+            class="mobile-menu__link") {{$tc('NN0166', 1)}}
         div(class="nav__option"
           @click="onLogoutClicked()")
           span {{$tc('NN0167', 1)}}
@@ -64,8 +60,29 @@ export default Vue.extend({
     currentPage(): string {
       return this.$route.name || ''
     },
+    currPath(): string {
+      return this.$route.path || '/'
+    },
     currLocale(): string {
       return localeUtils.currLocale()
+    },
+    tutorialPage(): string {
+      if (this.currLocale === 'tw') {
+        return 'https://blog.vivipic.com/tw/tutorial/'
+      } else if (this.currLocale === 'us') {
+        return 'https://blog.vivipic.com/us-tutorial/'
+      } else {
+        return 'https://www.facebook.com/vivipic' + this.currLocale
+      }
+    },
+    faqPage(): string {
+      if (this.currLocale === 'tw') {
+        return 'https://blog.vivipic.com/tw/faq/'
+      } else if (this.currLocale === 'us') {
+        return 'https://blog.vivipic.com/us-faq/'
+      } else {
+        return 'https://www.facebook.com/vivipic' + this.currLocale
+      }
     }
   },
   methods: {
@@ -74,11 +91,6 @@ export default Vue.extend({
         // this.$router.go(0)
       } else if (pageName === 'Login' || pageName === 'SignUp') {
         this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
-        // Temporary setting ----
-      } else if (pageName === 'Toturial' || pageName === 'Faq') {
-        if (this.currLocale === 'tw' || this.currLocale === 'us' || this.currLocale === 'jp') {
-          window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
-        }
       } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
         this.$router.push({ name: pageName })
       } else if (pageName === 'TemplateCenter') {
@@ -92,12 +104,6 @@ export default Vue.extend({
         this.$router.push({ name: 'Home' })
       }
       // ----------------------
-    },
-    goToPageByPath(path: string) {
-      if (this.$route.path !== path) {
-        this.$router.push({ path: path })
-        this.$emit('closeMenu')
-      }
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')
@@ -138,6 +144,10 @@ export default Vue.extend({
         border-radius: 50%;
       }
     }
+  }
+  &__link {
+    color: unset;
+    text-decoration: unset;
   }
 }
 .nav {

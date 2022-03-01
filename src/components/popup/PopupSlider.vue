@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="popup-slider"
       :style="styles")
-    input(class="popup-slider__range-input"
+    input(class="popup-slider__range-input input__slider--range"
       v-model.number="value"
       :max="max"
       :min="min"
@@ -82,29 +82,6 @@ export default Vue.extend({
     border: 1px solid setColor(gray-4);
     color: setColor(gray-3);
     border-radius: 0.25rem;
-  }
-
-  &__range-input {
-    display: block;
-    margin: auto;
-    appearance: none;
-    outline: none;
-    background: none;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: #d9dbe1;
-    }
-    &::-webkit-slider-thumb {
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background-color: #ffffff;
-      border: 2px solid #3c64b1;
-      transition: 0.2s;
-      margin-top: -6.5px;
-      position: relative;
-    }
   }
 }
 </style>

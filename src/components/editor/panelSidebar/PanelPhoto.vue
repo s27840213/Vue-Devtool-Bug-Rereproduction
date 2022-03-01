@@ -7,7 +7,7 @@
       :defaultKeyword="keyword"
       @search="handleSearch")
     div(v-if="!pending && !list.length"
-      class="text-white") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
+      class="text-white text-left") {{$t('NN0393', {keyword: keyword, target: $tc('NN0002',1)})}}
     image-gallery(v-else
       ref="gallery"
       :images="list"

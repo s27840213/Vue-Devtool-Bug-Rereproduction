@@ -237,7 +237,12 @@ router.beforeEach(async (to, from, next) => {
       verUni: json.ver_uni,
       imgSizeMap: json.image_size_map
     })
-    const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+    let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+
+    // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.
+    if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
+      defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
+    }
 
     defaultFontsJson
       .forEach(_font => {

@@ -4,13 +4,13 @@
       :iconName="'download'"
       :iconWidth="'18px'"
       :type="'primary-sm'"
-      :disabled="inprogress"
+      :disabled="inprogress || inBgRemoveMode"
       class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
       span(v-if="!inprogress") {{$t('NN0010')}}
     popup-download(v-if="show"
       class="download-btn__modal"
-      :page-index="middlemostPageIndex"
+      :page-index="currFocusPageIndex"
       @close="handleShowPopup"
       @inprogress="handleInprogress")
 </template>
@@ -33,8 +33,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      middlemostPageIndex: 'getMiddlemostPageIndex',
-      isLogin: 'user/isLogin'
+      currFocusPageIndex: 'getCurrFocusPageIndex',
+      isLogin: 'user/isLogin',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     })
   },
   methods: {

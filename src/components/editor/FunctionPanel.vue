@@ -5,61 +5,36 @@
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
         :iconWidth="'20px'"
-        :iconColor="!isInFirstStep ? 'gray-2' : 'gray-4'"
+        :iconColor="(!inBgRemoveMode && !isInFirstStep) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
         @click.native="undo"
         v-hint="$t('NN0119')"
       )
       svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
-        :iconColor="!isInLastStep ? 'gray-2' : 'gray-4'"
+        :iconColor="(!inBgRemoveMode && !isInLastStep) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
         @click.native="redo"
         v-hint="$t('NN0120')")
       download-btn
       btn(:hasIcon="true"
         :iconName="'menu'"
         :iconWidth="'25px'"
-        :type="'primary-sm'"
+        :type="!inBgRemoveMode  ? 'primary-sm' : 'inactive-sm'"
+        :disabled="inBgRemoveMode"
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
-    //- @Todo -> Simplify codes below ORZ
-    div(v-if="!isShowPagePreview")
-      div(v-if="inBgRemoveMode" class="p-20")
-        panel-bg-remove
-      div(v-else-if="!isGroup" class="p-20")
-        panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-        panel-text-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text')"
-          @openFontsPanel="openFontsPanel"
-          v-on="$listeners")
-        panel-photo-setting(v-if="!isFontsPanelOpened && (isFrameImage || currSelectedInfo.types.has('image')) && currSelectedInfo.types.size===1 && !isLocked")
-        panel-shape-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('shape') && currSelectedInfo.types.size===1 && !isLocked"  v-on="$listeners")
-        panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-        panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-        panel-text-effect-setting(v-if="!isFontsPanelOpened && currSelectedInfo.types.has('text') && !isLocked" v-on="$listeners")
-        panel-background-setting(v-if="selectedLayerNum===0" v-on="$listeners")
-      //- case for Group layer for handle the sub selected layer
-      div(v-else class="function-panel p-20")
-        template(v-if="!hasSubSelectedLayer")
-          panel-general(v-if="!isFontsPanelOpened && selectedLayerNum!==0")
-          panel-text-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked"
-            @openFontsPanel="openFontsPanel"
-            v-on="$listeners")
-          panel-photo-setting(v-if="!isFontsPanelOpened && groupTypes.has('image') && groupTypes.size===1 && !isLocked")
-          panel-shape-setting(v-if="!isFontsPanelOpened && groupTypes.has('shape') && groupTypes.size===1 && !isLocked"  v-on="$listeners")
-          panel-page-setting(v-if="!isFontsPanelOpened && selectedLayerNum===0")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
-          panel-text-effect-setting(v-if="!isFontsPanelOpened && groupTypes.has('text') && !isLocked" v-on="$listeners")
-        template(v-else)
-          panel-general
-          template(v-if="!isFontsPanelOpened && subLayerType === 'text' && !isLocked")
-            panel-text-setting(
-              @openFontsPanel="openFontsPanel()"
-              v-on="$listeners")
-            panel-text-effect-setting(v-on="$listeners")
-          panel-photo-setting(v-else-if="!isFontsPanelOpened && (isSubLayerFrameImage || subLayerType === 'image') && !isLocked")
-          panel-shape-setting(v-else-if="!isFontsPanelOpened && subLayerType === 'shape' && !isLocked"  v-on="$listeners")
-          panel-fonts(v-if="isFontsPanelOpened" @closeFontsPanel="closeFontsPanel")
+    div(v-if="!isShowPagePreview" class="p-20")
+      panel-bg-remove(v-if="showBgRemove")
+      panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
+      panel-general(v-if="showGeneral")
+      panel-page-setting(v-if="showPageSetting")
+      panel-background-setting(v-if="showPageSetting" v-on="$listeners")
+      panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
+      panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
+      panel-photo-setting(v-if="showPhotoSetting")
+      //- panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
+      panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
 
 <script lang="ts">
@@ -74,6 +49,7 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelShapeSetting from '@/components/editor/panelFunction/PanelShapeSetting.vue'
 import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextEffectSetting.vue'
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
 import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
@@ -81,9 +57,8 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import tiptapUtils from '@/utils/tiptapUtils'
-import textPropUtils from '@/utils/textPropUtils'
+import { LayerType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -97,7 +72,8 @@ export default Vue.extend({
     PanelShapeSetting,
     PanelTextEffectSetting,
     DownloadBtn,
-    PanelBgRemove
+    PanelBgRemove,
+    PanelPhotoShadow
   },
   data() {
     return {
@@ -110,7 +86,9 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
     functionPanelStyles(): { [index: string]: string } {
       return this.isShowPagePreview ? {
@@ -156,6 +134,57 @@ export default Vue.extend({
       const { index } = this.currSubSelectedInfo
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
+    },
+    showBgRemove(): boolean {
+      return this.inBgRemoveMode
+    },
+    showFont(): boolean {
+      return !this.inBgRemoveMode &&
+        this.isFontsPanelOpened
+    },
+    showGeneral(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum !== 0
+    },
+    showPageSetting(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum === 0
+    },
+    showTextSetting(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('text')
+    },
+    showPhotoSetting(): boolean {
+      console.log('photo', this.targetIs('image'))
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('image') && this.singleTargetType()
+    },
+    showPhotoShadow(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.isSuperUser &&
+        this.targetIs('image') && this.selectedLayerNum === 1 && // for non group
+        (!this.isGroup || this.hasSubSelectedLayer) && // for group and has sub selected layer
+        !this.currSelectedInfo.types.has('frame') // for frame
+    },
+    showShapeSetting(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('shape') && this.singleTargetType()
+    },
+    isSuperUser(): boolean {
+      return generalUtils.isSuperUser
+    },
+    layerType(): { [key: string]: string } {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      return {
+        currLayerType: currLayer.type,
+        targetLayerType: (() => {
+          if (subLayerIdx !== -1) {
+            return currLayer.type === LayerType.group
+              ? (currLayer as IGroup).layers[subLayerIdx].type : LayerType.image
+          }
+          return currLayer.type
+        })()
+      }
     }
   },
   watch: {
@@ -166,6 +195,31 @@ export default Vue.extend({
     }
   },
   methods: {
+    targetIs(type: string): boolean {
+      if (this.isGroup) {
+        if (this.hasSubSelectedLayer) {
+          return this.subLayerType === type
+        } else {
+          return this.groupTypes.has(type)
+        }
+      } else {
+        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
+          return this.isFrameImage
+        }
+        return this.currSelectedInfo.types.has(type)
+      }
+    },
+    singleTargetType(): boolean {
+      if (this.isGroup) {
+        if (this.hasSubSelectedLayer) {
+          return true
+        } else {
+          return this.groupTypes.size === 1
+        }
+      } else {
+        return this.currSelectedInfo.types.size === 1
+      }
+    },
     openFontsPanel() {
       this.isFontsPanelOpened = true
     },
@@ -178,34 +232,57 @@ export default Vue.extend({
       })
     },
     undo() {
-      shotcutUtils.undo()
-      // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-      // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-      //   this.$nextTick(() => {
-      //     tiptapUtils.agent(editor => {
-      //       const currLayer = LayerUtils.getCurrLayer as IText
-      //       if (!currLayer.active || currLayer.type !== 'text') return
-      //       editor.chain().sync().focus().run()
-      //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-      //       textPropUtils.updateTextPropsState()
-      //     })
-      //   })
-      // }
+      if (this.inBgRemoveMode) {
+        // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: false,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shotcutUtils.undo()
+        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        //   this.$nextTick(() => {
+        //     tiptapUtils.agent(editor => {
+        //       const currLayer = LayerUtils.getCurrLayer as IText
+        //       if (!currLayer.active || currLayer.type !== 'text') return
+        //       editor.chain().sync().focus().run()
+        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+        //       textPropUtils.updateTextPropsState()
+        //     })
+        //   })
+        // }
+      }
     },
     redo() {
-      shotcutUtils.redo()
-      // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
-      // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
-      //   this.$nextTick(() => {
-      //     tiptapUtils.agent(editor => {
-      //       const currLayer = LayerUtils.getCurrLayer as IText
-      //       if (!currLayer.active || currLayer.type !== 'text') return
-      //       editor.chain().sync().focus().run()
-      //       tiptapUtils.prevText = tiptapUtils.getText(editor)
-      //       textPropUtils.updateTextPropsState()
-      //     })
-      //   })
-      // }
+      if (this.inBgRemoveMode) {
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: true,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shotcutUtils.redo()
+        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        //   this.$nextTick(() => {
+        //     tiptapUtils.agent(editor => {
+        //       const currLayer = LayerUtils.getCurrLayer as IText
+        //       if (!currLayer.active || currLayer.type !== 'text') return
+        //       editor.chain().sync().focus().run()
+        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+        //       textPropUtils.updateTextPropsState()
+        //     })
+        //   })
+        // }
+      }
     }
   }
 })

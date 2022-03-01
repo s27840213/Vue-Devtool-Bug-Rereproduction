@@ -191,7 +191,6 @@ class DragUtils {
   }
 
   onImgDrop(e: DragEvent) {
-    console.log(generalUtils.deepCopy(store.state.currDraggedPhoto))
     if (store.state.currDraggedPhoto.srcObj.type) {
       e.stopPropagation()
       stepsUtils.record()
