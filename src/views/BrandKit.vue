@@ -18,7 +18,8 @@
       div(class="brand-kit__tab")
         brand-kit-tab(@deleteItem="handleDeleteItem")
     nu-footer
-    div(v-if="isOverlayed" class="dim-background")
+    div(v-if="isOverlayed" class="dim-background"
+      :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
       template(v-if="isDraggedOver")
         div(class="upload-large")
           svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
