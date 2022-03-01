@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
+import { IGroup, ISpanStyle } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
@@ -96,10 +96,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
       }
     })
-    const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-    ps.forEach(p => {
-      this.resizeObserver && this.resizeObserver.observe(p as Element)
-    })
+    this.observeAllPs()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -120,6 +117,16 @@ export default Vue.extend({
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    }
+  },
+  watch: {
+    'config.paragraphs': {
+      handler() {
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect()
+          this.observeAllPs()
+        }
+      }
     }
   },
   methods: {
@@ -154,6 +161,12 @@ export default Vue.extend({
           return 'url("' + spanStyles.fontUrl + '")'
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
+    },
+    observeAllPs() {
+      const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
+      ps.forEach(p => {
+        this.resizeObserver && this.resizeObserver.observe(p as Element)
+      })
     },
     autoResize(): number {
       if (this.config.widthLimit === -1) return this.config.widthLimit
