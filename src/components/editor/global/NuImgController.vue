@@ -9,8 +9,9 @@
       div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: primaryLayerType === 'frame' ? pointerEvents : 'initial' })"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents })"
           @mousedown.stop="scaleStart")
+          //- :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: primaryLayerType === 'frame' ? pointerEvents : 'initial' })"
 </template>
 
 <script lang="ts">
@@ -23,6 +24,7 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -90,8 +92,7 @@ export default Vue.extend({
       return this.config.styles.imgHeight
     },
     getLayerScale(): number {
-      // return this.config.styles.scale
-      return 1
+      return this.primaryLayerType === 'frame' ? this.config.styles.scale : 1
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
@@ -143,7 +144,7 @@ export default Vue.extend({
         width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
         height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
         outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
-        pointerEvents: this.primaryType === 'frame' ? this.pointerEvents : 'initial'
+        'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -159,7 +160,7 @@ export default Vue.extend({
       /**
        * Anchor denotes the top-left fix point of the element
        */
-      const scale = this.config.styles.scale
+      const scale = this.getLayerScale
       const layerAnchor = ControlUtils.getNoRotationPos(layerVect, rectCenter, -angleInRad)
       const imgAnchor = {
         x: Math.cos(angleInRad) * this.getImgX * scale - Math.sin(angleInRad) * this.getImgY * scale + layerAnchor.x,
@@ -181,7 +182,7 @@ export default Vue.extend({
        * if the frame layer is set the flip prop, do following mapping modification
        */
       const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'frame' && !this.forRender) {
+      if (currLayer.type === 'frame' && !this.config.forRender) {
         const baseLine = {
           x: -w / 2 + currLayer.styles.width / 2,
           y: -h / 2 + currLayer.styles.height / 2
@@ -333,10 +334,6 @@ export default Vue.extend({
       }
       // const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
       const [dx, dy] = [diff.offsetX, diff.offsetY]
-      console.log('dx', dx)
-      console.log('dy', dy)
-      console.log('ini w', this.initialWH.width)
-      console.log('ini  h', this.initialWH.height)
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * this.flipFactorX
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * this.flipFactorY
@@ -415,8 +412,6 @@ export default Vue.extend({
         width = offsetSize.width + initWidth
       }
 
-      console.log('wid', width)
-      console.log('hei', height)
       this.updateLayerStyles({
         imgWidth: width,
         imgHeight: height,
@@ -444,6 +439,11 @@ export default Vue.extend({
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
+    // pointerEvents() {
+    //   return {
+    //     'pointer-events': this.config.pointerEvents ?? 'initial'
+    //   }
+    // },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
       layer.style.cursor = cursor

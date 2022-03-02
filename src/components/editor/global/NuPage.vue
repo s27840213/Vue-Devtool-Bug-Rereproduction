@@ -292,9 +292,12 @@ export default Vue.extend({
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
         const subLayer = GeneralUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-        // subLayer.styles.scale = 1
-        return Object.assign(GroupUtils.mapLayersToPage(
-          [subLayer], this.getCurrLayer as ITmp)[0] as IImage, { forRender: true })
+        const scale = subLayer.styles.scale
+        subLayer.styles.scale = 1
+        const mappedLayer = GroupUtils
+          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
+        mappedLayer.styles.scale = scale
+        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
       } else if (layer.type === 'frame') {
         const primaryLayer = this.getCurrLayer as IFrame
         const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
