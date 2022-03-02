@@ -133,7 +133,8 @@ export default Vue.extend({
       carouselIdx: 0,
       waitTimer: 0,
       renderedWidth: 150,
-      renderedHeight: 150
+      renderedHeight: 150,
+      pageImages: [] as string[]
     }
   },
   directives: {
@@ -170,9 +171,6 @@ export default Vue.extend({
     },
     isThumbnailFound(): boolean {
       return this.config.thumbnail !== this.previewPlaceholder
-    },
-    pageImages(): string[] {
-      return designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
     }
   },
   methods: {
@@ -254,6 +252,9 @@ export default Vue.extend({
           const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
           this.renderedWidth = thumbnailElement.width
           this.renderedHeight = thumbnailElement.height
+          if (this.config.polling) {
+            this.multiPollingStep()
+          }
         }
       }, 1500)
     },
@@ -322,10 +323,12 @@ export default Vue.extend({
     checkImageSize() {
       this.previewCheckReady = false
       if (this.config.polling) {
+        this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
         this.previewCheckReady = true
         this.config.thumbnail = this.previewPlaceholder
         this.pollingStep()
       } else {
+        this.pageImages = designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
         imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight).then((size) => {
           const { width, height, exists } = size
           this.imgWidth = width
@@ -337,25 +340,43 @@ export default Vue.extend({
     },
     pollingStep(step = 0) {
       const timeout = step > 14 ? 2000 : 1000
-      setTimeout(() => {
-        imageUtils.getImageSize(
-          designUtils.getDesignPreview(
-            this.config.id, 2,
-            undefined,
-            this.config.signedUrl
-          ),
-          this.imgWidth, this.imgHeight
-        ).then((size) => {
-          const { width, height, exists } = size
-          this.imgWidth = width
-          this.imgHeight = height
-          if (exists) {
-            this.config.thumbnail = this.configPreview
-          } else if (step < 35) {
+      imageUtils.getImageSize(
+        designUtils.getDesignPreview(
+          this.config.id, 2,
+          undefined,
+          this.config.signedUrl
+        ),
+        this.imgWidth, this.imgHeight
+      ).then((size) => {
+        const { width, height, exists } = size
+        this.imgWidth = width
+        this.imgHeight = height
+        if (exists) {
+          this.config.thumbnail = this.configPreview
+        } else if (step < 35) {
+          setTimeout(() => {
             this.pollingStep(step + 1)
-          }
-        })
-      }, timeout)
+          }, timeout)
+        }
+      })
+    },
+    multiPollingStep() {
+      for (let i = 0; i < this.config.pageNum; i++) {
+        this.pagePollingStep(i)
+      }
+    },
+    pagePollingStep(index: number, step = 0) {
+      if (this.pageImages[index] !== this.previewPlaceholder) return
+      const timeout = step > 14 ? 2000 : 1000
+      imageUtils.getImageSize(designUtils.getDesignPreview(this.config.id, 2, undefined, this.config.signedUrl, index), 0, 0).then((size) => {
+        if (size.exists) {
+          this.pageImages[index] = designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl, index)
+        } else if (step < 35) {
+          setTimeout(() => {
+            this.pagePollingStep(index, step + 1)
+          }, timeout)
+        }
+      })
     }
   }
 })
