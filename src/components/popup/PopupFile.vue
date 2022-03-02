@@ -1,7 +1,14 @@
 <template lang="pug">
 div(class="popup-file")
-  div(class="popup-file__item text-gray-3")
-    span {{pageSize.w}}{{$t('NN0220')}} x {{pageSize.h}}{{$t('NN0220')}}
+  div(class="popup-file__profile")
+    router-link(to="/settings/account"
+        class="popup-file__option__link"
+        @click.native="closePopup")
+      avatar(class="mr-10"
+        :textSize="14"
+        :avatarSize="35")
+      div(class="profile-text text-body-2")
+        div {{showUname}}
   div(class="popup-file__item" @click="save()")
     span {{$t('NN0009')}}
   div(class="popup-file__item" @click="newDesign()")
@@ -24,6 +31,12 @@ div(class="popup-file")
       span 匯入設計
     div(class="popup-file__item" @click="exportJSON()")
       span 匯出設計
+  hr(class="popup-file__hr")
+  div(class="popup-file__item"
+      @click="onLogoutClicked()")
+      span {{$tc('NN0167',2)}}
+  div(v-if="buildNumber"
+    class="text-white body-2 build-number") {{buildNumber}}
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -35,20 +48,30 @@ import Vue from 'vue'
 import popupUtils from '@/utils/popupUtils'
 import pageUtils from '@/utils/pageUtils'
 import rulerUtils from '@/utils/rulerUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
+import Avatar from '@/components/Avatar.vue'
 
 export default Vue.extend({
+  components: {
+    Avatar
+  },
   data() {
     return {
       showPreference: false
     }
   },
   computed: {
+    ...mapState('user', [
+      'uname'
+    ]),
     ...mapGetters({
       isLogin: 'user/isLogin',
       isAdmin: 'user/isAdmin'
+    }),
+    ...mapGetters('user', {
+      account: 'getAccount'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -64,6 +87,24 @@ export default Vue.extend({
     },
     isShownRuler() {
       return rulerUtils.showRuler
+    },
+    buildNumber(): string {
+      const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
+      return buildNumber ? `v.${buildNumber}` : ''
+    },
+    showUname(): string {
+      if (this.uname.length > 10) {
+        return this.uname.substring(0, 10).concat('...')
+      } else {
+        return this.uname
+      }
+    },
+    showAccount(): string { // 要嗎？
+      if (this.account.length > 25) {
+        return this.account.substring(0, 25).concat('...')
+      } else {
+        return this.account
+      }
     }
   },
   methods: {
@@ -100,12 +141,21 @@ export default Vue.extend({
     exportJSON() {
       fileUtils.export()
       // designUtils.newDesign()
+    },
+    onLogoutClicked() {
+      localStorage.setItem('token', '')
+      window.location.href = '/'
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.build-number {
+  margin-top: -25px;
+  width: 70px;
+}
+
 .popup-file {
   position: relative;
   border-radius: 5px;
@@ -113,13 +163,43 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   z-index: setZindex("dropdowns");
-  padding: 0.125rem 0;
+  padding: 25px 20px;
+
+  &__profile {
+    display: flex;
+    padding-bottom: 10px;
+    .profile-img {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      background: #61aac2;
+      border-radius: 50%;
+    }
+    .profile-text {
+      display: flex;
+      text-align: left;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+  &__option {
+    &__link {
+      display: flex;
+      color: unset;
+      text-decoration: unset;
+    }
+  }
   &__item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     transition: background-color 0.1s ease-in;
-    padding: 0.35rem 1.5rem;
+    padding: 0.35rem;
     border-radius: 0.25rem;
     position: relative;
     > span {
