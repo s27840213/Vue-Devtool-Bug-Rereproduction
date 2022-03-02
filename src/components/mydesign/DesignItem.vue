@@ -112,10 +112,10 @@ export default Vue.extend({
       isMenuOpen: false,
       editableName: '',
       draggedImageCoordinate: { x: 0, y: 0 },
-      imgWidth: 10,
-      imgHeight: 10,
+      imgWidth: 150,
+      imgHeight: 150,
       previewCheckReady: false,
-      previewPlaceholder: require('@/assets/img/svg/image-preview-large.svg')
+      previewPlaceholder: require('@/assets/img/svg/loading-large.svg')
     }
   },
   directives: {
@@ -143,7 +143,7 @@ export default Vue.extend({
       return Array(this.menuItemNum ?? 0)
     },
     aspectRatio(): number {
-      return this.config.width / this.config.height
+      return this.isThumbnailFound ? this.config.width / this.config.height : this.imgWidth / this.imgHeight
     },
     configPreview(): string {
       return designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl)
@@ -153,6 +153,9 @@ export default Vue.extend({
     },
     isTempDesign(): boolean {
       return (this.config.id ?? '').endsWith('_new')
+    },
+    isThumbnailFound(): boolean {
+      return this.config.thumbnail !== this.previewPlaceholder
     }
   },
   methods: {
@@ -192,8 +195,8 @@ export default Vue.extend({
     draggedImageStyles(): { [key: string]: string } {
       if (this.isDragged && this.config.thumbnail === this.previewPlaceholder) {
         return {
-          width: '150px',
-          height: '150px'
+          width: '300px',
+          height: '300px'
         }
       } else {
         return {}
