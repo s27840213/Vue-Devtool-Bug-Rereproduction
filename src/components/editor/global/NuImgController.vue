@@ -6,10 +6,10 @@
         ref="body"
         :style="styles()"
         @mousedown.left.stop="moveStart")
-      div(v-for="(scaler, index)  in controlPoints.scalers"
+      div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents } )"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: primaryLayerType === 'frame' ? pointerEvents : 'initial' })"
           @mousedown.stop="scaleStart")
 </template>
 
@@ -37,6 +37,10 @@ export default Vue.extend({
     pointerEvents: {
       type: String,
       default: 'initial'
+    },
+    primaryLayerType: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -86,7 +90,8 @@ export default Vue.extend({
       return this.config.styles.imgHeight
     },
     getLayerScale(): number {
-      return this.config.styles.scale
+      // return this.config.styles.scale
+      return 1
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
@@ -110,6 +115,13 @@ export default Vue.extend({
         return this.getLayerRotate * Math.PI / 180
       }
     },
+    primaryType(): string {
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).type
+      } else {
+        return ''
+      }
+    },
     primaryScale(): number {
       const currLayer = LayerUtils.getCurrLayer
       if (typeof this.primaryLayerIndex !== 'undefined' && ['group', 'frame'].includes(currLayer.type)) {
@@ -131,7 +143,7 @@ export default Vue.extend({
         width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
         height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
         outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
-        'pointer-events': this.pointerEvents ?? 'initial'
+        pointerEvents: this.primaryType === 'frame' ? this.pointerEvents : 'initial'
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -288,6 +300,8 @@ export default Vue.extend({
         width: this.getImgWidth,
         height: this.getImgHeight
       }
+      console.log(this.getImgWidth)
+      console.log(this.getImgHeight)
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
 
@@ -317,7 +331,12 @@ export default Vue.extend({
         diff.offsetX /= primaryScale
         diff.offsetY /= primaryScale
       }
-      const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
+      // const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
+      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      console.log('dx', dx)
+      console.log('dy', dy)
+      console.log('ini w', this.initialWH.width)
+      console.log('ini  h', this.initialWH.height)
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * this.flipFactorX
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * this.flipFactorY
@@ -396,6 +415,8 @@ export default Vue.extend({
         width = offsetSize.width + initWidth
       }
 
+      console.log('wid', width)
+      console.log('hei', height)
       this.updateLayerStyles({
         imgWidth: width,
         imgHeight: height,
