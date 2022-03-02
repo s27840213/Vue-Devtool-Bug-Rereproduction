@@ -179,12 +179,12 @@ class BrandKitUtils {
     store.dispatch('brandkit/removePalette', palette)
   }
 
-  removeFont(font: IBrandFont) {
-    store.dispatch('brandkit/removeFont', font)
-  }
-
   async createPalette() {
     return await store.dispatch('brandkit/createPalette')
+  }
+
+  setPaletteName(palette: IBrandColorPalette, newName: string) {
+    store.dispatch('brandkit/setPaletteName', { palette, newName })
   }
 
   removeColor(paletteId: string, color: IBrandColor) {
@@ -197,6 +197,10 @@ class BrandKitUtils {
 
   createColor(paletteId: string) {
     store.dispatch('brandkit/createColor', paletteId)
+  }
+
+  removeFont(font: IBrandFont) {
+    store.dispatch('brandkit/removeFont', font)
   }
 
   updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {

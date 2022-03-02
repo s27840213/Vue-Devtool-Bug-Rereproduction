@@ -125,6 +125,17 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     })
     return palette.id
   },
+  async setPaletteName({ commit }, updateInfo: { palette: IBrandColorPalette, newName: string }) {
+    const { palette, newName } = updateInfo
+    const oldName = palette.name
+    brandkitApi.updateBrandsWrapper({}, () => {
+      palette.name = newName
+    }, () => {
+      palette.name = oldName
+    }, () => {
+      showNetworkError()
+    })
+  },
   async removeColor({ state, commit }, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
