@@ -9,9 +9,8 @@
       div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents })"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
           @mousedown.stop="scaleStart")
-          //- :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: primaryLayerType === 'frame' ? pointerEvents : 'initial' })"
 </template>
 
 <script lang="ts">
@@ -24,7 +23,6 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -35,10 +33,6 @@ export default Vue.extend({
     forRender: {
       type: Boolean,
       default: false
-    },
-    pointerEvents: {
-      type: String,
-      default: 'initial'
     },
     primaryLayerType: {
       type: String,
@@ -70,6 +64,9 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPage: 'getPage'
     }),
+    pointerEvents(): string {
+      return this.forRender ? 'none' : 'initial'
+    },
     getControlPoints(): any {
       return this.config.controlPoints
     },
@@ -92,6 +89,7 @@ export default Vue.extend({
       return this.config.styles.imgHeight
     },
     getLayerScale(): number {
+      /** only the image in frame use the scale to strech */
       return this.primaryLayerType === 'frame' ? this.config.styles.scale : 1
     },
     getLayerRotate(): number {
@@ -301,8 +299,6 @@ export default Vue.extend({
         width: this.getImgWidth,
         height: this.getImgHeight
       }
-      console.log(this.getImgWidth)
-      console.log(this.getImgHeight)
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
 
@@ -333,7 +329,7 @@ export default Vue.extend({
         diff.offsetY /= primaryScale
       }
       // const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
-      const [dx, dy] = [diff.offsetX, diff.offsetY]
+      const [dx, dy] = [diff.offsetX / this.getLayerScale, diff.offsetY / this.getLayerScale]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * this.flipFactorX
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * this.flipFactorY
@@ -439,11 +435,6 @@ export default Vue.extend({
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
-    // pointerEvents() {
-    //   return {
-    //     'pointer-events': this.config.pointerEvents ?? 'initial'
-    //   }
-    // },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
       layer.style.cursor = cursor

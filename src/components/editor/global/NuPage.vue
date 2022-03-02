@@ -135,7 +135,6 @@
                                     :primaryLayerIndex="currSelectedInfo.index"
                                     :primaryLayerType="getCurrLayer.type"
                                     :forRender="true"
-                                    :pointerEvents="'none'"
                                     :config="getCurrSubSelectedLayerShown")
             template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:style="'opacity: 0.45'"

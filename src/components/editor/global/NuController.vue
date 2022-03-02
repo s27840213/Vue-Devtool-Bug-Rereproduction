@@ -917,6 +917,7 @@ export default Vue.extend({
               imgX,
               imgY
             })
+            scale = 1
           }
           break
         }
