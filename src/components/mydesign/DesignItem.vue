@@ -8,11 +8,18 @@
       @dragend="handleDragEnd"
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave")
-      div(class="design-item__img-container"
-        :style="containerStyles()")
-        img(v-if="previewCheckReady"
+      div(class="design-item__img-container")
+        image-carousel(v-if="showCarousel"
+          :imgs="pageImages"
+          @change="handleCarouselIdx")
+          template(v-slot="{ url }")
+            img(class="design-item__thumbnail"
+                draggable="false"
+                :style="imageStyles()"
+                :src="url")
+        img(ref="thumbnail"
+            v-if="!showCarousel && previewCheckReady"
             class="design-item__thumbnail"
-            :style="imageStyles()"
             draggable="false"
             :src="appliedUrl")
       div(class="design-item__controller")
@@ -51,6 +58,8 @@
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
+          //- span(class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
+          span(v-if="isMouseOver" class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
     div(class="design-item__name"
         v-click-outside="handleNameEditEnd"
         @mouseenter="handleNameMouseEnter"
@@ -87,11 +96,15 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import imageUtils from '@/utils/imageUtils'
+import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import vClickOutside from 'v-click-outside'
+import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
+  components: {
+    ImageCarousel
+  },
   props: {
     config: Object,
     menuItemNum: Number,
@@ -115,7 +128,12 @@ export default Vue.extend({
       imgWidth: 150,
       imgHeight: 150,
       previewCheckReady: false,
-      previewPlaceholder: require('@/assets/img/svg/loading-large.svg')
+      previewPlaceholder: require('@/assets/img/svg/loading-large.svg'),
+      showCarousel: false,
+      carouselIdx: 0,
+      waitTimer: 0,
+      renderedWidth: 150,
+      renderedHeight: 150
     }
   },
   directives: {
@@ -142,9 +160,6 @@ export default Vue.extend({
     menuItems(): any[] {
       return Array(this.menuItemNum ?? 0)
     },
-    aspectRatio(): number {
-      return this.isThumbnailFound ? this.config.width / this.config.height : this.imgWidth / this.imgHeight
-    },
     configPreview(): string {
       return designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl)
     },
@@ -156,6 +171,9 @@ export default Vue.extend({
     },
     isThumbnailFound(): boolean {
       return this.config.thumbnail !== this.previewPlaceholder
+    },
+    pageImages(): string[] {
+      return designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
     }
   },
   methods: {
@@ -165,21 +183,8 @@ export default Vue.extend({
     blockStyles() {
       return (this.isMouseOver || this.isSelected) ? { 'background-color': '#474a5780' } : {}
     },
-    containerStyles() {
-      return (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) ? { padding: '26px' } : { padding: '17px' }
-    },
     imageStyles() {
-      if (this.aspectRatio > 1) {
-        return {
-          width: '100%',
-          height: 'auto'
-        }
-      } else {
-        return {
-          width: 'auto',
-          height: '100%'
-        }
-      }
+      return { width: `${this.renderedWidth}px`, height: `${this.renderedHeight}px` }
     },
     draggedImageContainerStyles(): { [key: string]: string } {
       if (this.isDragged) {
@@ -243,10 +248,21 @@ export default Vue.extend({
     handleMouseEnter() {
       if (this.isTempDesign) return
       this.isMouseOver = true
+      if (this.config.pageNum === 1) return
+      this.waitTimer = setTimeout(() => {
+        if (this.isMouseOver) {
+          this.showCarousel = true
+          const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
+          this.renderedWidth = thumbnailElement.width
+          this.renderedHeight = thumbnailElement.height
+        }
+      }, 1500)
     },
     handleMouseLeave() {
       this.isMouseOver = false
       this.isMenuOpen = false
+      this.showCarousel = false
+      window.clearInterval(this.waitTimer)
     },
     handleNameMouseEnter() {
       if (this.nameIneditable) return
@@ -280,6 +296,9 @@ export default Vue.extend({
       this.$router.push({ name: 'Editor' }).then(() => {
         designUtils.setDesign(this.config)
       })
+    },
+    handleCarouselIdx(idx: number) {
+      this.carouselIdx = idx
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
@@ -343,6 +362,12 @@ export default Vue.extend({
     position: absolute;
     width: 100%;
     height: 100%;
+    padding: 26px;
+  }
+  &__thumbnail {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
   }
   &__controller {
     display: flex;
@@ -359,6 +384,20 @@ export default Vue.extend({
       width: 100%;
       height: 100%;
     }
+  }
+  &__index {
+    background-color: white;
+    border-radius: 100px;
+    position: absolute;
+    padding: 0px 10px;
+    bottom: 6px;
+    right: 8px;
+    text-align: center;
+    min-width: 50px;
+    box-sizing: border-box;
+    font-family: Poppins;
+    @include body-XS;
+    line-height: unset;
   }
   &__checkbox {
     position: absolute;

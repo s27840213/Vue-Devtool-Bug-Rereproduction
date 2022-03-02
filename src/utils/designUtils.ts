@@ -34,7 +34,9 @@ class DesignUtils {
       favorite: design.favorite > 0,
       ver: design.ver,
       thumbnail: '',
-      signedUrl: design.signed_url
+      signedUrl: design.signed_url,
+      pageNum: design.page_num,
+      polling: design.polling
     }
   }
 
@@ -509,16 +511,20 @@ class DesignUtils {
     })
   }
 
-  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string {
+  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2 | 4, ver?: number, signedUrl?: {[key: string]: string}, page = 0): string {
+    const prevImageName = `${page}_prev${scale === 1 ? '' : `_${scale}x`}`
     if (assetId !== undefined) {
-      const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
       const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
       const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
       return previewUrl
     } else {
-      if (signedUrl) return scale === 2 ? signedUrl['0_prev_2x'] : signedUrl['0_prev']
+      if (signedUrl) return signedUrl[prevImageName]
       return '' // theoretically never reach here because either assestId or signedUrl will be non-undefined
     }
+  }
+
+  getDesignPreviews(pageNum: number, assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string[] {
+    return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
   // Below function is used to update the page
