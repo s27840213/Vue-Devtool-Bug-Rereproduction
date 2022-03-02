@@ -229,9 +229,7 @@ export default Vue.extend({
     padding-top: 20px;
     box-sizing: border-box;
     overflow-y: scroll;
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @include no-scrollbar;
   }
   &__item {
     display:block;

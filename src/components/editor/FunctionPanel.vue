@@ -155,7 +155,6 @@ export default Vue.extend({
         this.targetIs('text')
     },
     showPhotoSetting(): boolean {
-      console.log('photo', this.targetIs('image'))
       return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
         this.targetIs('image') && this.singleTargetType()
     },

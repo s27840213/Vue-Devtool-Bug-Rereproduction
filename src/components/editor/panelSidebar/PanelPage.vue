@@ -69,29 +69,8 @@ export default Vue.extend({
   &-items {
     margin-right: -10px;
     box-sizing: border-box;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    scrollbar-width: thin;
     padding: 0 20px 20px 20px;
-
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background-color: unset;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      visibility: hidden;
-      background-color: #d9dbe1;
-      border: 3px solid #2c2f43;
-    }
-
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        visibility: visible;
-      }
-    }
+    @include hide-scrollbar;
   }
   &__plus {
     z-index: 2;

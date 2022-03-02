@@ -155,9 +155,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  @include no-scrollbar;
   &__option {
     display: flex;
     align-items: center;
