@@ -301,8 +301,8 @@ export default Vue.extend({
     getCurrSubSelectedLayerShown(): IImage | undefined {
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0] as IImage
+        return Object.assign(GroupUtils.mapLayersToPage(
+          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0] as IImage, { forRender: true })
       } else if (layer.type === 'frame') {
         const primaryLayer = this.getCurrLayer as IFrame
         const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
