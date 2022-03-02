@@ -513,12 +513,12 @@ class DesignUtils {
 
   getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2 | 4, ver?: number, signedUrl?: {[key: string]: string}, page = 0): string {
     const prevImageName = `${page}_prev${scale === 1 ? '' : `_${scale}x`}`
+    const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
     if (assetId !== undefined) {
-      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
       const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
       return previewUrl
     } else {
-      if (signedUrl) return signedUrl[prevImageName]
+      if (signedUrl) return signedUrl[prevImageName] + `&ver=${verstring}`
       return '' // theoretically never reach here because either assestId or signedUrl will be non-undefined
     }
   }

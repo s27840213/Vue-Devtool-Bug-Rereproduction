@@ -143,14 +143,13 @@ export default Vue.extend({
     this.checkImageSize()
   },
   watch: {
-    config: {
+    'config.asset_index': {
       handler: function () {
         this.$nextTick(() => {
           this.isDragged = false
           this.checkImageSize()
         })
-      },
-      deep: true
+      }
     }
   },
   computed: {
@@ -321,18 +320,42 @@ export default Vue.extend({
       this.$emit('deselect')
     },
     checkImageSize() {
-      if (this.config.thumbnail !== '') {
-        this.previewCheckReady = true
-        return
-      }
       this.previewCheckReady = false
-      imageUtils.getImageSize(this.configPreview, 150, 150).then((size) => {
-        const { width, height, exists } = size
-        this.imgWidth = width
-        this.imgHeight = height
+      if (this.config.polling) {
         this.previewCheckReady = true
-        this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
-      })
+        this.config.thumbnail = this.previewPlaceholder
+        this.pollingStep()
+      } else {
+        imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight).then((size) => {
+          const { width, height, exists } = size
+          this.imgWidth = width
+          this.imgHeight = height
+          this.previewCheckReady = true
+          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+        })
+      }
+    },
+    pollingStep(step = 0) {
+      const timeout = step > 14 ? 2000 : 1000
+      setTimeout(() => {
+        imageUtils.getImageSize(
+          designUtils.getDesignPreview(
+            this.config.id, 2,
+            undefined,
+            this.config.signedUrl
+          ),
+          this.imgWidth, this.imgHeight
+        ).then((size) => {
+          const { width, height, exists } = size
+          this.imgWidth = width
+          this.imgHeight = height
+          if (exists) {
+            this.config.thumbnail = this.configPreview
+          } else if (step < 35) {
+            this.pollingStep(step + 1)
+          }
+        })
+      }, timeout)
     }
   }
 })
