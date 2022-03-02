@@ -6,11 +6,12 @@
         ref="body"
         :style="styles()"
         @mousedown.left.stop="moveStart")
-      div(v-for="(scaler, index)  in controlPoints.scalers"
+      div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
           :key="index"
-          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents } )"
+          :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents })"
           @mousedown.stop="scaleStart")
+          //- :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: primaryLayerType === 'frame' ? pointerEvents : 'initial' })"
 </template>
 
 <script lang="ts">
@@ -23,6 +24,7 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -37,6 +39,10 @@ export default Vue.extend({
     pointerEvents: {
       type: String,
       default: 'initial'
+    },
+    primaryLayerType: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -86,7 +92,7 @@ export default Vue.extend({
       return this.config.styles.imgHeight
     },
     getLayerScale(): number {
-      return this.config.styles.scale
+      return this.primaryLayerType === 'frame' ? this.config.styles.scale : 1
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
@@ -108,6 +114,13 @@ export default Vue.extend({
         return (primaryStyles.rotate + (type === 'group' ? rotate : 0)) * Math.PI / 180
       } else {
         return this.getLayerRotate * Math.PI / 180
+      }
+    },
+    primaryType(): string {
+      if (typeof this.primaryLayerIndex !== 'undefined') {
+        return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).type
+      } else {
+        return ''
       }
     },
     primaryScale(): number {
@@ -147,7 +160,7 @@ export default Vue.extend({
       /**
        * Anchor denotes the top-left fix point of the element
        */
-      const scale = this.config.styles.scale
+      const scale = this.getLayerScale
       const layerAnchor = ControlUtils.getNoRotationPos(layerVect, rectCenter, -angleInRad)
       const imgAnchor = {
         x: Math.cos(angleInRad) * this.getImgX * scale - Math.sin(angleInRad) * this.getImgY * scale + layerAnchor.x,
@@ -169,7 +182,7 @@ export default Vue.extend({
        * if the frame layer is set the flip prop, do following mapping modification
        */
       const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'frame' && !this.forRender) {
+      if (currLayer.type === 'frame' && !this.config.forRender) {
         const baseLine = {
           x: -w / 2 + currLayer.styles.width / 2,
           y: -h / 2 + currLayer.styles.height / 2
@@ -288,6 +301,8 @@ export default Vue.extend({
         width: this.getImgWidth,
         height: this.getImgHeight
       }
+      console.log(this.getImgWidth)
+      console.log(this.getImgHeight)
       const rect = (this.$refs.body as HTMLElement).getBoundingClientRect()
       this.center = ControlUtils.getRectCenter(rect)
 
@@ -317,7 +332,8 @@ export default Vue.extend({
         diff.offsetX /= primaryScale
         diff.offsetY /= primaryScale
       }
-      const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
+      // const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
+      const [dx, dy] = [diff.offsetX, diff.offsetY]
 
       const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * this.flipFactorX
       const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * this.flipFactorY
@@ -423,6 +439,11 @@ export default Vue.extend({
         : (index + Math.ceil(rotateAngle / 45) + 8) % 8
       return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
+    // pointerEvents() {
+    //   return {
+    //     'pointer-events': this.config.pointerEvents ?? 'initial'
+    //   }
+    // },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
       layer.style.cursor = cursor

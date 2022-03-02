@@ -17,11 +17,9 @@ class DownloadService {
       scale: params.scale,
       pdf_quality: params.pdfQuality,
       merge: params.merge,
-      split_size: params.splitSize
-      // new_test: 1
+      split_size: params.splitSize,
+      new_test: 1
     }
-    console.log(data)
-
     return axios.request<IDownloadServiceResponse>({
       url: '/export-template',
       method: 'POST',

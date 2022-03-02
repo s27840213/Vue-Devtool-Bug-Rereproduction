@@ -34,6 +34,7 @@
               :pageIndex="pageIndex"
               :layerIndex="index"
               :primaryLayerIndex="layerIndex"
+              :primaryLayerType="config.type"
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"
@@ -916,7 +917,6 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            scale = 1
           }
           break
         }
