@@ -1068,11 +1068,12 @@ body {
       display: flex;
       align-items: center;
       justify-content: center;
-      top: 12.5px;
+      top: $header-height / 2;
       right: 15px;
       width: 25px;
       height: 25px;
       z-index: 20;
+      transform: translate(0%, -50%);
       cursor: pointer;
     }
     &__content {
