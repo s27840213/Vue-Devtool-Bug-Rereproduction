@@ -29,7 +29,7 @@
                       @update="handleValueUpdate")
       div(class="action-bar flex-evenly brand-kit-text-setting__config__style")
         svg-icon(v-for="(icon, index) in fontIcons"
-          class="pointer"
+          class="feature-button pointer"
           :class="{active: styleHit(icon)}"
           :id="`icon-${icon}`"
           v-hint="hintMap[icon]"
@@ -284,14 +284,7 @@ export default Vue.extend({
       padding: 10px 20px;
       background-color: setColor(gray-7);
       & > svg {
-        &.active {
-          background-color: setColor(blue-3);
-          border-radius: 2.5px;
-        }
-        &:not(.active):hover {
-          background-color: setColor(blue-4);
-          border-radius: 2.5px;
-        }
+        border-radius: 2.5px;
       }
     }
   }

@@ -19,8 +19,8 @@
         v-click-outside="() => { isBrandListOpen = false }"
         class="brand-selector__brand-list")
         div(v-for="brand in brands"
-          class="brand-selector__brand-list__item pointer relative"
-          :class="{'selected': checkSelected(brand)}"
+          class="feature-button brand-selector__brand-list__item pointer relative"
+          :class="{'active': checkSelected(brand)}"
           @mouseenter="handleMouseEnter(brand)"
           @mouseleave="handleMouseLeave()"
           @click="handleSetCurrentBrand(brand)")
@@ -209,14 +209,9 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-radius: 0px; // to override .feature-button
       & > span {
         @include body-SM;
-      }
-      &.selected {
-        background: setColor(blue-3);
-      }
-      &:not(.selected):hover {
-        background: setColor(blue-4);
       }
       &:hover {
         & > .brand-selector__brand-list__item-menu-icon {

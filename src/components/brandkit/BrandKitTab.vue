@@ -59,14 +59,15 @@ export default Vue.extend({
   &__header {
     display: flex;
     gap: 20px;
+    height: 54px;
   }
   &__tab-block {
     border-radius: 4px;
     height: fit-content;
-    &:not(.selected):hover {
+    &:hover { // :not(.selected)
       background-color: setColor(blue-4);
     }
-    &.selected {
+    &:not(:hover).selected {
       .brand-kit-tab__tab-name {
         border-bottom: 6px solid setColor(bu);
         & > span {
