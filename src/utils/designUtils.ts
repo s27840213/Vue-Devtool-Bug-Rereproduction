@@ -10,6 +10,7 @@ import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
 import Vue from 'vue'
 import i18n from '@/i18n'
+import stepsUtils from './stepsUtils'
 
 interface Item {
   name: string,
@@ -542,7 +543,8 @@ class DesignUtils {
 
   newDesignWithTemplae(width: number, height: number, json: any) {
     console.log(json)
-    assetUtils.addTemplate(json).then(() => {
+    assetUtils.addTemplate(json, {}, false).then(() => {
+      stepsUtils.reset()
       pageUtils.clearPagesInfo()
       Vue.nextTick(() => {
         resizeUtils.resizePage(0, json, { width, height })
@@ -552,36 +554,41 @@ class DesignUtils {
         })
         themeUtils.refreshTemplateState()
         if (this.isLogin) {
-          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           /**
            * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
            */
-          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } })
+          store.commit('SET_assetId', generalUtils.generateAssetId())
+          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } }).then(() => {
+            uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          })
         }
       })
     })
   }
 
   setDesign(design: IDesign) {
-    pageUtils.setPages()
-    let isPrivate = false
-    if (design.id === undefined && design.signedUrl) {
-      isPrivate = true
-      design.id = this.getPrivateDesignId(design.signedUrl?.['config.json'])
-    }
-    pageUtils.clearPagesInfo()
-    if (this.isLogin) {
-      store.commit('SET_assetId', design.id)
-      if (router.currentRoute.query.design_id !== design.id) {
-        router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
+    uploadUtils.isGettingDesign = true
+    router.push({ name: 'Editor' }).then(() => {
+      pageUtils.setPages()
+      let isPrivate = false
+      if (design.id === undefined && design.signedUrl) {
+        isPrivate = true
+        design.id = this.getPrivateDesignId(design.signedUrl?.['config.json'])
       }
-    }
+      pageUtils.clearPagesInfo()
+      if (this.isLogin) {
+        store.commit('SET_assetId', design.id)
+        if (router.currentRoute.query.design_id !== design.id) {
+          router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
+        }
+      }
 
-    if (isPrivate) {
-      this.fetchDesign(this.teamId, design.id ?? '')
-    } else {
-      this.fetchDesign(this.teamId, design.id ?? '')
-    }
+      if (isPrivate) {
+        this.fetchDesign(this.teamId, design.id ?? '')
+      } else {
+        this.fetchDesign(this.teamId, design.id ?? '')
+      }
+    })
   }
 
   getPrivateDesignId(jsonUrl?: string): string {

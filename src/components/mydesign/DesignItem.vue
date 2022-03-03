@@ -274,9 +274,7 @@ export default Vue.extend({
         return
       }
       if (this.unenterable) return
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.setDesign(this.config)
-      })
+      designUtils.setDesign(this.config)
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
