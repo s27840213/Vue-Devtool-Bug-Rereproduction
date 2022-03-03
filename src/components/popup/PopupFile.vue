@@ -1,6 +1,7 @@
 <template lang="pug">
 div(class="popup-file")
-  div(class="popup-file__profile")
+  div(v-if="isLogin"
+    class="popup-file__profile")
     router-link(to="/settings/account"
         class="popup-file__option__link"
         @click.native="closePopup")
@@ -36,7 +37,8 @@ div(class="popup-file")
       @click="onLogoutClicked()")
       span {{$tc('NN0167',2)}}
   div(v-if="buildNumber"
-    class="text-white body-2 build-number") {{buildNumber}}
+    class="popup-file__item")
+    span(class="text-gray-3") Version: {{buildNumber}}
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -90,7 +92,7 @@ export default Vue.extend({
     },
     buildNumber(): string {
       const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
-      return buildNumber ? `v.${buildNumber}` : ''
+      return buildNumber ? `v.${buildNumber}` : 'local'
     },
     showUname(): string {
       if (this.uname.length > 10) {
@@ -151,11 +153,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.build-number {
-  margin-top: -25px;
-  width: 70px;
-}
-
 .popup-file {
   position: relative;
   border-radius: 5px;
@@ -205,10 +202,7 @@ export default Vue.extend({
     > span {
       font-size: 0.75rem;
     }
-    &:nth-child(1) {
-      font-weight: bold;
-    }
-    &:nth-child(n + 2) {
+    &:not(:last-child) {
       &:hover {
         background-color: setColor(blue-3, 0.5);
       }
