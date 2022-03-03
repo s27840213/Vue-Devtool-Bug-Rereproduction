@@ -71,7 +71,7 @@ class UploadUtils {
 
   event: any
   eventHash: { [index: string]: (param: any) => void }
-  hasGottenDesign: boolean
+  isGettingDesign: boolean
   designStatusTimer: number
   DEFAULT_POLLING_RETRY_LIMIT = 15
 
@@ -93,7 +93,7 @@ class UploadUtils {
       id: '',
       teamId: ''
     }
-    this.hasGottenDesign = false
+    this.isGettingDesign = false
     this.event = new EventEmitter()
     this.eventHash = {}
     this.designStatusTimer = -1
@@ -457,7 +457,7 @@ class UploadUtils {
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
-    if (designId && teamId && type && !this.hasGottenDesign) {
+    if (this.isGettingDesign) {
       return
     }
     if (!type || !designId || !teamId) {
@@ -956,7 +956,7 @@ class UploadUtils {
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
-
+    this.isGettingDesign = true
     logUtils.setLog(`Get Design
       Type: ${type}
       DesignId: ${designId}
@@ -1016,7 +1016,7 @@ class UploadUtils {
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
-          this.hasGottenDesign = true
+          this.isGettingDesign = false
         } else {
           response.json().then(async (json) => {
             switch (type) {
@@ -1057,14 +1057,14 @@ class UploadUtils {
               }
             }
           }).then(() => {
-            this.hasGottenDesign = true
+            this.isGettingDesign = false
             pageUtils.fitPage()
           })
         }
       })
       .catch((err) => {
         router.replace({ query: Object.assign({}) })
-        this.hasGottenDesign = true
+        this.isGettingDesign = false
         type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
         logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)

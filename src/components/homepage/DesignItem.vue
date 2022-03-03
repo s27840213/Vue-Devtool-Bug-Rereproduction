@@ -44,7 +44,7 @@ export default Vue.extend({
   },
   watch: {
     config: {
-      handler: function() {
+      handler: function () {
         this.$nextTick(() => {
           this.checkImageSize()
         })
@@ -83,9 +83,7 @@ export default Vue.extend({
       }
     },
     handleClick() {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.setDesign(this.config)
-      })
+      designUtils.setDesign(this.config)
     },
     checkImageSize() {
       if (this.config.thumbnail !== '') {
