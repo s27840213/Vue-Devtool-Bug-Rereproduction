@@ -100,13 +100,6 @@ export default Vue.extend({
       } else {
         return this.uname
       }
-    },
-    showAccount(): string { // 要嗎？
-      if (this.account.length > 25) {
-        return this.account.substring(0, 25).concat('...')
-      } else {
-        return this.account
-      }
     }
   },
   methods: {
