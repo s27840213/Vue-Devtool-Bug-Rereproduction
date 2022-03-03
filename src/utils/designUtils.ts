@@ -10,6 +10,7 @@ import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
 import Vue from 'vue'
 import i18n from '@/i18n'
+import stepsUtils from './stepsUtils'
 
 interface Item {
   name: string,
@@ -543,6 +544,7 @@ class DesignUtils {
   newDesignWithTemplae(width: number, height: number, json: any) {
     console.log(json)
     assetUtils.addTemplate(json).then(() => {
+      stepsUtils.reset()
       pageUtils.clearPagesInfo()
       Vue.nextTick(() => {
         resizeUtils.resizePage(0, json, { width, height })

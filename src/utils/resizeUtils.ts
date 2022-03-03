@@ -133,7 +133,9 @@ class ResizeUtils {
     page.layers.forEach((layer, index) => {
       this.scaleAndMoveLayer(pageIndex, index, layer, scale, xOffset, yOffset)
     })
-    this.scaleAndMoveGuideLines(page.guidelines, scale, xOffset, yOffset)
+    if (page.guidelines) {
+      this.scaleAndMoveGuideLines(page.guidelines, scale, xOffset, yOffset)
+    }
     return page
   }
 
