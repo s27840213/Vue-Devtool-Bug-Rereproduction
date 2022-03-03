@@ -139,7 +139,7 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(json: any, attrs: IAssetProps = {}) {
+  async addTemplate(json: any, attrs: IAssetProps = {}, recordStep = true) {
     const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
@@ -154,7 +154,9 @@ class AssetUtils {
       })
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
-    stepsUtils.record()
+    if (recordStep) {
+      stepsUtils.record()
+    }
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {

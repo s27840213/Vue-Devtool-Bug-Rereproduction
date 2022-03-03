@@ -107,9 +107,7 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  @include no-scrollbar;
 }
 .nav-container {
   display: flex;

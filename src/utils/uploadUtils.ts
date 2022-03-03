@@ -131,13 +131,14 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
-      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
@@ -147,7 +148,11 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        this.uploadAsset(type, files as FileList)
+        if (type !== 'logo' && type !== 'font') {
+          this.uploadAsset(type, files as FileList)
+        } else {
+          console.log(files)
+        }
       }
     }, false)
   }
@@ -1052,7 +1057,6 @@ class UploadUtils {
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
                 designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json)
                 logUtils.setLog('Successfully get new design template')
-                stepsUtils.reset()
                 break
               }
             }

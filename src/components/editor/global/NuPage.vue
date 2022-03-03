@@ -133,8 +133,8 @@
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
+                                    :primaryLayerType="getCurrLayer.type"
                                     :forRender="true"
-                                    :pointerEvents="'none'"
                                     :config="getCurrSubSelectedLayerShown")
             template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:style="'opacity: 0.45'"
@@ -287,22 +287,16 @@ export default Vue.extend({
     getCurrLayer(): ILayer {
       return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },
-    getCurrSubSelectedLayer(): ILayer | undefined {
-      const layer = this.getCurrLayer
-      if (layer.type === 'group') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
-      } else if (layer.type === 'frame') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IFrame).clips[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
-      }
-      return undefined
-    },
     getCurrSubSelectedLayerShown(): IImage | undefined {
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0] as IImage
+        const subLayer = GeneralUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
+        const scale = subLayer.styles.scale
+        subLayer.styles.scale = 1
+        const mappedLayer = GroupUtils
+          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
+        mappedLayer.styles.scale = scale
+        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
       } else if (layer.type === 'frame') {
         const primaryLayer = this.getCurrLayer as IFrame
         const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage

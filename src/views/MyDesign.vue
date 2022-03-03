@@ -64,7 +64,7 @@
                         iconColor="gray-2")
         component(v-if="currLocation !== ''"
                   :is="mydesignView"
-                  class="design-view"
+                  class="design-view scrollbar-gray"
                   @deleteItem="handleDeleteItem"
                   @clearSelection="handleClearSelection"
                   @recoverItem="handleRecoverItem"
@@ -566,7 +566,7 @@ export default Vue.extend({
   max-height: 100%;
   &__content {
     position: relative;
-    height: calc(100% - 50px);
+    height: calc(100% - #{$header-height});
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: auto 1fr;

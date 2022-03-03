@@ -13,11 +13,17 @@
           v-hint="$t(shadowPropI18nMap[icon]._effectName)"
         )
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
-        class="w-full photo-effect-setting__form")
+        :class="['w-full', currentEffect !== 'none' ? 'photo-effect-setting__form' : '']")
         div(v-for="field in shadowFields"
-          :key="field"
-          class="photo-effect-setting__field")
-          div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
+          :key="field")
+          div(class="photo-effect-setting__field")
+            div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
+            input(class="photo-effect-setting__value-input"
+              :value="getFieldValue(field)"
+              :name="field"
+              @change="handleEffectUpdate"
+              @blur="recordChange"
+              type="number")
           input(class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
             :max="fieldRange[currentEffect][field].max"
@@ -27,23 +33,14 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-          input(class="photo-effect-setting__value-input"
-            :value="getFieldValue(field)"
-            :name="field"
-            @change="handleEffectUpdate"
-            @blur="recordChange"
-            type="number")
-        div(v-if="currentEffect !== 'none'"
-          class="photo-effect-setting__field")
-          div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
-            @click="handleColorModal")
-          color-picker(v-if="openColorPicker"
-            class="photo-effect-setting__color-picker"
-            v-click-outside="handleColorModal"
-            :currentColor="currentStyle.shadow.effects.color"
-            @update="handleColorUpdate")
+        template(v-if="currentEffect !== 'none'")
+          div(class="photo-effect-setting__field")
+            div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
+            div(class="photo-effect-setting__value-input"
+              :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
+              @click="handleColorModal")
+          div(class="photo-effect-setting__reset")
+            button(@click="reset()") {{ 'Reset' }}
       div(class="flex-between photo-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
           :key="`shadow-${icon}`"
@@ -58,11 +55,16 @@
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
         class="w-full photo-effect-setting__form")
         div(v-for="field in shadowFields"
-          :key="field"
-          class="photo-effect-setting__field")
-          div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
-          input(v-if="field !== 'zIndex'"
-            class="photo-effect-setting__range-input"
+          :key="field")
+          div(class="photo-effect-setting__field")
+            div(class="photo-effect-setting__field-name") {{$t(shadowPropI18nMap[currentEffect][field])}}
+            input(class="photo-effect-setting__value-input"
+              :value="getFieldValue(field)"
+              :name="field"
+              @change="handleEffectUpdate"
+              @blur="recordChange"
+              type="number")
+          input(class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
             :max="fieldRange[currentEffect][field].max"
             :min="fieldRange[currentEffect][field].min"
@@ -71,29 +73,27 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-          input(:class="['photo-effect-setting__value-input']"
-            :value="getFieldValue(field)"
-            :name="field"
-            @change="handleEffectUpdate"
-            @blur="recordChange"
-            type='number')
         div(v-if="!['none', 'halo'].includes(currentEffect)"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
             :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
             @click="handleColorModal")
-          color-picker(v-if="openColorPicker"
-            class="photo-effect-setting__color-picker"
-            v-click-outside="handleColorModal"
-            :currentColor="currentStyle.textEffect.color"
-            @update="handleColorUpdate")
+        div(class="photo-effect-setting__reset")
+          button(@click="reset()") {{ 'Reset' }}
+          //- @toggleColorPanel="toggleColorPanel")
+          //- color-picker(v-if="openColorPicker"
+          //-   class="photo-effect-setting__color-picker"
+          //-   v-click-outside="handleColorModal"
+          //-   :currentColor="currentStyle.shadow.color"
+          //-   @update="handleColorUpdate")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
+import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
@@ -105,15 +105,14 @@ import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   components: {
-    ColorPicker
+    ColorPicker,
+    ColorPanel
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
   data() {
     return {
-      openModal: false,
-      openColorPicker: false,
       shadowPropI18nMap,
       fieldRange
     }
@@ -155,9 +154,6 @@ export default Vue.extend({
     optionStyle(idx: number) {
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
     },
-    handleStyleModal() {
-      this.openModal = !this.openModal
-    },
     handleColorModal() {
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.photoShadow)
@@ -193,6 +189,16 @@ export default Vue.extend({
     },
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
+    },
+    reset() {
+      const { currentEffect } = this
+      if (currentEffect !== ShadowEffectType.none) {
+        const defaultProps = imageShadowUtils.getDefaultEffect(currentEffect)[currentEffect]
+        imageShadowUtils.setEffect(currentEffect, {
+          [currentEffect]: defaultProps,
+          color: '#000000'
+        })
+      }
     }
   }
 })
@@ -203,6 +209,7 @@ export default Vue.extend({
   font-size: 14px;
   &__form {
     background: #fff;
+    padding: 12px;
   }
   &__name {
     flex: 1;
@@ -225,25 +232,22 @@ export default Vue.extend({
     }
   }
   &__field {
-    flex: 1;
     display: flex;
-    padding: 10px;
-    align-items: center;
-    position: relative;
+    justify-content: space-between;
   }
   &__field-name {
-    flex: 1;
     color: #18191f;
     text-align: left;
     text-transform: capitalize;
     white-space: nowrap;
   }
   &__range-input {
-    // width: 90px;
-    margin-left: 10px;
     appearance: none;
     outline: none;
     background: none;
+    width: 98%;
+    margin: 12px 0;
+    box-sizing: border-box;
     &::-webkit-slider-runnable-track {
       height: 2px;
       background-color: #d9dbe1;
@@ -267,13 +271,21 @@ export default Vue.extend({
     box-sizing: border-box;
     line-height: 20px;
     border-radius: 3px;
-    margin-left: 10px;
     text-align: center;
   }
   &__color-picker {
     position: absolute;
     right: 0px;
     bottom: 0px;
+  }
+  &__reset {
+    margin: 12px 0 0 0;
+    text-align: right;
+    > button {
+      color: setColor(blue-1);
+      font-size: 14px;
+      padding: 0;
+    }
   }
 }
 .action-bar {
