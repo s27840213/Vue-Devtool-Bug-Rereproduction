@@ -1,5 +1,8 @@
 <template lang="pug">
-  div(class="category-fonts pointer" draggable="false" @click="setFont()")
+  div(class="category-fonts pointer feature-button"
+    :class="{ active: props.font === item.id }"
+    draggable="false"
+    @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
         :src="fallbackSrc || `${host}/${item.id}/${preview}?ver=${item.ver}`"

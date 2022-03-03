@@ -109,8 +109,11 @@ export default Vue.extend({
     }
   },
   watch: {
-    spans(newSpans) {
-      this.computeDimensions(newSpans)
+    spans: {
+      handler(newSpans) {
+        this.computeDimensions(newSpans)
+      },
+      deep: true
     }
   },
   methods: {

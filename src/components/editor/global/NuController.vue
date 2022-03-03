@@ -34,6 +34,7 @@
               :pageIndex="pageIndex"
               :layerIndex="index"
               :primaryLayerIndex="layerIndex"
+              :primaryLayerType="config.type"
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"
@@ -541,7 +542,7 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        'pointer-events': this.isImgControl || (this.getLayerType === 'image' && this.isMoving) ? 'none' : 'initial',
+        'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
@@ -884,9 +885,9 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-          scale = 1
+          const scaleForImg = Math.max(width / this.getLayerWidth, height / this.getLayerHeight)
+          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scaleForImg, imgHeight * scaleForImg)
+          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scaleForImg, imgY * scaleForImg)
           break
         }
         case 'text':

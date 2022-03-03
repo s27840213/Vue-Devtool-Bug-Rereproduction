@@ -19,3 +19,32 @@
     -ms-overflow-style: none !important; /* IE and Edge */
     scrollbar-width: none !important; /* Firefox */
 }
+@mixin hide-scrollbar{
+    // Disable x scrollbar and let y scrollbar appear only when hovering it
+    // If element height <= parent height, y scrollbar will never appear.
+    overflow-y: auto; // Firefox will use this
+    overflow-y: overlay; // Only for Webkit
+    overflow-x: hidden;
+    scrollbar-width: none; // Only for Firefox
+    
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+      background-color: unset;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      visibility: hidden;
+      background-color: #d9dbe1;
+      border: 3px solid #2c2f43;
+    }
+    &:hover {
+      &::-webkit-scrollbar-thumb {
+        visibility: visible;
+      }
+      scrollbar-width: thin; // Only for Firefox
+      @-moz-document url-prefix(){ // Only for Firefox
+        padding-right: 0px;
+      }
+    }
+}

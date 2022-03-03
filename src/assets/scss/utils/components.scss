@@ -43,7 +43,7 @@
   &.active {
     background-color: setColor(blue-3);
   }
-  &:not(.disabled):not(.active):hover {
+  &:not(.disabled):hover {
     background-color: setColor(blue-4);
   }
 }

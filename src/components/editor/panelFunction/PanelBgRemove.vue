@@ -109,7 +109,7 @@ export default Vue.extend({
       this.setRestoreInitState(true)
     },
     save() {
-      const { index, pageIndex, layers } = this.currSelectedInfo as ICurrSelectedInfo
+      const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
       if (!this.modifiedFlag) {
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {

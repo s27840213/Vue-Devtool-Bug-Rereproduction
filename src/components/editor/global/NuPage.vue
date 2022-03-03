@@ -124,7 +124,7 @@
               nu-layer(style="opacity: 0.45"
                 :layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
-                :noClip="true"
+                :imgControl="true"
                 :config="getCurrSubSelectedLayerShown")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
@@ -133,16 +133,18 @@
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
-                                    :config="Object.assign(getCurrSubSelectedLayerShown, { pointerEvents: 'none' }, { forRender: true })")
+                                    :primaryLayerType="getCurrLayer.type"
+                                    :forRender="true"
+                                    :config="getCurrSubSelectedLayerShown")
             template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:style="'opacity: 0.45'"
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
-                :noClip="true"
-                :config="getCurrLayer")
+                :imgControl="true"
+                :config="Object.assign(getCurrLayer, { forRender: true })")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
-                :config="getCurrLayer")
+                :config="Object.assign(getCurrLayer, { forRender: true })")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSelectedIndex"
                                     :pageIndex="pageIndex"
@@ -283,24 +285,18 @@ export default Vue.extend({
     }),
     ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
-      return this.getLayer(this.pageIndex, this.currSelectedIndex)
-    },
-    getCurrSubSelectedLayer(): ILayer | undefined {
-      const layer = this.getCurrLayer
-      if (layer.type === 'group') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
-      } else if (layer.type === 'frame') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IFrame).clips[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0]
-      }
-      return undefined
+      return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },
     getCurrSubSelectedLayerShown(): IImage | undefined {
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
-        return GroupUtils.mapLayersToPage(
-          [(this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]], this.getCurrLayer as ITmp)[0] as IImage
+        const subLayer = GeneralUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
+        const scale = subLayer.styles.scale
+        subLayer.styles.scale = 1
+        const mappedLayer = GroupUtils
+          .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
+        mappedLayer.styles.scale = scale
+        return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
       } else if (layer.type === 'frame') {
         const primaryLayer = this.getCurrLayer as IFrame
         const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
@@ -311,6 +307,7 @@ export default Vue.extend({
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
           image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
         }
+        Object.assign(image, { forRender: true })
         return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
       }
       return undefined

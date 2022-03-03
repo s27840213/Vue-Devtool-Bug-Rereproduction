@@ -122,9 +122,6 @@ export default Vue.extend({
     ),
     ...mapState('user', ['userId', 'role', 'adminMode']),
     ...mapState(['themes']),
-    ...mapGetters({
-      currActivePageIndex: 'getCurrActivePageIndex'
-    }),
     showTemplateId(): boolean {
       return (this.role === 0) && this.adminMode
     },
@@ -194,9 +191,9 @@ export default Vue.extend({
         .map(theme => theme.id)
     },
     resultTooLess(): string[] {
-      return (i18n.t('NN0398') as string).split('{html}')
+      return (i18n.t('NN0398') as string).split('<html>')
     },
-    allThemesChecked():boolean {
+    allThemesChecked(): boolean {
       const allThemeString = _.sortBy(this.themes.map((item: Itheme) => item.id)).join(',')
       return allThemeString === this.theme
     }
@@ -255,7 +252,7 @@ export default Vue.extend({
       this.currentGroup = group
     },
     setAllTemplate(): void {
-      const allTheme: {[key: string]: boolean} = {}
+      const allTheme: { [key: string]: boolean } = {}
       this.themes.forEach((theme: Itheme) => {
         allTheme[theme.id] = true
       })
@@ -378,7 +375,7 @@ export default Vue.extend({
 }
 
 .set-all-templatebtn-btn {
-  color: setColor('blue-1');
+  color: setColor("blue-1");
   text-decoration: underline;
 }
 </style>

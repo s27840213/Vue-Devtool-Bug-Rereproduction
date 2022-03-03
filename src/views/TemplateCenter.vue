@@ -1,6 +1,6 @@
 <template lang="pug">
   div(ref="body"
-      class="template-center"
+      class="template-center scrollbar-gray"
       @scroll="handleScroll")
     nu-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
       transition(name="slide")
@@ -788,11 +788,7 @@ body {
     @media screen and (max-width: 767px) {
       height: 100vh;
       overflow-y: auto;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
+      @include no-scrollbar;
     }
   }
   &__waterfall {
@@ -1057,7 +1053,7 @@ body {
   }
   &__mobile-multi {
     position: fixed;
-    top: 50px;
+    top: $header-height;
     left: 0;
     width: 100vw;
     height: 100vh;
@@ -1068,17 +1064,18 @@ body {
       display: flex;
       align-items: center;
       justify-content: center;
-      top: 12.5px;
+      top: $header-height / 2;
       right: 15px;
       width: 25px;
       height: 25px;
       z-index: 20;
+      transform: translate(0%, -50%);
       cursor: pointer;
     }
     &__content {
       overflow-y: auto;
       width: 100%;
-      height: calc(100vh - 50px);
+      height: calc(100vh - #{$header-height});
     }
     &__gallery {
       display: grid;

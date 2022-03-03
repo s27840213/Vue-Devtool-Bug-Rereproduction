@@ -145,9 +145,7 @@ export default Vue.extend({
     box-sizing: border-box;
     overflow-y: scroll;
     width: auto;
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @include no-scrollbar;
   }
   &__item {
     display: flex;

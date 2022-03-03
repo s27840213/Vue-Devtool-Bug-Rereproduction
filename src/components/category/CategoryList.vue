@@ -44,31 +44,13 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-  #recycle {
+  #recycle {// For overwrite vue-recycle setting
     overflow-y: overlay;
   }
   .category-list {
-    margin-right: -10px;
+    margin-right: -10px; // Push scrollbar to outside
     padding-right: 10px;
-    overflow-y: overlay;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background-color: unset;
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      visibility: hidden;
-      background-color: #d9dbe1;
-      border: 3px solid #2c2f43;
-    }
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        visibility: visible;
-      }
-    }
+    @include hide-scrollbar;
     &__header {
       line-height: 26px;
       display: flex;

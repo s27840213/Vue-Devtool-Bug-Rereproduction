@@ -131,13 +131,14 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
-      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
@@ -147,7 +148,11 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        this.uploadAsset(type, files as FileList)
+        if (type !== 'logo' && type !== 'font') {
+          this.uploadAsset(type, files as FileList)
+        } else {
+          console.log(files)
+        }
       }
     }, false)
   }
@@ -1135,12 +1140,14 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
+        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,
           imgY: styles.imgY,
           imgWidth: styles.imgWidth,
           imgHeight: styles.imgHeight,
+          shadow: styles.shadow,
           ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
         }
       case 'text':
