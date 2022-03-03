@@ -184,9 +184,7 @@ export default Vue.extend({
     @media screen and (min-width: 1600px) {
       justify-content: center;
     }
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @include no-scrollbar;
   }
   &__plus {
     display: flex;

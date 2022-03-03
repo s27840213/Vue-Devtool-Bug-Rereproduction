@@ -788,11 +788,7 @@ body {
     @media screen and (max-width: 767px) {
       height: 100vh;
       overflow-y: auto;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
+      @include no-scrollbar;
     }
   }
   &__waterfall {

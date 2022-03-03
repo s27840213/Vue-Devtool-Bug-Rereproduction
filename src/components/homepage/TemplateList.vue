@@ -211,9 +211,7 @@ export default Vue.extend({
         column-gap: 0px;
       }
     }
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @include no-scrollbar;
   }
   &__plus {
     width: 90px;

@@ -137,6 +137,7 @@ export default Vue.extend({
         visibility: visible;
       }
     }
+
   }
 }
 </style>

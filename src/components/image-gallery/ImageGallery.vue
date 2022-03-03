@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="image-gallery")
-    recycle-scroller(class="image-gallery__content"
+    recycle-scroller(class="image-gallery__content" id="recycle"
       :items="rows")
       template(v-slot="{ item }")
         observer-sentinel(v-if="item.sentinel"
@@ -92,32 +92,24 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+#recycle {// For overwrite vue-recycle setting
+  overflow-y: overlay;
+}
+
 .image-gallery {
   &__content {
     height: 100%;
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
-    margin-right: -10px;
-    overflow-y: scroll;
-    scrollbar-width: thin;
-    overscroll-behavior: contain;
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background-color: unset;
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      visibility: hidden;
-      background-color: #d9dbe1;
-      border: 3px solid #2c2f43;
-    }
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        visibility: visible;
+    margin-right: -10px; // Push scrollbar to outside
+    padding-right: 10px;
+    @media not all and (min-resolution:.001dpcm){ // For safari only
+      @supports (-webkit-appearance:none) {
+        padding-right: 0;
       }
     }
+    @include hide-scrollbar;
   }
 }
 </style>
