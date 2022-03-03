@@ -543,7 +543,7 @@ class DesignUtils {
 
   newDesignWithTemplae(width: number, height: number, json: any) {
     console.log(json)
-    assetUtils.addTemplate(json).then(() => {
+    assetUtils.addTemplate(json, {}, false).then(() => {
       stepsUtils.reset()
       pageUtils.clearPagesInfo()
       Vue.nextTick(() => {
@@ -554,11 +554,13 @@ class DesignUtils {
         })
         themeUtils.refreshTemplateState()
         if (this.isLogin) {
-          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           /**
            * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
            */
-          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } })
+          store.commit('SET_assetId', generalUtils.generateAssetId())
+          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } }).then(() => {
+            uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          })
         }
       })
     })
