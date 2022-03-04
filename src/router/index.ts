@@ -11,6 +11,7 @@ import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import BrandKit from '../views/BrandKit.vue'
+import Billing from '../views/Billing.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -157,6 +158,11 @@ const routes: Array<RouteConfig> = [
     path: 'brandkit',
     name: 'BrandKit',
     component: BrandKit
+  },
+  {
+    path: 'billing',
+    name: 'Billing',
+    component: Billing
   }
 ]
 
