@@ -917,11 +917,6 @@ class UploadUtils {
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
-          if (layer.styles.scale !== 1) {
-            layer.styles.imgWidth = layer.styles.width as number
-            layer.styles.imgHeight = layer.styles.height as number
-            layer.styles.scale = 1
-          }
           layer.imgControl = false
           break
         case 'tmp': {

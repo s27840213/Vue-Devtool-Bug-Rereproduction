@@ -42,17 +42,17 @@
                 iconColor="gray-4"
                 @click.native="copyColor")
       div(class="action-bar action-bar--small flex-evenly")
-        svg-icon(class="pointer record-selection btn-lh feature-button"
+        svg-icon(class="pointer record-selection btn-lh feature-button p-5"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
           v-hint="$t('NN0109')")
-        svg-icon(class="pointer record-selection btn-ls feature-button"
+        svg-icon(class="pointer record-selection btn-ls feature-button p-5"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
           v-hint="$t('NN0110')")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
-        class="record-selection feature-button"
+        class="record-selection feature-button p-5"
         :class="{ pointer: icon !== 'font-vertical' || !hasCurveText, active: iconIsActived(icon) }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
@@ -60,7 +60,7 @@
         :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
-        class="pointer feature-button"
+        class="pointer feature-button p-5"
         :class="{ active: iconIsActived(icon) }"
         :key="`gp-action-icon-${index}`"
         v-hint="hintMap[icon]"
