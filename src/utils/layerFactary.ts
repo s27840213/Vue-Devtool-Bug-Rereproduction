@@ -399,7 +399,6 @@ class LayerFactary {
     }
 
     if (config.layers === undefined) return config
-
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
 
