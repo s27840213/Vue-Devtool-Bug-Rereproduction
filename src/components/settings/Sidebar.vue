@@ -10,19 +10,21 @@
             div {{showUname}}
             div(class="text-gray-3") {{showAccount}}
         div(class="nav-container__option"
-          :class="{'selected': optionSelected === 'account'}"
-          @click="switchNav('account')")
-          svg-icon(:iconName="'settings'"
-            :iconWidth="'15px'"
-            :iconColor="'gray-2'")
-          span {{$tc('NN0165', 1)}}
+          :class="{'selected': subPath === 'account'}")
+          router-link(to="/settings/account"
+            class="nav-container__option__link")
+            svg-icon(:iconName="'settings'"
+              :iconWidth="'15px'"
+              :iconColor="'gray-2'")
+            span {{$tc('NN0165', 1)}}
         div(class="nav-container__option"
-          :class="{'selected': optionSelected === 'security'}"
-          @click="switchNav('security')")
-          svg-icon(:iconName="'lock'"
-            :iconWidth="'15px'"
-            :iconColor="'gray-2'")
-          span {{$tc('NN0166', 1)}}
+          :class="{'selected': subPath === 'security'}")
+          router-link(to="/settings/security"
+            class="nav-container__option__link")
+            svg-icon(:iconName="'lock'"
+              :iconWidth="'15px'"
+              :iconColor="'gray-2'")
+            span {{$tc('NN0166', 1)}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -64,6 +66,9 @@ export default Vue.extend({
       } else {
         return this.account
       }
+    },
+    subPath(): string {
+      return this.$route.path.split('/settings/')[1] || 'account'
     }
   },
   methods: {
@@ -102,9 +107,7 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  @include no-scrollbar;
 }
 .nav-container {
   display: flex;
@@ -143,8 +146,20 @@ export default Vue.extend({
     font-weight: 400;
     cursor: pointer;
     margin: 10px 0;
-    > svg {
+    &:hover {
+      color: setColor(blue-1);
+      svg {
+        color: setColor(blue-1);
+      }
+    }
+    svg {
       padding: 0 10px 0 20px;
+    }
+    &__link {
+      display: flex;
+      align-items: center;
+      color: unset;
+      text-decoration: unset;
     }
   }
   .selected {

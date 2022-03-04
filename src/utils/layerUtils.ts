@@ -95,8 +95,7 @@ class LayerUtils {
     })
     ZindexUtils.reassignZindex(pageIndex)
     GroupUtils.deselect()
-    store.commit('SET_middlemostPageIndex', pageIndex)
-    FocusUtils.focusElement(`.nu-page-${pageIndex}`, false)
+    store.commit('SET_currActivePageIndex', pageIndex)
     GroupUtils.select(pageIndex, [store.getters.getLayers(pageIndex).length - 1])
 
     /**

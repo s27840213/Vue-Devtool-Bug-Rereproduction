@@ -71,7 +71,7 @@ class UploadUtils {
 
   event: any
   eventHash: { [index: string]: (param: any) => void }
-  hasGottenDesign: boolean
+  isGettingDesign: boolean
   designStatusTimer: number
   DEFAULT_POLLING_RETRY_LIMIT = 15
 
@@ -93,7 +93,7 @@ class UploadUtils {
       id: '',
       teamId: ''
     }
-    this.hasGottenDesign = false
+    this.isGettingDesign = false
     this.event = new EventEmitter()
     this.eventHash = {}
     this.designStatusTimer = -1
@@ -131,13 +131,14 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
-      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
@@ -147,7 +148,11 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        this.uploadAsset(type, files as FileList)
+        if (type !== 'logo' && type !== 'font') {
+          this.uploadAsset(type, files as FileList)
+        } else {
+          console.log(files)
+        }
       }
     }, false)
   }
@@ -457,7 +462,7 @@ class UploadUtils {
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
-    if (designId && teamId && type && !this.hasGottenDesign) {
+    if (this.isGettingDesign) {
       return
     }
     if (!type || !designId || !teamId) {
@@ -912,11 +917,6 @@ class UploadUtils {
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
-          if (layer.styles.scale !== 1) {
-            layer.styles.imgWidth = layer.styles.width as number
-            layer.styles.imgHeight = layer.styles.height as number
-            layer.styles.scale = 1
-          }
           layer.imgControl = false
           break
         case 'tmp': {
@@ -956,7 +956,7 @@ class UploadUtils {
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
-
+    this.isGettingDesign = true
     logUtils.setLog(`Get Design
       Type: ${type}
       DesignId: ${designId}
@@ -1016,7 +1016,7 @@ class UploadUtils {
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
-          this.hasGottenDesign = true
+          this.isGettingDesign = false
         } else {
           response.json().then(async (json) => {
             switch (type) {
@@ -1052,19 +1052,18 @@ class UploadUtils {
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
                 designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json)
                 logUtils.setLog('Successfully get new design template')
-                stepsUtils.reset()
                 break
               }
             }
           }).then(() => {
-            this.hasGottenDesign = true
+            this.isGettingDesign = false
             pageUtils.fitPage()
           })
         }
       })
       .catch((err) => {
         router.replace({ query: Object.assign({}) })
-        this.hasGottenDesign = true
+        this.isGettingDesign = false
         type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
         logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)
@@ -1135,12 +1134,14 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
+        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,
           imgY: styles.imgY,
           imgWidth: styles.imgWidth,
           imgHeight: styles.imgHeight,
+          shadow: styles.shadow,
           ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
         }
       case 'text':

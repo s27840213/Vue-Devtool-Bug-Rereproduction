@@ -240,6 +240,7 @@ class Controller {
         })
       }
     }
+    console.log((LayerUtils.getCurrConfig).styles)
   }
 
   refreshColor() {

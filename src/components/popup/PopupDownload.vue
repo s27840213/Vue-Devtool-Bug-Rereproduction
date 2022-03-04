@@ -43,7 +43,7 @@
               input(class="px-0"
                 type="text"
                 v-model.number="selectedTypeQuality")
-          input(class="popup-download__range-input"
+          input(class="popup-download__range-input input__slider--range"
             v-model.number="selected.quality"
             max="100"
             min="1"
@@ -242,6 +242,9 @@ export default Vue.extend({
       addExportId: 'ADD_exportIds'
     }),
     handleUploadJSON(id: string) {
+      /**
+       * @Todo check the upload design function
+       */
       return uploadUtils.uploadExportJSON(id)
         .then((res: any) => {
           const { status } = res?.target
@@ -413,28 +416,6 @@ export default Vue.extend({
   &__hr {
     border: none;
     border-top: 1px solid setColor(gray-4);
-  }
-  &__range-input {
-    appearance: none;
-    outline: none;
-    background: none;
-    flex: 1;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: setColor(gray-4);
-    }
-    &::-webkit-slider-thumb {
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background-color: setColor(white);
-      border: 2px solid #3c64b1;
-      transition: 0.2s;
-      margin-top: -6.5px;
-      position: relative;
-      cursor: pointer;
-    }
   }
   &__size-scale {
     width: 65px;

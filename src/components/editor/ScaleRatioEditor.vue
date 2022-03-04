@@ -19,11 +19,11 @@
       :iconColor="inBgRemoveMode ? 'gray-4' :'gray-2'"
       :disabled="inBgRemoveMode"
       :iconWidth="'24px'")
-    svg-icon(:class="{'hover-effect': !(isShowPagePreview || inBgRemoveMode), 'click-disabled': (inBgRemoveMode)}"
+    svg-icon(:class="{'hover-effect': !inBgRemoveMode, 'click-disabled': inBgRemoveMode}"
       :iconName="'navPage'"
-      :iconColor="(isShowPagePreview || inBgRemoveMode) ? 'gray-4' :'gray-2'"
+      :iconColor="inBgRemoveMode? 'gray-4' :'gray-2'"
       :iconWidth="'24px'"
-      :disabled="(isShowPagePreview || inBgRemoveMode)"
+      :disabled="inBgRemoveMode"
       @click.native="setShowPagePanel(!showPagePanel)")
 </template>
 

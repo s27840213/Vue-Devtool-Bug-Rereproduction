@@ -4,12 +4,12 @@
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="show === btn.show || (btn.name === 'crop' && isCropping) || (btn.name==='remove-bg' && inBgRemoveMode) ? 'active' : ''"
+        :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0 && btn.name === 'shadow' ? 'displayNone' : '']"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="selectedLayersNum === 1 && isAdmin"
+      btn(v-if="isImage && isAdmin && !isFrame"
         class="full-width"
         type="gray-mid"
         ref="btn"
@@ -17,21 +17,12 @@
     component(:is="show || 'div'"
       v-click-outside="handleOutside"
       :imageAdjust="currLayerAdjust"
-      @update="handleAdjust")
-    //- property-bar
-    //-   input(class="body-2 text-gray-2" max="100" min="0" step="1" v-model="opacity")
-    //-   svg-icon(class="pointer"
-    //-     :iconName="'transparency'" :iconWidth="'20px'" :iconColor="'gray-2'")
-    //- action-bar(class="flex-evenly")
-    //-   svg-icon(v-for="(icon,index) in mappingIcons('font')"
-    //-     :key="`gp-action-icon-${index}`"
-    //-     class="pointer"
-    //-     :iconName="icon" :iconWidth="'20px'" :iconColor="'gray-2'")
+      @update="handleAdjust" v-on="$listeners")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
@@ -42,6 +33,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
+import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 
 export default Vue.extend({
   data() {
@@ -50,7 +42,8 @@ export default Vue.extend({
       btns: [
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' }
+        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
+        { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow' }
       ],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
@@ -59,7 +52,8 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   components: {
-    PopupAdjust
+    PopupAdjust,
+    PanelPhotoShadow
   },
   computed: {
     ...mapGetters({
@@ -71,8 +65,19 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isAdmin: 'user/isAdmin'
     }),
+    ...mapState('user', {
+      isSuperUser: 'role'
+    }),
     isCropping(): boolean {
       return imageUtils.isImgControl()
+    },
+    isFrame(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('frame') && layers.length === 1
+    },
+    isImage(): boolean {
+      const { layers, types } = this.currSelectedInfo as ICurrSelectedInfo
+      return types.has('image') && layers.length === 1
     },
     currLayer(): any {
       const layers = this.currSelectedLayers as any[]
@@ -115,6 +120,12 @@ export default Vue.extend({
     ...mapActions({
       removeBg: 'user/removeBg'
     }),
+    activeBtn(btn: { [key: string]: string }): boolean {
+      if (this.show === btn.show) return true
+      if (btn.name === 'crop' && this.isCropping) return true
+      if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
+      return false
+    },
     handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
@@ -249,6 +260,9 @@ export default Vue.extend({
         border: 2px solid setColor(blue-1);
         color: setColor(blue-1);
         padding: 8px 20px;
+      }
+      &.displayNone {
+        display: none;
       }
     }
   }

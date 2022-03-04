@@ -34,7 +34,7 @@ export default Vue.extend({
     SearchBar,
     ImageGallery
   },
-  data () {
+  data() {
     return {
       scrollTop: 0
     }
@@ -46,17 +46,17 @@ export default Vue.extend({
       'pending'
     ])
   },
-  mounted () {
+  mounted() {
     this.handleSearch()
   },
-  activated () {
+  activated() {
     if (this.$refs.gallery) {
       const list = (this.$refs.gallery as Vue).$el.children[0]
       list.scrollTop = this.scrollTop
     }
   },
   watch: {
-    list (curr, prev) {
+    list(curr, prev) {
       if (curr.length && !prev.length && this.$refs.gallery) {
         const list = (this.$refs.gallery as Vue).$el.children[0]
         list.addEventListener('scroll', (event: Event) => {
@@ -69,11 +69,11 @@ export default Vue.extend({
     }
   },
   methods: {
-    async handleSearch (keyword?: string) {
+    async handleSearch(keyword?: string) {
       await this.$store.commit(`${moduleName}/SET_STATE`, { list: [] })
       this.$store.dispatch(`${moduleName}/getPhotos`, { keyword })
     },
-    handleLoadMore () {
+    handleLoadMore() {
       !this.pending && this.$store.dispatch(`${moduleName}/getMorePhotos`)
     },
     searchBarStyle() {
@@ -95,6 +95,8 @@ export default Vue.extend({
 .panel-photo {
   @include size(100%, 100%);
   display: grid;
+  // Use minmax(0, 1fr) instead of 1fr is because when the content is larger than container, 1fr will almost equal to auto.
+  // If you wanna to know this problem in detailed, please go to https://stackoverflow.com/questions/52861086/why-does-minmax0-1fr-work-for-long-elements-while-1fr-doesnt
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
 }

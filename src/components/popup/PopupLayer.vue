@@ -334,37 +334,7 @@ export default Vue.extend({
         text: this.$t('NN0096'),
         condition: this.inAdminMode && this.isLogin,
         shortcutText: '',
-        action: () => {
-          const currLayer = generalUtils.deepCopy(layerUtils.getCurrLayer) as IImage
-          if (currLayer.type === 'image') {
-            const { width, height, x, y, rotate } = currLayer.styles
-            const { designId } = currLayer
-            const layerIndex = layerUtils.layerIndex
-            const pageIndex = layerUtils.pageIndex
-            Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0, rotate: 0 })
-
-            const newFrame = layerFactary.newFrame({
-              designId,
-              styles: {
-                initWidth: width,
-                initHeight: height,
-                width,
-                height,
-                rotate,
-                x,
-                y
-              },
-              clips: [{
-                ...currLayer,
-                isFrameImg: true
-              }]
-            } as unknown as IFrame)
-            layerUtils.deleteLayer(layerIndex)
-            layerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
-            zindexUtils.reassignZindex(pageIndex)
-            uploadUtils.updateTemplate()
-          }
-        }
+        action: frameUtils.updateImgToFrame
       }
     },
     setBackgroundImage() {

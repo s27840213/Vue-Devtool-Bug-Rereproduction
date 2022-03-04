@@ -52,7 +52,8 @@ class LayerFactary {
         opacity: opacity || 100,
         horizontalFlip: false,
         verticalFlip: false,
-        adjust: {}
+        adjust: {},
+        shadow: { currentEffect: 'none', effects: {} }
       }
     }
     Object.assign(basicConfig.styles, config.styles)
@@ -398,7 +399,6 @@ class LayerFactary {
     }
 
     if (config.layers === undefined) return config
-
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
 

@@ -1,14 +1,15 @@
 <template lang="pug">
   div(class="shape-setting")
     //- span(class="color-picker__title text-blue-1 label-lg") Document Colors
+    //- Line shape setting
     div(class="action-bar flex-around line-actions" style="padding: 8px 0"
               v-if="isLine")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer"
+        svg-icon(class="pointer feature-button"
                 iconName="line-width" iconWidth="24px" iconColor="gray-2"
                 @click.native="openLineSliderPopup")
       div(class="shape-setting__line-action-wrapper")
-        svg-icon(class="pointer"
+        svg-icon(class="pointer feature-button"
                 iconName="line-dash" iconWidth="24px" iconColor="gray-2"
                 @click.native="handleValueModal('line-dash')")
         general-value-selector(v-if="openValueSelector === 'line-dash'"
@@ -30,7 +31,7 @@
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
       div(class="vertical-rule")
-      div(class="shape-setting__line-action-wrapper pointer"
+      div(class="shape-setting__line-action-wrapper pointer feature-button"
           @click="handleValueModal('start-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[startMarker].styleArray[0]"
@@ -62,7 +63,7 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
-      div(class="shape-setting__line-action-wrapper pointer"
+      div(class="shape-setting__line-action-wrapper pointer feature-button"
           @click="handleValueModal('end-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
           :styleFormat="markerContentMap[endMarker].styleArray[0]"
@@ -96,18 +97,19 @@
                       buttonHeight="37")
             template(v-slot:g0i0)
               svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="gray-2")
+    //- Other shape setting
     div(class="shape-setting__basic-shape-action" v-if="isBasicShape")
       div(class="action-bar flex-around basic-shape-actions" style="padding: 8px 0")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer"
+          svg-icon(class="pointer feature-button"
                   iconName="line-width" iconWidth="24px" iconColor="gray-2"
                   @click.native="openBasicShapeSliderPopup")
         div(class="shape-setting__line-action-wrapper")
-          svg-icon(class="pointer"
+          svg-icon(class="pointer feature-button"
                   v-if="filled"
                   iconName="filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
-          svg-icon(class="pointer"
+          svg-icon(class="pointer feature-button"
                   v-else
                   iconName="non-filled" iconWidth="24px" iconColor="gray-2"
                   @click.native="handleValueModal('isFilled')")
@@ -133,6 +135,7 @@
           div(class="shape-setting__basic-shape-corner-radius flex-evenly")
             svg-icon(iconName="rounded-corner" iconWidth="11px" iconColor="gray-2")
             div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
+    //- Shape color setting
     div(class="shape-setting__colors")
       div(v-if="inGrouped"
         class="shape-setting__color"
@@ -836,80 +839,6 @@ export default Vue.extend({
     width: 50%;
     box-sizing: border-box;
     position: relative;
-  }
-  &__range-input-wrapper {
-    position: absolute;
-    z-index: 9;
-    // top: -20px;
-    // left: auto;
-    right: auto;
-    padding: auto;
-    width: 135px;
-    height: 35px;
-    background-color: #ffffff;
-    background-color: white;
-    box-shadow: 0 0 0 1px rgb(64 87 109 / 7%), 0 2px 12px rgb(53 71 90 / 20%);
-    border: 1px solid #d9dbe1;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-
-    &-line-width {
-      @extend .shape-setting__range-input-wrapper;
-      width: 155px;
-      left: -15px;
-      right: unset;
-      top: 35px;
-    }
-
-    &-stroke-width {
-      @extend .shape-setting__range-input-wrapper;
-      width: 155px;
-      left: -17px;
-      right: unset;
-      top: 35px;
-    }
-  }
-  &__range-input {
-    display: block;
-    margin: auto;
-    width: 120px;
-    height: 35px;
-    appearance: none;
-    outline: none;
-    background: none;
-    &::-webkit-slider-runnable-track {
-      height: 2px;
-      background-color: #d9dbe1;
-    }
-    &::-webkit-slider-thumb {
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background-color: #ffffff;
-      border: 2px solid #3c64b1;
-      transition: 0.2s;
-      margin-top: -6.5px;
-      position: relative;
-    }
-    &-line-width {
-      width: 80px;
-
-      &-value {
-        @extend .shape-setting__range-input-line-width;
-        width: 30px;
-        margin: auto;
-        height: 23px;
-        line-height: 23px;
-        font-size: 10px;
-        border: 1px solid map-get($colors, gray-4);
-        border-radius: 5px;
-      }
-    }
-  }
-  &__range-input-button {
-    width: fit-content;
   }
   &__line-action-wrapper {
     position: relative;
