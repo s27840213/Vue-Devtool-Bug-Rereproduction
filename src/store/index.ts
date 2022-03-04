@@ -391,9 +391,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
     state.currDraggedPhoto.srcObj = {
+      ...state.currDraggedPhoto.srcObj,
       ...photo.srcObj
     }
     state.currDraggedPhoto.styles = {
+      ...state.currDraggedPhoto.styles,
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
