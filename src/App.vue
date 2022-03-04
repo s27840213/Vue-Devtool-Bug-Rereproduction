@@ -4,6 +4,12 @@
     link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
     link(href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet")
     link(href='https://fonts.googleapis.com/css?family=Poppins:400,600,700' rel='stylesheet' type='text/css')
+    link(href="https://template.vivipic.com/font/cZcveINUtk4i8rFJUfCa/subset/font.css" rel="stylesheet")
+    //- testFont1  宅在家自動筆_tw
+    link(href="https://template.vivipic.com/font/WEOjAxg7uz6oyalny0YF/subset/font.css" rel="stylesheet")
+    //- testFont2  芫荽_tw
+    link(href="https://template.vivipic.com/font/zxLXAhkbhShX6AcV0HGS/subset/font.css" rel="stylesheet")
+    //- testFont3  清松手寫體2-極細_tw
     //- div(class="coordinate" ref="coordinate")
     //-   div(class="coordinate__val coordinate__width")
     //-     span {{coordinateWidth}}px
