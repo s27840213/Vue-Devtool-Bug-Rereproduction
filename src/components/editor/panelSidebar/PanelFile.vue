@@ -7,8 +7,16 @@
     btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") {{$t('NN0014')}}
-    tmp-files(
-      :inFilePanel="true")
+    image-gallery(
+      ref="gallery"
+      :images="list"
+      vendor="myfile"
+      @loadMore="handleLoadMore")
+      template(#pending)
+        div(v-if="pending" class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
     transition(name="panel-up")
       div(v-if="hasCheckedAssets"
           class="panel-file__menu")
@@ -31,19 +39,24 @@ import SearchBar from '@/components/SearchBar.vue'
 import uploadUtils from '@/utils/uploadUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
+import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+
+const moduleName = 'file'
 
 export default Vue.extend({
   components: {
     SearchBar,
-    GalleryPhoto
+    GalleryPhoto,
+    ImageGallery
   },
   data() {
     return {
       galleryUtils: new GalleryUtils(300, 75, 5),
-      online: true
+      online: true,
+      scrollTop: 0
     }
   },
   created() {
@@ -60,11 +73,35 @@ export default Vue.extend({
     ...mapGetters({
       checkedAssets: 'user/getCheckedAssets'
     }),
+    ...mapState('photos', ['page']),
+    ...mapState(moduleName, [
+      'list',
+      'pending'
+    ]),
+    ...mapGetters('user', [
+      'getImages'
+    ]),
     margin(): number {
       return this.galleryUtils.margin
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
+    }
+  },
+  mounted () {
+    this.$store.dispatch(`${moduleName}/getFiles`)
+  },
+  watch: {
+    list (curr, prev) {
+      if (curr.length && !prev.length && this.$refs.gallery) {
+        const list = (this.$refs.gallery as Vue).$el.children[0]
+        list.addEventListener('scroll', (event: Event) => {
+          this.scrollTop = (event.target as HTMLElement).scrollTop
+        })
+      }
+      if (!curr.length && prev.length) {
+        this.scrollTop = 0
+      }
     }
   },
   methods: {
@@ -74,6 +111,9 @@ export default Vue.extend({
     ...mapMutations({
       clearCheckedAssets: 'user/CLEAR_CHECKED_ASSETS'
     }),
+    handleLoadMore() {
+      !this.pending && this.$store.dispatch(`${moduleName}/getFiles`)
+    },
     uploadImage() {
       if (!this.online) {
         networkUtils.notifyNetworkError()
@@ -107,7 +147,9 @@ export default Vue.extend({
 .panel-file {
   @include size(100%, 100%);
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  // Use minmax(0, 1fr) instead of 1fr is because when the content is larger than container, 1fr will almost equal to auto.
+  // If you wanna to know this problem in detailed, please go to https://stackoverflow.com/questions/52861086/why-does-minmax0-1fr-work-for-long-elements-while-1fr-doesnt
+  grid-template-rows: auto auto minmax(0, 1fr);
   grid-template-columns: 1fr;
   text-align: center;
   &__title {
@@ -125,34 +167,6 @@ export default Vue.extend({
     padding: 20px 20px;
     background: setColor(nav);
     font-size: 14px;
-  }
-}
-
-.tmp-gallery {
-  height: 100%;
-  line-height: 0;
-  text-align: left;
-  box-sizing: border-box;
-  overflow-y: scroll;
-  overscroll-behavior: contain;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.tmp-mydesign {
-  overflow: scroll;
-  display: flex;
-  height: 100px;
-  &::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-    background-color: unset;
-  }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background-color: #d9dbe1;
-    border: 3px solid #2c2f43;
   }
 }
 </style>

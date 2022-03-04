@@ -276,6 +276,12 @@ export interface IPhotoServiceParams {
   pageIndex?: number
 }
 
+export interface IFileParams {
+  token?: string
+  type?: 'image'
+  pageIndex?: number
+}
+
 export interface IPhotoServiceResponse {
   data: IPhotoServiceData
   flag: number
