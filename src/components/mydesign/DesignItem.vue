@@ -8,11 +8,18 @@
       @dragend="handleDragEnd"
       @mouseenter="handleMouseEnter"
       @mouseleave="handleMouseLeave")
-      div(class="design-item__img-container"
-        :style="containerStyles()")
-        img(v-if="previewCheckReady"
+      div(class="design-item__img-container")
+        image-carousel(v-if="showCarousel"
+          :imgs="pageImages"
+          @change="handleCarouselIdx")
+          template(v-slot="{ url }")
+            img(class="design-item__thumbnail"
+                draggable="false"
+                :style="imageStyles()"
+                :src="url")
+        img(ref="thumbnail"
+            v-if="!showCarousel && previewCheckReady"
             class="design-item__thumbnail"
-            :style="imageStyles()"
             draggable="false"
             :src="appliedUrl")
       div(class="design-item__controller")
@@ -51,6 +58,8 @@
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
+          //- span(class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
+          span(v-if="isMouseOver" class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
     div(class="design-item__name"
         v-click-outside="handleNameEditEnd"
         @mouseenter="handleNameMouseEnter"
@@ -87,11 +96,15 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import imageUtils from '@/utils/imageUtils'
+import ImageCarousel from '@/components/global/ImageCarousel.vue'
 import vClickOutside from 'v-click-outside'
+import imageUtils from '@/utils/imageUtils'
 import designUtils from '@/utils/designUtils'
 
 export default Vue.extend({
+  components: {
+    ImageCarousel
+  },
   props: {
     config: Object,
     menuItemNum: Number,
@@ -112,10 +125,16 @@ export default Vue.extend({
       isMenuOpen: false,
       editableName: '',
       draggedImageCoordinate: { x: 0, y: 0 },
-      imgWidth: 10,
-      imgHeight: 10,
+      imgWidth: 150,
+      imgHeight: 150,
       previewCheckReady: false,
-      previewPlaceholder: require('@/assets/img/svg/image-preview-large.svg')
+      previewPlaceholder: require('@/assets/img/svg/loading-large.svg'),
+      showCarousel: false,
+      carouselIdx: 0,
+      waitTimer: 0,
+      renderedWidth: 150,
+      renderedHeight: 150,
+      pageImages: [] as string[]
     }
   },
   directives: {
@@ -125,14 +144,13 @@ export default Vue.extend({
     this.checkImageSize()
   },
   watch: {
-    config: {
+    'config.asset_index': {
       handler: function () {
         this.$nextTick(() => {
           this.isDragged = false
           this.checkImageSize()
         })
-      },
-      deep: true
+      }
     }
   },
   computed: {
@@ -142,9 +160,6 @@ export default Vue.extend({
     menuItems(): any[] {
       return Array(this.menuItemNum ?? 0)
     },
-    aspectRatio(): number {
-      return this.config.width / this.config.height
-    },
     configPreview(): string {
       return designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl)
     },
@@ -153,6 +168,9 @@ export default Vue.extend({
     },
     isTempDesign(): boolean {
       return (this.config.id ?? '').endsWith('_new')
+    },
+    isThumbnailFound(): boolean {
+      return this.config.thumbnail !== this.previewPlaceholder
     }
   },
   methods: {
@@ -162,21 +180,8 @@ export default Vue.extend({
     blockStyles() {
       return (this.isMouseOver || this.isSelected) ? { 'background-color': '#474a5780' } : {}
     },
-    containerStyles() {
-      return (this.aspectRatio < 1.2 && this.aspectRatio > 0.83) ? { padding: '26px' } : { padding: '17px' }
-    },
     imageStyles() {
-      if (this.aspectRatio > 1) {
-        return {
-          width: '100%',
-          height: 'auto'
-        }
-      } else {
-        return {
-          width: 'auto',
-          height: '100%'
-        }
-      }
+      return { width: `${this.renderedWidth}px`, height: `${this.renderedHeight}px` }
     },
     draggedImageContainerStyles(): { [key: string]: string } {
       if (this.isDragged) {
@@ -192,8 +197,8 @@ export default Vue.extend({
     draggedImageStyles(): { [key: string]: string } {
       if (this.isDragged && this.config.thumbnail === this.previewPlaceholder) {
         return {
-          width: '150px',
-          height: '150px'
+          width: '300px',
+          height: '300px'
         }
       } else {
         return {}
@@ -240,10 +245,24 @@ export default Vue.extend({
     handleMouseEnter() {
       if (this.isTempDesign) return
       this.isMouseOver = true
+      if (this.config.pageNum === 1) return
+      this.waitTimer = setTimeout(() => {
+        if (this.isMouseOver) {
+          this.showCarousel = true
+          const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
+          this.renderedWidth = thumbnailElement.width
+          this.renderedHeight = thumbnailElement.height
+          if (this.config.polling) {
+            this.multiPollingStep()
+          }
+        }
+      }, 1500)
     },
     handleMouseLeave() {
       this.isMouseOver = false
       this.isMenuOpen = false
+      this.showCarousel = false
+      window.clearInterval(this.waitTimer)
     },
     handleNameMouseEnter() {
       if (this.nameIneditable) return
@@ -276,6 +295,9 @@ export default Vue.extend({
       if (this.unenterable) return
       designUtils.setDesign(this.config)
     },
+    handleCarouselIdx(idx: number) {
+      this.carouselIdx = idx
+    },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
         this.handleNameEditEnd()
@@ -297,17 +319,61 @@ export default Vue.extend({
       this.$emit('deselect')
     },
     checkImageSize() {
-      if (this.config.thumbnail !== '') {
-        this.previewCheckReady = true
-        return
-      }
       this.previewCheckReady = false
-      imageUtils.getImageSize(this.configPreview, 150, 150).then((size) => {
+      if (this.config.polling) {
+        this.pageImages = Array(this.config.pageNum).fill(this.previewPlaceholder)
+        this.previewCheckReady = true
+        this.config.thumbnail = this.previewPlaceholder
+        this.pollingStep()
+      } else {
+        this.pageImages = designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
+        imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight).then((size) => {
+          const { width, height, exists } = size
+          this.imgWidth = width
+          this.imgHeight = height
+          this.previewCheckReady = true
+          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+        })
+      }
+    },
+    pollingStep(step = 0) {
+      const timeout = step > 14 ? 2000 : 1000
+      imageUtils.getImageSize(
+        designUtils.getDesignPreview(
+          this.config.id, 2,
+          undefined,
+          this.config.signedUrl
+        ),
+        this.imgWidth, this.imgHeight
+      ).then((size) => {
         const { width, height, exists } = size
         this.imgWidth = width
         this.imgHeight = height
-        this.previewCheckReady = true
-        this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+        if (exists) {
+          this.config.thumbnail = this.configPreview
+        } else if (step < 35) {
+          setTimeout(() => {
+            this.pollingStep(step + 1)
+          }, timeout)
+        }
+      })
+    },
+    multiPollingStep() {
+      for (let i = 0; i < this.config.pageNum; i++) {
+        this.pagePollingStep(i)
+      }
+    },
+    pagePollingStep(index: number, step = 0) {
+      if (this.pageImages[index] !== this.previewPlaceholder) return
+      const timeout = step > 14 ? 2000 : 1000
+      imageUtils.getImageSize(designUtils.getDesignPreview(this.config.id, 2, undefined, this.config.signedUrl, index), 0, 0).then((size) => {
+        if (size.exists) {
+          this.pageImages[index] = designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl, index)
+        } else if (step < 35) {
+          setTimeout(() => {
+            this.pagePollingStep(index, step + 1)
+          }, timeout)
+        }
       })
     }
   }
@@ -338,6 +404,12 @@ export default Vue.extend({
     position: absolute;
     width: 100%;
     height: 100%;
+    padding: 26px;
+  }
+  &__thumbnail {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
   }
   &__controller {
     display: flex;
@@ -354,6 +426,20 @@ export default Vue.extend({
       width: 100%;
       height: 100%;
     }
+  }
+  &__index {
+    background-color: white;
+    border-radius: 100px;
+    position: absolute;
+    padding: 0px 10px;
+    bottom: 6px;
+    right: 8px;
+    text-align: center;
+    min-width: 50px;
+    box-sizing: border-box;
+    font-family: Poppins;
+    @include body-XS;
+    line-height: unset;
   }
   &__checkbox {
     position: absolute;

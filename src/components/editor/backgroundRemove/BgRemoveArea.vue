@@ -39,6 +39,8 @@ export default Vue.extend({
       initImgCtx: undefined as unknown as CanvasRenderingContext2D,
       blurCanvas: undefined as unknown as HTMLCanvasElement,
       blurCtx: undefined as unknown as CanvasRenderingContext2D,
+      clearModeCanvas: undefined as unknown as HTMLCanvasElement,
+      clearModeCtx: undefined as unknown as CanvasRenderingContext2D,
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
@@ -69,6 +71,7 @@ export default Vue.extend({
     this.imageElement.onload = () => {
       this.initCanvas()
       this.initBlurCanvas()
+      this.initClearModeCanvas()
     }
 
     this.initImageElement = new Image()
@@ -144,6 +147,7 @@ export default Vue.extend({
     brushSize(newVal: number) {
       this.ctx.lineWidth = newVal
       this.blurCtx.lineWidth = newVal
+      this.clearModeCtx.lineWidth = newVal
       this.brushStyle.width = `${newVal + this.blurPx}px`
       this.brushStyle.height = `${newVal + this.blurPx}px`
       if (this.clearMode) {
@@ -154,6 +158,7 @@ export default Vue.extend({
     restoreInitState(newVal) {
       if (newVal) {
         this.clearCtx()
+        this.initClearModeCanvas()
         if (this.clearMode) {
           this.ctx.filter = 'none'
           this.drawImageToCtx()
@@ -171,6 +176,7 @@ export default Vue.extend({
       if (newVal) {
         this.ctx.globalCompositeOperation = 'destination-out'
         this.ctx.filter = `blur(${this.blurPx}px)`
+        this.initClearModeCanvas()
       } else {
         this.ctx.globalCompositeOperation = 'source-over'
         this.ctx.filter = 'none'
@@ -218,6 +224,18 @@ export default Vue.extend({
 
       this.blurCtx = ctx
     },
+    initClearModeCanvas() {
+      this.clearModeCanvas = document.createElement('canvas') as HTMLCanvasElement
+      this.clearModeCanvas.width = this.size.width
+      this.clearModeCanvas.height = this.size.height
+      const ctx = this.clearModeCanvas.getContext('2d') as CanvasRenderingContext2D
+      // set up drawing settings
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineWidth = this.brushSize
+
+      this.clearModeCtx = ctx
+    },
     createInitImageCtx() {
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
@@ -251,7 +269,7 @@ export default Vue.extend({
         y
       })
       if (this.clearMode) {
-        this.drawLine(e, this.ctx)
+        this.drawInClearMode(e)
       } else {
         this.drawInResotreMode(e)
       }
@@ -260,7 +278,7 @@ export default Vue.extend({
     },
     drawing(e: MouseEvent) {
       if (this.clearMode) {
-        this.drawLine(e, this.ctx)
+        this.drawInClearMode(e)
       } else {
         this.drawInResotreMode(e)
       }
@@ -286,6 +304,13 @@ export default Vue.extend({
       } else {
         this.setCompositeOperationMode('source-over')
       }
+    },
+    drawInClearMode(e: MouseEvent) {
+      this.setCompositeOperationMode('source-over', this.ctx)
+      this.ctx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
+      this.drawLine(e, this.clearModeCtx)
+      this.setCompositeOperationMode('destination-out')
+      this.ctx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
     },
     drawInResotreMode(e: MouseEvent) {
       this.clearCtx(this.blurCtx)
