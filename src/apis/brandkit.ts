@@ -18,18 +18,12 @@ export default {
     return store.getters['user/getTeamId']
   },
   async getBrands(token: string): Promise<any> {
-    // TODO: integrate API
-    // return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-    //   method: 'POST',
-    //   data: {
-    //     type: 'design',
-    //     token,
-    //     data,
-    //     order_by: `${sortByField}:${sortByDescending ? 'desc' : 'asc'}`,
-    //     path: path,
-    //     ...params
-    //   }
-    // }))
+    return await apiUtils.requestWithRetry(() => axios('/list-brand', {
+      method: 'POST',
+      data: {
+        token
+      }
+    }))
   },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {

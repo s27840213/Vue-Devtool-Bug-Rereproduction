@@ -43,7 +43,8 @@ const getters: GetterTree<IBrandKitState, unknown> = {
 
 const actions: ActionTree<IBrandKitState, unknown> = {
   async fetchBrands({ commit }) {
-    const brands = await brandkitApi.getTestingBrands(brandkitApi.getToken())
+    // const brands = await brandkitApi.getTestingBrands(brandkitApi.getToken())
+    const brands = (await brandkitApi.getBrands(brandkitApi.getToken())).data.brands
     commit('SET_brands', brands)
     commit('SET_currentBrand', brands[0])
   },
