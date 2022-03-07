@@ -9,7 +9,7 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
     canvas(class="bg-remove-area" ref="canvas")
-    div(class="bg-remove-area__brush" :style="brushStyle")
+    div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
       :iconName="'spiner'"
@@ -54,7 +54,8 @@ export default Vue.extend({
       isMouseDown: false,
       initImgSrc: '',
       imgSrc: '',
-      blurPx: 1
+      blurPx: 1,
+      showBrush: false
     }
   },
   created() {
@@ -81,6 +82,8 @@ export default Vue.extend({
       this.createInitImageCtx()
     }
     this.editorViewCanvas.addEventListener('mousedown', this.drawStart)
+    this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
+    this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
     window.addEventListener('mousemove', this.brushMoving)
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
@@ -89,6 +92,8 @@ export default Vue.extend({
   destroyed() {
     window.removeEventListener('mouseup', this.drawEnd)
     window.removeEventListener('mousemove', this.brushMoving)
+    this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
+    this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
     this.editorViewCanvas.removeEventListener('mousedown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
@@ -390,6 +395,12 @@ export default Vue.extend({
           this.ctx.filter = `blur(${this.blurPx}px)`
         }
       }
+    },
+    handleBrushEnter() {
+      this.showBrush = true
+    },
+    handleBrushLeave() {
+      this.showBrush = false
     }
   }
 })
