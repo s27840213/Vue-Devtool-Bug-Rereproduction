@@ -71,7 +71,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .brand-kit-tab-text {
   display: flex;
-  justify-content: space-between;
+  gap: 145px;
   &__font-column {
     margin-left: 10px;
     display: flex;
@@ -126,8 +126,9 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     gap: 16px;
+    flex-grow: 1;
     &__item {
-      width: 680px;
+      width: 100%;
     }
   }
 }
