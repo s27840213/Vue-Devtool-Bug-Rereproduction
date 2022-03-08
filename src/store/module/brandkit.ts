@@ -43,10 +43,18 @@ const getters: GetterTree<IBrandKitState, unknown> = {
 
 const actions: ActionTree<IBrandKitState, unknown> = {
   async fetchBrands({ commit }) {
-    // const brands = await brandkitApi.getTestingBrands(brandkitApi.getToken())
-    const brands = (await brandkitApi.getBrands(brandkitApi.getToken(), brandkitApi.getTeamId())).data.brands
-    commit('SET_brands', brands)
-    commit('SET_currentBrand', brands[0])
+    try {
+      const { data } = await brandkitApi.getBrands()
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const brands = data.brands
+      commit('SET_brands', brands)
+      commit('SET_currentBrand', brands[0] ?? { id: '' })
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
   },
   async setBrandName({ commit }, updateInfo: { brand: IBrand, newName: string }) {
     const { brand, newName } = updateInfo

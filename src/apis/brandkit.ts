@@ -17,12 +17,12 @@ export default {
   getTeamId(): string {
     return store.getters['user/getTeamId']
   },
-  async getBrands(token: string, teamId: string): Promise<any> {
+  async getBrands(token?: string, teamId?: string): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-brand', {
       method: 'POST',
       data: {
-        token,
-        team_id: teamId
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId()
       }
     }))
   },

@@ -14,7 +14,7 @@ interface Item {
 }
 
 class BrandKitUtils {
-  createDefaultBrand(): IBrand {
+  createTestingDefaultBrand(): IBrand {
     const initTime = Date.now()
     return {
       id: generalUtils.generateAssetId(),
@@ -87,6 +87,22 @@ class BrandKitUtils {
         namePrevUrl: require('@/assets/img/png/brandkit/font2.png'),
         textPrevUrl: require('@/assets/img/png/brandkit/font2_prev.png')
       }]
+    }
+  }
+
+  createDefaultBrand(): IBrand {
+    return {
+      id: generalUtils.generateAssetId(),
+      createTime: (new Date()).toISOString(),
+      name: '',
+      logos: [],
+      textStyleSetting: {
+        headingStyle: this.createDefaultTextStyle('heading'),
+        subheadingStyle: this.createDefaultTextStyle('subheading'),
+        bodyStyle: this.createDefaultTextStyle('body')
+      },
+      colorPalettes: [],
+      fonts: []
     }
   }
 
