@@ -1,22 +1,31 @@
 import store from '@/store'
 import file from '@/apis/file'
+import user from '@/apis/user'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { AxiosResponse } from 'axios'
 
 const SET_STATE = 'SET_STATE' as const
+const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
+const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
+const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
+const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
 interface IPhotoState {
   list: Array<IAssetPhoto[]>,
   pageIndex: number,
-  pending: boolean
+  pending: boolean,
+  checkedAssets: Array<number>
 }
 
 const getDefaultState = (): IPhotoState => ({
   list: [],
   pageIndex: 0,
-  pending: false
+  pending: false,
+  checkedAssets: []
 })
+
+const state = getDefaultState()
 
 function addPerviewUrl(rawData: AxiosResponse) {
   const isAdmin = store.getters['user/isAdmin']
@@ -50,14 +59,14 @@ function addPerviewUrl(rawData: AxiosResponse) {
 }
 
 const actions: ActionTree<IPhotoState, unknown> = {
-  async getFiles({ commit, state }) {
+  async getFiles({ commit }) {
     const { list, pageIndex } = state
 
     if (pageIndex === -1) {
       return
     }
 
-    commit(SET_STATE, { pending: true, list: [] })
+    commit(SET_STATE, { pending: true })
     try {
       const rawData = await file.getFiles({ pageIndex })
       const data = addPerviewUrl(rawData)
@@ -68,6 +77,36 @@ const actions: ActionTree<IPhotoState, unknown> = {
       })
     } catch (error) {
       captureException(error)
+    }
+  },
+  async deleteAssets({ commit, dispatch }) {
+    try {
+      const keyList = state.checkedAssets.join(',')
+      const params = {
+        token: user.getToken(),
+        locale: user.getLocale(),
+        team_id: user.getTeamId(),
+        type: 'image',
+        update_type: 'delete',
+        src_asset: keyList,
+        target: '1'
+      }
+      user.updateAsset({ ...params }).then(() => {
+        // commit(SET_STATE, {
+        //   checkedAssets: [],
+        //   list: state.list.filter((item: any) => {
+        //     return !state.checkedAssets.includes(item.assetIndex)
+        //   })
+        // })
+        commit(SET_STATE, {
+          checkedAssets: [],
+          list: [],
+          pageIndex: 0
+        })
+        dispatch('getFiles')
+      })
+    } catch (error) {
+      console.log(error)
     }
   }
 }
@@ -82,6 +121,21 @@ const mutations: MutationTree<IPhotoState> = {
           (state[key] as any) = newState[key]
         }
       })
+  },
+  [UPDATE_CHECKED_ASSETS](state: IPhotoState, val) {
+    state.checkedAssets = [...val]
+  },
+  [ADD_CHECKED_ASSETS](state: IPhotoState, id) {
+    state.checkedAssets.push(id)
+  },
+  [DELETE_CHECKED_ASSETS](state: IPhotoState, index: number) {
+    const targetIndex = state.checkedAssets.findIndex((assetIndex) => {
+      return assetIndex === index
+    })
+    state.checkedAssets.splice(targetIndex, 1)
+  },
+  [CLEAR_CHECKED_ASSETS](state: IPhotoState) {
+    state.checkedAssets = []
   }
 }
 
@@ -96,11 +150,14 @@ const getters: GetterTree<IPhotoState, any> = {
   //     pageIndex: pageIndex + 1
   //   }
   // }
+  getCheckedAssets(state) {
+    return state.checkedAssets
+  }
 }
 
 export default {
   namespaced: true,
-  state: getDefaultState,
+  state,
   getters,
   mutations,
   actions

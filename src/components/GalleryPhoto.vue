@@ -38,6 +38,7 @@ import modalUtils from '@/utils/modalUtils'
 import { wrap } from '@sentry/browser/dist/helpers'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
+import file from '@/store/module/file'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -69,7 +70,7 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
       getLayers: 'getLayers',
-      checkedAssets: 'user/getCheckedAssets',
+      checkedAssets: 'file/getCheckedAssets',
       isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
@@ -102,9 +103,9 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo',
-      addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
-      deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
-      updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS',
+      addCheckedAssets: 'file/ADD_CHECKED_ASSETS',
+      deleteCheckedAssets: 'file/DELETE_CHECKED_ASSETS',
+      updateCheckedAssets: 'file/UPDATE_CHECKED_ASSETS',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
     dragStart(e: DragEvent, photo: any) {

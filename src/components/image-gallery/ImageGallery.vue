@@ -11,6 +11,7 @@
             :style="imageStyle(photo.preview)"
             :photo="photo"
             :vendor="vendor"
+            :inFilePanel="inFilePanel"
             :key="photo.id")
       template(#after)
         slot(name="pending")
@@ -28,6 +29,10 @@ export default Vue.extend({
     images: {
       type: Array as PropType<Array<IPhotoItem[]>>,
       default: () => []
+    },
+    inFilePanel: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
@@ -53,6 +58,13 @@ export default Vue.extend({
   },
   watch: {
     images(newImages: Array<IPhotoItem[]>) {
+      if (newImages.length === 0) {
+        this.rows = []
+        this.nextIndex = 0
+        this.prevLastRow = []
+        return
+      }
+
       const { nextIndex, prevLastRow } = this
       const latestImages = newImages.slice(nextIndex)
       this.nextIndex = newImages.length

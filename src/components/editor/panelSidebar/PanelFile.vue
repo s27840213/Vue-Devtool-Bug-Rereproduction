@@ -7,10 +7,13 @@
     btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") {{$t('NN0014')}}
+    //- tmp-files(
+    //-   :inFilePanel="true")
     image-gallery(
       ref="gallery"
       :images="list"
       vendor="myfile"
+      :inFilePanel="true"
       @loadMore="handleLoadMore")
       template(#pending)
         div(v-if="pending" class="text-center")
@@ -70,17 +73,13 @@ export default Vue.extend({
     networkUtils.offNetworkCahnge()
   },
   computed: {
-    ...mapGetters({
-      checkedAssets: 'user/getCheckedAssets'
-    }),
-    ...mapState('photos', ['page']),
     ...mapState(moduleName, [
       'list',
       'pending'
     ]),
-    ...mapGetters('user', [
-      'getImages'
-    ]),
+    ...mapGetters(moduleName, {
+      checkedAssets: 'getCheckedAssets'
+    }),
     margin(): number {
       return this.galleryUtils.margin
     },
@@ -89,7 +88,7 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.$store.dispatch(`${moduleName}/getFiles`)
+    this.getFiles()
   },
   watch: {
     list (curr, prev) {
@@ -105,14 +104,15 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions({
-      deleteAssets: 'user/deleteAssets'
+    ...mapActions(moduleName, {
+      deleteAssets: 'deleteAssets',
+      getFiles: 'getFiles'
     }),
-    ...mapMutations({
-      clearCheckedAssets: 'user/CLEAR_CHECKED_ASSETS'
+    ...mapMutations(moduleName, {
+      clearCheckedAssets: 'CLEAR_CHECKED_ASSETS'
     }),
     handleLoadMore() {
-      !this.pending && this.$store.dispatch(`${moduleName}/getFiles`)
+      !this.pending && this.getFiles()
     },
     uploadImage() {
       if (!this.online) {
