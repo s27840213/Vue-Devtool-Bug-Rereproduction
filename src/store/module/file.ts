@@ -1,18 +1,24 @@
 import store from '@/store'
 import file from '@/apis/file'
 import user from '@/apis/user'
+import apiUtils from '@/utils/apiUtils'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { AxiosResponse } from 'axios'
+import { IUserModule } from '@/store/module/user'
 
 const SET_STATE = 'SET_STATE' as const
 const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
 const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
 const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
 const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
+const ADD_PREVIEW = 'ADD_PREVIEW' as const
+const UPDATE_PROGRESS = 'UPDATE_PROGRESS' as const
+const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
+
 interface IPhotoState {
-  list: Array<IAssetPhoto[]>,
+  list: Array<IAssetPhoto>,
   pageIndex: number,
   pending: boolean,
   checkedAssets: Array<number>
@@ -27,12 +33,12 @@ const getDefaultState = (): IPhotoState => ({
 
 const state = getDefaultState()
 
-function addPerviewUrl(rawData: AxiosResponse) {
+function addPerviewUrl(data: any[]) {
   const isAdmin = store.getters['user/isAdmin']
   const teamId = store.getters['user/getTeamId']
   const userId = store.getters['user/getTeamId']
 
-  return rawData.data.data.image.content.map((image: IUserImageContentData) => {
+  return data.map((image: IUserImageContentData) => {
     const aspectRatio = image.width / image.height
     const prevW = image.width > image.height ? image.width : 384 * aspectRatio
     const prevH = image.height > image.width ? image.height : 384 / aspectRatio
@@ -69,7 +75,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
     commit(SET_STATE, { pending: true })
     try {
       const rawData = await file.getFiles({ pageIndex })
-      const data = addPerviewUrl(rawData)
+      const data = addPerviewUrl(rawData.data.data.image.content)
       commit(SET_STATE, {
         list: list.concat(data),
         pageIndex: rawData.data.next_page,
@@ -79,7 +85,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       captureException(error)
     }
   },
-  async deleteAssets({ commit, dispatch }) {
+  async deleteAssets({ commit }) {
     try {
       const keyList = state.checkedAssets.join(',')
       const params = {
@@ -92,21 +98,34 @@ const actions: ActionTree<IPhotoState, unknown> = {
         target: '1'
       }
       user.updateAsset({ ...params }).then(() => {
-        // commit(SET_STATE, {
-        //   checkedAssets: [],
-        //   list: state.list.filter((item: any) => {
-        //     return !state.checkedAssets.includes(item.assetIndex)
-        //   })
-        // })
         commit(SET_STATE, {
           checkedAssets: [],
-          list: [],
-          pageIndex: 0
+          list: state.list.filter((item: any) => {
+            return !state.checkedAssets.includes(item.assetIndex)
+          })
         })
-        dispatch('getFiles')
       })
     } catch (error) {
       console.log(error)
+    }
+  },
+  async updateImages({ state, commit }, { assetSet }) {
+    const { token } = state
+    // const { data } = await userApis.getAssets(token, {
+    //   asset_list: assetSet
+    //   // team_id: state.teamId || state.userId
+    // })
+    const { data } = await apiUtils.requestWithRetry(() => {
+      console.warn('fetch')
+      return userApis.getAllAssets(token, { asset_list: assetSet })
+    })
+    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
+    if (urlSet) {
+      for (const [assetId, urls] of Object.entries(urlSet)) {
+        commit(UPDATE_IMAGE_URLS, { assetId: +assetId, urls })
+      }
+    } else {
+      throw new Error('fail to fetch private image urls')
     }
   }
 }
@@ -136,6 +155,52 @@ const mutations: MutationTree<IPhotoState> = {
   },
   [CLEAR_CHECKED_ASSETS](state: IPhotoState) {
     state.checkedAssets = []
+  },
+  [ADD_PREVIEW](state: IPhotoState, { imageFile, assetId }) {
+    const previewImage = {
+      width: imageFile.width,
+      height: imageFile.height,
+      id: assetId,
+      assetIndex: assetId,
+      progress: 0,
+      preview: {
+        width: imageFile.width,
+        height: imageFile.height
+      },
+      urls: {
+        prev: imageFile.src,
+        full: imageFile.src,
+        larg: imageFile.src,
+        original: imageFile.src,
+        midd: imageFile.src,
+        smal: imageFile.src,
+        tiny: imageFile.src
+      }
+    }
+    state.list.unshift(previewImage as any)
+  },
+  [UPDATE_PROGRESS](state: IPhotoState, { assetId, progress }) {
+    const targetIndex = state.list.findIndex((img: IAssetPhoto) => {
+      return img.id === assetId
+    })
+    state.list[targetIndex].progress = progress
+  },
+  [UPDATE_IMAGE_URLS](state: IPhotoState, { assetId, urls, assetIndex, type = 'private' }) {
+    const { list } = state
+
+    const isAdmin = type === 'public'
+    const targetIndex = state.list.findIndex((img: IAssetPhoto) => {
+      return isAdmin ? img.id === assetId : img.assetIndex === assetId
+    })
+
+    const da = addPerviewUrl([{
+      width: list[targetIndex].width,
+      height: list[targetIndex].height,
+      id: isAdmin ? assetId : undefined,
+      asset_index: assetIndex ?? assetId,
+      signed_url: urls
+    }])
+    state.list[targetIndex] = (da as any)[0]
   }
 }
 
@@ -144,12 +209,9 @@ const getters: GetterTree<IPhotoState, any> = {
   //   const { pageIndex, list } = state
   //   return list[pageIndex] || []
   // },
-  // getNextParams(state) {
-  //   const { pageIndex } = state
-  //   return {
-  //     pageIndex: pageIndex + 1
-  //   }
-  // }
+  getImages(state) {
+    return state.list
+  },
   getCheckedAssets(state) {
     return state.checkedAssets
   }

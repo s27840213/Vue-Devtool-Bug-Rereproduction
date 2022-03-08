@@ -30,6 +30,10 @@ export default Vue.extend({
       type: Array as PropType<Array<IPhotoItem[]>>,
       default: () => []
     },
+    myfile: {
+      type: Array as PropType<Array<IPhotoItem[]>>,
+      default: () => []
+    },
     inFilePanel: {
       type: Boolean,
       default: false
@@ -57,14 +61,24 @@ export default Vue.extend({
     }
   },
   watch: {
-    images(newImages: Array<IPhotoItem[]>) {
-      if (newImages.length === 0) {
-        this.rows = []
-        this.nextIndex = 0
-        this.prevLastRow = []
-        return
+    myfile(newImages: Array<IPhotoItem[]>) { // For panel file
+      console.log('my file watch')
+      this.rows = this.galleryUtils
+        .generate(newImages as any)
+        .map((row, idx) => ({
+          list: row,
+          id: `row_${idx}`,
+          sentinel: false,
+          index: idx,
+          size: row[0].preview.height + this.margin
+        }))
+      if (this.rows.length) {
+        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
       }
-
+      console.log('my file watch end')
+    },
+    images(newImages: Array<IPhotoItem[]>) { // For panel unsplash and pexel
+      // Slice new images, arrange it and append to the end.
       const { nextIndex, prevLastRow } = this
       const latestImages = newImages.slice(nextIndex)
       this.nextIndex = newImages.length

@@ -11,7 +11,7 @@
     //-   :inFilePanel="true")
     image-gallery(
       ref="gallery"
-      :images="list"
+      :myfile="list"
       vendor="myfile"
       :inFilePanel="true"
       @loadMore="handleLoadMore")
