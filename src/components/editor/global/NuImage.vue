@@ -246,10 +246,10 @@ export default Vue.extend({
       const { type } = this.config.srcObj
       const { assetId } = this.config.srcObj
       if (type === 'private') {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
+        const images = store.getters['file/getImages'] as Array<IAssetPhoto>
         const img = images.find(img => img.assetIndex === assetId)
         if (!img) {
-          await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+          await store.dispatch('file/updateImages', { assetSet: `${assetId}` })
         }
       }
 

@@ -10,13 +10,14 @@ import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
 import apiUtils from '@/utils/apiUtils'
 import generalUtils from '@/utils/generalUtils'
+import file from '@/store/module/file'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
 const SET_IMAGES = 'SET_IMAGES' as const
 // const ADD_PREVIEW = 'ADD_PREVIEW' as const
 // const UPDATE_PROGRESS = 'UPDATE_PROGRESS' as const
-// const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
+const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
 // const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
 // const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
 // const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
@@ -259,40 +260,40 @@ const mutations: MutationTree<IUserModule> = {
   //   state.images[targetIndex].progress = progress
   //   console.log('muattion', targetIndex, state.images[targetIndex].id, assetId)
   // },
-  // [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex, type = 'private' }) {
-  //   const { images, teamId, userId } = state
-  //   const isAdmin = type === 'public'
-  //   const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
-  //     return isAdmin ? img.id === assetId : img.assetIndex === assetId
-  //   })
+  [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex, type = 'private' }) {
+    const { images, teamId, userId } = state
+    const isAdmin = type === 'public'
+    const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
+      return isAdmin ? img.id === assetId : img.assetIndex === assetId
+    })
 
-  //   const targetUrls = {
-  //     prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : urls.prev || '',
-  //     full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : urls.full || '',
-  //     larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/larg` : urls.larg || '',
-  //     original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/original` : urls.origin || '',
-  //     midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/midd` : urls.midd || '',
-  //     smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/smal` : urls.smal || '',
-  //     tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/tiny` : urls.tiny || ''
-  //   }
-  //   if (targetIndex === -1) {
-  //     images.push({
-  //       width: 500,
-  //       height: 400,
-  //       id: 'this is a test',
-  //       assetIndex: assetId,
-  //       preview: {
-  //         width: 100,
-  //         height: 200
-  //       },
-  //       urls
-  //     })
-  //   } else {
-  //     images[targetIndex].urls = targetUrls
-  //     images[targetIndex].id = isAdmin ? assetId : undefined
-  //     images[targetIndex].assetIndex = assetIndex ?? assetId
-  //   }
-  // },
+    const targetUrls = {
+      prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : urls.prev || '',
+      full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : urls.full || '',
+      larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/larg` : urls.larg || '',
+      original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/original` : urls.origin || '',
+      midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/midd` : urls.midd || '',
+      smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/smal` : urls.smal || '',
+      tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/tiny` : urls.tiny || ''
+    }
+    if (targetIndex === -1) {
+      images.push({
+        width: 500,
+        height: 400,
+        id: 'this is a test',
+        assetIndex: assetId,
+        preview: {
+          width: 100,
+          height: 200
+        },
+        urls
+      })
+    } else {
+      images[targetIndex].urls = targetUrls
+      images[targetIndex].id = isAdmin ? assetId : undefined
+      images[targetIndex].assetIndex = assetIndex ?? assetId
+    }
+  },
   // [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
   //   state.checkedAssets = [...val]
   // },
@@ -314,21 +315,21 @@ const mutations: MutationTree<IUserModule> = {
 }
 
 const actions: ActionTree<IUserModule, unknown> = {
-  // async getAllAssets({ commit }, { token }) {
-  //   try {
-  //     const { data } = await userApis.getAllAssets(token)
-  //     // console.warn(data)
-  //     commit(SET_STATE, {
-  //       pending: true,
-  //       contents: [],
-  //       userAssets: data.data
-  //     })
+  async getAllAssets({ commit }, { token }) {
+    try {
+      const { data } = await userApis.getAllAssets(token)
+      // console.warn(data)
+      commit(SET_STATE, {
+        pending: true,
+        contents: [],
+        userAssets: data.data
+      })
 
-  // commit(SET_IMAGES)
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // },
+      // commit(SET_IMAGES)
+    } catch (error) {
+      console.log(error)
+    }
+  },
   // async deleteAssets({ commit, dispatch }) {
   //   try {
   //     const keyList = state.checkedAssets.join(',')

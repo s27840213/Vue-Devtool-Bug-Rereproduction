@@ -81,7 +81,7 @@ class UploadUtils {
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
   get exportIds(): string { return store.state.exportIds }
-  get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
+  get images(): Array<IAssetPhoto> { return store.getters['file/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
   get isOutsourcer(): boolean { return store.getters['user/isOutsourcer'] }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -187,7 +187,7 @@ class UploadUtils {
       const img = new Image()
       img.src = evt.target?.result as string
       img.onload = (evt) => {
-        store.commit('user/ADD_PREVIEW', {
+        store.commit('file/ADD_PREVIEW', {
           imageFile: img,
           assetId: assetId
         })
@@ -201,7 +201,7 @@ class UploadUtils {
         let increaseInterval = undefined as any
         xhr.upload.onprogress = (event) => {
           const uploadProgress = Math.floor(event.loaded / event.total * 100)
-          store.commit('user/UPDATE_PROGRESS', {
+          store.commit('file/UPDATE_PROGRESS', {
             assetId: assetId,
             progress: uploadProgress / 2
           })
@@ -231,11 +231,11 @@ class UploadUtils {
                    * */
                   if (json.flag === 0) {
                     console.log('Successfully upload the file')
-                    store.commit('user/UPDATE_PROGRESS', {
+                    store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
@@ -288,7 +288,7 @@ class UploadUtils {
           const img = new Image()
           img.src = src
           img.onload = (evt) => {
-            store.commit('user/ADD_PREVIEW', {
+            store.commit('file/ADD_PREVIEW', {
               imageFile: img,
               assetId: assetId
             })
@@ -304,7 +304,7 @@ class UploadUtils {
             let increaseInterval = undefined as any
             xhr.upload.onprogress = (event) => {
               const uploadProgress = Math.floor(event.loaded / event.total * 100)
-              store.commit('user/UPDATE_PROGRESS', {
+              store.commit('file/UPDATE_PROGRESS', {
                 assetId: assetId,
                 progress: uploadProgress / 2
               })
@@ -332,12 +332,12 @@ class UploadUtils {
                       if (json.flag === 0) {
                         console.log('Successfully upload the file')
                         if (type === 'image') {
-                          store.commit('user/UPDATE_PROGRESS', {
+                          store.commit('file/UPDATE_PROGRESS', {
                             assetId: assetId,
                             progress: 100
                           })
 
-                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                          store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           if (pollingCallback) {
                             pollingCallback(json)
