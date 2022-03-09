@@ -69,7 +69,6 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   },
   async createBrand({ commit }) {
     const brand = brandkitUtils.createDefaultBrand()
-    console.log(brand)
     brandkitApi.updateBrandsWrapper({
       type: 'brand',
       update_type: 'create',
@@ -130,7 +129,11 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     const palette = brandkitUtils.createDefaultPalette()
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'palette',
+      update_type: 'create',
+      src: `${currentBrand.id},${palette.id},${palette.colors[0].id}`
+    }, () => {
       commit('UPDATE_addPalette', palette)
     }, () => {
       commit('UPDATE_deletePalette', palette)
@@ -167,7 +170,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const palette = brandkitUtils.getColorPalette(currentBrand.colorPalettes, paletteId)
     if (!palette) return
     const newColor = brandkitUtils.duplicateEnd(palette.colors)
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'color',
+      update_type: 'create',
+      src: `${palette.id},${newColor.id}`,
+      target: newColor.color
+    }, () => {
       commit('UPDATE_addColor', { paletteId, color: newColor })
     }, () => {
       commit('UPDATE_deleteColor', { paletteId, color: newColor })
