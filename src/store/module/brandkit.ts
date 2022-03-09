@@ -69,7 +69,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   },
   async createBrand({ commit }) {
     const brand = brandkitUtils.createDefaultBrand()
-    brandkitApi.updateBrandsWrapper({}, () => {
+    console.log(brand)
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'create',
+      src: brand.id
+    }, () => {
       commit('UPDATE_addBrand', brand)
       commit('SET_currentBrand', brand)
     }, () => {

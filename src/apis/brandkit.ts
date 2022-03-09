@@ -31,31 +31,30 @@ export default {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)
     })
   },
-  async updateBrands(token: string, locale: string, teamId: string): Promise<any> {
+  async updateBrands(token: string, locale: string, teamId: string, params: Partial<IBrandParams>): Promise<any> {
     // TODO: integrate API
-    // return await apiUtils.requestWithRetry(() => {
-    //   const payload: any = {
-    //     method: 'POST',
-    //     data: {
-    //       type: 'design',
-    //       token,
-    //       locale,
-    //       team_id: teamId,
-    //       update_type: updateType,
-    //       target
-    //     }
-    //   }
-    //   if (srcAsset != null) payload.data.src_asset = srcAsset
-    //   if (srcFolder != null) payload.data.src_folder = srcFolder
-    //   return axios('/update-asset', payload)
-    // })
-    return { data: { flag: 0 } }
+    if (params.type) {
+      return await apiUtils.requestWithRetry(() => {
+        const payload: any = {
+          method: 'POST',
+          data: {
+            token,
+            locale,
+            team_id: teamId
+          }
+        }
+        Object.assign(payload.data, params)
+        return axios('/update-brand', payload)
+      })
+    } else { // for testing (not implemented APIs)
+      return { data: { flag: 0 } }
+    }
     // return new Promise<any>(resolve => {
     //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
     // })
   },
   updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void) {
-    this.updateBrands(this.getToken(), this.getLocale(), this.getUserId())
+    this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
       .then((response) => {
         if (response.data.flag !== 0) {
           fallbacker()

@@ -61,5 +61,8 @@ export interface IDeletingItem {
 }
 
 export interface IBrandParams {
-
+  type: string,
+  update_type: string,
+  src: string,
+  target: string
 }
