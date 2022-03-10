@@ -103,7 +103,11 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     })
   },
   async removeBrand({ commit }, brand: IBrand) {
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'delete',
+      src: brand.id
+    }, () => {
       commit('UPDATE_deleteBrand', brand)
     }, () => {
       commit('UPDATE_addBrand', brand)
@@ -125,7 +129,11 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async removePalette({ commit }, palette: IBrandColorPalette) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'palette',
+      update_type: 'delete',
+      src: palette.id
+    }, () => {
       commit('UPDATE_deletePalette', { brand: currentBrand, palette })
     }, () => {
       commit('UPDATE_addPalette', { brand: currentBrand, palette })
@@ -172,7 +180,11 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async removeColor({ state, commit }, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'color',
+      update_type: 'delete',
+      src: updateInfo.color.id
+    }, () => {
       commit('UPDATE_deleteColor', { brand: currentBrand, ...updateInfo })
     }, () => {
       commit('UPDATE_addColor', { brand: currentBrand, ...updateInfo })
