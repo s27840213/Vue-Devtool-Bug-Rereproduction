@@ -213,7 +213,7 @@ router.beforeEach(async (to, from, next) => {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
-        next({ name: 'Login', query: { redirect: to.fullPath } })
+        next({ name: 'SignUp', query: { redirect: to.fullPath } })
         return
       } else {
         await store.dispatch('user/login', { token: token })
