@@ -567,11 +567,12 @@ export default Vue.extend({
         })
         console.log('on fb click', redirectStr)
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
+      } else {
+        const redirectStr = JSON.stringify({
+          platform: 'fb_vivipic'
+        })
+        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
       }
-      const redirectStr = JSON.stringify({
-        platform: 'fb_vivipic'
-      })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
     },
     onGoogleClicked() {
       let stateStr
