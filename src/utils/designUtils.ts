@@ -528,6 +528,21 @@ class DesignUtils {
     return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
   }
 
+  newDesignWithLoginRedirect(width: number|string = 1080, height: number|string = 1080, id: number|string|undefined = undefined) {
+    // Redirect user to editor and create new design, will be use by login redirect.
+    const query = {
+      type: 'new-design-size',
+      width: width.toString(),
+      height: id?.toString() === '7' ? width.toString() : height.toString(),
+      themeId: id ? id.toString() : undefined
+    }
+    const route = router.resolve({
+      name: 'Editor',
+      query
+    })
+    router.push(route.href)
+  }
+
   // Below function is used to update the page
   async newDesign(width?: number, height?: number, newDesignType?: number) {
     pageUtils.setPages([pageUtils.newPage({

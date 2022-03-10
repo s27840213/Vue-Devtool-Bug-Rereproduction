@@ -128,19 +128,10 @@ export default Vue.extend({
       // })
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        if (item.height !== 0) {
-          designUtils.newDesign(item.width, item.height, item.id)
-        } else { // for 電商詳情頁
-          designUtils.newDesign(item.width, item.width, item.id)
-          this.setGroupType(1)
-        }
-      })
+      designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
     },
     newDesignSquare() {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(1080, 1080)
-      })
+      designUtils.newDesignWithLoginRedirect()
     },
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items
