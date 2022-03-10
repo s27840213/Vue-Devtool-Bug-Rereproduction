@@ -57,6 +57,7 @@
 <script lang="ts">
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
+import gtmUtils from '@/utils/gtmUtils'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import Vue from 'vue'
 import { mapMutations } from 'vuex'
@@ -102,6 +103,7 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     newDesignWithTemplate(template: any) {
+      console.log(template)
       const query = {
         type: 'new-design-template',
         design_id: template.match_cover.id,
@@ -117,6 +119,7 @@ export default Vue.extend({
         name: 'Editor',
         query
       })
+
       window.open(route.href, '_blank')
 
       // // trigger newDesign method to reset the template themes. [Giambi 12/03]
