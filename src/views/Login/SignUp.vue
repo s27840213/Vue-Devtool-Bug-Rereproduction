@@ -458,21 +458,22 @@ export default Vue.extend({
       const redirectUri = window.location.href.split('?')[0]
       if (this.redirect) {
         const redirectStr = JSON.stringify({
-          redirect: this.redirect,
+          redirect: this.redirect.replaceAll('&', '%26'),
+          platform: 'fb_vivipic'
+        })
+        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
+      } else {
+        const redirectStr = JSON.stringify({
           platform: 'fb_vivipic'
         })
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
       }
-      const redirectStr = JSON.stringify({
-        platform: 'fb_vivipic'
-      })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
     },
     onGoogleClicked() {
       let stateStr
       if (this.redirect) {
         stateStr = JSON.stringify({
-          redirect: this.redirect,
+          redirect: this.redirect.replaceAll('&', '%26'),
           platform: 'google_vivipic'
         })
       } else {
