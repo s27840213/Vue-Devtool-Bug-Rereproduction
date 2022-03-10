@@ -17,6 +17,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const url = urlParams.get('url')
     const width = urlParams.get('width')
     const height = urlParams.get('height')
+    const themeId = urlParams.get('themeId')
     console.log(url, from.name)
     if (type && designId) {
       switch (type) {
@@ -33,6 +34,11 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
         default: {
           await uploadUtils.getDesign(type, { designId }, { width, height })
         }
+      }
+    } else if (type === 'new-design-size' && width && height) {
+      designUtils.newDesign(parseInt(width), parseInt(height), parseInt(themeId as string))
+      if (height === '0') {
+        store.commit('SET_groupType', 1)
       }
     } else if (!url && (!from.name || ['Login'].includes(from.name))) {
       // refresh /editor page

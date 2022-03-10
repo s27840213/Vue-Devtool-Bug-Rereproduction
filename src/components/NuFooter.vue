@@ -161,9 +161,7 @@ export default Vue.extend({
       window.location.href = page
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(item.width, item.height)
-      })
+      designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
     },
     expandItems(index: number, expand: boolean) {
       Vue.set(this.featureExpand, index, expand)
