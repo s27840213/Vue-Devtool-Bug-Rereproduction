@@ -37,7 +37,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       }
     } else if (type === 'new-design-size' && width && height) {
       designUtils.newDesign(parseInt(width), parseInt(height), parseInt(themeId as string))
-      if (height === '0') {
+      if (themeId === '7') {
         store.commit('SET_groupType', 1)
       }
     } else if (!url && (!from.name || ['Login'].includes(from.name))) {

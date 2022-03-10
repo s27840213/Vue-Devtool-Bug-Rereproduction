@@ -250,6 +250,7 @@ export default Vue.extend({
         this.hideBackButton = true
       }
     }
+    console.log('create', this.$route)
     if (this.$route.query.state) {
       const stateStr = this.$route.query.state as string
       const platform = JSON.parse(stateStr).platform
@@ -564,6 +565,7 @@ export default Vue.extend({
           redirect: this.redirect.replaceAll('&', '%26'),
           platform: 'fb_vivipic'
         })
+        console.log('on fb click', redirectStr)
         window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
       }
       const redirectStr = JSON.stringify({

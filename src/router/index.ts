@@ -208,12 +208,14 @@ router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response
   // before navigate to these pages
+  console.log('before each', to)
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
         next({ name: 'Login', query: { redirect: to.fullPath } })
+        return
       } else {
         await store.dispatch('user/login', { token: token })
       }
