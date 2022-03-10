@@ -9,6 +9,7 @@
       svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
+    div(v-else-if="brands.length === 0" class="brand-kit__main")
     div(v-else class="brand-kit__main")
       div(class="brand-kit__header")
         div(class="brand-kit__selector")
@@ -91,7 +92,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('brandkit', {
       isBrandsLoading: 'getIsBrandsLoading',
-      selectedTab: 'getSelectedTab'
+      selectedTab: 'getSelectedTab',
+      brands: 'getBrands'
     }),
     hintText(): string {
       return this.uploadHint[this.selectedTab as 'logo' | 'text']?.text ?? ''
