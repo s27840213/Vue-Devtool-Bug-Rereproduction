@@ -32,7 +32,6 @@ export default {
     })
   },
   async updateBrands(token: string, locale: string, teamId: string, params: Partial<IBrandParams>): Promise<any> {
-    // TODO: integrate API
     if (params.type) {
       return await apiUtils.requestWithRetry(() => {
         const payload: any = {
@@ -53,12 +52,15 @@ export default {
     //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
     // })
   },
-  updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void) {
+  updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void) {
     this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
       .then((response) => {
         if (response.data.flag !== 0) {
           fallbacker()
           errorShower()
+        }
+        if (responseHandler) {
+          responseHandler(response.data)
         }
       }).catch((error) => {
         console.error(error)

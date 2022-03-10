@@ -80,6 +80,10 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deleteBrand', brand)
     }, () => {
       showNetworkError()
+    // }, (data) => {
+    //   console.log(data)
+    //   const realCreateTime = data.createTime
+    //   commit('UPDATE_replaceBrandTime', { brand, createTime: realCreateTime })
     })
   },
   async copyBrand({ commit }, brand: IBrand) {
@@ -107,9 +111,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteLogo', logo)
+      commit('UPDATE_deleteLogo', { brand: currentBrand, logo })
     }, () => {
-      commit('UPDATE_addLogo', logo)
+      commit('UPDATE_addLogo', { brand: currentBrand, logo })
     }, () => {
       showNetworkError()
     })
@@ -118,9 +122,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deletePalette', palette)
+      commit('UPDATE_deletePalette', { brand: currentBrand, palette })
     }, () => {
-      commit('UPDATE_addPalette', palette)
+      commit('UPDATE_addPalette', { brand: currentBrand, palette })
     }, () => {
       showNetworkError()
     })
@@ -134,11 +138,15 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       update_type: 'create',
       src: `${currentBrand.id},${palette.id},${palette.colors[0].id}`
     }, () => {
-      commit('UPDATE_addPalette', palette)
+      commit('UPDATE_addPalette', { brand: currentBrand, palette })
     }, () => {
-      commit('UPDATE_deletePalette', palette)
+      commit('UPDATE_deletePalette', { brand: currentBrand, palette })
     }, () => {
       showNetworkError()
+    // }, (data) => {
+    //   console.log(data)
+    //   const realCreateTime = data.createTime
+    //   commit('UPDATE_replacePaletteTime', { brand: currentBrand, palette, createTime: realCreateTime })
     })
     return palette.id
   },
@@ -157,9 +165,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteColor', updateInfo)
+      commit('UPDATE_deleteColor', { brand: currentBrand, ...updateInfo })
     }, () => {
-      commit('UPDATE_addColor', updateInfo)
+      commit('UPDATE_addColor', { brand: currentBrand, ...updateInfo })
     }, () => {
       showNetworkError()
     })
@@ -176,11 +184,15 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       src: `${palette.id},${newColor.id}`,
       target: newColor.color
     }, () => {
-      commit('UPDATE_addColor', { paletteId, color: newColor })
+      commit('UPDATE_addColor', { brand: currentBrand, paletteId, color: newColor })
     }, () => {
-      commit('UPDATE_deleteColor', { paletteId, color: newColor })
+      commit('UPDATE_deleteColor', { brand: currentBrand, paletteId, color: newColor })
     }, () => {
       showNetworkError()
+    // }, (data) => {
+    //   console.log(data)
+    //   const realCreateTime = data.createTime
+    //   commit('UPDATE_replaceColorTime', { brand: currentBrand, palette, color: newColor, createTime: realCreateTime })
     })
   },
   async updateColor({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
@@ -190,9 +202,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     if (!oldColor) return
     const oldColorHex = oldColor.color
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_setColor', updateInfo)
+      commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
     }, () => {
-      commit('UPDATE_setColor', { ...updateInfo, color: oldColorHex })
+      commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo, color: oldColorHex })
     }, () => {
       showNetworkError()
     })
@@ -201,9 +213,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteFont', font)
+      commit('UPDATE_deleteFont', { brand: currentBrand, font })
     }, () => {
-      commit('UPDATE_addFont', font)
+      commit('UPDATE_addFont', { brand: currentBrand, font })
     }, () => {
       showNetworkError()
     })
@@ -213,14 +225,14 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     if (!currentBrand) return
     const isDefaultBeforeUpdate = brandkitUtils.getTextIsDefault(currentBrand, updateInfo.type)
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_updateTextStyle', updateInfo)
+      commit('UPDATE_updateTextStyle', { brand: currentBrand, ...updateInfo })
       if (isDefaultBeforeUpdate) {
-        commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: { isDefault: false } })
+        commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { isDefault: false } })
       }
     }, () => {
-      commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: brandkitUtils.getCurrentValues(currentBrand, updateInfo) })
+      commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: brandkitUtils.getCurrentValues(currentBrand, updateInfo) })
       if (isDefaultBeforeUpdate) {
-        commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: { isDefault: true } })
+        commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { isDefault: true } })
       }
     }, () => {
       showNetworkError()
@@ -256,76 +268,76 @@ const mutations: MutationTree<IBrandKitState> = {
       state.currentBrandId = state.brands[0].id
     }
   },
-  UPDATE_addLogo(state: IBrandKitState, logo: IBrandLogo) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = brandkitUtils.findInsertIndex(currentBrand.logos, logo)
-    currentBrand.logos.splice(index, 0, logo)
+  UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brandkitUtils.findInsertIndex(brand.logos, updateInfo.logo)
+    brand.logos.splice(index, 0, updateInfo.logo)
   },
-  UPDATE_deleteLogo(state: IBrandKitState, logo: IBrandLogo) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = currentBrand.logos.findIndex(logo_ => logo_.id === logo.id)
+  UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.logo.id)
     if (index < 0) return
-    currentBrand.logos.splice(index, 1)
+    brand.logos.splice(index, 1)
   },
-  UPDATE_addPalette(state: IBrandKitState, palette: IBrandColorPalette) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = brandkitUtils.findInsertIndex(currentBrand.colorPalettes, palette)
-    currentBrand.colorPalettes.splice(index, 0, palette)
+  UPDATE_addPalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brandkitUtils.findInsertIndex(brand.colorPalettes, updateInfo.palette)
+    brand.colorPalettes.splice(index, 0, updateInfo.palette)
   },
-  UPDATE_deletePalette(state: IBrandKitState, palette: IBrandColorPalette) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = currentBrand.colorPalettes.findIndex(palette_ => palette_.id === palette.id)
+  UPDATE_deletePalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brand.colorPalettes.findIndex(palette_ => palette_.id === updateInfo.palette.id)
     if (index < 0) return
-    currentBrand.colorPalettes.splice(index, 1)
+    brand.colorPalettes.splice(index, 1)
   },
-  UPDATE_addColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+  UPDATE_addColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = brandkitUtils.findInsertIndex(colorPalette.colors, updateInfo.color, true)
     colorPalette.colors.splice(index, 0, updateInfo.color)
   },
-  UPDATE_deleteColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+  UPDATE_deleteColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = colorPalette.colors.findIndex(color => color.id === updateInfo.color.id)
     if (index < 0) return
     colorPalette.colors.splice(index, 1)
   },
-  UPDATE_setColor(state: IBrandKitState, updateInfo: { paletteId: string, id: string, color: string }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+  UPDATE_setColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, id: string, color: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = colorPalette.colors.findIndex(color => color.id === updateInfo.id)
     if (index < 0) return
     const oldColor = colorPalette.colors[index]
     colorPalette.colors.splice(index, 1, { ...oldColor, color: updateInfo.color })
   },
-  UPDATE_deleteFont(state: IBrandKitState, font: IBrandFont) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = currentBrand.fonts.findIndex(font_ => font_.id === font.id)
+  UPDATE_deleteFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brand.fonts.findIndex(font_ => font_.id === updateInfo.font.id)
     if (index < 0) return
-    currentBrand.fonts.splice(index, 1)
+    brand.fonts.splice(index, 1)
   },
-  UPDATE_addFont(state: IBrandKitState, font: IBrandFont) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = brandkitUtils.findInsertIndex(currentBrand.fonts, font)
-    currentBrand.fonts.splice(index, 0, font)
+  UPDATE_addFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brandkitUtils.findInsertIndex(brand.fonts, updateInfo.font)
+    brand.fonts.splice(index, 0, updateInfo.font)
   },
-  UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { type: string, style: any }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const textStyle = (currentBrand.textStyleSetting as any)[`${updateInfo.type}Style`]
+  UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const textStyle = (brand.textStyleSetting as any)[`${updateInfo.type}Style`]
     if (!textStyle) return
     for (const [key, value] of Object.entries(updateInfo.style)) {
       textStyle[key] = value
