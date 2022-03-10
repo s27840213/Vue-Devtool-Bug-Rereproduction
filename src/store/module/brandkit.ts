@@ -59,7 +59,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async setBrandName({ commit }, updateInfo: { brand: IBrand, newName: string }) {
     const { brand, newName } = updateInfo
     const oldName = brand.name
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'rename',
+      src: brand.id,
+      target: newName
+    }, () => {
       brand.name = newName
     }, () => {
       brand.name = oldName
@@ -151,7 +156,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async setPaletteName({ commit }, updateInfo: { palette: IBrandColorPalette, newName: string }) {
     const { palette, newName } = updateInfo
     const oldName = palette.name
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'palette',
+      update_type: 'rename',
+      src: palette.id,
+      target: newName
+    }, () => {
       palette.name = newName
     }, () => {
       palette.name = oldName
