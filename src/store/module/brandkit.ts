@@ -80,10 +80,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deleteBrand', brand)
     }, () => {
       showNetworkError()
-    // }, (data) => {
-    //   console.log(data)
-    //   const realCreateTime = data.createTime
-    //   commit('UPDATE_replaceBrandTime', { brand, createTime: realCreateTime })
+    }, (data) => {
+      const realCreateTime = data.createTime
+      commit('UPDATE_replaceBrandTime', { brand, createTime: realCreateTime })
     })
   },
   async copyBrand({ commit }, brand: IBrand) {
@@ -143,10 +142,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deletePalette', { brand: currentBrand, palette })
     }, () => {
       showNetworkError()
-    // }, (data) => {
-    //   console.log(data)
-    //   const realCreateTime = data.createTime
-    //   commit('UPDATE_replacePaletteTime', { brand: currentBrand, palette, createTime: realCreateTime })
+    }, (data) => {
+      const realCreateTime = data.createTime
+      commit('UPDATE_replacePaletteTime', { brand: currentBrand, palette, createTime: realCreateTime })
     })
     return palette.id
   },
@@ -189,10 +187,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deleteColor', { brand: currentBrand, paletteId, color: newColor })
     }, () => {
       showNetworkError()
-    // }, (data) => {
-    //   console.log(data)
-    //   const realCreateTime = data.createTime
-    //   commit('UPDATE_replaceColorTime', { brand: currentBrand, palette, color: newColor, createTime: realCreateTime })
+    }, (data) => {
+      const realCreateTime = data.createTime
+      commit('UPDATE_replaceColorTime', { brand: currentBrand, palette, color: newColor, createTime: realCreateTime })
     })
   },
   async updateColor({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
@@ -268,6 +265,11 @@ const mutations: MutationTree<IBrandKitState> = {
       state.currentBrandId = state.brands[0].id
     }
   },
+  UPDATE_replaceBrandTime(state: IBrandKitState, updateInfo: { brand: IBrand, createTime: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    brand.createTime = updateInfo.createTime
+  },
   UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
@@ -293,6 +295,13 @@ const mutations: MutationTree<IBrandKitState> = {
     const index = brand.colorPalettes.findIndex(palette_ => palette_.id === updateInfo.palette.id)
     if (index < 0) return
     brand.colorPalettes.splice(index, 1)
+  },
+  UPDATE_replacePaletteTime(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette, createTime: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.palette.id)
+    if (!colorPalette) return
+    colorPalette.createTime = updateInfo.createTime
   },
   UPDATE_addColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -320,6 +329,16 @@ const mutations: MutationTree<IBrandKitState> = {
     if (index < 0) return
     const oldColor = colorPalette.colors[index]
     colorPalette.colors.splice(index, 1, { ...oldColor, color: updateInfo.color })
+  },
+  UPDATE_replaceColorTime(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor, createTime: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+    if (!colorPalette) return
+    const index = colorPalette.colors.findIndex(color => color.id === updateInfo.color.id)
+    if (index < 0) return
+    const color = colorPalette.colors[index]
+    color.createTime = updateInfo.createTime
   },
   UPDATE_deleteFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
