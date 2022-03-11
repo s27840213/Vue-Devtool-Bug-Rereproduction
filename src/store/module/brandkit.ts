@@ -105,7 +105,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }, () => {
       showNetworkError()
     }, (data) => {
-      commit('UPDATE_replaceBrand', { id: newBrand.id, brand: data.brand })
+      commit('UPDATE_replaceBrand', { id: newBrand.id, brand: data.data })
     })
   },
   async removeBrand({ commit }, brand: IBrand) {
