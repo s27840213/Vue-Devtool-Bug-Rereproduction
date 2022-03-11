@@ -92,14 +92,20 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   },
   async copyBrand({ commit }, brand: IBrand) {
     const newBrand = generalUtils.deepCopy(brand)
-    newBrand.id = generalUtils.generateAssetId()
-    brandkitApi.updateBrandsWrapper({}, () => {
+    newBrand.id = 'new_' + generalUtils.generateAssetId()
+    newBrand.createTime = (new Date()).toISOString()
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'copy',
+      src: brand.id
+    }, () => {
       commit('UPDATE_addBrand', newBrand)
-      commit('SET_currentBrand', newBrand)
     }, () => {
       commit('UPDATE_deleteBrand', newBrand)
     }, () => {
       showNetworkError()
+    }, (data) => {
+      commit('UPDATE_replaceBrand', { id: newBrand.id, brand: data.brand })
     })
   },
   async removeBrand({ commit }, brand: IBrand) {
@@ -286,6 +292,11 @@ const mutations: MutationTree<IBrandKitState> = {
     if (state.currentBrandId === brand.id) {
       state.currentBrandId = state.brands[0].id
     }
+  },
+  UPDATE_replaceBrand(state: IBrandKitState, updateInfo: { id: string, brand: IBrand }) {
+    const index = state.brands.findIndex(brand_ => brand_.id === updateInfo.id)
+    if (index < 0) return
+    state.brands.splice(index, 1, updateInfo.brand)
   },
   UPDATE_replaceBrandTime(state: IBrandKitState, updateInfo: { brand: IBrand, createTime: string }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)

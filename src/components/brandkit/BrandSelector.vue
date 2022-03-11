@@ -20,7 +20,7 @@
         class="brand-selector__brand-list")
         div(v-for="brand in brands"
           class="feature-button brand-selector__brand-list__item pointer relative"
-          :class="{'active': checkSelected(brand)}"
+          :class="{'active': checkSelected(brand), 'disabled': checkTemp(brand)}"
           @mouseenter="handleMouseEnter(brand)"
           @mouseleave="handleMouseLeave()"
           @click="handleSetCurrentBrand(brand)")
@@ -135,6 +135,9 @@ export default Vue.extend({
     checkSelected(brand: IBrand): boolean {
       return this.currentBrand.id === brand.id
     },
+    checkTemp(brand: IBrand): boolean {
+      return brand.id.startsWith('new_')
+    },
     checkBrandMenuShowing(brand: IBrand): boolean {
       return this.currentBrandMenuId === brand.id
     },
@@ -213,7 +216,7 @@ export default Vue.extend({
       & > span {
         @include body-SM;
       }
-      &:hover {
+      &:not(.disabled):hover {
         & > .brand-selector__brand-list__item-menu-icon {
           display: block;
         }
