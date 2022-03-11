@@ -519,7 +519,7 @@ class UploadUtils {
     }
     this.emitDesignUploadEvent('uploading')
     await this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
-      .then(() => {
+      .then(async () => {
         if (this.designStatusTimer !== -1) {
           clearTimeout(this.designStatusTimer)
         }
@@ -528,7 +528,7 @@ class UploadUtils {
         }, 300)
         if (putAssetDesignType !== undefined) {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
-          store.dispatch('user/putAssetDesign', {
+          await store.dispatch('user/putAssetDesign', {
             assetId,
             type: putAssetDesignType
           })
@@ -830,7 +830,7 @@ class UploadUtils {
   }
 
   async updateTemplate() {
-    const pageIndex = store.getters.getMiddlemostPageIndex
+    const pageIndex = pageUtils.currFocusPageIndex
     const designId = store.getters.getPage(pageIndex).designId
     if (this.isOutsourcer) {
       const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
