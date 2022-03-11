@@ -259,7 +259,7 @@ class BrandKitUtils {
   }
 
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
-    return { ...(colors[colors.length - 1] ?? this.createDefaultColor()), id: generalUtils.generateAssetId() }
+    return { ...(colors[colors.length - 1] ?? this.createDefaultColor()), id: generalUtils.generateAssetId(), createTime: (new Date()).toISOString() }
   }
 
   getCurrentValues(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }): {[key: string]: any} {
