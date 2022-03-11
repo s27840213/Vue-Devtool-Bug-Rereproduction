@@ -256,7 +256,7 @@ export default Vue.extend({
             this.multiPollingStep()
           }
         }
-      }, 1500)
+      }, 100)
     },
     handleMouseLeave() {
       this.isMouseOver = false

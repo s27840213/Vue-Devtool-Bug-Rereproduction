@@ -73,7 +73,7 @@ export default Vue.extend({
   data() {
     return {
       ROOT: designUtils.ROOT,
-      isShowHint: true,
+      isShowHint: false,
       messageTimer: -1,
       hintTopBase: 0,
       isAllDraggedOver: false,
