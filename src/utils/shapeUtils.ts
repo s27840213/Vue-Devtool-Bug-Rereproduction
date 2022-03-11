@@ -186,7 +186,7 @@ class ShapeUtils {
           theLayer.className = theLayer.className ? theLayer.className : shapeUtils.classGenerator()
           break
         case 'E':
-          theLayer.styleArray = ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0])']
+          theLayer.styleArray = ['fill:$fillcolor; stroke:$color[0]; stroke-width:calc(2*$size[0]px)']
           theLayer.svg = shapeUtils.genBasicShapeSvgTemplate(theLayer.shapeType ?? '')
           theLayer.pDiff = [0, 0]
           theLayer.pSize = [0, 0]
