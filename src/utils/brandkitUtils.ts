@@ -207,8 +207,12 @@ class BrandKitUtils {
     store.dispatch('brandkit/removeColor', { paletteId, color })
   }
 
-  updateColor(paletteId: string, id: string, color: string) {
-    store.dispatch('brandkit/updateColor', { paletteId, id, color })
+  async updateColor(id: string, color: string) {
+    return await store.dispatch('brandkit/updateColor', { id, color })
+  }
+
+  updateColorTemp(paletteId: string, id: string, color: string) {
+    store.dispatch('brandkit/updateColorTemp', { paletteId, id, color })
   }
 
   createColor(paletteId: string) {

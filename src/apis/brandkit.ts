@@ -52,21 +52,24 @@ export default {
     //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
     // })
   },
-  updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void) {
-    this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
-      .then((response) => {
-        if (response.data.flag !== 0) {
-          fallbacker()
-          errorShower()
-        }
-        if (responseHandler) {
-          responseHandler(response.data)
-        }
-      }).catch((error) => {
-        console.error(error)
+  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+    updater()
+    try {
+      const response = await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
+      if (response.data.flag !== 0) {
         fallbacker()
         errorShower()
-      })
-    updater()
+        return false
+      }
+      if (responseHandler) {
+        responseHandler(response.data)
+      }
+    } catch (error) {
+      console.error(error)
+      fallbacker()
+      errorShower()
+      return false
+    }
+    return true
   }
 }

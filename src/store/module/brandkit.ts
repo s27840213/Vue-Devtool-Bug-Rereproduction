@@ -220,19 +220,25 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_replaceColorTime', { brand: currentBrand, palette, color: newColor, createTime: realCreateTime })
     })
   },
-  async updateColor({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const oldColor = brandkitUtils.getColor(currentBrand, updateInfo)
-    if (!oldColor) return
-    const oldColorHex = oldColor.color
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
+  async updateColor({ commit }, updateInfo: { id: string, color: string }) {
+    return await brandkitApi.updateBrandsWrapper({
+      type: 'color',
+      update_type: 'update',
+      src: updateInfo.id,
+      target: updateInfo.color
     }, () => {
-      commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo, color: oldColorHex })
+      // do nothing
+    }, () => {
+      // do nothing
     }, () => {
       showNetworkError()
     })
+  },
+  async updateColorTemp({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
+    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
+    if (!currentBrand) return
+    console.log('tmp')
+    commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
   },
   async removeFont({ state, commit }, font: IBrandFont) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -354,6 +360,7 @@ const mutations: MutationTree<IBrandKitState> = {
     colorPalette.colors.splice(index, 1)
   },
   UPDATE_setColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, id: string, color: string }) {
+    console.log(updateInfo.color)
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
