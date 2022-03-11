@@ -325,16 +325,8 @@ export default Vue.extend({
     goToTemplateCenterTheme(themes = '') {
       this.$router.push({ name: 'TemplateCenter', query: { themes: themes } })
     },
-    newDesign(search = '') {
-      if (search) {
-        this.$router.push({ name: 'Editor', query: { search: search } }).then(() => {
-          designUtils.newDesign()
-        })
-      } else {
-        this.$router.push({ name: 'Editor' }).then(() => {
-          designUtils.newDesign()
-        })
-      }
+    newDesign() {
+      designUtils.newDesignWithLoginRedirect()
     },
     openPopup() {
       this.showSizePopup = true

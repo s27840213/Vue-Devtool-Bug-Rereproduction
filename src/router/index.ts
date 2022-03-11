@@ -191,8 +191,10 @@ const router = new VueRouter({
           localStorage.setItem('locale', locale)
         }
         next()
-        if ((window as any).__PRERENDER_INJECTED === undefined) {
-          router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
+        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+          // Delete locale in url, will be ignore by prerender.
+          delete router.currentRoute.params.locale
+          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
         }
       },
       children: routes
@@ -206,12 +208,13 @@ router.beforeEach(async (to, from, next) => {
   // some pages must render with userInfo,
   // hence we should guarantee to receive login response
   // before navigate to these pages
-  if (to.name === 'Settings' || to.name === 'MyDesign' || to.name === 'BrandKit') {
+  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
     // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
-        next({ name: 'Login', query: { redirect: to.fullPath } })
+        next({ name: 'SignUp', query: { redirect: to.fullPath } })
+        return
       } else {
         await store.dispatch('user/login', { token: token })
       }
