@@ -1000,6 +1000,7 @@ class UploadUtils {
           .then(() => {
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
+            this.isGettingDesign = false
           })
       }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
