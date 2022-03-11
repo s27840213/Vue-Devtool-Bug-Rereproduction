@@ -1,12 +1,9 @@
 import store from '@/store'
 import file from '@/apis/file'
 import user from '@/apis/user'
-import apiUtils from '@/utils/apiUtils'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
-import { AxiosResponse } from 'axios'
-import { IUserModule } from '@/store/module/user'
 
 const SET_STATE = 'SET_STATE' as const
 const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
@@ -19,6 +16,7 @@ const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
 
 interface IPhotoState {
   list: Array<IAssetPhoto>,
+  editorViewImage: Record<string, any>,
   pageIndex: number,
   pending: boolean,
   checkedAssets: Array<number>
@@ -26,6 +24,7 @@ interface IPhotoState {
 
 const getDefaultState = (): IPhotoState => ({
   list: [],
+  editorViewImage: {},
   pageIndex: 0,
   pending: false,
   checkedAssets: []
@@ -109,20 +108,15 @@ const actions: ActionTree<IPhotoState, unknown> = {
       console.log(error)
     }
   },
-  async updateImages({ state, commit }, { assetSet }) {
+  async updateImages({ commit }, { assetSet }) {
     const token = user.getToken()
-    const { data } = await apiUtils.requestWithRetry(() => {
-      console.warn('fetch')
-      return user.getAllAssets(token, { asset_list: assetSet })
+    user.getAllAssets(token, {
+      asset_list: assetSet
+    }).then((data) => {
+      commit(SET_STATE, {
+        editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
+      })
     })
-    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
-    if (urlSet) {
-      for (const [assetId, urls] of Object.entries(urlSet)) {
-        commit(UPDATE_IMAGE_URLS, { assetId: +assetId, urls })
-      }
-    } else {
-      throw new Error('fail to fetch private image urls')
-    }
   }
 }
 
@@ -210,6 +204,9 @@ const getters: GetterTree<IPhotoState, any> = {
   },
   getCheckedAssets(state) {
     return state.checkedAssets
+  },
+  getEditorViewImageIndex: (state) => (assetId: string) => {
+    return state.editorViewImage[assetId]
   }
 }
 

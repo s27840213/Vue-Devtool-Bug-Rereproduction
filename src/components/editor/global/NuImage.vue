@@ -15,7 +15,6 @@
       draggable="false"
       crossOrigin="Anonymous"
       :src="src"
-      @error="onError()"
       @load="onLoad()")
 </template>
 
@@ -61,7 +60,7 @@ export default Vue.extend({
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
+      // src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
       filter: undefined as unknown as HTMLElement
     }
   },
@@ -92,15 +91,15 @@ export default Vue.extend({
             preLoadImg('next')
           }
         }
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+        // this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
     },
-    srcObj: {
-      handler: function () {
-        this.perviewAsLoading()
-      },
-      deep: true
-    },
+    // srcObj: {
+    //   handler: function () {
+    //     this.perviewAsLoading()
+    //   },
+    //   deep: true
+    // },
     scale() {
       !this.forRender && this.updateShadowEffect(this.shadowEffects)
     },
@@ -114,9 +113,13 @@ export default Vue.extend({
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      assetId2Url: 'file/getEditorViewImageIndex'
     }),
     ...mapState('user', ['imgSizeMap']),
+    src(): string {
+      return this.assetId2Url(this.config.srcObj.assetId)?.full
+    },
     getImgDimension(): number {
       const { type } = this.config.srcObj
       const { imgWidth, imgHeight } = this.config.styles
@@ -209,51 +212,52 @@ export default Vue.extend({
         transform: `scaleX(${scaleX}) scaleY(${scaleY})`
       }
     },
-    onError() {
-      console.log('image on error')
-      this.isOnError = true
-      if (this.config.srcObj.type === 'private') {
-        try {
-          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
-        } catch (error) {
-        }
-      }
-    },
+    // onError(e: any) {
+    //   console.log('image on error', this.config.srcObj.assetId, e)
+    //   this.isOnError = true
+    //   if (this.config.srcObj.type === 'private') {
+    //     try {
+    //       console.log('enter update?')
+    //       // this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+    //     } catch (error) {
+    //     }
+    //   }
+    // },
     onLoad() {
       this.isOnError = false
     },
-    async perviewAsLoading() {
-      return new Promise<void>((resolve, reject) => {
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
-        const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
+    // async perviewAsLoading() {
+    //   return new Promise<void>((resolve, reject) => {
+    //     this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
+    //     const img = new Image()
+    //     img.setAttribute('crossOrigin', 'Anonymous')
 
-        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
-        img.onload = () => {
-          // If after onload the img, the config.srcObj is the same, set the src.
-          if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
-            this.src = src
-          }
-          resolve()
-        }
-        img.onerror = () => {
-          reject(new Error('cannot load the current image'))
-        }
-        img.src = src
-      })
-    },
+    //     const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+    //     img.onload = () => {
+    //       // If after onload the img, the config.srcObj is the same, set the src.
+    //       if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
+    //         this.src = src
+    //       }
+    //       resolve()
+    //     }
+    //     img.onerror = () => {
+    //       reject(new Error('cannot load the current image'))
+    //     }
+    //     img.src = src
+    //   })
+    // },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-      const { assetId } = this.config.srcObj
-      if (type === 'private') {
-        const images = store.getters['file/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (!img) {
-          await store.dispatch('file/updateImages', { assetSet: `${assetId}` })
-        }
-      }
+      // const { assetId } = this.config.srcObj
+      // if (type === 'private') {
+      //   const images = store.getters['file/getImages'] as Array<IAssetPhoto>
+      //   const img = images.find(img => img.assetIndex === assetId)
+      //   if (!img) {
+      //     await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+      //   }
+      // }
 
-      await this.perviewAsLoading()
+      // await this.perviewAsLoading()
 
       const preImg = new Image()
       preImg.setAttribute('crossOrigin', 'Anonymous')

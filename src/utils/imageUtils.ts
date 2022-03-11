@@ -41,13 +41,13 @@ class ImageUtils {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
       case 'private': {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (img) {
-          for (const [k, v] of Object.entries(img.urls)) {
-            if (k === size) return v
-          }
-        }
+        // const images = store.getters['user/getImages'] as Array<IAssetPhoto>
+        // const img = images.find(img => img.assetIndex === assetId)
+        // if (img) {
+        //   for (const [k, v] of Object.entries(img.urls)) {
+        //     if (k === size) return v
+        //   }
+        // }
         return ''
       }
       case 'unsplash':
