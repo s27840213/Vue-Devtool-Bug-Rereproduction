@@ -159,11 +159,15 @@ export default Vue.extend({
     line-height: unset;
     color: setColor(bu);
     height: 39px;
+    max-width: 260px;
     & > span {
       display: block;
       padding: 2px;
       cursor: text;
       border-radius: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       &:hover {
         background: setColor(blue-4);
       }

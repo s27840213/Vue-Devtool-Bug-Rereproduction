@@ -171,14 +171,18 @@ export default Vue.extend({
     margin-left: 8px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
     color: setColor(gray-1);
+    width: 300px;
     & > span {
       @include body-MD;
       cursor: text;
       line-height: 24px;
       height: 24px;
       display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     & > input {
       height: 24px;
