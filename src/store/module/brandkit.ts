@@ -256,7 +256,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     if (!currentBrand) return
     const updateStyle = brandkitUtils.getUpdateStyleAPIEncoding(updateInfo.style)
     const currentStyle = brandkitUtils.getCurrentValues(currentBrand, updateInfo)
-    await brandkitApi.updateBrandsWrapper({}, () => {
+    await brandkitApi.updateBrandsWrapper({
+      type: 'text',
+      update_type: 'update',
+      src: `${currentBrand.id},${updateInfo.type}`,
+      target: updateStyle
+    }, () => {
       commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { ...updateInfo.style, isDefault: false } })
     }, () => {
       commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: currentStyle })
