@@ -254,17 +254,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async updateTextStyle({ state, commit }, updateInfo: { type: string, style: Partial<IBrandTextStyle> }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const isDefaultBeforeUpdate = brandkitUtils.getTextIsDefault(currentBrand, updateInfo.type)
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_updateTextStyle', { brand: currentBrand, ...updateInfo })
-      if (isDefaultBeforeUpdate) {
-        commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { isDefault: false } })
-      }
+    const updateStyle = brandkitUtils.getUpdateStyleAPIEncoding(updateInfo.style)
+    const currentStyle = brandkitUtils.getCurrentValues(currentBrand, updateInfo)
+    await brandkitApi.updateBrandsWrapper({}, () => {
+      commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { ...updateInfo.style, isDefault: false } })
     }, () => {
-      commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: brandkitUtils.getCurrentValues(currentBrand, updateInfo) })
-      if (isDefaultBeforeUpdate) {
-        commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { isDefault: true } })
-      }
+      commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: currentStyle })
     }, () => {
       showNetworkError()
     })

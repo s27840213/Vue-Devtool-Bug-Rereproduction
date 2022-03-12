@@ -18,7 +18,7 @@
             svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
           button(class="brand-kit-text-setting__config__range-input-button" @click="handleValueModal")
             input(class="body-2 text-gray-2 center" type="text" ref="input-fontSize"
-                  @change="setSize" :value="fontSize")
+                  @change="setSize" :value="fontSizeBuffer")
           div(class="pointer"
             @mousedown="fontSizeStepping(1)")
             svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
@@ -77,6 +77,7 @@ export default Vue.extend({
       isConfigOpen: false,
       isFontsPanelOpen: false,
       isValueSelectorOpen: false,
+      fontSizeBuffer: 0,
       fontSelectValue,
       fontIcons: ['bold', 'underline', 'italic'],
       hintMap: {
@@ -125,7 +126,10 @@ export default Vue.extend({
       }
     },
     handleToggleConfig() {
-      if (!this.isConfigOpen) this.isConfigOpen = true
+      if (!this.isConfigOpen) {
+        this.isConfigOpen = true
+        this.refreshFontSizeBuffer()
+      }
     },
     openFontsPanel() {
       this.isFontsPanelOpen = true
@@ -139,7 +143,10 @@ export default Vue.extend({
       }
     },
     handleValueUpdate(value: number) {
-      brandkitUtils.updateTextStyle(this.type, { size: value })
+      this.fontSizeBuffer = value
+      brandkitUtils.updateTextStyle(this.type, { size: value }).then(() => {
+        this.refreshFontSizeBuffer()
+      })
     },
     isValidFloat(value: string) {
       return value.match(/[+-]?\d+(\.\d+)?/)
@@ -153,7 +160,10 @@ export default Vue.extend({
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), 6, 800)
-        brandkitUtils.updateTextStyle(this.type, { size: parseInt(value) })
+        this.fontSizeBuffer = parseInt(value)
+        brandkitUtils.updateTextStyle(this.type, { size: parseInt(value) }).then(() => {
+          this.refreshFontSizeBuffer()
+        })
       }
     },
     fontSizeStepping(step: number, tickInterval = 100) {
@@ -161,7 +171,7 @@ export default Vue.extend({
       const interval = setInterval(() => {
         if (new Date().getTime() - startTime > 500) {
           try {
-            brandkitUtils.updateTextStyle(this.type, { size: this.fontSize + step })
+            this.fontSizeBuffer += step
           } catch (error) {
             console.error(error)
             window.removeEventListener('mouseup', onmouseup)
@@ -173,8 +183,11 @@ export default Vue.extend({
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
         if (new Date().getTime() - startTime < 500) {
-          brandkitUtils.updateTextStyle(this.type, { size: this.fontSize + step })
+          this.fontSizeBuffer += step
         }
+        brandkitUtils.updateTextStyle(this.type, { size: this.fontSizeBuffer }).then(() => {
+          this.refreshFontSizeBuffer()
+        })
         clearInterval(interval)
       }
 
@@ -192,6 +205,9 @@ export default Vue.extend({
           brandkitUtils.updateTextStyle(this.type, { italic: !this.textStyle.italic })
           break
       }
+    },
+    refreshFontSizeBuffer() {
+      this.fontSizeBuffer = this.fontSize
     }
   }
 })

@@ -223,8 +223,8 @@ class BrandKitUtils {
     store.dispatch('brandkit/removeFont', font)
   }
 
-  updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
-    store.dispatch('brandkit/updateTextStyle', { type, style })
+  async updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
+    await store.dispatch('brandkit/updateTextStyle', { type, style })
   }
 
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
@@ -259,7 +259,11 @@ class BrandKitUtils {
   }
 
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
-    return { ...(colors[colors.length - 1] ?? this.createDefaultColor()), id: generalUtils.generateAssetId(), createTime: (new Date()).toISOString() }
+    return {
+      ...(colors[colors.length - 1] ?? this.createDefaultColor()),
+      id: generalUtils.generateAssetId(),
+      createTime: (new Date()).toISOString()
+    }
   }
 
   getCurrentValues(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }): {[key: string]: any} {
@@ -269,13 +273,22 @@ class BrandKitUtils {
     for (const k of Object.keys(info.style)) {
       res[k] = textStyle[k]
     }
+    res.isDefault = textStyle.isDefault
     return res
   }
 
-  getTextIsDefault(brand: any, type: string): boolean {
-    const textStyle = (brand.textStyleSetting)[`${type}Style`] as any
-    if (!textStyle) return false
-    return textStyle.isDefault
+  // getTextIsDefault(brand: any, type: string): boolean {
+  //   const textStyle = (brand.textStyleSetting)[`${type}Style`] as any
+  //   if (!textStyle) return false
+  //   return textStyle.isDefault
+  // }
+
+  getUpdateStyleAPIEncoding(style: Partial<IBrandTextStyle>): string {
+    const pairs = Object.entries(style).map(([key, value]) => {
+      return `${key}@${value}`
+    })
+    pairs.push('isDefault@false')
+    return pairs.join(',')
   }
 
   composeSettingText(textStyle: IBrandTextStyle, type: string): string {

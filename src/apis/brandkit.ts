@@ -47,10 +47,10 @@ export default {
       })
     } else { // for testing (not implemented APIs)
       return { data: { flag: 0 } }
+      // return new Promise<any>(resolve => {
+      //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
+      // })
     }
-    // return new Promise<any>(resolve => {
-    //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
-    // })
   },
   async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
     updater()
