@@ -11,6 +11,7 @@ import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import MobileEditor from '../views/MobileEditor.vue'
+import MobileTextEffect from '../views/MobileTextEffect.vue'
 import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
@@ -31,7 +32,8 @@ const MOBILE_ROUTES = [
   'Login',
   'MobileWarning',
   'Preview',
-  'MobileEditor'
+  'MobileEditor',
+  'MobileTextEffect'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -166,6 +168,11 @@ const routes: Array<RouteConfig> = [
     path: 'brandkit',
     name: 'BrandKit',
     component: BrandKit
+  },
+  {
+    path: 'mobile-text',
+    name: 'MobileTextEffect',
+    component: MobileTextEffect
   }
 ]
 
