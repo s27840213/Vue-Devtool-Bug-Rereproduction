@@ -175,9 +175,9 @@ export default Vue.extend({
     @media screen and (max-width: 768px) {
       column-gap: 20px;
     }
-    @media screen and (min-width: 1600px) {
-      justify-content: center;
-    }
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
     @include no-scrollbar;
   }
   &__plus {
