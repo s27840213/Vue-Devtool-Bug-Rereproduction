@@ -6,8 +6,10 @@
         @click="handleSelectTab(tab)")
         div(class="brand-kit-tab__tab-name")
           span(class="brand-kit-tab__tab-name-text") {{ $t(tabNames[tab]) }}
-    div(class="brand-kit-tab__content")
+    div(v-if="notNullBrand" class="brand-kit-tab__content")
       component(:is="`brand-kit-tab-${selectedTab}`" @deleteItem="handleDeleteItem")
+    div(v-else class="brand-kit-tab__content")
+      img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
 </template>
 
 <script lang="ts">
@@ -34,8 +36,12 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('brandkit', {
+      currentBrand: 'getCurrentBrand',
       selectedTab: 'getSelectedTab'
-    })
+    }),
+    notNullBrand(): boolean {
+      return !brandkitUtils.checkIsNullBrand(this.currentBrand)
+    }
   },
   methods: {
     ...mapMutations('brandkit', {

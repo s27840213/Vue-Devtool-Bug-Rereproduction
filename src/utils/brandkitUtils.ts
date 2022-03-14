@@ -106,6 +106,22 @@ class BrandKitUtils {
     }
   }
 
+  createNullBrand(): IBrand {
+    return {
+      id: 'null',
+      createTime: '',
+      name: '',
+      logos: [],
+      textStyleSetting: {
+        headingStyle: this.createDefaultTextStyle('heading'),
+        subheadingStyle: this.createDefaultTextStyle('subheading'),
+        bodyStyle: this.createDefaultTextStyle('body')
+      },
+      colorPalettes: [],
+      fonts: []
+    }
+  }
+
   createDefaultTextStyle(type: string): IBrandTextStyle {
     const res = {
       font: {
@@ -152,6 +168,10 @@ class BrandKitUtils {
       createTime: (new Date()).toISOString(),
       color: '#4EABE6'
     }
+  }
+
+  checkIsNullBrand(brand: IBrand): boolean {
+    return brand.id === 'null'
   }
 
   generateBrandColors(colorHexes: string[]): IBrandColor[] {
@@ -300,7 +320,7 @@ class BrandKitUtils {
   }
 
   getDisplayedBrandName(brand: IBrand): string {
-    return brand.name === '' ? `${i18n.t('NN0397')}` : brand.name
+    return (!this.checkIsNullBrand(brand) && brand.name === '') ? `${i18n.t('NN0397')}` : brand.name
   }
 
   getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {

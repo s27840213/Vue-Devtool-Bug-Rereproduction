@@ -9,7 +9,6 @@
       svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
-    div(v-else-if="brands.length === 0" class="brand-kit__main")
     div(v-else class="brand-kit__main")
       div(class="brand-kit__header")
         div(class="brand-kit__selector")

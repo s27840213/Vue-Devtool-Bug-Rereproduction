@@ -13,7 +13,7 @@ interface IBrandKitState {
   selectedTab: string
 }
 
-const DEFAULT_BRAND = brandkitUtils.createDefaultBrand()
+const NULL_BRAND = brandkitUtils.createNullBrand()
 const showNetworkError = () => {
   Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
 }
@@ -31,7 +31,7 @@ const getters: GetterTree<IBrandKitState, unknown> = {
     return state.brands
   },
   getCurrentBrand(state: IBrandKitState): IBrand {
-    return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? DEFAULT_BRAND
+    return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? NULL_BRAND
   },
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
