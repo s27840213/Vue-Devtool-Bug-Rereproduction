@@ -2,15 +2,21 @@
   div(class="spinner")
     div
       img(:src="require('@/assets/img/gif/rocket-loading.gif')")
-      span Loading...
+      span {{textContent}}...
 </template>
 
 <script lang="ts">
 
+import i18n from '@/i18n'
 import Vue from 'vue'
 
 export default Vue.extend({
-
+  props: {
+    textContent: {
+      type: String,
+      default: `${i18n.t('NN0454')}`
+    }
+  }
 })
 </script>
 
@@ -22,8 +28,8 @@ export default Vue.extend({
   position: fixed;
   width: 100vw;
   height: 100vh;
-  left:0;
-  top:0;
+  left: 0;
+  top: 0;
   background-color: #000000a1;
   z-index: 999999;
 
