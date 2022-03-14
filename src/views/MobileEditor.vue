@@ -77,21 +77,15 @@ export default Vue.extend({
     return {
       FunctionPanelType,
       isColorPanelOpen: false,
-      isConfigPanelOpen: false
+      isConfigPanelOpen: false,
+      isLoading: false,
+      isSaving: false
       // isSidebarPanelOpen: false
     }
   },
   watch: {
     isShowPagePreview() {
       this.toggleSidebarPanel = this.isShowPagePreview
-    }
-  },
-  mounted() {
-    const type = this.$router.currentRoute.query.type
-    const designId = this.$router.currentRoute.query.design_id
-    const teamId = this.$router.currentRoute.query.team_id
-    if (!type || !designId || !teamId) {
-      uploadUtils.hasGottenDesign = true
     }
   },
   computed: {
@@ -195,9 +189,11 @@ export default Vue.extend({
 
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
+      this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
-        uploadUtils.hasGottenDesign = false
+        uploadUtils.isGettingDesign = false
         logUtils.setLog('Leave editor')
+        this.isSaving = false
         next()
       })
     } else {
