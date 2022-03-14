@@ -26,7 +26,7 @@ export default Vue.extend({
     const designId = this.$router.currentRoute.query.design_id
     const teamId = this.$router.currentRoute.query.team_id
     if (!type || !designId || !teamId) {
-      uploadUtils.hasGottenDesign = true
+      uploadUtils.isGettingDesign = false
     }
   }
 })

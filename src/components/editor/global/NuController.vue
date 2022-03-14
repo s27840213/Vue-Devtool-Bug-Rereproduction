@@ -34,6 +34,7 @@
               :pageIndex="pageIndex"
               :layerIndex="index"
               :primaryLayerIndex="layerIndex"
+              :primaryLayerType="config.type"
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"

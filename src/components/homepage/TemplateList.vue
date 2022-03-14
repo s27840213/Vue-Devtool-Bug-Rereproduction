@@ -126,6 +126,7 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     newDesignWithTemplate(template: any) {
+      console.log(template)
       const query = {
         type: 'new-design-template',
         design_id: template.match_cover.id,
@@ -151,19 +152,10 @@ export default Vue.extend({
       // })
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        if (item.height !== 0) {
-          designUtils.newDesign(item.width, item.height)
-        } else {
-          designUtils.newDesign(item.width, item.width)
-          this.setGroupType(1)
-        }
-      })
+      designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
     },
     newDesignSquare() {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(1080, 1080)
-      })
+      designUtils.newDesignWithLoginRedirect()
     },
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items
@@ -211,9 +203,7 @@ export default Vue.extend({
         column-gap: 0px;
       }
     }
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @include no-scrollbar;
   }
   &__plus {
     width: 90px;

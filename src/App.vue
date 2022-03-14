@@ -92,7 +92,7 @@ export default Vue.extend({
       return localeUtils.currLocale()
     },
     customFont(): boolean {
-      return this.$route.name === 'Home' || this.$route.name === 'TemplateCenter'
+      return this.$route.name === 'Home' || this.$route.name === 'TemplateCenter' || this.$route.name === 'BrandKit'
     }
   },
   methods: {

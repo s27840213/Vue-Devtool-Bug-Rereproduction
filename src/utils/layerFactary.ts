@@ -238,13 +238,11 @@ class LayerFactary {
         if (paragraphs[pidx].spans.length === 0) {
           paragraphs.splice(pidx, 1)
           pidx--
-        } else {
-          const _pidx = pidx
-          for (let sidx = 0; sidx < paragraphs[_pidx].spans.length; sidx++) {
-            if (!paragraphs[_pidx].spans[sidx].text) {
-              paragraphs[_pidx].spans.splice(sidx, 1)
+        } else if (paragraphs[pidx].spans.length > 1) {
+          for (let sidx = 0; sidx < paragraphs[pidx].spans.length; sidx++) {
+            if (!paragraphs[pidx].spans[sidx].text && paragraphs[pidx].spans.length > 1) {
+              paragraphs[pidx].spans.splice(sidx, 1)
               sidx--
-              pidx = _pidx - 1
             }
           }
         }
@@ -399,7 +397,6 @@ class LayerFactary {
     }
 
     if (config.layers === undefined) return config
-
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
 

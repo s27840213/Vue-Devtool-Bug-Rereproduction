@@ -32,7 +32,7 @@
       panel-background-setting(v-if="showPageSetting" v-on="$listeners")
       panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
-      panel-photo-setting(v-if="showPhotoSetting")
+      panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
       //- panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
       panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
@@ -155,7 +155,6 @@ export default Vue.extend({
         this.targetIs('text')
     },
     showPhotoSetting(): boolean {
-      console.log('photo', this.targetIs('image'))
       return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
         this.targetIs('image') && this.singleTargetType()
     },

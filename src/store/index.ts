@@ -22,6 +22,7 @@ import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
 import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
+import brandkit from './module/brandkit'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -390,9 +391,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
     state.currDraggedPhoto.srcObj = {
+      ...state.currDraggedPhoto.srcObj,
       ...photo.srcObj
     }
     state.currDraggedPhoto.styles = {
+      ...state.currDraggedPhoto.styles,
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
@@ -773,6 +776,7 @@ export default new Vuex.Store({
     design,
     layouts,
     markers,
+    brandkit,
     unsplash,
     bgRemove
   }

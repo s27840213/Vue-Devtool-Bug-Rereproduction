@@ -10,6 +10,7 @@ import uploadUtils from './uploadUtils'
 import resizeUtils from './resizeUtils'
 import Vue from 'vue'
 import i18n from '@/i18n'
+import stepsUtils from './stepsUtils'
 
 interface Item {
   name: string,
@@ -34,7 +35,9 @@ class DesignUtils {
       favorite: design.favorite > 0,
       ver: design.ver,
       thumbnail: '',
-      signedUrl: design.signed_url
+      signedUrl: design.signed_url,
+      pageNum: design.page_num,
+      polling: design.polling
     }
   }
 
@@ -509,17 +512,37 @@ class DesignUtils {
     })
   }
 
-  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string {
+  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2 | 4, ver?: number, signedUrl?: {[key: string]: string}, page = 0): string {
+    const prevImageName = `${page}_prev${scale === 1 ? '' : `_${scale}x`}`
+    const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
     if (assetId !== undefined) {
-      const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
-      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
       const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
       return previewUrl
     } else {
-      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
-      if (signedUrl) return (scale === 2 ? signedUrl['0_prev_2x'] : signedUrl['0_prev']) + `&ver=${verstring}`
+      if (signedUrl) return signedUrl[prevImageName] + `&ver=${verstring}`
       return '' // theoretically never reach here because either assestId or signedUrl will be non-undefined
     }
+  }
+
+  getDesignPreviews(pageNum: number, assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string[] {
+    return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
+  }
+
+  newDesignWithLoginRedirect(width: number|string = 1080, height: number|string = 1080, id: number|string|undefined = undefined) {
+    // Redirect user to editor and create new design, will be use by login redirect.
+    const query = {
+      type: 'new-design-size',
+      width: width.toString(),
+      height: id?.toString() === '7' ? width.toString() : height.toString(),
+      themeId: id ? id.toString() : undefined
+    }
+    const route = router.resolve({
+      name: 'Editor',
+      query
+    })
+    // If user been redirect more than once, it will throw Uncaught (in promise) Error. https://stackoverflow.com/a/65326844
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    router.push(route.href).catch(() => {})
   }
 
   // Below function is used to update the page
@@ -542,7 +565,8 @@ class DesignUtils {
 
   newDesignWithTemplae(width: number, height: number, json: any) {
     console.log(json)
-    assetUtils.addTemplate(json).then(() => {
+    assetUtils.addTemplate(json, {}, false).then(() => {
+      stepsUtils.reset()
       pageUtils.clearPagesInfo()
       Vue.nextTick(() => {
         resizeUtils.resizePage(0, json, { width, height })
@@ -552,36 +576,41 @@ class DesignUtils {
         })
         themeUtils.refreshTemplateState()
         if (this.isLogin) {
-          uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           /**
            * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
            */
-          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } })
+          store.commit('SET_assetId', generalUtils.generateAssetId())
+          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } }).then(() => {
+            uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+          })
         }
       })
     })
   }
 
   setDesign(design: IDesign) {
-    pageUtils.setPages()
-    let isPrivate = false
-    if (design.id === undefined && design.signedUrl) {
-      isPrivate = true
-      design.id = this.getPrivateDesignId(design.signedUrl?.['config.json'])
-    }
-    pageUtils.clearPagesInfo()
-    if (this.isLogin) {
-      store.commit('SET_assetId', design.id)
-      if (router.currentRoute.query.design_id !== design.id) {
-        router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
+    uploadUtils.isGettingDesign = true
+    router.push({ name: 'Editor' }).then(() => {
+      pageUtils.setPages()
+      let isPrivate = false
+      if (design.id === undefined && design.signedUrl) {
+        isPrivate = true
+        design.id = this.getPrivateDesignId(design.signedUrl?.['config.json'])
       }
-    }
+      pageUtils.clearPagesInfo()
+      if (this.isLogin) {
+        store.commit('SET_assetId', design.id)
+        if (router.currentRoute.query.design_id !== design.id) {
+          router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
+        }
+      }
 
-    if (isPrivate) {
-      this.fetchDesign(this.teamId, design.id ?? '')
-    } else {
-      this.fetchDesign(this.teamId, design.id ?? '')
-    }
+      if (isPrivate) {
+        this.fetchDesign(this.teamId, design.id ?? '')
+      } else {
+        this.fetchDesign(this.teamId, design.id ?? '')
+      }
+    })
   }
 
   getPrivateDesignId(jsonUrl?: string): string {

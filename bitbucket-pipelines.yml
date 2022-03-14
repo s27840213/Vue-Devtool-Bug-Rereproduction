@@ -234,25 +234,25 @@ pipelines:
           #       - yarn serve & npx wait-on http://localhost:8080
           #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
       - parallel:
-        - step:
-            name: "deploy rd"
-            deployment: rd
-            trigger: manual
-            script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
-                variables:
-                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
-                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
-                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_RD
-                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
-        - step:
-            name: "create pull request"
-            trigger: manual
-            script:
-              - ./bash/create_pull_request.sh
+          - step:
+              name: "deploy rd"
+              deployment: rd
+              trigger: manual
+              script:
+                - pipe: atlassian/aws-s3-deploy:0.5.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_RD
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
+                  #no cache for test environment (since free cloudflare can not remove cache by host)
+          - step:
+              name: "create pull request"
+              trigger: manual
+              script:
+                - ./bash/create_pull_request.sh
     hotfix: #for non-master and non-develop branch, i.e., feature or hotfix...
       - parallel:
           - step:
@@ -338,19 +338,19 @@ pipelines:
                     EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
                   #no cache for test environment (since free cloudflare can not remove cache by host)
           - step:
-            name: "dev1 Nathan"
-            deployment: dev1
-            trigger: manual
-            script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
-                variables:
-                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
-                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
-                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV1
-                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+              name: "dev1 Nathan"
+              deployment: dev1
+              trigger: manual
+              script:
+                - pipe: atlassian/aws-s3-deploy:0.5.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV1
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
+                  #no cache for test environment (since free cloudflare can not remove cache by host)
           - step:
               name: "dev0"
               deployment: dev0

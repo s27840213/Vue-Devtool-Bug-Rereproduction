@@ -20,8 +20,6 @@ class DownloadService {
       split_size: params.splitSize
       // new_test: 1
     }
-    console.log(data)
-
     return axios.request<IDownloadServiceResponse>({
       url: '/export-template',
       method: 'POST',

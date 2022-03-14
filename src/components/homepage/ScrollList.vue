@@ -57,6 +57,7 @@
 <script lang="ts">
 import { Itheme } from '@/interfaces/theme'
 import designUtils from '@/utils/designUtils'
+import gtmUtils from '@/utils/gtmUtils'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import Vue from 'vue'
 import { mapMutations } from 'vuex'
@@ -102,6 +103,7 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     newDesignWithTemplate(template: any) {
+      console.log(template)
       const query = {
         type: 'new-design-template',
         design_id: template.match_cover.id,
@@ -117,6 +119,7 @@ export default Vue.extend({
         name: 'Editor',
         query
       })
+
       window.open(route.href, '_blank')
 
       // // trigger newDesign method to reset the template themes. [Giambi 12/03]
@@ -125,19 +128,10 @@ export default Vue.extend({
       // })
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        if (item.height !== 0) {
-          designUtils.newDesign(item.width, item.height, item.id)
-        } else { // for 電商詳情頁
-          designUtils.newDesign(item.width, item.width, item.id)
-          this.setGroupType(1)
-        }
-      })
+      designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
     },
     newDesignSquare() {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(1080, 1080)
-      })
+      designUtils.newDesignWithLoginRedirect()
     },
     handleNext() {
       const { scrollLeft, offsetWidth } = this.items
@@ -181,12 +175,10 @@ export default Vue.extend({
     @media screen and (max-width: 768px) {
       column-gap: 20px;
     }
-    @media screen and (min-width: 1600px) {
-      justify-content: center;
-    }
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    @include no-scrollbar;
   }
   &__plus {
     display: flex;

@@ -242,6 +242,9 @@ export default Vue.extend({
       addExportId: 'ADD_exportIds'
     }),
     handleUploadJSON(id: string) {
+      /**
+       * @Todo check the upload design function
+       */
       return uploadUtils.uploadExportJSON(id)
         .then((res: any) => {
           const { status } = res?.target

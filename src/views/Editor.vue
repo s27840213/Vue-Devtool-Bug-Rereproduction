@@ -36,7 +36,7 @@
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
-    spinner(v-if="isLoading")
+    spinner(v-if="isLoading || isSaving" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
 
 <script lang="ts">
@@ -78,7 +78,8 @@ export default Vue.extend({
       isColorPanelOpen: false,
       isSidebarPanelOpen: true,
       inputLocale: i18n.locale,
-      isLoading: false
+      isLoading: false,
+      isSaving: false
     }
   },
   watch: {
@@ -87,7 +88,7 @@ export default Vue.extend({
     },
     async inputLocale() {
       this.isLoading = true
-      const updateValue: {[key: string]: string} = {}
+      const updateValue: { [key: string]: string } = {}
       updateValue.token = this.token
       updateValue.locale = this.inputLocale
 
@@ -102,14 +103,6 @@ export default Vue.extend({
         }, () => {
           this.networkError()
         })
-    }
-  },
-  mounted() {
-    const type = this.$router.currentRoute.query.type
-    const designId = this.$router.currentRoute.query.design_id
-    const teamId = this.$router.currentRoute.query.team_id
-    if (!type || !designId || !teamId) {
-      uploadUtils.hasGottenDesign = true
     }
   },
   computed: {
@@ -192,9 +185,11 @@ export default Vue.extend({
 
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
+      this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
-        uploadUtils.hasGottenDesign = false
+        uploadUtils.isGettingDesign = false
         logUtils.setLog('Leave editor')
+        this.isSaving = false
         next()
       })
     } else {

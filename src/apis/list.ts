@@ -20,7 +20,7 @@ class ListService {
       group_id: params.groupId,
       cache: params.cache,
       platform: params.cache ? window.location.host : null,
-      // [2022.01.19] uncached: font, marker, hashtag
+      // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme
     }
 
@@ -81,6 +81,8 @@ class ListService {
 
   getLayout (params: IListServiceParams) {
     params.type = 'layout'
+    params.token = '1'
+    params.cache = true
     return this.getList(params)
   }
 

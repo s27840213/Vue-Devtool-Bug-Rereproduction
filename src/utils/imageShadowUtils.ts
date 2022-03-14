@@ -195,45 +195,45 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          distance: 50,
+          distance: 15,
           angle: 45,
-          radius: 15,
-          spread: 0,
-          opacity: 70
+          radius: 9,
+          spread: 3,
+          opacity: 55
         }
         break
       case ShadowEffectType.projection: {
         (effect as IProjectionEffect) = {
           x: 0,
           y: 0,
-          radius: 50,
-          spread: 50,
-          size: 80,
-          opacity: 70
+          radius: 57,
+          spread: 23,
+          size: 79,
+          opacity: 100
         }
         break
       }
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
-          radius: 50,
+          radius: 9,
           spread: 0,
-          opacity: 70
+          opacity: 55
         }
         break
       case ShadowEffectType.frame:
         (effect as IFrameEffect) = {
           radius: 0,
           spread: 20,
-          opacity: 70
+          opacity: 100
         }
         break
       case ShadowEffectType.halo:
         (effect as IHaloEffect) = {
-          distance: 10,
-          angle: 90,
-          radius: 15,
+          distance: 9,
+          angle: 30,
+          radius: 14,
           size: 100,
-          opacity: 70
+          opacity: 55
         }
         break
       case ShadowEffectType.none:

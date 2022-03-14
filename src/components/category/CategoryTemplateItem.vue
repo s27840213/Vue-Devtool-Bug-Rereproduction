@@ -67,6 +67,7 @@ export default Vue.extend({
       dataTransfer.setData('data', JSON.stringify(this.item))
     },
     addTemplate() {
+      console.log('Add template')
       const { match_cover: matchCover = {} } = this.item
       let { height, width } = this.item
 
@@ -85,9 +86,11 @@ export default Vue.extend({
       const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
         ? (resize?: any) => {
+          console.log('Add group template')
           AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         }
         : (resize?: any) => {
+          console.log('Add normal template')
           AssetUtils.addAsset(this.item, resize)
           GeneralUtils.fbq('track', 'AddToWishlist', {
             content_ids: [this.item.id]
