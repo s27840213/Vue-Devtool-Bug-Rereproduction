@@ -5,13 +5,13 @@ import store from '@/store'
 import Flatten from '@flatten-js/core'
 
 class MathUtils {
-  cos(angle: number) {
-    const angleInRad = angle * Math.PI / 180
+  cos(angleDeg: number) {
+    const angleInRad = angleDeg * Math.PI / 180
     return Math.cos(angleInRad)
   }
 
-  sin(angle: number) {
-    const angleInRad = angle * Math.PI / 180
+  sin(angleDeg: number) {
+    const angleInRad = angleDeg * Math.PI / 180
     return Math.sin(angleInRad)
   }
 
@@ -161,17 +161,21 @@ class MathUtils {
     return true
   }
 
-  multipy(multiplier: number, _params: { [key: string]: number } | Array<number>): { [key: string]: number } | Array<number> {
+  multipy(multiplier: number, _params: { [key: string]: number | string } | Array<number>, excludes: Array<string> = []): { [key: string]: number | string } | Array<number> {
     const params = Object.entries(_params)
     if (!params.length) return {}
 
-    const result = (params as any).map((el: number | [string, number]) => {
+    const result = (params as any).map((el: [string, number | string]) => {
       if (typeof el === 'number') {
         return el * multiplier
       } else {
-        const k = el[0] as string
-        const v = el[1] as number
-        return [k, v * multiplier]
+        if (typeof el[1] === 'number' && !excludes.includes(el[0])) {
+          const k = el[0]
+          const v = el[1]
+          return [k, v * multiplier]
+        } else {
+          return [el[0], el[1]]
+        }
       }
     })
     return Array.isArray(result[0]) ? Object.fromEntries(result as [string, number][]) : result

@@ -71,8 +71,9 @@ class UploadUtils {
 
   event: any
   eventHash: { [index: string]: (param: any) => void }
-  hasGottenDesign: boolean
+  isGettingDesign: boolean
   designStatusTimer: number
+  DEFAULT_POLLING_RETRY_LIMIT = 15
 
   get token(): string { return store.getters['user/getToken'] }
   get userId(): string { return store.getters['user/getUserId'] }
@@ -92,7 +93,7 @@ class UploadUtils {
       id: '',
       teamId: ''
     }
-    this.hasGottenDesign = false
+    this.isGettingDesign = false
     this.event = new EventEmitter()
     this.eventHash = {}
     this.designStatusTimer = -1
@@ -130,13 +131,14 @@ class UploadUtils {
     this.event.off('designUploadStatus', this.eventHash.designUploadStatus)
   }
 
-  chooseAssets(type: 'image' | 'font' | 'avatar') {
+  chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
-      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
+      avatar: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
+      logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')
@@ -146,7 +148,11 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        this.uploadAsset(type, files as FileList)
+        if (type !== 'logo' && type !== 'font') {
+          this.uploadAsset(type, files as FileList)
+        } else {
+          console.log(files)
+        }
       }
     }, false)
   }
@@ -249,10 +255,11 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList, addToPage = false) {
+  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, addToPage = false, pollingCallback?: (json: IUploadAssetResponse) => void) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
+    const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = generalUtils.generateAssetId()
@@ -265,22 +272,21 @@ class UploadUtils {
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(files[i].name)}`)
+      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original-rb')}`)
       formData.append('x-amz-meta-tn', this.userId)
       const xhr = new XMLHttpRequest()
 
+      const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
       if (formData.has('file')) {
-        formData.set('file', files[i])
+        formData.set('file', file)
       } else {
-        formData.append('file', files[i])
+        formData.append('file', file)
       }
-      reader.onload = (evt) => {
-        /**
-         * @TODO -> simplify the codes below
-         */
+
+      const assetHandler = (src: string) => {
         if (type === 'image') {
           const img = new Image()
-          img.src = evt.target?.result as string
+          img.src = src
           img.onload = (evt) => {
             store.commit('user/ADD_PREVIEW', {
               imageFile: img,
@@ -333,6 +339,9 @@ class UploadUtils {
 
                           store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
+                          if (pollingCallback) {
+                            pollingCallback(json)
+                          }
                         }
                       } else {
                         console.log('Failed to upload the file')
@@ -411,7 +420,14 @@ class UploadUtils {
         }
       }
 
-      reader.readAsDataURL(files[i])
+      if (isFile) {
+        reader.onload = (evt) => {
+          assetHandler(evt.target?.result as string)
+        }
+        reader.readAsDataURL(files[i] as File)
+      } else {
+        assetHandler(files[i] as string)
+      }
     }
   }
 
@@ -446,7 +462,7 @@ class UploadUtils {
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
-    if (designId && teamId && type && !this.hasGottenDesign) {
+    if (this.isGettingDesign) {
       return
     }
     if (!type || !designId || !teamId) {
@@ -503,7 +519,7 @@ class UploadUtils {
     }
     this.emitDesignUploadEvent('uploading')
     await this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
-      .then(() => {
+      .then(async () => {
         if (this.designStatusTimer !== -1) {
           clearTimeout(this.designStatusTimer)
         }
@@ -512,7 +528,7 @@ class UploadUtils {
         }, 300)
         if (putAssetDesignType !== undefined) {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
-          store.dispatch('user/putAssetDesign', {
+          await store.dispatch('user/putAssetDesign', {
             assetId,
             type: putAssetDesignType
           })
@@ -814,7 +830,7 @@ class UploadUtils {
   }
 
   async updateTemplate() {
-    const pageIndex = store.getters.getMiddlemostPageIndex
+    const pageIndex = pageUtils.currFocusPageIndex
     const designId = store.getters.getPage(pageIndex).designId
     if (this.isOutsourcer) {
       const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
@@ -901,11 +917,6 @@ class UploadUtils {
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
-          if (layer.styles.scale !== 1) {
-            layer.styles.imgWidth = layer.styles.width as number
-            layer.styles.imgHeight = layer.styles.height as number
-            layer.styles.scale = 1
-          }
           layer.imgControl = false
           break
         case 'tmp': {
@@ -945,7 +956,7 @@ class UploadUtils {
     let fetchTarget = ''
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
-
+    this.isGettingDesign = true
     logUtils.setLog(`Get Design
       Type: ${type}
       DesignId: ${designId}
@@ -989,6 +1000,7 @@ class UploadUtils {
           .then(() => {
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
+            this.isGettingDesign = false
           })
       }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
@@ -1005,7 +1017,7 @@ class UploadUtils {
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
-          this.hasGottenDesign = true
+          this.isGettingDesign = false
         } else {
           response.json().then(async (json) => {
             switch (type) {
@@ -1030,7 +1042,6 @@ class UploadUtils {
                  * @todo fix the filter function below
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
-                console.log(json.exportIds)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
@@ -1042,19 +1053,18 @@ class UploadUtils {
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
                 designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json)
                 logUtils.setLog('Successfully get new design template')
-                stepsUtils.reset()
                 break
               }
             }
           }).then(() => {
-            this.hasGottenDesign = true
+            this.isGettingDesign = false
             pageUtils.fitPage()
           })
         }
       })
       .catch((err) => {
         router.replace({ query: Object.assign({}) })
-        this.hasGottenDesign = true
+        this.isGettingDesign = false
         type === GetDesignType.ASSET_DESIGN && themeUtils.refreshTemplateState()
         logUtils.setLog(`Fetch error: ${err}`)
         console.error('fetch failed', err)
@@ -1125,12 +1135,14 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
+        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,
           imgY: styles.imgY,
           imgWidth: styles.imgWidth,
           imgHeight: styles.imgHeight,
+          shadow: styles.shadow,
           ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
         }
       case 'text':
@@ -1157,10 +1169,11 @@ class UploadUtils {
     switch (layer.type) {
       case 'image': {
         const image = layer as IImage
-        const { type, srcObj, styles } = image
+        const { type, srcObj, styles, trace } = image
         return {
           type,
           srcObj,
+          trace,
           styles: this.styleFilter(styles, 'image')
         }
       }
@@ -1354,6 +1367,26 @@ class UploadUtils {
       }
       xhr.send(data)
     })
+  }
+
+  polling(targetSrc: string, callback: (json: any) => boolean, retryLimit = this.DEFAULT_POLLING_RETRY_LIMIT, retryTime = 0) {
+    const interval = setInterval(() => {
+      if (retryTime === retryLimit) {
+        clearInterval(interval)
+        console.log('Polling failed')
+        return
+      }
+      retryTime += 1
+      fetch(`${targetSrc}?ver=${generalUtils.generateRandomString(6)}`).then((response) => {
+        if (response.status === 200) {
+          response.json().then((json: IUploadAssetResponse) => {
+            if (callback(json)) {
+              clearInterval(interval)
+            }
+          })
+        }
+      })
+    }, 2000)
   }
 
   resetControlStates(json: IPage[]) {

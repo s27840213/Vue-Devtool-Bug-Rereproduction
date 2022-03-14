@@ -322,11 +322,11 @@ class ShortcutUtils {
   }
 
   zoomIn() {
-    store.commit('SET_pageScaleRatio', this.scaleRatio + 10)
+    store.commit('SET_pageScaleRatio', Math.min(this.scaleRatio + 10, 500))
   }
 
   zoomOut() {
-    store.commit('SET_pageScaleRatio', this.scaleRatio - 10)
+    store.commit('SET_pageScaleRatio', Math.max(this.scaleRatio - 10, 10))
   }
 
   up(pressShift = false) {

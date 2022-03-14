@@ -1,31 +1,44 @@
 <template lang="pug">
   div(class="nu-header")
     div(class="nu-header__container")
-      div(class="body-2")
-        svg-icon(class="pointer"
-          :iconName="'logo'"
-          :iconWidth="'100px'"
-          style="height: 50px;"
-          @click.native="goToPage('Home')")
+      div
+        router-link(to="/"
+          class="nu-header__container__link"
+          style="height: 50px;")
+          svg-icon(class="pointer"
+            :iconName="'logo'"
+            :iconWidth="'100px'"
+            style="height: 50px;")
       transition(name="fade" mode="out-in")
         div(v-if="!noNavigation" class="body-2" key="navigation")
           div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'Home'}"
-            @click="goToPage('Home')") {{$t('NN0144')}}
+            :class="{'text-blue-1': currentPage === 'Home'}")
+            router-link(to="/"
+              class="nu-header__container__link") {{$t('NN0144')}}
           div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'TemplateCenter'}"
-            @click="goToPage('TemplateCenter')") {{$t('NN0145')}}
+            :class="{'text-blue-1': currentPage === 'TemplateCenter'}")
+            router-link(to="/templates"
+              class="nu-header__container__link") {{$t('NN0145')}}
           div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'Toturial'}"
-            @click="goToPage('Toturial')") {{$t('NN0146')}}
+            :class="{'text-blue-1': currentPage === 'Toturial'}")
+            a(:href="tutorialPage"
+              class="nu-header__container__link") {{$t('NN0146')}}
           div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'Faq'}"
-            @click="goToPage('Faq')") {{$t('NN0147')}}
+            :class="{'text-blue-1': currentPage === 'Faq'}")
+            a(:href="faqPage"
+              class="nu-header__container__link") {{$t('NN0147')}}
           div(v-if="isLogin"
             class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'MyDesign'}"
-            @click="goToPage('MyDesign')") {{$t('NN0080')}}
+            :class="{'text-blue-1': currentPage === 'MyDesign'}")
+            router-link(to="/mydesign"
+              class="nu-header__container__link") {{$t('NN0080')}}
+          //- div(v-if="isLogin && isAdmin"
+            class="p-5 pointer"
+            :class="{'text-blue-1': currentPage === 'BrandKit'}")
+            router-link(to="/brandkit"
+              class="nu-header__container__link") {{$t('NN0007')}}
         div(v-else class="body-2" key="no-navigation")
+          div
           div
           div
           div
@@ -162,6 +175,24 @@ export default Vue.extend({
     },
     currLocale(): string {
       return localeUtils.currLocale()
+    },
+    tutorialPage(): string {
+      if (this.currLocale === 'tw') {
+        return 'https://blog.vivipic.com/tw/tutorial/'
+      } else if (this.currLocale === 'us') {
+        return 'https://blog.vivipic.com/us-tutorial/'
+      } else {
+        return 'https://www.facebook.com/vivipic' + this.currLocale
+      }
+    },
+    faqPage(): string {
+      if (this.currLocale === 'tw') {
+        return 'https://blog.vivipic.com/tw/faq/'
+      } else if (this.currLocale === 'us') {
+        return 'https://blog.vivipic.com/us-faq/'
+      } else {
+        return 'https://www.facebook.com/vivipic' + this.currLocale
+      }
     }
   },
   methods: {
@@ -170,20 +201,7 @@ export default Vue.extend({
         // this.$router.go(0)
       } else if (pageName === 'Login' || pageName === 'SignUp') {
         this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
-        // Temporary setting ----
-      } else if (pageName === 'Toturial') {
-        if (this.currLocale === 'tw') {
-          window.location.href = 'https://blog.vivipic.com/tw/tutorial/'
-        } else if (this.currLocale === 'us' || this.currLocale === 'jp') {
-          window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
-        }
-      } else if (pageName === 'Faq') {
-        if (this.currLocale === 'tw') {
-          window.location.href = 'https://blog.vivipic.com/tw/faq/'
-        } else if (this.currLocale === 'us' || this.currLocale === 'jp') {
-          window.location.href = 'https://www.facebook.com/vivipic' + this.currLocale
-        }
-      } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
+      } else if (['Home', 'Pricing', 'MyDesign', 'BrandKit'].includes(pageName)) {
         this.$router.push({ name: pageName })
       } else if (pageName === 'TemplateCenter') {
         if (queryString.length > 0) {
@@ -217,7 +235,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-header {
-  height: 64px;
+  height: $header-height;
   background-size: cover;
   background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
   box-sizing: border-box;
@@ -274,6 +292,10 @@ export default Vue.extend({
         align-items: center;
         margin-right: 2vw;
       }
+    }
+    &__link {
+      color: unset;
+      text-decoration: unset;
     }
   }
   &__profile {

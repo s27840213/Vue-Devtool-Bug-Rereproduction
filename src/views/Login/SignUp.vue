@@ -21,7 +21,7 @@ div(style="position:relative;")
         img(:src="require('@/assets/img/png/google.png')")
         span(class="body-2") {{$t('NN0303', {media:'Google'})}}
       div
-        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $t('NN0173')})}}
+        btn(@click.native="onEmailClicked()" :type="'icon-mid-body text-white'") {{$t('NN0303', {media: $tc('NN0173', 2)})}}
       div
         span {{$t('NN0304')}}
         btn(:type="'icon'"
@@ -51,22 +51,22 @@ div(style="position:relative;")
           div(v-if="!nameValid" class="invalid-message")
             span {{$t('NN0163', {term: $t('NN0172')})}}
         div
-          span(class="label-mid") {{$t('NN0173')}}
+          span(class="label-mid") {{$tc('NN0173', 1)}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2"
               v-model="email" type="email" name="email"
-              :placeholder="$t('NN0163', {term: $t('NN0173')})")
+              :placeholder="$t('NN0163', {term: $tc('NN0173', 2)})")
           div(v-if="!mailValid"
             class="invalid-message")
             span {{ mailErrorMessage }}
         div
-          span(class="label-mid") {{$t('NN0180')}}
+          span(class="label-mid") {{$tc('NN0180', 1)}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
               v-model="password" type="number"
-              :placeholder="$t('NN0163', {term: $t('NN0180')})"
+              :placeholder="$t('NN0163', {term: $tc('NN0180', 2)})"
               :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
@@ -151,9 +151,9 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
-import Facebook from '@/utils/facebook'
 import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
+import loginUtils from '@/utils/loginUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -250,7 +250,7 @@ export default Vue.extend({
     },
     mailErrorMessage(): string {
       if (this.email.length === 0) {
-        return i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
+        return i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
       } else {
         return i18n.t('NN0297') as string
       }
@@ -360,11 +360,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     onCloseClicked() {
-      if (this.redirect) {
-        this.$router.push({ path: this.redirect })
-      } else {
-        this.$router.push({ name: 'Home' })
-      }
+      this.$router.push({ name: 'Home' })
     },
     async onSignUpClicked() {
       this.emailResponseError = false
@@ -455,40 +451,10 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      const redirectUri = window.location.href.split('?')[0]
-      if (this.redirect) {
-        const redirectStr = JSON.stringify({
-          redirect: this.redirect,
-          platform: 'fb_vivipic'
-        })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
-      }
-      const redirectStr = JSON.stringify({
-        platform: 'fb_vivipic'
-      })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
+      loginUtils.onFacebookClicked(this.redirect)
     },
     onGoogleClicked() {
-      let stateStr
-      if (this.redirect) {
-        stateStr = JSON.stringify({
-          redirect: this.redirect,
-          platform: 'google_vivipic'
-        })
-      } else {
-        stateStr = JSON.stringify({
-          platform: 'google_vivipic'
-        })
-      }
-      const redirectUri = window.location.href.split('?')[0]
-      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-        'include_granted_scopes=true&' +
-        'response_type=code&' +
-        'prompt=select_account&' +
-        `state=${stateStr}&` +
-        `redirect_uri=${redirectUri}&` +
-        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+      loginUtils.onGoogleClicked(this.redirect)
     }
   }
 })

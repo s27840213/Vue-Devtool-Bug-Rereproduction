@@ -28,6 +28,8 @@ class LayerFactary {
       locked: false,
       moved: false,
       imgControl: false,
+      inProcess: false,
+      trace: config.trace ?? 0,
       isClipper: true,
       dragging: false,
       designId: '',
@@ -50,7 +52,8 @@ class LayerFactary {
         opacity: opacity || 100,
         horizontalFlip: false,
         verticalFlip: false,
-        adjust: {}
+        adjust: {},
+        shadow: { currentEffect: 'none', effects: {} }
       }
     }
     Object.assign(basicConfig.styles, config.styles)
@@ -235,13 +238,11 @@ class LayerFactary {
         if (paragraphs[pidx].spans.length === 0) {
           paragraphs.splice(pidx, 1)
           pidx--
-        } else {
-          const _pidx = pidx
-          for (let sidx = 0; sidx < paragraphs[_pidx].spans.length; sidx++) {
-            if (!paragraphs[_pidx].spans[sidx].text) {
-              paragraphs[_pidx].spans.splice(sidx, 1)
+        } else if (paragraphs[pidx].spans.length > 1) {
+          for (let sidx = 0; sidx < paragraphs[pidx].spans.length; sidx++) {
+            if (!paragraphs[pidx].spans[sidx].text && paragraphs[pidx].spans.length > 1) {
+              paragraphs[pidx].spans.splice(sidx, 1)
               sidx--
-              pidx = _pidx - 1
             }
           }
         }
@@ -250,7 +251,7 @@ class LayerFactary {
         for (let i = 0; i < p.spans.length; i++) {
           if (!p.spans[i].styles.font) {
             Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-            (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+              (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
           }
         }
       })
@@ -396,7 +397,6 @@ class LayerFactary {
     }
 
     if (config.layers === undefined) return config
-
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
 

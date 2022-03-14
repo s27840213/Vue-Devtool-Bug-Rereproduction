@@ -83,7 +83,7 @@ export default Vue.extend({
         if (this.isHover) {
           this.showCarousel = true
         }
-      }, 1000)
+      }, 100)
     },
     stopCarouse () {
       this.isHover = false

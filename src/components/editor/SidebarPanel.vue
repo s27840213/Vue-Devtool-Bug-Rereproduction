@@ -1,12 +1,12 @@
 <template lang="pug">
   div(class="panel")
-    div(class="panel__color-panel")
-      transition(name="panel-up")
-        color-panel(v-if="isColorPanelOpen"
-          @toggleColorPanel="toggleColorPanel"
+    transition(name="panel-up")
+      div(v-if="isColorPanelOpen"
+      class="panel__color-panel")
+        color-panel(@toggleColorPanel="toggleColorPanel"
           :alignLeft="false")
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
-      component(v-show="isSidebarPanelOpen && !isShowPagePreview"
+      component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
         class="p-10 border-box"
         :style="panelStyles()"
         @toggleColorPanel="toggleColorPanel"
@@ -72,7 +72,8 @@ export default Vue.extend({
     ...mapGetters({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
-      showPagePanel: 'page/getShowPagePanel'
+      showPagePanel: 'page/getShowPagePanel',
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     })
   },
   methods: {
@@ -104,6 +105,7 @@ export default Vue.extend({
     position: absolute;
     bottom: 0;
     left: 0;
+    z-index: setZindex('color-panel');
   }
 }
 </style>

@@ -6,7 +6,7 @@
     img(class="color-panel__btn"
       :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
       @click="closePanel()")
-    search-bar(:placeholder="'Search color'"
+    search-bar(:placeholder="$t('NN0093', {target: $t('NN0017')})"
     class="mb-10")
     div(class="color-panel__colors mb-10"
         :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -145,8 +145,10 @@ export default Vue.extend({
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
     },
     handleDragUpdate(color: string) {
-      colorUtils.event.emit(colorUtils.currEvent, color)
-      colorUtils.setCurrColor(color)
+      window.requestAnimationFrame(() => {
+        colorUtils.event.emit(colorUtils.currEvent, color)
+        colorUtils.setCurrColor(color)
+      })
     },
     handleColorModal(): void {
       colorUtils.setIsColorPickerOpen(!colorUtils.isColorPickerOpen)

@@ -14,7 +14,7 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    noClip: Boolean
+    imgControl: Boolean
   },
   data() {
     return {
@@ -57,7 +57,7 @@ export default Vue.extend({
         width,
         height,
         'background-color': '#00000001',
-        ...(!this.noClip && { clipPath }),
+        ...(!this.imgControl && { clipPath }),
         ...flip
       }
     }

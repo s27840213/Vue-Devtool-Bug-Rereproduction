@@ -10,19 +10,24 @@
         div(class="text-gray-3 body-3") {{showAccount}}
     div(class="popup-account__hr")
     div(class="popup-account__option"
-      @click="goToPage('/settings/account')")
-      svg-icon(class="pr-10"
-        :iconName="'settings'"
-        :iconWidth="'15px'"
-        :iconColor="'gray-2'")
-      span {{$tc('NN0165',2)}}
+      @click="closePopup")
+      router-link(to="/settings/account"
+        class="popup-account__option__link")
+        svg-icon(class="pr-10"
+          :iconName="'settings'"
+          :iconWidth="'15px'"
+          :iconColor="'gray-2'")
+        span {{$tc('NN0165', 2)}}
     div(class="popup-account__option"
-      @click="goToPage('/settings/security')")
-      svg-icon(class="pr-10"
-        :iconName="'lock'"
-        :iconWidth="'15px'"
-        :iconColor="'gray-2'")
-      span {{$tc('NN0166',2)}}
+      @click="closePopup")
+      router-link(to="/settings/security"
+        class="popup-account__option__link"
+        @click="closePopup")
+        svg-icon(class="pr-10"
+          :iconName="'lock'"
+          :iconWidth="'15px'"
+          :iconColor="'gray-2'")
+        span {{$tc('NN0166', 2)}}
     div(class="popup-account__hr")
     div(class="popup-account__option"
       @click="onLogoutClicked()")
@@ -72,12 +77,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    goToPage(path: string) {
-      if (this.$route.path !== path) {
-        this.$router.push({ path: path })
-      }
-      this.closePopup()
-    },
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
@@ -141,9 +140,15 @@ export default Vue.extend({
     margin: 6px 0;
     &:hover {
       color: setColor(blue-1);
-      > svg {
+      svg {
         color: setColor(blue-1);
       }
+    }
+    &__link {
+      display: flex;
+      align-items: center;
+      color: unset;
+      text-decoration: unset;
     }
   }
 }

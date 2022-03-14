@@ -20,6 +20,7 @@ import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 import { ITextState } from '@/store/text'
+import gtmUtils from './gtmUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -139,7 +140,7 @@ class AssetUtils {
     }
   }
 
-  async addTemplate(json: any, attrs: IAssetProps = {}) {
+  async addTemplate(json: any, attrs: IAssetProps = {}, recordStep = true) {
     const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
@@ -154,7 +155,9 @@ class AssetUtils {
       })
     }
     store.commit('SET_currActivePageIndex', targetPageIndex)
-    stepsUtils.record()
+    if (recordStep) {
+      stepsUtils.record()
+    }
   }
 
   addSvg(json: any, attrs: IAssetProps = {}) {
@@ -552,6 +555,7 @@ class AssetUtils {
           this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
           break
         case 6:
+          gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:

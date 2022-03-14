@@ -197,7 +197,9 @@ export interface IUserDesignContentData {
   update_time: string,
   ver: number,
   width: number
-  signed_url?: { [key: string]: string }
+  signed_url?: { [key: string]: string },
+  page_num: number,
+  polling: boolean
 }
 
 export interface IAssetDesignParams {
@@ -232,6 +234,7 @@ export interface IUserImageContentData {
   id: string
   team_id: string
   ver: number,
+  hidden: number,
   // Only for private asset
   signed_url?: {
     full: string,

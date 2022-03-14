@@ -34,12 +34,16 @@ export default Vue.extend({
   },
   methods: {
     handleNext() {
-      const { scrollLeft, offsetWidth } = this.items
-      this.items.scrollLeft = scrollLeft + offsetWidth
+      const { scrollLeft } = this.items
+      const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
+      const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
+      this.items.scrollLeft = scrollLeft + (itemWidth + gridGap) * 2
     },
     handlePrev() {
-      const { scrollLeft, offsetWidth } = this.items
-      this.items.scrollLeft = scrollLeft - offsetWidth
+      const { scrollLeft } = this.items
+      const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
+      const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
+      this.items.scrollLeft = scrollLeft - (itemWidth + gridGap) * 2
     },
     handleScroll(event: Event) {
       const { scrollLeft } = event.target as HTMLElement
@@ -67,9 +71,7 @@ export default Vue.extend({
     grid-auto-flow: column;
     scroll-behavior: smooth;
     text-align: left;
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    @include no-scrollbar;
   }
   &__icon {
     display: flex;

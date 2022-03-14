@@ -452,6 +452,27 @@ paths:
           headers:
             Access-Control-Allow-Origin:
               type: string
+  /list-brand:
+    post:
+      description: 列出特定 team 擁有的所有 brand
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: listBrandInput
+          required: true
+          schema:
+            $ref: "#/definitions/listBrandInput"
+      responses:
+        "200":
+          description: 200 response
+          schema:
+            $ref: "#/definitions/listBrandOutput"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
 definitions:
   removeBgInput:
     allOf:
@@ -1174,3 +1195,114 @@ definitions:
               valid orderType: update for update time, create for create time, name for file/folder name.
 
               valid sortOrder: asc for ascending (由小到大), desc for descending (由大到小)
+  listBrandInput:
+    allOf:
+      - $ref: "#/definitions/apiCommonInput"
+      - type: object
+        required:
+          - team_id
+        properties:
+          team_id:
+            type: string
+            description: team id
+  listBrandOutput:
+    allOf:
+      - $ref: "#/definitions/apiCommonResponse"
+      - type: object
+        properties:
+          brands:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                createTime:
+                  type: string
+                name:
+                  type: string
+                logos:
+                  type: array
+                  description: logos of the brand, currently empry array only (item structure TBD)
+                  items:
+                    type: object
+                    description: properties TBD
+                textStyleSetting:
+                  type: object
+                  properties:
+                    headingStyle:
+                      type: object
+                      properties:
+                        font:
+                          type: object
+                          description: properties not finalized
+                        size:
+                          type: number
+                        bold:
+                          type: boolean
+                        underline:
+                          type: boolean
+                        italic:
+                          type: boolean
+                        isDefault:
+                          type: boolean
+                    subheadingStyle:
+                      type: object
+                      properties:
+                        font:
+                          type: object
+                          description: properties not finalized
+                        size:
+                          type: number
+                        bold:
+                          type: boolean
+                        underline:
+                          type: boolean
+                        italic:
+                          type: boolean
+                        isDefault:
+                          type: boolean
+                    bodyStyle:
+                      type: object
+                      properties:
+                        font:
+                          type: object
+                          description: properties not finalized
+                        size:
+                          type: number
+                        bold:
+                          type: boolean
+                        underline:
+                          type: boolean
+                        italic:
+                          type: boolean
+                        isDefault:
+                          type: boolean
+                colorPalettes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      createTime:
+                        type: string
+                      name:
+                        type: string
+                      colors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            createTime:
+                              type: string
+                            color:
+                              type: string
+                fonts:
+                  type: array
+                  description: fonts of the brand, currently empry array only (item structure TBD)
+                  items:
+                    type: object
+                    description: properties TBD

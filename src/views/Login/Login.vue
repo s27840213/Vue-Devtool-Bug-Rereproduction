@@ -22,19 +22,19 @@ div(style="position: relative;")
         span {{$t('NN0179')}}
       div
         div
-          span(class="label-mid") {{$t('NN0173')}}
+          span(class="label-mid") {{$tc('NN0173', 1)}}
           property-bar(class="mt-5"
             :class="{'input-invalid': !mailValid}")
             input(class="body-2 text-gray-2"
               v-model="email"
               type="email" name="email"
-              :placeholder="$t('NN0163', {term: $t('NN0173')})")
+              :placeholder="$t('NN0163', {term: $tc('NN0173', 2)})")
           div(v-if="!mailValid"
             class="invalid-message")
             span {{ mailErrorMessage }}
         div
           div(class="flex flex-between")
-            span(class="label-mid") {{$t('NN0180')}}
+            span(class="label-mid") {{$tc('NN0180', 1)}}
             btn(:type="'icon'"
               class="text-gray-3 body-2 forgot-pwd"
               @click.native="onForgotClicked()") {{$t('NN0181')}}
@@ -42,7 +42,7 @@ div(style="position: relative;")
             :class="{'input-invalid': !passwordValid}")
             input(class="body-2 text-gray-2"
               v-model="password" type="number"
-              :placeholder="$t('NN0163', {term: $t('NN0180')})"
+              :placeholder="$t('NN0163', {term: $tc('NN0180', 2)})"
               :type="togglePeerPasswordInput")
             button(@click="isPeerPassword = !isPeerPassword")
               svg-icon(class="pointer"
@@ -78,10 +78,15 @@ div(style="position: relative;")
           input(class="body-2 text-gray-2"
             v-model="email"
             type="email" name="email"
-            :placeholder="$t('NN0163', {term: $t('NN0173')})")
+            :placeholder="$t('NN0163', {term: $tc('NN0173', 2)})")
         div(v-if="!mailValid || emailResponseError"
           class="invalid-message")
           span {{ mailErrorMessage }}
+      div(class="pb-10")
+        i18n(path="NN0395" tag="span"
+          class="forgot-hint")
+          template(#newline)
+            br
       div(class="flex"
         :class="hideBackButton ? 'pt-20' : ''"
         style="justify-content: center;")
@@ -200,9 +205,9 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
-import Facebook from '@/utils/facebook'
 import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
+import loginUtils from '@/utils/loginUtils'
 
 export default Vue.extend({
   name: 'Login',
@@ -220,7 +225,7 @@ export default Vue.extend({
       vcode: '' as string,
       currentPageIndex: 0 as number,
       isLoginClicked: false as boolean,
-      passwordErrorMessage: i18n.t('NN0163', { term: i18n.t('NN0180') }) as string,
+      passwordErrorMessage: i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string,
       emailResponseError: false as boolean,
       mailErrorMessage: i18n.t('NN0297') as string,
       vcodeErrorMessage: i18n.t('NN0298') as string,
@@ -396,7 +401,7 @@ export default Vue.extend({
       this.isLoginClicked = true
       this.isLoading = true
       if (this.password.length === 0) {
-        this.passwordErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0180') }) as string
+        this.passwordErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string
         this.isLoading = false
         return
       }
@@ -424,11 +429,7 @@ export default Vue.extend({
       this.isLoginClicked = false
     },
     onCloseClicked() {
-      if (this.redirect) {
-        this.$router.push({ path: this.redirect })
-      } else {
-        this.$router.push({ name: 'Home' })
-      }
+      this.$router.push({ name: 'Home' })
     },
     async onSendEmailClicked() {
       this.isLoginClicked = true
@@ -436,7 +437,7 @@ export default Vue.extend({
       this.isLoading = true
       if (this.email.length === 0) {
         this.isLoading = false
-        this.mailErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0173') }) as string
+        this.mailErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0173', 2) }) as string
         return
       }
       if (!this.mailValid) {
@@ -553,40 +554,10 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      const redirectUri = window.location.href.split('?')[0]
-      if (this.redirect) {
-        const redirectStr = JSON.stringify({
-          redirect: this.redirect,
-          platform: 'fb_vivipic'
-        })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
-      }
-      const redirectStr = JSON.stringify({
-        platform: 'fb_vivipic'
-      })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
+      loginUtils.onFacebookClicked(this.redirect)
     },
     onGoogleClicked() {
-      let stateStr
-      if (this.redirect) {
-        stateStr = JSON.stringify({
-          redirect: this.redirect,
-          platform: 'google_vivipic'
-        })
-      } else {
-        stateStr = JSON.stringify({
-          platform: 'google_vivipic'
-        })
-      }
-      const redirectUri = window.location.href.split('?')[0]
-      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-        'include_granted_scopes=true&' +
-        'response_type=code&' +
-        'prompt=select_account&' +
-        `state=${stateStr}&` +
-        `redirect_uri=${redirectUri}&` +
-        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+      loginUtils.onGoogleClicked(this.redirect)
     }
   }
 })
@@ -753,5 +724,9 @@ export default Vue.extend({
   position: absolute;
   right: 15px;
   top: 15px;
+}
+.forgot-hint {
+  font-size: 12px;
+  color: setColor(gray-3);
 }
 </style>

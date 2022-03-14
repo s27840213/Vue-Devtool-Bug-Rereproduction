@@ -1,4 +1,5 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { IBgRemoveInfo } from '@/interfaces/image'
 import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
@@ -12,6 +13,8 @@ import uploadUtils from './uploadUtils'
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
+  get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
+  get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
   get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
@@ -328,7 +331,9 @@ class PageUtils {
 
   fitPage() {
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const resizeRatio = Math.min(editorViewBox.clientWidth / (this.currFocusPageSize.width * (this.scaleRatio / 100)), editorViewBox.clientHeight / (this.currFocusPageSize.height * (this.scaleRatio / 100))) * 0.8
+    const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.currFocusPageSize.width
+    const targetHeight = this.inBgRemoveMode ? this.autoRemoveResult.height : this.currFocusPageSize.height
+    const resizeRatio = Math.min(editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)), editorViewBox.clientHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
 
     editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
@@ -336,13 +341,15 @@ class PageUtils {
     } else {
       store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
     }
-    this.findCentralPageIndexInfo()
+    if (!this.inBgRemoveMode) {
+      this.findCentralPageIndexInfo()
+    }
   }
 
   fillPage() {
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const targetPage = this.getPage(this.middlemostPageIndex) as IPage
-    const resizeRatio = editorViewBox.clientWidth / (targetPage.width * (this.scaleRatio / 100)) * 0.9
+    const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.getPage(this.middlemostPageIndex).width
+    const resizeRatio = editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)) * 0.9
 
     editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
     if ((store.state as any).user.userId === 'backendRendering') {
@@ -350,7 +357,9 @@ class PageUtils {
     } else {
       store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
     }
-    this.findCentralPageIndexInfo()
+    if (!this.inBgRemoveMode) {
+      this.findCentralPageIndexInfo()
+    }
   }
 
   isAllPageSizeEqual() {

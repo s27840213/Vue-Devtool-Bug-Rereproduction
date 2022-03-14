@@ -22,6 +22,7 @@ import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
 import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
+import brandkit from './module/brandkit'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -31,6 +32,7 @@ import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
+import imgShadowMutations from '@/store/utils/imgShadow'
 
 Vue.use(Vuex)
 
@@ -53,6 +55,7 @@ const getDefaultState = (): IEditorState => ({
   pageScaleRatio: 100,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
+  currHoveredPageIndex: -1,
   lastSelectedLayerIndex: -1,
   clipboard: [],
   currSelectedInfo: {
@@ -182,6 +185,9 @@ const getters: GetterTree<IEditorState, unknown> = {
     return pageIndex >= 0 ? pageIndex
       : state.currActivePageIndex >= 0
         ? state.currActivePageIndex : state.middlemostPageIndex
+  },
+  getCurrHoveredPageIndex(state: IEditorState): number {
+    return state.currHoveredPageIndex
   },
   getLastSelectedLayerIndex(state: IEditorState): number {
     return state.lastSelectedLayerIndex
@@ -334,6 +340,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_lastSelectedLayerIndex(state: IEditorState, index: number) {
     state.lastSelectedLayerIndex = index
   },
+  SET_currHoveredPageIndex(state: IEditorState, index: number) {
+    state.currHoveredPageIndex = index
+  },
   SET_backgroundColor(state: IEditorState, updateInfo: { pageIndex: number, color: string }) {
     state.pages[updateInfo.pageIndex].backgroundColor = updateInfo.color
     state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
@@ -389,9 +398,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
     state.currDraggedPhoto.srcObj = {
+      ...state.currDraggedPhoto.srcObj,
       ...photo.srcObj
     }
     state.currDraggedPhoto.styles = {
+      ...state.currDraggedPhoto.styles,
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
@@ -747,7 +758,8 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
-  }
+  },
+  ...imgShadowMutations
 }
 
 export default new Vuex.Store({
@@ -771,6 +783,7 @@ export default new Vuex.Store({
     design,
     layouts,
     markers,
+    brandkit,
     unsplash,
     bgRemove
   }

@@ -6,13 +6,14 @@ import { IFrame, IImage, IImageStyle } from '@/interfaces/layer'
 import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
+import zindexUtils from './zindexUtils'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
   }
 
   frameClipFormatter(path: string | undefined) {
-    return "<path d='" + path ?? '' + "'></path>"
+    return "<path d='" + (path ?? '') + "'></path>"
   }
 
   frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
@@ -97,6 +98,37 @@ class FrameUtils {
       }, 0)
     }
     store.commit('SET_popupComponent', { layerIndex: -1 })
+  }
+
+  updateImgToFrame() {
+    const currLayer = generalUtils.deepCopy(LayerUtils.getCurrLayer) as IImage
+    if (currLayer.type === 'image') {
+      const { width, height, x, y, rotate } = currLayer.styles
+      const { designId } = currLayer
+      const layerIndex = LayerUtils.layerIndex
+      const pageIndex = LayerUtils.pageIndex
+      Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0, rotate: 0 })
+
+      const newFrame = layerFactary.newFrame({
+        designId,
+        styles: {
+          initWidth: width,
+          initHeight: height,
+          width,
+          height,
+          rotate,
+          x,
+          y
+        },
+        clips: [{
+          ...currLayer,
+          isFrameImg: true
+        }]
+      } as unknown as IFrame)
+      LayerUtils.deleteLayer(layerIndex)
+      LayerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
+      zindexUtils.reassignZindex(pageIndex)
+    }
   }
 
   updateFrameLayerStyles(pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: Partial<IImageStyle>) {

@@ -12,24 +12,16 @@
           @click="switchNav(index)")
           svg-icon(class="nav-item__icon"
             :iconName="item.icon"
-            :iconColor="currPanel === index ? 'blue-1' : 'gray-3'"
+            :iconColor="(currPanel === index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
             :iconWidth="'24px'")
           div(class="nav-item-text body-3"
-            :class="currPanel === index ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
+            :class="(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
     div(class="sidebar__chevron pointer"
         :class="[{'rotate-hr': isSidebarPanelOpen}]"
         @click="toggleSidebarPanel")
       svg-icon(:iconName="'chevron-duo-right'"
         :iconColor="'gray-3'"
         :iconWidth="'30px'")
-    div(class="nav-setting pointer")
-      avatar(v-if="isLogin"
-        class="mt-30"
-        :textSize="14"
-        :avatarSize="35"
-        @click.native="goToPage('Settings')")
-    div(v-if="buildNumber"
-      class="text-white body-2 build-number") {{buildNumber}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -55,7 +47,7 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
-      isLogin: 'user/isLogin'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       return [
@@ -68,10 +60,6 @@ export default Vue.extend({
         // { icon: 'brand', text: `${this.$t('NN0007')}` },
         // { icon: 'photo', text: 'Pexels' }
       ]
-    },
-    buildNumber(): string {
-      const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
-      return buildNumber ? `v.${buildNumber}` : ''
     }
   },
   methods: {
@@ -81,25 +69,31 @@ export default Vue.extend({
       _setShowPagePanel: 'page/SET_showPagePanel'
     }),
     switchNav(index: number): void {
-      // switch to sidebar panel index
-      this.setCurrSidebarPanel(index)
-      this.$emit('toggleSidebarPanel', true)
-      if (this.showPagePanel) {
-        this._setShowPagePanel(false)
-      }
-      if (this.isShowPagePreview) {
-        this._setIsShowPagePreview(false)
-        pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
+      if (!this.inBgRemoveMode) {
+        // switch to sidebar panel index
+        this.setCurrSidebarPanel(index)
+        this.$emit('toggleSidebarPanel', true)
+        if (this.showPagePanel) {
+          this._setShowPagePanel(false)
+        }
+        if (this.isShowPagePreview) {
+          this._setIsShowPagePreview(false)
+          pageUtils.jumpIntoPage(pageUtils.currFocusPageIndex)
+        }
       }
     },
     goToPage(pageName: string) {
-      this.$router.push({ name: pageName })
+      if (!this.inBgRemoveMode) {
+        this.$router.push({ name: pageName })
+      }
     },
     toggleSidebarPanel() {
-      if (this.showPagePanel) {
-        this._setShowPagePanel(false)
+      if (!this.inBgRemoveMode) {
+        if (this.showPagePanel) {
+          this._setShowPagePanel(false)
+        }
+        this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
       }
-      this.$emit('toggleSidebarPanel', !this.isSidebarPanelOpen)
     }
   }
 })
@@ -107,6 +101,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .sidebar {
+  width: 75px;
   height: 100%;
   background-color: setColor(nav);
   display: grid;
@@ -131,10 +126,7 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  overflow: scroll;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  @include hide-scrollbar;
 }
 .nav-container {
   display: grid;
@@ -155,27 +147,5 @@ export default Vue.extend({
   &__text {
     transition: color 0.2s;
   }
-}
-
-.nav-setting {
-  border-top: 1px solid #494e67;
-  padding: 20px 20px 60px 20px;
-}
-
-.profile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  aspect-ratio: 1/1;
-  font-weight: 700;
-  background: #61aac2;
-  border-radius: 50%;
-  box-sizing: border-box;
-}
-
-.build-number {
-  margin-top: -25px;
-  width: 70px;
 }
 </style>

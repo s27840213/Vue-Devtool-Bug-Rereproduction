@@ -161,9 +161,7 @@ export default Vue.extend({
       window.location.href = page
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(item.width, item.height)
-      })
+      designUtils.newDesignWithLoginRedirect(item.width, item.height, item.id)
     },
     expandItems(index: number, expand: boolean) {
       Vue.set(this.featureExpand, index, expand)
@@ -198,7 +196,7 @@ export default Vue.extend({
           break
         default:
           this.blogPage = 'https://blog.vivipic.com/'
-          this.toturialPage = 'https://www.facebook.com/vivipic' + locale
+          this.toturialPage = 'https://blog.vivipic.com/us-tutorial/'
           this.servicePage = 'https://blog.vivipic.com/us-terms-of-service/'
           this.privacyPage = 'https://blog.vivipic.com/us-privacy-policy/'
           this.agreementPage = 'https://blog.vivipic.com/us-terms-of-use/'

@@ -11,6 +11,7 @@ import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import MobileEditor from '../views/MobileEditor.vue'
+import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
@@ -159,6 +160,11 @@ const routes: Array<RouteConfig> = [
     path: 'mobilewarning',
     name: 'MobileWarning',
     component: MobileWarning
+  },
+  {
+    path: 'brandkit',
+    name: 'BrandKit',
+    component: BrandKit
   }
 ]
 
@@ -193,8 +199,10 @@ const router = new VueRouter({
           localStorage.setItem('locale', locale)
         }
         next()
-        if ((window as any).__PRERENDER_INJECTED === undefined) {
-          router.replace({ query: Object.assign({}, router.currentRoute.query), params: { locale: '' } })
+        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+          // Delete locale in url, will be ignore by prerender.
+          delete router.currentRoute.params.locale
+          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
         }
       },
       children: routes
@@ -205,18 +213,18 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title || i18n.t('SE0001')
 
-  // some pages must render with userInfo,
-  // hence we should guarantee to receive login response
-  // before navigate to these pages
-  if (to.name === 'Settings' || to.name === 'MyDesign') {
-    // if not login, navigate to login page
+  // Force login in these page
+  if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {
-        next({ name: 'Login', query: { redirect: to.fullPath } })
+        next({ name: 'SignUp', query: { redirect: to.fullPath } })
+        return
       } else {
         await store.dispatch('user/login', { token: token })
       }
+    } else if (to.name === 'BrandKit' && !store.getters['user/isAdmin']) {
+      next({ name: 'Home' })
     }
   } else {
     if (!store.getters['user/isLogin']) {
@@ -237,7 +245,12 @@ router.beforeEach(async (to, from, next) => {
       verUni: json.ver_uni,
       imgSizeMap: json.image_size_map
     })
-    const defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+    let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>
+
+    // Firefox doesn't support Noto Color Emoji font, so remove it from the default fonts.
+    if (/Firefox/i.test(navigator.userAgent || navigator.vendor)) {
+      defaultFontsJson = defaultFontsJson.filter(font => font.id !== 'zVUjQ0MaGOm7HOJXv5gB')
+    }
 
     defaultFontsJson
       .forEach(_font => {

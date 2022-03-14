@@ -35,6 +35,7 @@
               :pageIndex="pageIndex"
               :layerIndex="index"
               :primaryLayerIndex="layerIndex"
+              :primaryLayerType="config.type"
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"
@@ -220,6 +221,7 @@ export default Vue.extend({
   beforeDestroy() {
     window.removeEventListener('mouseup', this.moveEnd)
     window.removeEventListener('mousemove', this.moving)
+    // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
@@ -229,7 +231,8 @@ export default Vue.extend({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      currSubSelectedInfo: 'getCurrSubSelectedInfo'
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      currHoveredPageIndex: 'getCurrHoveredPageIndex'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -555,7 +558,7 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        'pointer-events': this.isImgControl || (this.getLayerType === 'image' && this.isMoving) ? 'none' : 'initial',
+        'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
@@ -746,7 +749,7 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) && this.getLayerType === 'image') {
+        if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.setMoving(true)
         }
       }
@@ -755,9 +758,7 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent | TouchEvent) {
-      if (this.getLayerType === 'image') {
-        this.setMoving(false)
-      }
+      this.setMoving(false)
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -774,7 +775,24 @@ export default Vue.extend({
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
           this.isMoved = true
-          StepsUtils.record()
+          // dragging to another page
+          if (LayerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+            const layerTmp = generalUtils.deepCopy(LayerUtils.getCurrLayer)
+
+            const { top, left } = (this.$refs.body as HTMLElement).getBoundingClientRect()
+            const targetPageRect = (document.querySelector(`.nu-page-${this.currHoveredPageIndex}`) as HTMLLIElement)?.getBoundingClientRect()
+            const newX = (left - targetPageRect.left) * (100 / this.scaleRatio)
+            const newY = (top - targetPageRect.top) * (100 / this.scaleRatio)
+
+            layerTmp.styles.x = newX
+            layerTmp.styles.y = newY
+
+            LayerUtils.deleteSelectedLayer(false)
+            LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
+          } else {
+            // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
+            StepsUtils.record()
+          }
         } else {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
@@ -797,6 +815,7 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
+
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent) {
@@ -909,9 +928,9 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image': {
           const { imgWidth, imgHeight, imgX, imgY } = (this.config as IImage).styles
-          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scale, imgHeight * scale)
-          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scale, imgY * scale)
-          scale = 1
+          const scaleForImg = Math.max(width / this.getLayerWidth, height / this.getLayerHeight)
+          ImageUtils.updateImgSize(this.pageIndex, this.layerIndex, imgWidth * scaleForImg, imgHeight * scaleForImg)
+          ImageUtils.updateImgPos(this.pageIndex, this.layerIndex, imgX * scaleForImg, imgY * scaleForImg)
           break
         }
         case 'text':
@@ -1631,6 +1650,13 @@ export default Vue.extend({
         document.documentElement.dispatchEvent(event)
       }
     }
+    // scrollUpdate() {
+    //   const event = new MouseEvent('mousemove', {
+    //     clientX: this.initialPos.x,
+    //     clientY: this.initialPos.y
+    //   })
+    //   window.dispatchEvent(event)
+    // }
   }
 })
 </script>

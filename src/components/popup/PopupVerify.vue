@@ -290,7 +290,7 @@ export default Vue.extend({
       this.isCheckPasswordClicked = true
       this.isLoading = true
       if (!this.oldPassValid) {
-        this.oldPassErrorMessage = i18n.t('NN0163', { term: i18n.t('NN0180') }) as string
+        this.oldPassErrorMessage = i18n.t('NN0163', { term: i18n.tc('NN0180', 2) }) as string
         this.isLoading = false
         return
       }

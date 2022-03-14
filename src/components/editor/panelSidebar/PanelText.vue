@@ -1,11 +1,11 @@
 <template lang="pug">
   div(class="panel-text")
     search-bar(class="mb-15"
-      :placeholder="`${$t('NN0092', {target: $tc('NN0005',1)})}`"
+      :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -142,7 +142,7 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any text for "${this.keyword}".` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0005', 1) })}` : ''
     }
   },
   async mounted() {

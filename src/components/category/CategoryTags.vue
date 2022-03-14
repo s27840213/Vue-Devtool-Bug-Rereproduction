@@ -69,9 +69,7 @@ export default Vue.extend({
       grid-template-columns: auto;
       grid-auto-flow: column;
       scroll-behavior: smooth;
-      &::-webkit-scrollbar {
-        display: none;
-      }
+      @include no-scrollbar;
     }
     &__icon {
       display: flex;

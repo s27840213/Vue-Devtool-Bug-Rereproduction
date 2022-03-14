@@ -236,9 +236,7 @@ export default Vue.extend({
       }
     },
     newDesign(item: Itheme) {
-      this.$router.push({ name: 'Editor' }).then(() => {
-        designUtils.newDesign(item.width, item.height)
-      })
+      designUtils.newDesignWithLoginRedirect(item.width, item.height)
     }
   }
 })

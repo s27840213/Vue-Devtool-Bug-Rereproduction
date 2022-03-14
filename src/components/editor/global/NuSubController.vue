@@ -168,6 +168,9 @@ export default Vue.extend({
     },
     primaryScale(): number {
       return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+    },
+    isDraggedPanelPhoto(): boolean {
+      return this.currDraggedPhoto.srcObj.type !== ''
     }
   },
   watch: {
@@ -245,7 +248,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
-      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened'
+      setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
+      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
     frameClipStyles() {
       return {
@@ -478,7 +482,7 @@ export default Vue.extend({
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
       if (!primaryLayer.locked) {
         e.stopPropagation()
-        if (this.currDraggedPhoto.srcObj.type && !this.currDraggedPhoto.isPreview && !this.imgBuff.cached) {
+        if (this.isDraggedPanelPhoto && !this.currDraggedPhoto.isPreview && !this.imgBuff.cached) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           Object.assign(this.imgBuff, {
             srcObj: {
@@ -516,18 +520,23 @@ export default Vue.extend({
     onFrameDragLeave(e: DragEvent) {
       e.stopPropagation()
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
-      if (this.imgBuff.cached && !primaryLayer.locked) {
+      if (this.isDraggedPanelPhoto && this.imgBuff.cached && !primaryLayer.locked) {
         FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
         this.imgBuff.cached = false
       }
     },
     onFrameDrop(e: DragEvent) {
-      if (this.imgBuff.cached) {
-        e.stopPropagation()
-        StepsUtils.record()
-        this.imgBuff.cached = false
-      }
+      e.stopPropagation()
+      StepsUtils.record()
+      this.imgBuff.cached = false
+      this.setCurrDraggedPhoto({
+        srcObj: {
+          type: '',
+          assetId: '',
+          userId: ''
+        }
+      })
     },
     undo() {
       ShortcutUtils.undo().then(() => {
@@ -540,10 +549,13 @@ export default Vue.extend({
       if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
-      e.stopPropagation()
       if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
+      if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto) {
+        return
+      }
+      e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
         const { styles, srcObj } = this.config
@@ -581,10 +593,11 @@ export default Vue.extend({
           verticalFlip: currLayer.styles.verticalFlip
         })
         const controller = this.$refs.body as HTMLElement
-        controller.addEventListener('mouseup', (e) => this.onFrameMouseUp(e))
+        controller.addEventListener('mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent) {
+      if (this.isDraggedPanelPhoto) return
       if (!this.imgBuff.cached || this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
@@ -610,6 +623,7 @@ export default Vue.extend({
       controller.removeEventListener('mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
+      if (this.isDraggedPanelPhoto) return
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.layerIndex)

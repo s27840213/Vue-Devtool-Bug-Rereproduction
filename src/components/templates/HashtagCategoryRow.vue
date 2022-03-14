@@ -73,11 +73,7 @@ export default Vue.extend({
     align-items: start;
     width: calc(100% - 5px);
     overflow-x: auto;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    @include no-scrollbar;
   }
   &__title {
     margin-top: 1px;

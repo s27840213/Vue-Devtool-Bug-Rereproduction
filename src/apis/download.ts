@@ -18,8 +18,8 @@ class DownloadService {
       pdf_quality: params.pdfQuality,
       merge: params.merge,
       split_size: params.splitSize
+      // new_test: 1
     }
-
     return axios.request<IDownloadServiceResponse>({
       url: '/export-template',
       method: 'POST',

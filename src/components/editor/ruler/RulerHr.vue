@@ -31,7 +31,6 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getPage: 'getPage',
-      currActivePageIndex: 'getCurrActivePageIndex',
       currSelectedInfo: 'getCurrSelectedInfo',
       getLayer: 'getLayer',
       pageScaleRatio: 'getPageScaleRatio',

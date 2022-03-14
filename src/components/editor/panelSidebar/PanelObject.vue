@@ -1,11 +1,11 @@
 <template lang="pug">
   div(class="panel-objects")
     search-bar(class="mb-15"
-      :placeholder="`${$t('NN0092', {target: $tc('NN0003',1)})}`"
+      :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
-    div(v-if="emptyResultMessage" class="text-white") {{ emptyResultMessage }}
+    div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -39,6 +39,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -100,7 +101,7 @@ export default Vue.extend({
       return this.listCategories.concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any objects for "${this.keyword}".` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0003', 1) })}` : ''
     }
   },
   mounted() {
