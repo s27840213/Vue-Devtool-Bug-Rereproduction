@@ -10,12 +10,14 @@
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
       div(class="size-bar relative")
         div(class="pointer"
-          @mousedown="fontSizeStepping(-step)") -
+          @touchstart="fontSizeStepping(-step)") -
+          //- @mousedown="fontSizeStepping(-step)"
         button(class="text-setting__range-input-button" @click="handleValueModal")
           input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
                 @change="setSize" :value="fontSize")
         div(class="pointer"
-          @mousedown="fontSizeStepping(step)") +
+          @touchstart="fontSizeStepping(step)") +
+          //- @mousedown="fontSizeStepping(step)"
         value-selector(v-if="openValueSelector"
                     :valueArray="fontSelectValue"
                     class="text-setting__value-selector"
@@ -450,6 +452,7 @@ export default Vue.extend({
 
       const onmouseup = () => {
         window.removeEventListener('mouseup', onmouseup)
+        window.removeEventListener('touchend', onmouseup)
         if (new Date().getTime() - startTime < 500) {
           TextPropUtils.fontSizeStepping(step)
           textEffectUtils.refreshSize()
@@ -464,6 +467,7 @@ export default Vue.extend({
       }
 
       window.addEventListener('mouseup', onmouseup)
+      window.addEventListener('touchend', onmouseup)
     },
     isValidInt(value: string) {
       return value.match(/^-?\d+$/)
