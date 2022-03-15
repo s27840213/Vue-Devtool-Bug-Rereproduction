@@ -62,7 +62,7 @@
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
-    template(v-if="!isOutOfBound || hasEditingText")
+    template(v-if="(!isOutOfBound && imgLoaded) || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles()"
@@ -237,6 +237,7 @@ export default Vue.extend({
       initialPageHeight: 0,
       isShownResizerHint: false,
       isResizingPage: false,
+      imgLoaded: false,
       pageIsHover: false,
       ImageUtils,
       layerUtils,
@@ -378,6 +379,14 @@ export default Vue.extend({
         this.getClosestSnaplines()
       },
       deep: true
+    },
+    async isOutOfBound(newVal: boolean) {
+      // If user see that page, request private url.
+      await this.loadLayerImg()
+    },
+    'config.layers': async function (newVal: any) {
+      // First page will not trigger watch isOutOfBound, use watch layer insead.
+      await this.loadLayerImg()
     }
   },
   methods: {
@@ -391,6 +400,19 @@ export default Vue.extend({
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
+    async loadLayerImg() {
+      if (!this.imgLoaded && !this.imgLoaded) {
+        const imgToRequest = new Set<string>()
+        for (const layer of this.config.layers) {
+          if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
+            imgToRequest.add((layer as IImage).srcObj.assetId.toString())
+          }
+        }
+
+        await this.$store.dispatch('file/updateImages', { assetSet: imgToRequest })
+        this.imgLoaded = true
+      }
+    },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width}px`,

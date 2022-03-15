@@ -1,6 +1,7 @@
 import store from '@/store'
 import file from '@/apis/file'
 import user from '@/apis/user'
+import _ from 'lodash'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
@@ -109,14 +110,20 @@ const actions: ActionTree<IPhotoState, unknown> = {
     }
   },
   async updateImages({ commit }, { assetSet }) {
+    // Request unknown private image url
     const token = user.getToken()
-    user.getAllAssets(token, { // need await?
+    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImage))
+    assetSet = Array.from(assetSet).join(',')
+    if (assetSet.length === 0) {
+      return
+    }
+
+    await user.getAllAssets(token, {
       asset_list: assetSet
     }).then((data) => {
       commit(SET_STATE, {
         editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
       })
-      console.log('update end', assetSet, data.data, data.data.url_map, state.editorViewImage)
     })
   }
 }

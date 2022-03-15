@@ -37,23 +37,12 @@ class ImageUtils {
         config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio / 100 : 0
       )
     }
-    console.log('get src 0', type, config.srcObj)
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
       case 'private': {
-        // const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        // const img = images.find(img => img.assetIndex === assetId)
-        // if (img) {
-        //   for (const [k, v] of Object.entries(img.urls)) {
-        //     if (k === size) return v
-        //   }
-        // }
-        // return ''
-        console.log('get src 2', store.getters['file/getEditorViewImageIndex'](assetId))
         const editorImg = store.getters['file/getEditorViewImageIndex']
         if (editorImg(assetId)) {
-          console.log('get src 3', store.getters['file/getEditorViewImageIndex'](assetId)[size as string])
           return store.getters['file/getEditorViewImageIndex'](assetId)[size as string]
         } else {
           return ''

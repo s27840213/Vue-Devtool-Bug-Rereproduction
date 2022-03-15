@@ -211,18 +211,18 @@ export default Vue.extend({
       }
     },
     onError() {
-      console.log('image on error', this.config.srcObj.assetId)
+      console.log('image on error')
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
-          console.log('enter update?')
-          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` }).then(() => {
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+          })
         } catch (error) {
         }
       }
     },
     onLoad() {
-      console.log('on load', this.config.srcObj.assetId)
       this.isOnError = false
     },
     async perviewAsLoading() {
@@ -249,15 +249,6 @@ export default Vue.extend({
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-      // const { assetId } = this.config.srcObj
-      // if (type === 'private') {
-      //   const images = store.getters['file/getImages'] as Array<IAssetPhoto>
-      //   const img = images.find(img => img.assetIndex === assetId)
-      //   if (!img) {
-      //     await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
-      //   }
-      // }
-
       await this.perviewAsLoading()
 
       const preImg = new Image()
