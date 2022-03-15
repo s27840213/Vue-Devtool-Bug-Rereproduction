@@ -1042,14 +1042,15 @@ class UploadUtils {
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
-                store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
+
                 const imgToRequest = new Set<number>()
-                for (const page of store.getters.getPages) {
-                  for (const layer of page.layers) {
-                    imgToRequest.add(layer.srcObj.assetId)
+                for (const page of json.pages) {
+                  for (let i = 0; i < page.layers.length - 1; i++) {
+                    imgToRequest.add(page.layers[i].srcObj.assetId)
                   }
                 }
                 await store.dispatch('file/updateImages', { assetSet: Array.from(imgToRequest).join(',') })
+                store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
                 //

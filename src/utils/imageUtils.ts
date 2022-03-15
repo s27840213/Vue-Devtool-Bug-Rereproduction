@@ -37,6 +37,7 @@ class ImageUtils {
         config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio / 100 : 0
       )
     }
+    console.log('get src 0', type, config.srcObj)
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
@@ -48,7 +49,15 @@ class ImageUtils {
         //     if (k === size) return v
         //   }
         // }
-        return ''
+        // return ''
+        console.log('get src 2', store.getters['file/getEditorViewImageIndex'](assetId))
+        const editorImg = store.getters['file/getEditorViewImageIndex']
+        if (editorImg(assetId)) {
+          console.log('get src 3', store.getters['file/getEditorViewImageIndex'](assetId)[size as string])
+          return store.getters['file/getEditorViewImageIndex'](assetId)[size as string]
+        } else {
+          return ''
+        }
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`

@@ -29,7 +29,7 @@ export default Vue.extend({
     const { srcObj } = this.image.config
     if (!srcObj || !srcObj.type) return
     const { assetId } = this.image.config.srcObj
-    if (srcObj.type === 'private') {
+    if (srcObj.type === 'private') { // todo
       const images = store.getters['user/getImages'] as Array<IAssetPhoto>
       const img = images.find(img => img.assetIndex === assetId)
       if (!img) {

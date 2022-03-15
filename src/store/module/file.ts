@@ -110,12 +110,13 @@ const actions: ActionTree<IPhotoState, unknown> = {
   },
   async updateImages({ commit }, { assetSet }) {
     const token = user.getToken()
-    user.getAllAssets(token, {
+    user.getAllAssets(token, { // need await?
       asset_list: assetSet
     }).then((data) => {
       commit(SET_STATE, {
         editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
       })
+      console.log('update end', assetSet, data.data, data.data.url_map, state.editorViewImage)
     })
   }
 }
@@ -205,8 +206,8 @@ const getters: GetterTree<IPhotoState, any> = {
   getCheckedAssets(state) {
     return state.checkedAssets
   },
-  getEditorViewImageIndex: (state) => (assetId: string) => {
-    return state.editorViewImage[assetId]
+  getEditorViewImageIndex: (state) => (assetId: string|undefined = undefined) => {
+    return assetId ? state.editorViewImage[assetId] : state.editorViewImage
   }
 }
 
