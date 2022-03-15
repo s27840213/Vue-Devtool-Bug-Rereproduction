@@ -12,6 +12,7 @@ import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import MobileEditor from '../views/MobileEditor.vue'
 import MobileTextEffect from '../views/MobileTextEffect.vue'
+import MobileImageAdjust from '../views/MobileImageAdjust.vue'
 import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
@@ -33,7 +34,8 @@ const MOBILE_ROUTES = [
   'MobileWarning',
   'Preview',
   'MobileEditor',
-  'MobileTextEffect'
+  'MobileTextEffect',
+  'MobileImageAdjust'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -173,6 +175,11 @@ const routes: Array<RouteConfig> = [
     path: 'mobile-text',
     name: 'MobileTextEffect',
     component: MobileTextEffect
+  },
+  {
+    path: 'mobile-image',
+    name: 'MobileImageAdjust',
+    component: MobileImageAdjust
   }
 ]
 
