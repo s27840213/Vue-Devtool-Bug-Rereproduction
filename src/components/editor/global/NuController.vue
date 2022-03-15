@@ -1122,6 +1122,8 @@ export default Vue.extend({
 
       document.documentElement.addEventListener('mousemove', this.resizing)
       document.documentElement.addEventListener('mouseup', this.resizeEnd)
+      // document.documentElement.addEventListener('touchmove', this.resizing)
+      // document.documentElement.addEventListener('touchend', this.resizeEnd)
       document.documentElement.addEventListener('keyup', this.handleScaleOffset)
       document.documentElement.addEventListener('keydown', this.handleScaleOffset)
       switch (this.getLayerType) {
@@ -1166,7 +1168,7 @@ export default Vue.extend({
           ImageUtils.isHorizon = ControlUtils.dirHandler(clientP, rect)
       }
     },
-    resizing(event: MouseEvent) {
+    resizing(event: MouseEvent | TouchEvent) {
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
 

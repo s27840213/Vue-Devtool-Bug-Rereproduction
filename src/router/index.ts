@@ -13,6 +13,7 @@ import Preview from '../views/Preview.vue'
 import MobileEditor from '../views/MobileEditor.vue'
 import MobileTextEffect from '../views/MobileTextEffect.vue'
 import MobileImageAdjust from '../views/MobileImageAdjust.vue'
+import MobileTextTyping from '../views/MobileTextTyping.vue'
 import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
 import uploadUtils from '@/utils/uploadUtils'
@@ -35,7 +36,8 @@ const MOBILE_ROUTES = [
   'Preview',
   'MobileEditor',
   'MobileTextEffect',
-  'MobileImageAdjust'
+  'MobileImageAdjust',
+  'MobileTextTyping'
 ]
 
 const routes: Array<RouteConfig> = [
@@ -180,6 +182,11 @@ const routes: Array<RouteConfig> = [
     path: 'mobile-image',
     name: 'MobileImageAdjust',
     component: MobileImageAdjust
+  },
+  {
+    path: 'mobile-typing',
+    name: 'MobileTextTyping',
+    component: MobileTextTyping
   }
 ]
 

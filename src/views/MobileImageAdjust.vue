@@ -40,7 +40,7 @@ import groupUtils from '@/utils/groupUtils'
 import controlUtils from '@/utils/controlUtils'
 
 export default Vue.extend({
-  name: 'MobileTextEffect',
+  name: 'MobileImageAdjust',
   directives: {
     clickOutside: vClickOutside.directive
   },
