@@ -930,6 +930,18 @@
   dependencies:
     "@floating-ui/core" "^0.3.0"
 
+"@gtm-support/core@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@gtm-support/core/-/core-1.1.0.tgz#bacc66e1b64a3c6b6302bb7feb81ba506c5330ba"
+  integrity sha512-GyiZEfKejkAQq2lDS0u2mv6NDVdNWqXi+uQX0zcBOsIpWHfQxWpuCeTTCSv3DZEKv2LMkC0cwv6ukVRJvPmpaA==
+
+"@gtm-support/vue2-gtm@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@gtm-support/vue2-gtm/-/vue2-gtm-1.2.1.tgz#0df2f6a6f65fd0a98907f265913a2dbe409557f3"
+  integrity sha512-sAsUWpdYTauMpIt0zFzfXRQLhaE+EJW+mSuRlgXXlPpCOLQXILo8aJs7ovM4hIszN0e0ZE9yO60mHW8ZgAEVAw==
+  dependencies:
+    "@gtm-support/core" "1.1.0"
+
 "@hapi/address@2.x.x":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.1.4.tgz#5d67ed43f3fd41a69d4b9ff7b56e7c0d1d0a81e5"

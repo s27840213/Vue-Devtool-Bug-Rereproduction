@@ -20,6 +20,7 @@ import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 import { ITextState } from '@/store/text'
+import gtmUtils from './gtmUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -551,6 +552,7 @@ class AssetUtils {
           this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
           break
         case 6:
+          gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:

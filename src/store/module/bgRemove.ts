@@ -18,7 +18,8 @@ interface IBgRemoveState {
     left: number
   },
   steps: Array<string>,
-  currStep: number
+  currStep: number,
+  isProcessing: boolean
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -37,7 +38,8 @@ const getDefaultState = (): IBgRemoveState => ({
     left: -1
   },
   steps: [],
-  currStep: -1
+  currStep: -1,
+  isProcessing: false
 })
 
 const state = getDefaultState()
@@ -86,6 +88,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   inFirstStep(): boolean {
     return state.currStep === 0
+  },
+  getIsProcessing(): boolean {
+    return state.isProcessing
   }
 }
 
@@ -103,7 +108,8 @@ const mutations: MutationTree<IBgRemoveState> = {
         modifiedFlag: false,
         loading: false,
         step: [],
-        currStep: -1
+        currStep: -1,
+        isProcessing: false
       })
     }
     state.inBgRemoveMode = bool
@@ -153,7 +159,8 @@ const mutations: MutationTree<IBgRemoveState> = {
       preScrollPos: {
         top: -1,
         left: -1
-      }
+      },
+      isProcessing: false
     })
   },
   ADD_step(state: IBgRemoveState, dataUrl: string) {
@@ -163,9 +170,17 @@ const mutations: MutationTree<IBgRemoveState> = {
     }
     state.steps.push(dataUrl)
     state.currStep = state.steps.length - 1
+    console.log(state.steps)
+  },
+  CLEAR_steps(state: IBgRemoveState) {
+    state.steps = []
+    state.currStep = -1
   },
   SET_currStep(state: IBgRemoveState, step: number) {
     state.currStep = step
+  },
+  SET_isProcessing(state: IBgRemoveState, bool) {
+    state.isProcessing = bool
   }
 }
 

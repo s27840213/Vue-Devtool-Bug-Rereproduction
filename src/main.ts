@@ -1,4 +1,4 @@
-import Vue, { VueConstructor } from 'vue'
+import Vue from 'vue'
 import '@/globalComponents'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import App from './App.vue'
@@ -6,14 +6,13 @@ import router from './router'
 import store from './store'
 import i18n from './i18n'
 import vueColor from 'vue-color'
-import { Store } from 'vuex'
-import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
 import VueMeta from 'vue-meta'
 import 'floating-vue/dist/style.css'
-import FloatingVue, { VTooltip } from 'floating-vue'
+import FloatingVue from 'floating-vue'
 import TooltipUtils from './utils/tooltipUtils'
+import VueGtm from '@gtm-support/vue2-gtm'
 
 const tooltipUtils = new TooltipUtils()
 
@@ -23,6 +22,13 @@ Vue.use(Notifications)
 Vue.use(VueMeta)
 Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
+})
+
+Vue.use(VueGtm, {
+  id: 'GTM-T7LDWBP',
+  enabled: true,
+  // display console logs debugs or not (optional)
+  debug: false
 })
 
 Vue.component('RecycleScroller', RecycleScroller)

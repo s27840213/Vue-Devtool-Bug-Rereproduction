@@ -227,7 +227,6 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
-      setInBgRemoveMode: 'SET_inBgRemoveMode',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
     brushCursorStyles() {

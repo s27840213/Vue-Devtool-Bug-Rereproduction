@@ -36,7 +36,7 @@
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
-    spinner(v-if="isLoading")
+    spinner(v-if="isLoading || isSaving" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
 
 <script lang="ts">
@@ -78,7 +78,8 @@ export default Vue.extend({
       isColorPanelOpen: false,
       isSidebarPanelOpen: true,
       inputLocale: i18n.locale,
-      isLoading: false
+      isLoading: false,
+      isSaving: false
     }
   },
   watch: {
@@ -184,20 +185,30 @@ export default Vue.extend({
 
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
+      this.isSaving = true
       uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
         uploadUtils.isGettingDesign = false
         logUtils.setLog('Leave editor')
+        this.isSaving = false
+        this.clearState()
         next()
       })
     } else {
       logUtils.setLog('Leave editor')
+      this.clearState()
       next()
     }
+  },
+  mounted() {
+    logUtils.setLog('Editor mounted')
+    this.clearBgRemoveState()
   },
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      _setAdminMode: 'user/SET_ADMIN_MODE'
+      _setAdminMode: 'user/SET_ADMIN_MODE',
+      clearState: 'CLEAR_state',
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
     setAdminMode() {
       this._setAdminMode(!this.adminMode)

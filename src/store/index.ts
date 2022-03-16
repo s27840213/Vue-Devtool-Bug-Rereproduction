@@ -752,6 +752,9 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
+  CLEAR_state(state: IEditorState) {
+    Object.assign(state, getDefaultState())
+  },
   ...imgShadowMutations
 }
 
