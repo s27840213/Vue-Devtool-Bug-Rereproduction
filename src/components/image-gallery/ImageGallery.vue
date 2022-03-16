@@ -61,21 +61,8 @@ export default Vue.extend({
     }
   },
   watch: {
-    myfile(newImages: Array<IPhotoItem[]>) { // For panel file
-      console.log('my file watch')
-      this.rows = this.galleryUtils
-        .generate(newImages as any)
-        .map((row, idx) => ({
-          list: row,
-          id: `row_${idx}`,
-          sentinel: false,
-          index: idx,
-          size: row[0].preview.height + this.margin
-        }))
-      if (this.rows.length) {
-        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
-      }
-      console.log('my file watch end')
+    myfile() { // For panel file
+      this.myfileUpdate()
     },
     images(newImages: Array<IPhotoItem[]>) { // For panel unsplash and pexel
       // Slice new images, arrange it and append to the end.
@@ -103,6 +90,21 @@ export default Vue.extend({
     }
   },
   methods: {
+    myfileUpdate() {
+      console.log('watch myfile')
+      this.rows = this.galleryUtils
+        .generate(this.myfile as any)
+        .map((row, idx) => ({
+          list: row,
+          id: `row_${idx}`,
+          sentinel: false,
+          index: idx,
+          size: row[0].preview.height + this.margin
+        }))
+      if (this.rows.length) {
+        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+      }
+    },
     imageStyle(preview: any) {
       return {
         width: `${preview.width}px`,

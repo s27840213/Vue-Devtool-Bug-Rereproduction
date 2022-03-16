@@ -17,7 +17,7 @@ const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
 
 interface IPhotoState {
   list: Array<IAssetPhoto>,
-  editorViewImage: Record<string, any>,
+  editorViewImage: Record<string, Record<string, string>>,
   pageIndex: number,
   pending: boolean,
   checkedAssets: Array<number>
@@ -27,7 +27,7 @@ const getDefaultState = (): IPhotoState => ({
   list: [],
   editorViewImage: {},
   pageIndex: 0,
-  pending: false,
+  pending: true,
   checkedAssets: []
 })
 
@@ -81,6 +81,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         pageIndex: rawData.data.next_page,
         pending: false
       })
+      console.log('get file', state.list, rawData.data.data.image.content)
     } catch (error) {
       captureException(error)
     }
@@ -111,6 +112,8 @@ const actions: ActionTree<IPhotoState, unknown> = {
   },
   async updateImages({ commit }, { assetSet }) {
     // Request unknown private image url
+    // If you want to reduce redundant update asset, assetSet should be Set<string>.
+    // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
     const token = user.getToken()
     assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImage))
     assetSet = Array.from(assetSet).join(',')
@@ -124,7 +127,29 @@ const actions: ActionTree<IPhotoState, unknown> = {
       commit(SET_STATE, {
         editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
       })
+      console.log('update end', data.data.url_map, state.editorViewImage, Object.keys(state.editorViewImage).length)
     })
+  },
+  initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData]}) {
+    console.log('init image', imgs, state.pending)
+    const data: Record<string, any> = {}
+    for (const img of imgs) {
+      data[img.asset_index] = img.signed_url
+    }
+
+    if (!store.getters['user/isAdmin']) {
+      commit(SET_STATE, {
+        editorViewImage: Object.assign({}, state.editorViewImage, data)
+      })
+      console.log('init end', state.editorViewImage, Object.keys(state.editorViewImage), Object.keys(state.editorViewImage).length)
+    }
+
+    commit(SET_STATE, {
+      list: state.list.concat(addPerviewUrl(imgs)),
+      pageIndex: imgs.length,
+      pending: false
+    })
+    console.log('init end 2', state.pageIndex, state.list, state.list.length)
   }
 }
 

@@ -238,6 +238,7 @@ export default Vue.extend({
       isShownResizerHint: false,
       isResizingPage: false,
       imgLoaded: false,
+      imgLoading: false,
       pageIsHover: false,
       ImageUtils,
       layerUtils,
@@ -267,6 +268,10 @@ export default Vue.extend({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
+    // if (!this.isOutOfBound) {
+    //   console.log('mounted', this.currFocusPageIndex, this.pageIndex, this.config.layers)
+    //   this.loadLayerImg()
+    // }
   },
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
@@ -380,13 +385,19 @@ export default Vue.extend({
       },
       deep: true
     },
-    async isOutOfBound(newVal: boolean) {
+    isOutOfBound(newVal: boolean, oldVal: boolean) {
       // If user see that page, request private url.
-      await this.loadLayerImg()
+      console.log('watch bound', this.pageIndex, newVal, oldVal)
+      if (!newVal) {
+        this.loadLayerImg()
+      }
     },
-    'config.layers': async function (newVal: any) {
+    'config.layers': function (newVal: any, oldVal: any) {
       // First page will not trigger watch isOutOfBound, use watch layer insead.
-      await this.loadLayerImg()
+      console.log('watch layer', this.pageIndex, newVal, oldVal)
+      if (newVal.length !== 0 && oldVal.length === 0) {
+        this.loadLayerImg()
+      }
     }
   },
   methods: {
@@ -401,16 +412,18 @@ export default Vue.extend({
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
     async loadLayerImg() {
-      if (!this.imgLoaded && !this.imgLoaded) {
+      if (!this.imgLoaded && !this.imgLoaded && !this.imgLoading) {
+        this.imgLoading = true
         const imgToRequest = new Set<string>()
         for (const layer of this.config.layers) {
           if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
             imgToRequest.add((layer as IImage).srcObj.assetId.toString())
           }
         }
-
+        console.log('img to request', imgToRequest, this.config.layers)
         await this.$store.dispatch('file/updateImages', { assetSet: imgToRequest })
         this.imgLoaded = true
+        this.imgLoading = false
       }
     },
     styles(type: string) {

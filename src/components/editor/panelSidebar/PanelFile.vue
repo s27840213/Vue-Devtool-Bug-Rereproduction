@@ -88,7 +88,7 @@ export default Vue.extend({
     }
   },
   mounted () {
-    this.getFiles()
+    (this.$refs.gallery as any).myfileUpdate()
   },
   watch: {
     list (curr, prev) {

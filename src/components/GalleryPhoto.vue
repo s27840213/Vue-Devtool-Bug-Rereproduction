@@ -74,7 +74,7 @@ export default Vue.extend({
       isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
-      return this.photo.progress && this.photo.progress !== 100
+      return typeof this.photo.progress !== 'undefined' && this.photo.progress !== 100
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0

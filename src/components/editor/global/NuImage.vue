@@ -114,8 +114,7 @@ export default Vue.extend({
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      assetId2Url: 'file/getEditorViewImageIndex'
+      scaleRatio: 'getPageScaleRatio'
     }),
     ...mapState('user', ['imgSizeMap']),
     getImgDimension(): number {
@@ -215,7 +214,8 @@ export default Vue.extend({
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` }).then(() => {
+          console.log('image or error update enter?', new Set<string>([this.config.srcObj.assetId]))
+          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
