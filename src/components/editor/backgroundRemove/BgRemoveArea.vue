@@ -318,6 +318,10 @@ export default Vue.extend({
       window.removeEventListener('mousemove', this.drawing)
       this._setCanvas(this.canvas)
 
+      if (this.clearMode) {
+        this.clearCtx(this.clearModeCtx)
+      }
+
       this.pushStep()
     },
     brushMoving(e: MouseEvent) {
@@ -338,7 +342,7 @@ export default Vue.extend({
     drawInClearMode(e: MouseEvent) {
       this.setCompositeOperationMode('source-over', this.ctx)
       this.ctx.filter = 'none'
-      this.ctx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
+      // this.ctx.drawImage(this.initImgCanvas, 0, 0, this.size.width, this.size.height)
       this.drawLine(e, this.clearModeCtx)
       this.setCompositeOperationMode('destination-out')
       this.ctx.filter = `blur(${this.blurPx}px)`
