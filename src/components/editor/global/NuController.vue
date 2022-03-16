@@ -18,7 +18,7 @@
         @dragleave="dragLeave($event)"
         @dragover.prevent
         @click.right.stop="!isMobile() && onRightClick"
-        @contextmenu.prevent
+        @contextmenu="handleContextMenu"
         @mousedown.left="moveStart"
         @touchstart="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
@@ -396,6 +396,11 @@ export default Vue.extend({
     }),
     isMobile(): boolean {
       return generalUtils.isMobile()
+    },
+    handleContextMenu(e: Event) {
+      if (!this.isMobile()) {
+        e.preventDefault()
+      }
     },
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
