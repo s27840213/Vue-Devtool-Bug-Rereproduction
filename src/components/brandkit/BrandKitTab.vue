@@ -8,8 +8,12 @@
           span(class="brand-kit-tab__tab-name-text") {{ $t(tabNames[tab]) }}
     div(v-if="notNullBrand" class="brand-kit-tab__content")
       component(:is="`brand-kit-tab-${selectedTab}`" @deleteItem="handleDeleteItem")
-    div(v-else class="brand-kit-tab__content")
-      img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
+    div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect")
+      div
+        img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
+      span(class="brand-kit-tab__disconnect__title") Oops!
+      span(class="brand-kit-tab__disconnect__description1") Something went wrong...
+      span(class="brand-kit-tab__disconnect__description2") Please try again later!
 </template>
 
 <script lang="ts">
@@ -40,7 +44,8 @@ export default Vue.extend({
       selectedTab: 'getSelectedTab'
     }),
     notNullBrand(): boolean {
-      return !brandkitUtils.checkIsNullBrand(this.currentBrand)
+      // return !brandkitUtils.checkIsNullBrand(this.currentBrand)
+      return false
     }
   },
   methods: {
@@ -94,6 +99,27 @@ export default Vue.extend({
   }
   &__content {
     margin-top: 30px;
+  }
+  &__disconnect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    &__title {
+      margin-top: 69px;
+      @include text-H1;
+      color: setColor(blue-1);
+    }
+    &__description1 {
+      margin-top: 13px;
+      @include body-XL;
+      color: setColor(gray-1);
+    }
+    &__description2 {
+      margin-top: 14px;
+      @include text-H5;
+      color: setColor(gray-2);
+    }
   }
 }
 </style>
