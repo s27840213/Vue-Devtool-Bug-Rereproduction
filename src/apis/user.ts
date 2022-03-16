@@ -140,7 +140,7 @@ export default {
         src_obj: srcObj,
         team_id: this.getTeamId(),
         ...(aspect !== undefined && { aspect }),
-        debug: 0
+        debug: 1
       }
     }))
   }

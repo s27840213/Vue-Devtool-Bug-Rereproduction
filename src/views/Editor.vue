@@ -190,17 +190,25 @@ export default Vue.extend({
         uploadUtils.isGettingDesign = false
         logUtils.setLog('Leave editor')
         this.isSaving = false
+        this.clearState()
         next()
       })
     } else {
       logUtils.setLog('Leave editor')
+      this.clearState()
       next()
     }
+  },
+  mounted() {
+    logUtils.setLog('Editor mounted')
+    this.clearBgRemoveState()
   },
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      _setAdminMode: 'user/SET_ADMIN_MODE'
+      _setAdminMode: 'user/SET_ADMIN_MODE',
+      clearState: 'CLEAR_state',
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
     setAdminMode() {
       this._setAdminMode(!this.adminMode)

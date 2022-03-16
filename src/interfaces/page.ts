@@ -9,6 +9,7 @@ export interface IBackgroundImage {
 }
 export interface IPage {
   [index: string]: unknown,
+  id: string,
   width: number,
   height: number,
   backgroundColor: string,
