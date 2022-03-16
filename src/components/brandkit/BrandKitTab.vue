@@ -11,9 +11,9 @@
     div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect")
       div
         img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
-      span(class="brand-kit-tab__disconnect__title") Oops!
-      span(class="brand-kit-tab__disconnect__description1") Something went wrong...
-      span(class="brand-kit-tab__disconnect__description2") Please try again later!
+      span(class="brand-kit-tab__disconnect__title") {{$t('NN0456')}}
+      span(class="brand-kit-tab__disconnect__description1") {{$t('NN0457')}}
+      span(class="brand-kit-tab__disconnect__description2") {{$t('NN0458')}}
 </template>
 
 <script lang="ts">
