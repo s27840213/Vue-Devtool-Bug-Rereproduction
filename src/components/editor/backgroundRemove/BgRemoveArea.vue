@@ -113,7 +113,8 @@ export default Vue.extend({
       currStep: 'bgRemove/getCurrStep',
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
-      loading: 'bgRemove/getLoading'
+      loading: 'bgRemove/getLoading',
+      inGestureMode: 'getInGestureToolMode'
     }),
     size(): { width: number, height: number } {
       return {
@@ -196,27 +197,18 @@ export default Vue.extend({
     stepsQueue: {
       async handler(newVal, oldVal) {
         /** step being pushed */
-        // console.log('handler')
-        // console.log(newVal.length)
-        if (newVal.length === 0) {
-          this.isProcessingStepsQueue = false
-          // console.log('handler1')
-        } else {
-          if (this.isProcessingStepsQueue) {
-            // console.log('handler2')
-          } else {
-            // console.log('handler3')
-            while (this.stepsQueue.length !== 0) {
-              // console.log(this.stepsQueue.length)
-              // console.log(this.stepsQueue)
-              this.isProcessingStepsQueue = true
-              const blob = await this.stepsQueue.shift()
-              if (blob) {
-                this.addStep(blob)
-              }
-            }
+        if (this.isProcessingStepsQueue) {
+          return
+        }
+        while (this.stepsQueue.length !== 0) {
+          this.isProcessingStepsQueue = true
+          const blob = await this.stepsQueue.shift()
+          if (blob) {
+            this.addStep(blob)
           }
         }
+
+        this.isProcessingStepsQueue = false
       },
       deep: true
     }
@@ -299,18 +291,20 @@ export default Vue.extend({
       this.setModifiedFlag(true)
     },
     drawStart(e: MouseEvent) {
-      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
-      Object.assign(this.initPos, {
-        x,
-        y
-      })
-      if (this.clearMode) {
-        this.drawInClearMode(e)
-      } else {
-        this.drawInResotreMode(e)
+      if (!this.inGestureMode) {
+        const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+        Object.assign(this.initPos, {
+          x,
+          y
+        })
+        if (this.clearMode) {
+          this.drawInClearMode(e)
+        } else {
+          this.drawInResotreMode(e)
+        }
+        window.addEventListener('mouseup', this.drawEnd)
+        window.addEventListener('mousemove', this.drawing)
       }
-      window.addEventListener('mouseup', this.drawEnd)
-      window.addEventListener('mousemove', this.drawing)
     },
     drawing(e: MouseEvent) {
       if (this.clearMode) {
@@ -412,32 +406,36 @@ export default Vue.extend({
       }
     },
     undo() {
-      this.setCurrStep(Math.max(this.currStep - 1, 0))
-      const img = new Image()
-      img.src = URL.createObjectURL(this.steps[this.currStep])
-      // img.src = this.steps[this.currStep]
-      img.onload = () => {
-        this.clearCtx()
-        this.clearModeCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
-        this.ctx.filter = 'none'
-        this.drawImageToCtx(img)
-        if (this.clearMode) {
-          this.ctx.filter = `blur(${this.blurPx}px)`
+      if (!this.isProcessingStepsQueue) {
+        this.setCurrStep(Math.max(this.currStep - 1, 0))
+        const img = new Image()
+        img.src = URL.createObjectURL(this.steps[this.currStep])
+        // img.src = this.steps[this.currStep]
+        img.onload = () => {
+          this.clearCtx()
+          this.clearModeCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+          this.ctx.filter = 'none'
+          this.drawImageToCtx(img)
+          if (this.clearMode) {
+            this.ctx.filter = `blur(${this.blurPx}px)`
+          }
         }
       }
     },
     redo() {
-      this.setCurrStep(Math.min(this.currStep + 1, this.steps.length - 1))
-      const img = new Image()
-      img.src = URL.createObjectURL(this.steps[this.currStep])
-      // img.src = this.steps[this.currStep]
+      if (!this.isProcessingStepsQueue) {
+        this.setCurrStep(Math.min(this.currStep + 1, this.steps.length - 1))
+        const img = new Image()
+        img.src = URL.createObjectURL(this.steps[this.currStep])
+        // img.src = this.steps[this.currStep]
 
-      img.onload = () => {
-        this.clearCtx()
-        this.ctx.filter = 'none'
-        this.drawImageToCtx(img)
-        if (this.clearMode) {
-          this.ctx.filter = `blur(${this.blurPx}px)`
+        img.onload = () => {
+          this.clearCtx()
+          this.ctx.filter = 'none'
+          this.drawImageToCtx(img)
+          if (this.clearMode) {
+            this.ctx.filter = `blur(${this.blurPx}px)`
+          }
         }
       }
     },

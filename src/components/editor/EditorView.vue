@@ -2,7 +2,7 @@
   div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
-      @mousedown.left="!inBgRemoveMode ? selectStart($event) : null"
+      @mousedown.left="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
@@ -69,6 +69,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -103,6 +104,9 @@ export default Vue.extend({
     }
   },
   mounted() {
+    window.addEventListener('keydown', this.handleKeydown)
+    window.addEventListener('keyup', this.handleKeydown)
+
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
     this.editorViewCanvas = this.$refs.canvas as HTMLElement
@@ -190,7 +194,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      prevScrollPos: 'bgRemove/getPrevScrollPos'
+      prevScrollPos: 'bgRemove/getPrevScrollPos',
+      getInInGestureMode: 'getInGestureToolMode'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -227,7 +232,8 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
-      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
+      clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
+      setInGestureMode: 'SET_inGestureMode'
     }),
     brushCursorStyles() {
       return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
@@ -250,7 +256,7 @@ export default Vue.extend({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (this.isTyping) return
+      if (this.isTyping || this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }
@@ -424,6 +430,32 @@ export default Vue.extend({
         this.from = -1
       }
     },
+    dragEditorViewStart(e: MouseEvent) {
+      this.initialRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.editorView as HTMLElement)
+      window.addEventListener('mousemove', this.draggingEditorViewPage)
+      // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      window.addEventListener('mouseup', this.dragditorViewPageEnd)
+    },
+    draggingEditorViewPage(e: MouseEvent) {
+      const editor = this.$refs.editorView as HTMLElement
+      const { x, y } = MouseUtils.getMouseRelPoint(e, editor)
+
+      this.$nextTick(() => {
+        // const scrollbarSize = generalUtils.getScrollbarSize(editor)
+        const deltaX = x - this.initialRelPos.x
+        const deltaY = y - this.initialRelPos.y
+        editor.scrollLeft += deltaX * 0.8
+        editor.scrollTop += deltaY * 0.8
+        this.initialRelPos = { x, y }
+      })
+    },
+    dragditorViewPageEnd() {
+      this.$nextTick(() => {
+        window.removeEventListener('mousemove', this.draggingEditorViewPage)
+        // window.removeEventListener('scroll', this.scrollUpdate)
+        window.removeEventListener('mouseup', this.dragditorViewPageEnd)
+      })
+    },
     dragStartH(e: MouseEvent) {
       RulerUtils.setIsDragging(true)
       this.isShowGuidelineH = true
@@ -490,6 +522,14 @@ export default Vue.extend({
     handleStepChange() {
       this.isShowGuidelineV = false
       this.isShowGuidelineH = false
+    },
+    handleKeydown(e: KeyboardEvent) {
+      if (e.key === ' ') {
+        e.preventDefault()
+        if (!e.repeat) {
+          this.setInGestureMode(!this.getInInGestureMode)
+        }
+      }
     }
   }
 })
@@ -502,6 +542,7 @@ $REULER_SIZE: 20px;
   overflow: scroll;
   position: relative;
   z-index: setZindex("editor-view");
+
   &__grid {
     position: absolute;
     min-width: 100%;

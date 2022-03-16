@@ -93,7 +93,8 @@ const getDefaultState = (): IEditorState => ({
   showGuideline: true,
   lockGuideline: false,
   themes: [],
-  hasCopiedFormat: false
+  hasCopiedFormat: false,
+  inGestureToolMode: false
 })
 
 const state = getDefaultState()
@@ -246,6 +247,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
+  },
+  getInGestureToolMode(state: IEditorState) {
+    return state.inGestureToolMode
   }
 }
 
@@ -754,6 +758,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   CLEAR_state(state: IEditorState) {
     Object.assign(state, getDefaultState())
+  },
+  SET_inGestureMode(state: IEditorState, bool: boolean) {
+    state.inGestureToolMode = bool
   },
   ...imgShadowMutations
 }

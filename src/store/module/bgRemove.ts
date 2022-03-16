@@ -170,7 +170,6 @@ const mutations: MutationTree<IBgRemoveState> = {
     }
     state.steps.push(dataUrl)
     state.currStep = state.steps.length - 1
-    console.log(state.steps)
   },
   CLEAR_steps(state: IBgRemoveState) {
     state.steps = []
