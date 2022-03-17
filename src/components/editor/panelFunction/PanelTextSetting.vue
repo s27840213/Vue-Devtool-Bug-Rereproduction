@@ -53,11 +53,11 @@
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="record-selection feature-button p-5"
-        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText, active: iconIsActived(icon) }"
+        :class="{ pointer: iconClickable(icon), active: iconIsActived(icon) }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         v-hint="hintMap[icon]"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer feature-button p-5"
@@ -207,6 +207,16 @@ export default Vue.extend({
         return textShapeUtils.isCurvedText(currLayer.styles)
       }
       return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
+    },
+    isVerticalText(): boolean {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (subLayerIdx !== -1) {
+        return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes('vertical')
+      }
+      if (currLayer.type === 'text') {
+        return (currLayer as IText).styles.writingMode.includes('vertical')
+      }
+      return false
     }
   },
   methods: {
@@ -342,9 +352,11 @@ export default Vue.extend({
             this.handleSpanPropClick('weight', ['bold', 'normal'])
             break
           case 'underline':
+            if (this.isVerticalText) return
             this.handleSpanPropClick('decoration', ['underline', 'none'])
             break
           case 'italic':
+            if (this.isVerticalText) return
             this.handleSpanPropClick('style', ['italic', 'normal'])
             break
         }
@@ -369,6 +381,10 @@ export default Vue.extend({
             const paragraphs = GeneralUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
             paragraphs.forEach(p => {
               p.spans.forEach(s => {
+                if ((l as IText).styles.writingMode.includes('vertical') && (
+                  (prop === 'decoration' && newPropVal === 'underline') ||
+                  (prop === 'style' && newPropVal === 'italic')
+                )) return
                 s.styles[prop] = newPropVal
               })
             })
@@ -593,6 +609,15 @@ export default Vue.extend({
         .then(() => {
           this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
+    },
+    iconClickable(icon: string): boolean {
+      if (icon === 'font-vertical') { // if there is any curveText, vertical mode is disabled
+        return !this.hasCurveText
+      }
+      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text, underline and italic are disabled
+        return !this.isVerticalText
+      }
+      return true
     }
   }
 })

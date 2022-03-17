@@ -7,6 +7,7 @@ import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
+import textPropUtils from './textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
 
@@ -251,28 +252,10 @@ class LayerFactary {
         }
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
-      config.paragraphs.forEach((p) => {
-        if (isVertical && p.styles.spanStyle) {
-          const pStyle = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(p.styles.spanStyle as string))
-          if (pStyle.style === 'italic') {
-            pStyle.style = 'normal'
-          }
-          if (pStyle.decoration === 'underline') {
-            pStyle.decoration = 'none'
-          }
-          p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
-        }
-        for (const span of p.spans) {
-          if (!span.styles.font) {
-            Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-              (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
-          }
-          if (span.styles.style === 'italic') {
-            span.styles.style = 'normal'
-          }
-          if (span.styles.decoration === 'underline') {
-            span.styles.decoration = 'none'
-          }
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, undefined, (span) => {
+        if (!span.styles.font) {
+          Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
+            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
         }
       })
     }
