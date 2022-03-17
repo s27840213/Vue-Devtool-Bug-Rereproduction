@@ -7,6 +7,7 @@ import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
+import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -230,6 +231,8 @@ class LayerFactary {
     /**
      * For the past structure, some text might have wrong structure
      * below fix the wrong part
+     * 1: empty span
+     * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -247,11 +250,28 @@ class LayerFactary {
           }
         }
       }
+      const isVertical = basicConfig.styles.writingMode.includes('vertical')
       config.paragraphs.forEach((p) => {
-        for (let i = 0; i < p.spans.length; i++) {
-          if (!p.spans[i].styles.font) {
+        if (isVertical && p.styles.spanStyle) {
+          const pStyle = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(p.styles.spanStyle as string))
+          if (pStyle.style === 'italic') {
+            pStyle.style = 'normal'
+          }
+          if (pStyle.decoration === 'underline') {
+            pStyle.decoration = 'none'
+          }
+          p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
+        }
+        for (const span of p.spans) {
+          if (!span.styles.font) {
             Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-              (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+              (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+          }
+          if (span.styles.style === 'italic') {
+            span.styles.style = 'normal'
+          }
+          if (span.styles.decoration === 'underline') {
+            span.styles.decoration = 'none'
           }
         }
       })
