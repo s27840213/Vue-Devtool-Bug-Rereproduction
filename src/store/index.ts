@@ -254,6 +254,7 @@ const getters: GetterTree<IEditorState, unknown> = {
 const mutations: MutationTree<IEditorState> = {
   SET_setLayersDone() {
     state.setLayersDone = true
+    console.log('set layer done')
   },
   SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportIds: string }) {
     groupUtils.reset()

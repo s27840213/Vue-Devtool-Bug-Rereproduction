@@ -545,6 +545,7 @@ class DesignUtils {
 
   // Below function is used to update the page
   async newDesign(width?: number, height?: number, newDesignType?: number) {
+    store.commit('SET_setLayersDone')
     pageUtils.setPages([pageUtils.newPage({
       width: width ?? 1080,
       height: height ?? 1080

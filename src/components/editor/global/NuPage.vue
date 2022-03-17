@@ -270,7 +270,8 @@ export default Vue.extend({
     })
     console.log('mounted', !this.isOutOfBound, this.setLayersDone)
     if (!this.isOutOfBound && this.setLayersDone) {
-      // Only trigger after developer modify NuPage.vue and re-yarn serve.
+      // Will be trigger if user go to B design after go to A design
+      // or after developer modify NuPage.vue and re-yarn serve.
       this.loadLayerImg()
     }
   },
@@ -419,6 +420,12 @@ export default Vue.extend({
         for (const layer of this.config.layers) {
           if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
             imgToRequest.add((layer as IImage).srcObj.assetId.toString())
+          } else if (layer.type === 'frame') {
+            for (const clip of (layer as IFrame).clips) {
+              if (clip.srcObj.assetId) {
+                imgToRequest.add(clip.srcObj.assetId.toString())
+              }
+            }
           }
         }
         console.log('img to request', imgToRequest, this.config.layers)
