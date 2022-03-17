@@ -64,7 +64,7 @@ export interface IEditorState {
   lockGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
-  setLayersed: boolean
+  setLayersDone: boolean
 }
 
 export enum SidebarPanelType {

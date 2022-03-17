@@ -1044,7 +1044,7 @@ class UploadUtils {
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
                 console.log('before set pages', json)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
-                store.commit('SET_Layersed')
+                store.commit('SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
                 //

@@ -268,13 +268,14 @@ export default Vue.extend({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
-    if (!this.isOutOfBound && this.setLayersed) {
+    console.log('mounted', !this.isOutOfBound, this.setLayersDone)
+    if (!this.isOutOfBound && this.setLayersDone) {
       // Only trigger after developer modify NuPage.vue and re-yarn serve.
       this.loadLayerImg()
     }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto', 'setLayersed']),
+    ...mapState(['isMoving', 'currDraggedPhoto', 'setLayersDone']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -392,7 +393,7 @@ export default Vue.extend({
         this.loadLayerImg()
       }
     },
-    setLayersed(newVal: boolean) {
+    setLayersDone(newVal: boolean) {
       // First page will not trigger watch isOutOfBound, so trigger it when uploadUtils call SET_pages.
       console.log('watch set layers', newVal, this.pageIndex)
       if (newVal) {

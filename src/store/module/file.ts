@@ -1,6 +1,6 @@
 import store from '@/store'
 import file from '@/apis/file'
-import user from '@/apis/user'
+import userApis from '@/apis/user'
 import _ from 'lodash'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
@@ -20,7 +20,8 @@ interface IPhotoState {
   editorViewImage: Record<string, Record<string, string>>,
   pageIndex: number,
   pending: boolean,
-  checkedAssets: Array<number>
+  checkedAssets: Array<number>,
+  initialized: boolean
 }
 
 const getDefaultState = (): IPhotoState => ({
@@ -28,7 +29,8 @@ const getDefaultState = (): IPhotoState => ({
   editorViewImage: {},
   pageIndex: 0,
   pending: true,
-  checkedAssets: []
+  checkedAssets: [],
+  initialized: false
 })
 
 const state = getDefaultState()
@@ -90,15 +92,15 @@ const actions: ActionTree<IPhotoState, unknown> = {
     try {
       const keyList = state.checkedAssets.join(',')
       const params = {
-        token: user.getToken(),
-        locale: user.getLocale(),
-        team_id: user.getTeamId(),
+        token: userApis.getToken(),
+        locale: userApis.getLocale(),
+        team_id: userApis.getTeamId(),
         type: 'image',
         update_type: 'delete',
         src_asset: keyList,
         target: '1'
       }
-      user.updateAsset({ ...params }).then(() => {
+      userApis.updateAsset({ ...params }).then(() => {
         commit(SET_STATE, {
           checkedAssets: [],
           list: state.list.filter((item: any) => {
@@ -114,14 +116,14 @@ const actions: ActionTree<IPhotoState, unknown> = {
     // Request unknown private image url
     // If you want to reduce redundant update asset, assetSet should be Set<string>.
     // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
-    const token = user.getToken()
+    const token = userApis.getToken()
     assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImage))
     assetSet = Array.from(assetSet).join(',')
     if (assetSet.length === 0) {
       return
     }
 
-    await user.getAllAssets(token, {
+    await userApis.getAllAssets(token, {
       asset_list: assetSet
     }).then((data) => {
       commit(SET_STATE, {
@@ -131,6 +133,10 @@ const actions: ActionTree<IPhotoState, unknown> = {
     })
   },
   initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData]}) {
+    if (state.initialized) {
+      return
+    }
+
     console.log('init image', imgs, state.pending)
     const data: Record<string, any> = {}
     for (const img of imgs) {
@@ -147,7 +153,8 @@ const actions: ActionTree<IPhotoState, unknown> = {
     commit(SET_STATE, {
       list: state.list.concat(addPerviewUrl(imgs)),
       pageIndex: imgs.length,
-      pending: false
+      pending: false,
+      initialized: true
     })
     console.log('init end 2', state.pageIndex, state.list, state.list.length)
   }
