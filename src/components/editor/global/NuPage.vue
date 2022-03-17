@@ -268,13 +268,13 @@ export default Vue.extend({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
-    // if (!this.isOutOfBound) {
-    //   console.log('mounted', this.currFocusPageIndex, this.pageIndex, this.config.layers)
-    //   this.loadLayerImg()
-    // }
+    if (!this.isOutOfBound && this.setLayersed) {
+      // Only trigger after developer modify NuPage.vue and re-yarn serve.
+      this.loadLayerImg()
+    }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapState(['isMoving', 'currDraggedPhoto', 'setLayersed']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -385,17 +385,17 @@ export default Vue.extend({
       },
       deep: true
     },
-    isOutOfBound(newVal: boolean, oldVal: boolean) {
-      // If user see that page, request private url.
-      console.log('watch bound', this.pageIndex, newVal, oldVal)
+    isOutOfBound(newVal: boolean) {
+      // If user see this page, request private url.
+      console.log('watch bound', !newVal, this.pageIndex)
       if (!newVal) {
         this.loadLayerImg()
       }
     },
-    'config.layers': function (newVal: any, oldVal: any) {
-      // First page will not trigger watch isOutOfBound, use watch layer insead.
-      console.log('watch layer', this.pageIndex, newVal, oldVal)
-      if (newVal.length !== 0 && oldVal.length === 0) {
+    setLayersed(newVal: boolean) {
+      // First page will not trigger watch isOutOfBound, so trigger it when uploadUtils call SET_pages.
+      console.log('watch set layers', newVal, this.pageIndex)
+      if (newVal) {
         this.loadLayerImg()
       }
     }
