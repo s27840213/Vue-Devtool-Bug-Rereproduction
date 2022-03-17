@@ -897,6 +897,10 @@ class UploadUtils {
       layer.active = false
     }
 
+    if (page.id) {
+      delete page.id
+    }
+
     if (page.backgroundImage.config.src) {
       const src = page.backgroundImage.config.src as string
       const type = ImageUtils.getSrcType(page.backgroundImage.config.src as any)
@@ -1037,7 +1041,9 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                store.commit('SET_assetId', designId)
+                if (teamId === this.teamId) {
+                  store.commit('SET_assetId', teamId === this.teamId ? designId : generalUtils.generateAssetId)
+                }
                 /**
                  * @todo fix the filter function below
                  */
