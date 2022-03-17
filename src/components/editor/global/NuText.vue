@@ -88,7 +88,16 @@ export default Vue.extend({
       const widthLimit = this.autoResize()
       const textHW = TextUtils.getTextHW(this.config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+        let x = this.config.styles.x
+        let y = this.config.styles.y
+        if (this.config.styles.widthLimit === -1) {
+          if (this.config.styles.writingMode.includes('vertical')) {
+            y = this.config.styles.y - (textHW.height - this.config.styles.height) / 2
+          } else {
+            x = this.config.styles.x - (textHW.width - this.config.styles.width) / 2
+          }
+        }
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height, widthLimit })
       } else {
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
