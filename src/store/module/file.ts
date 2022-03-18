@@ -114,21 +114,22 @@ const actions: ActionTree<IPhotoState, unknown> = {
     }
   },
   async updatePageImages({ dispatch }, { pageIndex }: { pageIndex: number }) {
-    const { layers } = store.state.pages[pageIndex]
+    const { layers, backgroundImage } = store.state.pages[pageIndex]
     const imgToRequest = new Set<string>()
 
+    imgToRequest.add(backgroundImage.config.srcObj.assetId.toString())
     for (const layer of layers) {
       if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
         imgToRequest.add((layer as IImage).srcObj.assetId.toString())
       } else if (layer.type === 'frame') {
         for (const clip of (layer as IFrame).clips) {
-          if (clip.srcObj.assetId) {
-            imgToRequest.add(clip.srcObj.assetId.toString())
-          }
+          imgToRequest.add(clip.srcObj.assetId.toString())
         }
       }
     }
-    console.log('img to request', imgToRequest, layers)
+
+    imgToRequest.delete('') // delete empty asset id
+    console.log('img to request', imgToRequest, layers, store.state.pages[pageIndex])
     await dispatch('updateImages', { assetSet: imgToRequest })
   },
   async updateImages({ commit }, { assetSet }) {

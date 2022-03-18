@@ -30,10 +30,12 @@ export default Vue.extend({
     if (!srcObj || !srcObj.type) return
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') { // todo
-      const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-      const img = images.find(img => img.assetIndex === assetId)
-      if (!img) {
-        await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+      const editorImg = store.getters['file/getEditorViewImageIndex']
+      console.log('editorImg', editorImg(), editorImg(assetId))
+
+      if (!editorImg(assetId)) {
+        console.log('image or error update enter? bbbbggggg', new Set<string>([assetId]))
+        await this.updateImages({ assetSet: new Set<string>([assetId]) })
       }
     }
     const nextImg = new Image()
@@ -116,7 +118,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('user', ['updateImages']),
+    ...mapActions('file', ['updateImages']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
@@ -131,7 +133,7 @@ export default Vue.extend({
         return 1600
       }
     },
-    onError() {
+    onError() { // deprecated?
       console.log('image on error')
       if (this.image.config.srcObj.type === 'private') {
         try {
