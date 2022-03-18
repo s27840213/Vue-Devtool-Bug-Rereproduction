@@ -519,6 +519,7 @@ export default Vue.extend({
       }
       res.push('order_by::' + this.selectedSorting)
       this.waterfallTemplatesPC = []
+      this.waterfallTemplatesTAB = []
       this.waterfallTemplatesMOBILE = []
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
