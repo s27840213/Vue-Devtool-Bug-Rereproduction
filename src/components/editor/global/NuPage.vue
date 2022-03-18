@@ -694,11 +694,9 @@ export default Vue.extend({
 .pages-wrapper {
   position: relative;
   box-sizing: content-box;
+  outline: none;
   &:empty {
     background-color: setColor(gray-4);
-  }
-  :focus {
-    outline: none;
   }
 }
 .scale-container {
