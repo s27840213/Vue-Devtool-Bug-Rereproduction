@@ -19,7 +19,7 @@ const UPDATE_PROGRESS = 'UPDATE_PROGRESS' as const
 const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
 
 interface IPhotoState {
-  list: Array<IAssetPhoto>,
+  myfileImages: Array<IAssetPhoto>,
   editorViewImage: Record<string, Record<string, string>>,
   pageIndex: number,
   pending: boolean,
@@ -28,7 +28,7 @@ interface IPhotoState {
 }
 
 const getDefaultState = (): IPhotoState => ({
-  list: [],
+  myfileImages: [],
   editorViewImage: {},
   pageIndex: 0,
   pending: true,
@@ -86,7 +86,7 @@ function addMyfile(response: [IUserImageContentData], pageIndex: number):void {
   }
 
   store.commit('file/SET_STATE', {
-    list: state.list.concat(addPerviewUrl(response)),
+    myfileImages: state.myfileImages.concat(addPerviewUrl(response)),
     pageIndex: pageIndex,
     pending: false,
     initialized: true
@@ -124,7 +124,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       userApis.updateAsset({ ...params }).then(() => {
         commit(SET_STATE, {
           checkedAssets: [],
-          list: state.list.filter((item: IAssetPhoto) => {
+          myfileImages: state.myfileImages.filter((item: IAssetPhoto) => {
             return !state.checkedAssets.includes(item.assetIndex as number)
           })
         })
@@ -234,42 +234,42 @@ const mutations: MutationTree<IPhotoState> = {
         tiny: imageFile.src
       }
     }
-    state.list.unshift(previewImage)
+    state.myfileImages.unshift(previewImage)
   },
   [UPDATE_PROGRESS](state: IPhotoState, { assetId, progress }) {
-    const targetIndex = state.list.findIndex((img: IAssetPhoto) => {
+    const targetIndex = state.myfileImages.findIndex((img: IAssetPhoto) => {
       return img.id === assetId
     })
-    state.list[targetIndex].progress = progress
+    state.myfileImages[targetIndex].progress = progress
   },
   [UPDATE_IMAGE_URLS](state: IPhotoState, { assetId, urls, assetIndex, type = 'private' }) {
-    const { list } = state
+    const { myfileImages } = state
 
     const isAdmin = type === 'public'
-    const targetIndex = state.list.findIndex((img: IAssetPhoto) => {
+    const targetIndex = state.myfileImages.findIndex((img: IAssetPhoto) => {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
     })
 
     const data = addPerviewUrl([{
-      width: list[targetIndex].width,
-      height: list[targetIndex].height,
+      width: myfileImages[targetIndex].width,
+      height: myfileImages[targetIndex].height,
       id: isAdmin ? assetId : undefined,
       asset_index: assetIndex ?? assetId,
       signed_url: urls
     }])
 
-    // state.list[targetIndex] = Object.assign({}, data[0])
+    // state.myfileImages[targetIndex] = Object.assign({}, data[0])
     // Below code reduandont but and work, above don't work, src will get data:image/...
-    state.list[targetIndex].urls = data[0].urls
-    state.list[targetIndex].id = isAdmin ? assetId : undefined
-    state.list[targetIndex].assetIndex = assetIndex ?? assetId
+    state.myfileImages[targetIndex].urls = data[0].urls
+    state.myfileImages[targetIndex].id = isAdmin ? assetId : undefined
+    state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
     state.editorViewImage[data[0].assetIndex] = data[0].urls
   }
 }
 
 const getters: GetterTree<IPhotoState, any> = {
   getImages(state) {
-    return state.list
+    return state.myfileImages
   },
   getCheckedAssets(state) {
     return state.checkedAssets

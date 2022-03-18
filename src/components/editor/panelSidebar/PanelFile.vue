@@ -9,7 +9,7 @@
       @click.native="uploadImage()") {{$t('NN0014')}}
     image-gallery(
       ref="gallery"
-      :myfile="list"
+      :myfile="myfileImages"
       vendor="myfile"
       :inFilePanel="true"
       @loadMore="handleLoadMore")
@@ -70,7 +70,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('file', [
-      'list',
+      'myfileImages',
       'pending'
     ]),
     ...mapGetters({
@@ -87,10 +87,10 @@ export default Vue.extend({
     (this.$refs.gallery as any).myfileUpdate()
   },
   watch: {
-    list (curr, prev) {
+    myfileImages (curr, prev) {
       if (curr.length && !prev.length && this.$refs.gallery) {
-        const list = (this.$refs.gallery as Vue).$el.children[0]
-        list.addEventListener('scroll', (event: Event) => {
+        const myfileImages = (this.$refs.gallery as Vue).$el.children[0]
+        myfileImages.addEventListener('scroll', (event: Event) => {
           this.scrollTop = (event.target as HTMLElement).scrollTop
         })
       }
