@@ -43,28 +43,17 @@ export default Vue.extend({
   data() {
     return {
       isDestroyed: false,
-      resizeObserver: undefined as ResizeObserver | undefined
+      resizeObserver: undefined as ResizeObserver | undefined,
+      isLoading: true,
+      initSize: {
+        width: this.config.styles.width,
+        height: this.config.styles.height,
+        widthLimit: this.config.widthLimit
+      }
     }
   },
   created() {
-    // if (LayerUtils.getCurrLayer.type === 'tmp') {
-    //   return
-    // }
-
     TextUtils.loadAllFonts(this.config, 1)
-
-    // if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
-
-    // const widthLimit = this.autoResize()
-    // const textHW = TextUtils.getTextHW(this.config, widthLimit)
-    // if (typeof this.subLayerIndex === 'undefined') {
-    //   LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-    // } else {
-    //   const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-    //   LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-    //   const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-    //   LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
-    // }
   },
   destroyed() {
     this.isDestroyed = true
@@ -83,9 +72,14 @@ export default Vue.extend({
     this.resizeObserver = new (window as any).ResizeObserver(() => {
       if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
 
-      console.log('resize')
+      // console.log('resize')
 
-      const widthLimit = this.autoResize()
+      let widthLimit
+      if (this.isLoading) {
+        widthLimit = this.autoResize()
+      } else {
+        widthLimit = this.config.widthLimit
+      }
       const textHW = TextUtils.getTextHW(this.config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
         let x = this.config.styles.x
@@ -97,12 +91,14 @@ export default Vue.extend({
             x = this.config.styles.x - (textHW.width - this.config.styles.width) / 2
           }
         }
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height, widthLimit })
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
     })
     this.observeAllPs()
@@ -131,6 +127,7 @@ export default Vue.extend({
   watch: {
     'config.paragraphs': {
       handler() {
+        this.isLoading = false
         if (this.resizeObserver) {
           this.resizeObserver.disconnect()
           this.observeAllPs()
@@ -183,9 +180,9 @@ export default Vue.extend({
       const scale = this.config.styles.scale
       let direction = 0
       let shouldContinue = true
-      let widthLimit = this.config.widthLimit
+      let widthLimit = this.initSize.widthLimit
       let autoSize = TextUtils.getTextHW(this.config, widthLimit)
-      const originDimension = this.config.styles[dimension]
+      const originDimension = this.initSize[dimension]
       let prevDiff = Number.MAX_VALUE
       let prevWidthLimit = -1
       while (shouldContinue) {

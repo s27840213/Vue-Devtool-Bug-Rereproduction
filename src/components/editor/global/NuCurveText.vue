@@ -36,7 +36,6 @@ export default Vue.extend({
   },
   created () {
     this.computeDimensions(this.spans)
-
     TextUtils.loadAllFonts(this.config, 1)
   },
   destroyed() {
@@ -48,7 +47,7 @@ export default Vue.extend({
     this.resizeObserver = new (window as any).ResizeObserver(() => {
       if (this.isDestroyed) return
 
-      console.log('resize')
+      // console.log('resize')
 
       if (typeof this.subLayerIndex === 'undefined') {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
