@@ -109,7 +109,7 @@ div(style="position:relative;")
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0281')}}
+          @click.native="onLoginClicked()") {{$t('NN0305')}}
     div(v-if="currentPageIndex === 2"
       class="signup")
       div(class="text-center")
@@ -151,9 +151,9 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
-import Facebook from '@/utils/facebook'
 import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
+import loginUtils from '@/utils/loginUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -360,11 +360,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     onCloseClicked() {
-      if (this.redirect) {
-        this.$router.push({ path: this.redirect })
-      } else {
-        this.$router.push({ name: 'Home' })
-      }
+      this.$router.push({ name: 'Home' })
     },
     async onSignUpClicked() {
       this.emailResponseError = false
@@ -455,41 +451,10 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      const redirectUri = window.location.href.split('?')[0]
-      if (this.redirect) {
-        const redirectStr = JSON.stringify({
-          redirect: this.redirect.replace(/&/g, '%26'),
-          platform: 'fb_vivipic'
-        })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
-      } else {
-        const redirectStr = JSON.stringify({
-          platform: 'fb_vivipic'
-        })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
-      }
+      loginUtils.onFacebookClicked(this.redirect)
     },
     onGoogleClicked() {
-      let stateStr
-      if (this.redirect) {
-        stateStr = JSON.stringify({
-          redirect: this.redirect.replace(/&/g, '%26'),
-          platform: 'google_vivipic'
-        })
-      } else {
-        stateStr = JSON.stringify({
-          platform: 'google_vivipic'
-        })
-      }
-      const redirectUri = window.location.href.split('?')[0]
-      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-        'include_granted_scopes=true&' +
-        'response_type=code&' +
-        'prompt=select_account&' +
-        `state=${stateStr}&` +
-        `redirect_uri=${redirectUri}&` +
-        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+      loginUtils.onGoogleClicked(this.redirect)
     }
   }
 })

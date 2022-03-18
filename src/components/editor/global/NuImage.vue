@@ -52,6 +52,11 @@ export default Vue.extend({
       this.handleNewShadowEffect(true)
     }
   },
+  beforeDestroy() {
+    if (this.config.inProcess) {
+      this.setIsProcessing(false)
+    }
+  },
   destroyed() {
     if (this.filter) {
       const svg = this.filter.parentElement
@@ -179,7 +184,8 @@ export default Vue.extend({
     ...mapActions('file', ['updateImages']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
-      UPDATE_shadowEffectState: 'UPDATE_shadowEffectState'
+      UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
+      setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     styles() {
       const { imgWidth, imgHeight, imgX, imgY } = this.config.styles

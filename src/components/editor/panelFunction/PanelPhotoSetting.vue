@@ -13,6 +13,7 @@
         class="full-width"
         type="gray-mid"
         ref="btn"
+        :disabled="isProcessing"
         @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
       v-click-outside="handleOutside"
@@ -63,6 +64,7 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedLayers: 'getCurrSelectedLayers',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isProcessing: 'bgRemove/getIsProcessing',
       isAdmin: 'user/isAdmin'
     }),
     ...mapState('user', {
@@ -115,7 +117,8 @@ export default Vue.extend({
       updateLayerStyles: 'UPDATE_layerStyles',
       setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
       setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
-      setPrevScrollPos: 'bgRemove/SET_prevScrollPos'
+      setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
+      setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -149,11 +152,15 @@ export default Vue.extend({
       } else if (name === 'remove-bg') {
         const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
 
+        this.setIsProcessing(true)
         layerUtils.updateLayerProps(pageIndex, index, {
           inProcess: true
         })
 
         const targetLayer = layers[0] as IImage
+        const targetPageId = pageUtils.currFocusPage.id
+        const targetLayerId = targetLayer.id
+
         const type = targetLayer.srcObj.type
 
         const { imgWidth, imgHeight } = targetLayer.styles
@@ -164,22 +171,38 @@ export default Vue.extend({
           if (data.flag === 0) {
             uploadUtils.polling(data.url, (json: any) => {
               if (json.flag === 0 && json.data) {
-                layerUtils.updateLayerProps(pageIndex, index, {
-                  inProcess: false
-                })
-                const editorView = document.querySelector('.editor-view')
-                const { scrollTop, scrollLeft } = editorView as HTMLElement
+                const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
+                const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
 
-                this.setPrevScrollPos({
-                  top: scrollTop,
-                  left: scrollLeft
-                })
+                if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
+                  layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+                    inProcess: false
+                  })
+                  const editorView = document.querySelector('.editor-view')
+                  const { scrollTop, scrollLeft } = editorView as HTMLElement
 
-                this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
-                this.setInBgRemoveMode(true)
+                  this.setPrevScrollPos({
+                    top: scrollTop,
+                    left: scrollLeft
+                  })
+
+                  this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
+                  this.setInBgRemoveMode(true)
+                }
                 return true
               }
               if (json.flag === 1) {
+                const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
+                const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+
+                if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
+                  layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+                    inProcess: false
+                  })
+
+                  this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                }
+
                 return true
               }
 

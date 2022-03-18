@@ -95,6 +95,7 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   themes: [],
   hasCopiedFormat: false,
+  inGestureToolMode: false,
   setLayersDone: false
 })
 
@@ -248,6 +249,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
+  },
+  getInGestureToolMode(state: IEditorState) {
+    return state.inGestureToolMode
   }
 }
 
@@ -756,6 +760,12 @@ const mutations: MutationTree<IEditorState> = {
   UPDATE_frameClipSrc(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIndex: number, srcObj: { [key: string]: string | number } }) {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
+  },
+  CLEAR_state(state: IEditorState) {
+    Object.assign(state, getDefaultState())
+  },
+  SET_inGestureMode(state: IEditorState, bool: boolean) {
+    state.inGestureToolMode = bool
   },
   ...imgShadowMutations
 }

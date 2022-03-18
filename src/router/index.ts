@@ -204,11 +204,8 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title || i18n.t('SE0001')
 
-  // some pages must render with userInfo,
-  // hence we should guarantee to receive login response
-  // before navigate to these pages
+  // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
-    // if not login, navigate to login page
     if (!store.getters['user/isLogin']) {
       const token = localStorage.getItem('token')
       if (token === '' || !token) {

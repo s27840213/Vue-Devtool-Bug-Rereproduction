@@ -151,28 +151,34 @@ const actions: ActionTree<ITextState, unknown> = {
     if (face && face !== 'undefined' && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
-        state.pending = face
-        const newFont = new FontFace(face, getFontUrl(type, url || face, ver ?? 0))
-        commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: false })
-        return new Promise<void>(resolve => {
-          newFont.load()
-            .then(newFont => {
-              document.fonts.add(newFont)
-              commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: true })
-              resolve()
-              state.pending = ''
-            })
-        })
-      } else {
-        return new Promise<void>(resolve => {
-          const checkLoaded = setInterval(() => {
-            if (font.loaded) {
-              clearInterval(checkLoaded)
-              resolve()
-            }
-          }, 100)
-        })
+        // state.pending = face
+        // const newFont = new FontFace(face, getFontUrl(type, url || face, ver ?? 0))
+        // commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
+        const link = document.createElement('link')
+        link.href = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+        link.rel = 'stylesheet'
+        document.head.appendChild(link)
+        commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+        // return new Promise<void>(resolve => {
+        //   newFont.load()
+        //     .then(newFont => {
+        //       document.fonts.add(newFont)
+        //       commit(UPDATE_FONTFACE, { name: newFont.family, face: newFont.family, loaded: true })
+        //       resolve()
+        //       state.pending = ''
+        //     })
+        // })
       }
+      // } else {
+      //   return new Promise<void>(resolve => {
+      //     const checkLoaded = setInterval(() => {
+      //       if (font.loaded) {
+      //         clearInterval(checkLoaded)
+      //         resolve()
+      //       }
+      //     }, 100)
+      //   })
+      // }
     }
   }
 }

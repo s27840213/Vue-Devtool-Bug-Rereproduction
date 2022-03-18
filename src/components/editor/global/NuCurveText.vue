@@ -4,6 +4,7 @@
       svg-icon(iconName="curve-center" :style="curveIconStyle")
     span(v-for="(span, sIndex) in spans"
       class="nu-curve-text__span"
+      :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
       :key="sIndex",
       :style="styles(span.styles, sIndex)") {{ span.text }}
 </template>
@@ -29,28 +30,36 @@ export default Vue.extend({
       textWidth: [] as number[],
       textHeight: [] as number[],
       minHeight: 0,
-      isDestroyed: false
+      isDestroyed: false,
+      resizeObserver: undefined as ResizeObserver | undefined
     }
   },
-  async created () {
+  created () {
     this.computeDimensions(this.spans)
-
-    await TextUtils.waitUntilAllFontsLoaded(this.config, 1)
-
-    if (this.isDestroyed) return
-
-    if (typeof this.subLayerIndex === 'undefined') {
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
-    } else {
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
-      TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-      TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-    }
-
-    this.computeDimensions(this.spans)
+    TextUtils.loadAllFonts(this.config, 1)
   },
   destroyed() {
     this.isDestroyed = true
+    this.resizeObserver && this.resizeObserver.disconnect()
+    this.resizeObserver = undefined
+  },
+  mounted() {
+    this.resizeObserver = new (window as any).ResizeObserver(() => {
+      if (this.isDestroyed) return
+
+      // console.log('resize')
+
+      if (typeof this.subLayerIndex === 'undefined') {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+      } else {
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+        TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+        TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+      }
+
+      this.computeDimensions(this.spans)
+    })
+    this.observeAllSpans()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -112,6 +121,10 @@ export default Vue.extend({
     spans: {
       handler(newSpans) {
         this.computeDimensions(newSpans)
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect()
+          this.observeAllSpans()
+        }
       },
       deep: true
     }
@@ -127,6 +140,12 @@ export default Vue.extend({
         { transform: transforms[idx] || 'none' },
         bend >= 0 ? { top: baseline } : { bottom: baseline }
       )
+    },
+    observeAllSpans() {
+      const spans = document.querySelectorAll(`.nu-curve-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
+      spans.forEach(span => {
+        this.resizeObserver && this.resizeObserver.observe(span as Element)
+      })
     },
     computeDimensions(spans: ISpan[]) {
       const { textWidth, textHeight, minHeight } = TextShapeUtils.getTextHWsBySpans(spans)

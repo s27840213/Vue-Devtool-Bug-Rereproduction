@@ -109,6 +109,11 @@
           :label="`${$t('NN0129')}`"
           :default-checked="saveSubmission"
           @change="({ checked }) => handleSubmission(checked)")
+        download-check-button(v-if="isAdmin"
+          type="checkbox"
+          class="mb-20"
+          label="使用測試 bucket (dev0)"
+          @change="({ checked }) => { useDev = checked }")
       div
         btn(class="full-width body-3 rounded"
           :disabled="isButtonDisabled"
@@ -123,7 +128,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
@@ -170,6 +175,7 @@ export default Vue.extend({
       polling: false,
       progress: -1,
       exportId: '',
+      useDev: false,
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
       detailPageDownloadOptions: [
@@ -194,6 +200,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapState(['name', 'groupType', 'exportIds']),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]
@@ -346,7 +355,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo)
+        .getFileUrl(fileInfo, this.isAdmin && this.useDev)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {

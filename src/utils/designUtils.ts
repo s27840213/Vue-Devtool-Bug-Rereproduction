@@ -540,7 +540,9 @@ class DesignUtils {
       name: 'Editor',
       query
     })
-    router.push(route.href)
+    // If user been redirect more than once, it will throw Uncaught (in promise) Error. https://stackoverflow.com/a/65326844
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    router.push(route.href).catch(() => {})
   }
 
   // Below function is used to update the page

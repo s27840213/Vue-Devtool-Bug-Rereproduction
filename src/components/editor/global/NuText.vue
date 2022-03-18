@@ -9,6 +9,7 @@
           :subLayerIndex="subLayerIndex")
         p(v-else
           v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+          :class="`nu-text__p-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
           :key="p.id",
           :style="styles(p.styles)")
           template(v-for="(span, sIndex) in p.spans")
@@ -30,6 +31,7 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -41,36 +43,67 @@ export default Vue.extend({
   },
   data() {
     return {
-      isDestroyed: false
+      isDestroyed: false,
+      resizeObserver: undefined as ResizeObserver | undefined,
+      isLoading: true,
+      initSize: {
+        width: this.config.styles.width,
+        height: this.config.styles.height,
+        widthLimit: this.config.widthLimit
+      }
     }
   },
-  async created() {
-    if (LayerUtils.getCurrLayer.type === 'tmp') {
-      return
-    }
-
-    await TextUtils.waitUntilAllFontsLoaded(this.config, 1)
-
-    if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
-
-    const widthLimit = this.autoResize()
-    const textHW = TextUtils.getTextHW(this.config, widthLimit)
-    if (typeof this.subLayerIndex === 'undefined') {
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-    } else {
-      const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-      LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height, widthLimit })
-      const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height, widthLimit })
-    }
+  created() {
+    TextUtils.loadAllFonts(this.config, 1)
   },
   destroyed() {
     this.isDestroyed = true
+    this.resizeObserver && this.resizeObserver.disconnect()
+    this.resizeObserver = undefined
   },
   mounted() {
     if (this.currSelectedInfo.layers >= 1) {
       TextPropUtils.updateTextPropsState()
     }
+
+    if (LayerUtils.getCurrLayer.type === 'tmp') {
+      return
+    }
+
+    this.resizeObserver = new (window as any).ResizeObserver(() => {
+      const config = generalUtils.deepCopy(this.config) as IText
+      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
+
+      // console.log('resize')
+
+      let widthLimit
+      if (this.isLoading) {
+        widthLimit = TextUtils.autoResize(config, this.initSize)
+      } else {
+        widthLimit = config.widthLimit
+      }
+      const textHW = TextUtils.getTextHW(config, widthLimit)
+      if (typeof this.subLayerIndex === 'undefined') {
+        let x = config.styles.x
+        let y = config.styles.y
+        if (config.styles.widthLimit === -1) {
+          if (config.styles.writingMode.includes('vertical')) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        }
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      } else {
+        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+      }
+    })
+    this.observeAllPs()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -91,6 +124,17 @@ export default Vue.extend({
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    }
+  },
+  watch: {
+    'config.paragraphs': {
+      handler() {
+        this.isLoading = false
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect()
+          this.observeAllPs()
+        }
+      }
     }
   },
   methods: {
@@ -126,48 +170,11 @@ export default Vue.extend({
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     },
-    autoResize(): number {
-      if (this.config.widthLimit === -1) return this.config.widthLimit
-      const dimension = this.config.styles.writingMode.includes('vertical') ? 'width' : 'height'
-      const scale = this.config.styles.scale
-      let direction = 0
-      let shouldContinue = true
-      let widthLimit = this.config.widthLimit
-      let autoSize = TextUtils.getTextHW(this.config, widthLimit)
-      const originDimension = this.config.styles[dimension]
-      let prevDiff = Number.MAX_VALUE
-      let prevWidthLimit = -1
-      while (shouldContinue) {
-        const autoDimension = autoSize[dimension]
-        const currDiff = Math.abs(autoDimension - originDimension)
-        if (currDiff > prevDiff) {
-          if (prevWidthLimit !== -1) {
-            return prevWidthLimit
-          } else {
-            return this.config.widthLimit
-          }
-        }
-        prevDiff = currDiff
-        prevWidthLimit = widthLimit
-        if (autoDimension - originDimension > 5 * scale) {
-          if (direction < 0) break
-          if (direction >= 20) return this.config.widthLimit
-          widthLimit += scale
-          direction += 1
-          autoSize = TextUtils.getTextHW(this.config, widthLimit)
-          continue
-        }
-        if (originDimension - autoDimension > 5 * scale) {
-          if (direction > 0) break
-          if (direction <= -20) return this.config.widthLimit
-          widthLimit -= scale
-          direction -= 1
-          autoSize = TextUtils.getTextHW(this.config, widthLimit)
-          continue
-        }
-        shouldContinue = false
-      }
-      return widthLimit
+    observeAllPs() {
+      const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
+      ps.forEach(p => {
+        this.resizeObserver && this.resizeObserver.observe(p as Element)
+      })
     }
   }
 })

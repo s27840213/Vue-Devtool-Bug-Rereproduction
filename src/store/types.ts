@@ -64,6 +64,7 @@ export interface IEditorState {
   lockGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
+  inGestureToolMode: boolean,
   setLayersDone: boolean
 }
 

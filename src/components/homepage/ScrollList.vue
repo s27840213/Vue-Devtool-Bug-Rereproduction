@@ -42,7 +42,7 @@
           :class="{'padding-end': idx === list.length - 1}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
-            :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
+            :src="(type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`) || fallbackSrc"
             @click="type === 'theme' ? newDesign(item) : newDesignWithTemplate(item)"
             @error="handleNotFound")
           div(v-if="type === 'theme'"
@@ -175,9 +175,9 @@ export default Vue.extend({
     @media screen and (max-width: 768px) {
       column-gap: 20px;
     }
-    @media screen and (min-width: 1600px) {
-      justify-content: center;
-    }
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
     @include no-scrollbar;
   }
   &__plus {

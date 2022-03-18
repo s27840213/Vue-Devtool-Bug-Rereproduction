@@ -113,10 +113,17 @@ class TextPropUtils {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
     }
-    const updateSelectedLayersProps = (styles: { [key: string]: string | number | boolean }) => {
-      this.updateSelectedLayersProps(styles, tmpLayerIndex ?? NaN)
+    const updateTextParagraphs = (paragraphs: IParagraph[]) => {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
     }
-    const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersProps
+    const updateSelectedLayersStyles = (styles: { [key: string]: string | number | boolean }) => {
+      this.updateSelectedLayersStyles(styles, tmpLayerIndex ?? NaN)
+    }
+    const updateSelectedLayersParagraphs = (paragraphs: IParagraph[]) => {
+      this.updateSelectedLayersParagraphs(paragraphs, tmpLayerIndex ?? NaN)
+    }
+    const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersStyles
+    const paragraphHandler = typeof tmpLayerIndex === 'undefined' ? updateTextParagraphs : updateSelectedLayersParagraphs
     switch (propName) {
       case 'font-vertical': {
         const targetIsVertical = !!value
@@ -128,10 +135,41 @@ class TextPropUtils {
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
           // @TODO: need to reallocate position of each layer
         }
+        if (targetIsVertical) {
+          const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
+          this.removeInvalidStyles(paragraphs, targetIsVertical)
+          paragraphHandler(paragraphs)
+        }
         handler({ writingMode: targetWritingMode })
-        this.updateTextPropsState({ isVertical: targetIsVertical })
+        this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
+        tiptapUtils.updateHtml()
       }
     }
+  }
+
+  removeInvalidStyles(paragraphs: IParagraph[], isVertical: boolean, pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void) {
+    paragraphs.forEach((p) => {
+      pHandler && pHandler(p)
+      if (isVertical && p.styles.spanStyle) {
+        const pStyle = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(p.styles.spanStyle as string))
+        if (pStyle.style === 'italic') {
+          pStyle.style = 'normal'
+        }
+        if (pStyle.decoration === 'underline') {
+          pStyle.decoration = 'none'
+        }
+        p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
+      }
+      for (const span of p.spans) {
+        spanHandler && spanHandler(span)
+        if (isVertical && span.styles.style === 'italic') {
+          span.styles.style = 'normal'
+        }
+        if (isVertical && span.styles.decoration === 'underline') {
+          span.styles.decoration = 'none'
+        }
+      }
+    })
   }
 
   groupHandler(propName: string, value?: string | number, selStart = TextUtils.getNullSel(), selEnd = TextUtils.getNullSel(),
@@ -1181,10 +1219,17 @@ class TextPropUtils {
     })
   }
 
-  updateSelectedLayersProps(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
+  updateSelectedLayersStyles(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
     store.commit('UPDATE_selectedLayersStyles', {
       styles,
       layerIndex
+    })
+  }
+
+  updateSelectedLayersParagraphs(paragraphs: IParagraph[], tmpLayerIndex: number) {
+    store.commit('UPDATE_selectedTextParagraphs', {
+      paragraphs,
+      tmpLayerIndex
     })
   }
 
