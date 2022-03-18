@@ -930,7 +930,7 @@ class TextUtils {
     }
   }
 
-  async waitUntilAllFontsLoaded(config: IText, times: number) {
+  loadAllFonts(config: IText, times: number) {
     /*
       Gary: 因為預設字型檔案較大，剛進入畫面時的下載過程可能會佔用網路頻寬，
       造成後續api呼叫及圖片載入等等被卡住而有畫面延遲。
@@ -941,43 +941,37 @@ class TextUtils {
     // 僅剛進入editor需要判斷
     if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
       if (!((store.state as any).templates.categories.length > 0) && times < 5) {
-        return new Promise<void>(resolve => {
-          setTimeout(async () => {
-            await this.waitUntilAllFontsLoaded(config, times + 1)
-            resolve()
-          }, 3000)
-        })
+        setTimeout(() => {
+          this.loadAllFonts(config, times + 1)
+        }, 3000)
+        return
       }
       // 第一次載入的等待結束，firstLoad -> true
       store.commit('text/SET_firstLoad', true)
     }
 
-    const promises: Array<Promise<void>> = []
+    // const promises: Array<Promise<void>> = []
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
-      promises.push(store.dispatch('text/addFont', defaultFont).catch(e => console.error(e)))
+      // promises.push()
+      store.dispatch('text/addFont', defaultFont).catch(e => console.error(e))
     }
 
     for (const p of config.paragraphs) {
-      promises.push(store.dispatch('text/addFont', {
+      store.dispatch('text/addFont', {
         type: p.styles.type,
         face: p.styles.font,
         url: p.styles.fontUrl,
         ver: store.getters['user/getVerUni']
-      }).catch(e => console.error(e)))
+      }).catch(e => console.error(e))
       for (const span of p.spans) {
-        const promise = store.dispatch('text/addFont', {
+        store.dispatch('text/addFont', {
           type: span.styles.type,
           face: span.styles.font,
           url: span.styles.fontUrl,
           ver: store.getters['user/getVerUni']
         }).catch(e => console.error(e))
-
-        promises.push(promise)
       }
     }
-
-    await Promise
-      .all(promises)
   }
 }
 

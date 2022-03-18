@@ -51,7 +51,7 @@ export default Vue.extend({
     //   return
     // }
 
-    TextUtils.waitUntilAllFontsLoaded(this.config, 1)
+    TextUtils.loadAllFonts(this.config, 1)
 
     // if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
 
