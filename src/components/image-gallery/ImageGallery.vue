@@ -91,7 +91,6 @@ export default Vue.extend({
   },
   methods: {
     myfileUpdate() {
-      console.log('watch myfile')
       this.rows = this.galleryUtils
         .generate(this.myfile as any)
         .map((row, idx) => ({

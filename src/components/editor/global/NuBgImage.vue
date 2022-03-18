@@ -29,12 +29,9 @@ export default Vue.extend({
     const { srcObj } = this.image.config
     if (!srcObj || !srcObj.type) return
     const { assetId } = this.image.config.srcObj
-    if (srcObj.type === 'private') { // todo
+    if (srcObj.type === 'private') {
       const editorImg = store.getters['file/getEditorViewImageIndex']
-      console.log('editorImg', editorImg(), editorImg(assetId))
-
       if (!editorImg(assetId)) {
-        console.log('image or error update enter? bbbbggggg', new Set<string>([assetId]))
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
       }
     }

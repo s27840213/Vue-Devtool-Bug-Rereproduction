@@ -7,8 +7,6 @@
     btn(class="full-width mb-20"
       :type="'primary-mid'"
       @click.native="uploadImage()") {{$t('NN0014')}}
-    //- tmp-files(
-    //-   :inFilePanel="true")
     image-gallery(
       ref="gallery"
       :myfile="list"
@@ -47,8 +45,6 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
 
-const moduleName = 'file'
-
 export default Vue.extend({
   components: {
     SearchBar,
@@ -73,12 +69,12 @@ export default Vue.extend({
     networkUtils.offNetworkCahnge()
   },
   computed: {
-    ...mapState(moduleName, [
+    ...mapState('file', [
       'list',
       'pending'
     ]),
-    ...mapGetters(moduleName, {
-      checkedAssets: 'getCheckedAssets'
+    ...mapGetters({
+      checkedAssets: 'file/getCheckedAssets'
     }),
     margin(): number {
       return this.galleryUtils.margin
@@ -104,15 +100,15 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions(moduleName, {
-      deleteAssets: 'deleteAssets',
-      getFiles: 'getFiles'
+    ...mapActions({
+      deleteAssets: 'file/deleteAssets',
+      getMoreMyfiles: 'file/getMoreMyfiles'
     }),
-    ...mapMutations(moduleName, {
-      clearCheckedAssets: 'CLEAR_CHECKED_ASSETS'
+    ...mapMutations({
+      clearCheckedAssets: 'file/CLEAR_CHECKED_ASSETS'
     }),
     handleLoadMore() {
-      !this.pending && this.getFiles()
+      !this.pending && this.getMoreMyfiles()
     },
     uploadImage() {
       if (!this.online) {

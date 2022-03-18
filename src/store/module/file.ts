@@ -70,11 +70,10 @@ function addPerviewUrl(data: any[]) {
 }
 
 function isPrivate(srcObj: SrcObj):string {
-  return srcObj.type === 'private' ? srcObj.assetId.toString() : ''
+  return (srcObj && srcObj.type === 'private') ? srcObj.assetId.toString() : ''
 }
 
 function addMyfile(response: [IUserImageContentData]):void {
-  console.log('init image', response, state.pending)
   const data: Record<string, any> = {}
   for (const img of response) {
     data[img.asset_index] = img.signed_url
@@ -84,7 +83,6 @@ function addMyfile(response: [IUserImageContentData]):void {
     store.commit('file/SET_STATE', {
       editorViewImage: Object.assign({}, state.editorViewImage, data)
     })
-    console.log('init end', state.editorViewImage, Object.keys(state.editorViewImage), Object.keys(state.editorViewImage).length)
   }
 
   store.commit('file/SET_STATE', {
@@ -93,12 +91,11 @@ function addMyfile(response: [IUserImageContentData]):void {
     pending: false,
     initialized: true
   })
-  console.log('init end 2', state.pageIndex, state.list, state.list.length)
 }
 
 const actions: ActionTree<IPhotoState, unknown> = {
-  async getFiles({ commit }) {
-    const { list, pageIndex } = state
+  async getMoreMyfiles({ commit }) {
+    const { pageIndex } = state
 
     if (pageIndex === -1) {
       return
@@ -108,7 +105,6 @@ const actions: ActionTree<IPhotoState, unknown> = {
     try {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
       addMyfile(rawData.data.data.image.content)
-      console.log('get file', state.list, rawData.data.data.image.content)
     } catch (error) {
       captureException(error)
     }
@@ -128,8 +124,8 @@ const actions: ActionTree<IPhotoState, unknown> = {
       userApis.updateAsset({ ...params }).then(() => {
         commit(SET_STATE, {
           checkedAssets: [],
-          list: state.list.filter((item: any) => {
-            return !state.checkedAssets.includes(item.assetIndex)
+          list: state.list.filter((item: IAssetPhoto) => {
+            return !state.checkedAssets.includes(item.assetIndex as number)
           })
         })
       })
@@ -160,7 +156,6 @@ const actions: ActionTree<IPhotoState, unknown> = {
     }
 
     imgToRequest.delete('') // delete empty asset id
-    console.log('img to request', imgToRequest, layers, store.state.pages[pageIndex])
     await dispatch('updateImages', { assetSet: imgToRequest })
   },
   async updateImages({ commit }, { assetSet }) {
@@ -181,7 +176,6 @@ const actions: ActionTree<IPhotoState, unknown> = {
       commit(SET_STATE, {
         editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
       })
-      console.log('update end', data.data.url_map, state.editorViewImage, Object.keys(state.editorViewImage).length)
     })
   },
   initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData]}) {
@@ -240,7 +234,7 @@ const mutations: MutationTree<IPhotoState> = {
         tiny: imageFile.src
       }
     }
-    state.list.unshift(previewImage as any)
+    state.list.unshift(previewImage)
   },
   [UPDATE_PROGRESS](state: IPhotoState, { assetId, progress }) {
     const targetIndex = state.list.findIndex((img: IAssetPhoto) => {
@@ -256,22 +250,19 @@ const mutations: MutationTree<IPhotoState> = {
       return isAdmin ? img.id === assetId : img.assetIndex === assetId
     })
 
-    const da = addPerviewUrl([{
+    const data = addPerviewUrl([{
       width: list[targetIndex].width,
       height: list[targetIndex].height,
       id: isAdmin ? assetId : undefined,
       asset_index: assetIndex ?? assetId,
       signed_url: urls
     }])
-    state.list[targetIndex] = (da as any)[0]
+    state.list[targetIndex] = data[0]
+    state.editorViewImage[data[0].assetIndex] = data[0].urls
   }
 }
 
 const getters: GetterTree<IPhotoState, any> = {
-  // getCurrentPageFile(state) {
-  //   const { pageIndex, list } = state
-  //   return list[pageIndex] || []
-  // },
   getImages(state) {
     return state.list
   },

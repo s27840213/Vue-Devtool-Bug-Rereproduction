@@ -268,7 +268,6 @@ export default Vue.extend({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
-    console.log('mounted', !this.isOutOfBound, this.setLayersDone)
     if (!this.isOutOfBound && this.setLayersDone) {
       // Will be trigger if user go to B design after go to A design
       // or after developer modify NuPage.vue and re-yarn serve.
@@ -389,14 +388,12 @@ export default Vue.extend({
     },
     isOutOfBound(newVal: boolean) {
       // If user see this page, request private url.
-      console.log('watch bound', !newVal, this.pageIndex)
       if (!newVal) {
         this.loadLayerImg()
       }
     },
     setLayersDone(newVal: boolean) {
       // First page will not trigger watch isOutOfBound, so trigger it when uploadUtils call SET_pages.
-      console.log('watch set layers', newVal, this.pageIndex)
       if (newVal) {
         this.loadLayerImg()
       }
