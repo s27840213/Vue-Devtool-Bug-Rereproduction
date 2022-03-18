@@ -4,7 +4,7 @@ import { IDownloadServiceParams, IDownloadServiceResponse } from '@/interfaces/d
 import { AxiosError } from 'axios'
 
 class DownloadService {
-  createFile (params: IDownloadServiceParams) {
+  createFile (params: IDownloadServiceParams, useDev = false) {
     const data = {
       token: authToken().token || '',
       team_id: params.teamId,
@@ -18,7 +18,9 @@ class DownloadService {
       pdf_quality: params.pdfQuality,
       merge: params.merge,
       split_size: params.splitSize
-      // new_test: 1
+    } as {[key: string]: any}
+    if (useDev) {
+      data.new_test = 1
     }
     return axios.request<IDownloadServiceResponse>({
       url: '/export-template',
