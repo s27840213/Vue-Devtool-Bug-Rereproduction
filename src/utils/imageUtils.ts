@@ -41,14 +41,8 @@ class ImageUtils {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
       case 'private': {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (img) {
-          for (const [k, v] of Object.entries(img.urls)) {
-            if (k === size) return v
-          }
-        }
-        return ''
+        const editorImg = store.getters['file/getEditorViewImageIndex']
+        return editorImg(assetId) ? editorImg(assetId)[size as string] : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`

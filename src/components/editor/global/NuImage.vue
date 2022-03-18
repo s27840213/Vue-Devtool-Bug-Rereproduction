@@ -181,7 +181,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('user', ['updateImages']),
+    ...mapActions('file', ['updateImages']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
@@ -220,7 +220,9 @@ export default Vue.extend({
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+          })
         } catch (error) {
         }
       }
@@ -229,6 +231,8 @@ export default Vue.extend({
       this.isOnError = false
     },
     async perviewAsLoading() {
+      // First put a preview to this.src, then start to load the image user want. When loading finish,
+      // if user still need that image, put it to this.src to replace preview, otherwise do nothing.
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
         const img = new Image()
@@ -250,15 +254,6 @@ export default Vue.extend({
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-      const { assetId } = this.config.srcObj
-      if (type === 'private') {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (!img) {
-          await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
-        }
-      }
-
       await this.perviewAsLoading()
 
       const preImg = new Image()

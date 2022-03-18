@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
+import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
@@ -33,6 +33,7 @@ import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import file from '@/store/module/file'
 
 Vue.use(Vuex)
 
@@ -94,7 +95,8 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   themes: [],
   hasCopiedFormat: false,
-  inGestureToolMode: false
+  inGestureToolMode: false,
+  setLayersDone: false
 })
 
 const state = getDefaultState()
@@ -254,6 +256,9 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
+  SET_setLayersDone() {
+    state.setLayersDone = true
+  },
   SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportIds: string }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {
@@ -788,6 +793,7 @@ export default new Vuex.Store({
     markers,
     brandkit,
     unsplash,
-    bgRemove
+    bgRemove,
+    file
   }
 })

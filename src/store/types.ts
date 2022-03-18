@@ -64,7 +64,8 @@ export interface IEditorState {
   lockGuideline: boolean,
   themes: Itheme[],
   hasCopiedFormat: boolean,
-  inGestureToolMode: boolean
+  inGestureToolMode: boolean,
+  setLayersDone: boolean
 }
 
 export enum SidebarPanelType {

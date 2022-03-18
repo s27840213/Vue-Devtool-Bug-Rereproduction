@@ -64,12 +64,11 @@ const routes: Array<RouteConfig> = [
     // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        next()
         const urlParams = new URLSearchParams(window.location.search)
         const url = urlParams.get('url')
 
         if (url) {
-          // e.g.: https://test.vivipic.com/editor?url=template.vivipic.com%2Fexport%2F9XBAb9yoKlJbzLiWNUVM%2F211123164456873giej3iKR%2Fpage_0.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
+          // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
           const hasToken = url.indexOf('token=') !== -1
           let tokenKey = ''
           let src = url
@@ -80,12 +79,12 @@ const routes: Array<RouteConfig> = [
             const teamId = url.substr((src + tokenKey + token + '&team_id=').length)
             store.commit('user/SET_STATE', { token, teamId })
           }
-          fetch(`https://${src}`)
-            .then(response => response.json())
-            .then(json => { assetUtils.addTemplate(json, { pageIndex: 0 }) })
-
+          const response = await (await fetch(`https://${src}`)).json()
+          await assetUtils.addTemplate(response, { pageIndex: 0 })
+          await store.dispatch('file/updatePageImages', { pageIndex: 0 })
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
         }
+        next()
       } catch (error) {
         console.log(error)
       }

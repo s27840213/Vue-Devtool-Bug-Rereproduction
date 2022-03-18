@@ -62,7 +62,7 @@
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
-    template(v-if="!isOutOfBound || hasEditingText")
+    template(v-if="(!isOutOfBound && imgLoaded) || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles()"
@@ -237,6 +237,8 @@ export default Vue.extend({
       initialPageHeight: 0,
       isShownResizerHint: false,
       isResizingPage: false,
+      imgLoaded: false,
+      imgLoading: false,
       pageIsHover: false,
       ImageUtils,
       layerUtils,
@@ -266,9 +268,14 @@ export default Vue.extend({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
+    if (!this.isOutOfBound && this.setLayersDone) {
+      // Will be trigger if user go to B design after go to A design
+      // or after developer modify NuPage.vue and re-yarn serve.
+      this.loadLayerImg()
+    }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapState(['isMoving', 'currDraggedPhoto', 'setLayersDone']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -378,6 +385,18 @@ export default Vue.extend({
         this.getClosestSnaplines()
       },
       deep: true
+    },
+    isOutOfBound(newVal: boolean) {
+      // If user see this page, request private url.
+      if (!newVal) {
+        this.loadLayerImg()
+      }
+    },
+    setLayersDone(newVal: boolean) {
+      // First page will not trigger watch isOutOfBound, so trigger it when uploadUtils call SET_pages.
+      if (newVal) {
+        this.loadLayerImg()
+      }
     }
   },
   methods: {
@@ -391,6 +410,14 @@ export default Vue.extend({
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
+    async loadLayerImg() {
+      if (!this.imgLoaded && !this.imgLoaded && !this.imgLoading) {
+        this.imgLoading = true
+        await this.$store.dispatch('file/updatePageImages', { pageIndex: this.pageIndex })
+        this.imgLoaded = true
+        this.imgLoading = false
+      }
+    },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width}px`,
