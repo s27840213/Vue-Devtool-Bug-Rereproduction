@@ -620,7 +620,7 @@ class TextUtils {
     return textHW
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false) {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     if (subLayerIndex !== -1) {
@@ -637,25 +637,27 @@ class TextUtils {
       /**
        * Group layout height compensation
        */
-      const isAllHorizon = !group.layers
-        .some(l => l.type === 'text' &&
-          ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
-      if (isAllHorizon) {
-        const lowLine = config.styles.y + originSize.height
-        const diff = textHW.height - originSize.height
-        const targetSubLayers: Array<[number, number]> = []
-        group.layers
-          .forEach((l, idx) => {
-            if (l.styles.y >= lowLine) {
-              targetSubLayers.push([idx, l.styles.y])
-            }
-          })
-        targetSubLayers
-          .forEach(data => {
-            LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, data[0], {
-              y: data[1] + diff
+      if (!noPush) {
+        const isAllHorizon = !group.layers
+          .some(l => l.type === 'text' &&
+            ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+        if (isAllHorizon) {
+          const lowLine = config.styles.y + originSize.height
+          const diff = textHW.height - originSize.height
+          const targetSubLayers: Array<[number, number]> = []
+          group.layers
+            .forEach((l, idx) => {
+              if (l.styles.y >= lowLine) {
+                targetSubLayers.push([idx, l.styles.y])
+              }
             })
-          })
+          targetSubLayers
+            .forEach(data => {
+              LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, data[0], {
+                y: data[1] + diff
+              })
+            })
+        }
       }
     }
     let { width, height } = calcTmpProps(group.layers)
@@ -723,7 +725,7 @@ class TextUtils {
     this.updateGroupLayerSize(pageIndex, layerIndex)
   }
 
-  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, noPush = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
@@ -732,10 +734,10 @@ class TextUtils {
       const heightOri = config.styles.height
       const textHW = textShapeUtils.getCurveTextProps(config as IText)
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
-      this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri)
+      this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, noPush)
     }
   }
 
