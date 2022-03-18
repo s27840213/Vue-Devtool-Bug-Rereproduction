@@ -104,8 +104,8 @@ export default Vue.extend({
     }
   },
   mounted() {
-    window.addEventListener('keydown', this.handleKeydown)
-    window.addEventListener('keyup', this.handleKeydown)
+    // window.addEventListener('keydown', this.handleKeydown)
+    // window.addEventListener('keyup', this.handleKeydown)
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
@@ -522,15 +522,15 @@ export default Vue.extend({
     handleStepChange() {
       this.isShowGuidelineV = false
       this.isShowGuidelineH = false
-    },
-    handleKeydown(e: KeyboardEvent) {
-      if (e.key === ' ') {
-        e.preventDefault()
-        if (!e.repeat) {
-          this.setInGestureMode(!this.getInInGestureMode)
-        }
-      }
     }
+    // handleKeydown(e: KeyboardEvent) {
+    //   if (e.key === ' ') {
+    //     e.preventDefault()
+    //     if (!e.repeat) {
+    //       this.setInGestureMode(!this.getInInGestureMode)
+    //     }
+    //   }
+    // }
   }
 })
 </script>
