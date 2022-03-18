@@ -2,10 +2,12 @@ import store from '@/store'
 import file from '@/apis/file'
 import userApis from '@/apis/user'
 import _ from 'lodash'
+import apiUtils from '@/utils/apiUtils'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
-import { IFrame, IImage } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
+import { SrcObj } from '@/interfaces/gallery'
 
 const SET_STATE = 'SET_STATE' as const
 const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
@@ -67,6 +69,33 @@ function addPerviewUrl(data: any[]) {
   })
 }
 
+function isPrivate(srcObj: SrcObj):string {
+  return srcObj.type === 'private' ? srcObj.assetId.toString() : ''
+}
+
+function addMyfile(response: [IUserImageContentData]):void {
+  console.log('init image', response, state.pending)
+  const data: Record<string, any> = {}
+  for (const img of response) {
+    data[img.asset_index] = img.signed_url
+  }
+
+  if (!store.getters['user/isAdmin']) {
+    store.commit('file/SET_STATE', {
+      editorViewImage: Object.assign({}, state.editorViewImage, data)
+    })
+    console.log('init end', state.editorViewImage, Object.keys(state.editorViewImage), Object.keys(state.editorViewImage).length)
+  }
+
+  store.commit('file/SET_STATE', {
+    list: state.list.concat(addPerviewUrl(response)),
+    pageIndex: state.pageIndex + response.length,
+    pending: false,
+    initialized: true
+  })
+  console.log('init end 2', state.pageIndex, state.list, state.list.length)
+}
+
 const actions: ActionTree<IPhotoState, unknown> = {
   async getFiles({ commit }) {
     const { list, pageIndex } = state
@@ -77,13 +106,8 @@ const actions: ActionTree<IPhotoState, unknown> = {
 
     commit(SET_STATE, { pending: true })
     try {
-      const rawData = await file.getFiles({ pageIndex })
-      const data = addPerviewUrl(rawData.data.data.image.content)
-      commit(SET_STATE, {
-        list: list.concat(data),
-        pageIndex: rawData.data.next_page,
-        pending: false
-      })
+      const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
+      addMyfile(rawData.data.data.image.content)
       console.log('get file', state.list, rawData.data.data.image.content)
     } catch (error) {
       captureException(error)
@@ -117,13 +141,20 @@ const actions: ActionTree<IPhotoState, unknown> = {
     const { layers, backgroundImage } = store.state.pages[pageIndex]
     const imgToRequest = new Set<string>()
 
-    imgToRequest.add(backgroundImage.config.srcObj.assetId.toString())
+    imgToRequest.add(isPrivate(backgroundImage.config.srcObj))
     for (const layer of layers) {
-      if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
-        imgToRequest.add((layer as IImage).srcObj.assetId.toString())
-      } else if (layer.type === 'frame') {
-        for (const clip of (layer as IFrame).clips) {
-          imgToRequest.add(clip.srcObj.assetId.toString())
+      const targets = layer.type === 'group' ? (layer as IGroup).layers : [layer]
+
+      for (const target of targets) {
+        switch (target.type) {
+          case 'image':
+            imgToRequest.add(isPrivate((target as IImage).srcObj))
+            break
+          case 'frame':
+            for (const clip of (target as IFrame).clips) {
+              imgToRequest.add(isPrivate(clip.srcObj))
+            }
+            break
         }
       }
     }
@@ -158,26 +189,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       return
     }
 
-    console.log('init image', imgs, state.pending)
-    const data: Record<string, any> = {}
-    for (const img of imgs) {
-      data[img.asset_index] = img.signed_url
-    }
-
-    if (!store.getters['user/isAdmin']) {
-      commit(SET_STATE, {
-        editorViewImage: Object.assign({}, state.editorViewImage, data)
-      })
-      console.log('init end', state.editorViewImage, Object.keys(state.editorViewImage), Object.keys(state.editorViewImage).length)
-    }
-
-    commit(SET_STATE, {
-      list: state.list.concat(addPerviewUrl(imgs)),
-      pageIndex: imgs.length,
-      pending: false,
-      initialized: true
-    })
-    console.log('init end 2', state.pageIndex, state.list, state.list.length)
+    addMyfile(imgs)
   }
 }
 
