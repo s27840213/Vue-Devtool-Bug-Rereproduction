@@ -975,6 +975,50 @@ class TextUtils {
       }
     }
   }
+
+  autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): number {
+    if (config.widthLimit === -1) return config.widthLimit
+    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+    const scale = config.styles.scale
+    let direction = 0
+    let shouldContinue = true
+    let widthLimit = initSize.widthLimit
+    let autoSize = this.getTextHW(config, widthLimit)
+    const originDimension = initSize[dimension]
+    let prevDiff = Number.MAX_VALUE
+    let prevWidthLimit = -1
+    while (shouldContinue) {
+      const autoDimension = autoSize[dimension]
+      const currDiff = Math.abs(autoDimension - originDimension)
+      if (currDiff > prevDiff) {
+        if (prevWidthLimit !== -1) {
+          return prevWidthLimit
+        } else {
+          return config.widthLimit
+        }
+      }
+      prevDiff = currDiff
+      prevWidthLimit = widthLimit
+      if (autoDimension - originDimension > 5 * scale) {
+        if (direction < 0) break
+        if (direction >= 20) return config.widthLimit
+        widthLimit += scale
+        direction += 1
+        autoSize = this.getTextHW(config, widthLimit)
+        continue
+      }
+      if (originDimension - autoDimension > 5 * scale) {
+        if (direction > 0) break
+        if (direction <= -20) return config.widthLimit
+        widthLimit -= scale
+        direction -= 1
+        autoSize = this.getTextHW(config, widthLimit)
+        continue
+      }
+      shouldContinue = false
+    }
+    return widthLimit
+  }
 }
 
 export default new TextUtils()

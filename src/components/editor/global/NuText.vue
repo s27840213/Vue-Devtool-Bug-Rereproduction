@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { IGroup, ISpanStyle } from '@/interfaces/layer'
+import { IGroup, ISpanStyle, IText } from '@/interfaces/layer'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
@@ -31,6 +31,7 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -70,25 +71,26 @@ export default Vue.extend({
     }
 
     this.resizeObserver = new (window as any).ResizeObserver(() => {
-      if (this.isDestroyed || textShapeUtils.isCurvedText(this.config.styles)) return
+      const config = generalUtils.deepCopy(this.config) as IText
+      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
       // console.log('resize')
 
       let widthLimit
       if (this.isLoading) {
-        widthLimit = this.autoResize()
+        widthLimit = TextUtils.autoResize(config, this.initSize)
       } else {
-        widthLimit = this.config.widthLimit
+        widthLimit = config.widthLimit
       }
-      const textHW = TextUtils.getTextHW(this.config, widthLimit)
+      const textHW = TextUtils.getTextHW(config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
-        let x = this.config.styles.x
-        let y = this.config.styles.y
-        if (this.config.styles.widthLimit === -1) {
-          if (this.config.styles.writingMode.includes('vertical')) {
-            y = this.config.styles.y - (textHW.height - this.config.styles.height) / 2
+        let x = config.styles.x
+        let y = config.styles.y
+        if (config.styles.widthLimit === -1) {
+          if (config.styles.writingMode.includes('vertical')) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
           } else {
-            x = this.config.styles.x - (textHW.width - this.config.styles.width) / 2
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
           }
         }
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
@@ -173,49 +175,6 @@ export default Vue.extend({
       ps.forEach(p => {
         this.resizeObserver && this.resizeObserver.observe(p as Element)
       })
-    },
-    autoResize(): number {
-      if (this.config.widthLimit === -1) return this.config.widthLimit
-      const dimension = this.config.styles.writingMode.includes('vertical') ? 'width' : 'height'
-      const scale = this.config.styles.scale
-      let direction = 0
-      let shouldContinue = true
-      let widthLimit = this.initSize.widthLimit
-      let autoSize = TextUtils.getTextHW(this.config, widthLimit)
-      const originDimension = this.initSize[dimension]
-      let prevDiff = Number.MAX_VALUE
-      let prevWidthLimit = -1
-      while (shouldContinue) {
-        const autoDimension = autoSize[dimension]
-        const currDiff = Math.abs(autoDimension - originDimension)
-        if (currDiff > prevDiff) {
-          if (prevWidthLimit !== -1) {
-            return prevWidthLimit
-          } else {
-            return this.config.widthLimit
-          }
-        }
-        prevDiff = currDiff
-        prevWidthLimit = widthLimit
-        if (autoDimension - originDimension > 5 * scale) {
-          if (direction < 0) break
-          if (direction >= 20) return this.config.widthLimit
-          widthLimit += scale
-          direction += 1
-          autoSize = TextUtils.getTextHW(this.config, widthLimit)
-          continue
-        }
-        if (originDimension - autoDimension > 5 * scale) {
-          if (direction > 0) break
-          if (direction <= -20) return this.config.widthLimit
-          widthLimit -= scale
-          direction -= 1
-          autoSize = TextUtils.getTextHW(this.config, widthLimit)
-          continue
-        }
-        shouldContinue = false
-      }
-      return widthLimit
     }
   }
 })
