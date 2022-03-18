@@ -42,7 +42,7 @@
           :class="{'padding-end': idx === list.length - 1}")
           img(class="pointer scroll-list__item-image"
             :class="{'square': type === 'template'}"
-            :src="fallbackSrc || (type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`)"
+            :src="(type === 'theme' ? item.url : `https://template.vivipic.com/template/${item.id}/prev_2x?ver=${item.ver}`) || fallbackSrc"
             @click="type === 'theme' ? newDesign(item) : newDesignWithTemplate(item)"
             @error="handleNotFound")
           div(v-if="type === 'theme'"
