@@ -5,6 +5,7 @@ import _ from 'lodash'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
+import { IFrame, IImage } from '@/interfaces/layer'
 
 const SET_STATE = 'SET_STATE' as const
 const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
@@ -112,10 +113,29 @@ const actions: ActionTree<IPhotoState, unknown> = {
       console.log(error)
     }
   },
+  async updatePageImages({ dispatch }, { pageIndex }: { pageIndex: number }) {
+    const { layers } = store.state.pages[pageIndex]
+    const imgToRequest = new Set<string>()
+
+    for (const layer of layers) {
+      if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
+        imgToRequest.add((layer as IImage).srcObj.assetId.toString())
+      } else if (layer.type === 'frame') {
+        for (const clip of (layer as IFrame).clips) {
+          if (clip.srcObj.assetId) {
+            imgToRequest.add(clip.srcObj.assetId.toString())
+          }
+        }
+      }
+    }
+    console.log('img to request', imgToRequest, layers)
+    await dispatch('updateImages', { assetSet: imgToRequest })
+  },
   async updateImages({ commit }, { assetSet }) {
     // Request unknown private image url
     // If you want to reduce redundant update asset, assetSet should be Set<string>.
     // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
+
     const token = userApis.getToken()
     assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImage))
     assetSet = Array.from(assetSet).join(',')

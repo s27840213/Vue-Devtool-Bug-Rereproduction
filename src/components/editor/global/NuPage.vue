@@ -416,20 +416,7 @@ export default Vue.extend({
     async loadLayerImg() {
       if (!this.imgLoaded && !this.imgLoaded && !this.imgLoading) {
         this.imgLoading = true
-        const imgToRequest = new Set<string>()
-        for (const layer of this.config.layers) {
-          if (layer.type === 'image' && (layer as IImage).srcObj.type === 'private') {
-            imgToRequest.add((layer as IImage).srcObj.assetId.toString())
-          } else if (layer.type === 'frame') {
-            for (const clip of (layer as IFrame).clips) {
-              if (clip.srcObj.assetId) {
-                imgToRequest.add(clip.srcObj.assetId.toString())
-              }
-            }
-          }
-        }
-        console.log('img to request', imgToRequest, this.config.layers)
-        await this.$store.dispatch('file/updateImages', { assetSet: imgToRequest })
+        await this.$store.dispatch('file/updatePageImages', { pageIndex: this.pageIndex })
         this.imgLoaded = true
         this.imgLoading = false
       }
