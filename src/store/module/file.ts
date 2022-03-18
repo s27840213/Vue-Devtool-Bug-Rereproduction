@@ -73,7 +73,7 @@ function isPrivate(srcObj: SrcObj):string {
   return (srcObj && srcObj.type === 'private') ? srcObj.assetId.toString() : ''
 }
 
-function addMyfile(response: [IUserImageContentData]):void {
+function addMyfile(response: [IUserImageContentData], pageIndex: number):void {
   const data: Record<string, any> = {}
   for (const img of response) {
     data[img.asset_index] = img.signed_url
@@ -87,7 +87,7 @@ function addMyfile(response: [IUserImageContentData]):void {
 
   store.commit('file/SET_STATE', {
     list: state.list.concat(addPerviewUrl(response)),
-    pageIndex: state.pageIndex + response.length,
+    pageIndex: pageIndex,
     pending: false,
     initialized: true
   })
@@ -104,7 +104,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
     commit(SET_STATE, { pending: true })
     try {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
-      addMyfile(rawData.data.data.image.content)
+      addMyfile(rawData.data.data.image.content, rawData.data.next_page)
     } catch (error) {
       captureException(error)
     }
@@ -183,7 +183,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       return
     }
 
-    addMyfile(imgs)
+    addMyfile(imgs, imgs.length)
   }
 }
 
@@ -257,7 +257,12 @@ const mutations: MutationTree<IPhotoState> = {
       asset_index: assetIndex ?? assetId,
       signed_url: urls
     }])
-    state.list[targetIndex] = data[0]
+
+    // state.list[targetIndex] = Object.assign({}, data[0])
+    // Below code reduandont but and work, above don't work, src will get data:image/...
+    state.list[targetIndex].urls = data[0].urls
+    state.list[targetIndex].id = isAdmin ? assetId : undefined
+    state.list[targetIndex].assetIndex = assetIndex ?? assetId
     state.editorViewImage[data[0].assetIndex] = data[0].urls
   }
 }
