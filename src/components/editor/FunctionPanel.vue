@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel scrollbar-gray"
+  div(class="function-panel scrollbar-gray-thin"
     :style="functionPanelStyles")
     div(class="function-panel__topbar")
       svg-icon(:class="{'pointer': !isInFirstStep}"

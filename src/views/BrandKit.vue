@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="brand-kit scrollbar-gray relative"
+  div(class="brand-kit scrollbar-gray-thin relative"
     @dragover.prevent.stop="handleDragEnter"
     @dragenter.prevent.stop="handleDragEnter"
     @dragleave.prevent.stop="handleDragLeave"
@@ -225,7 +225,7 @@ export default Vue.extend({
 }
 
 .delete-confirm {
-  background: #FFFFFF;
+  background: #ffffff;
   box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
   border-radius: 6px;
   padding: 20px;
@@ -259,7 +259,7 @@ export default Vue.extend({
       }
     }
     &__confirm {
-      background: #EC5858;
+      background: #ec5858;
       border-radius: 5px;
       padding: 4px 23px;
       & > span {

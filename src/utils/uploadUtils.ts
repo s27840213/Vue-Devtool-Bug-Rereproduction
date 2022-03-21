@@ -1041,8 +1041,12 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                if (teamId === this.teamId) {
-                  store.commit('SET_assetId', teamId === this.teamId ? designId : generalUtils.generateAssetId)
+                if (router.currentRoute.query.team_id === this.teamId) {
+                  store.commit('SET_assetId', designId)
+                } else {
+                  const id = generalUtils.generateAssetId()
+                  store.commit('SET_assetId', id)
+                  router.replace({ query: Object.assign({}, router.currentRoute.query, { design_id: id, team_id: this.teamId }) })
                 }
                 /**
                  * @todo fix the filter function below
