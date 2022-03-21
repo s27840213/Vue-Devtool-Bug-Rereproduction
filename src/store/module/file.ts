@@ -69,11 +69,11 @@ function addPerviewUrl(data: any[]) {
   })
 }
 
-function isPrivate(srcObj: SrcObj):string {
+function isPrivate(srcObj: SrcObj): string {
   return (srcObj && srcObj.type === 'private') ? srcObj.assetId.toString() : ''
 }
 
-function addMyfile(response: [IUserImageContentData], pageIndex: number):void {
+function addMyfile(response: [IUserImageContentData], pageIndex: number): void {
   const data: Record<string, any> = {}
   for (const img of response) {
     data[img.asset_index] = img.signed_url
@@ -178,7 +178,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       })
     })
   },
-  initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData]}) {
+  initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData] }) {
     if (state.initialized) {
       return
     }
@@ -274,7 +274,7 @@ const getters: GetterTree<IPhotoState, any> = {
   getCheckedAssets(state) {
     return state.checkedAssets
   },
-  getEditorViewImageIndex: (state) => (assetId: string|undefined = undefined) => {
+  getEditorViewImageIndex: (state) => (assetId: string | undefined = undefined) => {
     return assetId ? state.editorViewImage[assetId] : state.editorViewImage
   }
 }

@@ -55,12 +55,10 @@ import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IImage } from '@/interfaces/layer'
 import { IBgRemoveInfo } from '@/interfaces/image'
+import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
-import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data() {

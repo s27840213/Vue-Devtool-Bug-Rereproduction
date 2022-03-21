@@ -45,6 +45,7 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
+    this.src = this.uploadingImagePreviewSrc === undefined ? ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) : this.uploadingImagePreviewSrc
     const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
       (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
     if (!this.config.forRender && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
@@ -66,7 +67,7 @@ export default Vue.extend({
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
+      src: '',
       filter: undefined as unknown as HTMLElement
     }
   },
@@ -178,6 +179,9 @@ export default Vue.extend({
      *  only used for rendering as image controlling */
     forRender(): boolean {
       return this.config.forRender ?? false
+    },
+    uploadingImagePreviewSrc(): string {
+      return this.config.previewSrc
     }
   },
   methods: {
@@ -216,7 +220,6 @@ export default Vue.extend({
       }
     },
     onError() {
-      console.log('image on error')
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
@@ -233,6 +236,9 @@ export default Vue.extend({
     async perviewAsLoading() {
       // First put a preview to this.src, then start to load the image user want. When loading finish,
       // if user still need that image, put it to this.src to replace preview, otherwise do nothing.
+      if (this.uploadingImagePreviewSrc) {
+        return
+      }
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
         const img = new Image()
