@@ -108,10 +108,15 @@ export default Vue.extend({
     },
     scaleStyles() {
       let { width, height } = this.config.styles
-      const { scale, scaleX, scaleY, zindex } = this.config.styles
+      const { scale, scaleX, scaleY, zindex, shadow } = this.config.styles
       const { type } = this.config
       width /= (type === LayerType.image ? 1 : scale)
       height /= (type === LayerType.image ? 1 : scale)
+
+      const transform = type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+      // if (type === LayerType.image && shadow.currentEffect === 'shadow') {
+      //   transform = `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+      // }
 
       /**
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
@@ -120,7 +125,7 @@ export default Vue.extend({
       const styles = {
         width: this.config.type === 'shape' ? '' : `${width}px`,
         height: this.config.type === 'shape' ? '' : `${height}px`,
-        transform: type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        transform,
         'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles

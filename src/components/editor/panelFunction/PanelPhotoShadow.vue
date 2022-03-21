@@ -114,7 +114,8 @@ export default Vue.extend({
   data() {
     return {
       shadowPropI18nMap,
-      fieldRange
+      fieldRange,
+      update: undefined as number | undefined
     }
   },
   computed: {

@@ -8,11 +8,13 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
-    canvas(v-if="isShadowImage"
-      ref="canvas"
-      :width="config.styles.width * canvasScale"
-      :height="config.styles.height * canvasScale"
-    )
+    div(v-if="isShadowImage"
+      :style="canvasWrapperStyle()"
+      class="canvas-wrapper")
+      canvas(ref="canvas"
+        :width="config.styles.initWidth * canvasScale"
+        :height="config.styles.initHeight * canvasScale"
+      )
     img(v-show="!isAdjustImage && !isShadowImage"
       ref="img"
       :style="flipStyles()"
@@ -105,14 +107,20 @@ export default Vue.extend({
       },
       deep: true
     },
-    scale() {
-      !this.forRender && this.updateShadowEffect(this.shadowEffects)
-    },
+    // scale() {
+    //   !this.forRender && this.updateShadowEffect(this.shadowEffects)
+    // },
     shadowEffects(val) {
-      !this.forRender && this.updateShadowEffect(val)
+      if (this.$refs.canvas) {
+        !this.forRender && this.updateShadowEffect(val)
+      }
     },
     currentShadowEffect() {
-      !this.forRender && this.handleNewShadowEffect()
+      if (this.$refs.canvas && !this.forRender) {
+        this.handleNewShadowEffect()
+      } else if (!this.forRender) {
+        this.$nextTick(() => this.handleNewShadowEffect())
+      }
     }
   },
   components: { NuAdjustImage },
@@ -138,7 +146,7 @@ export default Vue.extend({
         .some(val => typeof val === 'number' && val !== 0)
     },
     isShadowImage(): boolean {
-      return this.currentShadowEffect !== 'none'
+      return [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(this.currentShadowEffect)
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -166,7 +174,7 @@ export default Vue.extend({
     shadowEffects(): IShadowEffects {
       return this.shadow.effects
     },
-    currentShadowEffect(): string {
+    currentShadowEffect(): ShadowEffectType {
       return this.shadow.currentEffect
     },
     scale(): number {
@@ -200,6 +208,14 @@ export default Vue.extend({
         width: `${imgWidth}px`,
         height: `${imgHeight}px`,
         ...inheritStyle
+      }
+    },
+    canvasWrapperStyle() {
+      return {
+        width: `${this.config.styles.initWidth * this.canvasScale}px`,
+        height: `${this.config.styles.initHeight * this.canvasScale}px`,
+        transform: `scale(${this.config.styles.scale})`,
+        flexShrink: 0
       }
     },
     flipStyles() {
@@ -295,16 +311,7 @@ export default Vue.extend({
       const { currentEffect } = this.shadow
       // if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
       if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
-        const draw = () => {
-          this.$nextTick(() => {
-            if (this.$refs.canvas) {
-              imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.$refs.img as HTMLImageElement, this.config)
-            } else {
-              draw()
-            }
-          })
-        }
-        draw()
+        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.$refs.img as HTMLImageElement, this.config)
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
@@ -334,7 +341,10 @@ export default Vue.extend({
   align-items: center;
   &__picture {
     object-fit: cover;
-    // object-fit: fill;
+    width: 100%;
+    height: 100%;
+  }
+  canvas {
     width: 100%;
     height: 100%;
   }

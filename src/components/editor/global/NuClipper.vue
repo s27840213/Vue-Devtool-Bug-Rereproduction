@@ -5,6 +5,7 @@
 </template>
 
 <script lang="ts">
+import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
@@ -56,8 +57,8 @@ export default Vue.extend({
       return {
         width,
         height,
-        'background-color': '#00000001',
-        ...(!this.imgControl && { clipPath }),
+        // ...(!this.imgControl && { clipPath }),
+        ...(!(this.config.type === 'image') && { clipPath }),
         ...flip
       }
     }

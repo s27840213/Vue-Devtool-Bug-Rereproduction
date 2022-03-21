@@ -6,21 +6,15 @@ import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import imageUtils from './imageUtils'
 import * as StackBlur from 'stackblur-canvas'
+import color from '@/store/module/color'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
-export const CANVAS_SCALE = 1.3
+export const CANVAS_SCALE = 1.5
 class ImageShadowUtils {
-  // canvasTemp = undefined as unknown as HTMLCanvasElement
-  // get ctxT(): CanvasRenderingContext2D {
-  //   return this.canvasTemp.getContext('2d') as CanvasRenderingContext2D
-  // }
-
-  // constructor() {
-  //   this.canvasTemp = document.createElement('canvas')
-  // }
+  _draw = undefined as number | undefined
 
   setEffect (effect: ShadowEffectType, attrs = {}): void {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
@@ -94,72 +88,60 @@ class ImageShadowUtils {
 
   readonly SPREAD_RADIUS = 1
   draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage) {
+    if (this._draw) {
+      clearTimeout(this._draw)
+    }
+    const ctx = canvas.getContext('2d')
     const { styles } = config
     const { width, height, shadow, imgX, imgY } = styles
     const { effects, currentEffect } = shadow
-    const ctx = canvas.getContext('2d')
+    const { distance, angle, blur, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if ((currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
       currentEffect === ShadowEffectType.projection)) return
     if (!ctx) return
-
-    const { distance, angle, blur, radius, spread, opacity } = effects[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+    let offsetX = 0
+    let offsetY = 0
+    if (distance && distance > 0) {
+      offsetX = distance * mathUtils.cos(angle)
+      offsetY = distance * mathUtils.sin(angle)
+    }
     const x = (CANVAS_SCALE - 1) / 2 * width + imgX
     const y = (CANVAS_SCALE - 1) / 2 * height + imgY
-    if (distance && distance > 0) {
-      //
-    }
 
-    let alphaVal = 0
-    for (let i = -spread; i <= spread; i++) {
-      for (let j = -spread; j <= spread; j++) {
-        const r = Math.sqrt(i * i + j * j)
-        if (r >= spread + this.SPREAD_RADIUS) {
-          alphaVal = 0
-        } else if (r >= spread) {
-          alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
-        } else {
-          alphaVal = 1
-        }
-        if (alphaVal) {
-          ctx.globalAlpha = alphaVal
-          ctx.drawImage(img, x + i, y + j, width, height)
+    this._draw = setTimeout(() => {
+      console.log('drawing')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      let alphaVal = 0
+      for (let i = -spread; i <= spread; i++) {
+        for (let j = -spread; j <= spread; j++) {
+          const r = Math.sqrt(i * i + j * j)
+          if (r >= spread + this.SPREAD_RADIUS) {
+            alphaVal = 0
+          } else if (r >= spread) {
+            alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
+          } else {
+            alphaVal = 1
+          }
+          if (alphaVal) {
+            ctx.globalAlpha = alphaVal
+            ctx.drawImage(img, x + offsetX + i, y + offsetY + j, width, height)
+          }
         }
       }
-    }
-    ctx.globalCompositeOperation = 'source-in'
-    ctx.globalAlpha = opacity / 100
-    ctx.fillStyle = 'red'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.globalCompositeOperation = 'source-over'
+      ctx.globalCompositeOperation = 'source-in'
+      ctx.globalAlpha = opacity / 100
+      ctx.fillStyle = effects.color
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.globalCompositeOperation = 'source-over'
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    StackBlur.imageDataRGBA(imageData, 0, 0, canvas.width, canvas.height, radius + 1)
-    ctx.putImageData(imageData, 0, 0)
-    ctx.globalAlpha = 1
-    ctx.drawImage(img, x, y, width, height)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      StackBlur.imageDataRGBA(imageData, 0, 0, canvas.width, canvas.height, radius + 1)
+      ctx.putImageData(imageData, 0, 0)
+      ctx.globalAlpha = 1
+      ctx.drawImage(img, x, y, width, height)
+    }, 100)
   }
-
-  // handleShadowStyles(config: IImage, styles: unknown, imgControl: boolean) {
-  //   const { filterId, currentEffect } = config.styles.shadow
-  //   switch (currentEffect) {
-  //     case ShadowEffectType.shadow:
-  //     case ShadowEffectType.blur:
-  //     case ShadowEffectType.frame:
-  //       Object.assign(
-  //         styles,
-  //         { ...((!imgControl && filterId) && { filter: `url(#${filterId})` }) }
-  //       )
-  //       break
-  //     case ShadowEffectType.none:
-  //     case ShadowEffectType.halo:
-  //     case ShadowEffectType.projection:
-  //       break
-  //     default:
-  //       return generalUtils.assertUnreachable(currentEffect)
-  //   }
-  // }
 
   convertToAlpha(percent: number): string {
     return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
@@ -278,14 +260,14 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 2 },
-    angle: { max: 180, min: -180, weighting: 2 },
-    radius: { max: 100, min: 0, weighting: 2 },
-    opacity: { max: 100, min: 0, weighting: 0.01 },
-    spread: { max: 15, min: 0, weighting: 1 }
+    distance: { max: 100, min: 0, weighting: 1 },
+    angle: { max: 180, min: -180, weighting: 1 },
+    radius: { max: 30, min: 0, weighting: 1 },
+    opacity: { max: 100, min: 0, weighting: 1 },
+    spread: { max: 25, min: 0, weighting: 1 }
   },
   blur: {
-    radius: { max: 100, min: 0, weighting: 2 },
+    radius: { max: 70, min: 0, weighting: 2 },
     spread: { max: 100, min: 0, weighting: 0.72 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
