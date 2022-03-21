@@ -56,7 +56,6 @@ export default Vue.extend({
       return {
         width,
         height,
-        'background-color': '#00000001',
         ...(!this.imgControl && { clipPath }),
         ...flip
       }
