@@ -93,9 +93,11 @@ export default Vue.extend({
             x = config.styles.x - (textHW.width - config.styles.width) / 2
           }
         }
+        console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {
+        console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
