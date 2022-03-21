@@ -70,7 +70,10 @@ export default Vue.extend({
       return
     }
 
-    this.resizeObserver = new (window as any).ResizeObserver(() => {
+    this.resizeObserver = new (window as any).ResizeObserver((entries: any) => {
+      for (const entry of entries) {
+        console.log(JSON.stringify(entry.contentBoxSize))
+      }
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
