@@ -72,7 +72,7 @@ export default Vue.extend({
 
     this.resizeObserver = new (window as any).ResizeObserver((entries: any) => {
       for (const entry of entries) {
-        console.log(JSON.stringify(entry.contentBoxSize))
+        console.log(JSON.stringify(entry.contentRect))
       }
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
@@ -134,6 +134,7 @@ export default Vue.extend({
   watch: {
     'config.paragraphs': {
       handler() {
+        console.log('paragraphs change')
         this.isLoading = false
         if (this.resizeObserver) {
           this.resizeObserver.disconnect()
