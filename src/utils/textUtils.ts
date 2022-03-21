@@ -610,6 +610,9 @@ class TextUtils {
     body.style.writingMode = content.styles.writingMode
     document.body.appendChild(body)
 
+    const rect = body.getBoundingClientRect()
+    console.log(rect.width, rect.height)
+
     const scale = content.styles.scale ?? 1
     const textHW = {
       width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
