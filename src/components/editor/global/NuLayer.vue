@@ -98,7 +98,7 @@ export default Vue.extend({
           break
         }
         case LayerType.image: {
-          imageShadowUtils.handleShadowStyles(this.config, styles, this.imgControl)
+          // imageShadowUtils.handleShadowStyles(this.config, styles, this.imgControl)
         }
       }
       return styles

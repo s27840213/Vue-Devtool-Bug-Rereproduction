@@ -8,7 +8,12 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
-    img(v-show="!isAdjustImage"
+    canvas(v-if="isShadowImage"
+      ref="canvas"
+      :width="config.styles.width * canvasScale"
+      :height="config.styles.height * canvasScale"
+    )
+    img(v-show="!isAdjustImage && !isShadowImage"
       ref="img"
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
@@ -30,7 +35,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
-import imgShadowUtils from '@/utils/imageShadowUtils'
+import imgShadowUtils, { CANVAS_SCALE } from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { LayerType } from '@/store/types'
 
@@ -57,17 +62,11 @@ export default Vue.extend({
       this.setIsProcessing(false)
     }
   },
-  destroyed() {
-    if (this.filter) {
-      const svg = this.filter.parentElement
-      svg && svg.remove()
-    }
-  },
   data() {
     return {
       isOnError: false,
       src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
-      filter: undefined as unknown as HTMLElement
+      canvasScale: CANVAS_SCALE
     }
   },
   watch: {
@@ -138,6 +137,9 @@ export default Vue.extend({
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
     },
+    isShadowImage(): boolean {
+      return this.currentShadowEffect !== 'none'
+    },
     srcObj(): any {
       return (this.config as IImage).srcObj
     },
@@ -179,6 +181,9 @@ export default Vue.extend({
     forRender(): boolean {
       return this.config.forRender ?? false
     }
+    // cavasScale(): number {
+    //   return cavasScale
+    // }
   },
   methods: {
     ...mapActions('user', ['updateImages']),
@@ -287,20 +292,19 @@ export default Vue.extend({
       preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
     },
     handleNewShadowEffect(isInit = false) {
-      const { filterId, currentEffect } = this.shadow
-      if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
-        const newFilterId = imgShadowUtils.fitlerIdGenerator()
-        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.getDefaultFilterAttrs()) as HTMLElement
-        this.updateShadowEffect(this.shadowEffects)
-
-        const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
-        const layerInfo = { layerIndex, pageIndex, subLayerIdx }
-        this.UPDATE_shadowEffectState({
-          layerInfo,
-          payload: {
-            filterId: newFilterId
-          }
-        })
+      const { currentEffect } = this.shadow
+      // if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
+      if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
+        const draw = () => {
+          this.$nextTick(() => {
+            if (this.$refs.canvas) {
+              imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.$refs.img as HTMLImageElement, this.config)
+            } else {
+              draw()
+            }
+          })
+        }
+        draw()
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
@@ -313,7 +317,7 @@ export default Vue.extend({
             ...effects
           }
         })
-        this.filter && imgShadowUtils.updateFilter(this.filter, this.config.styles)
+        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.$refs.img as HTMLImageElement, this.config)
       })
     }
   }
@@ -325,6 +329,9 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   &__picture {
     object-fit: cover;
     // object-fit: fill;

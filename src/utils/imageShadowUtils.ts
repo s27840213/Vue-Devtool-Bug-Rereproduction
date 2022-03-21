@@ -5,51 +5,23 @@ import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import imageUtils from './imageUtils'
+import * as StackBlur from 'stackblur-canvas'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
-type FilterNode = {
-  tag: string,
-  attrs: {
-    [key: string]: string | number
-  },
-  child?: Array<FilterNode>
-}
-
-const SVG = 'http://www.w3.org/2000/svg'
-const FilterTable = {
-  opacity: {
-    tag: 'feComponentTransfer',
-    child: {
-      tag: 'feFuncA',
-      prop: 'slope',
-      weighting: 0.01
-    }
-  },
-  spread: {
-    tag: 'feMorphology',
-    prop: 'radius'
-  },
-  radius: {
-    tag: 'feGaussianBlur',
-    prop: 'stdDeviation'
-  },
-  x: {
-    tag: 'feOffset',
-    prop: 'dx'
-  },
-  y: {
-    tag: 'feOffset',
-    prop: 'dy'
-  },
-  color: {
-    tag: 'feFlood',
-    prop: 'flood-color'
-  }
-} as any
 
 const HALO_Y_OFFSET = 70 as const
-export const HALO_SPREAD_LIMIT = 80 as const
+export const HALO_SPREAD_LIMIT = 80
+export const CANVAS_SCALE = 1.3
 class ImageShadowUtils {
+  // canvasTemp = undefined as unknown as HTMLCanvasElement
+  // get ctxT(): CanvasRenderingContext2D {
+  //   return this.canvasTemp.getContext('2d') as CanvasRenderingContext2D
+  // }
+
+  // constructor() {
+  //   this.canvasTemp = document.createElement('canvas')
+  // }
+
   setEffect (effect: ShadowEffectType, attrs = {}): void {
     const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
     if (subLayerIdx !== -1 || currLayer.type === LayerType.image) {
@@ -66,52 +38,6 @@ class ImageShadowUtils {
         }
       }, subLayerIdx)
     }
-  }
-
-  addFilter(filterId: string, filters: Array<FilterNode>) {
-    const svg = document.createElementNS(SVG, 'svg')
-    svg.setAttribute('viewBox', '0 0 5000 5000')
-    this.append(svg, [{
-      tag: 'filter',
-      attrs: {
-        id: `${filterId}`,
-        x: '-100%',
-        y: '-100%',
-        width: '300%',
-        height: '300%',
-        filterUnits: 'userSpaceOnUse',
-        'color-interpolation-filters': 'sRGB'
-      },
-      child: filters
-    }])
-    document.body.appendChild(svg)
-    return svg.firstChild
-  }
-
-  append(parent: HTMLElement | SVGElement, filters: Array<FilterNode>) {
-    filters
-      .forEach(f => {
-        const filter = document.createElementNS(SVG, f.tag)
-        Object.entries(f.attrs)
-          .forEach(([k, v]) => {
-            filter.setAttribute(k, v.toString())
-          })
-        if (f.child && f.child.length) {
-          this.append(filter, f.child)
-        }
-        parent.appendChild(filter)
-      })
-  }
-
-  fitlerIdGenerator(): string {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    const charLength = chars.length
-    let id = 'f'
-    for (let i = 0; i < 8; i++) {
-      const rand = Math.floor(Math.random() * charLength)
-      id += chars[rand]
-    }
-    return id
   }
 
   /** Only used for blur and projection effects */
@@ -166,25 +92,74 @@ class ImageShadowUtils {
     }
   }
 
-  handleShadowStyles(config: IImage, styles: unknown, imgControl: boolean) {
-    const { filterId, currentEffect } = config.styles.shadow
-    switch (currentEffect) {
-      case ShadowEffectType.shadow:
-      case ShadowEffectType.blur:
-      case ShadowEffectType.frame:
-        Object.assign(
-          styles,
-          { ...((!imgControl && filterId) && { filter: `url(#${filterId})` }) }
-        )
-        break
-      case ShadowEffectType.none:
-      case ShadowEffectType.halo:
-      case ShadowEffectType.projection:
-        break
-      default:
-        return generalUtils.assertUnreachable(currentEffect)
+  readonly SPREAD_RADIUS = 1
+  draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage) {
+    const { styles } = config
+    const { width, height, shadow, imgX, imgY } = styles
+    const { effects, currentEffect } = shadow
+    const ctx = canvas.getContext('2d')
+    if ((currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
+      currentEffect === ShadowEffectType.projection)) return
+    if (!ctx) return
+
+    const { distance, angle, blur, radius, spread, opacity } = effects[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    const x = (CANVAS_SCALE - 1) / 2 * width + imgX
+    const y = (CANVAS_SCALE - 1) / 2 * height + imgY
+    if (distance && distance > 0) {
+      //
     }
+
+    let alphaVal = 0
+    for (let i = -spread; i <= spread; i++) {
+      for (let j = -spread; j <= spread; j++) {
+        const r = Math.sqrt(i * i + j * j)
+        if (r >= spread + this.SPREAD_RADIUS) {
+          alphaVal = 0
+        } else if (r >= spread) {
+          alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
+        } else {
+          alphaVal = 1
+        }
+        if (alphaVal) {
+          ctx.globalAlpha = alphaVal
+          ctx.drawImage(img, x + i, y + j, width, height)
+        }
+      }
+    }
+    ctx.globalCompositeOperation = 'source-in'
+    ctx.globalAlpha = opacity / 100
+    ctx.fillStyle = 'red'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.globalCompositeOperation = 'source-over'
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    StackBlur.imageDataRGBA(imageData, 0, 0, canvas.width, canvas.height, radius + 1)
+    ctx.putImageData(imageData, 0, 0)
+    ctx.globalAlpha = 1
+    ctx.drawImage(img, x, y, width, height)
   }
+
+  // handleShadowStyles(config: IImage, styles: unknown, imgControl: boolean) {
+  //   const { filterId, currentEffect } = config.styles.shadow
+  //   switch (currentEffect) {
+  //     case ShadowEffectType.shadow:
+  //     case ShadowEffectType.blur:
+  //     case ShadowEffectType.frame:
+  //       Object.assign(
+  //         styles,
+  //         { ...((!imgControl && filterId) && { filter: `url(#${filterId})` }) }
+  //       )
+  //       break
+  //     case ShadowEffectType.none:
+  //     case ShadowEffectType.halo:
+  //     case ShadowEffectType.projection:
+  //       break
+  //     default:
+  //       return generalUtils.assertUnreachable(currentEffect)
+  //   }
+  // }
 
   convertToAlpha(percent: number): string {
     return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
@@ -195,8 +170,8 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          distance: 15,
-          angle: 45,
+          distance: 0,
+          angle: 0,
           radius: 9,
           spread: 3,
           opacity: 55
@@ -256,159 +231,6 @@ class ImageShadowUtils {
         effect === ShadowEffectType.none ? {} : this.getDefaultEffect(effect)[effect] as ShadowEffects)
     ]
   }
-
-  updateFilter(filter: HTMLElement, sytles: IImageStyle) {
-    const { shadow, scale } = sytles
-    const { effects, currentEffect } = shadow
-    if (currentEffect === ShadowEffectType.none) return
-
-    const currEffect = effects[currentEffect]
-    const update = (props: Array<string>, effect: ShadowEffects) => {
-      props
-        .forEach(k => {
-          if (effect && k in effect) {
-            const weighting = fieldRange[currentEffect][k].weighting
-            if (['distance', 'angle'].includes(k)) {
-              const { distance, angle } = effect
-              const x = distance * mathUtils.cos(angle)
-              const y = distance * mathUtils.sin(angle)
-              this.setAttrs(filter, { ...FilterTable.x, currentEffect, scale, weighting, k: 'x', v: x })
-              this.setAttrs(filter, { ...FilterTable.y, currentEffect, scale, weighting, k: 'y', v: y })
-            } else {
-              this.setAttrs(filter, { ...FilterTable[k], currentEffect, scale, weighting, k, v: effect[k] })
-            }
-          } else {
-            this.setAttrs(filter, { ...FilterTable[k], currentEffect, k, v: 0 })
-          }
-        })
-      /** setting color */
-      const subFilter = filter.getElementsByTagNameNS(SVG, FilterTable.color.tag)[0]
-      subFilter.setAttribute(FilterTable.color.prop, effects.color)
-    }
-
-    switch (currentEffect) {
-      case ShadowEffectType.shadow:
-        update(Object.keys(this.getDefaultEffect(ShadowEffectType.shadow).shadow || {}), mathUtils
-          .multipy(scale, currEffect as IShadowEffect, ['opacity', 'size', 'angle']) as ShadowEffects)
-        break
-      case ShadowEffectType.frame:
-        update(Object.keys(this.getDefaultEffect(ShadowEffectType.frame).frame || {})
-          .concat(...['x', 'y']),
-          mathUtils
-            .multipy(scale, currEffect as IFrameEffect, ['opacity']) as ShadowEffects)
-        break
-      case ShadowEffectType.blur:
-        update(Object.keys(this.getDefaultEffect(ShadowEffectType.blur).blur || {})
-          .concat(...['x', 'y']),
-          mathUtils
-            .multipy(scale, currEffect as IBlurEffect, ['opacity']) as ShadowEffects)
-    }
-  }
-
-  setAttrs(filter: SVGElement | HTMLElement, data: any) {
-    const { prop, child, tag, currentEffect, scale, weighting, k, v } = data
-    const subFilter = filter.getElementsByTagNameNS(SVG, tag)[0]
-    let val = v * (weighting || 1)
-    if (child) {
-      this.setAttrs(subFilter, { ...child, currentEffect, weighting, scale, k, v })
-    } else {
-      switch (k) {
-        case 'spread':
-          val *= scale
-          val = val > 72 ? 72 : val
-          subFilter.setAttribute('operator', val < 0 ? 'erode' : 'dilate')
-          subFilter.setAttribute(prop as string, Math.abs(val).toString())
-          break
-        default:
-          subFilter.setAttribute(prop as string, val.toString())
-      }
-    }
-  }
-
-  getDefaultFilterAttrs(): Array<FilterNode> {
-    return [
-      {
-        tag: 'feFlood',
-        attrs: {
-          result: 'flood',
-          'flood-opacity': '1',
-          'flood-color': 'yellow'
-        }
-      },
-      {
-        tag: 'feComposite',
-        attrs: {
-          in: 'flood',
-          in2: 'SourceAlpha',
-          operator: 'atop',
-          result: 'color'
-        }
-      },
-      {
-        tag: 'feComponentTransfer',
-        attrs: {
-          in: 'color',
-          result: 'opacity'
-        },
-        child: [
-          {
-            tag: 'feFuncA',
-            attrs: {
-              type: 'linear',
-              intercept: '0',
-              slope: '1'
-            }
-          }
-        ]
-      },
-      {
-        tag: 'feMorphology',
-        attrs: {
-          operator: 'dilate',
-          radius: 10,
-          result: 'spread',
-          in: 'opacity'
-        }
-      },
-      {
-        tag: 'feGaussianBlur',
-        attrs: {
-          stdDeviation: 5,
-          in: 'spread',
-          result: 'shadow'
-        }
-      },
-      {
-        tag: 'feOffset',
-        attrs: {
-          in: 'shadow',
-          result: 'offset',
-          dx: 20,
-          dy: 20
-        }
-      },
-      {
-        tag: 'feMerge',
-        attrs: {
-          result: 'merge'
-        },
-        child: [
-          {
-            tag: 'feMergeNode',
-            attrs: {
-              in: 'offset'
-            }
-          },
-          {
-            tag: 'feMergeNode',
-            attrs: {
-              in: 'SourceGraphic'
-            }
-          }
-        ]
-      }
-    ]
-  }
 }
 
 export const shadowPropI18nMap = {
@@ -460,7 +282,7 @@ export const fieldRange = {
     angle: { max: 180, min: -180, weighting: 2 },
     radius: { max: 100, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    spread: { max: 100, min: 0, weighting: 0.72 }
+    spread: { max: 15, min: 0, weighting: 1 }
   },
   blur: {
     radius: { max: 100, min: 0, weighting: 2 },
