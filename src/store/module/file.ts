@@ -20,7 +20,7 @@ const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
 
 interface IPhotoState {
   myfileImages: Array<IAssetPhoto>,
-  editorViewImage: Record<string, Record<string, string>>,
+  editorViewImages: Record<string, Record<string, string>>,
   pageIndex: number,
   pending: boolean,
   checkedAssets: Array<number>,
@@ -29,7 +29,7 @@ interface IPhotoState {
 
 const getDefaultState = (): IPhotoState => ({
   myfileImages: [],
-  editorViewImage: {},
+  editorViewImages: {},
   pageIndex: 0,
   pending: true,
   checkedAssets: [],
@@ -81,7 +81,7 @@ function addMyfile(response: [IUserImageContentData], pageIndex: number):void {
 
   if (!store.getters['user/isAdmin']) {
     store.commit('file/SET_STATE', {
-      editorViewImage: Object.assign({}, state.editorViewImage, data)
+      editorViewImages: Object.assign({}, state.editorViewImages, data)
     })
   }
 
@@ -164,17 +164,17 @@ const actions: ActionTree<IPhotoState, unknown> = {
     // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
 
     const token = userApis.getToken()
-    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImage))
+    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImages))
     assetSet = Array.from(assetSet).join(',')
     if (assetSet.length === 0) {
       return
     }
 
-    await userApis.getAllAssets(token, {
+    await apiUtils.requestWithRetry(() => userApis.getAllAssets(token, {
       asset_list: assetSet
-    }).then((data) => {
+    })).then((data) => {
       commit(SET_STATE, {
-        editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
+        editorViewImages: Object.assign({}, state.editorViewImages, data.data.url_map)
       })
     })
   },
@@ -263,7 +263,7 @@ const mutations: MutationTree<IPhotoState> = {
     state.myfileImages[targetIndex].urls = data[0].urls
     state.myfileImages[targetIndex].id = isAdmin ? assetId : undefined
     state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
-    state.editorViewImage[data[0].assetIndex] = data[0].urls
+    state.editorViewImages[data[0].assetIndex] = data[0].urls
   }
 }
 
@@ -274,8 +274,8 @@ const getters: GetterTree<IPhotoState, any> = {
   getCheckedAssets(state) {
     return state.checkedAssets
   },
-  getEditorViewImageIndex: (state) => (assetId: string|undefined = undefined) => {
-    return assetId ? state.editorViewImage[assetId] : state.editorViewImage
+  getEditorViewImages: (state) => (assetId: string|undefined = undefined) => {
+    return assetId ? state.editorViewImages[assetId] : state.editorViewImages
   }
 }
 
