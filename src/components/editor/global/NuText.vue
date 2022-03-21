@@ -86,7 +86,7 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         let x = config.styles.x
         let y = config.styles.y
-        if (config.styles.widthLimit === -1) {
+        if (config.widthLimit === -1) {
           if (config.styles.writingMode.includes('vertical')) {
             y = config.styles.y - (textHW.height - config.styles.height) / 2
           } else {
