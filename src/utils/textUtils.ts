@@ -610,9 +610,6 @@ class TextUtils {
     body.style.writingMode = content.styles.writingMode
     document.body.appendChild(body)
 
-    const rect = body.getBoundingClientRect()
-    console.log(rect.width, rect.height)
-
     const scale = content.styles.scale ?? 1
     const textHW = {
       width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
@@ -993,7 +990,7 @@ class TextUtils {
     while (shouldContinue) {
       const autoDimension = autoSize[dimension]
       const currDiff = Math.abs(autoDimension - originDimension)
-      console.log(autoDimension, originDimension, currDiff, prevDiff, widthLimit)
+      // console.log(autoDimension, originDimension, currDiff, prevDiff, widthLimit)
       if (currDiff > prevDiff) {
         if (prevWidthLimit !== -1) {
           return prevWidthLimit
