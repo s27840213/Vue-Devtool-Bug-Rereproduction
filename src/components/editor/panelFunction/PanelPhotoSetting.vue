@@ -16,7 +16,7 @@
         :disabled="isProcessing"
         @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
-      v-click-outside="handleOutside"
+      ref="popup"
       :imageAdjust="currLayerAdjust"
       @update="handleAdjust" v-on="$listeners")
 </template>
@@ -24,7 +24,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -49,8 +48,11 @@ export default Vue.extend({
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
   },
-  directives: {
-    clickOutside: vClickOutside.directive
+  mounted() {
+    document.addEventListener('mouseup', this.handleClick)
+  },
+  destroyed() {
+    document.removeEventListener('mouseup', this.handleClick)
   },
   components: {
     PopupAdjust,
@@ -213,11 +215,17 @@ export default Vue.extend({
         this.show = ''
       }
     },
-    handleOutside(event: PointerEvent) {
+    handleOutside() {
       this.show = ''
       // const target = event.target as HTMLButtonElement
       // const btn = this.$refs.btn as HTMLDivElement
       // if (!btns.contains(target)) {}
+    },
+    handleClick(e: MouseEvent) {
+      if (this.show === '') return
+      if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
+        this.handleOutside()
+      }
     },
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo
