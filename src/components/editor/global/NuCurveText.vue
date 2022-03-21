@@ -181,6 +181,7 @@ export default Vue.extend({
     letter-spacing: 0.1px;
     line-height: 1;
     position: absolute;
+    display: inline-block;
   }
 }
 </style>
