@@ -44,8 +44,7 @@ export default Vue.extend({
       selectedTab: 'getSelectedTab'
     }),
     notNullBrand(): boolean {
-      // return !brandkitUtils.checkIsNullBrand(this.currentBrand)
-      return false
+      return !brandkitUtils.checkIsNullBrand(this.currentBrand)
     }
   },
   methods: {
