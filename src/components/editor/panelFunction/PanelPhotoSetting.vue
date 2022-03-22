@@ -118,7 +118,8 @@ export default Vue.extend({
       setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
       setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setIdInfo: 'bgRemove/SET_idInfo'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -160,6 +161,11 @@ export default Vue.extend({
         const targetLayer = layers[0] as IImage
         const targetPageId = pageUtils.currFocusPage.id
         const targetLayerId = targetLayer.id
+
+        this.setIdInfo({
+          pageId: targetPageId,
+          layerId: targetLayerId
+        })
 
         const type = targetLayer.srcObj.type
 

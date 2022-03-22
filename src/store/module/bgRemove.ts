@@ -19,7 +19,11 @@ interface IBgRemoveState {
   },
   steps: Array<string>,
   currStep: number,
-  isProcessing: boolean
+  isProcessing: boolean,
+  idInfo: {
+    pageId: number,
+    layerId: number
+  }
 }
 
 const getDefaultState = (): IBgRemoveState => ({
@@ -39,7 +43,11 @@ const getDefaultState = (): IBgRemoveState => ({
   },
   steps: [],
   currStep: -1,
-  isProcessing: false
+  isProcessing: false,
+  idInfo: {
+    pageId: -1,
+    layerId: -1
+  }
 })
 
 const state = getDefaultState()
@@ -91,6 +99,9 @@ const getters: GetterTree<IBgRemoveState, unknown> = {
   },
   getIsProcessing(): boolean {
     return state.isProcessing
+  },
+  getIdInfo(): { pageId: number, layerId: number } {
+    return state.idInfo
   }
 }
 
@@ -180,6 +191,12 @@ const mutations: MutationTree<IBgRemoveState> = {
   },
   SET_isProcessing(state: IBgRemoveState, bool) {
     state.isProcessing = bool
+  },
+  SET_idInfo(state: IBgRemoveState, { pageId, layerId }) {
+    Object.assign(state.idInfo, {
+      pageId,
+      layerId
+    })
   }
 }
 

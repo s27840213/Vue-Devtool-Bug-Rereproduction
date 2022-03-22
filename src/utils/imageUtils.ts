@@ -29,6 +29,10 @@ class ImageUtils {
   }
 
   getSrc(config: IImage, size?: string | number): string {
+    if (config.previewSrc) {
+      return config.previewSrc
+    }
+
     const { type, userId, assetId } = config.srcObj || config.src_obj || {}
     if (typeof size === 'undefined' && config.styles) {
       const { imgWidth, imgHeight } = config.styles

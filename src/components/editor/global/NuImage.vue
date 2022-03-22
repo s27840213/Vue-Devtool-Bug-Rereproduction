@@ -28,8 +28,6 @@ import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
-import store from '@/store'
-import { IAssetPhoto } from '@/interfaces/api'
 import imgShadowUtils from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { LayerType } from '@/store/types'
@@ -73,7 +71,7 @@ export default Vue.extend({
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      if (!this.isOnError) {
+      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
 
@@ -167,9 +165,6 @@ export default Vue.extend({
     },
     currentShadowEffect(): string {
       return this.shadow.currentEffect
-    },
-    scale(): number {
-      return this.config.styles.scale
     },
     primaryLayerType(): string {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
