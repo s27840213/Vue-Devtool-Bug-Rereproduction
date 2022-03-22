@@ -30,7 +30,7 @@ class DownloadUtil {
     return { ...this.fileAttrs[type] }
   }
 
-  async getFileUrl (params: IDownloadServiceParams, useDev = false) {
+  async getFileUrl (params: IDownloadServiceParams, useDev = -1) {
     params.teamId = params.teamId || this.userId
     try {
       const { data: { url } } = await download.createFile(params, useDev)

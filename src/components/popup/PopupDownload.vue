@@ -121,6 +121,10 @@
           span(v-else) {{$t('NN0010')}}
       template(v-if="isAdmin")
         hr(class="popup-download__hr my-15")
+        div(class="dev-selector")
+          span(class="body-3") dev
+          select(class="body-3 rounded" v-model="selectedDev")
+            option(v-for="dev in devs" :value="dev") {{ dev }}
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
@@ -201,7 +205,9 @@ export default Vue.extend({
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
-      ] as ITypeOption[]
+      ] as ITypeOption[],
+      selectedDev: 0,
+      devs: [0, 1, 2, 3, 4, 5]
     }
   },
   computed: {
@@ -361,7 +367,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, this.isAdmin && useDev)
+        .getFileUrl(fileInfo, (this.isAdmin && useDev) ? this.selectedDev : -1)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
@@ -468,6 +474,14 @@ export default Vue.extend({
   }
   input {
     padding: 0;
+  }
+  .dev-selector {
+    display: flex;
+    padding: 5px;
+    margin-bottom: 10px;
+    & > select {
+      width: fit-content;
+    }
   }
 }
 </style>
