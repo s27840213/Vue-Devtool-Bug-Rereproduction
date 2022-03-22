@@ -325,8 +325,13 @@ class TiptapUtils {
     if (this.editor) {
       if (!paragraphs) {
         const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
-        paragraphs = currLayer.type === 'text' ? (currLayer as IText).paragraphs
-          : (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
+        if (currLayer.type === 'text') {
+          paragraphs = (currLayer as IText).paragraphs
+        } else if (subLayerIdx !== -1) {
+          paragraphs = (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
+        } else {
+          return
+        }
       }
       this.editor.chain().setContent(this.toJSON(paragraphs)).selectPrevious().run()
     }

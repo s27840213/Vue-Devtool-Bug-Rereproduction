@@ -1,6 +1,6 @@
 <template lang="pug">
   div(ref="body"
-      class="template-center scrollbar-gray"
+      class="template-center scrollbar-gray-thin"
       @scroll="handleScroll")
     nu-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
       transition(name="slide")
@@ -519,6 +519,7 @@ export default Vue.extend({
       }
       res.push('order_by::' + this.selectedSorting)
       this.waterfallTemplatesPC = []
+      this.waterfallTemplatesTAB = []
       this.waterfallTemplatesMOBILE = []
       this.isTemplateReady = false
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {

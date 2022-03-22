@@ -109,7 +109,7 @@ div(style="position:relative;")
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0281')}}
+          @click.native="onLoginClicked()") {{$t('NN0305')}}
     div(v-if="currentPageIndex === 2"
       class="signup")
       div(class="text-center")

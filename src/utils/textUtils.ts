@@ -620,7 +620,7 @@ class TextUtils {
     return textHW
   }
 
-  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false) {
+  updateGroupLayerSize(pageIndex: number, layerIndex: number, subLayerIndex = -1, compensateX = false, noPush = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     if (subLayerIndex !== -1) {
@@ -637,25 +637,27 @@ class TextUtils {
       /**
        * Group layout height compensation
        */
-      const isAllHorizon = !group.layers
-        .some(l => l.type === 'text' &&
-          ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
-      if (isAllHorizon) {
-        const lowLine = config.styles.y + originSize.height
-        const diff = textHW.height - originSize.height
-        const targetSubLayers: Array<[number, number]> = []
-        group.layers
-          .forEach((l, idx) => {
-            if (l.styles.y >= lowLine) {
-              targetSubLayers.push([idx, l.styles.y])
-            }
-          })
-        targetSubLayers
-          .forEach(data => {
-            LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, data[0], {
-              y: data[1] + diff
+      if (!noPush) {
+        const isAllHorizon = !group.layers
+          .some(l => l.type === 'text' &&
+            ((l as IText).styles.writingMode.includes('vertical') || l.styles.rotate !== 0))
+        if (isAllHorizon) {
+          const lowLine = config.styles.y + originSize.height
+          const diff = textHW.height - originSize.height
+          const targetSubLayers: Array<[number, number]> = []
+          group.layers
+            .forEach((l, idx) => {
+              if (l.styles.y >= lowLine) {
+                targetSubLayers.push([idx, l.styles.y])
+              }
             })
-          })
+          targetSubLayers
+            .forEach(data => {
+              LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, data[0], {
+                y: data[1] + diff
+              })
+            })
+        }
       }
     }
     let { width, height } = calcTmpProps(group.layers)
@@ -723,7 +725,7 @@ class TextUtils {
     this.updateGroupLayerSize(pageIndex, layerIndex)
   }
 
-  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+  updateGroupLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number, noPush = false) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     if (!group.layers) return
     const config = group.layers[subLayerIndex]
@@ -732,10 +734,10 @@ class TextUtils {
       const heightOri = config.styles.height
       const textHW = textShapeUtils.getCurveTextProps(config as IText)
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textHW)
-      this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri)
+      this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, noPush)
     }
   }
 
@@ -930,7 +932,7 @@ class TextUtils {
     }
   }
 
-  async waitUntilAllFontsLoaded(config: IText, times: number) {
+  loadAllFonts(config: IText, times: number) {
     /*
       Gary: 因為預設字型檔案較大，剛進入畫面時的下載過程可能會佔用網路頻寬，
       造成後續api呼叫及圖片載入等等被卡住而有畫面延遲。
@@ -941,43 +943,82 @@ class TextUtils {
     // 僅剛進入editor需要判斷
     if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
       if (!((store.state as any).templates.categories.length > 0) && times < 5) {
-        return new Promise<void>(resolve => {
-          setTimeout(async () => {
-            await this.waitUntilAllFontsLoaded(config, times + 1)
-            resolve()
-          }, 3000)
-        })
+        setTimeout(() => {
+          this.loadAllFonts(config, times + 1)
+        }, 3000)
+        return
       }
       // 第一次載入的等待結束，firstLoad -> true
       store.commit('text/SET_firstLoad', true)
     }
 
-    const promises: Array<Promise<void>> = []
+    // const promises: Array<Promise<void>> = []
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
-      promises.push(store.dispatch('text/addFont', defaultFont).catch(e => console.error(e)))
+      // promises.push()
+      store.dispatch('text/addFont', defaultFont).catch(e => console.error(e))
     }
 
     for (const p of config.paragraphs) {
-      promises.push(store.dispatch('text/addFont', {
+      store.dispatch('text/addFont', {
         type: p.styles.type,
         face: p.styles.font,
         url: p.styles.fontUrl,
         ver: store.getters['user/getVerUni']
-      }).catch(e => console.error(e)))
+      }).catch(e => console.error(e))
       for (const span of p.spans) {
-        const promise = store.dispatch('text/addFont', {
+        store.dispatch('text/addFont', {
           type: span.styles.type,
           face: span.styles.font,
           url: span.styles.fontUrl,
           ver: store.getters['user/getVerUni']
         }).catch(e => console.error(e))
-
-        promises.push(promise)
       }
     }
+  }
 
-    await Promise
-      .all(promises)
+  autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): number {
+    if (config.widthLimit === -1) return config.widthLimit
+    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+    const scale = config.styles.scale
+    let direction = 0
+    let shouldContinue = true
+    let widthLimit = initSize.widthLimit
+    let autoSize = this.getTextHW(config, widthLimit)
+    const originDimension = initSize[dimension]
+    let prevDiff = Number.MAX_VALUE
+    let prevWidthLimit = -1
+    while (shouldContinue) {
+      const autoDimension = autoSize[dimension]
+      const currDiff = Math.abs(autoDimension - originDimension)
+      // console.log(autoDimension, originDimension, currDiff, prevDiff, widthLimit)
+      if (currDiff > prevDiff) {
+        if (prevWidthLimit !== -1) {
+          return prevWidthLimit
+        } else {
+          return config.widthLimit
+        }
+      }
+      prevDiff = currDiff
+      prevWidthLimit = widthLimit
+      if (autoDimension - originDimension > 5 * scale) {
+        if (direction < 0) break
+        if (direction >= 20) return config.widthLimit
+        widthLimit += scale
+        direction += 1
+        autoSize = this.getTextHW(config, widthLimit)
+        continue
+      }
+      if (originDimension - autoDimension > 5 * scale) {
+        if (direction > 0) break
+        if (direction <= -20) return config.widthLimit
+        widthLimit -= scale
+        direction -= 1
+        autoSize = this.getTextHW(config, widthLimit)
+        continue
+      }
+      shouldContinue = false
+    }
+    return widthLimit
   }
 }
 

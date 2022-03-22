@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
+import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
@@ -33,6 +33,7 @@ import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import file from '@/store/module/file'
 
 Vue.use(Vuex)
 
@@ -93,7 +94,8 @@ const getDefaultState = (): IEditorState => ({
   showGuideline: true,
   lockGuideline: false,
   themes: [],
-  hasCopiedFormat: false
+  hasCopiedFormat: false,
+  inGestureToolMode: false
 })
 
 const state = getDefaultState()
@@ -246,6 +248,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
+  },
+  getInGestureToolMode(state: IEditorState) {
+    return state.inGestureToolMode
   }
 }
 
@@ -755,6 +760,9 @@ const mutations: MutationTree<IEditorState> = {
   CLEAR_state(state: IEditorState) {
     Object.assign(state, getDefaultState())
   },
+  SET_inGestureMode(state: IEditorState, bool: boolean) {
+    state.inGestureToolMode = bool
+  },
   ...imgShadowMutations
 }
 
@@ -781,6 +789,7 @@ export default new Vuex.Store({
     markers,
     brandkit,
     unsplash,
-    bgRemove
+    bgRemove,
+    file
   }
 })

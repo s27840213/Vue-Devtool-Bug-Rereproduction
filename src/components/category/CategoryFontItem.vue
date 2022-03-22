@@ -130,16 +130,17 @@ export default Vue.extend({
 
         if (['tmp', 'group'].includes(type) && !contentEditable && currLayerIndex !== -1) {
           TextPropUtils.applyPropsToAll('span', { font: this.item.id }, currLayerIndex, subLayerIdx)
+          tiptapUtils.updateHtml()
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           this.$nextTick(() => {
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: true })
             if (subLayerIdx === -1) {
               (layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup).layers.forEach((l, index) => {
                 if (l.type !== 'text') return
-                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index)
+                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index, true)
               })
             } else {
-              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx)
+              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx, true)
             }
           })
 

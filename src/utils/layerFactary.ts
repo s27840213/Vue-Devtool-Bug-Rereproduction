@@ -7,6 +7,8 @@ import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
+import textPropUtils from './textPropUtils'
+import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -230,6 +232,8 @@ class LayerFactary {
     /**
      * For the past structure, some text might have wrong structure
      * below fix the wrong part
+     * 1: empty span
+     * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -247,12 +251,11 @@ class LayerFactary {
           }
         }
       }
-      config.paragraphs.forEach((p) => {
-        for (let i = 0; i < p.spans.length; i++) {
-          if (!p.spans[i].styles.font) {
-            Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-              (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
-          }
+      const isVertical = basicConfig.styles.writingMode.includes('vertical')
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, undefined, (span) => {
+        if (!span.styles.font) {
+          Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
+            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
         }
       })
     }
