@@ -124,7 +124,7 @@ class ImageShadowUtils {
       console.log('part 1 drawing')
       this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
-      let alphaVal = 0
+      let alphaVal = 1
       for (let i = -spread; i <= spread; i++) {
         for (let j = -spread; j <= spread; j++) {
           const r = Math.sqrt(i * i + j * j)
@@ -142,22 +142,20 @@ class ImageShadowUtils {
         }
       }
       this.ctxT.globalCompositeOperation = 'source-in'
+      const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
+      StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
+      this.ctxT.putImageData(imageData, 0, 0)
+
       this.ctxT.globalAlpha = opacity / 100
       this.ctxT.fillStyle = effects.color
       this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
-      this.ctxT.globalCompositeOperation = 'source-over'
-      const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-      StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
-      setTimeout(() => {
-        console.log('part 2 drawing')
-        if (!this.ctxT || !imageData) return
-        this.ctxT.putImageData(imageData, 0, 0)
-        this.ctxT.globalAlpha = 1
-        this.ctxT.drawImage(img, x, y, img.width, img.height)
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(this.canvasT, 0, 0)
-      }, 0)
+      this.ctxT.globalCompositeOperation = 'source-over'
+      this.ctxT.globalAlpha = 1
+      this.ctxT.drawImage(img, x, y, img.width, img.height)
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(this.canvasT, 0, 0)
     }, 50)
   }
 
@@ -213,8 +211,8 @@ class ImageShadowUtils {
       }
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
-          radius: 9,
-          spread: 0,
+          radius: 10,
+          spread: 5,
           opacity: 55
         }
         break
@@ -303,13 +301,13 @@ export const fieldRange = {
   shadow: {
     distance: { max: 50, min: 0, weighting: 1 },
     angle: { max: 180, min: -180, weighting: 1 },
-    radius: { max: 50, min: 0, weighting: 1 },
+    radius: { max: 60, min: 0, weighting: 1 },
     opacity: { max: 100, min: 0, weighting: 1 },
-    spread: { max: 25, min: 0, weighting: 1 }
+    spread: { max: 30, min: 0, weighting: 1 }
   },
   blur: {
-    radius: { max: 70, min: 0, weighting: 2 },
-    spread: { max: 100, min: 0, weighting: 0.72 },
+    radius: { max: 60, min: 0, weighting: 2 },
+    spread: { max: 30, min: 5, weighting: 0.72 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   halo: {
@@ -320,9 +318,9 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
-    spread: { max: 100, min: 0, weighting: 0.72 },
+    spread: { max: 30, min: 0, weighting: 0.72 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    radius: { max: 100, min: 0, weighting: 2 }
+    radius: { max: 60, min: 0, weighting: 2 }
   },
   projection: {
     spread: { max: 100, min: 0, weighting: 0.5 },
