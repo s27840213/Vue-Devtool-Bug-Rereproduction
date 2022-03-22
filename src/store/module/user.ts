@@ -336,9 +336,9 @@ const actions: ActionTree<IUserModule, unknown> = {
     }
   },
   /* eslint-disable camelcase */
-  async verifyVcode({ commit }, { account, vcode, token }) {
+  async verifyVcode({ commit }, { account, vcode, token, type }) {
     try {
-      const { data } = await userApis.verifyVcode(account, vcode, token)
+      const { data } = await userApis.verifyVcode(account, vcode, token, type)
       return Promise.resolve(data)
     } catch (error) {
       console.log(error)

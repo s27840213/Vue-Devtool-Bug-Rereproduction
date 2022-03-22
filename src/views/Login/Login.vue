@@ -510,7 +510,8 @@ export default Vue.extend({
       }
       const parameter = {
         account: this.email,
-        vcode: this.vcode
+        vcode: this.vcode,
+        type: 2
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''

@@ -109,21 +109,28 @@
           :label="`${$t('NN0129')}`"
           :default-checked="saveSubmission"
           @change="({ checked }) => handleSubmission(checked)")
-        download-check-button(v-if="isAdmin"
-          type="checkbox"
-          class="mb-20"
-          label="使用測試 bucket (dev0)"
-          @change="({ checked }) => { useDev = checked }")
       div
         btn(class="full-width body-3 rounded"
           :disabled="isButtonDisabled"
-          @click.native="handleSubmit")
+          @click.native="handleSubmit()")
           svg-icon(v-if="polling"
             class="align-middle"
             iconName="loading"
             iconColor="white"
             iconWidth="20px")
           span(v-else) {{$t('NN0010')}}
+      template(v-if="isAdmin")
+        hr(class="popup-download__hr my-15")
+        div
+          btn(class="full-width body-3 rounded"
+            :disabled="isButtonDisabled"
+            @click.native="handleSubmit(true)")
+            svg-icon(v-if="polling"
+              class="align-middle"
+              iconName="loading"
+              iconColor="white"
+              iconWidth="20px")
+            span(v-else) 下載 (測試 bucket)
 </template>
 
 <script lang="ts">
@@ -175,7 +182,6 @@ export default Vue.extend({
       polling: false,
       progress: -1,
       exportId: '',
-      useDev: false,
       functionQueue: [] as Array<() => void>,
       scaleOptions: [0.5, 0.75, 1, 1.5, 2, 2.5, 3],
       detailPageDownloadOptions: [
@@ -307,9 +313,9 @@ export default Vue.extend({
     handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
-    handleSubmit() {
+    handleSubmit(useDev = false) {
       this.polling = true
-      this.exportId ? this.handleDownload() : (this.functionQueue = [this.handleDownload])
+      this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
     handleSubmissionInfo() {
       const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange } = this
@@ -324,7 +330,7 @@ export default Vue.extend({
         ? localStorage.setItem(submission, JSON.stringify(info))
         : localStorage.removeItem(submission)
     },
-    async handleDownload() {
+    async handleDownload(useDev = false) {
       this.polling = true
       const {
         exportId,
@@ -355,7 +361,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, this.isAdmin && this.useDev)
+        .getFileUrl(fileInfo, this.isAdmin && useDev)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {

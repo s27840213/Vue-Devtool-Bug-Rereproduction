@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="sidebar")
-    div(class="nav scrollbar-gray")
+    div(class="nav scrollbar-gray-thin")
       div(class="nav-container")
         div(class="nav-item-new-folder")
           div(class="nav-item-new-folder__container"
