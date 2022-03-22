@@ -279,9 +279,9 @@ export interface IPhotoServiceParams {
 }
 
 export interface IFileParams {
-  token?: string
-  type?: 'image'
-  pageIndex?: number
+  token: string
+  type: 'image'
+  pageIndex: number
 }
 
 export interface IPhotoServiceResponse {

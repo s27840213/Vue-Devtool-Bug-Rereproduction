@@ -45,7 +45,7 @@ class ImageUtils {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
       case 'private': {
-        const editorImg = store.getters['file/getEditorViewImageIndex']
+        const editorImg = store.getters['file/getEditorViewImages']
         return editorImg(assetId) ? editorImg(assetId)[size as string] : ''
       }
       case 'unsplash':

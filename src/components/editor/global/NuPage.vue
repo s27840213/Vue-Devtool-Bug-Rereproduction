@@ -197,7 +197,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapGetters, mapState } from 'vuex'
+import { mapMutations, mapGetters, mapState, mapActions } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import MouseUtils from '@/utils/mouseUtils'
@@ -275,7 +275,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto', 'setLayersDone']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -288,9 +288,9 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline'
+      lockGuideline: 'getLockGuideline',
+      setLayersDone: 'file/getSetLayersDone'
     }),
-    ...mapState('user', ['checkedAssets']),
     getCurrLayer(): ILayer {
       return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },
@@ -410,10 +410,14 @@ export default Vue.extend({
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
+    ...mapActions({
+      updatePageImages: 'file/updatePageImages'
+    }),
     async loadLayerImg() {
-      if (!this.imgLoaded && !this.imgLoaded && !this.imgLoading) {
+      if (!this.isOutOfBound && this.setLayersDone &&
+          !this.imgLoaded && !this.imgLoading) {
         this.imgLoading = true
-        await this.$store.dispatch('file/updatePageImages', { pageIndex: this.pageIndex })
+        await this.updatePageImages({ pageIndex: this.pageIndex })
         this.imgLoaded = true
         this.imgLoading = false
       }
