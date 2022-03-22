@@ -95,8 +95,7 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   themes: [],
   hasCopiedFormat: false,
-  inGestureToolMode: false,
-  setLayersDone: false
+  inGestureToolMode: false
 })
 
 const state = getDefaultState()
@@ -256,9 +255,6 @@ const getters: GetterTree<IEditorState, unknown> = {
 }
 
 const mutations: MutationTree<IEditorState> = {
-  SET_setLayersDone() {
-    state.setLayersDone = true
-  },
   SET_pages(state: IEditorState, newPages: Array<IPage> | { name: string, pages: Array<IPage>, loadDesign: boolean, groupId: string, groupType: number, exportIds: string }) {
     groupUtils.reset()
     if (Array.isArray(newPages)) {

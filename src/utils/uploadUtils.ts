@@ -1054,7 +1054,7 @@ class UploadUtils {
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
-                store.commit('SET_setLayersDone')
+                store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
                 //

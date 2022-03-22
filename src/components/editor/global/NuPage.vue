@@ -275,7 +275,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(['isMoving', 'currDraggedPhoto', 'setLayersDone']),
+    ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -288,7 +288,8 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline'
+      lockGuideline: 'getLockGuideline',
+      setLayersDone: 'file/getSetLayersDone'
     }),
     getCurrLayer(): ILayer {
       return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
