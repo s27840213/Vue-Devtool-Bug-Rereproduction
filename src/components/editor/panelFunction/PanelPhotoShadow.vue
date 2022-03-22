@@ -172,6 +172,7 @@ export default Vue.extend({
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[this.currentEffect][name]
       if (currentEffect !== ShadowEffectType.none) {
+        console.log('update change')
         const oldEffect = generalUtils
           .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
         imageShadowUtils.setEffect(currentEffect, {

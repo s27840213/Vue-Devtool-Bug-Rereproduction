@@ -11,10 +11,7 @@
     div(v-if="isShadowImage"
       :style="canvasWrapperStyle()"
       class="canvas-wrapper")
-      canvas(ref="canvas"
-        :width="config.styles.initWidth * canvasScale"
-        :height="config.styles.initHeight * canvasScale"
-      )
+      canvas(ref="canvas")
     img(v-show="!isAdjustImage && !isShadowImage"
       ref="img"
       :style="flipStyles()"
@@ -69,7 +66,8 @@ export default Vue.extend({
     return {
       isOnError: false,
       src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
-      canvasScale: CANVAS_SCALE
+      canvasScale: CANVAS_SCALE,
+      canvasImg: undefined as undefined | HTMLImageElement
     }
   },
   watch: {
@@ -312,7 +310,22 @@ export default Vue.extend({
       const { currentEffect } = this.shadow
       // if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
       if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
-        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.$refs.img as HTMLImageElement, this.config)
+        if (this.canvasImg) {
+          imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
+        } else {
+          const _canvasImg = new Image()
+          const imgWidth = ImageUtils.getSrcSize(this.config.srcObj.type, 500)
+          _canvasImg.onload = () => {
+            this.canvasImg = _canvasImg
+            this.canvasImg.crossOrigin = 'Anonymous'
+            imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
+            const ratio = this.canvasImg.height / this.canvasImg.width
+            const canvas = this.$refs.canvas as HTMLCanvasElement
+            canvas.setAttribute('width', `${imgWidth * CANVAS_SCALE}`)
+            canvas.setAttribute('height', `${imgWidth * ratio * CANVAS_SCALE}`)
+          }
+          _canvasImg.src = ImageUtils.getSrc(this.config, imgWidth)
+        }
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
@@ -325,7 +338,7 @@ export default Vue.extend({
             ...effects
           }
         })
-        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.$refs.img as HTMLImageElement, this.config)
+        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
       })
     }
   }

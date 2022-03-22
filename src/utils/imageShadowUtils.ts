@@ -11,7 +11,7 @@ type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | 
 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
-export const CANVAS_SCALE = 1.5
+export const CANVAS_SCALE = 1.7
 class ImageShadowUtils {
   _draw = undefined as number | undefined
   _drawing = false
@@ -112,94 +112,52 @@ class ImageShadowUtils {
       offsetX = distance * mathUtils.cos(angle)
       offsetY = distance * mathUtils.sin(angle)
     }
-    const x = (CANVAS_SCALE - 1) / 2 * width + imgX
-    const y = (CANVAS_SCALE - 1) / 2 * height + imgY
+    const ratio = img.height / img.width
+    const imgWidth = img.width
+    const x = (CANVAS_SCALE - 1) / 2 * imgWidth + imgX
+    const y = (CANVAS_SCALE - 1) / 2 * imgWidth * ratio + imgY
+    this.canvasT.setAttribute('width', `${imgWidth * CANVAS_SCALE}`)
+    this.canvasT.setAttribute('height', `${imgWidth * ratio * CANVAS_SCALE}`)
 
-    // this._draw = setTimeout(() => {
-    //   console.log('drawing')
-    //   ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    //   let alphaVal = 0
-    //   for (let i = -spread; i <= spread; i++) {
-    //     for (let j = -spread; j <= spread; j++) {
-    //       const r = Math.sqrt(i * i + j * j)
-    //       if (r >= spread + this.SPREAD_RADIUS) {
-    //         alphaVal = 0
-    //       } else if (r >= spread) {
-    //         alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
-    //       } else {
-    //         alphaVal = 1
-    //       }
-    //       if (alphaVal) {
-    //         ctx.globalAlpha = alphaVal
-    //         ctx.drawImage(img, x + offsetX + i, y + offsetY + j, width, height)
-    //       }
-    //     }
-    //   }
-    //   ctx.globalCompositeOperation = 'source-in'
-    //   ctx.globalAlpha = opacity / 100
-    //   ctx.fillStyle = effects.color
-    //   ctx.fillRect(0, 0, canvas.width, canvas.height)
-    //   ctx.globalCompositeOperation = 'source-over'
-
-    //   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    //   StackBlur.imageDataRGBA(imageData, 0, 0, canvas.width, canvas.height, radius + 1)
-    //   ctx.putImageData(imageData, 0, 0)
-    //   ctx.globalAlpha = 1
-    //   ctx.drawImage(img, x, y, width, height)
-    // }, 100)
-    this.canvasT.setAttribute('width', `${width * CANVAS_SCALE}`)
-    this.canvasT.setAttribute('height', `${height * CANVAS_SCALE}`)
-    this.canvasT.style.width = `${width * CANVAS_SCALE}px`
-    this.canvasT.style.height = `${height * CANVAS_SCALE}px`
-    const win = this.getOptimizeWin(spread)
     this._draw = setTimeout(() => {
-      this._drawing = true
-      const p1 = new Promise<void>((resolve) => {
-        if (!this.ctxT) return
-        this.ctxT.clearRect(0, 0, canvas.width, canvas.height)
+      if (!this.ctxT) return
+      console.log('part 1 drawing')
+      this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
-        let alphaVal = 0
-        for (let i = -spread; i <= spread; i++) {
-          for (let j = -spread; j <= spread; j++) {
-            const r = Math.sqrt(i * i + j * j)
-            if (r >= spread + this.SPREAD_RADIUS) {
-              alphaVal = 0
-            } else if (r >= spread) {
-              alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
-            } else {
-              alphaVal = 1
-            }
-            if (alphaVal && win[i + spread][j + spread]) {
-              this.ctxT.globalAlpha = alphaVal
-              this.ctxT.drawImage(img, x + offsetX + i, y + offsetY + j, width, height)
-            }
+      let alphaVal = 0
+      for (let i = -spread; i <= spread; i++) {
+        for (let j = -spread; j <= spread; j++) {
+          const r = Math.sqrt(i * i + j * j)
+          if (r >= spread + this.SPREAD_RADIUS) {
+            alphaVal = 0
+          } else if (r >= spread) {
+            alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
+          } else {
+            alphaVal = 1
+          }
+          if (alphaVal) {
+            this.ctxT.globalAlpha = alphaVal
+            this.ctxT.drawImage(img, x + offsetX + i, y + offsetY + j, img.width, img.height)
           }
         }
-        this.ctxT.globalCompositeOperation = 'source-in'
-        this.ctxT.globalAlpha = opacity / 100
-        this.ctxT.fillStyle = effects.color
-        this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
-        this.ctxT.globalCompositeOperation = 'source-over'
-        resolve()
-      })
-      p1
-        .then(() => {
-          if (!this.ctxT) return
-          const imageData = this.ctxT.getImageData(0, 0, canvas.width, canvas.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, canvas.width, canvas.height, radius + 1)
-          return Promise.resolve(imageData)
-        })
-        .then((imageData) => {
-          if (!this.ctxT || !imageData) return
-          this.ctxT.putImageData(imageData, 0, 0)
-          this.ctxT.globalAlpha = 1
-          this.ctxT.drawImage(img, x, y, width, height)
+      }
+      this.ctxT.globalCompositeOperation = 'source-in'
+      this.ctxT.globalAlpha = opacity / 100
+      this.ctxT.fillStyle = effects.color
+      this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
+      this.ctxT.globalCompositeOperation = 'source-over'
+      const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
+      StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
+      setTimeout(() => {
+        console.log('part 2 drawing')
+        if (!this.ctxT || !imageData) return
+        this.ctxT.putImageData(imageData, 0, 0)
+        this.ctxT.globalAlpha = 1
+        this.ctxT.drawImage(img, x, y, img.width, img.height)
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(this.canvasT, 0, 0)
-          this._drawing = false
-        })
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(this.canvasT, 0, 0)
+      }, 0)
     }, 50)
   }
 
@@ -239,7 +197,7 @@ class ImageShadowUtils {
           angle: 0,
           radius: 9,
           spread: 3,
-          opacity: 55
+          opacity: 70
         }
         break
       case ShadowEffectType.projection: {
@@ -343,9 +301,9 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 1 },
+    distance: { max: 50, min: 0, weighting: 1 },
     angle: { max: 180, min: -180, weighting: 1 },
-    radius: { max: 20, min: 0, weighting: 1 },
+    radius: { max: 50, min: 0, weighting: 1 },
     opacity: { max: 100, min: 0, weighting: 1 },
     spread: { max: 25, min: 0, weighting: 1 }
   },
