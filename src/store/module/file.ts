@@ -8,32 +8,24 @@ import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { SrcObj } from '@/interfaces/gallery'
-
-const SET_STATE = 'SET_STATE' as const
-const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
-const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
-const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
-const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
-const ADD_PREVIEW = 'ADD_PREVIEW' as const
-const UPDATE_PROGRESS = 'UPDATE_PROGRESS' as const
-const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
-
 interface IPhotoState {
   myfileImages: Array<IAssetPhoto>,
-  editorViewImage: Record<string, Record<string, string>>,
-  pageIndex: number,
-  pending: boolean,
+  editorViewImages: Record<string, Record<string, string>>,
   checkedAssets: Array<number>,
-  initialized: boolean
+  pending: boolean,
+  initialized: boolean,
+  setLayersDone: boolean
+  pageIndex: number,
 }
 
 const getDefaultState = (): IPhotoState => ({
   myfileImages: [],
-  editorViewImage: {},
-  pageIndex: 0,
-  pending: true,
+  editorViewImages: {},
   checkedAssets: [],
-  initialized: false
+  pending: true,
+  initialized: false,
+  setLayersDone: false,
+  pageIndex: 0
 })
 
 const state = getDefaultState()
@@ -81,7 +73,7 @@ function addMyfile(response: [IUserImageContentData], pageIndex: number): void {
 
   if (!store.getters['user/isAdmin']) {
     store.commit('file/SET_STATE', {
-      editorViewImage: Object.assign({}, state.editorViewImage, data)
+      editorViewImages: Object.assign({}, state.editorViewImages, data)
     })
   }
 
@@ -101,7 +93,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       return
     }
 
-    commit(SET_STATE, { pending: true })
+    commit('SET_STATE', { pending: true })
     try {
       const rawData = await apiUtils.requestWithRetry(() => file.getFiles({ pageIndex }))
       addMyfile(rawData.data.data.image.content, rawData.data.next_page)
@@ -122,7 +114,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         target: '1'
       }
       userApis.updateAsset({ ...params }).then(() => {
-        commit(SET_STATE, {
+        commit('SET_STATE', {
           checkedAssets: [],
           myfileImages: state.myfileImages.filter((item: IAssetPhoto) => {
             return !state.checkedAssets.includes(item.assetIndex as number)
@@ -164,17 +156,17 @@ const actions: ActionTree<IPhotoState, unknown> = {
     // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
 
     const token = userApis.getToken()
-    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImage))
+    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewImages))
     assetSet = Array.from(assetSet).join(',')
     if (assetSet.length === 0) {
       return
     }
 
-    await userApis.getAllAssets(token, {
+    await apiUtils.requestWithRetry(() => userApis.getAllAssets(token, {
       asset_list: assetSet
-    }).then((data) => {
-      commit(SET_STATE, {
-        editorViewImage: Object.assign({}, state.editorViewImage, data.data.url_map)
+    })).then((data) => {
+      commit('SET_STATE', {
+        editorViewImages: Object.assign({}, state.editorViewImages, data.data.url_map)
       })
     })
   },
@@ -188,7 +180,10 @@ const actions: ActionTree<IPhotoState, unknown> = {
 }
 
 const mutations: MutationTree<IPhotoState> = {
-  [SET_STATE](state: IPhotoState, data: Partial<IPhotoState>) {
+  SET_setLayersDone() {
+    state.setLayersDone = true
+  },
+  SET_STATE(state: IPhotoState, data: Partial<IPhotoState>) {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IPhotoState>
     keys
@@ -198,22 +193,22 @@ const mutations: MutationTree<IPhotoState> = {
         }
       })
   },
-  [UPDATE_CHECKED_ASSETS](state: IPhotoState, val) {
+  UPDATE_CHECKED_ASSETS(state: IPhotoState, val) {
     state.checkedAssets = [...val]
   },
-  [ADD_CHECKED_ASSETS](state: IPhotoState, id) {
+  ADD_CHECKED_ASSETS(state: IPhotoState, id) {
     state.checkedAssets.push(id)
   },
-  [DELETE_CHECKED_ASSETS](state: IPhotoState, index: number) {
+  DELETE_CHECKED_ASSETS(state: IPhotoState, index: number) {
     const targetIndex = state.checkedAssets.findIndex((assetIndex) => {
       return assetIndex === index
     })
     state.checkedAssets.splice(targetIndex, 1)
   },
-  [CLEAR_CHECKED_ASSETS](state: IPhotoState) {
+  CLEAR_CHECKED_ASSETS(state: IPhotoState) {
     state.checkedAssets = []
   },
-  [ADD_PREVIEW](state: IPhotoState, { imageFile, assetId }) {
+  ADD_PREVIEW(state: IPhotoState, { imageFile, assetId }) {
     const previewImage = {
       width: imageFile.width,
       height: imageFile.height,
@@ -236,13 +231,13 @@ const mutations: MutationTree<IPhotoState> = {
     }
     state.myfileImages.unshift(previewImage)
   },
-  [UPDATE_PROGRESS](state: IPhotoState, { assetId, progress }) {
+  UPDATE_PROGRESS(state: IPhotoState, { assetId, progress }) {
     const targetIndex = state.myfileImages.findIndex((img: IAssetPhoto) => {
       return img.id === assetId
     })
     state.myfileImages[targetIndex].progress = progress
   },
-  [UPDATE_IMAGE_URLS](state: IPhotoState, { assetId, urls, assetIndex, type = 'private' }) {
+  UPDATE_IMAGE_URLS(state: IPhotoState, { assetId, urls, assetIndex, type = 'private' }) {
     const { myfileImages } = state
 
     const isAdmin = type === 'public'
@@ -263,19 +258,22 @@ const mutations: MutationTree<IPhotoState> = {
     state.myfileImages[targetIndex].urls = data[0].urls
     state.myfileImages[targetIndex].id = isAdmin ? assetId : undefined
     state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
-    state.editorViewImage[data[0].assetIndex] = data[0].urls
+    state.editorViewImages[data[0].assetIndex] = data[0].urls
   }
 }
 
 const getters: GetterTree<IPhotoState, any> = {
+  getSetLayersDone(state) {
+    return state.setLayersDone
+  },
   getImages(state) {
     return state.myfileImages
   },
   getCheckedAssets(state) {
     return state.checkedAssets
   },
-  getEditorViewImageIndex: (state) => (assetId: string | undefined = undefined) => {
-    return assetId ? state.editorViewImage[assetId] : state.editorViewImage
+  getEditorViewImages: (state) => (assetId: string | undefined = undefined) => {
+    return assetId ? state.editorViewImages[assetId] : state.editorViewImages
   }
 }
 

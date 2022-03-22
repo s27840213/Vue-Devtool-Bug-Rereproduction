@@ -31,9 +31,6 @@ export interface IUserModule {
   subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
-  pending: boolean,
-  images: Array<IAssetPhoto>,
-  checkedAssets: Array<string>,
   verUni: number,
   imgSizeMap: Array<{ [key: string]: string | number }>,
   avatar: {
@@ -77,9 +74,6 @@ const getDefaultState = (): IUserModule => ({
     }
   },
   downloadUrl: '',
-  pending: false,
-  images: [],
-  checkedAssets: [],
   verUni: 0,
   imgSizeMap: [],
   avatar: {
@@ -140,15 +134,6 @@ const getters: GetterTree<IUserModule, any> = {
         'prev-2x-sample': isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/font/${font.id}/prev-2x-sample` : font.signed_url?.['prev-2x-sample'] ?? ''
       }
     })
-  },
-  getImages(state) {
-    return state.images
-  },
-  getIsPending(state) {
-    return state.pending
-  },
-  getCheckedAssets(state) {
-    return state.checkedAssets
   },
   getVerUni(state) {
     return state.verUni

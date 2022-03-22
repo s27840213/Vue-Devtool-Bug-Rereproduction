@@ -30,7 +30,7 @@ export default Vue.extend({
     if (!srcObj || !srcObj.type) return
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
-      const editorImg = store.getters['file/getEditorViewImageIndex']
+      const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
       }
@@ -55,7 +55,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getPageSize: 'getPageSize'
+      getPageSize: 'getPageSize',
+      getEditorViewImages: 'file/getEditorViewImages'
     }),
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
@@ -134,7 +135,7 @@ export default Vue.extend({
       console.log('image on error')
       if (this.image.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.image.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
         } catch (error) {
           console.log(error)
         }
