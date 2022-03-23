@@ -146,16 +146,15 @@ const mutations: MutationTree<ITextState> = {
 }
 
 const actions: ActionTree<ITextState, unknown> = {
-  async addFont({ state, commit }, data: { type: string, face: string, url: string, ver: number }): Promise<void> {
-    const { face, type, url, ver } = data
+  async addFont({ state, commit }, data: { type: string, face: string, url: string, userId: string, assetId: string, ver: number }): Promise<void> {
+    const { face, type, url, userId, assetId, ver } = data
     if (face && face !== 'undefined' && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
         // state.pending = face
-        // const newFont = new FontFace(face, getFontUrl(type, url || face, ver ?? 0))
         // commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
         const link = document.createElement('link')
-        link.href = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+        link.href = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
         link.rel = 'stylesheet'
         document.head.appendChild(link)
         commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
@@ -183,16 +182,22 @@ const actions: ActionTree<ITextState, unknown> = {
   }
 }
 
-const getFontUrl = (type: string, id: string, ver = 0): string => {
+const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   switch (type) {
     case 'public':
-      return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
+      // return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
+      return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+    case 'admin':
+      return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}}/subset/font.css?ver=${ver}`
     case 'private':
+      // not implemented yet (may need fetching new presigned url (async))
+      // params: assetId (index)
       return ''
     case 'URL':
-      return 'url("' + id + '")'
+      // return 'url("' + id + '")'
+      return url
   }
-  return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
+  return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
 }
 
 export default {
