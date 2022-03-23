@@ -5,12 +5,12 @@
 	scrollbar-width: thin;
 	overscroll-behavior: contain;
 	&::-webkit-scrollbar {
-		width: 7px;
-		height: 7px;
+		width: 15px;
+		height: 15px;
 		background-color: unset;
 	}
 	&::-webkit-scrollbar-thumb {
-		border-radius: 5px;
+		border-radius: 10px;
 		background-color: white;
 	}
 }
@@ -19,12 +19,12 @@
 	scrollbar-width: thin;
 	overscroll-behavior: contain;
 	&::-webkit-scrollbar {
-		width: 7px;
-		height: 7px;
+		width: 15px;
+		height: 15px;
 		background-color: unset;
 	}
 	&::-webkit-scrollbar-thumb {
-		border-radius: 5px;
+		border-radius: 10px;
 		background-color: setColor(gray-3);
 	}
 }

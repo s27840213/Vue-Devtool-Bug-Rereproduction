@@ -6,7 +6,6 @@
 
 <script lang="ts">
 import cssConverter from '@/utils/cssConverter'
-import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -56,7 +55,6 @@ export default Vue.extend({
       return {
         width,
         height,
-        'background-color': '#00000001',
         ...(!this.imgControl && { clipPath }),
         ...flip
       }
@@ -68,6 +66,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-clipper {
   transform-style: preserve-3d;
+  transform: scaleZ(1);
 }
 
 .layer-flip {

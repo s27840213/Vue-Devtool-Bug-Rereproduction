@@ -449,7 +449,8 @@ export default Vue.extend({
         account: this.email,
         register: '0',
         vcode_only: '1',
-        locale: this.currLocale
+        locale: this.currLocale,
+        type: 2
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -474,7 +475,8 @@ export default Vue.extend({
         account: this.email,
         register: '0',
         vcode_only: '1',
-        locale: this.currLocale
+        locale: this.currLocale,
+        type: 2
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -510,7 +512,8 @@ export default Vue.extend({
       }
       const parameter = {
         account: this.email,
-        vcode: this.vcode
+        vcode: this.vcode,
+        type: 2
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''

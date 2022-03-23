@@ -167,6 +167,7 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.background, (color: string) => {
       this.setBgColor(color)
     })
+    colorUtils.onStop(ColorEventType.background, this.recordChange)
 
     await this.getCategories()
     this.getContent()
@@ -183,6 +184,7 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.background, (color: string) => {
       this.setBgColor(color)
     })
+    colorUtils.offStop(ColorEventType.background, this.recordChange)
   },
   destroyed() {
     this.resetContent()
@@ -216,7 +218,6 @@ export default Vue.extend({
         pageIndex: pageUtils.currFocusPageIndex,
         color: color
       })
-      stepsUtils.record()
     },
     async handleSearch(keyword: string) {
       this.resetContent()
@@ -241,6 +242,9 @@ export default Vue.extend({
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
+    },
+    recordChange() {
+      this.$nextTick(() => stepsUtils.record())
     }
   }
 })
