@@ -11,6 +11,7 @@
             :style="imageStyle(photo.preview)"
             :photo="photo"
             :vendor="vendor"
+            :inFilePanel="inFilePanel"
             :key="photo.id")
       template(#after)
         slot(name="pending")
@@ -28,6 +29,14 @@ export default Vue.extend({
     images: {
       type: Array as PropType<Array<IPhotoItem[]>>,
       default: () => []
+    },
+    myfile: {
+      type: Array as PropType<Array<IPhotoItem[]>>,
+      default: () => []
+    },
+    inFilePanel: {
+      type: Boolean,
+      default: false
     }
   },
   components: {
@@ -52,7 +61,11 @@ export default Vue.extend({
     }
   },
   watch: {
-    images(newImages: Array<IPhotoItem[]>) {
+    myfile() { // For panel file
+      this.myfileUpdate()
+    },
+    images(newImages: Array<IPhotoItem[]>) { // For panel unsplash and pexel
+      // Slice new images, arrange it and append to the end.
       const { nextIndex, prevLastRow } = this
       const latestImages = newImages.slice(nextIndex)
       this.nextIndex = newImages.length
@@ -77,6 +90,20 @@ export default Vue.extend({
     }
   },
   methods: {
+    myfileUpdate() {
+      this.rows = this.galleryUtils
+        .generate(this.myfile as any)
+        .map((row, idx) => ({
+          list: row,
+          id: `row_${idx}`,
+          sentinel: false,
+          index: idx,
+          size: row[0].preview.height + this.margin
+        }))
+      if (this.rows.length) {
+        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+      }
+    },
     imageStyle(preview: any) {
       return {
         width: `${preview.width}px`,

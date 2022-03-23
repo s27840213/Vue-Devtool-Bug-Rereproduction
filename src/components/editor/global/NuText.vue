@@ -134,7 +134,6 @@ export default Vue.extend({
   watch: {
     'config.paragraphs': {
       handler() {
-        console.log('paragraphs change')
         this.isLoading = false
         if (this.resizeObserver) {
           this.resizeObserver.disconnect()

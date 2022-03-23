@@ -578,7 +578,10 @@ class AssetUtils {
   }
 
   addAssetToRecentlyUsed(asset: IAsset) {
-    const { id, type, width, height, content_ids: contentIds, match_cover: matchCover } = asset
+    const {
+      id, type, width, height,
+      content_ids: contentIds, match_cover: matchCover, ver
+    } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
@@ -596,7 +599,8 @@ class AssetUtils {
           width,
           height,
           content_ids: contentIds,
-          match_cover: matchCover
+          match_cover: matchCover,
+          ver
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }

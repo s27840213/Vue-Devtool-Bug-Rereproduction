@@ -298,6 +298,9 @@ export default Vue.extend({
       colorUtils.on(ColorEventType.shape, (color: string) => {
         this.handleColorUpdate(color)
       })
+      colorUtils.onStop(ColorEventType.shape, () => {
+        this.$nextTick(() => stepsUtils.record())
+      })
       colorUtils.setCurrEvent(ColorEventType.shape)
       colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
       this.initilizeRecord()
@@ -545,7 +548,6 @@ export default Vue.extend({
       this.openValueSelector = modalName
     },
     setColor(newColor: string, index: number) {
-      stepsUtils.record()
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         const subSelectedIdx = (currLayer as IGroup).layers

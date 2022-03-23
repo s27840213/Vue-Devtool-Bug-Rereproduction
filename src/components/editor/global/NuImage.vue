@@ -28,8 +28,6 @@ import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
-import store from '@/store'
-import { IAssetPhoto } from '@/interfaces/api'
 import imgShadowUtils from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { LayerType } from '@/store/types'
@@ -45,6 +43,7 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
+    this.src = this.uploadingImagePreviewSrc === undefined ? ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) : this.uploadingImagePreviewSrc
     const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
       (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
     if (!this.config.forRender && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
@@ -66,13 +65,13 @@ export default Vue.extend({
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
+      src: '',
       filter: undefined as unknown as HTMLElement
     }
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      if (!this.isOnError) {
+      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
 
@@ -167,9 +166,6 @@ export default Vue.extend({
     currentShadowEffect(): string {
       return this.shadow.currentEffect
     },
-    scale(): number {
-      return this.config.styles.scale
-    },
     primaryLayerType(): string {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
@@ -178,10 +174,13 @@ export default Vue.extend({
      *  only used for rendering as image controlling */
     forRender(): boolean {
       return this.config.forRender ?? false
+    },
+    uploadingImagePreviewSrc(): string {
+      return this.config.previewSrc
     }
   },
   methods: {
-    ...mapActions('user', ['updateImages']),
+    ...mapActions('file', ['updateImages']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
@@ -216,11 +215,12 @@ export default Vue.extend({
       }
     },
     onError() {
-      console.log('image on error')
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+          })
         } catch (error) {
         }
       }
@@ -229,6 +229,11 @@ export default Vue.extend({
       this.isOnError = false
     },
     async perviewAsLoading() {
+      // First put a preview to this.src, then start to load the image user want. When loading finish,
+      // if user still need that image, put it to this.src to replace preview, otherwise do nothing.
+      if (this.uploadingImagePreviewSrc) {
+        return
+      }
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
         const img = new Image()
@@ -250,15 +255,6 @@ export default Vue.extend({
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-      const { assetId } = this.config.srcObj
-      if (type === 'private') {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (!img) {
-          await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
-        }
-      }
-
       await this.perviewAsLoading()
 
       const preImg = new Image()
