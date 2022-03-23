@@ -1,23 +1,33 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     div(ref="text" class="nu-text__body" :style="bodyStyles()")
-        nu-curve-text(v-if="isCurveText"
-          ref="curveText"
-          :config="config"
-          :layerIndex="layerIndex"
-          :pageIndex="pageIndex"
-          :subLayerIndex="subLayerIndex")
-        p(v-else
-          v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-          :class="`nu-text__p-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-          :key="p.id",
-          :style="styles(p.styles)")
-          template(v-for="(span, sIndex) in p.spans")
-            span(class="nu-text__span"
-              :data-sindex="sIndex"
-              :key="span.id",
-              :style="styles(span.styles)") {{ span.text }}
-              br(v-if="!span.text && p.spans.length === 1")
+      nu-curve-text(v-if="isCurveText"
+        ref="curveText"
+        :config="config"
+        :layerIndex="layerIndex"
+        :pageIndex="pageIndex"
+        :subLayerIndex="subLayerIndex")
+      p(v-else
+        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+        :key="p.id",
+        :style="styles(p.styles)")
+        template(v-for="(span, sIndex) in p.spans")
+          span(class="nu-text__span"
+            :data-sindex="sIndex"
+            :key="span.id",
+            :style="styles(span.styles)") {{ span.text }}
+            br(v-if="!span.text && p.spans.length === 1")
+    div(v-if="!isCurveText" class="nu-text__observee")
+      p(v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+        :class="`nu-text__p-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
+        :key="p.id",
+        :style="styles(p.styles)")
+        template(v-for="(span, sIndex) in p.spans")
+          span(class="nu-text__span"
+            :data-sindex="sIndex"
+            :key="span.id",
+            :style="styles(span.styles)") {{ span.text }}
+            br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
@@ -197,13 +207,21 @@ export default Vue.extend({
   }
   &__p {
     margin: 0;
-    width: fit-content;
-    height: fit-content;
   }
   &__span {
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+  }
+  &__observee {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    & > p {
+      width: fit-content;
+      height: fit-content;
+    }
   }
 }
 </style>
