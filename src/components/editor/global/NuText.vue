@@ -1,23 +1,33 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     div(ref="text" class="nu-text__body" :style="bodyStyles()")
-        nu-curve-text(v-if="isCurveText"
-          ref="curveText"
-          :config="config"
-          :layerIndex="layerIndex"
-          :pageIndex="pageIndex"
-          :subLayerIndex="subLayerIndex")
-        p(v-else
-          v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-          :key="p.id",
-          :style="styles(p.styles)")
-          template(v-for="(span, sIndex) in p.spans")
-            span(class="nu-text__span"
-              :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-              :data-sindex="sIndex"
-              :key="span.id",
-              :style="styles(span.styles)") {{ span.text }}
-              br(v-if="!span.text && p.spans.length === 1")
+      nu-curve-text(v-if="isCurveText"
+        ref="curveText"
+        :config="config"
+        :layerIndex="layerIndex"
+        :pageIndex="pageIndex"
+        :subLayerIndex="subLayerIndex")
+      p(v-else
+        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+        :key="p.id",
+        :style="styles(p.styles)")
+        template(v-for="(span, sIndex) in p.spans")
+          span(class="nu-text__span"
+            :data-sindex="sIndex"
+            :key="span.id",
+            :style="styles(span.styles)") {{ span.text }}
+            br(v-if="!span.text && p.spans.length === 1")
+    div(v-if="!isCurveText" class="nu-text__observee")
+      p(v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+        :class="`nu-text__p-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
+        :key="p.id",
+        :style="styles(p.styles)")
+        template(v-for="(span, sIndex) in p.spans")
+          span(class="nu-text__span"
+            :data-sindex="sIndex"
+            :key="span.id",
+            :style="styles(span.styles)") {{ span.text }}
+            br(v-if="!span.text && p.spans.length === 1")
 </template>
 
 <script lang="ts">
@@ -70,7 +80,7 @@ export default Vue.extend({
       return
     }
 
-    this.resizeObserver = new (window as any).ResizeObserver(() => {
+    this.resizeObserver = new (window as any).ResizeObserver((entries: any) => {
       // for (const entry of entries) {
       //   console.log(JSON.stringify(entry.contentRect))
       // }
@@ -96,9 +106,11 @@ export default Vue.extend({
             x = config.styles.x - (textHW.width - config.styles.width) / 2
           }
         }
+        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {
+        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
@@ -106,7 +118,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
     })
-    this.observeAllSpans()
+    this.observeAllPs()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -135,7 +147,7 @@ export default Vue.extend({
         this.isLoading = false
         if (this.resizeObserver) {
           this.resizeObserver.disconnect()
-          this.observeAllSpans()
+          this.observeAllPs()
         }
       }
     }
@@ -173,10 +185,10 @@ export default Vue.extend({
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
+    observeAllPs() {
+      const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
+      ps.forEach(p => {
+        this.resizeObserver && this.resizeObserver.observe(p as Element)
       })
     }
   }
@@ -200,7 +212,16 @@ export default Vue.extend({
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    display: inline-block;
+  }
+  &__observee {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    & > p {
+      width: fit-content;
+      height: fit-content;
+    }
   }
 }
 </style>
