@@ -2,11 +2,26 @@ import i18n from '@/i18n'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import generalUtils from './generalUtils'
+import defaultHeading from '@/assets/json/heading.json'
+import defaultSubheading from '@/assets/json/subheading.json'
+import defaultBody from '@/assets/json/body.json'
 
 const TAB_NAMES = {
   logo: 'NN0399',
   color: 'NN0401',
   text: 'NN0400'
+}
+
+const TEXT_DEFAULTS = {
+  heading: {
+    defaultHeading
+  },
+  subheading: {
+    defaultSubheading
+  },
+  body: {
+    defaultBody
+  }
 }
 
 interface Item {
