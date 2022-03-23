@@ -12,6 +12,7 @@ type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.7
+export const CANVAS_SIZE = 500
 class ImageShadowUtils {
   _draw = undefined as number | undefined
   _drawing = false
@@ -99,9 +100,9 @@ class ImageShadowUtils {
     }
     const ctx = canvas.getContext('2d')
     const { styles } = config
-    const { width, height, shadow, imgX, imgY } = styles
+    const { shadow, imgX, imgY } = styles
     const { effects, currentEffect } = shadow
-    const { distance, angle, blur, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
+    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
 
     if ((currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
       currentEffect === ShadowEffectType.projection)) return
@@ -119,9 +120,9 @@ class ImageShadowUtils {
     this.canvasT.setAttribute('width', `${imgWidth * CANVAS_SCALE}`)
     this.canvasT.setAttribute('height', `${imgWidth * ratio * CANVAS_SCALE}`)
 
+    const _spread = 1 / this.SPREAD_RADIUS
     this._draw = setTimeout(() => {
       if (!this.ctxT) return
-      console.log('part 1 drawing')
       this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
       let alphaVal = 1
@@ -131,7 +132,7 @@ class ImageShadowUtils {
           if (r >= spread + this.SPREAD_RADIUS) {
             alphaVal = 0
           } else if (r >= spread) {
-            alphaVal = (1 - (r - spread) * this.SPREAD_RADIUS)
+            alphaVal = (1 - (r - spread) * _spread)
           } else {
             alphaVal = 1
           }

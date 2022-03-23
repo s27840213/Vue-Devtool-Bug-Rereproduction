@@ -9,8 +9,8 @@
         :styles="adjustImgStyles"
         :style="flipStyles()")
     div(v-if="isShadowImage"
-      :style="canvasWrapperStyle()"
-      class="canvas-wrapper")
+      class="canvas-wrapper"
+      :style="canvasWrapperStyle()")
       canvas(ref="canvas")
     img(v-show="!isAdjustImage && !isShadowImage"
       ref="img"
@@ -34,7 +34,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
-import imgShadowUtils, { CANVAS_SCALE } from '@/utils/imageShadowUtils'
+import imgShadowUtils, { CANVAS_SCALE, CANVAS_SIZE } from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { LayerType } from '@/store/types'
 
@@ -53,8 +53,8 @@ export default Vue.extend({
   mounted() {
     const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
       (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
-    if (!this.config.forRender && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
-      .includes(this.config.styles.shadow.currentEffect) && !isPrimaryLayerFrame) {
+    if (!this.config.forRender && !isPrimaryLayerFrame) {
+      this.handleNewShadowEffect()
     }
   },
   beforeDestroy() {
@@ -213,8 +213,7 @@ export default Vue.extend({
       return {
         width: `${this.config.styles.initWidth * this.canvasScale}px`,
         height: `${this.config.styles.initHeight * this.canvasScale}px`,
-        transform: `scale(${this.config.styles.scale})`,
-        flexShrink: 0
+        transform: `scale(${this.config.styles.scale})`
       }
     },
     flipStyles() {
@@ -306,25 +305,24 @@ export default Vue.extend({
       }
       preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
     },
-    handleNewShadowEffect(isInit = false) {
+    handleNewShadowEffect() {
       const { currentEffect } = this.shadow
-      // if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
       if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
         if (this.canvasImg) {
           imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
         } else {
           const _canvasImg = new Image()
-          const imgWidth = ImageUtils.getSrcSize(this.config.srcObj.type, 500)
+          _canvasImg.crossOrigin = 'Anonymous'
           _canvasImg.onload = () => {
-            this.canvasImg = _canvasImg
-            this.canvasImg.crossOrigin = 'Anonymous'
-            imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
-            const ratio = this.canvasImg.height / this.canvasImg.width
+            const imgWidth = _canvasImg.width
+            const ratio = _canvasImg.height / _canvasImg.width
             const canvas = this.$refs.canvas as HTMLCanvasElement
             canvas.setAttribute('width', `${imgWidth * CANVAS_SCALE}`)
             canvas.setAttribute('height', `${imgWidth * ratio * CANVAS_SCALE}`)
+            this.canvasImg = _canvasImg
+            imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, _canvasImg as HTMLImageElement, this.config)
           }
-          _canvasImg.src = ImageUtils.getSrc(this.config, imgWidth)
+          _canvasImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, CANVAS_SIZE))
         }
       }
     },
@@ -357,6 +355,10 @@ export default Vue.extend({
     object-fit: cover;
     width: 100%;
     height: 100%;
+  }
+  .canvas-wrapper {
+    pointer-events: none;
+    flex-shrink: 0;
   }
   canvas {
     width: 100%;

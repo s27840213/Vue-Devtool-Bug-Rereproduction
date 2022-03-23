@@ -5,6 +5,7 @@
 </template>
 
 <script lang="ts">
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import imageUtils from '@/utils/imageUtils'
@@ -58,7 +59,8 @@ export default Vue.extend({
         width,
         height,
         // ...(!this.imgControl && { clipPath }),
-        ...(!(this.config.type === 'image') && { clipPath }),
+        ...(!this.imgControl && !(this.config.type === 'image' && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
+          .includes(this.config.styles.shadow.currentEffect)) && { clipPath }),
         ...flip
       }
     }
