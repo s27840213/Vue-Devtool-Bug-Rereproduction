@@ -229,6 +229,11 @@ export default Vue.extend({
     },
     handleClick(e: MouseEvent) {
       if (this.show === '') return
+      if (!this.$refs.popup) return
+      const colorPanel = document.querySelector('.color-panel')
+      if (colorPanel && colorPanel.contains(e.target as Node)) {
+        return
+      }
       if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
         this.handleOutside()
       }

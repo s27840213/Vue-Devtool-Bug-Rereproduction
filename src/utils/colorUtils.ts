@@ -3,6 +3,8 @@ import { EventEmitter } from 'events'
 import store from '@/store'
 import { IPage } from '@/interfaces/page'
 
+const STOP_POSTFIX = '_st'
+
 class ColorUtils {
   event: any
   eventHash: { [index: string]: (color: string) => void }
@@ -17,6 +19,8 @@ class ColorUtils {
     this.isColorPickerOpen = false
   }
 
+  get currStopEvent(): string { return this.currEvent + STOP_POSTFIX }
+
   on(type: string, callback: (color: string) => void) {
     // replace origin event
     if (this.eventHash[type]) {
@@ -25,6 +29,14 @@ class ColorUtils {
     }
     this.event.on(type, callback)
     this.eventHash[type] = callback
+  }
+
+  onStop(type: string, callback: (color: string) => void) {
+    this.on(type + STOP_POSTFIX, callback)
+  }
+
+  offStop(type: string, callback: (color: string) => void) {
+    this.event.off(type + STOP_POSTFIX, callback)
   }
 
   setCurrEvent(event: string) {
