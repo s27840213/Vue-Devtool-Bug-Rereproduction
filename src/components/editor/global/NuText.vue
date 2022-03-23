@@ -9,11 +9,11 @@
           :subLayerIndex="subLayerIndex")
         p(v-else
           v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+          :class="`nu-text__p-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
           :key="p.id",
           :style="styles(p.styles)")
           template(v-for="(span, sIndex) in p.spans")
             span(class="nu-text__span"
-              :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
               :data-sindex="sIndex"
               :key="span.id",
               :style="styles(span.styles)") {{ span.text }}
@@ -70,7 +70,7 @@ export default Vue.extend({
       return
     }
 
-    this.resizeObserver = new (window as any).ResizeObserver(() => {
+    this.resizeObserver = new (window as any).ResizeObserver((entries: any) => {
       // for (const entry of entries) {
       //   console.log(JSON.stringify(entry.contentRect))
       // }
@@ -96,9 +96,11 @@ export default Vue.extend({
             x = config.styles.x - (textHW.width - config.styles.width) / 2
           }
         }
+        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
       } else {
+        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
@@ -106,7 +108,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
     })
-    this.observeAllSpans()
+    this.observeAllPs()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -135,7 +137,7 @@ export default Vue.extend({
         this.isLoading = false
         if (this.resizeObserver) {
           this.resizeObserver.disconnect()
-          this.observeAllSpans()
+          this.observeAllPs()
         }
       }
     }
@@ -173,10 +175,10 @@ export default Vue.extend({
       }
       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     },
-    observeAllSpans() {
-      const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
-      spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
+    observeAllPs() {
+      const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
+      ps.forEach(p => {
+        this.resizeObserver && this.resizeObserver.observe(p as Element)
       })
     }
   }
@@ -195,12 +197,13 @@ export default Vue.extend({
   }
   &__p {
     margin: 0;
+    width: fit-content;
+    height: fit-content;
   }
   &__span {
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    display: inline-block;
   }
 }
 </style>
