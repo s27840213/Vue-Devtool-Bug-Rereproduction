@@ -100,7 +100,7 @@ class ImageShadowUtils {
     }
     const ctx = canvas.getContext('2d')
     const { styles } = config
-    const { shadow, imgX, imgY } = styles
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
 
@@ -113,12 +113,15 @@ class ImageShadowUtils {
       offsetX = distance * mathUtils.cos(angle)
       offsetY = distance * mathUtils.sin(angle)
     }
-    const ratio = img.height / img.width
-    const imgWidth = img.width
-    const x = (CANVAS_SCALE - 1) / 2 * imgWidth + imgX
-    const y = (CANVAS_SCALE - 1) / 2 * imgWidth * ratio + imgY
-    this.canvasT.setAttribute('width', `${imgWidth * CANVAS_SCALE}`)
-    this.canvasT.setAttribute('height', `${imgWidth * ratio * CANVAS_SCALE}`)
+    const x = (CANVAS_SCALE - 1) / 2 * img.naturalWidth
+    const y = (CANVAS_SCALE - 1) / 2 * img.naturalHeight
+    const scaleRatio = img.naturalWidth / _imgWidth
+    const imgX = _imgX * scaleRatio
+    const imgY = _imgY * scaleRatio
+    const drawWidth = layerWidth / _imgWidth * img.naturalWidth
+    const drawHeight = layerHeight / _imgHeight * img.naturalHeight
+    this.canvasT.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
+    this.canvasT.setAttribute('height', `${img.naturalHeight * CANVAS_SCALE}`)
 
     const _spread = 1 / this.SPREAD_RADIUS
     this._draw = setTimeout(() => {
@@ -138,7 +141,7 @@ class ImageShadowUtils {
           }
           if (alphaVal) {
             this.ctxT.globalAlpha = alphaVal
-            this.ctxT.drawImage(img, x + offsetX + i, y + offsetY + j, img.width, img.height)
+            this.ctxT.drawImage(img, -imgX, -imgY, drawWidth, drawHeight, x + offsetX + i, y + offsetY + j, img.naturalWidth, img.naturalHeight)
           }
         }
       }
@@ -153,7 +156,7 @@ class ImageShadowUtils {
 
       this.ctxT.globalCompositeOperation = 'source-over'
       this.ctxT.globalAlpha = 1
-      this.ctxT.drawImage(img, x, y, img.width, img.height)
+      this.ctxT.drawImage(img, -imgX, -imgY, drawWidth, drawHeight, x, y, img.naturalWidth, img.naturalHeight)
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(this.canvasT, 0, 0)

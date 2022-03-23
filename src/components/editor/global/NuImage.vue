@@ -106,9 +106,6 @@ export default Vue.extend({
       },
       deep: true
     },
-    // scale() {
-    //   !this.forRender && this.updateShadowEffect(this.shadowEffects)
-    // },
     shadowEffects(val) {
       if (this.$refs.canvas) {
         !this.forRender && this.updateShadowEffect(val)
@@ -200,12 +197,16 @@ export default Vue.extend({
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     styles() {
-      const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
+      const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
-      return {
-        transform: `translate(${imgX}px, ${imgY}px)`,
+      return this.isShadowImage ? {
+        width: `${width}px`,
+        height: `${height}px`,
+        ...inheritStyle
+      } : {
         width: `${imgWidth}px`,
         height: `${imgHeight}px`,
+        transform: `translate(${imgX}px, ${imgY}px)`,
         ...inheritStyle
       }
     },
@@ -314,14 +315,14 @@ export default Vue.extend({
           const _canvasImg = new Image()
           _canvasImg.crossOrigin = 'Anonymous'
           _canvasImg.onload = () => {
-            const imgWidth = _canvasImg.width
-            const ratio = _canvasImg.height / _canvasImg.width
             const canvas = this.$refs.canvas as HTMLCanvasElement
-            canvas.setAttribute('width', `${imgWidth * CANVAS_SCALE}`)
-            canvas.setAttribute('height', `${imgWidth * ratio * CANVAS_SCALE}`)
+            canvas.setAttribute('width', `${_canvasImg.naturalWidth * CANVAS_SCALE}`)
+            canvas.setAttribute('height', `${_canvasImg.naturalHeight * CANVAS_SCALE}`)
+            console.log(_canvasImg.width)
             this.canvasImg = _canvasImg
             imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, _canvasImg as HTMLImageElement, this.config)
           }
+          // _canvasImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, this.config.styles.imgWidth))
           _canvasImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, CANVAS_SIZE))
         }
       }

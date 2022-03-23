@@ -153,6 +153,7 @@ import pageUtils from '@/utils/pageUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 const LAYER_SIZE_MIN = 10
 const RESIZER_SHOWN_MIN = 4000
@@ -1502,7 +1503,13 @@ export default Vue.extend({
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
-      ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+      switch (this.getLayerType) {
+        case LayerType.image:
+          if (![ShadowEffectType.frame, ShadowEffectType.halo, ShadowEffectType.shadow]
+            .includes(this.config.styles.shadow.currentEffect)) {
+            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+          }
+      }
     },
     onRightClick(event: MouseEvent) {
       /**
