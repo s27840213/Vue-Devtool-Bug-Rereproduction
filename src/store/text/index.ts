@@ -152,7 +152,7 @@ const actions: ActionTree<ITextState, unknown> = {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
         // state.pending = face
-        // commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
+        commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
         const link = document.createElement('link')
         link.href = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
         link.rel = 'stylesheet'
