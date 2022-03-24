@@ -13,7 +13,7 @@ import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width, height, initWidth, initHeight, zindex, opacity } = config.styles
+    const { width, height, initWidth, initHeight, zindex, opacity, scale } = config.styles
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -38,7 +38,7 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        scale: 1,
+        scale: scale,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
@@ -419,7 +419,6 @@ class LayerFactary {
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
     config.backgroundImage.id = GeneralUtils.generateRandomString(8)
-
     return config
   }
 
