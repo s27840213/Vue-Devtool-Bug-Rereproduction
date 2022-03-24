@@ -174,7 +174,7 @@ export default Vue.extend({
            */
           const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
           if (start.sIndex === 0 && !config.paragraphs[start.pIndex].spans[start.sIndex].text) {
-            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraphs[start.pIndex].spanStyle as string))
+            const sStyles = tiptapUtils.generateSpanStyle(paragraphs[start.pIndex].spanStyle as string)
             sStyles.font = this.item.id
             paragraphs[start.pIndex].spans[start.sIndex].styles.font = this.item.id
             paragraphs[start.pIndex].styles.font = this.item.id

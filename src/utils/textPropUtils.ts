@@ -151,7 +151,7 @@ class TextPropUtils {
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
       if (isVertical && p.styles.spanStyle) {
-        const pStyle = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(p.styles.spanStyle as string))
+        const pStyle = tiptapUtils.generateSpanStyle(p.styles.spanStyle as string)
         if (pStyle.style === 'italic') {
           pStyle.style = 'normal'
         }
@@ -780,7 +780,7 @@ class TextPropUtils {
             } else {
               spanStyle = editor.storage.nuTextStyle.spanStyle
             }
-            startStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+            startStyles = tiptapUtils.generateSpanStyle(spanStyle)
           }
 
           origin = startStyles[prop]
@@ -916,7 +916,7 @@ class TextPropUtils {
         const paragraphs = tiptapJSON.content ?? []
 
         if (selection.empty) {
-          const sAttrs = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(editor.storage.nuTextStyle.spanStyle))
+          const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
           sAttrs.size += step
           editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
           editor.chain().focus().setMark('textStyle', sAttrs).run()
@@ -992,7 +992,7 @@ class TextPropUtils {
               const pAttrs = paragraphs[i].attrs ?? {}
               pAttrs.size += step
               const spanStyle = pAttrs.spanStyle ?? ''
-              const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+              const sStyles = tiptapUtils.generateSpanStyle(spanStyle)
               sStyles.size += step
               pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
             }
@@ -1116,6 +1116,7 @@ class TextPropUtils {
       font: span ? span.styles.font : '',
       type: span ? span.styles.type : 'public',
       userId: span ? span.styles.userId : '',
+      assetId: span ? span.styles.assetId : '',
       fontUrl: span ? span.styles.fontUrl : '',
       weight: span ? span.styles.weight : '',
       size: span ? span.styles.size : NaN,
