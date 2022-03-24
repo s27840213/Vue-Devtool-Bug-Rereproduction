@@ -116,6 +116,12 @@ class LayerFactary {
       }))
     }
 
+    if (clips.some(img => img.styles.rotate !== 0)) {
+      const img = clips.find(img => img.styles.rotate !== 0) as IImage
+      styles.rotate = img.styles.rotate
+      img.styles.rotate = 0
+    }
+
     return {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -138,8 +144,8 @@ class LayerFactary {
         initHeight: initHeight,
         zindex: styles.zindex ?? -1,
         opacity: styles.opacity || 100,
-        horizontalFlip: styles.horizontalFlip,
-        verticalFlip: styles.verticalFlip
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       },
       clips,
       decoration: decoration ? this.newShape((() => {
