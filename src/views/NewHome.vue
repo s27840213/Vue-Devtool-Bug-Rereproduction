@@ -10,12 +10,10 @@
             src="@/assets/img/svg/newHomepage/dot-and-cursor.svg")
           div(class="home-top__buttom rounded btn-primary-sm")
             span(class="home-top__buttom__text btn-LG") Get Started
-        div(class="home-top__video-wrapper")
-          video(class="home-top__video"
-            src='@/video-demo/demo.mp4'
-            type="video/mp4"
-            autoplay muted loop)
-            //- need control? loop?
+        animation(class="home-top__video"
+          path='@/assets/img/svg/newHomepage/demo.mp4'
+          :width='468')
+          //- need control? loop?
       scroll-list(:list="themeList" type='theme'
         @openPopup="openPopup()") // todo
       div(class="home-block")
@@ -32,10 +30,13 @@ import NewHeader from '@/components/new-homepage/NewHeader.vue'
 import Block from '@/components/new-homepage/Block.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import ScrollList from '@/components/homepage/ScrollList.vue'
+import Animation from '@/components/Animation.vue'
 
 import themeUtils from '@/utils/themeUtils'
 
 import _ from 'lodash'
+
+import blocklist from '@/assets/json/newHomepageBlock.json'
 
 export default Vue.extend({
   name: 'Home',
@@ -43,116 +44,12 @@ export default Vue.extend({
     NewHeader,
     Block,
     NuFooter,
-    ScrollList
+    ScrollList,
+    Animation
   },
   data() {
     return {
-      blocklist: [ // or blockList?
-        { // 獨立成另一個檔案？
-          title: 'Tailor-made templates\njust for your business',
-          description: 'Find your ideal design fast with the filters of events\nand industries at Template Center.',
-          link: 'See Template Center',
-          img: {
-            name: 'bussiness.json',
-            width: 500
-          },
-          colorBlock: [
-            {
-              name: 'oval_blue1.svg',
-              top: 13,
-              left: 0
-            }, {
-              name: 'oval_orange1.svg',
-              top: 118.21,
-              left: 105.21
-            }, {
-              name: 'oval_pink2.svg',
-              top: 351,
-              left: 961
-            }
-          ],
-          textRight: true
-        }, {
-          title: 'Template Bundle\naligned across all\nplatforms',
-          description: 'Effortlessly obtain all sizes of templates from\nsocial media posts, stories, website banners\nand more.',
-          img: {
-            name: 'bundle.json',
-            width: 520
-          },
-          colorBlock: [{
-            name: 'vector_blue1.svg',
-            top: 126,
-            left: 586
-          }],
-          textRight: false
-        }, {
-          title: 'Extensible Canvas\nmakes design\nprocess smoother',
-          description: 'Users are allowed to create multiple sizes of\ndesigns in the same page, reducing repetition\nof switching files.',
-          img: {
-            name: 'multiple-sizes.json',
-            width: 500
-          },
-          colorBlock: [{
-            name: 'vector_purple1.svg',
-            top: 0,
-            left: 0
-          }],
-          textRight: true
-        }, {
-          title: 'Storytelling Templates\nprovide hints to your\nmarketing strategy',
-          description: 'Co-developed with well-known marketing\nlecturers, nine image slides tell the benefits of your\nproduct in a logical way.',
-          img: {
-            name: 'storytelling.json',
-            width: 488,
-            height: 520
-          },
-          colorBlock: [
-            {
-              name: 'oval_orange2.svg',
-              top: 13,
-              left: 0
-            }, {
-              name: 'oval_lightblue2.svg',
-              top: 118.21,
-              left: 105.21
-            }, {
-              name: 'oval_brown1.svg',
-              top: 351,
-              left: 961
-            }
-          ],
-          textRight: false
-        }, {
-          comingSoon: true,
-          title: 'Smart Background\nRemover makes it\neasier to edit image',
-          description: 'Get your image background cleared and\nchanged automatically with the remover.',
-          img: {
-            name: 'remover.json',
-            width: 500,
-            height: 374.48
-          },
-          colorBlock: [{
-            name: 'oval_blue2.svg',
-            top: 13,
-            left: 0
-          }],
-          textRight: true
-        }, {
-          comingSoon: true,
-          title: 'Manage your brand\nidentify with Brandkit',
-          description: 'This tool set allows users to add their own logos,\nfonts and colors, taking brand and style to the next\nlevel.',
-          img: {
-            name: 'brandkit.json',
-            width: 500
-          },
-          colorBlock: [{
-            name: 'vector_orange1.svg',
-            top: 13,
-            left: 0
-          }],
-          textRight: false
-        }
-      ]
+      blocklist
     }
   },
   // need meta info?
@@ -224,18 +121,11 @@ export default Vue.extend({
     box-shadow: 0px 9px 13px 0px #7190CC40;
   }
   &__video{
-    width: 468px;
-    // border-width: 14.62px 26px; // 需要雙重圓角?
-    // border-style: solid;
-    // border-color: #DEE7EE;
+    border-width: 14px 26px;
+    border-style: solid;
     border-radius: 1em;
-    &-wrapper{
-      border-width: 14px 26px;
-      border-style: solid;
-      border-radius: 1em;
-      border-color: transparent;
-      background-color: #DEE7EE;
-    }
+    border-color: transparent;
+    background-color: #DEE7EE;
   }
 }
 </style>

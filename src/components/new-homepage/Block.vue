@@ -1,42 +1,49 @@
 <template lang="pug">
   div(class="block"
-    :style="{ 'flex-direction': content.textRight ? 'row' : 'row-reverse' }")
-    div(class="block-text")
+    :style="blockStyle()")
+    div(class="block-text"
+      :style="blockTextStyle()")
       div(v-if="content.comingSoon"
         class="block-text__coming_soon overline-SM")
         span {{'COMING SOON'}}
-      div(class="text-H2")
+      div(class="block-text__title text-H2")
         span {{content.title}}
+        img(v-for="cb in content.colorBlock"
+          v-if="!cb.ref"
+          class="block__colorBlock"
+          :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
+          :style="{ 'top': `${cb.top}px`, 'left': `${cb.left}px` }")
       div(class="body-XL")
         span {{content.description}}
       //- need v-if?
       div(v-if="content.link"
-        class="text-H5")
+        class="block-text__link text-H5")
         span {{content.link}}
     div(class="block-img")
-      lottie-animation(
+      animation(
         :path="'@/assets/img/svg/newHomepage/' + content.img.name"
         :width="content.img.width"
         :height="content.img.height ? content.img.height : content.img.width")
-    img(v-for="cb in content.colorBlock"
-      class="block__colorBlock"
-      :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
-      :style="{ 'top': `${cb.top}px`, 'left': `${cb.left}px` }")
+      img(v-for="cb in content.colorBlock"
+        v-if="cb.ref==='img'"
+        class="block__colorBlock"
+        :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
+        :style="{ 'top': `${cb.top}px`, 'left': `${cb.left}px` }")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 // import i18n from '@/i18n'
-import LottieAnimation from '@/components/LottieAnimation.vue'
+import Animation from '@/components/Animation.vue'
 
 export default Vue.extend({
   name: 'Block', // need rename
   components: {
-    LottieAnimation
+    Animation
   },
   props: {
     content: {
-      type: Object, // redefine
+      type: Object, // redefine a interface
       required: true
     }
   },
@@ -49,6 +56,17 @@ export default Vue.extend({
   // async mounted() {
   // },
   methods: {
+    blockStyle() {
+      return {
+        'flex-direction': this.content.align
+      }
+    },
+    blockTextStyle() {
+      return {
+        'align-items': this.content.align === 'column' ? 'center' : 'flex-start',
+        'text-align': this.content.align === 'column' ? 'center' : 'left'
+      }
+    }
   }
 })
 </script>
@@ -58,9 +76,9 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  width: 1143.45px;
-  height: 533.45px;
+  width: 1200px;
+  min-height: 500px;
+  margin: 100px 0 100px;
   &__colorBlock {
     position: absolute;
     z-index: -1;
@@ -69,16 +87,23 @@ export default Vue.extend({
 .block-text {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  // white-space: pre;
   &__coming_soon {
     padding: 4px;
     color: white;
     background: #FFBA49;
     border-radius: 4px;
   }
+  &__title {
+    position: relative;
+  }
+  &__link {
+    color: setColor(blue-1)
+  }
   div {
     margin: 10px;
   }
+}
+.block-img {
+  position: relative;
 }
 </style>

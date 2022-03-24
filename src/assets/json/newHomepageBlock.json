@@ -1,0 +1,151 @@
+[
+  {
+    "title": "Perfect your design with\nthousands of beautiful templates",
+    "description": "Get inspiration by simply searching keywords and tags.",
+    "img": {
+      "name": "carousel1.svg",
+      "width": 3000,
+      "height": 600,
+      "carousel": true
+    },
+    "colorBlock": [
+      {
+        "name": "oval_lightblue1.svg",
+        "top": -13,
+        "left": 17
+      }, {
+        "name": "oval_pink1.svg",
+        "top": 65.56,
+        "left": 95.56
+      }
+    ],
+    "align": "column"
+  }, {
+    "title": "Tailor-made templates\njust for your business",
+    "description": "Find your ideal design fast with the filters of events\nand industries at Template Center.",
+    "link": "See Template Center →",
+    "img": {
+      "name": "bussiness.json",
+      "width": 500
+    },
+    "colorBlock": [
+      {
+        "name": "oval_blue1.svg",
+        "top": -107,
+        "left": -96
+      }, {
+        "name": "oval_orange1.svg",
+        "top": 1.79,
+        "left": 9.21
+      }, {
+        "name": "oval_pink2.svg",
+        "ref": "img",
+        "top": 351,
+        "left": 329
+      }
+    ],
+    "align": "row"
+  }, {
+    "title": "Template Bundle\naligned across all\nplatforms",
+    "description": "Effortlessly obtain all sizes of templates from\nsocial media posts, stories, website banners\nand more.",
+    "img": {
+      "name": "bundle.json",
+      "width": 520
+    },
+    "colorBlock": [{
+      "name": "vector_blue1.svg",
+
+      "top": -11,
+      "left": -77
+    }],
+    "align": "row-reverse"
+  }, {
+    "title": "Extensible Canvas\nmakes design\nprocess smoother",
+    "description": "Users are allowed to create multiple sizes of\ndesigns in the same page, reducing repetition\nof switching files.",
+    "img": {
+      "name": "multiple-sizes.json",
+      "width": 500
+    },
+    "colorBlock": [{
+      "name": "vector_purple1.svg",
+
+      "top": -32,
+      "left": 331
+    }],
+    "align": "row"
+  }, {
+    "title": "Storytelling Templates\nprovide hints to your\nmarketing strategy",
+    "description": "Co-developed with well-known marketing\nlecturers, nine image slides tell the benefits of your\nproduct in a logical way.",
+    "img": {
+      "name": "storytelling.mp4",
+      "width": -32,
+      "height": 331
+    },
+    "colorBlock": [
+      {
+        "name": "oval_orange2.svg",
+        "top": -69,
+        "left": -101
+      }, {
+        "name": "oval_lightblue2.svg",
+        "top": -59.25,
+        "left": -79.07
+      }, {
+        "name": "oval_brown1.svg",
+        "top": 33.34,
+        "left": 8.65
+      }
+    ],
+    "align": "row-reverse"
+  }, {
+    "comingSoon": true,
+    "title": "Smart Background\nRemover makes it\neasier to edit images",
+    "description": "Get your image background cleared and\nchanged automatically with the remover.",
+    "img": {
+      "name": "remover.mp4",
+      "width": 500,
+      "height": 374.48
+    },
+    "colorBlock": [{
+      "name": "oval_blue2.svg",
+      "top": 120,
+      "left": 297
+    }],
+    "align": "row"
+  }, {
+    "comingSoon": true,
+    "title": "Manage your brand\nidentify with Brandkit",
+    "description": "This tool set allows users to add their own logos,\nfonts and colors, taking brand and style to the next\nlevel.",
+    "img": {
+      "name": "brandkit.json",
+      "width": 500
+    },
+    "colorBlock": [{
+      "name": "vector_orange1.svg",
+      "top": -64,
+      "left": -116
+    }],
+    "align": "row-reverse"
+  }, {
+    "title": "Who loves Vivipic?",
+    "description": "Join over 1000+ Editors",
+    "img": {
+      "name": "carousel1.",
+      "width": 3000,
+      "height": 600,
+      "carousel": true
+    },
+    "colorBlock": [
+      {
+        "name": "oval_lightblue3.svg",
+        "top": -6,
+        "left": 331
+      }, {
+        "name": "oval_pink3.svg",
+        "top": 48,
+        "left": 310
+      }
+    ],
+    "align": "column"
+  }
+]
