@@ -5,8 +5,7 @@
     "img": {
       "name": "carousel1.svg",
       "width": 3000,
-      "height": 600,
-      "carousel": true
+      "height": 600
     },
     "colorBlock": [
       {
@@ -130,10 +129,9 @@
     "title": "Who loves Vivipic?",
     "description": "Join over 1000+ Editors",
     "img": {
-      "name": "carousel1.",
-      "width": 3000,
-      "height": 600,
-      "carousel": true
+      "name": "comment1.svg",
+      "width": 2700,
+      "height": 318
     },
     "colorBlock": [
       {

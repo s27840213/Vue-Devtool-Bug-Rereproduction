@@ -1,18 +1,20 @@
 <template lang="pug">
   div(class="animation")
-    div(v-if="this.path.endsWith('json') && style"
+    div(v-if="isJSON && style"
       class="lottie"
       :style="style" ref="lavContainer")
-    img(v-if="this.path.endsWith('svg')"
+    img(v-if="isSvg"
+      v-for="index in 2"
       class="img"
-      :src="require('@/' + this.path.slice(2))"
-      :width="this.width"
-      :height="this.height")
-    video(v-if="this.path.endsWith('mp4')"
+      :src="require('@/' + path.slice(2))"
+      :width="width"
+      :height="height"
+      :style="carousel")
+    video(v-if="isMp4"
       class="video"
-      :src="require('@/' + this.path.slice(2))"
-      :width="this.width"
-      :height="this.height"
+      :src="require('@/' + path.slice(2))"
+      :width="width"
+      :height="height"
       type="video/mp4"
       autoplay muted loop)
 </template>
@@ -65,6 +67,14 @@ export default Vue.extend({
       type: Number,
       required: false,
       default: 0
+    },
+    delay: {
+      type: Number,
+      default: 1
+    },
+    imgSpeed: {
+      type: Number,
+      default: 0.02
     }
   },
   data() {
@@ -77,7 +87,31 @@ export default Vue.extend({
         hideOnTransparent: true
       },
       anim: null as any,
-      style: null as any
+      style: null as any,
+      time: 0 as number
+    }
+  },
+  computed: {
+    carousel(): Record<string, string> {
+      return {
+        transform: `translateX(-${this.time % 100}%)`
+      }
+    },
+    isJSON():boolean {
+      return this.path.endsWith('.json')
+    },
+    isSvg():boolean {
+      return this.path.endsWith('.svg')
+    },
+    isMp4():boolean {
+      return this.path.endsWith('.mp4')
+    }
+  },
+  created() {
+    if (this.isSvg) {
+      setInterval(() => {
+        this.time += this.imgSpeed
+      }, this.delay)
     }
   },
   mounted() {
@@ -100,7 +134,7 @@ export default Vue.extend({
       )
     },
     async init() {
-      if (!this.path.endsWith('json')) {
+      if (!this.isJSON) {
         return
       }
 
@@ -157,4 +191,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.animation {
+  .img {
+    position: relative;
+    left: calc(50% - 50vw);
+  }
+}
 </style>
