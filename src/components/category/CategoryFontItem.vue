@@ -112,8 +112,10 @@ export default Vue.extend({
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
         await this.$store.dispatch('text/addFont', {
-          type: 'public',
-          url: '',
+          type: this.item.fontType,
+          url: this.item.fontUrl,
+          userId: this.item.userId,
+          assetId: this.item.assetId,
           face: this.item.id,
           ver: this.item.ver
         })

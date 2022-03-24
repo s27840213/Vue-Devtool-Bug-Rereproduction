@@ -185,7 +185,6 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   switch (type) {
     case 'public':
-      // return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
       return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
     case 'admin':
       return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}}/subset/font.css?ver=${ver}`
@@ -194,7 +193,6 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       // params: assetId (index)
       return ''
     case 'URL':
-      // return 'url("' + id + '")'
       return url
   }
   return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
