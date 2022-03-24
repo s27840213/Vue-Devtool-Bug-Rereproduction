@@ -210,6 +210,8 @@ class LayerFactary {
                 opacity: 1,
                 font: 'normal',
                 userId: '',
+                assetId: '',
+                fontUrl: '',
                 type: 'public',
                 weight: 'normal',
                 color: '#000000',

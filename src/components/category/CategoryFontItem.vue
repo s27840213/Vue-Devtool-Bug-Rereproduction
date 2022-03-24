@@ -112,7 +112,7 @@ export default Vue.extend({
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
         await this.$store.dispatch('text/addFont', {
-          type: this.item.fontType,
+          type: this.item.type || this.item.fontType, // public fonts in list-design don't have type
           url: this.item.fontUrl,
           userId: this.item.userId,
           assetId: this.item.assetId,
