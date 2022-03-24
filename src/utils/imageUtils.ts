@@ -238,7 +238,6 @@ class ImageUtils {
   }
 
   imgScaling(layerWidth: number, layerHeight: number, offsetWidth: number, offsetHeight: number, updatePos = null as any, updateSize = null as any) {
-    console.log('exceed')
     ControlUtils.updateLayerInitSize(LayerUtils.pageIndex, LayerUtils.layerIndex, layerWidth, layerHeight, 1)
     let imgWidth = this.initImgSize.width
     let imgHeight = this.initImgSize.height
@@ -297,7 +296,6 @@ class ImageUtils {
   }
 
   imgClipping(width: number, height: number, offsetX: number | undefined, offsetY: number | undefined, updatePos = null as any, updateSize = null as any) {
-    console.log('clipping')
     ControlUtils.updateLayerInitSize(LayerUtils.pageIndex, LayerUtils.layerIndex, width, height, 1)
     const imgX = this.initImgPos.x
     const imgY = this.initImgPos.y

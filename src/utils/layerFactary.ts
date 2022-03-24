@@ -116,6 +116,12 @@ class LayerFactary {
       }))
     }
 
+    if (clips.some(img => img.styles.rotate !== 0)) {
+      const img = clips.find(img => img.styles.rotate !== 0) as IImage
+      styles.rotate = img.styles.rotate
+      img.styles.rotate = 0
+    }
+
     return {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
