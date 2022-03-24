@@ -144,8 +144,8 @@ class LayerFactary {
         initHeight: initHeight,
         zindex: styles.zindex ?? -1,
         opacity: styles.opacity || 100,
-        horizontalFlip: styles.horizontalFlip,
-        verticalFlip: styles.verticalFlip
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       },
       clips,
       decoration: decoration ? this.newShape((() => {
