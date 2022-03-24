@@ -234,6 +234,7 @@ class LayerFactary {
      * below fix the wrong part
      * 1: empty span
      * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
+     * 3: span style that has only font but no type
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -255,7 +256,10 @@ class LayerFactary {
       textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, undefined, (span) => {
         if (!span.styles.font) {
           Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()]) &&
+            (span.styles.type = 'public')
+        } else if (!span.styles.type) {
+          span.styles.type = 'public'
         }
       })
     }
