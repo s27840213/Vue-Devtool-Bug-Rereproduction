@@ -4,7 +4,8 @@ import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
-import Home from '../views/Home.vue'
+// import Home from '../views/Home.vue'
+import NewHome from '../views/NewHome.vue'
 import Pricing from '../views/Pricing.vue'
 import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
@@ -36,7 +37,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '',
     name: 'Home',
-    component: Home,
+    component: NewHome,
     beforeEnter: async (to, from, next) => {
       // const locale = from.params.locale
       // if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {

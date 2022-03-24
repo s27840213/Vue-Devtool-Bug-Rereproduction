@@ -53,6 +53,7 @@
     "vue-recyclerview": "^0.4.1",
     "vue-router": "^3.5.1",
     "vue-virtual-scroller": "^1.0.10",
+    "lottie-vuejs": "^0.4.0",
     "vuex": "^3.4.0"
   },
   "devDependencies": {
