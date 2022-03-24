@@ -151,13 +151,14 @@ const actions: ActionTree<ITextState, unknown> = {
     if (face && face !== 'undefined' && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
-        // state.pending = face
+        state.pending = face
         commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
         const link = document.createElement('link')
         link.href = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
         link.rel = 'stylesheet'
         document.head.appendChild(link)
         commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+        state.pending = ''
         // return new Promise<void>(resolve => {
         //   newFont.load()
         //     .then(newFont => {
@@ -167,17 +168,16 @@ const actions: ActionTree<ITextState, unknown> = {
         //       state.pending = ''
         //     })
         // })
+      } else {
+        return new Promise<void>(resolve => {
+          const checkLoaded = setInterval(() => {
+            if (font.loaded) {
+              clearInterval(checkLoaded)
+              resolve()
+            }
+          }, 100)
+        })
       }
-      // } else {
-      //   return new Promise<void>(resolve => {
-      //     const checkLoaded = setInterval(() => {
-      //       if (font.loaded) {
-      //         clearInterval(checkLoaded)
-      //         resolve()
-      //       }
-      //     }, 100)
-      //   })
-      // }
     }
   }
 }
