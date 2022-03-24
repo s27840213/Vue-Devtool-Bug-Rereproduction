@@ -132,6 +132,9 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
     })
+    colorUtils.onStop(ColorEventType.text, () => {
+      this.$nextTick(() => StepsUtils.record())
+    })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
       this.setParagraphProp('lineHeight', value)
@@ -238,6 +241,7 @@ export default Vue.extend({
       if (GeneralUtils.isValidHexColor(target.value)) {
         target.value = target.value.toUpperCase()
         this.handleColorUpdate(target.value)
+        StepsUtils.record()
       }
     },
     handleColorModal() {
@@ -270,7 +274,6 @@ export default Vue.extend({
           }
       }
       textEffectUtils.refreshColor()
-      StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {

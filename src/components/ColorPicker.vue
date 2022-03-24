@@ -24,6 +24,7 @@
             type="text"
             spellcheck="false"
             v-model="color"
+            @change="handleColorInputChange"
             maxlength="7")
       template(v-if="showColorSlip")
         div(class="color-picker__colors")
@@ -160,7 +161,11 @@ export default Vue.extend({
       this.$emit('update', color)
     },
     onmouseup() {
+      this.$emit('final', this.convertedHex)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
+    },
+    handleColorInputChange() {
+      this.$emit('final', this.convertedHex)
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {

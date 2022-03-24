@@ -8,19 +8,11 @@ import modalUtils from '@/utils/modalUtils'
 import Vue from 'vue'
 import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
-import apiUtils from '@/utils/apiUtils'
+// import apiUtils from '@/utils/apiUtils'
 import generalUtils from '@/utils/generalUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
-const SET_IMAGES = 'SET_IMAGES' as const
-const ADD_PREVIEW = 'ADD_PREVIEW' as const
-const UPDATE_PROGRESS = 'UPDATE_PROGRESS' as const
-const UPDATE_IMAGE_URLS = 'UPDATE_IMAGE_URLS' as const
-const UPDATE_CHECKED_ASSETS = 'UPDATE_CHECKED_ASSETS' as const
-const ADD_CHECKED_ASSETS = 'ADD_CHECKED_ASSETS' as const
-const DELETE_CHECKED_ASSETS = 'DELETE_CHECKED_ASSETS' as const
-const CLEAR_CHECKED_ASSETS = 'CLEAR_CHECKED_ASSETS' as const
 const SET_ADMIN_MODE = 'SET_ADMIN_MODE' as const
 
 export interface IUserModule {
@@ -39,9 +31,6 @@ export interface IUserModule {
   subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
-  pending: boolean,
-  images: Array<IAssetPhoto>,
-  checkedAssets: Array<string>,
   verUni: number,
   imgSizeMap: Array<{ [key: string]: string | number }>,
   avatar: {
@@ -85,9 +74,6 @@ const getDefaultState = (): IUserModule => ({
     }
   },
   downloadUrl: '',
-  pending: false,
-  images: [],
-  checkedAssets: [],
   verUni: 0,
   imgSizeMap: [],
   avatar: {
@@ -149,15 +135,6 @@ const getters: GetterTree<IUserModule, any> = {
       }
     })
   },
-  getImages(state) {
-    return state.images
-  },
-  getIsPending(state) {
-    return state.pending
-  },
-  getCheckedAssets(state) {
-    return state.checkedAssets
-  },
   getVerUni(state) {
     return state.verUni
   },
@@ -197,123 +174,13 @@ const mutations: MutationTree<IUserModule> = {
         }
       })
   },
-  // This function is out of date, may be modified in the future
-  [SET_IMAGES](state: IUserModule) {
-    const { userAssets, teamId, userId } = state
-    const isAdmin = state.role === 0
-    const images = userAssets.image.content.map((image: IUserImageContentData) => {
-      const aspectRatio = image.width / image.height
-      const prevW = image.width > image.height ? image.width : 384 * aspectRatio
-      const prevH = image.height > image.width ? image.height : 384 / aspectRatio
-      return {
-        width: image.width,
-        height: image.height,
-        id: image.id,
-        assetIndex: image.asset_index,
-        preview: {
-          width: prevW,
-          height: prevH
-        },
-        urls: {
-          prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/prev` : image.signed_url?.prev ?? '',
-          full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/full` : image.signed_url?.full ?? '',
-          larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/larg` : image.signed_url?.larg ?? '',
-          original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/original` : image.signed_url?.original ?? '',
-          midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/midd` : image.signed_url?.midd ?? '',
-          smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/smal` : image.signed_url?.smal ?? '',
-          tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${image.id}/tiny` : image.signed_url?.tiny ?? ''
-        }
-      }
-    })
-
-    state.images = [...images]
-    state.pending = false
-  },
-  [ADD_PREVIEW](state: IUserModule, { imageFile, assetId }) {
-    const previewImage = {
-      width: imageFile.width,
-      height: imageFile.height,
-      id: assetId,
-      assetIndex: assetId,
-      progress: 0,
-      preview: {
-        width: imageFile.width,
-        height: imageFile.height
-      },
-      urls: {
-        prev: imageFile.src,
-        full: imageFile.src,
-        larg: imageFile.src,
-        original: imageFile.src,
-        midd: imageFile.src,
-        smal: imageFile.src,
-        tiny: imageFile.src
-      }
-    }
-    state.images.unshift(previewImage)
-  },
-  [UPDATE_PROGRESS](state: IUserModule, { assetId, progress }) {
-    const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
-      return img.id === assetId
-    })
-    state.images[targetIndex].progress = progress
-  },
-  [UPDATE_IMAGE_URLS](state: IUserModule, { assetId, urls, assetIndex, type = 'private' }) {
-    const { images, teamId, userId } = state
-    const isAdmin = type === 'public'
-    const targetIndex = state.images.findIndex((img: IAssetPhoto) => {
-      return isAdmin ? img.id === assetId : img.assetIndex === assetId
-    })
-
-    const targetUrls = {
-      prev: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/prev` : urls.prev || '',
-      full: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/full` : urls.full || '',
-      larg: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/larg` : urls.larg || '',
-      original: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/original` : urls.origin || '',
-      midd: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/midd` : urls.midd || '',
-      smal: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/smal` : urls.smal || '',
-      tiny: isAdmin ? `https://template.vivipic.com/admin/${teamId || userId}/asset/image/${images[targetIndex].id}/tiny` : urls.tiny || ''
-    }
-    if (targetIndex === -1) {
-      images.push({
-        width: 500,
-        height: 400,
-        id: 'this is a test',
-        assetIndex: assetId,
-        preview: {
-          width: 100,
-          height: 200
-        },
-        urls
-      })
-    } else {
-      images[targetIndex].urls = targetUrls
-      images[targetIndex].id = isAdmin ? assetId : undefined
-      images[targetIndex].assetIndex = assetIndex ?? assetId
-    }
-  },
-  [UPDATE_CHECKED_ASSETS](state: IUserModule, val) {
-    state.checkedAssets = [...val]
-  },
-  [ADD_CHECKED_ASSETS](state: IUserModule, id) {
-    state.checkedAssets.push(id)
-  },
-  [DELETE_CHECKED_ASSETS](state: IUserModule, index: string) {
-    const targetIndex = state.checkedAssets.findIndex((assetIndex) => {
-      return assetIndex === index
-    })
-    state.checkedAssets.splice(targetIndex, 1)
-  },
-  [CLEAR_CHECKED_ASSETS](state: IUserModule) {
-    state.checkedAssets = []
-  },
   [SET_ADMIN_MODE](state: IUserModule, mode: boolean) {
     state.adminMode = mode
   }
 }
 
 const actions: ActionTree<IUserModule, unknown> = {
-  async getAllAssets({ commit }, { token }) {
+  async getAllAssets({ commit, dispatch }, { token }) {
     try {
       const { data } = await userApis.getAllAssets(token)
       // console.warn(data)
@@ -323,26 +190,11 @@ const actions: ActionTree<IUserModule, unknown> = {
         userAssets: data.data
       })
 
-      commit(SET_IMAGES)
-    } catch (error) {
-      console.log(error)
-    }
-  },
-  async deleteAssets({ commit, dispatch }) {
-    try {
-      const keyList = state.checkedAssets.join(',')
-      const params = {
-        token: state.token,
-        locale: state.locale,
-        team_id: state.teamId || state.userId,
-        type: 'image',
-        update_type: 'delete',
-        src_asset: keyList,
-        target: '1'
-      }
-      const { data } = await userApis.updateAsset({ ...params })
-      dispatch('getAllAssets', { token: state.token })
-      commit('CLEAR_CHECKED_ASSETS')
+      dispatch('file/initImages', {
+        imgs: data.data.image.content
+      }, {
+        root: true
+      })
     } catch (error) {
       console.log(error)
     }
@@ -500,26 +352,6 @@ const actions: ActionTree<IUserModule, unknown> = {
     } catch (error) {
       console.log(error)
       return Promise.reject(error)
-    }
-  },
-  // as private images expire, redraw these images
-  async updateImages({ state, commit }, { assetSet }) {
-    const { token } = state
-    // const { data } = await userApis.getAssets(token, {
-    //   asset_list: assetSet
-    //   // team_id: state.teamId || state.userId
-    // })
-    const { data } = await apiUtils.requestWithRetry(() => {
-      console.warn('fetch')
-      return userApis.getAllAssets(token, { asset_list: assetSet })
-    })
-    const urlSet = data.url_map as { [assetId: string]: { [urls: string]: string } }
-    if (urlSet) {
-      for (const [assetId, urls] of Object.entries(urlSet)) {
-        commit(UPDATE_IMAGE_URLS, { assetId: +assetId, urls })
-      }
-    } else {
-      throw new Error('fail to fetch private image urls')
     }
   },
   async removeBg({ state }, { srcObj, aspect }) {

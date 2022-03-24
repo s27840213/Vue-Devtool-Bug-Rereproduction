@@ -33,6 +33,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
         }
         default: {
           await uploadUtils.getDesign(type, { designId }, { width, height })
+          store.commit('file/SET_setLayersDone')
         }
       }
     } else if (type === 'new-design-size' && width && height) {
@@ -42,6 +43,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       }
     } else if (!url && (!from.name || ['Login'].includes(from.name))) {
       // refresh /editor page
+      store.commit('file/SET_setLayersDone')
       themeUtils.refreshTemplateState()
     }
 

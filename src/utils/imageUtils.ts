@@ -29,6 +29,10 @@ class ImageUtils {
   }
 
   getSrc(config: IImage, size?: string | number): string {
+    if (config.previewSrc) {
+      return config.previewSrc
+    }
+
     const { type, userId, assetId } = config.srcObj || config.src_obj || {}
     if (typeof size === 'undefined' && config.styles) {
       const { imgWidth, imgHeight } = config.styles
@@ -41,14 +45,8 @@ class ImageUtils {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
       case 'private': {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (img) {
-          for (const [k, v] of Object.entries(img.urls)) {
-            if (k === size) return v
-          }
-        }
-        return ''
+        const editorImg = store.getters['file/getEditorViewImages']
+        return editorImg(assetId) ? editorImg(assetId)[size as string] : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`

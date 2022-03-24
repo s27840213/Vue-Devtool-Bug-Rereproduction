@@ -44,10 +44,9 @@ export default Vue.extend({
     if (!srcObj || !srcObj.type) return
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
-      const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-      const img = images.find(img => img.assetIndex === assetId)
-      if (!img) {
-        await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+      const editorImg = this.getEditorViewImages
+      if (!editorImg(assetId)) {
+        await this.updateImages({ assetSet: new Set<string>([assetId]) })
         this.src = ImageUtils.getSrc(this.image.config)
       }
     }
@@ -74,7 +73,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getPageSize: 'getPageSize'
+      getPageSize: 'getPageSize',
+      getEditorViewImages: 'file/getEditorViewImages'
     }),
     ...mapState('user', ['userId']),
     isColorBackground(): boolean {
@@ -138,7 +138,7 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('user', ['updateImages']),
+    ...mapActions('file', ['updateImages']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
@@ -153,11 +153,11 @@ export default Vue.extend({
         return 1600
       }
     },
-    onError() {
+    onError() { // deprecated?
       console.log('image on error')
       if (this.image.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.image.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
         } catch (error) {
           console.log(error)
         }
