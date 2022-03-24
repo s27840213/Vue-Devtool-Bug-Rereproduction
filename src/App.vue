@@ -90,7 +90,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('text', ['addFont']),
     ...mapMutations('text', {
       updateDefaultFonts: 'UPDATE_DEFAULT_FONT'
     }),

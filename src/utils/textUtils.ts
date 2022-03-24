@@ -963,6 +963,8 @@ class TextUtils {
         type: p.styles.type,
         face: p.styles.font,
         url: p.styles.fontUrl,
+        assetId: p.styles.assetId,
+        userId: p.styles.userId,
         ver: store.getters['user/getVerUni']
       }).catch(e => console.error(e))
       for (const span of p.spans) {
@@ -970,6 +972,8 @@ class TextUtils {
           type: span.styles.type,
           face: span.styles.font,
           url: span.styles.fontUrl,
+          assetId: span.styles.assetId,
+          userId: span.styles.userId,
           ver: store.getters['user/getVerUni']
         }).catch(e => console.error(e))
       }
