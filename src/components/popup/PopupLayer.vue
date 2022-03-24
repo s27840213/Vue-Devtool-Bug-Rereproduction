@@ -242,7 +242,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       _setBackgroundImage: 'SET_backgroundImage',
-      set_popupComponent: 'SET_popupComponent'
+      set_popupComponent: 'SET_popupComponent',
+      _setBgImgSrc: 'SET_backgroundImageSrc'
     }),
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
@@ -350,10 +351,14 @@ export default Vue.extend({
         image.styles.imgX = 0
         image.styles.imgY = 0
         const pageIndex = this.currSelectedInfo.pageIndex
-        this._setBackgroundImage({
+        this._setBgImgSrc({
           pageIndex: pageIndex,
-          config: image
+          srcObj: image.srcObj
         })
+        // this._setBackgroundImage({
+        //   pageIndex: pageIndex,
+        //   config: image
+        // })
         const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
         pageUtils.updateBackgroundImageSize(pageIndex, width, height)
         pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)

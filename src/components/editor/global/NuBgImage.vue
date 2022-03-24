@@ -12,12 +12,13 @@
 import Vue from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 import store from '@/store'
 import { IAssetPhoto } from '@/interfaces/api'
+import { SrcObj } from '@/interfaces/gallery'
 
 export default Vue.extend({
   props: {
@@ -25,8 +26,21 @@ export default Vue.extend({
     color: String,
     pageIndex: Number
   },
+  data() {
+    return {
+      src: ''
+    }
+  },
+  watch: {
+    srcObj: {
+      deep: true,
+      handler: function() {
+        this.isColorBackground ? (this.src = '') : (this.src = ImageUtils.getSrc(this.image.config))
+      }
+    }
+  },
   async created() {
-    const { srcObj } = this.image.config
+    const { srcObj } = this
     if (!srcObj || !srcObj.type) return
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
@@ -34,23 +48,27 @@ export default Vue.extend({
       const img = images.find(img => img.assetIndex === assetId)
       if (!img) {
         await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+        this.src = ImageUtils.getSrc(this.image.config)
       }
     }
-    const nextImg = new Image()
-    nextImg.onerror = () => {
-      if (srcObj.type === 'pexels') {
-        this.setBgImageSrc({
-          pageIndex: this.pageIndex,
-          srcObj: { ...srcObj, userId: 'jpeg' }
-        })
-        nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+
+    if (this.userId !== 'backendRendering') {
+      const nextImg = new Image()
+      nextImg.onerror = () => {
+        if (srcObj.type === 'pexels') {
+          this.setBgImageSrc({
+            pageIndex: this.pageIndex,
+            srcObj: { ...srcObj, userId: 'jpeg' }
+          })
+          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+        }
       }
+      nextImg.onload = () => {
+        const preImg = new Image()
+        preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
+      }
+      nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
     }
-    nextImg.onload = () => {
-      const preImg = new Image()
-      preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
-    }
-    nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
   },
   components: { NuAdjustImage },
   computed: {
@@ -58,6 +76,7 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize'
     }),
+    ...mapState('user', ['userId']),
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.assetId === ''
@@ -65,9 +84,12 @@ export default Vue.extend({
     getImgDimension(): number {
       return ImageUtils.getSignificantDimension(this.image.config.styles.width, this.image.config.styles.height) * (this.scaleRatio / 100)
     },
-    src(): string {
-      return this.isColorBackground ? '' : ImageUtils.getSrc(this.image.config)
+    srcObj(): SrcObj {
+      return this.image.config.srcObj
     },
+    // src(): string {
+    //   return this.isColorBackground ? '' : ImageUtils.getSrc(this.image.config)
+    // },
     flipStyles(): { transform: any } {
       const { horizontalFlip, verticalFlip } = this.image.config.styles
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)

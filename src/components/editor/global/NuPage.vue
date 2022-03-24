@@ -396,7 +396,7 @@ export default Vue.extend({
         width: `${this.config.width}px`,
         height: `${this.config.height}px`,
         backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${this.config.backgroundImage.config.srcObj ? ImageUtils.getSrc(this.config.backgroundImage.config) : this.config.backgroundImage.src})`,
+        backgroundImage: `url(${ImageUtils.getSrc(this.config.backgroundImage.config)})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
           : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
         backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
