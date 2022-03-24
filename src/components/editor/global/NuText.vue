@@ -153,7 +153,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('text', ['addFont']),
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)
     },
@@ -174,17 +173,17 @@ export default Vue.extend({
         opacity
       }
     },
-    getFontUrl(spanStyles: ISpanStyle): string {
-      switch (spanStyles.type) {
-        case 'public':
-          return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-        case 'private':
-          return ''
-        case 'URL':
-          return 'url("' + spanStyles.fontUrl + '")'
-      }
-      return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    },
+    // getFontUrl(spanStyles: ISpanStyle): string {
+    //   switch (spanStyles.type) {
+    //     case 'public':
+    //       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
+    //     case 'private':
+    //       return ''
+    //     case 'URL':
+    //       return 'url("' + spanStyles.fontUrl + '")'
+    //   }
+    //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
+    // },
     observeAllPs() {
       const ps = document.querySelectorAll(`.nu-text__p-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
       ps.forEach(p => {
