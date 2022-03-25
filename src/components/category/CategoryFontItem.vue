@@ -111,8 +111,17 @@ export default Vue.extend({
         }
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
+        const updateItem = {
+          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          fontUrl: this.item.fontUrl ?? '',
+          userId: this.item.userId ?? '',
+          assetId: this.item.assetId ?? '',
+          font: this.item.id,
+          ver: this.item.ver
+        }
+
         await this.$store.dispatch('text/addFont', {
-          type: this.item.type || this.item.fontType, // public fonts in list-design don't have type
+          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
           url: this.item.fontUrl,
           userId: this.item.userId,
           assetId: this.item.assetId,
@@ -146,7 +155,7 @@ export default Vue.extend({
             }
           })
 
-          AssetUtils.addAssetToRecentlyUsed(this.item)
+          AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
           StepsUtils.record()
           TextPropUtils.updateTextPropsState({ font: this.item.id })
           return
@@ -206,7 +215,7 @@ export default Vue.extend({
           }
         }
 
-        AssetUtils.addAssetToRecentlyUsed(this.item)
+        AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
         StepsUtils.record()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {
