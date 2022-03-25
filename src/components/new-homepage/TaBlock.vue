@@ -13,12 +13,13 @@
           class="block__colorBlock"
           :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
           :style="{ 'top': `${cb.top}px`, 'left': `${cb.left}px` }")
-      div(class="body-XL")
+      div(class="block-text__description body-XL")
         span {{content.description}}
       //- need v-if?
       div(v-if="content.link"
         class="block-text__link text-H5")
-        span {{content.link}}
+        router-link(:to="content.link.to")
+          span {{content.link.text}}
     div(class="block-img")
       animation(
         :path="'@/assets/img/svg/newHomepage/' + content.img.name"
@@ -47,14 +48,6 @@ export default Vue.extend({
       required: true
     }
   },
-  data() {
-    return {
-    }
-  },
-  computed: {
-  },
-  // async mounted() {
-  // },
   methods: {
     blockStyle() {
       return {
@@ -97,7 +90,10 @@ export default Vue.extend({
     position: relative;
   }
   &__link {
-    color: setColor(blue-1)
+    a {
+      color: setColor(blue-1);
+      text-decoration: none;
+    }
   }
   div {
     margin: 10px;

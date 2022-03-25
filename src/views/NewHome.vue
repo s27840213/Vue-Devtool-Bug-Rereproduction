@@ -14,10 +14,9 @@
           path='@/assets/img/svg/newHomepage/demo.mp4'
           :width='468')
           //- need control? loop?
-      scroll-list(:list="themeList" type='theme'
-        @openPopup="openPopup()") // todo
+      scroll-list(type="theme")
       div(class="home-block")
-        block(v-for="item in blocklist"
+        ta-block(v-for="item in blocklist"
           :content="item")
       nu-footer
 </template>
@@ -25,12 +24,11 @@
 <script lang="ts">
 import Vue from 'vue'
 // import i18n from '@/i18n'
-import { mapActions, mapGetters } from 'vuex'
 import NewHeader from '@/components/new-homepage/NewHeader.vue'
-import Block from '@/components/new-homepage/Block.vue'
-import NuFooter from '@/components/NuFooter.vue'
-import ScrollList from '@/components/homepage/ScrollList.vue'
 import Animation from '@/components/Animation.vue'
+import ScrollList from '@/components/new-homepage/ScrollList.vue'
+import TaBlock from '@/components/new-homepage/TaBlock.vue'
+import NuFooter from '@/components/NuFooter.vue'
 
 import themeUtils from '@/utils/themeUtils'
 
@@ -42,10 +40,10 @@ export default Vue.extend({
   name: 'Home',
   components: {
     NewHeader,
-    Block,
-    NuFooter,
+    Animation,
     ScrollList,
-    Animation
+    TaBlock,
+    NuFooter
   },
   data() {
     return {
@@ -54,18 +52,9 @@ export default Vue.extend({
   },
   // need meta info?
   computed: {
-    ...mapGetters({
-    }),
-    themeList() {
-      return _.filter(themeUtils.themes, ['mainHidden', 0])
-    }
   },
   async mounted() {
     themeUtils.checkThemeState() // move to created?
-  },
-  methods: {
-    ...mapActions({
-    })
   }
 })
 </script>

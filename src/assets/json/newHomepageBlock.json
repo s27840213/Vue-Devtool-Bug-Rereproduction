@@ -22,7 +22,10 @@
   }, {
     "title": "Tailor-made templates\njust for your business",
     "description": "Find your ideal design fast with the filters of events\nand industries at Template Center.",
-    "link": "See Template Center →",
+    "link": {
+      "text": "See Template Center →",
+      "to": "/templates"
+    },
     "img": {
       "name": "bussiness.json",
       "width": 500
