@@ -16,9 +16,8 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
-import store from '@/store'
-import { IAssetPhoto } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
+import { IImage } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -35,7 +34,11 @@ export default Vue.extend({
     srcObj: {
       deep: true,
       handler: function() {
-        this.isColorBackground ? (this.src = '') : (this.src = ImageUtils.getSrc(this.image.config))
+        if (this.isColorBackground) {
+          this.src = ''
+        } else {
+          this.perviewAsLoading()
+        }
       }
     }
   },
@@ -52,6 +55,7 @@ export default Vue.extend({
     }
 
     if (this.userId !== 'backendRendering') {
+      this.perviewAsLoading()
       const nextImg = new Image()
       nextImg.onerror = () => {
         if (srcObj.type === 'pexels') {
@@ -76,7 +80,12 @@ export default Vue.extend({
       getPageSize: 'getPageSize',
       getEditorViewImages: 'file/getEditorViewImages'
     }),
-    ...mapState('user', ['userId']),
+    ...mapState('user', ['imgSizeMap', 'userId']),
+    getPreviewSize(): number {
+      const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
+      return ImageUtils
+        .getSrcSize(this.image.config.srcObj.type, sizeMap.flatMap(e => e.key === 'smal' ? [e.size] : [])[0] as number || 150)
+    },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.assetId === ''
@@ -87,9 +96,6 @@ export default Vue.extend({
     srcObj(): SrcObj {
       return this.image.config.srcObj
     },
-    // src(): string {
-    //   return this.isColorBackground ? '' : ImageUtils.getSrc(this.image.config)
-    // },
     flipStyles(): { transform: any } {
       const { horizontalFlip, verticalFlip } = this.image.config.styles
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
@@ -142,17 +148,6 @@ export default Vue.extend({
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
-    sizeMap(width: number) {
-      if (width < 540) {
-        return 540
-      } else if (width < 800) {
-        return 800
-      } else if (width < 1080) {
-        return 1080
-      } else {
-        return 1600
-      }
-    },
     onError() { // deprecated?
       console.log('image on error')
       if (this.image.config.srcObj.type === 'private') {
@@ -162,6 +157,33 @@ export default Vue.extend({
           console.log(error)
         }
       }
+    },
+    async perviewAsLoading() {
+      // First put a preview to this.src, then start to load the image user want. When loading finish,
+      // if user still need that image, put it to this.src to replace preview, otherwise do nothing.
+      return new Promise<void>((resolve, reject) => {
+        const config = this.image.config as IImage
+        if (config.previewSrc) {
+          this.src = config.previewSrc
+          config.previewSrc = ''
+        } else {
+          this.src = ImageUtils.getSrc(config, this.getPreviewSize)
+        }
+        const img = new Image()
+        img.setAttribute('crossOrigin', 'Anonymous')
+        const src = ImageUtils.getSrc(config)
+        img.onload = () => {
+          /** If after onload the img, the config.srcObj is the same, set the src. */
+          if (ImageUtils.getSrc(config) === src) {
+            this.src = src
+          }
+          resolve()
+        }
+        img.onerror = () => {
+          reject(new Error('cannot load the current image'))
+        }
+        img.src = src
+      })
     }
   }
 })

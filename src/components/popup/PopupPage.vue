@@ -45,6 +45,8 @@ import layerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import pageUtils from '@/utils/pageUtils'
+import assetUtils from '@/utils/assetUtils'
+import imageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
@@ -168,22 +170,21 @@ export default Vue.extend({
     detachBackgroundImage() {
       const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(pageUtils.currFocusPageIndex))
       if (detachedBackgroundImage.config.srcObj.assetId) {
-        let { initWidth: width, initHeight: height } = detachedBackgroundImage.config.styles
-        while (width > 1000 && height > 1000) {
-          width /= 1.5
-          height /= 1.5
+        /** get a tiny photo in order to get the aspectRatio of the image */
+        const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj.type, 50))
+        const img = new Image()
+        img.onload = () => {
+          const ratio = img.naturalWidth / img.naturalHeight
+          assetUtils.addImage(src, ratio, {
+            pageIndex: layerUtils.pageIndex,
+            ...detachedBackgroundImage.config.srcObj
+          })
+          this._setBackgroundImage({
+            pageIndex: pageUtils.currFocusPageIndex,
+            config: this.baseBgImgConfig
+          })
         }
-        Object.assign(detachedBackgroundImage.config.styles, {
-          width,
-          height,
-          imgWidth: width,
-          imgHeight: height
-        })
-        layerUtils.addLayers(pageUtils.currFocusPageIndex, [detachedBackgroundImage.config])
-        this._setBackgroundImage({
-          pageIndex: pageUtils.currFocusPageIndex,
-          config: this.baseBgImgConfig
-        })
+        img.src = src
       } else {
         this._setBackgroundColor({
           pageIndex: pageUtils.currFocusPageIndex,

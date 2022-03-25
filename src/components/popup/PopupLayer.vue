@@ -340,7 +340,8 @@ export default Vue.extend({
     },
     setBackgroundImage() {
       const image = this.currSelectedInfo.layers[0] as IImage
-      imageUtils.getImageSize(imageUtils.getSrc(image), image.styles.imgWidth, image.styles.imgHeight).then(({ width: imgWidth, height: imgHeight }) => {
+      const src = imageUtils.getSrc(image)
+      imageUtils.getImageSize(src, image.styles.imgWidth, image.styles.imgHeight).then(({ width: imgWidth, height: imgHeight }) => {
         image.styles.imgWidth = imgWidth
         image.styles.imgHeight = imgHeight
         image.styles.width = imgWidth
@@ -353,7 +354,8 @@ export default Vue.extend({
         const pageIndex = this.currSelectedInfo.pageIndex
         this._setBgImgSrc({
           pageIndex: pageIndex,
-          srcObj: image.srcObj
+          srcObj: image.srcObj,
+          previewSrc: src
         })
         // this._setBackgroundImage({
         //   pageIndex: pageIndex,
