@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="list")
     div(class="list-title text-H5")
-      span Design for...
+      span {{title}}
     div(class="list-content")
       div(v-if="prevIcon"
         class="list-content__lefticon"
@@ -18,19 +18,26 @@
       div(class="list-content-items"
         @scroll="updateIcon"
         ref="items")
-        div(v-if="type === 'theme'"
-          v-for="item in contentData"
-          class="list-content-items__item")
+        //- type theme
+        template(v-if="type === 'theme'")
+          div(class="list-content-items__item")
+            img(:src="require('@/assets/img/png/plus-origin.png')"
+              @click="$emit('openSizePopup')")
+            span(class="body-SM text-gray-1") {{$t('NN0023')}}
+          div(v-for="item in contentData"
+            class="list-content-items__item")
             router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
               img(:src="item.url"
                 @error="imgOnerror")
             span(class="body-SM text-gray-1") {{item.title}}
             span(class="body-XS text-gray-3") {{item.width}} x {{item.height}}
+        //- type template
+        template(v-if="type === 'template'")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-// import i18n from '@/i18n'
+import i18n from '@/i18n'
 import themeUtils from '@/utils/themeUtils'
 import _ from 'lodash'
 
@@ -49,6 +56,7 @@ export default Vue.extend({
       initialed: false,
       prevIcon: false,
       nextIcon: false,
+      title: '',
       fallbackSrc: require('@/assets/img/svg/image-preview.svg')
     }
   },
@@ -60,6 +68,7 @@ export default Vue.extend({
   created() {
     if (this.type === 'theme') {
       themeUtils.checkThemeState()
+      this.title = i18n.t('NN0154') as string
     }
   },
   async mounted() {
@@ -106,6 +115,7 @@ export default Vue.extend({
     }
     &-items {
       display: flex;
+      align-items: center;
       max-width: 80vw; // ask kitty
       overflow: auto;
       @include no-scrollbar;
@@ -117,13 +127,13 @@ export default Vue.extend({
         a {
           width: 140px;
           height: 120px;
-          img {
-            width: 100px;
-            height: 100px;
-            &:hover {
-              transition: all 0.2s ease-in-out;
-              transform: translate(0, -5px);
-            }
+        }
+        img {
+          width: 100px;
+          height: 100px;
+          &:hover {
+            transition: all 0.2s ease-in-out;
+            transform: translate(0, -5px);
           }
         }
       }

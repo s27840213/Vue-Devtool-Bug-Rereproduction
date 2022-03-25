@@ -14,23 +14,28 @@
           path='@/assets/img/svg/newHomepage/demo.mp4'
           :width='468')
           //- need control? loop?
-      scroll-list(type="theme")
+      scroll-list(v-if="!isMobile"
+        type="theme"
+        @openSizePopup="openSizePopup()")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
       nu-footer
+      div(v-if="showSizePopup"
+        class="home__size-popup")
+        popup-size(@close="closeSizePopup()")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 // import i18n from '@/i18n'
 import NewHeader from '@/components/new-homepage/NewHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/new-homepage/ScrollList.vue'
 import TaBlock from '@/components/new-homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
-
-import themeUtils from '@/utils/themeUtils'
+import PopupSize from '@/components/popup/PopupSize.vue'
 
 import _ from 'lodash'
 
@@ -43,18 +48,28 @@ export default Vue.extend({
     Animation,
     ScrollList,
     TaBlock,
-    NuFooter
+    NuFooter,
+    PopupSize
   },
   data() {
     return {
-      blocklist
+      blocklist,
+      showSizePopup: false
     }
   },
   // need meta info?
   computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    })
   },
-  async mounted() {
-    themeUtils.checkThemeState() // move to created?
+  methods: {
+    openSizePopup() {
+      this.showSizePopup = true
+    },
+    closeSizePopup() {
+      this.showSizePopup = false
+    }
   }
 })
 </script>
@@ -116,5 +131,17 @@ export default Vue.extend({
     border-color: transparent;
     background-color: #DEE7EE;
   }
+}
+.home__size-popup { // 有屬於popup的scss嗎？ 開一個新的？
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000000a1;
+  z-index: setZindex('popup');
 }
 </style>

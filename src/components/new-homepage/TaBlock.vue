@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="block"
-    :style="blockStyle()")
+    :style="blockStyle")
     div(class="block-text"
-      :style="blockTextStyle()")
+      :style="blockTextStyle")
       div(v-if="content.comingSoon"
         class="block-text__coming_soon overline-SM")
         span {{'COMING SOON'}}
@@ -34,6 +34,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapState } from 'vuex'
 // import i18n from '@/i18n'
 import Animation from '@/components/Animation.vue'
 
@@ -48,13 +49,16 @@ export default Vue.extend({
       required: true
     }
   },
-  methods: {
-    blockStyle() {
+  computed: {
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
+    blockStyle(): Record<string, string> {
       return {
-        'flex-direction': this.content.align
+        'flex-direction': this.isMobile ? 'column' : this.content.align
       }
     },
-    blockTextStyle() {
+    blockTextStyle(): Record<string, string> {
       return {
         'align-items': this.content.align === 'column' ? 'center' : 'flex-start',
         'text-align': this.content.align === 'column' ? 'center' : 'left'

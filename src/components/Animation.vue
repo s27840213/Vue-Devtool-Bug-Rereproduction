@@ -70,11 +70,11 @@ export default Vue.extend({
     },
     delay: {
       type: Number,
-      default: 1
+      default: 10
     },
     imgSpeed: {
       type: Number,
-      default: 0.02
+      default: 0.05
     }
   },
   data() {
@@ -94,7 +94,7 @@ export default Vue.extend({
   computed: {
     carousel(): Record<string, string> {
       return {
-        transform: `translateX(-${this.time % 100}%)`
+        transform: `translateX(-${this.time}%)`
       }
     },
     isJSON():boolean {
@@ -110,7 +110,7 @@ export default Vue.extend({
   created() {
     if (this.isSvg) {
       setInterval(() => {
-        this.time += this.imgSpeed
+        this.time = (this.time + this.imgSpeed) % 100
       }, this.delay)
     }
   },
