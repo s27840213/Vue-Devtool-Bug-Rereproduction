@@ -44,7 +44,7 @@ class ImageUtils {
     }
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}&origin=true`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true`
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
         return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' : ''
@@ -54,7 +54,7 @@ class ImageUtils {
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}&origin=true`
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/full&origin=true`
+        return `https://template.vivipic.com/background/${assetId}/full?origin=true`
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       default:
