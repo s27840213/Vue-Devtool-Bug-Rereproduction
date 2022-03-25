@@ -198,13 +198,10 @@ class StepsUtils {
       if (pageUtils.isOutOfBound(pageIndex)) continue
       pagePromises.push(new Promise((resolve, reject) => {
         try {
-          // const newLayers = []
           const layerPromises = []
           for (const layer of page.layers) {
-            // newLayers.push(await this.fillDataForLayer(layer))
             layerPromises.push(this.fillDataForLayer(layer))
           }
-          // page.layers = newLayers
           Promise.all(layerPromises).then((layers) => {
             page.layers = layers
             resolve(page)

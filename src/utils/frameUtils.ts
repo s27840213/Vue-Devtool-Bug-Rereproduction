@@ -16,17 +16,17 @@ class FrameUtils {
     return "<path d='" + (path ?? '') + "'></path>"
   }
 
-  frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
-    const updateFrameLayer = () => {
-      const clipPath = `M0,0h${width}v${height}h${-width}z`
-      this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
-      LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { initWidth: width, initHeight: height })
-    }
+  updateFrameLayer(width: number, height: number) {
+    const clipPath = `M0,0h${width}v${height}h${-width}z`
+    this.updateFrameLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { clipPath })
+    LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { initWidth: width, initHeight: height })
+  }
 
+  frameResizeHandler(width: number, height: number, offsetWidth: number, offsetHeight: number) {
     ImageUtils.imgResizeHandler(width, height, offsetWidth, offsetHeight,
       (imgX: number, imgY: number) => {
         this.updateFrameLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, { imgX, imgY })
-        updateFrameLayer()
+        this.updateFrameLayer(width, height)
       },
       (imgWidth: number, imgHeight: number) => {
         this.updateFrameLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, 0, {
@@ -35,7 +35,7 @@ class FrameUtils {
           width,
           height
         })
-        updateFrameLayer()
+        this.updateFrameLayer(width, height)
       }
     )
   }

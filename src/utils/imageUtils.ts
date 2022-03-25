@@ -6,6 +6,7 @@ import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
+import generalUtils from './generalUtils'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -370,6 +371,7 @@ class ImageUtils {
     const isAdmin = store.getters['user/isAdmin']
     const teamId = image.team_id ?? store.getters['user/getTeamId']
     const userId = store.getters['user/getTeamId']
+    console.log(image)
     return {
       width: image.width,
       height: image.height,
@@ -394,6 +396,14 @@ class ImageUtils {
       return `${src}&origin=true`
     } else {
       return `${src}?origin=true`
+    }
+  }
+
+  appendRandomQuery(src: string) {
+    if (src.includes('?')) {
+      return `${src}&ver=${generalUtils.generateRandomString(6)}`
+    } else {
+      return `${src}?ver=${generalUtils.generateRandomString(6)}`
     }
   }
 }
