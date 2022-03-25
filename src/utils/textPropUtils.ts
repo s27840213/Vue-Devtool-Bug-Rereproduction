@@ -275,15 +275,22 @@ class TextPropUtils {
           config.paragraphs[pidx].styles.font = config.paragraphs[pidx].spans[0].styles.font
         }
       }
-      if (propName !== 'fontSize') {
-        // [start, end] = this.spanMerger(config.paragraphs, start, end)
-      }
     }
     if (!TextUtils.isSel(end)) {
-      const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, prop[propName], config)
-      if (propName !== 'fontSize') {
-        // [start, end] = this.spanMerger(config.paragraphs, start, end)
+      /** If the start is selection is captured use the start position */
+      if (TextUtils.isSel(start)) {
+        const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
+        this.noRangedHandler(styles, propName, prop[propName], config)
+      } else {
+        /** else: the start position is not captured apply the props to all the text block */
+        config.paragraphs
+          .forEach(p => {
+            p.spans
+              .forEach(s => {
+                const styles = s.styles
+                this.noRangedHandler(styles, propName, prop[propName], config)
+              })
+          })
       }
     }
 
@@ -299,27 +306,29 @@ class TextPropUtils {
       }
     }
 
-    if (TextUtils.isSel(end)) {
-      if (isStartContainerDivided) {
-        if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-          start.sIndex++
-          start.offset = 0
-          end.sIndex++
-          end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-        } else {
-          start.sIndex++
-        }
-      }
-    } else {
-      if (propName === 'fontFamily' || propName === 'fontSize') {
-        start.offset = 0
-        Object.assign(end, start)
-        end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
-      } else {
-        end = TextUtils.getNullSel()
-      }
-    }
-    TextUtils.updateSelection(start, end)
+    // @ Obsolete code
+    // if (TextUtils.isSel(end)) {
+    //   if (isStartContainerDivided) {
+    //     if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+    //       start.sIndex++
+    //       start.offset = 0
+    //       end.sIndex++
+    //       end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
+    //     } else {
+    //       start.sIndex++
+    //     }
+    //   }
+    // } else {
+    //   if (propName === 'fontFamily' || propName === 'fontSize') {
+    //     if (TextUtils.isSel(start))
+    //     start.offset = 0
+    //     Object.assign(end, start)
+    //     end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
+    //   } else {
+    //     end = TextUtils.getNullSel()
+    //   }
+    // }
+    // TextUtils.updateSelection(start, end)
 
     // Sync updating text effect if the color changed
     // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
@@ -496,6 +505,7 @@ class TextPropUtils {
       case 'fontSize':
         styles.size = value as number
         return
+      case 'font':
       case 'fontFamily':
         styles.font = value as string
         return
@@ -547,7 +557,6 @@ class TextPropUtils {
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
       Object.assign(config?.paragraphs, paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
-      console.warn(propName)
     }
   }
 
