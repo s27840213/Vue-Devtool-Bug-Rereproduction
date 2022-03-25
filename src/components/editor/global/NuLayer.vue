@@ -74,8 +74,8 @@ export default Vue.extend({
       return MathUtils.cos(this.config.styles.rotate)
     },
     appendShadowEffect(): boolean {
-      if (this.config.type !== LayerType.image) return false
-      const config = this.config as IImage
+      const { config } = this
+      if (config.type !== LayerType.image || !config.styles.shadow) return false
       return [ShadowEffectType.projection, ShadowEffectType.halo].includes(config.styles.shadow.currentEffect)
     }
   },
@@ -100,9 +100,6 @@ export default Vue.extend({
             }
           )
           break
-        }
-        case LayerType.image: {
-          imageShadowUtils.handleShadowStyles(this.config, styles, this.imgControl)
         }
       }
       return styles
