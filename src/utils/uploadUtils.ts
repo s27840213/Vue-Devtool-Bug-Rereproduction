@@ -1150,7 +1150,6 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
-        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,
