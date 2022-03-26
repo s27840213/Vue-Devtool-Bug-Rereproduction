@@ -123,7 +123,7 @@ export default Vue.extend({
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
-        const teamId = (this.autoRemoveResult as IBgRemoveInfo).teamId
+        const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
         const previewSrc = this.canvas.toDataURL('image/png;base64')
         const { pageId, layerId } = this.bgRemoveIdInfo
         const targetPageIndex = pageUtils.getPageIndexById(pageId)
@@ -133,21 +133,28 @@ export default Vue.extend({
           previewSrc,
           trace: 1
         })
+
         this.setInBgRemoveMode(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
 
-        uploadUtils.uploadAsset('image', [previewSrc], false, (json: IUploadAssetResponse) => {
-          layerUtils.updateLayerProps(pageIndex, index, {
-            srcObj: {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index
-            },
-            trace: 1
-          })
-          this.setLoading(false)
-          stepsUtils.record()
+        uploadUtils.uploadAsset('image', [previewSrc], {
+          addToPage: false,
+          pollingCallback: (json: IUploadAssetResponse) => {
+            layerUtils.updateLayerProps(pageIndex, index, {
+              srcObj: {
+                type: this.isAdmin ? 'public' : 'private',
+                userId: teamId,
+                assetId: this.isAdmin ? json.data.id : json.data.asset_index
+              },
+              trace: 1
+            })
+            this.setLoading(false)
+            stepsUtils.record()
+          },
+          id: id
         })
+
+        console.log(id)
       }
     },
     cancel() {

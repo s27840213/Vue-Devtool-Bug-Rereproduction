@@ -24,8 +24,8 @@ class ResizeUtils {
       case 'image': {
         layer = targetLayer as IImage
         const { imgWidth, imgHeight, imgX, imgY } = (layer as IImage).styles
-        imageUtils.updateImgSize(pageIndex, layerIndex, imgWidth * scale, imgHeight * scale)
-        imageUtils.updateImgPos(pageIndex, layerIndex, imgX * scale, imgY * scale)
+        imageUtils.updateImgSize(pageIndex, layerIndex, imgWidth * targetScale, imgHeight * targetScale)
+        imageUtils.updateImgPos(pageIndex, layerIndex, imgX * targetScale, imgY * targetScale)
         scale = 1
         break
       }
