@@ -273,6 +273,10 @@ class TextPropUtils {
       if (propName === 'fontFamily') {
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           config.paragraphs[pidx].styles.font = config.paragraphs[pidx].spans[0].styles.font
+          config.paragraphs[pidx].styles.type = config.paragraphs[pidx].spans[0].styles.type
+          config.paragraphs[pidx].styles.userId = config.paragraphs[pidx].spans[0].styles.userId
+          config.paragraphs[pidx].styles.assetId = config.paragraphs[pidx].spans[0].styles.assetId
+          config.paragraphs[pidx].styles.fontUrl = config.paragraphs[pidx].spans[0].styles.fontUrl
         }
       }
       if (propName !== 'fontSize') {
@@ -281,7 +285,8 @@ class TextPropUtils {
     }
     if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, prop[propName], config)
+      // this.noRangedHandler(styles, propName, prop[propName], config)
+      Object.assign(styles, prop)
       if (propName !== 'fontSize') {
         // [start, end] = this.spanMerger(config.paragraphs, start, end)
       }

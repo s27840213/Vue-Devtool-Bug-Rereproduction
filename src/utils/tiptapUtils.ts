@@ -227,6 +227,10 @@ class TiptapUtils {
           spans.push({ text: '', styles: sStyles })
           pStyles.size = sStyles.size
           pStyles.font = sStyles.font
+          pStyles.type = sStyles.type
+          pStyles.userId = sStyles.userId
+          pStyles.assetId = sStyles.assetId
+          pStyles.fontUrl = sStyles.fontUrl
           result.push({ spans, styles: pStyles, spanStyle: paragraph.attrs.spanStyle })
         } else {
           isSetContentRequired = true
@@ -234,6 +238,10 @@ class TiptapUtils {
           spans.push({ text: '', styles: sStyles })
           pStyles.size = sStyles.size
           pStyles.font = sStyles.font
+          pStyles.type = sStyles.type
+          pStyles.userId = sStyles.userId
+          pStyles.assetId = sStyles.assetId
+          pStyles.fontUrl = sStyles.fontUrl
           result.push({ spans, styles: pStyles, spanStyle: defaultStyle })
         }
       } else {
@@ -287,9 +295,10 @@ class TiptapUtils {
     return lines.join('\n')
   }
 
-  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined) {
+  applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: {[key: string]: any} = {}) {
     const item: {[string: string]: any} = {}
     item[key] = value
+    Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
     const contentEditable = subLayerIdx === -1 ? getCurrLayer.contentEditable : (getCurrLayer as IGroup).layers[subLayerIdx].contentEditable
     this.agent(editor => {
@@ -299,6 +308,7 @@ class TiptapUtils {
           if (ranges[0].$from.pos === ranges[0].$to.pos) {
             const attr = this.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
             attr[key] = value
+            Object.assign(attr, otherUpdates)
             editor.storage.nuTextStyle.spanStyle = this.textStyles(attr)
             editor.chain().setMark('textStyle', attr).run()
             setTimeout(() => {
