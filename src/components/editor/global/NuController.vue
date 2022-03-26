@@ -316,7 +316,10 @@ export default Vue.extend({
       }
     },
     textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
+      // return tiptapUtils.toJSON(this.config.paragraphs)
+      const res = tiptapUtils.toJSON(this.config.paragraphs)
+      console.log(res)
+      return res
     }
   },
   watch: {
