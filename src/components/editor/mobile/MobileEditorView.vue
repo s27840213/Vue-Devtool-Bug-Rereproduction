@@ -495,8 +495,7 @@ $REULER_SIZE: 20px;
   overflow: scroll;
   position: relative;
   z-index: setZindex("editor-view");
-  height: calc(100% - 75px);
-  width: calc(100vw - 75px);
+  @include size(100%, 100%);
   // height: 100%;
   // @include no-scrollbar;
   &__grid {
