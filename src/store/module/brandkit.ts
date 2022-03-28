@@ -10,7 +10,8 @@ interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
   isBrandsLoading: boolean,
-  selectedTab: string
+  selectedTab: string,
+  fonts: IBrandFont[]
 }
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
@@ -22,7 +23,8 @@ const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
   isBrandsLoading: false,
-  selectedTab: brandkitUtils.getTabKeys()[0]
+  selectedTab: brandkitUtils.getTabKeys()[0],
+  fonts: []
 })
 
 const state = getDefaultState()
@@ -38,6 +40,9 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getSelectedTab(state: IBrandKitState): string {
     return state.selectedTab
+  },
+  getFonts(state: IBrandKitState): IBrandFont[] {
+    return state.fonts
   }
 }
 
@@ -254,6 +259,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async updateTextStyle({ state, commit }, updateInfo: { type: string, style: Partial<IBrandTextStyle> }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
+    // if current is default setting and property other than font is to be updated
+    // add default font setting into updateInfo.style
+    brandkitUtils.setDefaultFontInfo(currentBrand, updateInfo)
     const updateStyle = brandkitUtils.getUpdateStyleAPIEncoding(updateInfo.style)
     const currentStyle = brandkitUtils.getCurrentValues(currentBrand, updateInfo)
     await brandkitApi.updateBrandsWrapper({
@@ -381,17 +389,13 @@ const mutations: MutationTree<IBrandKitState> = {
     color.createTime = updateInfo.createTime
   },
   UPDATE_deleteFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
-    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
-    if (!brand) return
-    const index = brand.fonts.findIndex(font_ => font_.id === updateInfo.font.id)
+    const index = state.fonts.findIndex(font_ => font_.id === updateInfo.font.id)
     if (index < 0) return
-    brand.fonts.splice(index, 1)
+    state.fonts.splice(index, 1)
   },
   UPDATE_addFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
-    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
-    if (!brand) return
-    const index = brandkitUtils.findInsertIndex(brand.fonts, updateInfo.font)
-    brand.fonts.splice(index, 0, updateInfo.font)
+    const index = brandkitUtils.findInsertIndex(state.fonts, updateInfo.font)
+    state.fonts.splice(index, 0, updateInfo.font)
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)

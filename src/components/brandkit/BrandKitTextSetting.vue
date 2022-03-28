@@ -61,19 +61,10 @@ export default Vue.extend({
   data() {
     return {
       MAPPING: {
-        heading: {
-          textType: `${this.$t('NN0408')}`,
-          default: defaultHeading
-        },
-        subheading: {
-          textType: `${this.$t('NN0409')}`,
-          default: defaultSubheading
-        },
-        body: {
-          textType: `${this.$t('NN0410')}`,
-          default: defaultBody
-        }
-      } as {[key: string]: { textType: string, default: any }},
+        heading: `${this.$t('NN0408')}`,
+        subheading: `${this.$t('NN0409')}`,
+        body: `${this.$t('NN0410')}`
+      } as {[key: string]: string},
       isConfigOpen: false,
       isFontsPanelOpen: false,
       isValueSelectorOpen: false,
@@ -111,17 +102,17 @@ export default Vue.extend({
       }
     },
     getDisplayedText(): string {
-      const textType = this.MAPPING[this.type]?.textType ?? ''
+      const textType = this.MAPPING[this.type] ?? ''
       return this.textStyle.isDefault ? `${this.$t('NN0403', { textType })}` : brandkitUtils.composeSettingText(this.textStyle, textType)
     },
     getFontStyles() {
       if (this.textStyle.isDefault) {
         return {
-          fontFamily: this.MAPPING[this.type].default.paragraphs[0].spans[0].styles.font
+          fontFamily: brandkitUtils.getDefaultFontId(this.$i18n.locale)
         }
       } else {
         return {
-          fontFamily: this.textStyle.font.id
+          fontFamily: this.textStyle.fontId
         }
       }
     },

@@ -50,13 +50,11 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('brandkit', {
-      currentBrand: 'getCurrentBrand'
+      currentBrand: 'getCurrentBrand',
+      fonts: 'getFonts'
     }),
     textStyleSetting(): IBrandTextStyleSetting {
       return (this.currentBrand as IBrand).textStyleSetting
-    },
-    fonts(): IBrandFont[] {
-      return (this.currentBrand as IBrand).fonts
     }
   },
   methods: {

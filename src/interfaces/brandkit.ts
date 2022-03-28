@@ -1,11 +1,12 @@
+import { IUserFontContentData } from "./api"
+
 export interface IBrand {
   id: string,
   createTime: string,
   name: string,
   logos: IBrandLogo[],
   textStyleSetting: IBrandTextStyleSetting,
-  colorPalettes: IBrandColorPalette[],
-  fonts: IBrandFont[]
+  colorPalettes: IBrandColorPalette[]
 }
 
 export interface IBrandLogo {
@@ -24,7 +25,11 @@ export interface IBrandTextStyleSetting {
 }
 
 export interface IBrandTextStyle {
-  font: IBrandFont,
+  fontId: string,
+  fontUserId: string,
+  fontAssetId: string,
+  fontType: string,
+  fontName: string,
   size: number,
   bold: boolean,
   underline: boolean,
@@ -45,14 +50,9 @@ export interface IBrandColor {
   color: string
 }
 
-export interface IBrandFont {
-  type: string,
-  id: string,
+export interface IBrandFont extends Omit<IUserFontContentData, 'create_time' | 'update_time'> {
   createTime: string,
-  name: string,
-  ver: number,
-  namePrevUrl: string,
-  textPrevUrl: string
+  updateTime: string
 }
 
 export interface IDeletingItem {

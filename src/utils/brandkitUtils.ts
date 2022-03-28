@@ -1,10 +1,8 @@
 import i18n from '@/i18n'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
+import { STANDARD_TEXT_FONT } from './assetUtils'
 import generalUtils from './generalUtils'
-import defaultHeading from '@/assets/json/heading.json'
-import defaultSubheading from '@/assets/json/subheading.json'
-import defaultBody from '@/assets/json/body.json'
 
 const TAB_NAMES = {
   logo: 'NN0399',
@@ -12,17 +10,11 @@ const TAB_NAMES = {
   text: 'NN0400'
 }
 
-const TEXT_DEFAULTS = {
-  heading: {
-    defaultHeading
-  },
-  subheading: {
-    defaultSubheading
-  },
-  body: {
-    defaultBody
-  }
-}
+const FONT_DEFAULTS = {
+  tw: '思源黑體-標準',
+  us: 'Roboto-Regular',
+  jp: '裝甲明朝'
+} as {[key: string]: string}
 
 interface Item {
   createTime: string
@@ -84,23 +76,6 @@ class BrandKitUtils {
           '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
           '#68B82B', '#F84343', '#EA273E', '#55400C'
         ])
-      }],
-      fonts: [{
-        type: 'public',
-        id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 60)).toISOString(),
-        name: 'Angkor',
-        ver: 0,
-        namePrevUrl: require('@/assets/img/png/brandkit/font1.png'),
-        textPrevUrl: require('@/assets/img/png/brandkit/font1_prev.png')
-      }, {
-        type: 'public',
-        id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 50)).toISOString(),
-        name: 'Arial Hebrew School',
-        ver: 0,
-        namePrevUrl: require('@/assets/img/png/brandkit/font2.png'),
-        textPrevUrl: require('@/assets/img/png/brandkit/font2_prev.png')
       }]
     }
   }
@@ -116,8 +91,7 @@ class BrandKitUtils {
         subheadingStyle: this.createDefaultTextStyle('subheading'),
         bodyStyle: this.createDefaultTextStyle('body')
       },
-      colorPalettes: [],
-      fonts: []
+      colorPalettes: []
     }
   }
 
@@ -132,22 +106,17 @@ class BrandKitUtils {
         subheadingStyle: this.createDefaultTextStyle('subheading'),
         bodyStyle: this.createDefaultTextStyle('body')
       },
-      colorPalettes: [],
-      fonts: []
+      colorPalettes: []
     }
   }
 
   createDefaultTextStyle(type: string): IBrandTextStyle {
     const res = {
-      font: {
-        id: '',
-        name: '',
-        type: '',
-        ver: 0,
-        textPrevUrl: '',
-        namePrevUrl: '',
-        createTime: ''
-      },
+      fontId: '',
+      fontUserId: '',
+      fontAssetId: '',
+      fontType: '',
+      fontName: '',
       bold: false,
       underline: false,
       italic: false,
@@ -312,11 +281,15 @@ class BrandKitUtils {
     return res
   }
 
-  // getTextIsDefault(brand: any, type: string): boolean {
-  //   const textStyle = (brand.textStyleSetting)[`${type}Style`] as any
-  //   if (!textStyle) return false
-  //   return textStyle.isDefault
-  // }
+  setDefaultFontInfo(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }) {
+    const textStyle = (brand.textStyleSetting)[`${info.type}Style`] as IBrandTextStyle
+    if (!textStyle) return
+    if (textStyle.fontId === '' && !info.style.fontId) { // if current font is not set and updateInfo doesn't set font as well
+      info.style.fontId = STANDARD_TEXT_FONT[i18n.locale]
+      info.style.fontName = FONT_DEFAULTS[i18n.locale]
+      info.style.fontType = 'public'
+    }
+  }
 
   getUpdateStyleAPIEncoding(style: Partial<IBrandTextStyle>): string {
     const pairs = Object.entries(style).map(([key, value]) => {
@@ -327,7 +300,11 @@ class BrandKitUtils {
   }
 
   composeSettingText(textStyle: IBrandTextStyle, type: string): string {
-    return `${type},${textStyle.font.name},${textStyle.size}`
+    return `${type},${textStyle.fontName},${textStyle.size}`
+  }
+
+  getDefaultFontId(locale: string): string {
+    return STANDARD_TEXT_FONT[locale]
   }
 
   getDownloadUrl(logo: IBrandLogo): string {

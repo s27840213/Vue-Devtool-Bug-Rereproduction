@@ -261,6 +261,7 @@ export interface IUserFontContentData {
   team_id: string,
   update_time: string,
   ver: number,
+  font_family: string,
   signed_url?: {
     original: string,
     font: string,
