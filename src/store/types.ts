@@ -90,6 +90,17 @@ export enum FunctionPanelType {
   backgroundSetting
 }
 
+export enum MobilePanelType {
+  none,
+  template,
+  photo,
+  object,
+  bg,
+  text,
+  file,
+  brand,
+}
+
 export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
