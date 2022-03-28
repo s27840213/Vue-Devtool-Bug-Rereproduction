@@ -269,7 +269,7 @@ export default Vue.extend({
         }
         preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
       } else {
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
     },
     handleNewShadowEffect() {

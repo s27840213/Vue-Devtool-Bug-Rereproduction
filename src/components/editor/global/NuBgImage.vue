@@ -71,6 +71,8 @@ export default Vue.extend({
         preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
       }
       nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+    } else {
+      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
     }
   },
   components: { NuAdjustImage },
