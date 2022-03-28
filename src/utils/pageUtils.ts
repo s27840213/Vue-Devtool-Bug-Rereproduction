@@ -61,7 +61,11 @@ class PageUtils {
       backgroundImage: {
         config: {
           type: 'image',
-          src: 'none',
+          srcObj: {
+            type: '',
+            userId: '',
+            assetId: ''
+          },
           clipPath: '',
           active: false,
           shown: false,
