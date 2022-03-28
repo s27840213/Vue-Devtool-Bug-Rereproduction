@@ -770,7 +770,7 @@ const mutations: MutationTree<IEditorState> = {
 
 function handleResize() {
   state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
-  state.isLargeDesktop = window.matchMedia('screen and (max-width: 1440px)').matches
+  state.isLargeDesktop = window.matchMedia('screen and (min-width: 1440px)').matches
 }
 
 window.addEventListener('resize', handleResize)

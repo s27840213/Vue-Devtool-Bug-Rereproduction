@@ -70,7 +70,6 @@
     },
     "colorBlock": [{
       "name": "vector_purple1.svg",
-
       "top": -32,
       "left": 331
     }],
@@ -80,8 +79,8 @@
     "description": "Co-developed with well-known marketing lecturers, nine image slides tell the benefits of your product in a logical way.",
     "img": {
       "name": "storytelling.mp4",
-      "width": -32,
-      "height": 331
+      "width": 488,
+      "height": 520
     },
     "colorBlock": [
       {
@@ -125,7 +124,7 @@
     "colorBlock": [{
       "name": "vector_orange1.svg",
       "top": -64,
-      "left": -116
+      "left": -50
     }],
     "align": "row-reverse"
   }, {

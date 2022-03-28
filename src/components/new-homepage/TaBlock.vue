@@ -13,7 +13,7 @@
           class="block__colorBlock"
           :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
           :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
-      div(class="block-text__description body-XL")
+      div(class="block-text__description text-gray-2")
         span {{content.description}}
       //- need v-if?
       div(v-if="content.link"
@@ -67,7 +67,7 @@ export default Vue.extend({
       }
     },
     rwdModifier() {
-      return this.isLargeDesktop ? 0.7 : 1
+      return this.isLargeDesktop ? 1 : 0.7
     }
   }
 })
@@ -78,7 +78,7 @@ export default Vue.extend({
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin: 100px 0 100px;
+  // margin: 100px 0 100px;
   &__colorBlock {
     position: absolute;
     z-index: -1;
@@ -113,6 +113,7 @@ export default Vue.extend({
 @media screen and (max-width: 768px) {
   .block{
     width: 375px;
+    margin: 100px 0;
   }
   .block-text{
     width: 327px;
@@ -120,13 +121,14 @@ export default Vue.extend({
       @include text-H3;
     }
     &__description {
-      // width: 327px;
+      @include body-MD;
     }
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
   .block{
     width: 768px;
+    margin: 150px 0;
   }
   .block-text{
     width: 352px;
@@ -134,21 +136,22 @@ export default Vue.extend({
       @include text-H2;
     }
     &__description {
-      // width: 352px;
+      @include body-LG;
     }
   }
 }
 @media screen and (min-width: 1440.02px) {
   .block{
     max-width: 1200px;
+    margin: 150px 0;
   }
   .block-text{
-    width: 521px;
+    width: 500px;
     &__title {
       @include text-H2;
     }
     &__description {
-      // width: 521px;
+      @include body-LG;
     }
   }
 }

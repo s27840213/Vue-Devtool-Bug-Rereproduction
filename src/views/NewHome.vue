@@ -14,15 +14,17 @@
             span(class="home-top__buttom__text btn-LG") Get Started
         animation(class="home-top__video"
           path='@/assets/img/svg/newHomepage/demo.mp4'
-          :width="isLargeDesktop ? 327 : 656")
+          :width="isLargeDesktop ? 656 : 327")
           //- need control? loop?
       scroll-list(v-if="!isMobile"
         type="theme"
         @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin && !isMobile"
+      scroll-list(v-if="isLogin"
+        class="isComputer"
         type="mydesign")
-      scroll-list(v-if="isLogin && !isMobile"
+      scroll-list(v-if="isLogin"
         v-for="theme in themeList"
+        class="isComputer"
         :theme="theme"
         type="template")
       div(class="home-block")
@@ -180,7 +182,7 @@ export default Vue.extend({
     }
     &__underline{
       position: absolute;
-      top: 65px;
+      top: 70px;
       left: 28px;
       width: 209px;
       height: 14px;
@@ -226,6 +228,11 @@ export default Vue.extend({
       top: 153.25px;
       left: 266.5px;
     }
+  }
+}
+@media screen and (max-width: 1023px) {
+  .isComputer {
+    display: none;
   }
 }
 </style>
