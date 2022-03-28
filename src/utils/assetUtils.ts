@@ -394,7 +394,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
+  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
