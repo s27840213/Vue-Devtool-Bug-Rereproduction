@@ -5,13 +5,16 @@ import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import { IUserFontContentData } from '@/interfaces/api'
 
 interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
   isBrandsLoading: boolean,
+  isFontsLoading: boolean,
   selectedTab: string,
-  fonts: IBrandFont[]
+  fonts: IBrandFont[],
+  fontsPageindex: number
 }
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
@@ -23,8 +26,10 @@ const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
   isBrandsLoading: false,
+  isFontsLoading: false,
   selectedTab: brandkitUtils.getTabKeys()[0],
-  fonts: []
+  fonts: [],
+  fontsPageindex: 0
 })
 
 const state = getDefaultState()
@@ -38,11 +43,17 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
   },
+  getIsFontsLoading(state: IBrandKitState): boolean {
+    return state.isFontsLoading
+  },
   getSelectedTab(state: IBrandKitState): string {
     return state.selectedTab
   },
   getFonts(state: IBrandKitState): IBrandFont[] {
     return state.fonts
+  },
+  getFontsPageIndex(state: IBrandKitState): number {
+    return state.fontsPageindex
   }
 }
 
@@ -56,6 +67,36 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       const brands = data.brands
       commit('SET_brands', brands)
       commit('SET_currentBrand', brands[0] ?? { id: '' })
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchFonts({ commit }) {
+    try {
+      const { data } = await brandkitApi.getFonts()
+      if (data.flag !== 0) {
+        throw new Error('fetch fonts request failed')
+      }
+      commit('SET_fontsPageIndex', data.next_page)
+      commit('SET_fonts', data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)))
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchMoreFonts({ commit, getters }) {
+    const pageIndex = getters.getFontsPageIndex
+    if (pageIndex < 0) return
+    try {
+      const { data } = await brandkitApi.getFonts(undefined, undefined, {
+        page_index: pageIndex
+      })
+      if (data.flag !== 0) {
+        throw new Error('fetch fonts request failed')
+      }
+      commit('SET_fontsPageIndex', data.next_page)
+      commit('SET_fonts', data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)))
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -245,13 +286,11 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     console.log('tmp')
     commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
   },
-  async removeFont({ state, commit }, font: IBrandFont) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
+  async removeFont({ commit }, font: IBrandFont) {
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteFont', { brand: currentBrand, font })
+      commit('UPDATE_deleteFont', font)
     }, () => {
-      commit('UPDATE_addFont', { brand: currentBrand, font })
+      commit('UPDATE_addFont', font)
     }, () => {
       showNetworkError()
     })
@@ -289,8 +328,17 @@ const mutations: MutationTree<IBrandKitState> = {
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
   },
+  SET_isFontsLoading(state: IBrandKitState, isFontsLoading: boolean) {
+    state.isFontsLoading = isFontsLoading
+  },
   SET_selectedTab(state: IBrandKitState, selectedTab: string) {
     state.selectedTab = selectedTab
+  },
+  SET_fonts(state: IBrandKitState, fonts: IBrandFont[]) {
+    state.fonts = fonts
+  },
+  SET_fontsPageIndex(state: IBrandKitState, fontsPageindex: number) {
+    state.fontsPageindex = fontsPageindex
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand, true)
@@ -388,14 +436,19 @@ const mutations: MutationTree<IBrandKitState> = {
     const color = colorPalette.colors[index]
     color.createTime = updateInfo.createTime
   },
-  UPDATE_deleteFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
-    const index = state.fonts.findIndex(font_ => font_.id === updateInfo.font.id)
+  UPDATE_deleteFont(state: IBrandKitState, font: IBrandFont) {
+    const index = state.fonts.findIndex(font_ => font_.id === font.id)
     if (index < 0) return
     state.fonts.splice(index, 1)
   },
-  UPDATE_addFont(state: IBrandKitState, updateInfo: { brand: IBrand, font: IBrandFont }) {
-    const index = brandkitUtils.findInsertIndex(state.fonts, updateInfo.font)
-    state.fonts.splice(index, 0, updateInfo.font)
+  UPDATE_addFont(state: IBrandKitState, font: IBrandFont) {
+    const index = brandkitUtils.findInsertIndex(state.fonts, font)
+    state.fonts.splice(index, 0, font)
+  },
+  UPDATE_replaceFont(state: IBrandKitState, updateInfo: { id: string, font: IBrandFont }) {
+    const index = state.fonts.findIndex(font_ => font_.id === updateInfo.id)
+    if (index < 0) return
+    state.fonts.splice(index, 1, updateInfo.font)
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)

@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { IUserFontContentData } from '@/interfaces/api'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
 import { STANDARD_TEXT_FONT } from './assetUtils'
@@ -154,6 +155,23 @@ class BrandKitUtils {
     }
   }
 
+  createDefaultFont(id: string): IBrandFont {
+    return {
+      asset_index: -1,
+      author: '',
+      createTime: (new Date()).toISOString(),
+      favorite: 0,
+      file_ext: '',
+      file_name: '',
+      id: 'new_' + id,
+      name: '',
+      team_id: '',
+      updateTime: '',
+      ver: 0,
+      font_family: ''
+    }
+  }
+
   checkIsNullBrand(brand: IBrand): boolean {
     return brand.id === 'null'
   }
@@ -227,8 +245,25 @@ class BrandKitUtils {
     store.dispatch('brandkit/removeFont', font)
   }
 
+  deleteFont(id: string) {
+    store.commit('brandkit/UPDATE_deleteFont', { id })
+  }
+
+  replaceFont(id: string, apiFont: IUserFontContentData) {
+    store.commit('brandkit/UPDATE_replaceFont', {
+      id,
+      font: this.apiFont2IBrandFont(apiFont)
+    })
+  }
+
   async updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
     await store.dispatch('brandkit/updateTextStyle', { type, style })
+  }
+
+  createTempFont(id: string) {
+    const newFont = this.createDefaultFont(id)
+    store.commit('brandkit/UPDATE_addFont', newFont)
+    return newFont.id
   }
 
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
@@ -238,6 +273,16 @@ class BrandKitUtils {
     store.commit('brandkit/SET_isBrandsLoading', true)
     fetcher().then(() => {
       store.commit('brandkit/SET_isBrandsLoading', false)
+    })
+  }
+
+  fetchFonts(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_fonts', [])
+    }
+    store.commit('brandkit/SET_isFontsLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isFontsLoading', false)
     })
   }
 
@@ -327,6 +372,17 @@ class BrandKitUtils {
         return this.getDisplayedPaletteName(content as IBrandColorPalette)
       default:
         return content.name
+    }
+  }
+
+  apiFont2IBrandFont(font: IUserFontContentData): IBrandFont {
+    const res = { ...font } as any
+    delete res.create_time
+    delete res.update_time
+    return {
+      ...res,
+      createTime: font.create_time,
+      updateTime: font.update_time
     }
   }
 }

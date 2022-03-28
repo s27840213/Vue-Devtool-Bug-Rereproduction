@@ -10,7 +10,7 @@ import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
+import { IUploadAssetFontResponse, IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
 import { EventEmitter } from 'events'
@@ -21,6 +21,7 @@ import i18n from '@/i18n'
 import logUtils from './logUtils'
 import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
+import brandkitUtils from './brandkitUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -359,6 +360,7 @@ class UploadUtils {
             }
           }
         } else if (type === 'font') {
+          const tempId = brandkitUtils.createTempFont(assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
           xhr.onload = () => {
@@ -368,10 +370,11 @@ class UploadUtils {
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
-                  response.json().then((json: IUploadAssetResponse) => {
+                  response.json().then((json: IUploadAssetFontResponse) => {
                     if (json.flag === 0) {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
+                      brandkitUtils.replaceFont(tempId, json.data)
                       // store.dispatch('getAllAssets', { token: this.token })
                       // update uploading font as real object
                       setTimeout(() => {
@@ -379,6 +382,7 @@ class UploadUtils {
                       }, 2000)
                     } else {
                       this.emitFontUploadEvent('fail')
+                      brandkitUtils.deleteFont(tempId)
                       console.log('Failed to upload the file')
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')

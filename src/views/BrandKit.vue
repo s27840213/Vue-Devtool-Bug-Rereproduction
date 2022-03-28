@@ -68,6 +68,7 @@ export default Vue.extend({
   },
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
+    brandkitUtils.fetchFonts(this.fetchFonts)
   },
   data() {
     return {
@@ -109,7 +110,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('brandkit', {
-      fetchBrands: 'fetchBrands'
+      fetchBrands: 'fetchBrands',
+      fetchFonts: 'fetchFonts'
     }),
     addNewBrand() {
       brandkitUtils.addNewBrand()
