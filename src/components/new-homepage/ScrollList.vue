@@ -126,7 +126,6 @@ export default Vue.extend({
           cache: true
         }).then((response) => {
           this.templateData = response.data.content[0].list
-          console.log('template', this.templateData)
         })
         this.title = this.templateTitle[this.theme]
         this.moreLink = `/templates?themes=${this.theme}`

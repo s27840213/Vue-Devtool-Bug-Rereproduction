@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="animation")
-    div(v-if="isJSON && style"
+    div(v-if="isJSON"
       class="lottie"
-      :style="style" ref="lavContainer")
+      :style="lottieStyle" ref="lavContainer")
     img(v-if="isSvg"
       v-for="index in 2"
       class="img"
@@ -105,6 +105,14 @@ export default Vue.extend({
     },
     isMp4():boolean {
       return this.path.endsWith('.mp4')
+    },
+    lottieStyle() {
+      return {
+        width: (this.width !== -1) ? `${this.width}px` : '100%',
+        height: (this.height !== -1) ? `${this.height}px` : '100%',
+        overflow: 'hidden',
+        margin: '0 auto'
+      }
     }
   },
   created() {
@@ -138,12 +146,6 @@ export default Vue.extend({
         return
       }
 
-      this.style = {
-        width: (this.width !== -1) ? `${this.width}px` : '100%',
-        height: (this.height !== -1) ? `${this.height}px` : '100%',
-        overflow: 'hidden',
-        margin: '0 auto'
-      }
       const jsonData = await this.loadJsonData(this.path)
 
       // await this.waitMe()
@@ -192,6 +194,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .animation {
+  white-space: pre;
   .img {
     position: relative;
     left: calc(50% - 50vw);

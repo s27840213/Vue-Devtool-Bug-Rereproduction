@@ -96,7 +96,8 @@ const getDefaultState = (): IEditorState => ({
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
-  isMobile: window.matchMedia('screen and (max-width: 767px)').matches
+  isMobile: window.matchMedia('screen and (max-width: 768px)').matches,
+  isLargeDesktop: window.matchMedia('screen and (max-width: 1440px)').matches
 })
 
 const state = getDefaultState()
@@ -768,7 +769,8 @@ const mutations: MutationTree<IEditorState> = {
 }
 
 function handleResize() {
-  state.isMobile = window.matchMedia('screen and (max-width: 767px)').matches
+  state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
+  state.isLargeDesktop = window.matchMedia('screen and (max-width: 1440px)').matches
 }
 
 window.addEventListener('resize', handleResize)

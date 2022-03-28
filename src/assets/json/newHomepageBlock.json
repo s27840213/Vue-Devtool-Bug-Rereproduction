@@ -1,6 +1,6 @@
 [
   {
-    "title": "Perfect your design with\nthousands of beautiful templates",
+    "title": "Perfect your design with thousands of beautiful templates",
     "description": "Get inspiration by simply searching keywords and tags.",
     "img": {
       "name": "carousel1.svg",
@@ -20,8 +20,8 @@
     ],
     "align": "column"
   }, {
-    "title": "Tailor-made templates\njust for your business",
-    "description": "Find your ideal design fast with the filters of events\nand industries at Template Center.",
+    "title": "Tailor-made templates just for your business",
+    "description": "Find your ideal design fast with the filters of events and industries at Template Center.",
     "link": {
       "text": "See Template Center →",
       "to": "/templates"
@@ -48,8 +48,8 @@
     ],
     "align": "row"
   }, {
-    "title": "Template Bundle\naligned across all\nplatforms",
-    "description": "Effortlessly obtain all sizes of templates from\nsocial media posts, stories, website banners\nand more.",
+    "title": "Template Bundle aligned across all platforms",
+    "description": "Effortlessly obtain all sizes of templates from social media posts, stories, website banners and more.",
     "img": {
       "name": "bundle.json",
       "width": 520
@@ -62,8 +62,8 @@
     }],
     "align": "row-reverse"
   }, {
-    "title": "Extensible Canvas\nmakes design\nprocess smoother",
-    "description": "Users are allowed to create multiple sizes of\ndesigns in the same page, reducing repetition\nof switching files.",
+    "title": "Extensible Canvas makes design process smoother",
+    "description": "Users are allowed to create multiple sizes of designs in the same page, reducing repetition of switching files.",
     "img": {
       "name": "multiple-sizes.json",
       "width": 500
@@ -76,8 +76,8 @@
     }],
     "align": "row"
   }, {
-    "title": "Storytelling Templates\nprovide hints to your\nmarketing strategy",
-    "description": "Co-developed with well-known marketing\nlecturers, nine image slides tell the benefits of your\nproduct in a logical way.",
+    "title": "Storytelling Templates provide hints to your marketing strategy",
+    "description": "Co-developed with well-known marketing lecturers, nine image slides tell the benefits of your product in a logical way.",
     "img": {
       "name": "storytelling.mp4",
       "width": -32,
@@ -101,8 +101,8 @@
     "align": "row-reverse"
   }, {
     "comingSoon": true,
-    "title": "Smart Background\nRemover makes it\neasier to edit images",
-    "description": "Get your image background cleared and\nchanged automatically with the remover.",
+    "title": "Smart Background Remover makes it easier to edit images",
+    "description": "Get your image background cleared and changed automatically with the remover.",
     "img": {
       "name": "remover.mp4",
       "width": 500,
@@ -116,8 +116,8 @@
     "align": "row"
   }, {
     "comingSoon": true,
-    "title": "Manage your brand\nidentify with Brandkit",
-    "description": "This tool set allows users to add their own logos,\nfonts and colors, taking brand and style to the next\nlevel.",
+    "title": "Manage your brand identify with Brandkit",
+    "description": "This tool set allows users to add their own logos, fonts and colors, taking brand and style to the next level.",
     "img": {
       "name": "brandkit.json",
       "width": 500

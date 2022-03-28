@@ -6,13 +6,13 @@
       div(v-if="content.comingSoon"
         class="block-text__coming_soon overline-SM")
         span {{'COMING SOON'}}
-      div(class="block-text__title text-H2")
+      div(class="block-text__title")
         span {{content.title}}
         img(v-for="cb in content.colorBlock"
           v-if="!cb.ref"
           class="block__colorBlock"
           :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
-          :style="{ 'top': `${cb.top}px`, 'left': `${cb.left}px` }")
+          :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
       div(class="block-text__description body-XL")
         span {{content.description}}
       //- need v-if?
@@ -23,13 +23,13 @@
     div(class="block-img")
       animation(
         :path="'@/assets/img/svg/newHomepage/' + content.img.name"
-        :width="content.img.width"
-        :height="content.img.height ? content.img.height : content.img.width")
+        :width="content.img.width * rwdModifier"
+        :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
       img(v-for="cb in content.colorBlock"
         v-if="cb.ref==='img'"
         class="block__colorBlock"
         :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
-        :style="{ 'top': `${cb.top}px`, 'left': `${cb.left}px` }")
+        :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
 </template>
 
 <script lang="ts">
@@ -51,7 +51,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState({
-      isMobile: 'isMobile'
+      isMobile: 'isMobile',
+      isLargeDesktop: 'isLargeDesktop'
     }),
     blockStyle(): Record<string, string> {
       return {
@@ -61,8 +62,12 @@ export default Vue.extend({
     blockTextStyle(): Record<string, string> {
       return {
         'align-items': this.content.align === 'column' ? 'center' : 'flex-start',
-        'text-align': this.content.align === 'column' ? 'center' : 'left'
+        'text-align': this.content.align === 'column' && !this.isMobile ? 'center' : 'left',
+        width: this.content.align === 'column' ? '100%' : ''
       }
+    },
+    rwdModifier() {
+      return this.isLargeDesktop ? 0.7 : 1
     }
   }
 })
@@ -71,10 +76,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .block {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
-  width: 1200px;
-  min-height: 500px;
   margin: 100px 0 100px;
   &__colorBlock {
     position: absolute;
@@ -84,6 +87,7 @@ export default Vue.extend({
 .block-text {
   display: flex;
   flex-direction: column;
+  max-width: 700px;
   &__coming_soon {
     padding: 4px;
     color: white;
@@ -100,10 +104,52 @@ export default Vue.extend({
     }
   }
   div {
-    margin: 10px;
+    margin: 10px 0;
   }
 }
 .block-img {
   position: relative;
+}
+@media screen and (max-width: 768px) {
+  .block{
+    width: 375px;
+  }
+  .block-text{
+    width: 327px;
+    &__title {
+      @include text-H3;
+    }
+    &__description {
+      // width: 327px;
+    }
+  }
+}
+@media screen and (max-width: 1440px) and (min-width: 768.02px) {
+  .block{
+    width: 768px;
+  }
+  .block-text{
+    width: 352px;
+    &__title {
+      @include text-H2;
+    }
+    &__description {
+      // width: 352px;
+    }
+  }
+}
+@media screen and (min-width: 1440.02px) {
+  .block{
+    max-width: 1200px;
+  }
+  .block-text{
+    width: 521px;
+    &__title {
+      @include text-H2;
+    }
+    &__description {
+      // width: 521px;
+    }
+  }
 }
 </style>

@@ -2,24 +2,26 @@
   div(class="home")
     new-header()
     div(class="home-content")
-      div(class="home-top")
-        div(class="home-top__text text-H1")
+      div(class="home-top"
+        :style="homeTopStyle")
+        div(class="home-top__text")
           span {{'Become\na Pro Designer\nin few clicks.'}}
           div(class="home-top__underline")
           img(class="home-top__dot"
             src="@/assets/img/svg/newHomepage/dot-and-cursor.svg")
-          div(class="home-top__buttom rounded btn-primary-sm")
+          div(v-if="!isMobile"
+            class="home-top__buttom rounded btn-primary-sm")
             span(class="home-top__buttom__text btn-LG") Get Started
         animation(class="home-top__video"
           path='@/assets/img/svg/newHomepage/demo.mp4'
-          :width='468')
+          :width="isLargeDesktop ? 327 : 656")
           //- need control? loop?
       scroll-list(v-if="!isMobile"
         type="theme"
         @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin"
+      scroll-list(v-if="isLogin && !isMobile"
         type="mydesign")
-      scroll-list(v-if="isLogin"
+      scroll-list(v-if="isLogin && !isMobile"
         v-for="theme in themeList"
         :theme="theme"
         type="template")
@@ -70,8 +72,16 @@ export default Vue.extend({
       isLogin: 'user/isLogin'
     }),
     ...mapState({
-      isMobile: 'isMobile'
-    })
+      isMobile: 'isMobile',
+      isLargeDesktop: 'isLargeDesktop'
+    }),
+    homeTopStyle(): Record<string, string> {
+      return {
+        'flex-direction': this.isMobile ? 'column' : 'row',
+        'align-items': this.isMobile ? 'flex-start' : 'center',
+        width: this.isMobile ? 'auto' : '80%'
+      }
+    }
   },
   created() {
     if (i18n.locale === 'us') {
@@ -100,7 +110,8 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   font-family: Poppins;
-  white-space: pre;
+  // white-space: pre;
+  // word-wrap: break-word;
   text-align: left;
 }
 .home-content {
@@ -114,29 +125,26 @@ export default Vue.extend({
 }
 .home-top{
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
-  width: 1020px;
-  min-height: 566px; // not work
+  // width: 80%;
+  // min-height: 566px; // not work
   &__text{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     position: relative;
+    white-space: pre;
   }
   &__underline{
     position: absolute;
-    top: 102px;
-    left: 39px;
-    width: 286px;
-    height: 14px;
     z-index: -1; // find better way
     background-color: setColor(blue-1)
   }
   &__dot{
     position: absolute;
-    top: 153.25px;
-    left: 266.5px;
+    // top: 153.25px;
+    // left: 266.5px;
   }
   &__buttom{
     margin-top: 25px;
@@ -163,5 +171,61 @@ export default Vue.extend({
   align-items: center;
   background-color: #000000a1;
   z-index: setZindex('popup');
+}
+@media screen and (max-width: 768px) {
+  .home-top {
+    min-height: 437px;
+    &__text {
+      @include text-H3
+    }
+    &__underline{
+      position: absolute;
+      top: 65px;
+      left: 28px;
+      width: 209px;
+      height: 14px;
+    }
+    &__dot{
+      top: 108px;
+      left: 195px;
+    }
+  }
+}
+@media screen and (max-width: 1440px) and (min-width: 768.02px) {
+  .home-top {
+    min-height: 366px;
+    &__text {
+      @include text-H1
+    }
+    &__underline{
+      top: 102px;
+      left: 39px;
+      width: 286px;
+      height: 14px;
+    }
+    &__dot{
+      top: 153.25px;
+      left: 266.5px;
+    }
+  }
+}
+@media screen and (min-width: 1440.02px) {
+  .home-top {
+    min-height: 566px;
+    &__text {
+      @include text-H1
+    }
+    &__underline{
+      position: absolute;
+      top: 102px;
+      left: 39px;
+      width: 286px;
+      height: 14px;
+    }
+    &__dot{
+      top: 153.25px;
+      left: 266.5px;
+    }
+  }
 }
 </style>
