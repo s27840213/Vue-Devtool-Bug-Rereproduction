@@ -17,6 +17,12 @@
       scroll-list(v-if="!isMobile"
         type="theme"
         @openSizePopup="openSizePopup()")
+      scroll-list(v-if="isLogin"
+        type="mydesign")
+      scroll-list(v-if="isLogin"
+        v-for="theme in themeList"
+        :theme="theme"
+        type="template")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -28,8 +34,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
-// import i18n from '@/i18n'
+import { mapGetters, mapState } from 'vuex'
+import i18n from '@/i18n'
 import NewHeader from '@/components/new-homepage/NewHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/new-homepage/ScrollList.vue'
@@ -54,14 +60,28 @@ export default Vue.extend({
   data() {
     return {
       blocklist,
-      showSizePopup: false
+      showSizePopup: false,
+      themeList: ['1,2', '3', '8', '6', '5', '7', '9']
     }
   },
   // need meta info?
   computed: {
+    ...mapGetters({
+      isLogin: 'user/isLogin'
+    }),
     ...mapState({
       isMobile: 'isMobile'
     })
+  },
+  created() {
+    if (i18n.locale === 'us') {
+      this.themeList = _.without(this.themeList, '7')
+    }
+    if (!this.isLogin) {
+      this.themeList = this.themeList.filter((val, index) => {
+        return index <= 4
+      })
+    }
   },
   methods: {
     openSizePopup() {

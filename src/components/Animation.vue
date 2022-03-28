@@ -74,7 +74,7 @@ export default Vue.extend({
     },
     imgSpeed: {
       type: Number,
-      default: 0.05
+      default: 0.03
     }
   },
   data() {
