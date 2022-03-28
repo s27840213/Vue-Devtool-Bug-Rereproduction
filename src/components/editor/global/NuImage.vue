@@ -316,14 +316,13 @@ export default Vue.extend({
           _canvasImg.crossOrigin = 'Anonymous'
           _canvasImg.onload = () => {
             const canvas = this.$refs.canvas as HTMLCanvasElement
-            canvas.setAttribute('width', `${_canvasImg.naturalWidth * CANVAS_SCALE}`)
-            canvas.setAttribute('height', `${_canvasImg.naturalHeight * CANVAS_SCALE}`)
-            console.log(_canvasImg.width)
+            const ratio = _canvasImg.naturalWidth / _canvasImg.naturalHeight
+            canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
+            canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
             this.canvasImg = _canvasImg
             imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, _canvasImg as HTMLImageElement, this.config)
           }
-          // _canvasImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, this.config.styles.imgWidth))
-          _canvasImg.src = ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, CANVAS_SIZE))
+          _canvasImg.src = ImageUtils.getSrc(this.config)
         }
       }
     },

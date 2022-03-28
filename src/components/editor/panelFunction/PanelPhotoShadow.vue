@@ -151,6 +151,11 @@ export default Vue.extend({
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
   },
+  destroyed() {
+    const pageIndex = layerUtils.pageIndex
+    const layerIndex = layerUtils.layerIndex
+    // imageShadowUtils.handleShadowApply(pageIndex, layerIndex)
+  },
   methods: {
     optionStyle(idx: number) {
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }

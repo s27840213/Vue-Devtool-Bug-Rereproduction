@@ -113,15 +113,21 @@ class ImageShadowUtils {
       offsetX = distance * mathUtils.cos(angle)
       offsetY = distance * mathUtils.sin(angle)
     }
-    const x = (CANVAS_SCALE - 1) / 2 * img.naturalWidth
-    const y = (CANVAS_SCALE - 1) / 2 * img.naturalHeight
+
     const scaleRatio = img.naturalWidth / _imgWidth
+    const imgRatio = _imgWidth / _imgHeight
     const imgX = _imgX * scaleRatio
     const imgY = _imgY * scaleRatio
-    const drawWidth = layerWidth / _imgWidth * img.naturalWidth
-    const drawHeight = layerHeight / _imgHeight * img.naturalHeight
-    this.canvasT.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
-    this.canvasT.setAttribute('height', `${img.naturalHeight * CANVAS_SCALE}`)
+    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+    // const drawCanvasWidth = canvas.width / CANVAS_SCALE
+    // const drawCanvasHeight = canvas.height / CANVAS_SCALE
+    const drawCanvasHeight = CANVAS_SIZE
+    const drawCanvasWidth = drawCanvasHeight * imgRatio
+    const x = (canvas.width - CANVAS_SIZE * imgRatio) / 2
+    const y = (canvas.height - CANVAS_SIZE) / 2
+    this.canvasT.setAttribute('width', `${canvas.width}`)
+    this.canvasT.setAttribute('height', `${canvas.height}`)
 
     const _spread = 1 / this.SPREAD_RADIUS
     this._draw = setTimeout(() => {
@@ -141,7 +147,7 @@ class ImageShadowUtils {
           }
           if (alphaVal) {
             this.ctxT.globalAlpha = alphaVal
-            this.ctxT.drawImage(img, -imgX, -imgY, drawWidth, drawHeight, x + offsetX + i, y + offsetY + j, img.naturalWidth, img.naturalHeight)
+            this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + offsetX + i, y + offsetY + j, drawCanvasWidth, drawCanvasHeight)
           }
         }
       }
@@ -156,7 +162,7 @@ class ImageShadowUtils {
 
       this.ctxT.globalCompositeOperation = 'source-over'
       this.ctxT.globalAlpha = 1
-      this.ctxT.drawImage(img, -imgX, -imgY, drawWidth, drawHeight, x, y, img.naturalWidth, img.naturalHeight)
+      this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(this.canvasT, 0, 0)
