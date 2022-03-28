@@ -148,7 +148,7 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        if (type !== 'logo' && type !== 'font') {
+        if (type !== 'logo') {
           this.uploadAsset(type, files as FileList)
         } else {
           console.log(files)
@@ -273,6 +273,8 @@ class UploadUtils {
       })
       if (type === 'avatar') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
+      } else if (type === 'font') {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.locale}_original`)
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
@@ -370,7 +372,8 @@ class UploadUtils {
                     if (json.flag === 0) {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
-                      store.dispatch('getAllAssets', { token: this.token })
+                      // store.dispatch('getAllAssets', { token: this.token })
+                      // update uploading font as real object
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)

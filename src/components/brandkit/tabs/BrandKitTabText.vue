@@ -40,6 +40,11 @@ export default Vue.extend({
   created() {
     textUtils.loadDefaultFonts()
   },
+  mounted() {
+    uploadUtils.onFontUploadStatus((status) => {
+      console.log(status)
+    })
+  },
   components: {
     BrandKitTextSetting
   },
