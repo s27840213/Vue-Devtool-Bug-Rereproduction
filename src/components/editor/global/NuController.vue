@@ -1463,7 +1463,9 @@ export default Vue.extend({
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
-        uploadUtils.uploadAsset('image', files, true)
+        uploadUtils.uploadAsset('image', files, {
+          addToPage: true
+        })
       }
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {

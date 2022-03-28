@@ -144,10 +144,12 @@ export default Vue.extend({
   mounted() {
     popupUtils.on(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
     colorUtils.on(ColorEventType.background, this.handleChangeBgColor)
+    colorUtils.onStop(ColorEventType.background, this.recordChange)
   },
   beforeDestroy() {
     popupUtils.event.off(PopupSliderEventType.opacity, this.handleChangeBgOpacity)
     colorUtils.event.off(ColorEventType.background, this.handleChangeBgColor)
+    colorUtils.offStop(ColorEventType.background, this.recordChange)
   },
   methods: {
     ...mapMutations({
@@ -182,7 +184,6 @@ export default Vue.extend({
         pageIndex: pageUtils.currFocusPageIndex,
         color
       })
-      stepsUtils.record()
     },
     handleChangeBgOpacity(opacity: number) {
       this.setBgOpacity({
@@ -244,6 +245,9 @@ export default Vue.extend({
     },
     handleOutSide() {
       this.show = ''
+    },
+    recordChange() {
+      stepsUtils.record()
     }
   }
 })

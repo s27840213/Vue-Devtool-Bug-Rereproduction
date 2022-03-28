@@ -1,15 +1,13 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
-import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
 import uploadUtils from './uploadUtils'
-
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -63,7 +61,11 @@ class PageUtils {
       backgroundImage: {
         config: {
           type: 'image',
-          src: 'none',
+          srcObj: {
+            type: '',
+            userId: '',
+            assetId: ''
+          },
           clipPath: '',
           active: false,
           shown: false,
@@ -100,6 +102,7 @@ class PageUtils {
       ],
       documentColors: [],
       designId: '',
+      id: generalUtils.generateRandomString(8),
       guidelines: {
         v: [],
         h: []
@@ -138,6 +141,12 @@ class PageUtils {
         width: format.width,
         height: format.height
       }
+    })
+  }
+
+  getPageIndexById(id: string): number {
+    return this.getPages.findIndex((page: IPage) => {
+      return page.id === id
     })
   }
 

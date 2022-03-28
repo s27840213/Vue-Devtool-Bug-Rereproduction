@@ -94,10 +94,10 @@ export default Vue.extend({
     async setFont() {
       if (this.pending) return
       tiptapUtils.agent(editor => editor.setEditable(false))
-      const isRanged = !!this.isRanged()
+      const isRanged = this.isRanged()
       const sel = isRanged ? tiptapUtils.getSelection() as { start: ISelection, end: ISelection } : undefined
-      const start = sel?.start || {} as ISelection
-      const end = sel?.end || {} as ISelection
+      const start = sel?.start || TextUtils.getNullSel() as ISelection
+      const end = sel?.end || TextUtils.getNullSel() as ISelection
       try {
         const { id, type } = layerUtils.getCurrLayer
         const preLayerIndex = layerUtils.layerIndex
@@ -130,16 +130,17 @@ export default Vue.extend({
 
         if (['tmp', 'group'].includes(type) && !contentEditable && currLayerIndex !== -1) {
           TextPropUtils.applyPropsToAll('span', { font: this.item.id }, currLayerIndex, subLayerIdx)
+          tiptapUtils.updateHtml()
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           this.$nextTick(() => {
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: true })
             if (subLayerIdx === -1) {
               (layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup).layers.forEach((l, index) => {
                 if (l.type !== 'text') return
-                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index)
+                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index, true)
               })
             } else {
-              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx)
+              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx, true)
             }
           })
 
@@ -151,11 +152,7 @@ export default Vue.extend({
 
         const currLayer = layerUtils.getCurrLayer
         if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
-          // if (!sel) {
-          //   Object.assign(start, TextUtils.selectAll(config).start)
-          //   Object.assign(end, TextUtils.selectAll(config).end)
-          // }
-          const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText)
+          const newConfig = TextPropUtils.spanPropertyHandler('font', { font: this.item.id }, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
             tiptapUtils.updateHtml(newConfig.paragraphs)

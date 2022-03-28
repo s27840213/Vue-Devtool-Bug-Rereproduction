@@ -147,6 +147,7 @@ export interface IListServiceContentData {
   category_id: number
   list: IListServiceContentDataItem[]
   title: string
+  is_recent?: number
 }
 
 export interface IListServiceData {
@@ -276,6 +277,12 @@ export interface IPhotoServiceParams {
   type?: 'unsplash' | 'pexels'
   keyword?: string
   pageIndex?: number
+}
+
+export interface IFileParams {
+  token: string
+  type: 'image'
+  pageIndex: number
 }
 
 export interface IPhotoServiceResponse {

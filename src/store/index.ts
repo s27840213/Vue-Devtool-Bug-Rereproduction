@@ -33,6 +33,7 @@ import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import file from '@/store/module/file'
 
 Vue.use(Vuex)
 
@@ -94,7 +95,8 @@ const getDefaultState = (): IEditorState => ({
   showGuideline: true,
   lockGuideline: false,
   themes: [],
-  hasCopiedFormat: false
+  hasCopiedFormat: false,
+  inGestureToolMode: false
 })
 
 const state = getDefaultState()
@@ -250,6 +252,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
+  },
+  getInGestureToolMode(state: IEditorState) {
+    return state.inGestureToolMode
   }
 }
 
@@ -350,8 +355,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
   },
-  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any }) {
+  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
+    updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
   },
   SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
@@ -759,6 +765,12 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
+  CLEAR_state(state: IEditorState) {
+    Object.assign(state, getDefaultState())
+  },
+  SET_inGestureMode(state: IEditorState, bool: boolean) {
+    state.inGestureToolMode = bool
+  },
   ...imgShadowMutations
 }
 
@@ -785,6 +797,7 @@ export default new Vuex.Store({
     markers,
     brandkit,
     unsplash,
-    bgRemove
+    bgRemove,
+    file
   }
 })

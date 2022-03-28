@@ -20,6 +20,7 @@ Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
 Vue.use(VueMeta)
+Vue.use(require('vue-shortkey'))
 Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
 })

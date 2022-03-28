@@ -113,10 +113,17 @@ class TextPropUtils {
     const updateTextStyles = (styles: { [key: string]: string | number | boolean }) => {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, styles)
     }
-    const updateSelectedLayersProps = (styles: { [key: string]: string | number | boolean }) => {
-      this.updateSelectedLayersProps(styles, tmpLayerIndex ?? NaN)
+    const updateTextParagraphs = (paragraphs: IParagraph[]) => {
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs })
     }
-    const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersProps
+    const updateSelectedLayersStyles = (styles: { [key: string]: string | number | boolean }) => {
+      this.updateSelectedLayersStyles(styles, tmpLayerIndex ?? NaN)
+    }
+    const updateSelectedLayersParagraphs = (paragraphs: IParagraph[]) => {
+      this.updateSelectedLayersParagraphs(paragraphs, tmpLayerIndex ?? NaN)
+    }
+    const handler = typeof tmpLayerIndex === 'undefined' ? updateTextStyles : updateSelectedLayersStyles
+    const paragraphHandler = typeof tmpLayerIndex === 'undefined' ? updateTextParagraphs : updateSelectedLayersParagraphs
     switch (propName) {
       case 'font-vertical': {
         const targetIsVertical = !!value
@@ -128,10 +135,41 @@ class TextPropUtils {
           LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width: height, height: width })
           // @TODO: need to reallocate position of each layer
         }
+        if (targetIsVertical) {
+          const paragraphs = GeneralUtils.deepCopy(config.paragraphs)
+          this.removeInvalidStyles(paragraphs, targetIsVertical)
+          paragraphHandler(paragraphs)
+        }
         handler({ writingMode: targetWritingMode })
-        this.updateTextPropsState({ isVertical: targetIsVertical })
+        this.updateTextPropsState({ isVertical: targetIsVertical, decoration: 'none', style: 'normal' })
+        tiptapUtils.updateHtml()
       }
     }
+  }
+
+  removeInvalidStyles(paragraphs: IParagraph[], isVertical: boolean, pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void) {
+    paragraphs.forEach((p) => {
+      pHandler && pHandler(p)
+      if (isVertical && p.styles.spanStyle) {
+        const pStyle = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(p.styles.spanStyle as string))
+        if (pStyle.style === 'italic') {
+          pStyle.style = 'normal'
+        }
+        if (pStyle.decoration === 'underline') {
+          pStyle.decoration = 'none'
+        }
+        p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
+      }
+      for (const span of p.spans) {
+        spanHandler && spanHandler(span)
+        if (isVertical && span.styles.style === 'italic') {
+          span.styles.style = 'normal'
+        }
+        if (isVertical && span.styles.decoration === 'underline') {
+          span.styles.decoration = 'none'
+        }
+      }
+    })
   }
 
   groupHandler(propName: string, value?: string | number, selStart = TextUtils.getNullSel(), selEnd = TextUtils.getNullSel(),
@@ -237,15 +275,22 @@ class TextPropUtils {
           config.paragraphs[pidx].styles.font = config.paragraphs[pidx].spans[0].styles.font
         }
       }
-      if (propName !== 'fontSize') {
-        // [start, end] = this.spanMerger(config.paragraphs, start, end)
-      }
     }
     if (!TextUtils.isSel(end)) {
-      const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, prop[propName], config)
-      if (propName !== 'fontSize') {
-        // [start, end] = this.spanMerger(config.paragraphs, start, end)
+      /** If the start is selection is captured use the start position */
+      if (TextUtils.isSel(start)) {
+        const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
+        this.noRangedHandler(styles, propName, prop[propName], config)
+      } else {
+        /** else: the start position is not captured apply the props to all the text block */
+        config.paragraphs
+          .forEach(p => {
+            p.spans
+              .forEach(s => {
+                const styles = s.styles
+                this.noRangedHandler(styles, propName, prop[propName], config)
+              })
+          })
       }
     }
 
@@ -261,27 +306,29 @@ class TextPropUtils {
       }
     }
 
-    if (TextUtils.isSel(end)) {
-      if (isStartContainerDivided) {
-        if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-          start.sIndex++
-          start.offset = 0
-          end.sIndex++
-          end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-        } else {
-          start.sIndex++
-        }
-      }
-    } else {
-      if (propName === 'fontFamily' || propName === 'fontSize') {
-        start.offset = 0
-        Object.assign(end, start)
-        end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
-      } else {
-        end = TextUtils.getNullSel()
-      }
-    }
-    TextUtils.updateSelection(start, end)
+    // @ Obsolete code
+    // if (TextUtils.isSel(end)) {
+    //   if (isStartContainerDivided) {
+    //     if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+    //       start.sIndex++
+    //       start.offset = 0
+    //       end.sIndex++
+    //       end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
+    //     } else {
+    //       start.sIndex++
+    //     }
+    //   }
+    // } else {
+    //   if (propName === 'fontFamily' || propName === 'fontSize') {
+    //     if (TextUtils.isSel(start))
+    //     start.offset = 0
+    //     Object.assign(end, start)
+    //     end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
+    //   } else {
+    //     end = TextUtils.getNullSel()
+    //   }
+    // }
+    // TextUtils.updateSelection(start, end)
 
     // Sync updating text effect if the color changed
     // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
@@ -458,6 +505,7 @@ class TextPropUtils {
       case 'fontSize':
         styles.size = value as number
         return
+      case 'font':
       case 'fontFamily':
         styles.font = value as string
         return
@@ -509,7 +557,6 @@ class TextPropUtils {
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
       Object.assign(config?.paragraphs, paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
-      console.warn(propName)
     }
   }
 
@@ -1181,10 +1228,17 @@ class TextPropUtils {
     })
   }
 
-  updateSelectedLayersProps(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
+  updateSelectedLayersStyles(styles: { [key: string]: string | number | boolean }, layerIndex: number) {
     store.commit('UPDATE_selectedLayersStyles', {
       styles,
       layerIndex
+    })
+  }
+
+  updateSelectedLayersParagraphs(paragraphs: IParagraph[], tmpLayerIndex: number) {
+    store.commit('UPDATE_selectedTextParagraphs', {
+      paragraphs,
+      tmpLayerIndex
     })
   }
 

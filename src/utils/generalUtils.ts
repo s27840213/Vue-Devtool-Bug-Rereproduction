@@ -124,6 +124,10 @@ class GeneralUtils {
     return size * (100 / this.scaleRatio)
   }
 
+  scaledSize(size: number) {
+    return size * (this.scaleRatio / 100)
+  }
+
   test() {
     const modifiedPageIndex = [] as Array<number>
     const pages = pageUtils.getPages
@@ -170,6 +174,13 @@ class GeneralUtils {
 
   assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here")
+  }
+
+  getScrollbarSize(el: HTMLElement): { width: number, height: number } {
+    return {
+      width: el.scrollWidth - el.clientWidth,
+      height: el.scrollHeight - el.clientHeight
+    }
   }
 
   dataURLtoBlob(dataurl: string) {

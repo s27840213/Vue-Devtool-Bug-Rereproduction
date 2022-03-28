@@ -28,11 +28,8 @@ import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
-import store from '@/store'
-import { IAssetPhoto } from '@/interfaces/api'
 import imgShadowUtils from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -45,29 +42,22 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
-      (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
-    if (!this.config.forRender && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
-      .includes(this.config.styles.shadow.currentEffect) && !isPrimaryLayerFrame) {
-      this.handleNewShadowEffect(true)
-    }
+    this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
   },
-  destroyed() {
-    if (this.filter) {
-      const svg = this.filter.parentElement
-      svg && svg.remove()
+  beforeDestroy() {
+    if (this.config.inProcess) {
+      this.setIsProcessing(false)
     }
   },
   data() {
     return {
       isOnError: false,
-      src: ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)),
-      filter: undefined as unknown as HTMLElement
+      src: ''
     }
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      if (!this.isOnError) {
+      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
 
@@ -116,7 +106,7 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    ...mapState('user', ['imgSizeMap']),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     getImgDimension(): number {
       const { type } = this.config.srcObj
       const { imgWidth, imgHeight } = this.config.styles
@@ -157,13 +147,10 @@ export default Vue.extend({
       return (this.config as IImage).styles.shadow
     },
     shadowEffects(): IShadowEffects {
-      return this.shadow.effects
+      return this.shadow ? this.shadow.effects : { color: '#FFFFFF' }
     },
     currentShadowEffect(): string {
-      return this.shadow.currentEffect
-    },
-    scale(): number {
-      return this.config.styles.scale
+      return this.shadow ? this.shadow.currentEffect : ''
     },
     primaryLayerType(): string {
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
@@ -173,13 +160,17 @@ export default Vue.extend({
      *  only used for rendering as image controlling */
     forRender(): boolean {
       return this.config.forRender ?? false
+    },
+    uploadingImagePreviewSrc(): string {
+      return this.config.previewSrc
     }
   },
   methods: {
-    ...mapActions('user', ['updateImages']),
+    ...mapActions('file', ['updateImages']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
-      UPDATE_shadowEffectState: 'UPDATE_shadowEffectState'
+      UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
+      setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     styles() {
       const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
@@ -210,11 +201,12 @@ export default Vue.extend({
       }
     },
     onError() {
-      console.log('image on error')
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+          })
         } catch (error) {
         }
       }
@@ -223,12 +215,18 @@ export default Vue.extend({
       this.isOnError = false
     },
     async perviewAsLoading() {
+      /**
+       *  First put a preview to this.src, then start to load the right-sized-image.
+       *  As loading finished, if the right-sized-image is still need, put it to the image src to replace preview, otherwise doing nothing.
+       **/
+      if (this.uploadingImagePreviewSrc) {
+        return
+      }
       return new Promise<void>((resolve, reject) => {
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, this.getPreviewSize))
+        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
+        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         const img = new Image()
         img.setAttribute('crossOrigin', 'Anonymous')
-
-        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
           if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
@@ -244,47 +242,40 @@ export default Vue.extend({
     },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-      const { assetId } = this.config.srcObj
-      if (type === 'private') {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (!img) {
-          await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
-        }
-      }
 
-      await this.perviewAsLoading()
-
-      const preImg = new Image()
-      preImg.setAttribute('crossOrigin', 'Anonymous')
-      preImg.onerror = () => {
-        if (type === 'pexels') {
-          const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
-          switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
-            case 'group':
-              layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
-              break
-            case 'frame':
-              frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
-              break
-            default:
-              layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
+      if (this.userId !== 'backendRendering') {
+        await this.perviewAsLoading()
+        const preImg = new Image()
+        preImg.setAttribute('crossOrigin', 'Anonymous')
+        preImg.onerror = () => {
+          if (type === 'pexels') {
+            const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
+            switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
+              case 'group':
+                layerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
+                break
+              case 'frame':
+                frameUtils.updateFrameLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { srcObj })
+                break
+              default:
+                layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
+            }
           }
-          preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
         }
+        preImg.onload = () => {
+          const nextImg = new Image()
+          nextImg.setAttribute('crossOrigin', 'Anonymous')
+          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
+        }
+        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
+      } else {
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
-      preImg.onload = () => {
-        const nextImg = new Image()
-        nextImg.setAttribute('crossOrigin', 'Anonymous')
-        nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
-      }
-      preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
     },
-    handleNewShadowEffect(isInit = false) {
+    handleNewShadowEffect() {
       const { filterId, currentEffect } = this.shadow
-      if (isInit || (!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
+      if ((!filterId && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect))) {
         const newFilterId = imgShadowUtils.fitlerIdGenerator()
-        this.filter = imgShadowUtils.addFilter(newFilterId, imgShadowUtils.getDefaultFilterAttrs()) as HTMLElement
         this.updateShadowEffect(this.shadowEffects)
 
         const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
@@ -307,7 +298,6 @@ export default Vue.extend({
             ...effects
           }
         })
-        this.filter && imgShadowUtils.updateFilter(this.filter, this.config.styles)
       })
     }
   }

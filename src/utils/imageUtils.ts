@@ -6,6 +6,7 @@ import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
+import generalUtils from './generalUtils'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -29,6 +30,10 @@ class ImageUtils {
   }
 
   getSrc(config: IImage, size?: string | number): string {
+    if (config.previewSrc) {
+      return config.previewSrc
+    }
+
     const { type, userId, assetId } = config.srcObj || config.src_obj || {}
     if (typeof size === 'undefined' && config.styles) {
       const { imgWidth, imgHeight } = config.styles
@@ -39,23 +44,17 @@ class ImageUtils {
     }
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true`
       case 'private': {
-        const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-        const img = images.find(img => img.assetIndex === assetId)
-        if (img) {
-          for (const [k, v] of Object.entries(img.urls)) {
-            if (k === size) return v
-          }
-        }
-        return ''
+        const editorImg = store.getters['file/getEditorViewImages']
+        return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' : ''
       }
       case 'unsplash':
-        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`
+        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}&origin=true`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}&origin=true`
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/full`
+        return `https://template.vivipic.com/background/${assetId}/full?origin=true`
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       default:
@@ -372,6 +371,7 @@ class ImageUtils {
     const isAdmin = store.getters['user/isAdmin']
     const teamId = image.team_id ?? store.getters['user/getTeamId']
     const userId = store.getters['user/getTeamId']
+    console.log(image)
     return {
       width: image.width,
       height: image.height,
@@ -392,10 +392,19 @@ class ImageUtils {
   }
 
   appendOriginQuery(src: string) {
+    if (src.includes('origin=true')) return src
     if (src.includes('?')) {
       return `${src}&origin=true`
     } else {
       return `${src}?origin=true`
+    }
+  }
+
+  appendRandomQuery(src: string) {
+    if (src.includes('?')) {
+      return `${src}&ver=${generalUtils.generateRandomString(6)}`
+    } else {
+      return `${src}?ver=${generalUtils.generateRandomString(6)}`
     }
   }
 }

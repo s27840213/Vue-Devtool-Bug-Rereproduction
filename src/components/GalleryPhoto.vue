@@ -27,15 +27,13 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IImage } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
-import ImageUtils from '@/utils/imageUtils'
+import imageUtils from '@/utils/imageUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IAssetPhoto } from '@/interfaces/api'
 import networkUtils from '@/utils/networkUtils'
-import modalUtils from '@/utils/modalUtils'
-import { wrap } from '@sentry/browser/dist/helpers'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
 
@@ -69,11 +67,11 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
       getLayers: 'getLayers',
-      checkedAssets: 'user/getCheckedAssets',
+      checkedAssets: 'file/getCheckedAssets',
       isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
-      return this.photo.progress && this.photo.progress !== 100
+      return typeof this.photo.progress !== 'undefined' && this.photo.progress !== 100
     },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
@@ -88,7 +86,7 @@ export default Vue.extend({
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
       const sizeMap = this.$store.state.user.imgSizeMap as Array<{ [key: string]: number | string }>
-      return ImageUtils.getSrc(data, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] || 150)
+      return imageUtils.appendRandomQuery(imageUtils.getSrc(data, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] || 150))
     },
     fullSrc(): string {
       const { inFilePanel, photo, vendor } = this
@@ -96,15 +94,15 @@ export default Vue.extend({
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
-      return ImageUtils.getSrc(data, photo.width)
+      return imageUtils.getSrc(data, photo.width)
     }
   },
   methods: {
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo',
-      addCheckedAssets: 'user/ADD_CHECKED_ASSETS',
-      deleteCheckedAssets: 'user/DELETE_CHECKED_ASSETS',
-      updateCheckedAssets: 'user/UPDATE_CHECKED_ASSETS',
+      addCheckedAssets: 'file/ADD_CHECKED_ASSETS',
+      deleteCheckedAssets: 'file/DELETE_CHECKED_ASSETS',
+      updateCheckedAssets: 'file/UPDATE_CHECKED_ASSETS',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
     dragStart(e: DragEvent, photo: any) {
@@ -123,11 +121,11 @@ export default Vue.extend({
         const photoHeight = photoAspectRatio > pageAspectRatio ? (pageSize.width * resizeRatio) / photoAspectRatio : pageSize.height * resizeRatio
 
         const src = this.fullSrc
-        const type = ImageUtils.getSrcType(this.fullSrc)
+        const type = imageUtils.getSrcType(this.fullSrc)
         const srcObj = {
           type,
-          userId: ImageUtils.getUserId(src, type),
-          assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : ImageUtils.getAssetId(src, type)
+          userId: imageUtils.getUserId(src, type),
+          assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : imageUtils.getAssetId(src, type)
         }
 
         new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
@@ -137,13 +135,13 @@ export default Vue.extend({
           offsetY: 15
         })
 
-        const significantSize = ImageUtils.getSignificantDimension(photoWidth, photoHeight)
+        const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
         const imgPreload = new Image()
-        imgPreload.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize))
+        imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
         const imgPreloadPre = new Image()
-        imgPreloadPre.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize, 'pre'))
+        imgPreloadPre.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'pre'))
         const imgPreloadNext = new Image()
-        imgPreloadNext.src = ImageUtils.getSrc({ srcObj } as IImage, ImageUtils.getSrcSize(type, significantSize, 'next'))
+        imgPreloadNext.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'next'))
 
         this.setCurrDraggedPhoto({
           srcObj: {

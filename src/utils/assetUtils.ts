@@ -581,13 +581,16 @@ class AssetUtils {
   }
 
   addAssetToRecentlyUsed(asset: IAsset) {
-    const { id, type, width, height, content_ids: contentIds, match_cover: matchCover } = asset
+    const {
+      id, type, width, height,
+      content_ids: contentIds, match_cover: matchCover, ver
+    } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
       const categories = GeneralUtils.deepCopy((store.state as any)[typeModule].categories)
-      const recentlyUsed = categories.find((category: IListServiceContentData) => category.title.includes('最近使用的項目'))
+      const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)
         if (assetIndex >= 0) {
@@ -599,7 +602,8 @@ class AssetUtils {
           width,
           height,
           content_ids: contentIds,
-          match_cover: matchCover
+          match_cover: matchCover,
+          ver
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }

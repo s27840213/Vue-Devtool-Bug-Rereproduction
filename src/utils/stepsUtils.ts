@@ -15,6 +15,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import { IMarker } from '@/interfaces/shape'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
+import textUtils from './textUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -147,18 +148,31 @@ class StepsUtils {
     return layer
   }
 
-  async refetchForShapes(layer: ILayer): Promise<any> {
+  fillLoadingSize(layer: IText): IText {
+    const initSize = {
+      width: layer.styles.width,
+      height: layer.styles.height,
+      widthLimit: layer.widthLimit
+    }
+    layer.widthLimit = textUtils.autoResize(layer, initSize)
+    return layer
+  }
+
+  async fillDataForLayer(layer: ILayer): Promise<any> {
     let typedLayer
     const newLayers = []
     switch (layer.type) {
       case 'shape':
         typedLayer = layer as IShape
         return await this.refetchForShape(typedLayer)
+      case 'text':
+        typedLayer = layer as IText
+        return this.fillLoadingSize(typedLayer)
       case 'tmp':
       case 'group':
         typedLayer = layer as IGroup
         for (const subLayer of typedLayer.layers) {
-          newLayers.push(await this.refetchForShapes(subLayer))
+          newLayers.push(await this.fillDataForLayer(subLayer))
         }
         typedLayer.layers = newLayers
         return typedLayer
@@ -178,14 +192,26 @@ class StepsUtils {
     return pages
   }
 
-  async refetchForShapesInPages(pages: IPage[]): Promise<IPage[]> {
-    for (const page of pages) {
-      const newLayers = []
-      for (const layer of page.layers) {
-        newLayers.push(await this.refetchForShapes(layer))
-      }
-      page.layers = newLayers
+  async fillDataForLayersInPages(pages: IPage[]): Promise<IPage[]> {
+    const pagePromises = []
+    for (const [pageIndex, page] of pages.entries()) {
+      if (pageUtils.isOutOfBound(pageIndex)) continue
+      pagePromises.push(new Promise((resolve, reject) => {
+        try {
+          const layerPromises = []
+          for (const layer of page.layers) {
+            layerPromises.push(this.fillDataForLayer(layer))
+          }
+          Promise.all(layerPromises).then((layers) => {
+            page.layers = layers
+            resolve(page)
+          })
+        } catch (error) {
+          reject(error)
+        }
+      }))
     }
+    await Promise.all(pagePromises)
     return pages
   }
 
@@ -230,7 +256,7 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep--
-    const pages = await this.refetchForShapesInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
+    const pages = await this.fillDataForLayersInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
@@ -284,7 +310,7 @@ class StepsUtils {
       popupUtils.closePopup()
     }
     this.currStep++
-    const pages = await this.refetchForShapesInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
+    const pages = await this.fillDataForLayersInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
     const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo

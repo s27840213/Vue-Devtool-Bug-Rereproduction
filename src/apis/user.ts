@@ -89,12 +89,13 @@ export default {
       locale
     }
   }),
-  verifyVcode: (account: string, vcode: string, token: string): AxiosPromise => axios('/verify-vcode', {
+  verifyVcode: (account: string, vcode: string, token: string, type: number): AxiosPromise => axios('/verify-vcode', {
     method: 'POST',
     data: {
       account,
       vcode,
-      token
+      token,
+      type
     }
   }),
   updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number): AxiosPromise => axios('/update-user', {

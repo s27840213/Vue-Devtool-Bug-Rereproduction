@@ -7,6 +7,8 @@ import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
+import textPropUtils from './textPropUtils'
+import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -114,6 +116,12 @@ class LayerFactary {
       }))
     }
 
+    if (clips.some(img => img.styles.rotate !== 0)) {
+      const img = clips.find(img => img.styles.rotate !== 0) as IImage
+      styles.rotate = img.styles.rotate
+      img.styles.rotate = 0
+    }
+
     return {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -136,8 +144,8 @@ class LayerFactary {
         initHeight: initHeight,
         zindex: styles.zindex ?? -1,
         opacity: styles.opacity || 100,
-        horizontalFlip: styles.horizontalFlip,
-        verticalFlip: styles.verticalFlip
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       },
       clips,
       decoration: decoration ? this.newShape((() => {
@@ -230,6 +238,8 @@ class LayerFactary {
     /**
      * For the past structure, some text might have wrong structure
      * below fix the wrong part
+     * 1: empty span
+     * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -247,12 +257,11 @@ class LayerFactary {
           }
         }
       }
-      config.paragraphs.forEach((p) => {
-        for (let i = 0; i < p.spans.length; i++) {
-          if (!p.spans[i].styles.font) {
-            Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-              (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
-          }
+      const isVertical = basicConfig.styles.writingMode.includes('vertical')
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, undefined, (span) => {
+        if (!span.styles.font) {
+          Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
+            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
         }
       })
     }

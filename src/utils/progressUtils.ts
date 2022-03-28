@@ -37,7 +37,7 @@ class ColorUtils {
     const hashId = id || generalUtils.generateRandomString(20)
     xhr.upload.onprogress = (event) => {
       const uploadProgress = Math.floor(event.loaded / event.total * 100)
-      // store.commit('user/UPDATE_PROGRESS', {
+      // store.commit('file/UPDATE_PROGRESS', {
       //   assetId: assetId,
       //   progress: uploadProgress / 2
       // })

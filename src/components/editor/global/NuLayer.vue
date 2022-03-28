@@ -11,10 +11,11 @@
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     div(v-if="appendShadowEffect" class="img-shadow-effect" :style="shadowStyles()")
     div(v-if="config.inProcess" class="nu-layer__inProcess")
-      svg-icon(class="spiner"
-        :iconName="'spiner'"
-        :iconColor="'white'"
-        :iconWidth="'150px'")
+      square-loading
+      //- svg-icon(class="spiner"
+      //-   :iconName="'spiner'"
+      //-   :iconColor="'white'"
+      //-   :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
@@ -24,14 +25,17 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import { IGroup, IImage } from '@/interfaces/layer'
+import { IImage } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import generalUtils from '@/utils/generalUtils'
+import SquareLoading from '@/components/global/SqureLoading.vue'
 
 export default Vue.extend({
+  components: {
+    SquareLoading
+  },
   props: {
     config: Object,
     pageIndex: Number,
@@ -70,8 +74,8 @@ export default Vue.extend({
       return MathUtils.cos(this.config.styles.rotate)
     },
     appendShadowEffect(): boolean {
-      if (this.config.type !== LayerType.image) return false
-      const config = this.config as IImage
+      const { config } = this
+      if (config.type !== LayerType.image || !config.styles.shadow) return false
       return [ShadowEffectType.projection, ShadowEffectType.halo].includes(config.styles.shadow.currentEffect)
     }
   },
@@ -96,9 +100,6 @@ export default Vue.extend({
             }
           )
           break
-        }
-        case LayerType.image: {
-          imageShadowUtils.handleShadowStyles(this.config, styles, this.imgControl)
         }
       }
       return styles
@@ -175,7 +176,7 @@ export default Vue.extend({
 }
 
 .img-shadow-effect {
-  position: absolute;;
+  position: absolute;
   pointer-events: none;
   display: block;
   border-radius: 100px/50px;

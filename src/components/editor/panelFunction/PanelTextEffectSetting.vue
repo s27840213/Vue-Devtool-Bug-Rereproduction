@@ -225,9 +225,11 @@ export default Vue.extend({
   },
   mounted() {
     colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
+    colorUtils.onStop(ColorEventType.textEffect, this.recordChange)
   },
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
+    colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
     optionStyle(idx: number) {
@@ -274,7 +276,6 @@ export default Vue.extend({
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
       TextEffectUtils.setTextEffect(currentEffect, { color })
-      this.recordChange()
     },
     recordChange() {
       stepsUtils.record()

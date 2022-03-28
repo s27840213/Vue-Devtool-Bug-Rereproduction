@@ -146,9 +146,12 @@ export default Vue.extend({
   },
   mounted() {
     colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
+    // colorUtils.onStop(ColorEventType.photoShadow, () => this.recordChange())
+    colorUtils.onStop(ColorEventType.photoShadow, this.recordChange)
   },
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
+    colorUtils.offStop(ColorEventType.photoShadow, this.recordChange)
   },
   methods: {
     optionStyle(idx: number) {
@@ -182,7 +185,6 @@ export default Vue.extend({
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
       imageShadowUtils.setEffect(currentEffect, { color })
-      this.recordChange()
     },
     recordChange() {
       stepsUtils.record()
