@@ -20,7 +20,10 @@
               span {{$t('NN0391')}}
           div(class="home-top__buttom rounded btn-primary-sm"
             @click="test()")
-            span(class="home-top__buttom__text btn-LG") test
+            span(class="home-top__buttom__text btn-LG") test：
+            span(class="mobile") mobile
+            span(class="tablet") tablet
+            span(class="desktop") desktop
         animation(class="home-top__video"
           path='@/assets/img/svg/newHomepage/demo.mp4'
           :width="isLargeDesktop ? 656 : 327")
@@ -140,7 +143,7 @@ export default Vue.extend({
       this.showSizePopup = false
     },
     test() { // todo delete
-      alert(`window width: ${window.screen.width}\nisMobile: ${this.isMobile}\nisLD: ${this.isLargeDesktop}`)
+      alert(`window: ${document.body.clientWidth}x${document.body.clientHeight}\nisMobile: ${this.isMobile}\nisLD: ${this.isLargeDesktop}`)
     }
   }
 })
@@ -217,6 +220,12 @@ export default Vue.extend({
   z-index: setZindex('popup');
 }
 @media screen and (max-width: 768px) {
+  .mobile {
+    display: block;
+  }
+  .tablet, .desktop {
+    display: none;
+  }
   .home-top {
     min-height: 437px;
     &__text {
@@ -225,6 +234,12 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
+  .tablet {
+    display: block;
+  }
+  .mobile, .desktop {
+    display: none;
+  }
   .home-top {
     min-height: 366px;
     &__text {
@@ -233,6 +248,12 @@ export default Vue.extend({
   }
 }
 @media screen and (min-width: 1440.02px) {
+  .desktop {
+    display: block;
+  }
+  .tablet, .mobile {
+    display: none;
+  }
   .home-top {
     min-height: 566px;
     &__text {

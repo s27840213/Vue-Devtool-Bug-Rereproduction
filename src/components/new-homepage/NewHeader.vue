@@ -45,11 +45,11 @@
           div
           div
       div(class="body-2")
-        div(v-if="!isLogin")
-          search-bar(v-if="!noSearchbar"
-            class="nu-header__search"
-            :placeholder="$t('NN0037')"
-            @search="handleSearch")
+        //- div(v-if="!isLogin")
+        //-   search-bar(v-if="!noSearchbar"
+        //-     class="nu-header__search"
+        //-     :placeholder="$t('NN0037')"
+        //-     @search="handleSearch")
         div(v-if="!isLogin"
           class="py-5 px-30 text-bold pointer text-blue-1"
           style="white-space: nowrap;"
@@ -69,30 +69,30 @@
             class="nu-header__account"
             @close="() => (isAccountPopup = false)")
     div(class="nu-header__container-mobile")
-      div(class="pl-15")
-        svg-icon(v-if="!isShowSearchPage"
-          :iconName="'menu'"
-          :iconWidth="'25px'"
-          :iconColor="'gray-3'"
-          @click.native="openMenu")
-      div(class="flex-center")
+      div(class="flex-center pl-15")
         svg-icon(class="pointer"
           :iconName="'logo'"
           :iconWidth="'90px'"
           style="height: 45px;"
           @click.native="goToPage('Home')")
-      div(v-if="noSearchbar")
-      div(v-else class="pr-15 relative")
+      div(class="pr-15")
         svg-icon(v-if="!isShowSearchPage"
-          :iconName="'search'"
-          :iconColor="'gray-3'"
+          :iconName="'menu'"
           :iconWidth="'25px'"
-          @click.native="() => { isShowSearchPage = true }")
-        svg-icon(v-else
-          :iconName="'close'"
           :iconColor="'gray-3'"
-          :iconWidth="'25px'"
-          @click.native="closeSearchPage")
+          @click.native="openMenu")
+      //- div(v-if="noSearchbar")
+      //- div(v-else class="pr-15 relative")
+      //-   svg-icon(v-if="!isShowSearchPage"
+      //-     :iconName="'search'"
+      //-     :iconColor="'gray-3'"
+      //-     :iconWidth="'25px'"
+      //-     @click.native="() => { isShowSearchPage = true }")
+      //-   svg-icon(v-else
+      //-     :iconName="'close'"
+      //-     :iconColor="'gray-3'"
+      //-     :iconWidth="'25px'"
+      //-     @click.native="closeSearchPage")
     slot
     div(v-if="isShowMenu"
         class="nu-header__menu")
@@ -117,9 +117,10 @@ import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import Avatar from '@/components/Avatar.vue'
-import MobileMenu from '@/components/homepage/MobileMenu.vue'
+import MobileMenu from '@/components/new-homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
 import localeUtils from '@/utils/localeUtils'
+
 export default Vue.extend({
   components: {
     SearchBar,
@@ -319,8 +320,7 @@ export default Vue.extend({
     @media screen and (min-width: 769px) {
       display: none;
     }
-    :nth-child(1),
-    :nth-child(3) {
+    :nth-child(2) {
       width: 25px;
       display: flex;
       align-items: center;
