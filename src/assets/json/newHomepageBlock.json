@@ -3,7 +3,27 @@
     "title": "NN0461",
     "description": "NN0462",
     "img": {
-      "name": "template_garlly.jpg",
+      "name": "template-garlly.jpg",
+      "width": 3000,
+      "height": 600
+    },
+    "colorBlock": [
+      {
+        "name": "oval_lightblue1.svg",
+        "top": -13,
+        "left": 17
+      }, {
+        "name": "oval_pink1.svg",
+        "top": 65.56,
+        "left": 95.56
+      }
+    ],
+    "align": "column"
+  }, {
+    "title": "NN0461",
+    "description": "NN0462",
+    "img": {
+      "name": "c900.jpg",
       "width": 3000,
       "height": 600
     },
