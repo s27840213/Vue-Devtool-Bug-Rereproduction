@@ -104,7 +104,7 @@ export default Vue.extend({
   &__link {
     a {
       color: setColor(blue-1);
-      text-decoration: none;
+      text-decoration: none; // todo make a class
     }
   }
   div {

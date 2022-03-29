@@ -15,12 +15,14 @@
             :style="dotStyle")
           div(v-if="!isMobile"
             class="home-top__buttom rounded btn-primary-sm")
-            span(class="home-top__buttom__text btn-LG") Get Started
+            router-link(to="/editor"
+              class="home-top__buttom__text btn-LG")
+              span {{$t('NN0391')}}({{windowWidth()}})
         animation(class="home-top__video"
           path='@/assets/img/svg/newHomepage/demo.mp4'
           :width="isLargeDesktop ? 656 : 327")
           //- need control? loop?
-      scroll-list(v-if="!isMobile"
+      scroll-list(v-if="!isMobile || isLogin"
         type="theme"
         @openSizePopup="openSizePopup()")
       scroll-list(v-if="isLogin"
@@ -135,6 +137,9 @@ export default Vue.extend({
     },
     closeSizePopup() {
       this.showSizePopup = false
+    },
+    windowWidth() {
+      return window.screen.width
     }
   }
 })
@@ -185,6 +190,10 @@ export default Vue.extend({
     width: 216px; // consider padding 有沒有更好的方式？
     height: 44px;
     box-shadow: 0px 9px 13px 0px #7190CC40;
+    &__text {
+      color: setColor(white);
+      text-decoration: none;
+    }
   }
   // &__video{
     // border-width: 14px 26px;

@@ -31,7 +31,7 @@
           div(v-for="item in themeData"
             class="list-content-items__theme-item")
             router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
-              img(:src="item.url"
+              img(:src="require('@/assets/img/svg/newHomepage/designfor/' + item.url)"
                 @error="imgOnerror")
             span(class="body-SM text-gray-1") {{item.title}}
             span(class="body-XS text-gray-3") {{item.width}} x {{item.height}}
@@ -111,6 +111,20 @@ export default Vue.extend({
       case 'theme':
         themeUtils.checkThemeState().then(() => {
           this.themeData = _.filter(themeUtils.themes, ['mainHidden', 0])
+          const localUrl = [
+            'FBpost.png',
+            'FBbanner.png',
+            'IGpost.png',
+            'IGstory.png',
+            'Productimage.png',
+            'Productbanner.png',
+            'youtube.png',
+            'googleda.png'
+          ]
+          for (let i = 0; i < this.themeData.length; i++) {
+            (this.themeData[i] as any).url = localUrl[i] // todo any
+          }
+          console.log('themedata', this.themeData)
         })
         this.title = i18n.t('NN0154') as string
         break
@@ -200,12 +214,12 @@ export default Vue.extend({
         text-align: center;
         padding: 8px 12px;
         a {
-          width: 140px;
-          height: 120px;
+          // width: 140px;
+          // height: 120px;
         }
         img {
-          width: 100px;
-          height: 100px;
+          // width: 100px;
+          // height: 100px;
           &:hover {
             transition: all 0.2s ease-in-out;
             box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
