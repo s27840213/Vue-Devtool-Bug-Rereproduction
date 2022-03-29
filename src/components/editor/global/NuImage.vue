@@ -320,7 +320,8 @@ export default Vue.extend({
             canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
             canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
             this.canvasImg = _canvasImg
-            imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, _canvasImg as HTMLImageElement, this.config)
+            imgShadowUtils.clearLayerData()
+            imgShadowUtils.draw(canvas, _canvasImg, this.config)
           }
           _canvasImg.src = ImageUtils.getSrc(this.config)
         }

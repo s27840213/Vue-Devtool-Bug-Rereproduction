@@ -188,6 +188,15 @@ export default Vue.extend({
 
                   this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
                   this.setInBgRemoveMode(true)
+
+                  const data = imageUtils.getBgRemoveInfo(json.data, initSrc)
+                  console.log('already get the img config', imageUtils.getSrc({
+                    srcObj: {
+                      type: 'public',
+                      userId: data.teamId,
+                      assetId: data.id
+                    }
+                  } as IImage, 'larg'))
                 }
                 return true
               }

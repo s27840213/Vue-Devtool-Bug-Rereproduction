@@ -14,10 +14,17 @@ export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.7
 export const CANVAS_SIZE = 500
 class ImageShadowUtils {
-  _draw = undefined as number | undefined
-  _drawing = false
-  canvasT = document.createElement('canvas')
-  ctxT = null as CanvasRenderingContext2D | null
+  private canvasT = document.createElement('canvas')
+  private ctxT = null as CanvasRenderingContext2D | null
+  private _draw = undefined as number | undefined
+  // @TODO
+  private _drawing = false
+  private _layerData = null as {
+    img: HTMLImageElement,
+    config: IImage
+  } | null
+
+  get layerData() { return this._layerData }
 
   constructor() {
     this.ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
@@ -94,9 +101,12 @@ class ImageShadowUtils {
   }
 
   readonly SPREAD_RADIUS = 1
-  draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage) {
+  draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 75) {
     if (this._draw) {
       clearTimeout(this._draw)
+    }
+    if (!this._layerData) {
+      this._layerData = { img: img, config }
     }
     const ctx = canvas.getContext('2d')
     const { styles } = config
@@ -120,17 +130,15 @@ class ImageShadowUtils {
     const imgY = _imgY * scaleRatio
     const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
     const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-    // const drawCanvasWidth = canvas.width / CANVAS_SCALE
-    // const drawCanvasHeight = canvas.height / CANVAS_SCALE
-    const drawCanvasHeight = CANVAS_SIZE
+    const drawCanvasHeight = canvasSize
     const drawCanvasWidth = drawCanvasHeight * imgRatio
-    const x = (canvas.width - CANVAS_SIZE * imgRatio) / 2
-    const y = (canvas.height - CANVAS_SIZE) / 2
+    const x = (canvas.width - canvasSize * imgRatio) / 2
+    const y = (canvas.height - canvasSize) / 2
     this.canvasT.setAttribute('width', `${canvas.width}`)
     this.canvasT.setAttribute('height', `${canvas.height}`)
 
     const _spread = 1 / this.SPREAD_RADIUS
-    this._draw = setTimeout(() => {
+    const handler = () => {
       if (!this.ctxT) return
       this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
@@ -166,7 +174,12 @@ class ImageShadowUtils {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(this.canvasT, 0, 0)
-    }, 50)
+    }
+    timeout ? (this._draw = setTimeout(handler, timeout)) : handler()
+  }
+
+  clearLayerData() {
+    this._layerData = null
   }
 
   getOptimizeWin(n: number) {

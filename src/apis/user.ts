@@ -4,6 +4,7 @@ import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import store from '@/store'
 import apiUtils from '@/utils/apiUtils'
+import generalUtils from '@/utils/generalUtils'
 import { AxiosPromise } from 'axios'
 
 export default {

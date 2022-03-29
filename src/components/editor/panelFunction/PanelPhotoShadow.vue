@@ -97,11 +97,16 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import imageShadowUtils, { CANVAS_SCALE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { mapActions, mapGetters } from 'vuex'
+import uploadUtils from '@/utils/uploadUtils'
+import imageUtils from '@/utils/imageUtils'
+import { IUnsplashPhoto } from '@/interfaces/api'
+import { IUploadAssetResponse } from '@/interfaces/upload'
 
 export default Vue.extend({
   components: {
@@ -119,6 +124,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters({
+      isAdmin: 'user/isAdmin'
+    }),
     shadowOption(): string[] {
       return Object.keys(this.effects)
     },
@@ -151,12 +159,63 @@ export default Vue.extend({
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
   },
-  destroyed() {
-    const pageIndex = layerUtils.pageIndex
-    const layerIndex = layerUtils.layerIndex
-    // imageShadowUtils.handleShadowApply(pageIndex, layerIndex)
+  async destroyed() {
+    const layerData = imageShadowUtils.layerData
+    if (layerData) {
+      const { config, img } = layerData
+      const { width, height } = config.styles
+      const updateCanvas = document.createElement('canvas')
+      updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
+      updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
+      imageShadowUtils.draw(updateCanvas, img, config, height, 0)
+
+      // Only used for dev
+      // updateCanvas.style.width = updateCanvas.width.toString() + 'px'
+      // updateCanvas.style.height = updateCanvas.height.toString() + 'px'
+      // updateCanvas.style.position = 'absolute'
+      // updateCanvas.style.top = '0'
+      // updateCanvas.style.zIndex = '1000'
+      // document.body.appendChild(updateCanvas)
+      // setTimeout(() => {
+      //   document.body.removeChild(updateCanvas)
+      // }, 5000)
+      // ===============
+
+      // const aspect = config.styles.imgWidth >= config.styles.imgHeight ? 0 : 1
+      // const data = await this.removeBg({ srcObj: config.srcObj, aspect })
+      // console.log(data)
+      // if (data.flag === 0) {
+      //   uploadUtils.polling(data.url, (json: any) => {
+      //     console.log('plooing')
+      //     // if (json.flag === 0 && json.data) {
+      //     //   const data = imageUtils.getBgRemoveInfo(json.data, '12312412')
+      //     //   console.log('already get the img config', imageUtils.getSrc({
+      //     //     srcObj: {
+      //     //       type: 'public',
+      //     //       userId: data.teamId,
+      //     //       assetId: data.id
+      //     //     }
+      //     //   } as IImage, 'larg'))
+      //     //   return true
+      //     // }
+      //     return false
+      //   })
+      // }
+      uploadUtils.uploadAsset('image', [updateCanvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
+        const srcObj = {
+          type: this.isAdmin ? 'public' : 'private',
+          userId: json.data.team_id,
+          assetId: this.isAdmin ? json.data.id : json.data.asset_index
+        }
+        console.log(imageUtils.getSrc({ srcObj } as IImage, 'larg'))
+      })
+      imageShadowUtils.clearLayerData()
+    }
   },
   methods: {
+    ...mapActions({
+      removeBg: 'user/removeBg'
+    }),
     optionStyle(idx: number) {
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
     },
@@ -177,7 +236,6 @@ export default Vue.extend({
       const { name, value } = event.target as HTMLInputElement
       const { max, min } = (fieldRange as any)[this.currentEffect][name]
       if (currentEffect !== ShadowEffectType.none) {
-        console.log('update change')
         const oldEffect = generalUtils
           .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
         imageShadowUtils.setEffect(currentEffect, {
