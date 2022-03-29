@@ -208,6 +208,7 @@ export default Vue.extend({
           height: 100px;
           &:hover {
             transition: all 0.2s ease-in-out;
+            box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
             transform: translate(0, -5px);
           }
         }

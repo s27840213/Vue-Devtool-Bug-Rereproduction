@@ -3,19 +3,25 @@ It's a simple project which generate i18n format json parsed from google sheet
 
 ## How to setup
 
+### 0.5. Install brew if you don't have one
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
 ### 1. Install pyenv
 ```
 brew update
 brew install pyenv
 ```
 
-### 2. Install pipenv
+### 2. Install pipenv. (To avoid `command not found: pipenv`, use sudo to install it.)
 ```
-pip install pipenv
+sudo pip install pipenv
 ```
 
 ### 3. Installs all packages specified in Pipfile.lock.
 ```
+cd /to/this/folder
 pipenv sync
 ```
 
@@ -35,11 +41,13 @@ python main.py [google_sheet_name] [works_sheet_name]
 
 
 // for example
-python main.py i18n Frontier21
+python main.py 'Vivipic Summary (nuDesign)' i18n
 ```
 
 
 ## Related Reference
+
+[brew](https://brew.sh/index_zh-tw)
 
 [pipenv](https://github.com/pypa/pipenv)
 
