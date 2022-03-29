@@ -293,7 +293,6 @@ class LayerFactary {
         }
       )
     }
-    console.log(config.paragraphs)
     return Object.assign(basicConfig, config)
   }
 
