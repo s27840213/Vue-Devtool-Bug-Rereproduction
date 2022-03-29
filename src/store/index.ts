@@ -96,8 +96,8 @@ const getDefaultState = (): IEditorState => ({
   themes: [],
   hasCopiedFormat: false,
   inGestureToolMode: false,
-  isMobile: window.matchMedia('screen and (max-width: 768px)').matches,
-  isLargeDesktop: window.matchMedia('screen and (max-width: 1440px)').matches
+  isMobile: false,
+  isLargeDesktop: false
 })
 
 const state = getDefaultState()
@@ -775,6 +775,7 @@ function handleResize() {
 }
 
 window.addEventListener('resize', handleResize)
+handleResize()
 
 export default new Vuex.Store({
   state,

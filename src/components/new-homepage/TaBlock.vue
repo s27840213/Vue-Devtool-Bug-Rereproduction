@@ -7,22 +7,24 @@
         class="block-text__coming_soon overline-SM")
         span {{'COMING SOON'}}
       div(class="block-text__title")
-        span {{content.title}}
+        i18n(:path="content.title" tag="span")
+          template(#newline)
+            br
         img(v-for="cb in content.colorBlock"
           v-if="!cb.ref"
           class="block__colorBlock"
           :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
           :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
       div(class="block-text__description text-gray-2")
-        span {{content.description}}
+        span {{$t(content.description)}}
       //- need v-if?
       div(v-if="content.link"
         class="block-text__link text-H5")
         router-link(:to="content.link.to")
-          span {{content.link.text}}
+          span {{$t(content.link.text)+ ' →'}}
     div(class="block-img")
       animation(
-        :path="'@/assets/img/svg/newHomepage/' + content.img.name"
+        :path="`@/assets/img/svg/newHomepage/${locale}/${content.img.name}`"
         :width="content.img.width * rwdModifier"
         :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
       img(v-for="cb in content.colorBlock"
@@ -34,8 +36,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
-// import i18n from '@/i18n'
+import { mapGetters, mapState } from 'vuex'
+import i18n from '@/i18n'
 import Animation from '@/components/Animation.vue'
 
 export default Vue.extend({
@@ -68,6 +70,9 @@ export default Vue.extend({
     },
     rwdModifier() {
       return this.isLargeDesktop ? 1 : 0.7
+    },
+    locale():string {
+      return i18n.locale
     }
   }
 })
@@ -76,9 +81,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .block {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  // margin: 100px 0 100px;
   &__colorBlock {
     position: absolute;
     z-index: -1;

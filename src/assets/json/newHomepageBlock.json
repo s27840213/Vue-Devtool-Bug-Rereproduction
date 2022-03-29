@@ -1,9 +1,9 @@
 [
   {
-    "title": "原版svg",
-    "description": "Get inspiration by simply searching keywords and tags.",
+    "title": "NN0461",
+    "description": "NN0462",
     "img": {
-      "name": "carousel1.svg",
+      "name": "templateGarlly.jpg",
       "width": 3000,
       "height": 600
     },
@@ -20,70 +20,10 @@
     ],
     "align": "column"
   }, {
-    "title": "png",
-    "description": "Get inspiration by simply searching keywords and tags.",
-    "img": {
-      "name": "carousel1.png",
-      "width": 3000,
-      "height": 600
-    },
-    "colorBlock": [
-      {
-        "name": "oval_lightblue1.svg",
-        "top": -13,
-        "left": 17
-      }, {
-        "name": "oval_pink1.svg",
-        "top": 65.56,
-        "left": 95.56
-      }
-    ],
-    "align": "column"
-  }, {
-    "title": "600jpg",
-    "description": "Get inspiration by simply searching keywords and tags.",
-    "img": {
-      "name": "carousel600.jpg",
-      "width": 3000,
-      "height": 600
-    },
-    "colorBlock": [
-      {
-        "name": "oval_lightblue1.svg",
-        "top": -13,
-        "left": 17
-      }, {
-        "name": "oval_pink1.svg",
-        "top": 65.56,
-        "left": 95.56
-      }
-    ],
-    "align": "column"
-  }, {
-    "title": "900jpg",
-    "description": "Get inspiration by simply searching keywords and tags.",
-    "img": {
-      "name": "carousel900.jpg",
-      "width": 3000,
-      "height": 600
-    },
-    "colorBlock": [
-      {
-        "name": "oval_lightblue1.svg",
-        "top": -13,
-        "left": 17
-      }, {
-        "name": "oval_pink1.svg",
-        "top": 65.56,
-        "left": 95.56
-      }
-    ],
-    "align": "column"
-  }, {
-    "title": "Tailor-made templates just for your business",
-    "description": "Find your ideal design fast with the filters of events and industries at Template Center.",
+    "title": "NN0463",
+    "description": "NN0464",
     "link": {
-      "text": "See Template Center →",
+      "text": "NN0465",
       "to": "/templates"
     },
     "img": {
@@ -108,8 +48,8 @@
     ],
     "align": "row"
   }, {
-    "title": "Template Bundle aligned across all platforms",
-    "description": "Effortlessly obtain all sizes of templates from social media posts, stories, website banners and more.",
+    "title": "NN0466",
+    "description": "NN0467",
     "img": {
       "name": "bundle.json",
       "width": 520
@@ -122,8 +62,8 @@
     }],
     "align": "row-reverse"
   }, {
-    "title": "Extensible Canvas makes design process smoother",
-    "description": "Users are allowed to create multiple sizes of designs in the same page, reducing repetition of switching files.",
+    "title": "NN0468",
+    "description": "NN0469",
     "img": {
       "name": "multiple-sizes.json",
       "width": 500
@@ -135,8 +75,8 @@
     }],
     "align": "row"
   }, {
-    "title": "Storytelling Templates provide hints to your marketing strategy",
-    "description": "Co-developed with well-known marketing lecturers, nine image slides tell the benefits of your product in a logical way.",
+    "title": "NN0470",
+    "description": "NN0471",
     "img": {
       "name": "storytelling.mp4",
       "width": 488,
@@ -160,8 +100,8 @@
     "align": "row-reverse"
   }, {
     "comingSoon": true,
-    "title": "Smart Background Remover makes it easier to edit images",
-    "description": "Get your image background cleared and changed automatically with the remover.",
+    "title": "NN0472",
+    "description": "NN0473",
     "img": {
       "name": "remover.mp4",
       "width": 500,
@@ -175,8 +115,8 @@
     "align": "row"
   }, {
     "comingSoon": true,
-    "title": "Manage your brand identify with Brandkit",
-    "description": "This tool set allows users to add their own logos, fonts and colors, taking brand and style to the next level.",
+    "title": "NN0474",
+    "description": "NN0475",
     "img": {
       "name": "brandkit.json",
       "width": 500
@@ -188,10 +128,10 @@
     }],
     "align": "row-reverse"
   }, {
-    "title": "Who loves Vivipic?",
-    "description": "Join over 1000+ Editors",
+    "title": "NN0476",
+    "description": "NN0477",
     "img": {
-      "name": "comment1.svg",
+      "name": "comment.svg",
       "width": 2700,
       "height": 318
     },

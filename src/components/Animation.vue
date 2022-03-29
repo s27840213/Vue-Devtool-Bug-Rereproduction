@@ -16,7 +16,7 @@
       :width="width"
       :height="height"
       type="video/mp4"
-      autoplay muted loop)
+      autoplay muted loop playsinline)
 </template>
 
 <script lang="ts">
