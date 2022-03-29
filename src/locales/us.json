@@ -439,9 +439,9 @@
   "NN0431": "Distance",
   "NN0432": "Angle",
   "NN0433": "Are you sure?",
-  "NN0434": "You are about to delete {itemName}",
-  "NN0435": "You will not be able to recover it if you change your mind.",
-  "NN0436": "",
+  "NN0434": "You are going to delete {itemName}",
+  "NN0435": "You cannot recover it if you change your mind.",
+  "NN0436": "Existing designs will not be affected by the action.",
   "NN0437": "Yes, delete it",
   "NN0438": "Shadow",
   "NN0439": "page | pages",
@@ -462,6 +462,10 @@
   "NN0454": "Loading",
   "NN0455": "Saving",
   "NN0456": "Oops!",
-  "NN0457": "Something went wrong",
-  "NN0458": "Please try again later"
+  "NN0457": "Something went wrong...",
+  "NN0458": "Please try again later!",
+  "NN0459": "{itemName} will also be removed from all existing designs.",
+  "NN0460": "Test environment",
+  "NN0461": "Failed to upload design. Please try downloading the file again.",
+  "NN0462": "Download failed. Please try again."
 }
