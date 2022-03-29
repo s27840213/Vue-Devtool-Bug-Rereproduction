@@ -29,11 +29,9 @@
         type="theme"
         @openSizePopup="openSizePopup()")
       scroll-list(v-if="isLogin"
-        class="isComputer"
         type="mydesign")
       scroll-list(v-if="isLogin"
         v-for="theme in themeList"
-        class="isComputer"
         :theme="theme"
         type="template")
       div(class="home-block")
@@ -53,7 +51,7 @@ import NewHeader from '@/components/new-homepage/NewHeader.vue'
 import Animation from '@/components/Animation.vue'
 import ScrollList from '@/components/new-homepage/ScrollList.vue'
 import TaBlock from '@/components/new-homepage/TaBlock.vue'
-import NuFooter from '@/components/NuFooter.vue'
+import NuFooter from '@/components/new-homepage/NuFooter.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 
 import _ from 'lodash'
@@ -242,9 +240,9 @@ export default Vue.extend({
     }
   }
 }
-@media screen and (max-width: 1023px) {
-  .isComputer {
-    display: none;
-  }
-}
+// @media screen and (max-width: 1023px) {
+//   .isComputer {
+//     display: none;
+//   }
+// }
 </style>
