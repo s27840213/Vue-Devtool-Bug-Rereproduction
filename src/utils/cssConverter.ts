@@ -84,7 +84,7 @@ class CssConveter {
       } else if (prop === 'fontSpacing') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (prop === 'lineHeight') {
-        result[styleMap[prop]] = `${sourceStyles[prop]}`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * (sourceStyles.size as number) * 1.333333}px`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (typeof sourceStyles[prop] !== 'undefined') {
