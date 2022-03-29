@@ -206,7 +206,12 @@ class BrandKitUtils {
   }
 
   removeBrand(brand: IBrand) {
-    store.dispatch('brandkit/removeBrand', brand)
+    store.dispatch('brandkit/removeBrand', brand).then((needFetch) => {
+      if (!needFetch) return
+      this.fetchBrands(async () => {
+        await store.dispatch('brandkit/fetchBrands')
+      })
+    })
   }
 
   removeLogo(logo: IBrandLogo) {

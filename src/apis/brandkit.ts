@@ -56,6 +56,9 @@ export default {
         Object.assign(payload.data, params)
         return axios('/update-brand', payload)
       })
+      // return new Promise<any>(resolve => {
+      //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
+      // })
     } else { // for testing (not implemented APIs)
       return { data: { flag: 0 } }
       // return new Promise<any>(resolve => {

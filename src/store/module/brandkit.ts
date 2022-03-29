@@ -154,18 +154,28 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_replaceBrand', { id: newBrand.id, brand: data.data })
     })
   },
-  async removeBrand({ commit }, brand: IBrand) {
-    brandkitApi.updateBrandsWrapper({
+  async removeBrand({ commit, state }, brand: IBrand) {
+    const needCreateDefault = state.brands.length <= 1
+    const success = await brandkitApi.updateBrandsWrapper({
       type: 'brand',
       update_type: 'delete',
       src: brand.id
     }, () => {
-      commit('UPDATE_deleteBrand', brand)
+      if (needCreateDefault) {
+        commit('SET_isBrandsLoading', true)
+      } else {
+        commit('UPDATE_deleteBrand', brand)
+      }
     }, () => {
-      commit('UPDATE_addBrand', brand)
+      if (needCreateDefault) {
+        commit('SET_isBrandsLoading', false)
+      } else {
+        commit('UPDATE_addBrand', brand)
+      }
     }, () => {
       showNetworkError()
     })
+    return needCreateDefault && success
   },
   async removeLogo({ commit }, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -348,10 +358,7 @@ const mutations: MutationTree<IBrandKitState> = {
     const index = state.brands.findIndex(brand_ => brand_.id === brand.id)
     if (index < 0) return
     state.brands.splice(index, 1)
-    if (state.brands.length === 0) {
-      state.brands = [brandkitUtils.createDefaultBrand()]
-    }
-    if (state.currentBrandId === brand.id) {
+    if (state.currentBrandId === brand.id && state.brands.length > 0) {
       state.currentBrandId = state.brands[0].id
     }
   },
