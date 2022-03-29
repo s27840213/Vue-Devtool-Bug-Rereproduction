@@ -108,7 +108,7 @@ export default Vue.extend({
     }
   }
   div {
-    margin: 10px 0;
+    margin: 0 0 10px;
   }
 }
 .block-img {
@@ -135,7 +135,7 @@ export default Vue.extend({
     margin: 150px 0;
   }
   .block-text{
-    width: 352px;
+    width: 360px;
     &__title {
       @include text-H2;
     }

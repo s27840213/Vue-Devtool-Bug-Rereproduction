@@ -17,7 +17,10 @@
             class="home-top__buttom rounded btn-primary-sm")
             router-link(to="/editor"
               class="home-top__buttom__text btn-LG")
-              span {{$t('NN0391')}}({{windowWidth()}})
+              span {{$t('NN0391')}}
+          div(class="home-top__buttom rounded btn-primary-sm"
+            @click="test()")
+            span(class="home-top__buttom__text btn-LG") test
         animation(class="home-top__video"
           path='@/assets/img/svg/newHomepage/demo.mp4'
           :width="isLargeDesktop ? 656 : 327")
@@ -138,8 +141,8 @@ export default Vue.extend({
     closeSizePopup() {
       this.showSizePopup = false
     },
-    windowWidth() {
-      return window.screen.width
+    test() { // todo delete
+      alert(`window width: ${window.screen.width}\nisMobile: ${this.isMobile}\nisLD: ${this.isLargeDesktop}`)
     }
   }
 })

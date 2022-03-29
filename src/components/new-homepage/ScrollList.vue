@@ -27,14 +27,14 @@
           div(class="list-content-items__theme-item")
             img(:src="require('@/assets/img/png/plus-origin.png')"
               @click="$emit('openSizePopup')")
-            span(class="body-SM text-gray-1") {{$t('NN0023')}}
+            span(class="body-XS text-gray-1") {{$t('NN0023')}}
           div(v-for="item in themeData"
             class="list-content-items__theme-item")
             router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
-              img(:src="require('@/assets/img/svg/newHomepage/designfor/' + item.url)"
+              img(:src="require('@/assets/img/svg/newHomepage/designfor/' + localUrl[item.url])"
                 @error="imgOnerror")
-            span(class="body-SM text-gray-1") {{item.title}}
-            span(class="body-XS text-gray-3") {{item.width}} x {{item.height}}
+            span(class="body-XS text-gray-1") {{item.title}}
+            span(class="body-XXS text-gray-3") {{item.width}} x {{item.height}}
         //- type mydesign
         template(v-if="type === 'mydesign'")
           design-item(v-for="item in mydesignData"
@@ -91,7 +91,19 @@ export default Vue.extend({
         5: i18n.t('NN0027'),
         7: i18n.t('NN0369'),
         9: i18n.t('NN0370')
-      } as Record<string, string>
+      } as Record<string, string>,
+      localUrl: {
+        'https://template.vivipic.com/static/theme/fb.svg': 'FBpost.png',
+        'https://template.vivipic.com/static/theme/fb_cover.svg': 'FBbanner.png',
+        'https://template.vivipic.com/static/theme/ig-post.svg': 'IGpost.png',
+        'https://template.vivipic.com/static/theme/ig-story.svg': 'IGstory.png',
+        'https://template.vivipic.com/static/theme/line-broadcast.svg': 'Line.png',
+        'https://template.vivipic.com/static/theme/eco-product.svg': 'Productimage.png',
+        'https://template.vivipic.com/static/theme/eco-banner.svg': 'Productbanner.png',
+        'https://template.vivipic.com/static/theme/eco-detail.svg': 'Productdetail.png',
+        'https://template.vivipic.com/static/theme/youtube_cover.svg': 'youtube.png',
+        'https://template.vivipic.com/static/theme/google-ads.svg': 'googleda.png'
+      }
     }
   },
   computed: {
@@ -111,20 +123,6 @@ export default Vue.extend({
       case 'theme':
         themeUtils.checkThemeState().then(() => {
           this.themeData = _.filter(themeUtils.themes, ['mainHidden', 0])
-          const localUrl = [
-            'FBpost.png',
-            'FBbanner.png',
-            'IGpost.png',
-            'IGstory.png',
-            'Productimage.png',
-            'Productbanner.png',
-            'youtube.png',
-            'googleda.png'
-          ]
-          for (let i = 0; i < this.themeData.length; i++) {
-            (this.themeData[i] as any).url = localUrl[i] // todo any
-          }
-          console.log('themedata', this.themeData)
         })
         this.title = i18n.t('NN0154') as string
         break
