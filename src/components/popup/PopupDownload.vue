@@ -119,8 +119,11 @@
             iconColor="white"
             iconWidth="20px")
           span(v-else) {{$t('NN0010')}}
-      template(v-if="isAdmin")
+      template(v-if="isAdmin || onRd")
         hr(class="popup-download__hr my-15")
+        div(class="dev-selector")
+          select(class="body-3 rounded" v-model="selectedDev")
+            option(v-for="(dev, index) in devs" :value="index + 1") {{ dev }}
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
@@ -130,7 +133,7 @@
               iconName="loading"
               iconColor="white"
               iconWidth="20px")
-            span(v-else) 下載 (測試 bucket)
+            span(v-else) 下載 (測試環境)
 </template>
 
 <script lang="ts">
@@ -201,7 +204,18 @@ export default Vue.extend({
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
-      ] as ITypeOption[]
+      ] as ITypeOption[],
+      selectedDev: 1,
+      devs: [
+        'dev0',
+        'dev1',
+        'dev2',
+        'dev3',
+        'dev4',
+        'dev5',
+        'rd'
+      ],
+      onRd: window.location.hostname === 'rd.vivipic.com'
     }
   },
   computed: {
@@ -234,6 +248,9 @@ export default Vue.extend({
     detailPageOptionLabel(): string {
       const { selectedDetailPage, detailPageDownloadOptions = [] } = this
       return detailPageDownloadOptions.find(option => option.value === selectedDetailPage.option)?.label ?? ''
+    },
+    wrappedSelectedDev(): number {
+      return this.selectedDev === this.devs.length ? 999 : this.selectedDev
     }
   },
   mounted() {
@@ -361,7 +378,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, this.isAdmin && useDev)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.wrappedSelectedDev : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
@@ -468,6 +485,14 @@ export default Vue.extend({
   }
   input {
     padding: 0;
+  }
+  .dev-selector {
+    display: flex;
+    padding: 5px;
+    margin-bottom: 10px;
+    & > select {
+      width: fit-content;
+    }
   }
 }
 </style>

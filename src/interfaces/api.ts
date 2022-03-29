@@ -147,6 +147,7 @@ export interface IListServiceContentData {
   category_id: number
   list: IListServiceContentDataItem[]
   title: string
+  is_recent?: number
 }
 
 export interface IListServiceData {

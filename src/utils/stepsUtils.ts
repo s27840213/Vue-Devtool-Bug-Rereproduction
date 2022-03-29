@@ -193,13 +193,25 @@ class StepsUtils {
   }
 
   async fillDataForLayersInPages(pages: IPage[]): Promise<IPage[]> {
-    for (const page of pages) {
-      const newLayers = []
-      for (const layer of page.layers) {
-        newLayers.push(await this.fillDataForLayer(layer))
-      }
-      page.layers = newLayers
+    const pagePromises = []
+    for (const [pageIndex, page] of pages.entries()) {
+      if (pageUtils.isOutOfBound(pageIndex)) continue
+      pagePromises.push(new Promise((resolve, reject) => {
+        try {
+          const layerPromises = []
+          for (const layer of page.layers) {
+            layerPromises.push(this.fillDataForLayer(layer))
+          }
+          Promise.all(layerPromises).then((layers) => {
+            page.layers = layers
+            resolve(page)
+          })
+        } catch (error) {
+          reject(error)
+        }
+      }))
     }
+    await Promise.all(pagePromises)
     return pages
   }
 

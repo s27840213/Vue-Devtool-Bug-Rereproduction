@@ -255,14 +255,18 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, addToPage = false, pollingCallback?: (json: IUploadAssetResponse) => void) {
+  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, { addToPage = false, id, pollingCallback }: {
+    addToPage?: boolean,
+    id?: string,
+    pollingCallback?: (json: IUploadAssetResponse) => void
+  } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
-      const assetId = generalUtils.generateAssetId()
+      const assetId = id ?? generalUtils.generateAssetId()
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
@@ -1146,7 +1150,6 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
-        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,
