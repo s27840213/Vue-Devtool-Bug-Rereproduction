@@ -5,10 +5,14 @@
       div(class="home-top"
         :style="homeTopStyle")
         div(class="home-top__text")
-          span {{'Become\na Pro Designer\nin few clicks.'}}
-          div(class="home-top__underline")
+          i18n(:path="'NN0460'" tag="span")
+            template(#newline)
+              br
+          div(class="home-top__underline"
+            :style="unterlineStyle")
           img(class="home-top__dot"
-            src="@/assets/img/svg/newHomepage/dot-and-cursor.svg")
+            src="@/assets/img/svg/newHomepage/dot-and-cursor.svg"
+            :style="dotStyle")
           div(v-if="!isMobile"
             class="home-top__buttom rounded btn-primary-sm")
             span(class="home-top__buttom__text btn-LG") Get Started
@@ -83,6 +87,36 @@ export default Vue.extend({
         'align-items': this.isMobile ? 'flex-start' : 'center',
         width: this.isMobile ? 'auto' : '80%'
       }
+    },
+    unterlineStyle(): Record<string, string> {
+      return i18n.locale === 'us' ? {
+        top: this.isMobile ? '70px' : '102px',
+        left: this.isMobile ? '28px' : '39px',
+        width: this.isMobile ? '209px' : '286px',
+        height: '14px'
+      } : i18n.locale === 'tw' ? {
+        top: this.isMobile ? '25px' : '38px',
+        left: this.isMobile ? '65px' : '85px',
+        width: this.isMobile ? '115px' : '160px',
+        height: this.isMobile ? '14px' : '16px'
+      } : i18n.locale === 'jp' ? {
+        top: this.isMobile ? '25px' : '38px',
+        left: this.isMobile ? '0px' : '0px',
+        width: this.isMobile ? '115px' : '160px',
+        height: this.isMobile ? '14px' : '16px'
+      } : {}
+    },
+    dotStyle(): Record<string, string> {
+      return i18n.locale === 'us' ? {
+        top: this.isMobile ? '108px' : '153.25px',
+        left: this.isMobile ? '221px' : '305px'
+      } : i18n.locale === 'tw' ? {
+        top: this.isMobile ? '114px' : '160px',
+        left: this.isMobile ? '138px' : '195px'
+      } : i18n.locale === 'jp' ? {
+        top: this.isMobile ? '100px' : '142px',
+        left: this.isMobile ? '260px' : '365px'
+      } : {}
     }
   },
   created() {
@@ -145,8 +179,6 @@ export default Vue.extend({
   }
   &__dot{
     position: absolute;
-    // top: 153.25px;
-    // left: 266.5px;
   }
   &__buttom{
     margin-top: 25px;
@@ -154,13 +186,13 @@ export default Vue.extend({
     height: 44px;
     box-shadow: 0px 9px 13px 0px #7190CC40;
   }
-  &__video{
-    border-width: 14px 26px;
-    border-style: solid;
-    border-radius: 1em;
-    border-color: transparent;
-    background-color: #DEE7EE;
-  }
+  // &__video{
+    // border-width: 14px 26px;
+    // border-style: solid;
+    // border-radius: 1em;
+    // border-color: transparent;
+    // background-color: #DEE7EE;
+  // }
 }
 .home__size-popup { // 有屬於popup的scss嗎？ 開一個新的？
   position: fixed;
@@ -180,17 +212,6 @@ export default Vue.extend({
     &__text {
       @include text-H3
     }
-    &__underline{
-      position: absolute;
-      top: 70px;
-      left: 28px;
-      width: 209px;
-      height: 14px;
-    }
-    &__dot{
-      top: 108px;
-      left: 195px;
-    }
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
@@ -199,16 +220,6 @@ export default Vue.extend({
     &__text {
       @include text-H1
     }
-    &__underline{
-      top: 102px;
-      left: 39px;
-      width: 286px;
-      height: 14px;
-    }
-    &__dot{
-      top: 153.25px;
-      left: 266.5px;
-    }
   }
 }
 @media screen and (min-width: 1440.02px) {
@@ -216,17 +227,6 @@ export default Vue.extend({
     min-height: 566px;
     &__text {
       @include text-H1
-    }
-    &__underline{
-      position: absolute;
-      top: 102px;
-      left: 39px;
-      width: 286px;
-      height: 14px;
-    }
-    &__dot{
-      top: 153.25px;
-      left: 266.5px;
     }
   }
 }
