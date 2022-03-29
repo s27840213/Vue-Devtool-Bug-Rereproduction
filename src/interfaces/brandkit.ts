@@ -50,9 +50,10 @@ export interface IBrandColor {
   color: string
 }
 
-export interface IBrandFont extends Omit<IUserFontContentData, 'create_time' | 'update_time'> {
+export interface IBrandFont extends Omit<IUserFontContentData, 'create_time' | 'update_time' | 'id'> {
   createTime: string,
-  updateTime: string
+  updateTime: string,
+  id: string
 }
 
 export interface IDeletingItem {

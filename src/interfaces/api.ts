@@ -256,7 +256,7 @@ export interface IUserFontContentData {
   favorite: number,
   file_ext: string,
   file_name: string,
-  id: string,
+  id?: string,
   name: string,
   team_id: string,
   update_time: string,

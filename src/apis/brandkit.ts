@@ -37,6 +37,17 @@ export default {
       }
     }))
   },
+  async getFont(assetIndex: number, token?: string, teamId?: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId(),
+        type: 'font',
+        asset_list: assetIndex.toString()
+      }
+    }))
+  },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)

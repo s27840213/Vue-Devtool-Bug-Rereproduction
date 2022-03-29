@@ -386,6 +386,7 @@ class BrandKitUtils {
     delete res.update_time
     return {
       ...res,
+      id: font.id ?? font.asset_index.toString(),
       createTime: font.create_time,
       updateTime: font.update_time
     }

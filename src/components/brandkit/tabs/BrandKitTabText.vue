@@ -14,7 +14,7 @@
             svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
         template(v-else)
           div(class="brand-kit-tab-text__font-column__font-img")
-            img(:src="font.namePrevUrl")
+            img(:src="font.namePrevUrl" @error="onError(font)")
           div(class="brand-kit-tab-text__font-column__font-img")
             img(:src="font.textPrevUrl")
           svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
@@ -91,7 +91,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('brandkit', {
-      fetchMoreFonts: 'fetchMoreFonts'
+      fetchMoreFonts: 'fetchMoreFonts',
+      refreshFontAsset: 'refreshFontAsset'
     }),
     handleUploadFont() {
       uploadUtils.chooseAssets('font')
@@ -108,17 +109,26 @@ export default Vue.extend({
     checkUploading(font: IBrandFont) {
       return font.id.startsWith('new_')
     },
-    async refreshFontUrls() {
+    refreshFontUrls() {
       this.fonts = this.rawFonts
-      if (this.isAdmin) {
-        this.fonts = this.fonts.map(font => {
+      this.fonts = this.fonts.map(font => {
+        if (this.isAdmin) {
           return {
             ...font,
             namePrevUrl: `https://template.vivipic.com/admin/${font.team_id}/asset/font/${font.id}/prev-name`,
             textPrevUrl: `https://template.vivipic.com/admin/${font.team_id}/asset/font/${font.id}/prev-sample`
           }
-        })
-      }
+        } else {
+          return {
+            ...font,
+            namePrevUrl: font.signed_url?.['prev-name'] ?? '',
+            textPrevUrl: font.signed_url?.['prev-sample'] ?? ''
+          }
+        }
+      })
+    },
+    onError(font: IBrandFont) {
+      this.refreshFontAsset(font).then(this.refreshFontUrls)
     }
   }
 })

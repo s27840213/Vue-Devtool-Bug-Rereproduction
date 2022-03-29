@@ -96,7 +96,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         throw new Error('fetch fonts request failed')
       }
       commit('SET_fontsPageIndex', data.next_page)
-      commit('SET_fonts', data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)))
+      commit('SET_fonts', getters.getFonts.concat(data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font))))
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -325,6 +325,13 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }, () => {
       showNetworkError()
     })
+  },
+  async refreshFontAsset({ commit }, font: IBrandFont) {
+    const { data } = await brandkitApi.getFont(font.asset_index)
+    if (data.flag === 0) {
+      const urlMap = data.url_map[font.asset_index.toString()]
+      commit('UPDATE_replaceFontUrl', { font, urlMap })
+    }
   }
 }
 
@@ -456,6 +463,13 @@ const mutations: MutationTree<IBrandKitState> = {
     const index = state.fonts.findIndex(font_ => font_.id === updateInfo.id)
     if (index < 0) return
     state.fonts.splice(index, 1, updateInfo.font)
+  },
+  UPDATE_replaceFontUrl(state: IBrandKitState, updateInfo: { font: IBrandFont, urlMap: {[key: string]: string} }) {
+    const font = state.fonts.find(font_ => font_.id === updateInfo.font.id)
+    if (!font || !font.signed_url) return
+    for (const key of Object.keys(font.signed_url)) {
+      (font.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
+    }
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
