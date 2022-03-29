@@ -37,11 +37,7 @@ pipenv shell
 
 ### 6. Run !!!
 ```
-python main.py [google_sheet_name] [works_sheet_name]
-
-
-// for example
-python main.py 'Vivipic Summary (nuDesign)' i18n
+python main.py
 ```
 
 

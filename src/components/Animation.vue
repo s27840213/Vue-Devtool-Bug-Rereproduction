@@ -3,7 +3,7 @@
     div(v-if="isJSON"
       class="lottie"
       :style="lottieStyle" ref="lavContainer")
-    img(v-if="isSvg"
+    img(v-if="isImg"
       v-for="index in 2"
       class="img"
       :src="require('@/' + path.slice(2))"
@@ -100,8 +100,8 @@ export default Vue.extend({
     isJSON():boolean {
       return this.path.endsWith('.json')
     },
-    isSvg():boolean {
-      return this.path.endsWith('.svg')
+    isImg():boolean {
+      return this.path.endsWith('.svg') || this.path.endsWith('.png') || this.path.endsWith('.jpg')
     },
     isMp4():boolean {
       return this.path.endsWith('.mp4')
@@ -116,7 +116,7 @@ export default Vue.extend({
     }
   },
   created() {
-    if (this.isSvg) {
+    if (this.isImg) {
       setInterval(() => {
         this.time = (this.time + this.imgSpeed) % 100
       }, this.delay)

@@ -1,9 +1,69 @@
 [
   {
-    "title": "Perfect your design with thousands of beautiful templates",
+    "title": "原版svg",
     "description": "Get inspiration by simply searching keywords and tags.",
     "img": {
       "name": "carousel1.svg",
+      "width": 3000,
+      "height": 600
+    },
+    "colorBlock": [
+      {
+        "name": "oval_lightblue1.svg",
+        "top": -13,
+        "left": 17
+      }, {
+        "name": "oval_pink1.svg",
+        "top": 65.56,
+        "left": 95.56
+      }
+    ],
+    "align": "column"
+  }, {
+    "title": "png",
+    "description": "Get inspiration by simply searching keywords and tags.",
+    "img": {
+      "name": "carousel1.png",
+      "width": 3000,
+      "height": 600
+    },
+    "colorBlock": [
+      {
+        "name": "oval_lightblue1.svg",
+        "top": -13,
+        "left": 17
+      }, {
+        "name": "oval_pink1.svg",
+        "top": 65.56,
+        "left": 95.56
+      }
+    ],
+    "align": "column"
+  }, {
+    "title": "600jpg",
+    "description": "Get inspiration by simply searching keywords and tags.",
+    "img": {
+      "name": "carousel600.jpg",
+      "width": 3000,
+      "height": 600
+    },
+    "colorBlock": [
+      {
+        "name": "oval_lightblue1.svg",
+        "top": -13,
+        "left": 17
+      }, {
+        "name": "oval_pink1.svg",
+        "top": 65.56,
+        "left": 95.56
+      }
+    ],
+    "align": "column"
+  }, {
+    "title": "900jpg",
+    "description": "Get inspiration by simply searching keywords and tags.",
+    "img": {
+      "name": "carousel900.jpg",
       "width": 3000,
       "height": 600
     },
