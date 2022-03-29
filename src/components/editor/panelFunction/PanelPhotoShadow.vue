@@ -99,14 +99,13 @@ import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import imageShadowUtils, { CANVAS_SCALE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
-import imageUtils from '@/utils/imageUtils'
-import { IUnsplashPhoto } from '@/interfaces/api'
 import { IUploadAssetResponse } from '@/interfaces/upload'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   components: {
@@ -165,6 +164,7 @@ export default Vue.extend({
       const { config, img } = layerData
       const { width, height } = config.styles
       const updateCanvas = document.createElement('canvas')
+      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
       updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
       imageShadowUtils.draw(updateCanvas, img, config, height, 0)
@@ -207,7 +207,10 @@ export default Vue.extend({
           userId: json.data.team_id,
           assetId: this.isAdmin ? json.data.id : json.data.asset_index
         }
-        console.log(imageUtils.getSrc({ srcObj } as IImage, 'larg'))
+        const pageIndex = pageUtils.getPageIndexById(pageId)
+        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+        this.resetAll(pageIndex, layerIndex)
       })
       imageShadowUtils.clearLayerData()
     }
@@ -255,15 +258,30 @@ export default Vue.extend({
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
-    reset() {
-      const { currentEffect } = this
-      if (currentEffect !== ShadowEffectType.none) {
-        const defaultProps = imageShadowUtils.getDefaultEffect(currentEffect)[currentEffect]
-        imageShadowUtils.setEffect(currentEffect, {
-          [currentEffect]: defaultProps,
-          color: '#000000'
-        })
+    reset(effect: ShadowEffectType = ShadowEffectType.none, pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
+      if (effect === ShadowEffectType.none) {
+        if (subLayerIdx === -1) {
+          effect = pageIndex !== -1 && layerIndex !== -1
+            ? (layerUtils.getLayer(pageIndex, layerIndex) as IImage).styles.shadow.currentEffect
+            : this.currentEffect
+        } else if (pageIndex !== -1 && layerIndex !== -1) {
+          effect = ((layerUtils.getLayer(pageIndex, layerIndex) as IGroup)
+            .layers[subLayerIdx] as IImage)
+            .styles.shadow.currentEffect
+        }
       }
+      if (effect !== ShadowEffectType.none) {
+        const defaultProps = imageShadowUtils.getDefaultEffect(effect)[effect]
+        imageShadowUtils.setEffect(effect, {
+          [effect]: defaultProps,
+          color: '#000000'
+        }, pageIndex, layerIndex, subLayerIdx)
+      }
+    },
+    resetAll(pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
+      Object.keys(ShadowEffectType)
+        .forEach(k => this.reset(k as ShadowEffectType, pageIndex, layerIndex, subLayerIdx))
+      imageShadowUtils.setEffect(ShadowEffectType.none, {}, pageIndex, layerIndex, subLayerIdx)
     }
   }
 })

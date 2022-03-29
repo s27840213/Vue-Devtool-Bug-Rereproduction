@@ -975,8 +975,6 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
 
-      // const body = this.$refs.body as HTMLElement
-      // body.classList.add('hover')
       this.setCursorStyle('')
       document.documentElement.removeEventListener('mousemove', this.scaling, false)
       document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)

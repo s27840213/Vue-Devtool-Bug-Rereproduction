@@ -1,11 +1,12 @@
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
-import { LayerType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
 import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import imageUtils from './imageUtils'
 import * as StackBlur from 'stackblur-canvas'
+import store from '@/store'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
 
@@ -30,15 +31,24 @@ class ImageShadowUtils {
     this.ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
   }
 
-  setEffect (effect: ShadowEffectType, attrs = {}): void {
-    const { pageIndex, layerIndex, subLayerIdx, getCurrConfig: currLayer } = layerUtils
-    if (subLayerIdx !== -1 || currLayer.type === LayerType.image) {
-      const { shadow } = (currLayer as IImage).styles
-      const { effects, filterId } = shadow
+  setEffect (effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
+    let { pageIndex, layerIndex, subLayerIdx } = layerUtils
+    _pageIndex !== -1 && (pageIndex = _pageIndex)
+    _layerIndex !== -1 && (layerIndex = _layerIndex)
+    if (_pageIndex !== -1 && _layerIndex !== -1 && _subLayerIdx !== -1) {
+      subLayerIdx = _subLayerIdx
+    }
+
+    const layer = subLayerIdx !== -1
+      ? (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
+      : layerUtils.getLayer(pageIndex, layerIndex) as IImage
+
+    if (layer.type === LayerType.image) {
+      const { shadow } = layer.styles
+      const { effects } = shadow
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         shadow: {
           currentEffect: effect,
-          filterId,
           effects: {
             ...effects,
             ...attrs
@@ -274,6 +284,20 @@ class ImageShadowUtils {
       ...Object.keys(
         effect === ShadowEffectType.none ? {} : this.getDefaultEffect(effect)[effect] as ShadowEffects)
     ]
+  }
+
+  updateEffect(layerInfo: ILayerInfo, effects: IShadowEffects) {
+    store.commit('UPDATE_shadowEffect', {
+      layerInfo,
+      payload: effects
+    })
+  }
+
+  updateEffectState(layerInfo: ILayerInfo, currEffect: string) {
+    store.commit('UPDATE_shadowEffectState', {
+      layerInfo,
+      payload: { currEffect }
+    })
   }
 }
 

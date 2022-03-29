@@ -8,11 +8,11 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
-    div(v-if="isShadowImage"
+    div(v-if="showCanvas"
       class="canvas-wrapper"
       :style="canvasWrapperStyle()")
       canvas(ref="canvas")
-    img(v-show="!isAdjustImage && !isShadowImage"
+    img(v-show="!isAdjustImage && !showCanvas"
       ref="img"
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
@@ -141,7 +141,7 @@ export default Vue.extend({
         .values(styles.adjust || {})
         .some(val => typeof val === 'number' && val !== 0)
     },
-    isShadowImage(): boolean {
+    showCanvas(): boolean {
       return [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(this.currentShadowEffect)
     },
     srcObj(): any {
@@ -193,13 +193,12 @@ export default Vue.extend({
     ...mapActions('user', ['updateImages']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
-      UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     styles() {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
-      return this.isShadowImage ? {
+      return this.showCanvas ? {
         width: `${width}px`,
         height: `${height}px`,
         ...inheritStyle
@@ -255,6 +254,7 @@ export default Vue.extend({
         img.setAttribute('crossOrigin', 'Anonymous')
 
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+        console.warn(src)
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
           if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {

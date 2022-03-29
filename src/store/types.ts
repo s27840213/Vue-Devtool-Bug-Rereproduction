@@ -119,7 +119,7 @@ export enum LayerType {
 export interface ILayerInfo {
   pageIndex: number,
   layerIndex: number,
-  subLayerIdx: number
+  subLayerIdx?: number
 }
 
 export enum LineTemplatesType {

@@ -1,6 +1,5 @@
 import { IShadowEffects } from '@/interfaces/imgShadow'
 import { IGroup, IImage } from '@/interfaces/layer'
-import store from '@/store'
 import { IEditorState, ILayerInfo } from '../types'
 
 const imgShadowMutations = {
