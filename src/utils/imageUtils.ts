@@ -44,17 +44,17 @@ class ImageUtils {
     }
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true&ver=03302022`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true&ver=033020221448`
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true&ver=03302022' : ''
+        return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true&ver=033020221448' : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}&origin=true`
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}&origin=true`
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/full?origin=true&ver=03302022`
+        return `https://template.vivipic.com/background/${assetId}/full?origin=true&ver=033020221448`
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       default:
