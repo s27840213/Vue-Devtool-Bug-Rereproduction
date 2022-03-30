@@ -92,7 +92,8 @@
           img(class="pointer ml-25"
             src="@/assets/img/svg/newHomepage/email.svg"
             :iconWidth="'25px'")
-      div(class="nu-footer__bottom-mobile-locale")
+      div(class="nu-footer__bottom-mobile-locale"
+        :style="{ 'margin': isHome ? '0 0 100px' : 0 }")
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-mobile-copyright")
@@ -109,6 +110,12 @@ import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 
 export default Vue.extend({
+  props: {
+    isHome: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       inputLocale: '',

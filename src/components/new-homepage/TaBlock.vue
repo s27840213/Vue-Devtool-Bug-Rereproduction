@@ -65,7 +65,7 @@ export default Vue.extend({
       return {
         'align-items': this.content.align === 'column' ? 'center' : 'flex-start',
         'text-align': this.content.align === 'column' && !this.isMobile ? 'center' : 'left',
-        width: (this.content.align === 'column' && !this.isMobile) ? '80%'
+        width: (this.content.align === 'column' && !this.isMobile) ? '100%'
           : this.isMobile ? '327px' : !this.isLargeDesktop ? '360px' : '500px'
       }
     },
@@ -119,7 +119,7 @@ export default Vue.extend({
 }
 .block-img {
   position: relative;
-  z-index: -2;
+  // z-index: -2;
 }
 @media screen and (max-width: 768px) {
   .block{
@@ -127,7 +127,6 @@ export default Vue.extend({
     margin: 100px 0;
   }
   .block-text{
-    width: 327px;
     &__title {
       @include text-H3;
     }
@@ -142,7 +141,6 @@ export default Vue.extend({
     margin: 150px 0;
   }
   .block-text{
-    width: 360px;
     &__title {
       @include text-H2;
     }
@@ -157,7 +155,6 @@ export default Vue.extend({
     margin: 150px 0;
   }
   .block-text{
-    width: 500px;
     &__title {
       @include text-H2;
     }

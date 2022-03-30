@@ -79,7 +79,7 @@
         svg-icon(v-if="!isShowSearchPage"
           :iconName="'menu'"
           :iconWidth="'25px'"
-          :iconColor="'gray-3'"
+          :iconColor="'gray-1'"
           @click.native="openMenu")
       //- div(v-if="noSearchbar")
       //- div(v-else class="pr-15 relative")

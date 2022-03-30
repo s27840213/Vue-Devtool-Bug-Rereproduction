@@ -40,7 +40,7 @@
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
-      nu-footer
+      nu-footer(:isHome="true")
       div(v-if="showSizePopup"
         class="home__size-popup")
         popup-size(@close="closeSizePopup()")
@@ -208,13 +208,6 @@ export default Vue.extend({
       text-decoration: none;
     }
   }
-  // &__video{
-    // border-width: 14px 26px;
-    // border-style: solid;
-    // border-radius: 1em;
-    // border-color: transparent;
-    // background-color: #DEE7EE;
-  // }
 }
 .home__size-popup { // 有屬於popup的scss嗎？ 開一個新的？
   position: fixed;
