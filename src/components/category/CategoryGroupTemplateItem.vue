@@ -42,6 +42,7 @@ export default Vue.extend({
   },
   mounted () {
     const preImg = new Image()
+    preImg.setAttribute('crossOrigin', 'Anonymous')
     preImg.src = this.groupImages[0]
   },
   computed: {

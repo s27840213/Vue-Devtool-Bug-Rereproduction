@@ -4,6 +4,7 @@
     draggable="false")
     div(v-if="!isColorBackground && isAdjustImage" :style="frameStyles")
       nu-adjust-image(:src="src"
+        crossOrigin='Anonymous'
         :styles="adjustImgStyles")
     div(v-else :style="bgStyles")
 </template>
@@ -57,6 +58,7 @@ export default Vue.extend({
     if (this.userId !== 'backendRendering') {
       this.perviewAsLoading()
       const nextImg = new Image()
+      nextImg.setAttribute('crossOrigin', 'Anonymous')
       nextImg.onerror = () => {
         if (srcObj.type === 'pexels') {
           this.setBgImageSrc({
@@ -68,6 +70,7 @@ export default Vue.extend({
       }
       nextImg.onload = () => {
         const preImg = new Image()
+        preImg.setAttribute('crossOrigin', 'Anonymous')
         preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
       }
       nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
@@ -161,8 +164,6 @@ export default Vue.extend({
       }
     },
     async perviewAsLoading() {
-      // First put a preview to this.src, then start to load the image user want. When loading finish,
-      // if user still need that image, put it to this.src to replace preview, otherwise do nothing.
       return new Promise<void>((resolve, reject) => {
         const config = this.image.config as IImage
         if (config.previewSrc) {
