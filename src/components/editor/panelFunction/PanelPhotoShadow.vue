@@ -106,6 +106,7 @@ import { mapActions, mapGetters } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from '@/utils/pageUtils'
+import imageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   components: {
@@ -169,38 +170,23 @@ export default Vue.extend({
       updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
       imageShadowUtils.draw(updateCanvas, img, config, height, 0)
 
-      // Only used for dev
-      // updateCanvas.style.width = updateCanvas.width.toString() + 'px'
-      // updateCanvas.style.height = updateCanvas.height.toString() + 'px'
-      // updateCanvas.style.position = 'absolute'
-      // updateCanvas.style.top = '0'
-      // updateCanvas.style.zIndex = '1000'
-      // document.body.appendChild(updateCanvas)
-      // setTimeout(() => {
-      //   document.body.removeChild(updateCanvas)
-      // }, 5000)
-      // ===============
+      const ctx = updateCanvas.getContext('2d') as CanvasRenderingContext2D
+      const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
 
-      // const aspect = config.styles.imgWidth >= config.styles.imgHeight ? 0 : 1
-      // const data = await this.removeBg({ srcObj: config.srcObj, aspect })
-      // console.log(data)
-      // if (data.flag === 0) {
-      //   uploadUtils.polling(data.url, (json: any) => {
-      //     console.log('plooing')
-      //     // if (json.flag === 0 && json.data) {
-      //     //   const data = imageUtils.getBgRemoveInfo(json.data, '12312412')
-      //     //   console.log('already get the img config', imageUtils.getSrc({
-      //     //     srcObj: {
-      //     //       type: 'public',
-      //     //       userId: data.teamId,
-      //     //       assetId: data.id
-      //     //     }
-      //     //   } as IImage, 'larg'))
-      //     //   return true
-      //     // }
-      //     return false
-      //   })
-      // }
+      console.log('top', top, 'right', right, 'bottom', bottom, 'left', left)
+
+      // const uploadCanvas = document.createElement('canvas')
+      // const uploadCtx = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
+      const drawnImg = new Image()
+      drawnImg.src = updateCanvas.toDataURL('image/png;base64')
+      await new Promise<void>((resolve) => {
+        drawnImg.onload = () => {
+          ctx.clearRect(0, 0, updateCanvas.width, updateCanvas.height)
+          ctx.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, updateCanvas.width, updateCanvas.height)
+          resolve()
+        }
+      })
+
       uploadUtils.uploadAsset('image', [updateCanvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
         const srcObj = {
           type: this.isAdmin ? 'public' : 'private',
@@ -209,8 +195,11 @@ export default Vue.extend({
         }
         const pageIndex = pageUtils.getPageIndexById(pageId)
         const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
-        this.resetAll(pageIndex, layerIndex)
+        if (pageIndex !== -1 && layerIndex !== -1) {
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+          console.log(imageUtils.getSrc(layerUtils.getLayer(pageIndex, layerIndex) as IImage))
+          this.resetAll(pageIndex, layerIndex)
+        }
       })
       imageShadowUtils.clearLayerData()
     }

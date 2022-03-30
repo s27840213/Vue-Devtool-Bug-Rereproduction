@@ -254,7 +254,6 @@ export default Vue.extend({
         img.setAttribute('crossOrigin', 'Anonymous')
 
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
-        console.warn(src)
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
           if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {

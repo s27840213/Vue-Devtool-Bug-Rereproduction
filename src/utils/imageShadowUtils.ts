@@ -12,7 +12,7 @@ type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | 
 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
-export const CANVAS_SCALE = 1.7
+export const CANVAS_SCALE = 1.5
 export const CANVAS_SIZE = 500
 class ImageShadowUtils {
   private canvasT = document.createElement('canvas')
@@ -112,21 +112,19 @@ class ImageShadowUtils {
 
   readonly SPREAD_RADIUS = 1
   draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 75) {
+    const { styles } = config
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
+    const { effects, currentEffect } = shadow
+    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
+    if (!canvas || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
+      currentEffect === ShadowEffectType.projection)) return
     if (this._draw) {
       clearTimeout(this._draw)
     }
     if (!this._layerData) {
       this._layerData = { img: img, config }
     }
-    const ctx = canvas.getContext('2d')
-    const { styles } = config
-    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
-    const { effects, currentEffect } = shadow
-    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
 
-    if ((currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
-      currentEffect === ShadowEffectType.projection)) return
-    if (!ctx) return
     let offsetX = 0
     let offsetY = 0
     if (distance && distance > 0) {
@@ -134,6 +132,7 @@ class ImageShadowUtils {
       offsetY = distance * mathUtils.sin(angle)
     }
 
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const scaleRatio = img.naturalWidth / _imgWidth
     const imgRatio = _imgWidth / _imgHeight
     const imgX = _imgX * scaleRatio
@@ -190,6 +189,75 @@ class ImageShadowUtils {
 
   clearLayerData() {
     this._layerData = null
+  }
+
+  getImgEdgeWidth(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      .data.reduce((pixel, c, i) => {
+        if (i % 4 === 0) {
+          pixel.push([c])
+        } else {
+          pixel[pixel.length - 1].push(c)
+        }
+        return pixel
+      }, [] as Array<Array<number>>)
+      .reduce((row, p, i) => {
+        if (i % canvas.width === 0) {
+          row.push([p])
+        } else {
+          row[row.length - 1].push(p)
+        }
+        return row
+      }, [] as Array<Array<Array<number>>>)
+
+    let reach = false
+    let top = 0
+    const alphaTresh = 0
+    while (!reach) {
+      for (let i = 0; i < canvas.width; i++) {
+        if (imageData[top][i][3] > alphaTresh) {
+          console.log(imageData[top][i])
+          reach = true
+          break
+        }
+      }
+      top++
+    }
+    reach = false
+    let bottom = 0
+    while (!reach) {
+      for (let i = 0; i < canvas.width; i++) {
+        if (imageData[canvas.height - bottom - 1][i][3] > alphaTresh) {
+          reach = true
+          break
+        }
+      }
+      bottom++
+    }
+    reach = false
+    let left = 0
+    while (!reach) {
+      for (let j = 0; j < canvas.height; j++) {
+        if (imageData[j][left][3] > alphaTresh) {
+          reach = true
+          break
+        }
+      }
+      left++
+    }
+    reach = false
+    let right = 0
+    while (!reach) {
+      for (let j = 0; j < canvas.height; j++) {
+        if (imageData[j][canvas.width - right - 1][3] > alphaTresh) {
+          reach = true
+          break
+        }
+      }
+      right++
+    }
+    return { right, left, top, bottom }
   }
 
   getOptimizeWin(n: number) {

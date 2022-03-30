@@ -17,7 +17,7 @@ const imgShadowMutations = {
           .styles.shadow.effects, payload)
     }
   },
-  UPDATE_shadowEffectState(state: IEditorState, data: { layerInfo: ILayerInfo, payload: { filterId?: string, currentEffect?: string }}) {
+  UPDATE_shadowEffectState(state: IEditorState, data: { layerInfo: ILayerInfo, payload: { currentEffect?: string }}) {
     const { layerInfo, payload } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {

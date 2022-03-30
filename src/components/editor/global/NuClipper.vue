@@ -59,8 +59,8 @@ export default Vue.extend({
         width,
         height,
         // ...(!this.imgControl && { clipPath }),
-        ...(!this.imgControl && !(this.config.type === 'image' && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
-          .includes(this.config.styles.shadow.currentEffect)) && { clipPath }),
+        // ...(!this.imgControl && !(this.config.type === 'image' && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur]
+        //   .includes(this.config.styles.shadow.currentEffect)) && { clipPath }),
         ...flip
       }
     }
