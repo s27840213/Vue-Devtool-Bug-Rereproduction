@@ -151,6 +151,7 @@ export default Vue.extend({
   text-align: center;
   overflow: hidden;
   user-select: none;
+  text-rendering: geometricPrecision;
 }
 
 // Debug used class, won't be released in production
