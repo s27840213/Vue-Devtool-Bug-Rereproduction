@@ -60,7 +60,7 @@
       "top": -11,
       "left": -77
     }],
-    "align": "row-reverse"
+    "align": "alternately"
   }, {
     "title": "NN0468",
     "description": "NN0469",
@@ -73,7 +73,7 @@
       "top": -32,
       "left": 331
     }],
-    "align": "row"
+    "align": "alternately"
   }, {
     "title": "NN0470",
     "description": "NN0471",
@@ -97,7 +97,21 @@
         "left": 8.65
       }
     ],
-    "align": "row-reverse"
+    "align": "alternately"
+  }, {
+    "title": "NN0478",
+    "description": "NN0479",
+    "img": {
+      "name": "e-commerce.json",
+      "width": 500
+    },
+    "colorBlock": [{
+      "name": "vector_yellow1.svg",
+      "ref": "img",
+      "top": -128,
+      "left": 0
+    }],
+    "align": "alternately"
   }, {
     "comingSoon": true,
     "title": "NN0472",
@@ -112,7 +126,7 @@
       "top": 120,
       "left": 297
     }],
-    "align": "row"
+    "align": "alternately"
   }, {
     "comingSoon": true,
     "title": "NN0474",
@@ -126,7 +140,7 @@
       "top": -64,
       "left": -50
     }],
-    "align": "row-reverse"
+    "align": "alternately"
   }, {
     "title": "NN0476",
     "description": "NN0477",

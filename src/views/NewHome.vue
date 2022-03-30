@@ -64,7 +64,7 @@ import PopupSize from '@/components/popup/PopupSize.vue'
 
 import _ from 'lodash'
 
-import blocklist from '@/assets/json/newHomepageBlock.json'
+import blocklistData from '@/assets/json/newHomepageBlock.json'
 
 export default Vue.extend({
   name: 'Home',
@@ -78,7 +78,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      blocklist,
       showSizePopup: false,
       isTop: true,
       themeList: ['1,2', '3', '8', '6', '5', '7', '9']
@@ -93,6 +92,18 @@ export default Vue.extend({
       isMobile: 'isMobile',
       isLargeDesktop: 'isLargeDesktop'
     }),
+    blocklist(): Record<string, any>[] {
+      const blocklist = blocklistData.filter((item) => {
+        return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
+      })
+      // Set align as row, row-reverse alternately.
+      for (let i = 1; i < blocklist.length; i++) {
+        if (blocklist[i].align === 'alternately') {
+          blocklist[i].align = blocklist[i - 1].align === 'row' ? 'row-reverse' : 'row'
+        }
+      }
+      return blocklist
+    },
     homeTopStyle(): Record<string, string> {
       return {
         'flex-direction': this.isMobile ? 'column' : 'row',
