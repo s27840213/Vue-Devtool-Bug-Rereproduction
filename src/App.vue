@@ -146,7 +146,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   position: relative;
   max-height: 100%;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   overflow: hidden;
