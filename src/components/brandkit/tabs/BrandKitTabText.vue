@@ -160,7 +160,7 @@ export default Vue.extend({
       box-sizing: border-box;
       border-radius: 4px;
       display: grid;
-      grid-template-columns: 150px auto;
+      grid-template-columns: 160px auto;
       align-items: center;
       padding: 10px;
       &:hover {
