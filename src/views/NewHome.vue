@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="home")
-    new-header()
-    div(class="home-content")
+    new-header(:isTop="isTop")
+    div(class="home-content" ref="content" @scroll="onScroll")
       div(class="home-top"
         :style="homeTopStyle")
         div(class="home-top__text")
@@ -44,6 +44,11 @@
       div(v-if="showSizePopup"
         class="home__size-popup")
         popup-size(@close="closeSizePopup()")
+      div(v-if="isMobile"
+        class="home__float-start home-top__buttom rounded btn-primary-sm")
+        router-link(to="/editor"
+          class="home-top__buttom__text btn-LG")
+          span {{$t('NN0391')}}
 </template>
 
 <script lang="ts">
@@ -75,6 +80,7 @@ export default Vue.extend({
     return {
       blocklist,
       showSizePopup: false,
+      isTop: true,
       themeList: ['1,2', '3', '8', '6', '5', '7', '9']
     }
   },
@@ -144,6 +150,9 @@ export default Vue.extend({
     },
     test() { // todo delete
       alert(`window: ${document.body.clientWidth}x${document.body.clientHeight}\nisMobile: ${this.isMobile}\nisLD: ${this.isLargeDesktop}`)
+    },
+    onScroll() {
+      this.isTop = (this.$refs.content as HTMLElement).scrollTop === 0
     }
   }
 })
@@ -219,8 +228,13 @@ export default Vue.extend({
   background-color: #000000a1;
   z-index: setZindex('popup');
 }
+.home__float-start {
+  position: fixed;
+  width: 70%;
+  bottom: 50px;
+}
 @media screen and (max-width: 768px) {
-  .mobile {
+  .mobile { // to-delete
     display: block;
   }
   .tablet, .desktop {

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-header")
+  div(class="nu-header" :class="{'navbar-shadow': !isTop}")
     div(class="nu-header__container")
       div
         router-link(to="/"
@@ -134,7 +134,8 @@ export default Vue.extend({
   props: {
     noSearchbar: Boolean,
     noNavigation: Boolean,
-    showSearchPage: Boolean
+    showSearchPage: Boolean,
+    isTop: Boolean
   },
   data() {
     return {
@@ -404,5 +405,8 @@ export default Vue.extend({
   &-leave-to {
     opacity: 0;
   }
+}
+.navbar-shadow {
+  border-bottom: 1px solid #EEEFF4;
 }
 </style>

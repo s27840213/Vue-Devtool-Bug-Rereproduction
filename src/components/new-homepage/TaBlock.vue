@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import i18n from '@/i18n'
 import Animation from '@/components/Animation.vue'
 
@@ -65,7 +65,8 @@ export default Vue.extend({
       return {
         'align-items': this.content.align === 'column' ? 'center' : 'flex-start',
         'text-align': this.content.align === 'column' && !this.isMobile ? 'center' : 'left',
-        width: this.content.align === 'column' ? '100%' : ''
+        width: (this.content.align === 'column' && !this.isMobile) ? '80%'
+          : this.isMobile ? '327px' : !this.isLargeDesktop ? '360px' : '500px'
       }
     },
     rwdModifier() {
@@ -118,6 +119,7 @@ export default Vue.extend({
 }
 .block-img {
   position: relative;
+  z-index: -2;
 }
 @media screen and (max-width: 768px) {
   .block{
