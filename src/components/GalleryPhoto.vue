@@ -13,6 +13,7 @@
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
     img(:src="previewSrc",
+      crossOrigin="Anonymous"
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
