@@ -24,7 +24,7 @@
           span {{$t(content.link.text)+ ' →'}}
     div(class="block-img")
       animation(
-        :path="`@/assets/img/svg/newHomepage/${locale}/${content.img.name}`"
+        :path="`${dir}/${locale}/${content.img.name}`"
         :width="content.img.width * rwdModifier"
         :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
       img(v-for="cb in content.colorBlock"
@@ -73,6 +73,11 @@ export default Vue.extend({
     },
     locale():string {
       return i18n.locale
+    },
+    dir(): string {
+      return this.content.img.name.endsWith('json')
+        ? '/lottie'
+        : '@/assets/img/svg/newHomepage'
     }
   }
 })
