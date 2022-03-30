@@ -60,9 +60,6 @@ export default Vue.extend({
     textUtils.loadDefaultFonts()
   },
   mounted() {
-    uploadUtils.onFontUploadStatus((status) => {
-      console.log(status)
-    })
     this.refreshFontUrls()
   },
   components: {
