@@ -1,6 +1,6 @@
 <template lang="pug">
 div(style="position: relative;")
-  div(class="login-wrapper")
+  div(class="login-wrapper popup-window")
     div(v-if="currentPageIndex === 0"
       class="login login-p0")
       div
@@ -567,17 +567,17 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.login-wrapper {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: #000000a1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+// .login-wrapper {
+  // position: fixed;
+  // top: 0;
+  // right: 0;
+  // bottom: 0;
+  // left: 0;
+  // background-color: #000000a1;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
+// }
 .login {
   position: relative;
   margin: 0 auto;

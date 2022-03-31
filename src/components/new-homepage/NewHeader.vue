@@ -95,7 +95,7 @@
       //-     @click.native="closeSearchPage")
     slot
     div(v-if="isShowMenu"
-        class="nu-header__menu")
+        class="nu-header__menu popup-window")
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
           v-click-outside="() => { isShowMenu = false }")
     div(v-if="isShowSearchPage"
@@ -385,15 +385,16 @@ export default Vue.extend({
     width: 250px;
   }
   &__menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    background-color: #000000a1;
-    z-index: 999999;
+    justify-content: flex-start;
+    // position: fixed;
+    // top: 0;
+    // left: 0;
+    // width: 100vw;
+    // height: 100vh;
+    // display: flex;
+    // align-items: center;
+    // background-color: #000000a1;
+    // z-index: 999999;
   }
 }
 .fade {

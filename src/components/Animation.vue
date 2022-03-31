@@ -87,7 +87,6 @@ export default Vue.extend({
         hideOnTransparent: true
       },
       anim: null as any,
-      style: null as any,
       time: 0 as number
     }
   },
@@ -106,7 +105,7 @@ export default Vue.extend({
     isMp4():boolean {
       return this.path.endsWith('.mp4')
     },
-    lottieStyle() {
+    lottieStyle():Record<string, string> {
       return {
         width: (this.width !== -1) ? `${this.width}px` : '100%',
         height: (this.height !== -1) ? `${this.height}px` : '100%',
@@ -146,7 +145,7 @@ export default Vue.extend({
         this.anim.destroy() // Releases resources. The DOM element will be emptied.
       }
       this.anim = lottie.loadAnimation({
-        container: this.$refs.lavContainer as any, // ??
+        container: this.$refs.lavContainer as HTMLElement,
         renderer: 'svg',
         loop: this.loop,
         autoplay: this.autoPlay,

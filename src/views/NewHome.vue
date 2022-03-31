@@ -32,7 +32,7 @@
           :content="item")
       nu-footer(:isHome="true")
       div(v-if="showSizePopup"
-        class="home__size-popup")
+        class="popup-window")
         popup-size(@close="closeSizePopup()")
       div(v-if="isMobile"
         class="home__float-start home-top__buttom rounded btn-primary-sm")
@@ -51,9 +51,7 @@ import ScrollList from '@/components/new-homepage/ScrollList.vue'
 import TaBlock from '@/components/new-homepage/TaBlock.vue'
 import NuFooter from '@/components/new-homepage/NuFooter.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
-
 import _ from 'lodash'
-
 import blocklistData from '@/assets/json/newHomepageBlock.json'
 
 export default Vue.extend({
@@ -119,7 +117,7 @@ export default Vue.extend({
       isMobile: 'isMobile',
       isLargeDesktop: 'isLargeDesktop'
     }),
-    blocklist(): Record<string, any>[] {
+    blocklist(): typeof blocklistData { // legal??
       const blocklist = blocklistData.filter((item) => {
         return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
       })
@@ -225,7 +223,6 @@ export default Vue.extend({
     flex-direction: column;
     align-items: flex-start;
     position: relative;
-    white-space: pre;
   }
   &__underline{
     position: absolute;
@@ -246,18 +243,18 @@ export default Vue.extend({
     }
   }
 }
-.home__size-popup { // 有屬於popup的scss嗎？ 開一個新的？
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #000000a1;
-  z-index: setZindex('popup');
-}
+// .home__size-popup { // 有屬於popup的scss嗎？ 開一個新的？
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   width: 100vw;
+//   height: 100vh;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   background-color: #000000a1;
+//   z-index: setZindex('popup');
+// }
 .home__float-start {
   position: fixed;
   width: 70%;
