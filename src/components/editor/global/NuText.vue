@@ -52,6 +52,7 @@ export default Vue.extend({
     subLayerIndex: Number
   },
   data() {
+    const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
@@ -59,7 +60,7 @@ export default Vue.extend({
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
-        widthLimit: this.config.widthLimit
+        widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       }
     }
   },
