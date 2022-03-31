@@ -27,7 +27,7 @@
       "to": "/templates"
     },
     "img": {
-      "name": "bussiness.json",
+      "name": "business.json",
       "width": 500
     },
     "colorBlock": [
@@ -37,8 +37,8 @@
         "left": -96
       }, {
         "name": "oval_orange1.svg",
-        "top": 1.79,
-        "left": 9.21
+        "top": -107,
+        "left": -96
       }, {
         "name": "oval_pink2.svg",
         "ref": "img",
@@ -52,7 +52,7 @@
     "description": "NN0467",
     "img": {
       "name": "bundle.json",
-      "width": 520
+      "width": 500
     },
     "colorBlock": [{
       "name": "vector_blue1.svg",

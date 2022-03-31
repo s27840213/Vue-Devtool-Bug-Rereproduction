@@ -1,42 +1,38 @@
 <template lang="pug">
-  div(class="home")
+  div(class="home" :style="homeStyle")
     new-header(:isTop="isTop")
     div(class="home-content" ref="content" @scroll="onScroll")
-      div(class="home-top"
-        :style="homeTopStyle")
+      div(class="home-top" :style="homeTopStyle")
         div(class="home-top__text")
           i18n(:path="'NN0460'" tag="span")
             template(#newline)
               br
-          div(class="home-top__underline"
-            :style="unterlineStyle")
-          img(class="home-top__dot"
-            src="@/assets/img/svg/newHomepage/dot-and-cursor.svg"
-            :style="dotStyle")
+          div(class="home-top__underline" :style="unterlineStyle")
+          img(class="home-top__dot" :style="dotStyle"
+            src="@/assets/img/svg/newHomepage/dot-and-cursor.svg" )
           div(v-if="!isMobile"
             class="home-top__buttom rounded btn-primary-sm")
             router-link(to="/editor"
               class="home-top__buttom__text btn-LG")
               span {{$t('NN0391')}}
-          div(class="home-top__buttom rounded btn-primary-sm"
-            @click="test()")
+          div(class="home-top__buttom rounded btn-primary-sm" @click="test()")
             span(class="home-top__buttom__text btn-LG") test：
             span(class="mobile") mobile
             span(class="tablet") tablet
             span(class="desktop") desktop
-        animation(class="home-top__video"
-          path='@/assets/img/svg/newHomepage/demo.mp4'
-          :width="isLargeDesktop ? 656 : 327")
-          //- need control? loop?
+        iframe(title="Vivipic"
+          :src="`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}`"
+          frameborder="0"
+          :width="isLargeDesktop ? 656 : 327"
+          :height="isLargeDesktop ? 369 : 184"
+          allowfullscreen)
       scroll-list(v-if="!isMobile || isLogin"
-        type="theme"
-        @openSizePopup="openSizePopup()")
+        type="theme" @openSizePopup="openSizePopup()")
       scroll-list(v-if="isLogin"
         type="mydesign")
       scroll-list(v-if="isLogin"
         v-for="theme in themeList"
-        :theme="theme"
-        type="template")
+        :theme="theme" type="template")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -92,6 +88,11 @@ export default Vue.extend({
       isMobile: 'isMobile',
       isLargeDesktop: 'isLargeDesktop'
     }),
+    ytId() {
+      return i18n.locale === 'us' ? 'iNvcKkFIdQc'
+        : i18n.locale === 'jp' ? 'iNvcKkFIdQc'
+          : i18n.locale === 'tw' ? 'iNvcKkFIdQc' : 'iNvcKkFIdQc'
+    },
     blocklist(): Record<string, any>[] {
       const blocklist = blocklistData.filter((item) => {
         return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
@@ -103,6 +104,9 @@ export default Vue.extend({
         }
       }
       return blocklist
+    },
+    homeStyle(): Record<string, string> {
+      return i18n.locale === 'us' ? { 'font-family': 'Poppins' } : { 'font-family': 'NOTO SANS TC' }
     },
     homeTopStyle(): Record<string, string> {
       return {
@@ -174,9 +178,6 @@ export default Vue.extend({
   position: relative;
   width: 100%;
   height: 100%;
-  font-family: Poppins;
-  // white-space: pre;
-  // word-wrap: break-word;
   text-align: left;
 }
 .home-content {
@@ -184,7 +185,6 @@ export default Vue.extend({
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  // overflow-x: scroll;
   overflow-y: scroll;
   height: calc(100% - 50px); // why 50?(gary)
 }
@@ -235,7 +235,7 @@ export default Vue.extend({
 .home__float-start {
   position: fixed;
   width: 70%;
-  bottom: 50px;
+  bottom: 40px;
 }
 @media screen and (max-width: 768px) {
   .mobile { // to-delete
@@ -261,7 +261,7 @@ export default Vue.extend({
   .home-top {
     min-height: 366px;
     &__text {
-      @include text-H1
+      @include text-H2
     }
   }
 }

@@ -87,7 +87,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .block {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   &__colorBlock {
     position: absolute;
