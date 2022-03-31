@@ -1000,7 +1000,7 @@ class TextUtils {
         minDiff = currDiff
         minDiffWidLimit = widthLimit
       }
-      console.log(autoDimension, originDimension, currDiff, prevDiff, widthLimit)
+      // console.log(autoDimension, originDimension, currDiff, prevDiff, widthLimit)
       if (currDiff > prevDiff) {
         if (prevWidthLimit !== -1) {
           return prevWidthLimit
