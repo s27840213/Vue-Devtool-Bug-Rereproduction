@@ -74,7 +74,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapActions, mapState, mapMutations, mapGetters } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
@@ -87,6 +87,7 @@ import themeUtils from '@/utils/themeUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
 import _ from 'lodash'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -146,9 +147,9 @@ export default Vue.extend({
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(300, 200, 10)
+        galleryUtils = new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 200, 10)
       } else {
-        galleryUtils = new GalleryUtils(300, 140, 10)
+        galleryUtils = new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 140, 10)
       }
       const idContainerHeight = this.showTemplateId ? 24 : 0
       const result = galleryUtils

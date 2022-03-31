@@ -1,12 +1,13 @@
 <template lang="pug">
   div(class="footer-tabs")
-    div(class="footer-tabs__item" v-for="(item, index) in navItem"
-        @click="handleItemAction(item, index)")
+    div(class="footer-tabs__item" v-for="(item, index) in tabItem"
+        @click="handleItemAction(item.type)")
       svg-icon(class="mb-5"
         :iconName="item.icon"
-        :iconColor="currAcitveTab === index ? 'blue-1' :'white'"
+        :iconColor="currTab ===  item.type ? 'blue-1' :'white'"
         :iconWidth="'20px'")
-      span(class="text-white text-body-4 no-wrap") {{item.text}}
+      span(class="text-body-4 no-wrap"
+      :class="(currTab ===  item.type ) ? 'text-blue-1' : 'text-white'") {{item.text}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -15,28 +16,32 @@ export default Vue.extend({
   components: {
   },
   props: {
+    currTab: {
+      default: 'none',
+      type: String
+    }
   },
   data() {
     return {
-      currAcitveTab: -1
+      currAcitvePanel: -1
     }
   },
   computed: {
-    navItem(type?: string): Array<{ icon: string, text: string }> {
+    tabItem(type?: string): Array<{ icon: string, text: string, type: string }> {
       return [
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}` },
-        { icon: 'photo', text: `${this.$tc('NN0002', 2)}` },
-        { icon: 'shape', text: `${this.$tc('NN0003', 2)}` },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
-        { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
-        { icon: 'upload', text: `${this.$tc('NN0006')}` }
-        // { icon: 'brand', text: `${this.$t('NN0007')}` }
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, type: 'panel-template' },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, type: 'panel-photo' },
+        { icon: 'shape', text: `${this.$tc('NN0003', 2)}`, type: 'panel-object' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, type: 'panel-background' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, type: 'panel-text' },
+        { icon: 'upload', text: `${this.$tc('NN0006')}`, type: 'panel-file' }
+        // { type: 'brand', text: `${this.$t('NN0007')}` }
       ]
     }
   },
   methods: {
-    handleItemEvent(item: { icon: string, text: string, action: () => void }, index: number) {
-      this.currAcitveTab = index
+    handleItemAction(type: string) {
+      this.$emit('switchTab', type)
     }
   }
 })

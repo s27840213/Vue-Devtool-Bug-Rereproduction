@@ -44,6 +44,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -53,7 +54,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      galleryUtils: new GalleryUtils(300, 75, 5),
+      galleryUtils: new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 75, 5),
       online: true,
       scrollTop: 0
     }
@@ -83,11 +84,11 @@ export default Vue.extend({
       return this.checkedAssets.length !== 0
     }
   },
-  mounted () {
+  mounted() {
     (this.$refs.gallery as any).myfileUpdate()
   },
   watch: {
-    myfileImages (curr, prev) {
+    myfileImages(curr, prev) {
       if (curr.length && !prev.length && this.$refs.gallery) {
         const myfileImages = (this.$refs.gallery as Vue).$el.children[0]
         myfileImages.addEventListener('scroll', (event: Event) => {

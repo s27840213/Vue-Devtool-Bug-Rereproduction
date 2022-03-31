@@ -1,5 +1,9 @@
 <template lang="pug">
   div(class="header-bar")
+    svg-icon(class="nu-footer__feature-icon"
+      :iconName="'chevron-left'"
+      :iconColor="'white'"
+      :iconWidth="'15px'")
 </template>
 <script lang="ts">
 import Vue from 'vue'

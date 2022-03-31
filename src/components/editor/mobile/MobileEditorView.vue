@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="scrollbar-gray editor-view"
+  div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @mousedown.left="!inBgRemoveMode ? selectStart($event) : null"
@@ -496,8 +496,8 @@ $REULER_SIZE: 20px;
   position: relative;
   z-index: setZindex("editor-view");
   @include size(100%, 100%);
-  // height: 100%;
-  // @include no-scrollbar;
+  @include no-scrollbar;
+
   &__grid {
     position: absolute;
     min-width: 100%;

@@ -63,6 +63,7 @@ Vue.directive('ratio-change', {
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
+// console.log(requireAll(req).map((item: any) => item.default.id))
 requireAll(req)
 
 // add temporarily for testing

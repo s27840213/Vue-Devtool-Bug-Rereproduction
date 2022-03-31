@@ -1,11 +1,13 @@
 <template lang="pug">
-  div(class="editor")
-    header-tabs
-    div(class="editor__content")
-        mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
-            //- div(class="content__panel" :style="panelStyles()")
-            //-   mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
-    footer-tabs
+  div(class="mobile-editor")
+    div(class="mobile-editor__top")
+      header-tabs
+      div(class="mobile-editor__content")
+          mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
+              //- div(class="content__panel" :style="panelStyles()")
+              //-   mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
+      mobile-panel(v-if="currActivePanel !== 'none'" :currActivePanel="currActivePanel")
+    footer-tabs(@switchTab="switchTab" :currTab="currActivePanel")
     //- mobile-sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
     //-   @toggleSidebarPanel="toggleSidebarPanel")
     //- section(style="height: 100%;")
@@ -23,6 +25,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
+import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
@@ -39,6 +42,7 @@ export default Vue.extend({
   name: 'MobileEditor',
   components: {
     MobileEditorView,
+    MobilePanel,
     HeaderTabs,
     MobilePanelTextSetting,
     FooterTabs
@@ -49,13 +53,9 @@ export default Vue.extend({
       isColorPanelOpen: false,
       isConfigPanelOpen: false,
       isLoading: false,
-      isSaving: false
+      isSaving: false,
+      currActivePanel: 'none'
       // isSidebarPanelOpen: false
-    }
-  },
-  watch: {
-    isShowPagePreview() {
-      this.toggleSidebarPanel = this.isShowPagePreview
     }
   },
   computed: {
@@ -94,7 +94,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
         return layer.type
       })
       return new Set(types)
@@ -136,32 +136,33 @@ export default Vue.extend({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       _setAdminMode: 'user/SET_ADMIN_MODE'
     }),
-    panelStyles() {
-      return this.isConfigPanelOpen ? { height: '200px' } : { height: '75px' }
-    },
-    setAdminMode() {
-      this._setAdminMode(!this.adminMode)
-    },
-    toggleColorPanel(bool: boolean) {
-      this.isColorPanelOpen = bool
-    },
-    toggleSidebarPanel(bool: boolean) {
-      this.setMobileSidebarPanelOpen(bool)
-    },
-    toggleConfigPanel(bool: boolean) {
-      this.isConfigPanelOpen = bool
+    switchTab(panelType: string) {
+      if (this.currActivePanel === panelType) {
+        this.currActivePanel = 'none'
+      } else {
+        this.currActivePanel = panelType
+      }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.editor {
+.mobile-editor {
   @include size(100%, 100%);
-  max-height: 100%;
+  height: 100%;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: 1fr auto;
   grid-template-columns: 1fr;
+
+  &__top {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto minmax(auto, 1fr);
+    grid-template-columns: 1fr;
+  }
 
   &__content {
     height: 100%;
