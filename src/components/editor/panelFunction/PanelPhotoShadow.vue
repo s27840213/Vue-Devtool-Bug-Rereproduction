@@ -163,31 +163,36 @@ export default Vue.extend({
     const layerData = imageShadowUtils.layerData
     if (layerData) {
       const { config, img } = layerData
-      const { width, height } = config.styles
+      const { width, height, imgWidth, imgHeight, x, y } = config.styles
       const updateCanvas = document.createElement('canvas')
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
       updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
       imageShadowUtils.draw(updateCanvas, img, config, height, 0)
 
-      const ctx = updateCanvas.getContext('2d') as CanvasRenderingContext2D
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
+      const imgHeightInCanvas = height
+      const imgWidthInCanvas = width
+      const leftShadowThickness = (updateCanvas.width - imgWidthInCanvas) * 0.5 - left
+      const topShadowThickness = (updateCanvas.height - imgHeightInCanvas) * 0.5 - top
+      const newWidth = updateCanvas.width - right - left
+      const newHeight = updateCanvas.height - top - bottom
 
-      console.log('top', top, 'right', right, 'bottom', bottom, 'left', left)
+      const uploadCanvas = document.createElement('canvas')
+      uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
+      uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
+      const ctx = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
 
-      // const uploadCanvas = document.createElement('canvas')
-      // const uploadCtx = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
       const drawnImg = new Image()
       drawnImg.src = updateCanvas.toDataURL('image/png;base64')
       await new Promise<void>((resolve) => {
         drawnImg.onload = () => {
-          ctx.clearRect(0, 0, updateCanvas.width, updateCanvas.height)
-          ctx.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, updateCanvas.width, updateCanvas.height)
+          ctx.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
           resolve()
         }
       })
 
-      uploadUtils.uploadAsset('image', [updateCanvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
+      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
         const srcObj = {
           type: this.isAdmin ? 'public' : 'private',
           userId: json.data.team_id,
@@ -197,7 +202,17 @@ export default Vue.extend({
         const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
         if (pageIndex !== -1 && layerIndex !== -1) {
           layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
-          console.log(imageUtils.getSrc(layerUtils.getLayer(pageIndex, layerIndex) as IImage))
+          layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+            width: newWidth,
+            height: newHeight,
+            imgWidth: newWidth,
+            imgHeight: newHeight,
+            initWidth: newWidth,
+            initHeight: newHeight,
+            x: x - leftShadowThickness,
+            y: y - topShadowThickness,
+            scale: 1
+          })
           this.resetAll(pageIndex, layerIndex)
         }
       })
