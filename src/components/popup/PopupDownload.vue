@@ -119,12 +119,12 @@
             iconColor="white"
             iconWidth="20px")
           span(v-else) {{$t('NN0010')}}
-      template(v-if="isAdmin")
+      template(v-if="isAdmin || onRd")
         hr(class="popup-download__hr my-15")
-        div(class="dev-selector")
-          span(class="body-3") dev
-          select(class="body-3 rounded" v-model="selectedDev")
-            option(v-for="dev in devs" :value="dev") {{ dev }}
+        div(class="dev-selector mb-10")
+          dropdown(class="body-3 full-width"
+                  :options="devs"
+                  @select="handleDevSelect") {{ selectedDevLabel }}
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
@@ -134,7 +134,7 @@
               iconName="loading"
               iconColor="white"
               iconWidth="20px")
-            span(v-else) 下載 (測試 bucket)
+            span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
 </template>
 
 <script lang="ts">
@@ -206,8 +206,17 @@ export default Vue.extend({
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
       ] as ITypeOption[],
-      selectedDev: 0,
-      devs: [0, 1, 2, 3, 4, 5]
+      selectedDev: 1,
+      devs: [
+        { value: 1, label: 'dev0' },
+        { value: 2, label: 'dev1' },
+        { value: 3, label: 'dev2' },
+        { value: 4, label: 'dev3' },
+        { value: 5, label: 'dev4' },
+        { value: 6, label: 'dev5' },
+        { value: 999, label: 'rd' }
+      ],
+      onRd: window.location.hostname === 'rd.vivipic.com'
     }
   },
   computed: {
@@ -240,6 +249,10 @@ export default Vue.extend({
     detailPageOptionLabel(): string {
       const { selectedDetailPage, detailPageDownloadOptions = [] } = this
       return detailPageDownloadOptions.find(option => option.value === selectedDetailPage.option)?.label ?? ''
+    },
+    selectedDevLabel(): string {
+      const { selectedDev, devs } = this
+      return devs.find(option => option.value === selectedDev)?.label ?? ''
     }
   },
   mounted() {
@@ -275,7 +288,7 @@ export default Vue.extend({
             this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.query, { export_ids: this.exportIds }) })
             uploadUtils.uploadDesign()
           } else {
-            this.$notify({ group: 'error', text: `設計上傳失敗，請重新點擊下載 (status: ${status})` })
+            this.$notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
             this.$emit('close')
           }
         })
@@ -297,6 +310,9 @@ export default Vue.extend({
     },
     handleDetailPageIsLimited(data: { [key: string]: any }) {
       this.selectedDetailPage.noLimit = data.value === 'no-limit'
+    },
+    handleDevSelect(data: { value: number }) {
+      this.selectedDev = data.value
     },
     handleMaxHeight(e: Event) {
       const value = +(e.target as HTMLInputElement).value
@@ -367,7 +383,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, (this.isAdmin && useDev) ? this.selectedDev : -1)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.selectedDev : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
@@ -383,7 +399,7 @@ export default Vue.extend({
           break
         case 1:
           console.log(response)
-          this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
+          this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
           this.$emit('close')
           break
         case 2:
@@ -477,11 +493,6 @@ export default Vue.extend({
   }
   .dev-selector {
     display: flex;
-    padding: 5px;
-    margin-bottom: 10px;
-    & > select {
-      width: fit-content;
-    }
   }
 }
 </style>

@@ -149,10 +149,11 @@ class StepsUtils {
   }
 
   fillLoadingSize(layer: IText): IText {
+    const dimension = layer.styles.writingMode.includes('vertical') ? layer.styles.height : layer.styles.width
     const initSize = {
       width: layer.styles.width,
       height: layer.styles.height,
-      widthLimit: layer.widthLimit
+      widthLimit: layer.widthLimit === -1 ? -1 : dimension
     }
     layer.widthLimit = textUtils.autoResize(layer, initSize)
     return layer

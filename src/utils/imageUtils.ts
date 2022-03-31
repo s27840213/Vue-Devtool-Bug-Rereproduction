@@ -7,6 +7,8 @@ import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import generalUtils from './generalUtils'
+
+const FORCE_UPDATE_VER = '&ver=033020221655'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -31,7 +33,7 @@ class ImageUtils {
 
   getSrc(config: IImage, size?: string | number): string {
     if (config.previewSrc) {
-      return config.previewSrc
+      return config.previewSrc + FORCE_UPDATE_VER
     }
 
     const { type, userId, assetId } = config.srcObj || config.src_obj || {}
@@ -44,17 +46,17 @@ class ImageUtils {
     }
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true` + FORCE_UPDATE_VER
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' : ''
+        return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}&origin=true`
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}&origin=true`
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/full?origin=true`
+        return `https://template.vivipic.com/background/${assetId}/full?origin=true` + FORCE_UPDATE_VER
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       default:
@@ -338,6 +340,7 @@ class ImageUtils {
   async getImageSize(url: string, defaultWidth: number, defaultHeight: number): Promise<{ width: number; height: number, exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image()
+      image.setAttribute('crossOrigin', 'Anonymous')
       image.onload = () => resolve(image)
       image.onerror = () => reject(new Error('Could not load image'))
       image.src = url
