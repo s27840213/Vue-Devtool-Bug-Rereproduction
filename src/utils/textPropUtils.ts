@@ -160,6 +160,7 @@ class TextPropUtils {
         }
         p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
       }
+      const paragraphStyles = p.styles
       for (const span of p.spans) {
         spanHandler && spanHandler(span)
         if (isVertical && span.styles.style === 'italic') {
@@ -168,6 +169,12 @@ class TextPropUtils {
         if (isVertical && span.styles.decoration === 'underline') {
           span.styles.decoration = 'none'
         }
+        span.styles.font = paragraphStyles.font as string
+        span.styles.type = paragraphStyles.type as string
+        span.styles.userId = paragraphStyles.userId as string
+        span.styles.assetId = paragraphStyles.assetId as string
+        span.styles.fontUrl = paragraphStyles.fontUrl as string
+        span.styles.size = paragraphStyles.size
       }
     })
   }

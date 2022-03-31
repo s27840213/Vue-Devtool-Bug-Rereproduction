@@ -258,37 +258,42 @@ class LayerFactary {
         }
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
+      const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
       textPropUtils.removeInvalidStyles(config.paragraphs, isVertical,
         (paragraph) => {
-          if (!paragraph.styles.font || paragraph.styles.font === 'undefined') {
-            if (paragraph.spans.length > 0 && paragraph.spans[0].styles.font) {
-              const firstSpanStyles = paragraph.spans[0].styles
+          if (paragraph.spans.length > 0) {
+            const firstSpanStyles = paragraph.spans[0].styles
+            if (firstSpanStyles.font) {
               paragraph.styles.font = firstSpanStyles.font
               paragraph.styles.type = firstSpanStyles.type
               paragraph.styles.userId = firstSpanStyles.userId
               paragraph.styles.assetId = firstSpanStyles.assetId
               paragraph.styles.fontUrl = firstSpanStyles.fontUrl
-            } else if (paragraph.styles.spanStyle) {
-              const spanStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraph.styles.spanStyle as string))
-              paragraph.styles.font = spanStyles.font
-              paragraph.styles.type = spanStyles.type
-              paragraph.styles.userId = spanStyles.userId
-              paragraph.styles.assetId = spanStyles.assetId
-              paragraph.styles.fontUrl = spanStyles.fontUrl
-            } else if (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) {
-              const standardFont = STANDARD_TEXT_FONT[localeUtils.currLocale()]
-              paragraph.styles.font = standardFont
-              paragraph.styles.type = 'public'
-            } else { // should never happen, just in case
-              paragraph.styles.font = STANDARD_TEXT_FONT.tw
+            } else {
+              paragraph.styles.font = defaultFont
               paragraph.styles.type = 'public'
             }
+            paragraph.styles.size = firstSpanStyles.size
+            if (paragraph.styles.spanStyle) {
+              delete paragraph.styles.spanStyle
+            }
+          } else if (paragraph.styles.spanStyle) {
+            const spanStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraph.styles.spanStyle as string))
+            paragraph.styles.font = spanStyles.font
+            paragraph.styles.type = spanStyles.type
+            paragraph.styles.userId = spanStyles.userId
+            paragraph.styles.assetId = spanStyles.assetId
+            paragraph.styles.fontUrl = spanStyles.fontUrl
+            paragraph.styles.size = spanStyles.size
+          } else {
+            paragraph.styles.font = defaultFont
+            paragraph.styles.type = 'public'
           }
         },
         (span) => {
           if (!span.styles.font) {
-            Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-              (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+            span.styles.font = defaultFont
+            span.styles.type = 'public'
           }
         }
       )
