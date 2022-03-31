@@ -243,18 +243,6 @@ export default Vue.extend({
     }
   }
 }
-// .home__size-popup { // 有屬於popup的scss嗎？ 開一個新的？
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   width: 100vw;
-//   height: 100vh;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   background-color: #000000a1;
-//   z-index: setZindex('popup');
-// }
 .home__float-start {
   position: fixed;
   width: 70%;
