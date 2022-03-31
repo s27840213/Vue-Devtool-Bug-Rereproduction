@@ -98,14 +98,13 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   max-width: 700px;
+  position: -webkit-sticky; // For safari < 13
+  position: relative;
   &__coming_soon {
     padding: 4px;
     color: white;
     background: #FFBA49;
     border-radius: 4px;
-  }
-  &__title {
-    position: relative;
   }
   &__link {
     a {
@@ -118,6 +117,7 @@ export default Vue.extend({
   }
 }
 .block-img {
+  position: -webkit-sticky; // For safari < 13
   position: relative;
   // z-index: -2;
 }
@@ -147,6 +147,7 @@ export default Vue.extend({
     &__description {
       @include body-LG;
     }
+    margin-bottom: 10px;
   }
 }
 @media screen and (min-width: 1440.02px) {

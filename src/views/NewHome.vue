@@ -15,17 +15,11 @@
             router-link(to="/editor"
               class="home-top__buttom__text btn-LG")
               span {{$t('NN0391')}}
-          div(class="home-top__buttom rounded btn-primary-sm" @click="test()")
-            span(class="home-top__buttom__text btn-LG") test：
-            span(class="mobile") mobile
-            span(class="tablet") tablet
-            span(class="desktop") desktop
         iframe(title="Vivipic"
           :src="`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}`"
-          frameborder="0"
+          frameborder="0" allowfullscreen
           :width="isLargeDesktop ? 656 : 327"
-          :height="isLargeDesktop ? 369 : 184"
-          allowfullscreen)
+          :height="isLargeDesktop ? 369 : 184")
       scroll-list(v-if="!isMobile || isLogin"
         type="theme" @openSizePopup="openSizePopup()")
       scroll-list(v-if="isLogin"
@@ -79,7 +73,44 @@ export default Vue.extend({
       themeList: ['1,2', '3', '8', '6', '5', '7', '9']
     }
   },
-  // need meta info?
+  metaInfo() {
+    return {
+      title: `${this.$t('SE0001')}`,
+      meta: [{
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'og:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'og:title'
+      }, {
+        property: 'og:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'og:image'
+      }, {
+        name: 'description',
+        content: `${this.$t('SE0002')}`,
+        vmid: 'description'
+      }, {
+        property: 'twitter:title',
+        content: `${this.$t('OG0001')}`,
+        vmid: 'twitter:title'
+      }, {
+        property: 'twitter:image',
+        content: `${this.$t('OG0003')}`,
+        vmid: 'twitter:image'
+      }, {
+        property: 'twitter:description',
+        content: `${this.$t('OG0002')}`,
+        vmid: 'twitter:description'
+      }, {
+        property: 'og:url',
+        content: `${this.$t('OG0005')}`,
+        vmid: 'og:url'
+      }]
+    }
+  },
   computed: {
     ...mapGetters({
       isLogin: 'user/isLogin'
@@ -88,11 +119,6 @@ export default Vue.extend({
       isMobile: 'isMobile',
       isLargeDesktop: 'isLargeDesktop'
     }),
-    ytId() {
-      return i18n.locale === 'us' ? 'iNvcKkFIdQc'
-        : i18n.locale === 'jp' ? 'iNvcKkFIdQc'
-          : i18n.locale === 'tw' ? 'iNvcKkFIdQc' : 'iNvcKkFIdQc'
-    },
     blocklist(): Record<string, any>[] {
       const blocklist = blocklistData.filter((item) => {
         return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
@@ -104,6 +130,11 @@ export default Vue.extend({
         }
       }
       return blocklist
+    },
+    ytId() {
+      return i18n.locale === 'us' ? 'iNvcKkFIdQc'
+        : i18n.locale === 'jp' ? 'iNvcKkFIdQc'
+          : i18n.locale === 'tw' ? 'Rj-hsax9v1E' : 'iNvcKkFIdQc'
     },
     homeStyle(): Record<string, string> {
       return i18n.locale === 'us' ? { 'font-family': 'Poppins' } : { 'font-family': 'NOTO SANS TC' }
@@ -163,9 +194,6 @@ export default Vue.extend({
     closeSizePopup() {
       this.showSizePopup = false
     },
-    test() { // todo delete
-      alert(`window: ${document.body.clientWidth}x${document.body.clientHeight}\nisMobile: ${this.isMobile}\nisLD: ${this.isLargeDesktop}`)
-    },
     onScroll() {
       this.isTop = (this.$refs.content as HTMLElement).scrollTop === 0
     }
@@ -192,8 +220,6 @@ export default Vue.extend({
   display: flex;
   justify-content: space-around;
   align-items: center;
-  // width: 80%;
-  // min-height: 566px; // not work
   &__text{
     display: flex;
     flex-direction: column;
@@ -203,7 +229,7 @@ export default Vue.extend({
   }
   &__underline{
     position: absolute;
-    z-index: -1; // find better way
+    z-index: -1;
     background-color: setColor(blue-1)
   }
   &__dot{
@@ -238,12 +264,6 @@ export default Vue.extend({
   bottom: 40px;
 }
 @media screen and (max-width: 768px) {
-  .mobile { // to-delete
-    display: block;
-  }
-  .tablet, .desktop {
-    display: none;
-  }
   .home-top {
     min-height: 437px;
     &__text {
@@ -252,12 +272,6 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
-  .tablet {
-    display: block;
-  }
-  .mobile, .desktop {
-    display: none;
-  }
   .home-top {
     min-height: 366px;
     &__text {
@@ -266,12 +280,6 @@ export default Vue.extend({
   }
 }
 @media screen and (min-width: 1440.02px) {
-  .desktop {
-    display: block;
-  }
-  .tablet, .mobile {
-    display: none;
-  }
   .home-top {
     min-height: 566px;
     &__text {
@@ -279,9 +287,4 @@ export default Vue.extend({
     }
   }
 }
-// @media screen and (max-width: 1023px) {
-//   .isComputer {
-//     display: none;
-//   }
-// }
 </style>

@@ -135,22 +135,12 @@ export default Vue.extend({
         })
       }
     },
-    async waitMe():Promise<void> { // to delete
-      console.log('start')
-      return new Promise<void>(resolve =>
-        setTimeout(() => resolve(), 2000)
-      )
-    },
     async init() {
       if (!this.isJSON) {
         return
       }
 
       const jsonData = await this.loadJsonData(this.path)
-
-      // await this.waitMe()
-      // const jsonData = this.test
-      // console.log('test', jsonData, jsonData.assets[0], jsonData.assets[0].id)
 
       if (this.anim) {
         this.anim.destroy() // Releases resources. The DOM element will be emptied.
@@ -185,7 +175,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    src: function(newVal, oldVal) {
+    src: function() {
       this.init()
     }
   }
