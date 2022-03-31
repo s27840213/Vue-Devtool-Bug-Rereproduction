@@ -111,9 +111,19 @@ export default Vue.extend({
         }
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
+        const updateItem = {
+          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          fontUrl: this.item.fontUrl ?? '',
+          userId: this.item.userId ?? '',
+          assetId: this.item.assetId ?? '',
+          font: this.item.id
+        }
+
         await this.$store.dispatch('text/addFont', {
-          type: 'public',
-          url: '',
+          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          url: this.item.fontUrl,
+          userId: this.item.userId,
+          assetId: this.item.assetId,
           face: this.item.id,
           ver: this.item.ver
         })
@@ -129,7 +139,7 @@ export default Vue.extend({
         }
 
         if (['tmp', 'group'].includes(type) && !contentEditable && currLayerIndex !== -1) {
-          TextPropUtils.applyPropsToAll('span', { font: this.item.id }, currLayerIndex, subLayerIdx)
+          TextPropUtils.applyPropsToAll('span', updateItem, currLayerIndex, subLayerIdx)
           tiptapUtils.updateHtml()
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           this.$nextTick(() => {
@@ -144,7 +154,7 @@ export default Vue.extend({
             }
           })
 
-          AssetUtils.addAssetToRecentlyUsed(this.item)
+          AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
           StepsUtils.record()
           TextPropUtils.updateTextPropsState({ font: this.item.id })
           return
@@ -152,7 +162,11 @@ export default Vue.extend({
 
         const currLayer = layerUtils.getCurrLayer
         if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
-          const newConfig = TextPropUtils.spanPropertyHandler('font', { font: this.item.id }, start, end, config as IText)
+          // if (!sel) {
+          //   Object.assign(start, TextUtils.selectAll(config).start)
+          //   Object.assign(end, TextUtils.selectAll(config).end)
+          // }
+          const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
             tiptapUtils.updateHtml(newConfig.paragraphs)
@@ -170,10 +184,10 @@ export default Vue.extend({
            */
           const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
           if (start.sIndex === 0 && !config.paragraphs[start.pIndex].spans[start.sIndex].text) {
-            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraphs[start.pIndex].spanStyle as string))
-            sStyles.font = this.item.id
-            paragraphs[start.pIndex].spans[start.sIndex].styles.font = this.item.id
-            paragraphs[start.pIndex].styles.font = this.item.id
+            const sStyles = tiptapUtils.generateSpanStyle(paragraphs[start.pIndex].spanStyle as string)
+            Object.assign(sStyles, updateItem)
+            Object.assign(paragraphs[start.pIndex].spans[start.sIndex].styles, updateItem)
+            Object.assign(paragraphs[start.pIndex].styles, updateItem)
             paragraphs[start.pIndex].spanStyle = tiptapUtils.textStyles(sStyles)
             this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs })
             tiptapUtils.updateHtml(paragraphs)
@@ -182,7 +196,7 @@ export default Vue.extend({
             tiptapUtils.agent(editor => {
               const ranges = editor.state.selection.ranges
               if (ranges.length > 0 && ranges[0].$from.pos !== ranges[0].$to.pos) {
-                tiptapUtils.applySpanStyle('font', this.item.id)
+                tiptapUtils.applySpanStyle('font', this.item.id, undefined, updateItem) // font: item.id will be assigned twice but it is OK.
               } else {
                 /**
                  * Fix problem: caret at the end of a paragraph, the returned sIndex is not as expected.
@@ -190,8 +204,7 @@ export default Vue.extend({
                 if (start.sIndex >= config.paragraphs[start.pIndex].spans.length) {
                   start.sIndex = paragraphs[start.pIndex].spans.length - 1
                 }
-                paragraphs[start.pIndex].spans[start.sIndex]
-                  .styles.font = this.item.id
+                Object.assign(paragraphs[start.pIndex].spans[start.sIndex].styles, updateItem)
                 layerUtils.updatecCurrTypeLayerProp({ paragraphs })
                 tiptapUtils.updateHtml(paragraphs)
               }
@@ -200,7 +213,7 @@ export default Vue.extend({
           }
         }
 
-        AssetUtils.addAssetToRecentlyUsed(this.item)
+        AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
         StepsUtils.record()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {

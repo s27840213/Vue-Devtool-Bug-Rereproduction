@@ -151,13 +151,15 @@ const actions: ActionTree<ITextState, unknown> = {
     if (face && face !== 'undefined' && !state.fontStore.some(font => font.face === face && font.loaded)) {
       const font = state.fontStore.find(font => font.face === face)
       if (!font) {
-        // state.pending = face
+        state.pending = face
         commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
         const link = document.createElement('link')
         link.href = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
         link.rel = 'stylesheet'
         document.head.appendChild(link)
         commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+        state.pending = ''
+        // await new Promise(resolve => setTimeout(resolve, 10000))
         // return new Promise<void>(resolve => {
         //   newFont.load()
         //     .then(newFont => {
@@ -167,17 +169,16 @@ const actions: ActionTree<ITextState, unknown> = {
         //       state.pending = ''
         //     })
         // })
+      } else {
+        return new Promise<void>(resolve => {
+          const checkLoaded = setInterval(() => {
+            if (font.loaded) {
+              clearInterval(checkLoaded)
+              resolve()
+            }
+          }, 100)
+        })
       }
-      // } else {
-      //   return new Promise<void>(resolve => {
-      //     const checkLoaded = setInterval(() => {
-      //       if (font.loaded) {
-      //         clearInterval(checkLoaded)
-      //         resolve()
-      //       }
-      //     }, 100)
-      //   })
-      // }
     }
   }
 }
@@ -185,7 +186,6 @@ const actions: ActionTree<ITextState, unknown> = {
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
   switch (type) {
     case 'public':
-      // return `url("https://template.vivipic.com/font/${id}/font?ver=${ver}")`
       return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
     case 'admin':
       return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}}/subset/font.css?ver=${ver}`
@@ -194,7 +194,6 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       // params: assetId (index)
       return ''
     case 'URL':
-      // return 'url("' + id + '")'
       return url
   }
   return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`

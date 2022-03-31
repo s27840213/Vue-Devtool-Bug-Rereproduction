@@ -216,6 +216,8 @@ class LayerFactary {
                 opacity: 1,
                 font: 'normal',
                 userId: '',
+                assetId: '',
+                fontUrl: '',
                 type: 'public',
                 weight: 'normal',
                 color: '#000000',
@@ -240,6 +242,7 @@ class LayerFactary {
      * below fix the wrong part
      * 1: empty span
      * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
+     * 3: span style that has only font but no type
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -278,7 +281,7 @@ class LayerFactary {
               delete paragraph.styles.spanStyle
             }
           } else if (paragraph.styles.spanStyle) {
-            const spanStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraph.styles.spanStyle as string))
+            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
             paragraph.styles.font = spanStyles.font
             paragraph.styles.type = spanStyles.type
             paragraph.styles.userId = spanStyles.userId
@@ -293,6 +296,8 @@ class LayerFactary {
         (span) => {
           if (!span.styles.font) {
             span.styles.font = defaultFont
+            span.styles.type = 'public'
+          } else if (!span.styles.type) {
             span.styles.type = 'public'
           }
         }

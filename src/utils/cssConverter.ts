@@ -26,7 +26,12 @@ const styleMap = {
   writingMode: 'writing-mode',
   decoration: 'text-decoration',
   style: 'font-style',
-  caretColor: 'caret-color'
+  caretColor: 'caret-color',
+  // below are not css valid properties, only for tiptap to record
+  type: 'font-type',
+  assetId: 'asset-id',
+  userId: 'user-id',
+  fontUrl: 'font-url'
 } as IStyleMap
 
 // const fontStyleMap = {
@@ -48,7 +53,9 @@ const styleMap = {
 
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
-  'size', 'color', 'writingMode', 'decoration', 'style', 'opacity', 'caretColor']
+  'size', 'color', 'writingMode', 'decoration', 'style', 'opacity', 'caretColor',
+  'type', 'assetId', 'userId', 'fontUrl'
+]
 
 class CssConveter {
   convertTransformStyle(x: number, y: number, zindex: number, rotate: number): { transform: string } {

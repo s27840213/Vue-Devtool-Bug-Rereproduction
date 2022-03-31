@@ -1,3 +1,5 @@
+import { IUserFontContentData } from "./api"
+
 /* eslint-disable camelcase */
 export interface IUploadAssetResponse {
   flag: number,
@@ -25,4 +27,9 @@ export interface IUploadAssetResponse {
     ver: number,
     width: number
   }
+}
+
+export interface IUploadAssetFontResponse {
+  flag: number,
+  data: IUserFontContentData
 }

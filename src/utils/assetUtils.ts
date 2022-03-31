@@ -394,7 +394,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
+  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -580,7 +580,8 @@ class AssetUtils {
   addAssetToRecentlyUsed(asset: IAsset) {
     const {
       id, type, width, height,
-      content_ids: contentIds, match_cover: matchCover, ver
+      content_ids: contentIds, match_cover: matchCover,
+      src, userId, assetId, fontUrl, ver
     } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
@@ -600,11 +601,19 @@ class AssetUtils {
           height,
           content_ids: contentIds,
           match_cover: matchCover,
+          src,
+          userId,
+          assetId,
+          fontUrl,
           ver
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      listApi.addDesign(id, typeCategory)
+      const params = {} as {[key: string]: any}
+      if (typeCategory === 'font') {
+        params.is_asset = (src === 'private' || src === 'admin') ? 1 : 0
+      }
+      listApi.addDesign(id, typeCategory, params)
     }
   }
 }

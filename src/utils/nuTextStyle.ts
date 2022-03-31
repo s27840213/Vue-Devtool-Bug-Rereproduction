@@ -136,6 +136,54 @@ export default Extension.create({
                 style: tiptapUtils.textStyles(attributes)
               }
             }
+          },
+          type: {
+            default: 'public',
+            parseHTML: element => {
+              return element.getAttribute('data-font-type')
+            },
+            renderHTML: attributes => {
+              if (!attributes.type) return {}
+              return {
+                'data-font-type': attributes.type
+              }
+            }
+          },
+          userId: {
+            default: '',
+            parseHTML: element => {
+              return element.getAttribute('data-font-userId')
+            },
+            renderHTML: attributes => {
+              if (!attributes.userId) return {}
+              return {
+                'data-font-userId': attributes.userId
+              }
+            }
+          },
+          assetId: {
+            default: '',
+            parseHTML: element => {
+              return element.getAttribute('data-font-assetId')
+            },
+            renderHTML: attributes => {
+              if (!attributes.assetId) return {}
+              return {
+                'data-font-assetId': attributes.assetId
+              }
+            }
+          },
+          fontUrl: {
+            default: '',
+            parseHTML: element => {
+              return element.getAttribute('data-font-fontUrl')
+            },
+            renderHTML: attributes => {
+              if (!attributes.fontUrl) return {}
+              return {
+                'data-font-fontUrl': attributes.fontUrl
+              }
+            }
           }
         }
       }, {
@@ -245,6 +293,54 @@ export default Extension.create({
               return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
             },
             renderHTML: () => ({})
+          },
+          type: {
+            default: 'public',
+            parseHTML: element => {
+              return element.getAttribute('data-font-type')
+            },
+            renderHTML: attributes => {
+              if (!attributes.type) return {}
+              return {
+                'data-font-type': attributes.type
+              }
+            }
+          },
+          userId: {
+            default: '',
+            parseHTML: element => {
+              return element.getAttribute('data-font-userId')
+            },
+            renderHTML: attributes => {
+              if (!attributes.userId) return {}
+              return {
+                'data-font-userId': attributes.userId
+              }
+            }
+          },
+          assetId: {
+            default: '',
+            parseHTML: element => {
+              return element.getAttribute('data-font-assetId')
+            },
+            renderHTML: attributes => {
+              if (!attributes.assetId) return {}
+              return {
+                'data-font-assetId': attributes.assetId
+              }
+            }
+          },
+          fontUrl: {
+            default: '',
+            parseHTML: element => {
+              return element.getAttribute('data-font-fontUrl')
+            },
+            renderHTML: attributes => {
+              if (!attributes.fontUrl) return {}
+              return {
+                'data-font-fontUrl': attributes.fontUrl
+              }
+            }
           }
         }
       }

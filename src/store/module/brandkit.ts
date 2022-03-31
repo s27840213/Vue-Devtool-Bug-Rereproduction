@@ -5,15 +5,19 @@ import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import { IUserFontContentData } from '@/interfaces/api'
 
 interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
   isBrandsLoading: boolean,
-  selectedTab: string
+  isFontsLoading: boolean,
+  selectedTab: string,
+  fonts: IBrandFont[],
+  fontsPageindex: number
 }
 
-const DEFAULT_BRAND = brandkitUtils.createDefaultBrand()
+const NULL_BRAND = brandkitUtils.createNullBrand()
 const showNetworkError = () => {
   Vue.notify({ group: 'error', text: `${i18n.t('NN0242')}` })
 }
@@ -22,7 +26,10 @@ const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
   isBrandsLoading: false,
-  selectedTab: brandkitUtils.getTabKeys()[0]
+  isFontsLoading: false,
+  selectedTab: brandkitUtils.getTabKeys()[0],
+  fonts: [],
+  fontsPageindex: 0
 })
 
 const state = getDefaultState()
@@ -31,26 +38,79 @@ const getters: GetterTree<IBrandKitState, unknown> = {
     return state.brands
   },
   getCurrentBrand(state: IBrandKitState): IBrand {
-    return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? DEFAULT_BRAND
+    return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? NULL_BRAND
   },
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
   },
+  getIsFontsLoading(state: IBrandKitState): boolean {
+    return state.isFontsLoading
+  },
   getSelectedTab(state: IBrandKitState): string {
     return state.selectedTab
+  },
+  getFonts(state: IBrandKitState): IBrandFont[] {
+    return state.fonts
+  },
+  getFontsPageIndex(state: IBrandKitState): number {
+    return state.fontsPageindex
   }
 }
 
 const actions: ActionTree<IBrandKitState, unknown> = {
   async fetchBrands({ commit }) {
-    const brands = await brandkitApi.getTestingBrands(brandkitApi.getToken())
-    commit('SET_brands', brands)
-    commit('SET_currentBrand', brands[0])
+    try {
+      const { data } = await brandkitApi.getBrands()
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const brands = data.brands
+      commit('SET_brands', brands)
+      commit('SET_currentBrand', brands[0] ?? { id: '' })
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchFonts({ commit }) {
+    try {
+      const { data } = await brandkitApi.getFonts()
+      if (data.flag !== 0) {
+        throw new Error('fetch fonts request failed')
+      }
+      commit('SET_fontsPageIndex', data.next_page)
+      commit('SET_fonts', data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)))
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchMoreFonts({ commit, getters }) {
+    const pageIndex = getters.getFontsPageIndex
+    if (pageIndex < 0) return
+    try {
+      const { data } = await brandkitApi.getFonts(undefined, undefined, {
+        page_index: pageIndex
+      })
+      if (data.flag !== 0) {
+        throw new Error('fetch fonts request failed')
+      }
+      commit('SET_fontsPageIndex', data.next_page)
+      commit('SET_fonts', getters.getFonts.concat(data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font))))
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
   },
   async setBrandName({ commit }, updateInfo: { brand: IBrand, newName: string }) {
     const { brand, newName } = updateInfo
     const oldName = brand.name
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'rename',
+      src: brand.id,
+      target: newName
+    }, () => {
       brand.name = newName
     }, () => {
       brand.name = oldName
@@ -60,43 +120,70 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   },
   async createBrand({ commit }) {
     const brand = brandkitUtils.createDefaultBrand()
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'create',
+      src: brand.id
+    }, () => {
       commit('UPDATE_addBrand', brand)
       commit('SET_currentBrand', brand)
     }, () => {
       commit('UPDATE_deleteBrand', brand)
     }, () => {
       showNetworkError()
+    }, (data) => {
+      const realCreateTime = data.createTime
+      commit('UPDATE_replaceBrandTime', { brand, createTime: realCreateTime })
     })
   },
   async copyBrand({ commit }, brand: IBrand) {
     const newBrand = generalUtils.deepCopy(brand)
-    newBrand.id = generalUtils.generateAssetId()
-    brandkitApi.updateBrandsWrapper({}, () => {
+    newBrand.id = 'new_' + generalUtils.generateAssetId()
+    newBrand.createTime = (new Date()).toISOString()
+    brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'copy',
+      src: brand.id
+    }, () => {
       commit('UPDATE_addBrand', newBrand)
-      commit('SET_currentBrand', newBrand)
     }, () => {
       commit('UPDATE_deleteBrand', newBrand)
     }, () => {
       showNetworkError()
+    }, (data) => {
+      commit('UPDATE_replaceBrand', { id: newBrand.id, brand: data.data })
     })
   },
-  async removeBrand({ commit }, brand: IBrand) {
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteBrand', brand)
+  async removeBrand({ commit, state }, brand: IBrand) {
+    const needCreateDefault = state.brands.length <= 1
+    const success = await brandkitApi.updateBrandsWrapper({
+      type: 'brand',
+      update_type: 'delete',
+      src: brand.id
     }, () => {
-      commit('UPDATE_addBrand', brand)
+      if (needCreateDefault) {
+        commit('SET_isBrandsLoading', true)
+      } else {
+        commit('UPDATE_deleteBrand', brand)
+      }
+    }, () => {
+      if (needCreateDefault) {
+        commit('SET_isBrandsLoading', false)
+      } else {
+        commit('UPDATE_addBrand', brand)
+      }
     }, () => {
       showNetworkError()
     })
+    return needCreateDefault && success
   },
   async removeLogo({ commit }, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteLogo', logo)
+      commit('UPDATE_deleteLogo', { brand: currentBrand, logo })
     }, () => {
-      commit('UPDATE_addLogo', logo)
+      commit('UPDATE_addLogo', { brand: currentBrand, logo })
     }, () => {
       showNetworkError()
     })
@@ -104,10 +191,14 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async removePalette({ commit }, palette: IBrandColorPalette) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deletePalette', palette)
+    brandkitApi.updateBrandsWrapper({
+      type: 'palette',
+      update_type: 'delete',
+      src: palette.id
     }, () => {
-      commit('UPDATE_addPalette', palette)
+      commit('UPDATE_deletePalette', { brand: currentBrand, palette })
+    }, () => {
+      commit('UPDATE_addPalette', { brand: currentBrand, palette })
     }, () => {
       showNetworkError()
     })
@@ -116,19 +207,31 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
     const palette = brandkitUtils.createDefaultPalette()
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_addPalette', palette)
+    brandkitApi.updateBrandsWrapper({
+      type: 'palette',
+      update_type: 'create',
+      src: `${currentBrand.id},${palette.id},${palette.colors[0].id}`
     }, () => {
-      commit('UPDATE_deletePalette', palette)
+      commit('UPDATE_addPalette', { brand: currentBrand, palette })
+    }, () => {
+      commit('UPDATE_deletePalette', { brand: currentBrand, palette })
     }, () => {
       showNetworkError()
+    }, (data) => {
+      const realCreateTime = data.createTime
+      commit('UPDATE_replacePaletteTime', { brand: currentBrand, palette, createTime: realCreateTime })
     })
     return palette.id
   },
   async setPaletteName({ commit }, updateInfo: { palette: IBrandColorPalette, newName: string }) {
     const { palette, newName } = updateInfo
     const oldName = palette.name
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateBrandsWrapper({
+      type: 'palette',
+      update_type: 'rename',
+      src: palette.id,
+      target: newName
+    }, () => {
       palette.name = newName
     }, () => {
       palette.name = oldName
@@ -139,10 +242,14 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async removeColor({ state, commit }, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_deleteColor', updateInfo)
+    brandkitApi.updateBrandsWrapper({
+      type: 'color',
+      update_type: 'delete',
+      src: updateInfo.color.id
     }, () => {
-      commit('UPDATE_addColor', updateInfo)
+      commit('UPDATE_deleteColor', { brand: currentBrand, ...updateInfo })
+    }, () => {
+      commit('UPDATE_addColor', { brand: currentBrand, ...updateInfo })
     }, () => {
       showNetworkError()
     })
@@ -153,31 +260,43 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     const palette = brandkitUtils.getColorPalette(currentBrand.colorPalettes, paletteId)
     if (!palette) return
     const newColor = brandkitUtils.duplicateEnd(palette.colors)
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_addColor', { paletteId, color: newColor })
+    brandkitApi.updateBrandsWrapper({
+      type: 'color',
+      update_type: 'create',
+      src: `${palette.id},${newColor.id}`,
+      target: newColor.color
     }, () => {
-      commit('UPDATE_deleteColor', { paletteId, color: newColor })
+      commit('UPDATE_addColor', { brand: currentBrand, paletteId, color: newColor })
+    }, () => {
+      commit('UPDATE_deleteColor', { brand: currentBrand, paletteId, color: newColor })
+    }, () => {
+      showNetworkError()
+    }, (data) => {
+      const realCreateTime = data.createTime
+      commit('UPDATE_replaceColorTime', { brand: currentBrand, palette, color: newColor, createTime: realCreateTime })
+    })
+  },
+  async updateColor({ commit }, updateInfo: { id: string, color: string }) {
+    return await brandkitApi.updateBrandsWrapper({
+      type: 'color',
+      update_type: 'update',
+      src: updateInfo.id,
+      target: updateInfo.color
+    }, () => {
+      // do nothing
+    }, () => {
+      // do nothing
     }, () => {
       showNetworkError()
     })
   },
-  async updateColor({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
+  async updateColorTemp({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const oldColor = brandkitUtils.getColor(currentBrand, updateInfo)
-    if (!oldColor) return
-    const oldColorHex = oldColor.color
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_setColor', updateInfo)
-    }, () => {
-      commit('UPDATE_setColor', { ...updateInfo, color: oldColorHex })
-    }, () => {
-      showNetworkError()
-    })
+    console.log('tmp')
+    commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
   },
-  async removeFont({ state, commit }, font: IBrandFont) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
+  async removeFont({ commit }, font: IBrandFont) {
     brandkitApi.updateBrandsWrapper({}, () => {
       commit('UPDATE_deleteFont', font)
     }, () => {
@@ -189,20 +308,30 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async updateTextStyle({ state, commit }, updateInfo: { type: string, style: Partial<IBrandTextStyle> }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    const isDefaultBeforeUpdate = brandkitUtils.getTextIsDefault(currentBrand, updateInfo.type)
-    brandkitApi.updateBrandsWrapper({}, () => {
-      commit('UPDATE_updateTextStyle', updateInfo)
-      if (isDefaultBeforeUpdate) {
-        commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: { isDefault: false } })
-      }
+    // if current is default setting and property other than font is to be updated
+    // add default font setting into updateInfo.style
+    brandkitUtils.setDefaultFontInfo(currentBrand, updateInfo)
+    const updateStyle = brandkitUtils.getUpdateStyleAPIEncoding(updateInfo.style)
+    const currentStyle = brandkitUtils.getCurrentValues(currentBrand, updateInfo)
+    await brandkitApi.updateBrandsWrapper({
+      type: 'text',
+      update_type: 'update',
+      src: `${currentBrand.id},${updateInfo.type}`,
+      target: updateStyle
     }, () => {
-      commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: brandkitUtils.getCurrentValues(currentBrand, updateInfo) })
-      if (isDefaultBeforeUpdate) {
-        commit('UPDATE_updateTextStyle', { type: updateInfo.type, style: { isDefault: true } })
-      }
+      commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { ...updateInfo.style, isDefault: false } })
+    }, () => {
+      commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: currentStyle })
     }, () => {
       showNetworkError()
     })
+  },
+  async refreshFontAsset({ commit }, font: IBrandFont) {
+    const { data } = await brandkitApi.getFont(font.asset_index)
+    if (data.flag === 0) {
+      const urlMap = data.url_map[font.asset_index.toString()]
+      commit('UPDATE_replaceFontUrl', { font, urlMap })
+    }
   }
 }
 
@@ -216,8 +345,17 @@ const mutations: MutationTree<IBrandKitState> = {
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
   },
+  SET_isFontsLoading(state: IBrandKitState, isFontsLoading: boolean) {
+    state.isFontsLoading = isFontsLoading
+  },
   SET_selectedTab(state: IBrandKitState, selectedTab: string) {
     state.selectedTab = selectedTab
+  },
+  SET_fonts(state: IBrandKitState, fonts: IBrandFont[]) {
+    state.fonts = fonts
+  },
+  SET_fontsPageIndex(state: IBrandKitState, fontsPageindex: number) {
+    state.fontsPageindex = fontsPageindex
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand, true)
@@ -227,83 +365,116 @@ const mutations: MutationTree<IBrandKitState> = {
     const index = state.brands.findIndex(brand_ => brand_.id === brand.id)
     if (index < 0) return
     state.brands.splice(index, 1)
-    if (state.brands.length === 0) {
-      state.brands = [brandkitUtils.createDefaultBrand()]
-    }
-    if (state.currentBrandId === brand.id) {
+    if (state.currentBrandId === brand.id && state.brands.length > 0) {
       state.currentBrandId = state.brands[0].id
     }
   },
-  UPDATE_addLogo(state: IBrandKitState, logo: IBrandLogo) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = brandkitUtils.findInsertIndex(currentBrand.logos, logo)
-    currentBrand.logos.splice(index, 0, logo)
-  },
-  UPDATE_deleteLogo(state: IBrandKitState, logo: IBrandLogo) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = currentBrand.logos.findIndex(logo_ => logo_.id === logo.id)
+  UPDATE_replaceBrand(state: IBrandKitState, updateInfo: { id: string, brand: IBrand }) {
+    const index = state.brands.findIndex(brand_ => brand_.id === updateInfo.id)
     if (index < 0) return
-    currentBrand.logos.splice(index, 1)
+    state.brands.splice(index, 1, updateInfo.brand)
   },
-  UPDATE_addPalette(state: IBrandKitState, palette: IBrandColorPalette) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = brandkitUtils.findInsertIndex(currentBrand.colorPalettes, palette)
-    currentBrand.colorPalettes.splice(index, 0, palette)
+  UPDATE_replaceBrandTime(state: IBrandKitState, updateInfo: { brand: IBrand, createTime: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    brand.createTime = updateInfo.createTime
   },
-  UPDATE_deletePalette(state: IBrandKitState, palette: IBrandColorPalette) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = currentBrand.colorPalettes.findIndex(palette_ => palette_.id === palette.id)
+  UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brandkitUtils.findInsertIndex(brand.logos, updateInfo.logo)
+    brand.logos.splice(index, 0, updateInfo.logo)
+  },
+  UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.logo.id)
     if (index < 0) return
-    currentBrand.colorPalettes.splice(index, 1)
+    brand.logos.splice(index, 1)
   },
-  UPDATE_addColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+  UPDATE_addPalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brandkitUtils.findInsertIndex(brand.colorPalettes, updateInfo.palette)
+    brand.colorPalettes.splice(index, 0, updateInfo.palette)
+  },
+  UPDATE_deletePalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const index = brand.colorPalettes.findIndex(palette_ => palette_.id === updateInfo.palette.id)
+    if (index < 0) return
+    brand.colorPalettes.splice(index, 1)
+  },
+  UPDATE_replacePaletteTime(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette, createTime: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.palette.id)
+    if (!colorPalette) return
+    colorPalette.createTime = updateInfo.createTime
+  },
+  UPDATE_addColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = brandkitUtils.findInsertIndex(colorPalette.colors, updateInfo.color, true)
     colorPalette.colors.splice(index, 0, updateInfo.color)
   },
-  UPDATE_deleteColor(state: IBrandKitState, updateInfo: { paletteId: string, color: IBrandColor }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+  UPDATE_deleteColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = colorPalette.colors.findIndex(color => color.id === updateInfo.color.id)
     if (index < 0) return
     colorPalette.colors.splice(index, 1)
   },
-  UPDATE_setColor(state: IBrandKitState, updateInfo: { paletteId: string, id: string, color: string }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const colorPalette = currentBrand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+  UPDATE_setColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, id: string, color: string }) {
+    console.log(updateInfo.color)
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
     if (!colorPalette) return
     const index = colorPalette.colors.findIndex(color => color.id === updateInfo.id)
     if (index < 0) return
     const oldColor = colorPalette.colors[index]
     colorPalette.colors.splice(index, 1, { ...oldColor, color: updateInfo.color })
   },
-  UPDATE_deleteFont(state: IBrandKitState, font: IBrandFont) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = currentBrand.fonts.findIndex(font_ => font_.id === font.id)
+  UPDATE_replaceColorTime(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, color: IBrandColor, createTime: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
+    if (!colorPalette) return
+    const index = colorPalette.colors.findIndex(color => color.id === updateInfo.color.id)
     if (index < 0) return
-    currentBrand.fonts.splice(index, 1)
+    const color = colorPalette.colors[index]
+    color.createTime = updateInfo.createTime
+  },
+  UPDATE_deleteFont(state: IBrandKitState, font: IBrandFont) {
+    const index = state.fonts.findIndex(font_ => font_.id === font.id)
+    if (index < 0) return
+    state.fonts.splice(index, 1)
   },
   UPDATE_addFont(state: IBrandKitState, font: IBrandFont) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const index = brandkitUtils.findInsertIndex(currentBrand.fonts, font)
-    currentBrand.fonts.splice(index, 0, font)
+    const index = brandkitUtils.findInsertIndex(state.fonts, font)
+    state.fonts.splice(index, 0, font)
   },
-  UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { type: string, style: any }) {
-    const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
-    if (!currentBrand) return
-    const textStyle = (currentBrand.textStyleSetting as any)[`${updateInfo.type}Style`]
+  UPDATE_replaceFont(state: IBrandKitState, updateInfo: { id: string, font: IBrandFont }) {
+    const index = state.fonts.findIndex(font_ => font_.id === updateInfo.id)
+    if (index < 0) return
+    state.fonts.splice(index, 1, updateInfo.font)
+  },
+  UPDATE_replaceFontUrl(state: IBrandKitState, updateInfo: { font: IBrandFont, urlMap: {[key: string]: string} }) {
+    const font = state.fonts.find(font_ => font_.id === updateInfo.font.id)
+    if (!font || !font.signed_url) return
+    for (const key of Object.keys(font.signed_url)) {
+      (font.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
+    }
+  },
+  UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const textStyle = (brand.textStyleSetting as any)[`${updateInfo.type}Style`]
     if (!textStyle) return
     for (const [key, value] of Object.entries(updateInfo.style)) {
       textStyle[key] = value

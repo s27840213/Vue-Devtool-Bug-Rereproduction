@@ -1,6 +1,8 @@
 import i18n from '@/i18n'
+import { IUserFontContentData } from '@/interfaces/api'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import store from '@/store'
+import { STANDARD_TEXT_FONT } from './assetUtils'
 import generalUtils from './generalUtils'
 
 const TAB_NAMES = {
@@ -9,12 +11,18 @@ const TAB_NAMES = {
   text: 'NN0400'
 }
 
+const FONT_DEFAULTS = {
+  tw: '思源黑體-標準',
+  us: 'Roboto-Regular',
+  jp: '裝甲明朝'
+} as {[key: string]: string}
+
 interface Item {
   createTime: string
 }
 
 class BrandKitUtils {
-  createDefaultBrand(): IBrand {
+  createTestingDefaultBrand(): IBrand {
     const initTime = Date.now()
     return {
       id: generalUtils.generateAssetId(),
@@ -69,38 +77,47 @@ class BrandKitUtils {
           '#FFFFFF', '#4469A0', '#1877F2', '#FF9900', '#43EEED',
           '#68B82B', '#F84343', '#EA273E', '#55400C'
         ])
-      }],
-      fonts: [{
-        type: 'public',
-        id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 60)).toISOString(),
-        name: 'Angkor',
-        ver: 0,
-        namePrevUrl: require('@/assets/img/png/brandkit/font1.png'),
-        textPrevUrl: require('@/assets/img/png/brandkit/font1_prev.png')
-      }, {
-        type: 'public',
-        id: generalUtils.generateAssetId(),
-        createTime: (new Date(initTime + 50)).toISOString(),
-        name: 'Arial Hebrew School',
-        ver: 0,
-        namePrevUrl: require('@/assets/img/png/brandkit/font2.png'),
-        textPrevUrl: require('@/assets/img/png/brandkit/font2_prev.png')
       }]
+    }
+  }
+
+  createDefaultBrand(): IBrand {
+    return {
+      id: generalUtils.generateAssetId(),
+      createTime: (new Date()).toISOString(),
+      name: '',
+      logos: [],
+      textStyleSetting: {
+        headingStyle: this.createDefaultTextStyle('heading'),
+        subheadingStyle: this.createDefaultTextStyle('subheading'),
+        bodyStyle: this.createDefaultTextStyle('body')
+      },
+      colorPalettes: []
+    }
+  }
+
+  createNullBrand(): IBrand {
+    return {
+      id: 'null',
+      createTime: '',
+      name: '',
+      logos: [],
+      textStyleSetting: {
+        headingStyle: this.createDefaultTextStyle('heading'),
+        subheadingStyle: this.createDefaultTextStyle('subheading'),
+        bodyStyle: this.createDefaultTextStyle('body')
+      },
+      colorPalettes: []
     }
   }
 
   createDefaultTextStyle(type: string): IBrandTextStyle {
     const res = {
-      font: {
-        id: '',
-        name: '',
-        type: '',
-        ver: 0,
-        textPrevUrl: '',
-        namePrevUrl: '',
-        createTime: ''
-      },
+      fontId: '',
+      fontUserId: '',
+      fontAssetId: '',
+      fontType: '',
+      fontName: '',
       bold: false,
       underline: false,
       italic: false,
@@ -138,6 +155,27 @@ class BrandKitUtils {
     }
   }
 
+  createDefaultFont(id: string): IBrandFont {
+    return {
+      asset_index: -1,
+      author: '',
+      createTime: (new Date()).toISOString(),
+      favorite: 0,
+      file_ext: '',
+      file_name: '',
+      id: 'new_' + id,
+      name: '',
+      team_id: '',
+      updateTime: '',
+      ver: 0,
+      font_family: ''
+    }
+  }
+
+  checkIsNullBrand(brand: IBrand): boolean {
+    return brand.id === 'null'
+  }
+
   generateBrandColors(colorHexes: string[]): IBrandColor[] {
     const initTime = Date.now()
     return colorHexes.map((colorHex, index) => ({
@@ -168,7 +206,12 @@ class BrandKitUtils {
   }
 
   removeBrand(brand: IBrand) {
-    store.dispatch('brandkit/removeBrand', brand)
+    store.dispatch('brandkit/removeBrand', brand).then((needFetch) => {
+      if (!needFetch) return
+      this.fetchBrands(async () => {
+        await store.dispatch('brandkit/fetchBrands')
+      })
+    })
   }
 
   removeLogo(logo: IBrandLogo) {
@@ -191,8 +234,12 @@ class BrandKitUtils {
     store.dispatch('brandkit/removeColor', { paletteId, color })
   }
 
-  updateColor(paletteId: string, id: string, color: string) {
-    store.dispatch('brandkit/updateColor', { paletteId, id, color })
+  async updateColor(id: string, color: string) {
+    return await store.dispatch('brandkit/updateColor', { id, color })
+  }
+
+  updateColorTemp(paletteId: string, id: string, color: string) {
+    store.dispatch('brandkit/updateColorTemp', { paletteId, id, color })
   }
 
   createColor(paletteId: string) {
@@ -203,8 +250,25 @@ class BrandKitUtils {
     store.dispatch('brandkit/removeFont', font)
   }
 
-  updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
-    store.dispatch('brandkit/updateTextStyle', { type, style })
+  deleteFont(id: string) {
+    store.commit('brandkit/UPDATE_deleteFont', { id })
+  }
+
+  replaceFont(id: string, apiFont: IUserFontContentData) {
+    store.commit('brandkit/UPDATE_replaceFont', {
+      id,
+      font: this.apiFont2IBrandFont(apiFont)
+    })
+  }
+
+  async updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
+    await store.dispatch('brandkit/updateTextStyle', { type, style })
+  }
+
+  createTempFont(id: string) {
+    const newFont = this.createDefaultFont(id)
+    store.commit('brandkit/UPDATE_addFont', newFont)
+    return newFont.id
   }
 
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
@@ -214,6 +278,16 @@ class BrandKitUtils {
     store.commit('brandkit/SET_isBrandsLoading', true)
     fetcher().then(() => {
       store.commit('brandkit/SET_isBrandsLoading', false)
+    })
+  }
+
+  fetchFonts(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_fonts', [])
+    }
+    store.commit('brandkit/SET_isFontsLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isFontsLoading', false)
     })
   }
 
@@ -239,7 +313,11 @@ class BrandKitUtils {
   }
 
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
-    return { ...colors[colors.length - 1], id: generalUtils.generateAssetId() }
+    return {
+      ...(colors[colors.length - 1] ?? this.createDefaultColor()),
+      id: generalUtils.generateAssetId(),
+      createTime: (new Date()).toISOString()
+    }
   }
 
   getCurrentValues(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }): {[key: string]: any} {
@@ -249,17 +327,34 @@ class BrandKitUtils {
     for (const k of Object.keys(info.style)) {
       res[k] = textStyle[k]
     }
+    res.isDefault = textStyle.isDefault
     return res
   }
 
-  getTextIsDefault(brand: any, type: string): boolean {
-    const textStyle = (brand.textStyleSetting)[`${type}Style`] as any
-    if (!textStyle) return false
-    return textStyle.isDefault
+  setDefaultFontInfo(brand: any, info: { type: string, style: Partial<IBrandTextStyle> }) {
+    const textStyle = (brand.textStyleSetting)[`${info.type}Style`] as IBrandTextStyle
+    if (!textStyle) return
+    if (textStyle.fontId === '' && !info.style.fontId) { // if current font is not set and updateInfo doesn't set font as well
+      info.style.fontId = STANDARD_TEXT_FONT[i18n.locale]
+      info.style.fontName = FONT_DEFAULTS[i18n.locale]
+      info.style.fontType = 'public'
+    }
+  }
+
+  getUpdateStyleAPIEncoding(style: Partial<IBrandTextStyle>): string {
+    const pairs = Object.entries(style).map(([key, value]) => {
+      return `${key}@${value}`
+    })
+    pairs.push('isDefault@false')
+    return pairs.join(',')
   }
 
   composeSettingText(textStyle: IBrandTextStyle, type: string): string {
-    return `${type},${textStyle.font.name},${textStyle.size}`
+    return `${type},${textStyle.fontName},${textStyle.size}`
+  }
+
+  getDefaultFontId(locale: string): string {
+    return STANDARD_TEXT_FONT[locale]
   }
 
   getDownloadUrl(logo: IBrandLogo): string {
@@ -267,7 +362,7 @@ class BrandKitUtils {
   }
 
   getDisplayedBrandName(brand: IBrand): string {
-    return brand.name === '' ? `${i18n.t('NN0397')}` : brand.name
+    return (!this.checkIsNullBrand(brand) && brand.name === '') ? `${i18n.t('NN0397')}` : brand.name
   }
 
   getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
@@ -282,6 +377,18 @@ class BrandKitUtils {
         return this.getDisplayedPaletteName(content as IBrandColorPalette)
       default:
         return content.name
+    }
+  }
+
+  apiFont2IBrandFont(font: IUserFontContentData): IBrandFont {
+    const res = { ...font } as any
+    delete res.create_time
+    delete res.update_time
+    return {
+      ...res,
+      id: font.id ?? font.asset_index.toString(),
+      createTime: font.create_time,
+      updateTime: font.update_time
     }
   }
 }
