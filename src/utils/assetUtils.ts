@@ -308,7 +308,7 @@ class AssetUtils {
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
-    const { pageIndex, styles = {} } = attrs
+    const { pageIndex, styles = {}, ver } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
@@ -332,7 +332,8 @@ class AssetUtils {
         type: 'background',
         assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
-      }
+      },
+      ver
     })
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
@@ -543,8 +544,14 @@ class AssetUtils {
         case 1:
           this.addBackground(
             asset.urls.prev,
-            { ...attrs, styles: { width: asset.width, height: asset.height } },
-            await ImageUtils.getImageSize(asset.urls.full, asset.width ?? 0, asset.height ?? 0)
+            { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver },
+            await ImageUtils.getImageSize(ImageUtils.getSrc({
+              srcObj: {
+                type: 'background',
+                assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
+                userId: ''
+              }
+            }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
           )
           break
         case 5:
