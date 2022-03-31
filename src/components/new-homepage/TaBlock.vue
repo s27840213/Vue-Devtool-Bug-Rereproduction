@@ -99,12 +99,14 @@ export default Vue.extend({
   flex-direction: column;
   max-width: 700px;
   position: -webkit-sticky; // For safari < 13
-  position: relative;
   &__coming_soon {
     padding: 4px;
     color: white;
     background: #FFBA49;
     border-radius: 4px;
+  }
+  &__title {
+    position: relative;
   }
   &__link {
     a {
@@ -113,7 +115,7 @@ export default Vue.extend({
     }
   }
   div {
-    margin: 0 0 10px;
+    margin-bottom: 10px;
   }
 }
 .block-img {
