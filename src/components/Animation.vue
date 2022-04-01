@@ -3,17 +3,6 @@
     div(v-if="isJSON"
       class="lottie"
       :style="lottieStyle" ref="lavContainer")
-    div(style="width: 100px; position: absolute; left: 50%") gsap
-    br
-    img(v-if="isImg"
-      v-for="index in 2"
-      class="img1 img"
-      :src="require('@/' + path.slice(2))"
-      :width="width"
-      :height="height")
-    br
-    div(style="width: 100px; position: absolute; left: 50%") js
-    br
     img(v-if="isImg"
       v-for="index in 2"
       class="img"
@@ -34,7 +23,6 @@
 import Vue from 'vue'
 import lottie from 'lottie-web'
 import axios from 'axios'
-import gsap from 'gsap'
 
 export default Vue.extend({
   props: {
@@ -147,14 +135,6 @@ export default Vue.extend({
       }
     },
     async init() {
-      if (this.isImg) {
-        gsap.to('.img1', {
-          ease: 'linear',
-          duration: 110,
-          repeat: -1,
-          transform: 'translateX(-100%)'
-        })
-      }
       if (!this.isJSON) {
         return
       }
@@ -207,24 +187,6 @@ export default Vue.extend({
   .img {
     position: relative;
     left: calc(50% - 50vw);
-    // animation: 20s ease-in 1s infinite both slidein;
-    // animation-iteration-count: infinite;
-    // animation-name: slidein;
-    // animation-duration: 20s;
-    // animation-timing-function: linear;
-    // @keyframes slidein {
-    //   from {
-    //     transform: translateX(0%)
-    //   }
-    //   to {
-    //     transform: translateX(-100%)
-    //   }
-    // }
-
-    // transition-property: transform;
-    // transition-duration: 20s;
-    // transition-timing-function: linear;
-    // transform: translateX(-100%);
   }
 }
 </style>

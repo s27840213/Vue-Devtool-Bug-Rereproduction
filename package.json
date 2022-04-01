@@ -37,7 +37,6 @@
     "dotenv": "^8.2.0",
     "floating-vue": "^1.0.0-beta.5",
     "fontfaceobserver": "^2.1.0",
-    "gsap": "^3.10.2",
     "konva": "^7.2.5",
     "lottie-vuejs": "^0.4.0",
     "pug": "^3.0.2",
