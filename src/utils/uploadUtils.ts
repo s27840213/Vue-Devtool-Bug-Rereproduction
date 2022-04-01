@@ -966,6 +966,7 @@ class UploadUtils {
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
     this.isGettingDesign = true
+    console.log(designId, teamId)
     logUtils.setLog(`Get Design
       Type: ${type}
       DesignId: ${designId}
@@ -990,6 +991,7 @@ class UploadUtils {
          */
         jsonName = 'config.json'
         fetchTarget = designParams.fetchTarget ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        console.log(fetchTarget)
         break
       }
 
@@ -1023,6 +1025,7 @@ class UploadUtils {
           /**
            * @Note remove the designId and type query if 404
            */
+          console.log('failed to get design')
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
