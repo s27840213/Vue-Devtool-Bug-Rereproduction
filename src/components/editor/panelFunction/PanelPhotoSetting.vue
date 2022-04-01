@@ -58,6 +58,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
+      currFunctionPanelType: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
@@ -223,10 +224,9 @@ export default Vue.extend({
       }
     },
     handleOutside(event: PointerEvent) {
-      this.show = ''
-      // const target = event.target as HTMLButtonElement
-      // const btn = this.$refs.btn as HTMLDivElement
-      // if (!btns.contains(target)) {}
+      if (this.currFunctionPanelType !== 3) {
+        this.show = ''
+      }
     },
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo

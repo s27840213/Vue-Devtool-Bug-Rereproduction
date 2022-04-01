@@ -111,7 +111,7 @@ export default Vue.extend({
   },
   destroyed() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
-    this.setCurrFunctionPanel(FunctionPanelType.none)
+    setTimeout(() => this.setCurrFunctionPanel(FunctionPanelType.none))
   },
   computed: {
     ...mapGetters({

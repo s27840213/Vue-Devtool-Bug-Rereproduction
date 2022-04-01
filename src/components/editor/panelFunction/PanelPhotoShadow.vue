@@ -91,7 +91,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import vClickOutside from 'v-click-outside'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
@@ -113,9 +112,6 @@ export default Vue.extend({
     ColorPicker,
     ColorPanel
   },
-  directives: {
-    clickOutside: vClickOutside.directive
-  },
   data() {
     return {
       shadowPropI18nMap,
@@ -123,9 +119,76 @@ export default Vue.extend({
       update: undefined as number | undefined
     }
   },
+  mounted() {
+    colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
+  },
+  async beforeDestroy() {
+    colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
+    const layerData = imageShadowUtils.layerData
+    if (layerData) {
+      const { config, img } = layerData
+      const { width, height, imgWidth, imgHeight, x, y } = config.styles
+      const updateCanvas = document.createElement('canvas')
+      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
+      updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
+      updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
+      imageShadowUtils.draw(updateCanvas, img, config, height, 0)
+
+      const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
+      const imgHeightInCanvas = height
+      const imgWidthInCanvas = width
+      const leftShadowThickness = (updateCanvas.width - imgWidthInCanvas) * 0.5 - left
+      const topShadowThickness = (updateCanvas.height - imgHeightInCanvas) * 0.5 - top
+      const newWidth = updateCanvas.width - right - left
+      const newHeight = updateCanvas.height - top - bottom
+
+      const uploadCanvas = document.createElement('canvas')
+      uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
+      uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
+      const ctx = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
+
+      const drawnImg = new Image()
+      drawnImg.src = updateCanvas.toDataURL('image/png;base64', 1)
+      await new Promise<void>((resolve) => {
+        drawnImg.onload = () => {
+          ctx.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
+          resolve()
+        }
+      })
+
+      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
+        const srcObj = {
+          type: this.isAdmin ? 'public' : 'private',
+          userId: json.data.team_id,
+          assetId: this.isAdmin ? json.data.id : json.data.asset_index
+        }
+        const pageIndex = pageUtils.getPageIndexById(pageId)
+        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+        if (pageIndex !== -1 && layerIndex !== -1) {
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+          layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+            width: newWidth,
+            height: newHeight,
+            imgWidth: newWidth,
+            imgHeight: newHeight,
+            initWidth: newWidth,
+            initHeight: newHeight,
+            imgX: 0,
+            imgY: 0,
+            x: x - leftShadowThickness,
+            y: y - topShadowThickness,
+            scale: 1
+          })
+          this.resetAll(pageIndex, layerIndex)
+        }
+      })
+      imageShadowUtils.clearLayerData()
+    }
+  },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     shadowOption(): string[] {
       return Object.keys(this.effects)
@@ -151,72 +214,6 @@ export default Vue.extend({
         frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
         projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
       }
-    }
-  },
-  mounted() {
-    colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
-  },
-  beforeDestroy() {
-    colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
-  },
-  async destroyed() {
-    const layerData = imageShadowUtils.layerData
-    if (layerData) {
-      const { config, img } = layerData
-      const { width, height, imgWidth, imgHeight, x, y } = config.styles
-      const updateCanvas = document.createElement('canvas')
-      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
-      updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
-      updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
-      imageShadowUtils.draw(updateCanvas, img, config, height, 0)
-
-      const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
-      const imgHeightInCanvas = height
-      const imgWidthInCanvas = width
-      const leftShadowThickness = (updateCanvas.width - imgWidthInCanvas) * 0.5 - left
-      const topShadowThickness = (updateCanvas.height - imgHeightInCanvas) * 0.5 - top
-      const newWidth = updateCanvas.width - right - left
-      const newHeight = updateCanvas.height - top - bottom
-
-      const uploadCanvas = document.createElement('canvas')
-      uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
-      uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
-      const ctx = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
-
-      const drawnImg = new Image()
-      drawnImg.src = updateCanvas.toDataURL('image/png;base64')
-      await new Promise<void>((resolve) => {
-        drawnImg.onload = () => {
-          ctx.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
-          resolve()
-        }
-      })
-
-      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
-        const srcObj = {
-          type: this.isAdmin ? 'public' : 'private',
-          userId: json.data.team_id,
-          assetId: this.isAdmin ? json.data.id : json.data.asset_index
-        }
-        const pageIndex = pageUtils.getPageIndexById(pageId)
-        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-        if (pageIndex !== -1 && layerIndex !== -1) {
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
-          layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-            width: newWidth,
-            height: newHeight,
-            imgWidth: newWidth,
-            imgHeight: newHeight,
-            initWidth: newWidth,
-            initHeight: newHeight,
-            x: x - leftShadowThickness,
-            y: y - topShadowThickness,
-            scale: 1
-          })
-          this.resetAll(pageIndex, layerIndex)
-        }
-      })
-      imageShadowUtils.clearLayerData()
     }
   },
   methods: {

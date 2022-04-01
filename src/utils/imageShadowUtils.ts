@@ -217,7 +217,6 @@ class ImageShadowUtils {
     while (!reach) {
       for (let i = 0; i < canvas.width; i++) {
         if (imageData[top][i][3] > alphaTresh) {
-          console.log(imageData[top][i])
           reach = true
           break
         }

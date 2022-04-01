@@ -307,23 +307,32 @@ export default Vue.extend({
     },
     handleNewShadowEffect() {
       const { currentEffect } = this.shadow
-      if ([ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(currentEffect)) {
-        if (this.canvasImg) {
-          imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
-        } else {
-          const _canvasImg = new Image()
-          _canvasImg.crossOrigin = 'Anonymous'
-          _canvasImg.onload = () => {
-            const canvas = this.$refs.canvas as HTMLCanvasElement
-            const ratio = _canvasImg.naturalWidth / _canvasImg.naturalHeight
-            canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
-            canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
-            this.canvasImg = _canvasImg
-            imgShadowUtils.clearLayerData()
-            imgShadowUtils.draw(canvas, _canvasImg, this.config)
+      switch (currentEffect) {
+        case ShadowEffectType.shadow:
+        case ShadowEffectType.frame:
+        case ShadowEffectType.blur: {
+          if (this.canvasImg) {
+            imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
+          } else {
+            const _canvasImg = new Image()
+            _canvasImg.crossOrigin = 'Anonymous'
+            _canvasImg.onload = () => {
+              const canvas = this.$refs.canvas as HTMLCanvasElement
+              const ratio = _canvasImg.naturalWidth / _canvasImg.naturalHeight
+              canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
+              canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
+              this.canvasImg = _canvasImg
+              imgShadowUtils.clearLayerData()
+              imgShadowUtils.draw(canvas, _canvasImg, this.config)
+            }
+            _canvasImg.src = ImageUtils.getSrc(this.config)
           }
-          _canvasImg.src = ImageUtils.getSrc(this.config)
+          break
         }
+        case ShadowEffectType.halo:
+        case ShadowEffectType.projection:
+        case ShadowEffectType.none:
+          this.canvasImg = undefined
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
