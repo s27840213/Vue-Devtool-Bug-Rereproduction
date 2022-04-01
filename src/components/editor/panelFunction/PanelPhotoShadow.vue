@@ -127,7 +127,7 @@ export default Vue.extend({
     const layerData = imageShadowUtils.layerData
     if (layerData) {
       const { config, img } = layerData
-      const { width, height, imgWidth, imgHeight, x, y } = config.styles
+      const { width, height, imgWidth, imgHeight } = config.styles
       const updateCanvas = document.createElement('canvas')
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
@@ -175,8 +175,8 @@ export default Vue.extend({
             initHeight: newHeight,
             imgX: 0,
             imgY: 0,
-            x: x - leftShadowThickness,
-            y: y - topShadowThickness,
+            x: config.styles.x - leftShadowThickness,
+            y: config.styles.y - topShadowThickness,
             scale: 1
           })
           this.resetAll(pageIndex, layerIndex)

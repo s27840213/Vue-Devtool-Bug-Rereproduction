@@ -4,7 +4,7 @@
     div(class="photo-setting__grid mb-5")
       btn(v-for="btn in btns"
         class="full-width"
-        :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0 && btn.name === 'shadow' ? 'displayNone' : '']"
+        :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
         type="gray-mid"
         ref="btn"
         :key="btn.name"
