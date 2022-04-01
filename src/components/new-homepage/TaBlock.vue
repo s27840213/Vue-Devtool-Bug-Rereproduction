@@ -93,6 +93,7 @@ export default Vue.extend({
     position: absolute;
     z-index: -1;
   }
+  position: -webkit-sticky; // For safari < 13
 }
 .block-text {
   display: flex;
@@ -119,9 +120,7 @@ export default Vue.extend({
   }
 }
 .block-img {
-  position: -webkit-sticky; // For safari < 13
   position: relative;
-  // z-index: -2;
 }
 @media screen and (max-width: 768px) {
   .block{

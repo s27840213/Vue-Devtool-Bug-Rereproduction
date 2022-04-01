@@ -64,7 +64,7 @@
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-center")
-        span COPYRIGHT Vivipic 2021
+        span {{'COPYRIGHT Vivipic 2021 - TERMS & CONDITIONS  PRIVACY POLICY'}}
       div(class="nu-footer__bottom-right")
         a(:href="facebookPage")
           img(class="pointer"
@@ -93,11 +93,11 @@
             src="@/assets/img/svg/newHomepage/email.svg"
             :iconWidth="'25px'")
       div(class="nu-footer__bottom-mobile-locale"
-        :style="{ 'margin': isHome ? '0 0 100px' : 0 }")
+        :style="{ 'margin-bottom': isHome ? '80px' : 0 }")
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-mobile-copyright")
-        span COPYRIGHT Vivipic 2021
+        span {{'COPYRIGHT Vivipic 2021 - TERMS & CONDITIONS  PRIVACY POLICY'}}
 </template>
 
 <script lang="ts">

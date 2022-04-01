@@ -12,15 +12,6 @@
       :width="width"
       :height="height")
     br
-    div(style="width: 100px; position: absolute; left: 50%") css
-    br
-    img(v-if="isImg"
-      v-for="index in 2"
-      class="img2 img"
-      :src="require('@/' + path.slice(2))"
-      :width="width"
-      :height="height")
-    br
     div(style="width: 100px; position: absolute; left: 50%") js
     br
     img(v-if="isImg"
@@ -234,20 +225,6 @@ export default Vue.extend({
     // transition-duration: 20s;
     // transition-timing-function: linear;
     // transform: translateX(-100%);
-  }
-  .img2 {
-    animation-iteration-count: infinite;
-    animation-name: slidein;
-    animation-duration: 110s;
-    animation-timing-function: linear;
-    @keyframes slidein {
-      from {
-        transform: translateX(0%)
-      }
-      to {
-        transform: translateX(-100%)
-      }
-    }
   }
 }
 </style>
