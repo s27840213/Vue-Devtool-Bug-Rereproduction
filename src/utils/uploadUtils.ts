@@ -108,11 +108,20 @@ class UploadUtils {
   }
 
   onFontUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
+    if (this.eventHash.fontUploadStatus) {
+      delete this.eventHash.fontUploadStatus
+    }
+    this.event.on('fontUploadStatus', callback)
+    this.eventHash.fontUploadStatus = callback
     this.event.on('fontUploadStatus', callback)
   }
 
   emitFontUploadEvent(status: 'none' | 'uploading' | 'success' | 'fail') {
     this.event.emit('fontUploadStatus', status)
+  }
+
+  offFontUploadStatus() {
+    this.event.off('fontUploadStatus', this.eventHash.fontUploadStatus)
   }
 
   onDesignUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {

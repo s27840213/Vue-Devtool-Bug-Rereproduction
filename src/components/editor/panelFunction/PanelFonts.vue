@@ -75,6 +75,7 @@ export default Vue.extend({
   },
   destroyed() {
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
+    uploadUtils.offFontUploadStatus()
   },
   computed: {
     ...mapState(
