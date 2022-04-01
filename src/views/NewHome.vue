@@ -6,9 +6,9 @@
         div(class="home-top-text")
           span(class="home-top-text__title" v-html="title")
           span(class="home-top-text__description") {{$t('NN0461')}}
-          img(v-for="cb in colorBlock"
-            :class="`home-top__colorBlock ${cb.name.replace('.svg', '')}`"
-            :src="require('@/assets/img/svg/newHomepage/' + cb.name)")
+          Animation(v-for="cb in colorBlock"
+            :class="`home-top__colorBlock ${cb.name.replace('.json', '')}`"
+            :path="'/lottie/' + cb.name")
         iframe(title="Vivipic" class="home-top__yt"
           :src="`https://www.youtube.com/embed/?autoplay=1&mute=1&loop=1&playlist=${ytId}`"
           frameborder="0" allowfullscreen)
@@ -61,10 +61,10 @@ export default Vue.extend({
       isTop: true,
       themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
       colorBlock: [
-        { name: 'vector_lightblue2.svg' },
-        { name: 'vector_pink1.svg' },
-        { name: 'oval_pink4.svg' },
-        { name: 'oval_yellow1.svg' }
+        { name: 'vector_lightblue2.json' },
+        { name: 'vector_pink1.json' },
+        { name: 'oval_pink4.json' },
+        { name: 'oval_yellow1.json' }
       ]
     }
   },
@@ -132,9 +132,9 @@ export default Vue.extend({
       return blocklist
     },
     ytId() {
-      return i18n.locale === 'us' ? 'iNvcKkFIdQc'
+      return i18n.locale === 'us' ? 'GRSlz37Njo0'
         : i18n.locale === 'jp' ? 'iNvcKkFIdQc'
-          : i18n.locale === 'tw' ? 'Rj-hsax9v1E' : 'iNvcKkFIdQc'
+          : i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
     },
     homeStyle(): Record<string, string> {
       return i18n.locale === 'us' ? { 'font-family': 'Poppins' } : { 'font-family': 'NOTO SANS TC' }
