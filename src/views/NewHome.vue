@@ -16,7 +16,7 @@
               class="home-top__buttom__text btn-LG")
               span {{$t('NN0391')}}
         iframe(title="Vivipic"
-          :src="`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}`"
+          :src="`https://www.youtube.com/embed/?autoplay=1&mute=1&loop=1&playlist=${ytId}`"
           frameborder="0" allowfullscreen
           :width="isLargeDesktop ? 656 : 327"
           :height="isLargeDesktop ? 369 : 184")

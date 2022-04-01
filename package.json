@@ -37,7 +37,9 @@
     "dotenv": "^8.2.0",
     "floating-vue": "^1.0.0-beta.5",
     "fontfaceobserver": "^2.1.0",
+    "gsap": "^3.10.2",
     "konva": "^7.2.5",
+    "lottie-vuejs": "^0.4.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "tinycolor": "^0.0.1",
@@ -53,7 +55,6 @@
     "vue-recyclerview": "^0.4.1",
     "vue-router": "^3.5.1",
     "vue-virtual-scroller": "^1.0.10",
-    "lottie-vuejs": "^0.4.0",
     "vuex": "^3.4.0"
   },
   "devDependencies": {

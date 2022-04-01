@@ -6,7 +6,7 @@
         class="list-title__more body-MD text-gray-2"
         :to="moreLink")
         span {{$t('NN0082')}}
-    div(class="list-content")
+    div(class="list-content" :style=" { width: type === 'theme' ? 'fit-content' : '80vw' } ")
       div(v-if="prevIcon"
         class="list-content__lefticon"
         @click="scroll(false)")
@@ -189,7 +189,7 @@ export default Vue.extend({
     display: flex;
     position: relative;
     align-items: center;
-    width: 80vw; // ask kitty
+    max-width: 80vw;
     &__lefticon, &__righticon {
       position: absolute;
       cursor: pointer;
