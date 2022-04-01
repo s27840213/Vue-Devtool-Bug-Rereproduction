@@ -18,7 +18,7 @@
       div(class="block-text__description text-gray-2")
         span {{$t(content.description)}}
       //- need v-if?
-      div(v-if="content.link"
+      div(v-if="content.link && $t(content.link.text)"
         class="block-text__link text-H5")
         router-link(:to="content.link.to")
           span {{$t(content.link.text)+ ' →'}}

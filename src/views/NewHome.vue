@@ -2,9 +2,10 @@
   div(class="home" :style="homeStyle")
     new-header(:isTop="isTop")
     div(class="home-content" ref="content" @scroll="onScroll")
-      div(class="home-top" :style="homeTopStyle")
-        div(class="home-top__text")
-          span(v-html="title")
+      div(class="home-top")
+        div(class="home-top-text")
+          span(class="home-top-text__title" v-html="title")
+          span(class="home-top-text__description") {{$t('NN0461')}}
           img(v-for="cb in colorBlock"
             :class="`home-top__colorBlock ${cb.name.replace('.svg', '')}`"
             :src="require('@/assets/img/svg/newHomepage/' + cb.name)")
@@ -21,7 +22,7 @@
         type="mydesign")
       scroll-list(v-if="isLogin"
         v-for="theme in themeList"
-        :theme="theme" type="template")
+        type="template" :theme="theme")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -29,11 +30,6 @@
       div(v-if="showSizePopup"
         class="popup-window")
         popup-size(@close="closeSizePopup()")
-      //- div(v-if="isMobile"
-      //-   class="home__float-start home-top__buttom rounded btn-primary-sm")
-      //-   router-link(to="/editor"
-      //-     class="home-top__buttom__text btn-LG")
-      //-     span {{$t('NN0391')}}
 </template>
 
 <script lang="ts">
@@ -118,9 +114,6 @@ export default Vue.extend({
       isMobile: 'isMobile',
       isLargeDesktop: 'isLargeDesktop'
     }),
-    rwdModifier() {
-      return this.isMobile ? 1 : 0.7
-    },
     title(): string {
       return (i18n.t('NN0460') as string)
         .replace('<blue>', '<span class="text-blue-1">')
@@ -145,44 +138,7 @@ export default Vue.extend({
     },
     homeStyle(): Record<string, string> {
       return i18n.locale === 'us' ? { 'font-family': 'Poppins' } : { 'font-family': 'NOTO SANS TC' }
-    },
-    homeTopStyle(): Record<string, string> {
-      return {
-        // 'flex-direction': this.isMobile ? 'column' : 'row',
-        // 'align-items': this.isMobile ? 'flex-start' : 'center',
-        // width: this.isMobile ? 'auto' : '80%'
-      }
     }
-    // unterlineStyle(): Record<string, string> {
-    //   return i18n.locale === 'us' ? {
-    //     top: this.isMobile ? '70px' : '102px',
-    //     left: this.isMobile ? '28px' : '39px',
-    //     width: this.isMobile ? '209px' : '286px',
-    //     height: '14px'
-    //   } : i18n.locale === 'tw' ? {
-    //     top: this.isMobile ? '25px' : '38px',
-    //     left: this.isMobile ? '65px' : '85px',
-    //     width: this.isMobile ? '115px' : '160px',
-    //     height: this.isMobile ? '14px' : '16px'
-    //   } : i18n.locale === 'jp' ? {
-    //     top: this.isMobile ? '25px' : '38px',
-    //     left: this.isMobile ? '0px' : '0px',
-    //     width: this.isMobile ? '115px' : '160px',
-    //     height: this.isMobile ? '14px' : '16px'
-    //   } : {}
-    // },
-    // dotStyle(): Record<string, string> {
-    //   return i18n.locale === 'us' ? {
-    //     top: this.isMobile ? '108px' : '153.25px',
-    //     left: this.isMobile ? '221px' : '305px'
-    //   } : i18n.locale === 'tw' ? {
-    //     top: this.isMobile ? '114px' : '160px',
-    //     left: this.isMobile ? '138px' : '195px'
-    //   } : i18n.locale === 'jp' ? {
-    //     top: this.isMobile ? '100px' : '142px',
-    //     left: this.isMobile ? '260px' : '365px'
-    //   } : {}
-    // }
   },
   created() {
     if (i18n.locale === 'us') {
@@ -231,11 +187,17 @@ export default Vue.extend({
   text-align: center;
   // position: -webkit-sticky; // For safari < 13
   position: relative;
-  &__text {
+  margin-top: 20px;
+  &-text {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    color: setColor(gray-1);
+    align-items: center;
+    &__title {
+      color: setColor(gray-1);
+    }
+    &__description {
+      color: setColor(gray-2);
+    }
   }
   &__colorBlock {
     position: absolute;
@@ -254,10 +216,15 @@ export default Vue.extend({
 }
 @media screen and (max-width: 768px) {
   .home-top {
-    min-height: 528px;
+    min-height: 400px;
     width: 327px;
-    &__text {
-      @include text-H3
+    &-text {
+      &__title {
+        @include text-H3
+      }
+      &__description {
+        @include body-MD
+      }
     }
     &__yt {
       width: 327px;
@@ -284,9 +251,14 @@ export default Vue.extend({
   .home-top {
     min-height: 724px;
     width: 768px;
-    &__text {
+    &-text {
       width: 560px; // todo ? 500 560
-      @include text-H2
+      &__title {
+        @include text-H2
+      }
+      &__description {
+        @include body-LG
+      }
     }
     &__yt {
       width: 720px;
@@ -307,8 +279,13 @@ export default Vue.extend({
   .home-top {
     min-height: 724.15px;
     width: 1241px;
-    &__text {
-      @include text-H1
+    &-text {
+      &__title {
+        @include text-H1
+      }
+      &__description {
+        @include body-LG
+      }
     }
     &__yt {
       width: 800px;
