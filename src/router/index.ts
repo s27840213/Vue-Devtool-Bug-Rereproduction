@@ -5,7 +5,6 @@ import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
-import Pricing from '../views/Pricing.vue'
 import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
@@ -14,16 +13,14 @@ import MobileEditor from '../views/MobileEditor.vue'
 import MobileTextEffect from '../views/MobileTextEffect.vue'
 import MobileImageAdjust from '../views/MobileImageAdjust.vue'
 import MobileTextTyping from '../views/MobileTextTyping.vue'
+import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
-import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
-import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
-import generalUtils from '@/utils/generalUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -188,6 +185,14 @@ const routes: Array<RouteConfig> = [
     component: MobileTextTyping
   }
 ]
+
+if (process.env.NODE_ENV !== 'production') {
+  routes.push({
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: SvgIconView
+  })
+}
 
 const router = new VueRouter({
   mode: 'history',
