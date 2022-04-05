@@ -111,7 +111,8 @@ class ImageShadowUtils {
   }
 
   readonly SPREAD_RADIUS = 1
-  draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 75) {
+  handlerId = ''
+  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 75) {
     const { styles } = config
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
@@ -147,44 +148,57 @@ class ImageShadowUtils {
     this.canvasT.setAttribute('height', `${canvas.height}`)
 
     const _spread = 1 / this.SPREAD_RADIUS
-    const handler = () => {
+    const handlerId = generalUtils.generateRandomString(6)
+    const handler = async () => {
       if (!this.ctxT) return
       this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
       let alphaVal = 1
-      for (let i = -spread; i <= spread; i++) {
-        for (let j = -spread; j <= spread; j++) {
-          const r = Math.sqrt(i * i + j * j)
-          if (r >= spread + this.SPREAD_RADIUS) {
-            alphaVal = 0
-          } else if (r >= spread) {
-            alphaVal = (1 - (r - spread) * _spread)
-          } else {
-            alphaVal = 1
-          }
-          if (alphaVal) {
-            this.ctxT.globalAlpha = alphaVal
-            this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + offsetX + i, y + offsetY + j, drawCanvasWidth, drawCanvasHeight)
-          }
-        }
+
+      for (let i = -spread; i <= spread && this.handlerId === handlerId; i++) {
+        await new Promise<void>(resolve => {
+          setTimeout(() => {
+            for (let j = -spread; j <= spread && this.handlerId === handlerId; j++) {
+              const r = Math.sqrt(i * i + j * j)
+              if (r >= spread + this.SPREAD_RADIUS) {
+                alphaVal = 0
+              } else if (r >= spread) {
+                alphaVal = (1 - (r - spread) * _spread)
+              } else {
+                alphaVal = 1
+              }
+              if (alphaVal && this.ctxT) {
+                this.ctxT.globalAlpha = alphaVal
+                this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + offsetX + i, y + offsetY + j, drawCanvasWidth, drawCanvasHeight)
+              }
+            }
+            console.log('i:', i)
+            resolve()
+          }, 0)
+        })
       }
-      this.ctxT.globalCompositeOperation = 'source-in'
-      const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-      StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
-      this.ctxT.putImageData(imageData, 0, 0)
+      if (this.handlerId === handlerId) {
+        console.log('for loop done')
+        this.ctxT.globalCompositeOperation = 'source-in'
+        const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
+        StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
+        this.ctxT.putImageData(imageData, 0, 0)
 
-      this.ctxT.globalAlpha = opacity / 100
-      this.ctxT.fillStyle = effects.color
-      this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
+        this.ctxT.globalAlpha = opacity / 100
+        this.ctxT.fillStyle = effects.color
+        this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
 
-      this.ctxT.globalCompositeOperation = 'source-over'
-      this.ctxT.globalAlpha = 1
-      this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+        this.ctxT.globalCompositeOperation = 'source-over'
+        this.ctxT.globalAlpha = 1
+        this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(this.canvasT, 0, 0)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(this.canvasT, 0, 0)
+      }
     }
-    timeout ? (this._draw = setTimeout(handler, timeout)) : handler()
+    this.handlerId = handlerId
+    timeout ? (this._draw = setTimeout(handler, timeout)) : await handler()
+    console.log('already drawed')
   }
 
   clearLayerData() {
@@ -216,6 +230,10 @@ class ImageShadowUtils {
     const alphaTresh = 0
     while (!reach) {
       for (let i = 0; i < canvas.width; i++) {
+        if (!imageData[top]) {
+          console.log(top)
+          console.log(canvas.height)
+        }
         if (imageData[top][i][3] > alphaTresh) {
           reach = true
           break

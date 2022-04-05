@@ -132,7 +132,7 @@ export default Vue.extend({
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
       updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
-      imageShadowUtils.draw(updateCanvas, img, config, height, 0)
+      await imageShadowUtils.draw(updateCanvas, img, config, height, 0)
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const imgHeightInCanvas = height
@@ -156,32 +156,32 @@ export default Vue.extend({
         }
       })
 
-      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
-        const srcObj = {
-          type: this.isAdmin ? 'public' : 'private',
-          userId: json.data.team_id,
-          assetId: this.isAdmin ? json.data.id : json.data.asset_index
-        }
-        const pageIndex = pageUtils.getPageIndexById(pageId)
-        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-        if (pageIndex !== -1 && layerIndex !== -1) {
-          layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
-          layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-            width: newWidth,
-            height: newHeight,
-            imgWidth: newWidth,
-            imgHeight: newHeight,
-            initWidth: newWidth,
-            initHeight: newHeight,
-            imgX: 0,
-            imgY: 0,
-            x: config.styles.x - leftShadowThickness,
-            y: config.styles.y - topShadowThickness,
-            scale: 1
-          })
-          this.resetAll(pageIndex, layerIndex)
-        }
-      })
+      // uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
+      //   const srcObj = {
+      //     type: this.isAdmin ? 'public' : 'private',
+      //     userId: json.data.team_id,
+      //     assetId: this.isAdmin ? json.data.id : json.data.asset_index
+      //   }
+      //   const pageIndex = pageUtils.getPageIndexById(pageId)
+      //   const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+      //   if (pageIndex !== -1 && layerIndex !== -1) {
+      //     layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+      //     layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+      //       width: newWidth,
+      //       height: newHeight,
+      //       imgWidth: newWidth,
+      //       imgHeight: newHeight,
+      //       initWidth: newWidth,
+      //       initHeight: newHeight,
+      //       imgX: 0,
+      //       imgY: 0,
+      //       x: config.styles.x - leftShadowThickness,
+      //       y: config.styles.y - topShadowThickness,
+      //       scale: 1
+      //     })
+      //     this.resetAll(pageIndex, layerIndex)
+      //   }
+      // })
       imageShadowUtils.clearLayerData()
     }
   },
