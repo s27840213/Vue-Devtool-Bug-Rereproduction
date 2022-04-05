@@ -53,6 +53,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { IBrandFont } from '@/interfaces/brandkit'
 
 export default Vue.extend({
   components: {
@@ -69,6 +70,7 @@ export default Vue.extend({
   },
   mounted() {
     this.getCategories()
+    this.fetchFonts()
     uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
       this.fontUploadStatus = status
     })
@@ -92,6 +94,13 @@ export default Vue.extend({
     ),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
+    ...mapGetters('brandkit', {
+      privateFonts: 'getFonts',
+      fontsPageIndex: 'getFontsPageIndex'
+    }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -139,14 +148,50 @@ export default Vue.extend({
               type: 'category-font-item',
               list: [{
                 ...font,
-                fontType: 'public'
+                fontType: 'public',
+                userId: font.user_id,
+                assetId: font.src === 'admin' ? font.asset_id : font.asset_index?.toString()
               }]
             }))
           ])
         }
+        if (category.is_recent === 1) {
+          result = result.concat(this.listAssets)
+        }
       })
       if (result.length) {
         result[result.length - 1].sentinel = hasNextPage
+      }
+      return result
+    },
+    listAssets(): any[] {
+      const { isAdmin, fontsPageIndex, privateFonts, keyword } = this
+      let result = [] as any[]
+      if (keyword) return result
+      result = [
+        {
+          size: 36,
+          id: 'uploaded_font',
+          type: 'title',
+          title: '上傳的字型'
+        }
+      ]
+      result = result.concat(privateFonts.map((font: IBrandFont) => {
+        return {
+          id: `${font.id}`,
+          size: 32,
+          type: 'category-font-item',
+          list: [{
+            id: font.font_family,
+            src: isAdmin ? 'admin' : 'private',
+            userId: font.team_id,
+            assetId: isAdmin ? font.id : font.asset_index.toString(),
+            signed_url: font.signed_url
+          }]
+        }
+      }))
+      if (result.length) {
+        result[result.length - 1].sentinel = fontsPageIndex >= 0
       }
       return result
     },
@@ -168,6 +213,12 @@ export default Vue.extend({
         'getCategories',
         'getMoreContent',
         'getMoreCategory'
+      ]
+    ),
+    ...mapActions('brandkit',
+      [
+        'fetchFonts',
+        'fetchMoreFonts'
       ]
     ),
     // getFontUrl(fontID: string): string {

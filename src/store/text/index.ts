@@ -1,5 +1,7 @@
+import { IBrandFont } from '@/interfaces/brandkit'
 import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
+import brandkitUtils from '@/utils/brandkitUtils'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -184,15 +186,18 @@ const actions: ActionTree<ITextState, unknown> = {
 }
 
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
+  let font: IBrandFont | undefined
   switch (type) {
     case 'public':
       return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
     case 'admin':
-      return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}}/subset/font.css?ver=${ver}`
+      return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}`
     case 'private':
       // not implemented yet (may need fetching new presigned url (async))
       // params: assetId (index)
-      return ''
+      font = brandkitUtils.getFont(assetId)
+      if (!font) return ''
+      return font.signed_url?.css ?? ''
     case 'URL':
       return url
   }

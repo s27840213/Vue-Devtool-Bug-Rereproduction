@@ -89,6 +89,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -168,7 +169,8 @@ export default Vue.extend({
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
     },
     getFontPrev(): string {
-      return `https://template.vivipic.com/font/${this.props.font}/prev-name`
+      // return `https://template.vivipic.com/font/${this.props.font}/prev-name`
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.props.font)
     },
     scale(): number {
       const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)

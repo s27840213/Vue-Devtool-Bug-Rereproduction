@@ -35,6 +35,7 @@ export interface IAsset {
     original: string
     json: string
   }
+  signed_url?: {[key: string]: string},
   content_ids?: IListServiceContentDataItem[]
   match_cover?: {
     height: number
@@ -44,9 +45,9 @@ export interface IAsset {
     ver: number
   },
   src?: string,
-  userId?: string,
-  assetId?: string,
-  fontUrl?: string
+  user_id?: string,
+  asset_id?: string,
+  asset_index?: number
 }
 
 export interface IAssetProps {

@@ -110,7 +110,7 @@ export interface IListServiceParams {
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
-  fontList?: 0 | 1
+  fontList?: 0 | 1 | 2
   aspect?: string
   width?: number
   height?: number
@@ -140,7 +140,11 @@ export interface IListServiceContentDataItem {
   description?: string
   content_ids?: IListServiceContentDataItem[],
   group_id?: string,
-  group_type?: number | string
+  group_type?: number | string,
+  user_id?: string,
+  asset_index?: number,
+  asset_id?: string,
+  src?: string
 }
 
 export interface IListServiceContentData {
@@ -265,6 +269,7 @@ export interface IUserFontContentData {
   signed_url?: {
     original: string,
     font: string,
+    css: string,
     'prev-name': string,
     'prev_2x-name': string,
     'prev-sample': string,

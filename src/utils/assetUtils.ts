@@ -581,7 +581,8 @@ class AssetUtils {
     const {
       id, type, width, height,
       content_ids: contentIds, match_cover: matchCover,
-      src, userId, assetId, fontUrl, ver
+      user_id: userId, asset_id: assetId, asset_index: assetIndex_,
+      src, ver, signed_url: signedUrl
     } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
@@ -602,9 +603,10 @@ class AssetUtils {
           content_ids: contentIds,
           match_cover: matchCover,
           src,
-          userId,
-          assetId,
-          fontUrl,
+          user_id: userId,
+          asset_id: assetId,
+          asset_index: assetIndex_,
+          signed_url: signedUrl,
           ver
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })

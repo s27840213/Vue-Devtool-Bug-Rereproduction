@@ -5,11 +5,11 @@
     @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${host}/${item.id}/${preview}?ver=${item.ver}`"
+        :src="fallbackSrc || `${getPreview()}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${host}/${item.id}/${preview2}`"
+        :src="fallbackSrc || `${getPreview2()}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
       svg-icon(v-if="props.font === item.id"
@@ -89,6 +89,7 @@ export default Vue.extend({
     }),
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
+      // TODO: if private, refetch signedUrl for 3 times before using fallbackSrc
       console.warn(this.item)
     },
     async setFont() {
@@ -154,7 +155,23 @@ export default Vue.extend({
             }
           })
 
-          AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
+          AssetUtils.addAssetToRecentlyUsed({
+            id: this.item.id,
+            type: 0,
+            user_id: this.item.userId,
+            asset_id: this.item.assetId,
+            asset_index: this.item.asset_index,
+            src: this.item.src || this.item.fontType,
+            ver: this.item.ver,
+            signed_url: this.item.signed_url,
+            urls: {
+              prev: '',
+              full: '',
+              larg: '',
+              original: '',
+              json: ''
+            }
+          })
           StepsUtils.record()
           TextPropUtils.updateTextPropsState({ font: this.item.id })
           return
@@ -213,7 +230,23 @@ export default Vue.extend({
           }
         }
 
-        AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
+        AssetUtils.addAssetToRecentlyUsed({
+          id: this.item.id,
+          type: 0,
+          user_id: this.item.userId,
+          asset_id: this.item.assetId,
+          asset_index: this.item.asset_index,
+          src: this.item.src || this.item.fontType,
+          ver: this.item.ver,
+          signed_url: this.item.signed_url,
+          urls: {
+            prev: '',
+            full: '',
+            larg: '',
+            original: '',
+            json: ''
+          }
+        })
         StepsUtils.record()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {
@@ -242,6 +275,23 @@ export default Vue.extend({
         return sel.getRangeAt(0).toString()
       }
       return false
+    },
+    getPreviewUrl(postfix: string): string {
+      switch (this.item.src || this.item.fontType) {
+        case 'public':
+          return `${this.host}/${this.item.id}/${postfix}?ver=${this.item.ver}`
+        case 'admin':
+          return `https://template.vivipic.com/admin/${this.item.userId}/asset/font/${this.item.assetId}/${postfix}?ver=${this.item.ver}`
+        case 'private':
+          return this.item.signed_url?.[postfix]
+      }
+      return ''
+    },
+    getPreview(): string {
+      return this.getPreviewUrl(this.preview)
+    },
+    getPreview2(): string {
+      return this.getPreviewUrl(this.preview2)
     }
   }
 })

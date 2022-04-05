@@ -312,6 +312,19 @@ class BrandKitUtils {
     return colorPalettes.find(palette => palette.id === paletteId)
   }
 
+  getFont(assetId: string): IBrandFont | undefined {
+    return (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.id === assetId)
+  }
+
+  getFontPrevUrlByFontFamily(fontFamily: string): string {
+    const privateFont = (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.font_family === fontFamily)
+    return privateFont ? (
+      store.getters['user/isAdmin']
+        ? `https://template.vivipic.com/admin/${privateFont.team_id}/asset/font/${privateFont.id}/prev-name?ver=${privateFont.ver}`
+        : privateFont.signed_url?.['prev-name'] ?? ''
+    ) : `https://template.vivipic.com/font/${fontFamily}/prev-name?ver=${generalUtils.generateRandomString(6)}`
+  }
+
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
     return {
       ...(colors[colors.length - 1] ?? this.createDefaultColor()),
