@@ -133,7 +133,7 @@ export default Vue.extend({
     },
     ytId() {
       return i18n.locale === 'us' ? 'GRSlz37Njo0'
-        : i18n.locale === 'jp' ? 'iNvcKkFIdQc'
+        : i18n.locale === 'jp' ? 'FzPHWU0O1uI'
           : i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
     },
     homeStyle(): Record<string, string> {
@@ -213,6 +213,18 @@ export default Vue.extend({
       text-decoration: none;
     }
   }
+  .vector_lightblue2 {
+    width: 85px; height: 87px;
+  }
+  .vector_pink1 {
+    width: 139px; height: 118px;
+  }
+  .oval_pink4 {
+    width: 70px; height: 70px;
+  }
+  .oval_yellow1 {
+    width: 45px; height: 46px;
+  }
 }
 @media screen and (max-width: 768px) {
   .home-top {
@@ -227,8 +239,8 @@ export default Vue.extend({
       }
     }
     &__yt {
-      width: 327px;
-      height: 183.53px;
+      width: 320px;
+      height: 180px;
     }
     .vector_lightblue2 {
       top: 42px; left: 14px;
@@ -244,7 +256,7 @@ export default Vue.extend({
     position: fixed;
     width: 70%;
     bottom: 30px;
-    z-index: setZindex('popup');
+    z-index: 1; // a better layer? why nu-headre will not work
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
@@ -262,7 +274,7 @@ export default Vue.extend({
     }
     &__yt {
       width: 720px;
-      height: 404.1px;
+      height: 405px;
     }
     .vector_lightblue2 {
       top: 9px; left: 67px;
@@ -289,7 +301,7 @@ export default Vue.extend({
     }
     &__yt {
       width: 800px;
-      height: 449px;
+      height: 449.9px;
     }
     .vector_lightblue2 {
       top: 50px; left: 146px;

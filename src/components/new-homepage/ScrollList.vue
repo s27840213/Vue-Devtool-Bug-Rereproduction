@@ -75,7 +75,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      initialed: false,
       prevIcon: false,
       nextIcon: false,
       title: '',
@@ -143,16 +142,7 @@ export default Vue.extend({
         this.moreLink = `/templates?themes=${this.theme}`
         break
     }
-  },
-  async mounted() {
-    //
-  },
-  updated() {
-    if (this.initialed) {
-      return
-    }
-    this.updateIcon()
-    this.initialed = true
+    this.delayInit()
   },
   methods: {
     ...mapActions({
@@ -161,6 +151,16 @@ export default Vue.extend({
     }),
     imgOnerror(e: Event) { // what type
       (e.target as HTMLImageElement).src = this.fallbackSrc
+    },
+    delayInit(retry = 10) {
+      const items = this.$refs.items as HTMLElement
+      if ((!items || items.scrollWidth === items.offsetWidth) && retry > 0) {
+        setTimeout(() => {
+          this.delayInit(retry - 1)
+        }, 1000)
+      } else {
+        this.updateIcon()
+      }
     },
     updateIcon() {
       const items = this.$refs.items as HTMLElement
