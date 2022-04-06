@@ -31,7 +31,7 @@
           div(v-for="item in themeData"
             class="list-content-items__theme-item")
             router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
-              img(:src="require('@/assets/img/svg/newHomepage/designfor/' + localUrl[item.url])"
+              img(:src="require('@/assets/img/png/designfor/' + localUrl[item.url])"
                 @error="imgOnerror")
             span(class="body-XS text-gray-1") {{item.title}}
             span(class="body-XXS text-gray-3") {{item.width}} x {{item.height}}
@@ -92,7 +92,7 @@ export default Vue.extend({
         9: i18n.t('NN0370')
       } as Record<string, string>,
       localUrl: {
-        'https://template.vivipic.com/static/theme/fb.svg': 'FBpost.png',
+        'https://template.vivipic.com/static/theme/fb.svg': 'FBpost.png', // todo ask mingchi to modify the return
         'https://template.vivipic.com/static/theme/fb_cover.svg': 'FBbanner.png',
         'https://template.vivipic.com/static/theme/ig-post.svg': 'IGpost.png',
         'https://template.vivipic.com/static/theme/ig-story.svg': 'IGstory.png',
