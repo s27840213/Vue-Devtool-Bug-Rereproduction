@@ -4,7 +4,7 @@
     span(class="text-setting__title text-blue-1 label-lg") {{$t('NN0062')}}
     div(class="text-setting__row1")
       div(class="property-bar pointer record-selection" @click="openFontsPanel")
-        img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="getFontPrev")
+        img(v-if="props.font[0] !== '_'" class="text-setting__text-preview" :src="fontPrevUrl")
         span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
@@ -71,7 +71,7 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import { IGroup, ILayer, IParagraph, ISpan, IText, ITmp } from '@/interfaces/layer'
 import vClickOutside from 'v-click-outside'
@@ -124,10 +124,12 @@ export default Vue.extend({
         'text-align-center': `${this.$t('NN0106')}`,
         'text-align-right': `${this.$t('NN0107')}`,
         'text-align-justify': `${this.$t('NN0108')}`
-      }
+      },
+      fontPrevUrl: ''
     }
   },
   mounted() {
+    this.getFontPrev()
     this.setCurrFunctionPanel(FunctionPanelType.textSetting)
     // TextPropUtils.updateTextPropsState()
     colorUtils.on(ColorEventType.text, (color: string) => {
@@ -167,10 +169,6 @@ export default Vue.extend({
     }),
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
-    },
-    getFontPrev(): string {
-      // return `https://template.vivipic.com/font/${this.props.font}/prev-name`
-      return brandkitUtils.getFontPrevUrlByFontFamily(this.props.font)
     },
     scale(): number {
       const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)
@@ -224,6 +222,11 @@ export default Vue.extend({
       return false
     }
   },
+  watch: {
+    'props.font': function() {
+      this.getFontPrev()
+    }
+  },
   methods: {
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType'
@@ -231,8 +234,28 @@ export default Vue.extend({
     ...mapMutations('text', {
       setCurrTextInfo: 'SET_textInfo'
     }),
+    ...mapActions('brandkit', {
+      refreshFontAsset: 'refreshFontAsset'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
+    },
+    getFontPrev() {
+      const url = brandkitUtils.getFontPrevUrlByFontFamily(this.props.font, this.props.type, this.props.userId, this.props.assetId)
+      if (this.props.type === 'private' && url === '') {
+        this.refreshFont(this.props.assetId)
+      }
+      this.fontPrevUrl = url
+    },
+    refreshFont(assetId: string) {
+      const assetIndex = parseInt(assetId)
+      this.refreshFontAsset({
+        id: assetId,
+        asset_index: assetIndex
+      }).then((urlMap) => {
+        if (!urlMap['prev-name']) return
+        this.fontPrevUrl = urlMap['prev-name']
+      })
     },
     openFontsPanel() {
       this.isOpenFontPanel = true

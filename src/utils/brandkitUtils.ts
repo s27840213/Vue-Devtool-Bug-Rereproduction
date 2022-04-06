@@ -316,13 +316,20 @@ class BrandKitUtils {
     return (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.id === assetId)
   }
 
-  getFontPrevUrlByFontFamily(fontFamily: string): string {
-    const privateFont = (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.font_family === fontFamily)
-    return privateFont ? (
-      store.getters['user/isAdmin']
-        ? `https://template.vivipic.com/admin/${privateFont.team_id}/asset/font/${privateFont.id}/prev-name?ver=${privateFont.ver}`
-        : privateFont.signed_url?.['prev-name'] ?? ''
-    ) : `https://template.vivipic.com/font/${fontFamily}/prev-name?ver=${generalUtils.generateRandomString(6)}`
+  getFontPrevUrlByFontFamily(fontFamily: string, type: string, userId: string, assetId: string): string {
+    switch (type) {
+      case 'public':
+        return `https://template.vivipic.com/font/${fontFamily}/prev-name?ver=${generalUtils.generateRandomString(6)}`
+      case 'admin':
+        return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/prev-name?ver=${generalUtils.generateRandomString(6)}`
+      case 'private': {
+        const privateFont = (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.font_family === fontFamily)
+        if (!privateFont) return ''
+        return privateFont.signed_url?.['prev-name'] ?? ''
+      }
+      default:
+        return ''
+    }
   }
 
   duplicateEnd(colors: IBrandColor[]): IBrandColor {

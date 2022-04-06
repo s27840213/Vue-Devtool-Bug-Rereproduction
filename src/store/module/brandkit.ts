@@ -331,7 +331,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     if (data.flag === 0) {
       const urlMap = data.url_map[font.asset_index.toString()]
       commit('UPDATE_replaceFontUrl', { font, urlMap })
+      return urlMap
     }
+    return {}
   }
 }
 

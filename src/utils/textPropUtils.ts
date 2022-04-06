@@ -20,7 +20,10 @@ const fontPropsMap: {[key: string]: string} = {
   color: 'color',
   lineHeight: 'lineHeight',
   fontSpacing: 'fontSpacing',
-  textAlign: 'align'
+  textAlign: 'align',
+  type: 'type',
+  assetId: 'assetId',
+  userId: 'userId'
 }
 
 enum textPropType {
@@ -1143,6 +1146,9 @@ class TextPropUtils {
       'fontSpacing',
       'lineHeight',
       'font',
+      'type',
+      'assetId',
+      'userId',
       'color',
       'opacity',
       'weight',
@@ -1178,6 +1184,21 @@ class TextPropUtils {
           const font = this.propReader('fontFamily')
           // const font = this.getTextState.fontStore.find(font => font.face === this.propReader('fontFamily'))?.name
           value = typeof font === 'string' ? font : `_${i18n.t('NN0341')}`
+          break
+        }
+        case 'type': {
+          const type = this.propReader('type')
+          value = typeof type === 'string' ? type : '--'
+          break
+        }
+        case 'assetId': {
+          const assetId = this.propReader('assetId')
+          value = assetId ?? ''
+          break
+        }
+        case 'userId': {
+          const userId = this.propReader('userId')
+          value = userId ?? ''
           break
         }
         case 'color': {
