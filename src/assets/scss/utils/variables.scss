@@ -1,5 +1,4 @@
-$colors: (
-	blue-1: #4EABE6, // primary
+$colors: (blue-1: #4EABE6, // primary
 	blue-2: #7190CC, // secondary
 	blue-3: #C9DBFF,
 	blue-4: #E7EFFF,
@@ -9,7 +8,7 @@ $colors: (
 	dark-blue-2: #09467E,
 	bu: #3C64B1,
 	gray-0: #000000,
-	gray-1: #18191F, 
+	gray-1: #18191F,
 	gray-1-5: #2C2F43,
 	gray-2-7: #828282,
 	gray-2-5: #7f8186,
@@ -21,7 +20,7 @@ $colors: (
 	gray-7: #F8F8F8,
 	light-gray: #C3CBCD,
 	white: #FFFFFF,
-	nav: #14182A ,
+	nav: #14182A,
 	nav-design: #373B53,
 	nav-active: #2C2F43,
 	nav-input: #2D3143,
@@ -33,15 +32,12 @@ $colors: (
 	green-1: #4DB433,
 	green-2: #27ae60,
 	yellow: #FFECA8,
-	orange: #F28606
+	orange: #F28606);
+
+$linear-gradient: (progress-bar: linear-gradient(90deg, #09467E 0%, #4EABE6 100%),
 );
 
-$linear-gradient: (
-  progress-bar: linear-gradient(90deg, #09467E 0%, #4EABE6 100%),
-);
-
-$zindex: (
-	'default-1',
+$zindex: ('default-1',
 	'default-2',
 	'frames',
 	'editor-view',
@@ -66,9 +62,7 @@ $zindex: (
 	'popup'
 );
 
-$ease-functions: (
-  ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1),
-  ease-out-elastic: cubic-bezier(0.75, -0.5, 0, 1.75)
-);
+$ease-functions: (ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1),
+	ease-out-elastic: cubic-bezier(0.75, -0.5, 0, 1.75));
 
-$header-height: 64px;
+$header-height: 72px;

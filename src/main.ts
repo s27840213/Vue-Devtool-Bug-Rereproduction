@@ -69,6 +69,8 @@ if (process.env.NODE_ENV !== 'production') {
   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
     return context.default.id
   }))
+} else {
+  requireAll(req)
 }
 
 requireAll(req)
