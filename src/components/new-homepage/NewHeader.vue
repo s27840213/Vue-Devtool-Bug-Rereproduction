@@ -240,6 +240,7 @@ export default Vue.extend({
   height: $header-height;
   background-size: cover;
   // background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+  background: white;
   box-sizing: border-box;
   position: sticky;
   top: 0;
