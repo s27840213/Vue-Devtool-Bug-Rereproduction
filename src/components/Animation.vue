@@ -3,13 +3,13 @@
     div(v-if="isJSON"
       class="lottie"
       :style="lottieStyle" ref="lavContainer")
-    img(v-if="isImg"
-      v-for="index in 2"
-      class="img"
-      :src="require('@/' + path.slice(2))"
-      :width="width"
-      :height="height"
-      :style="carousel")
+    template(v-if="isImg")
+      img(v-for="index in 2"
+        class="img"
+        :src="require('@/' + path.slice(2))"
+        :width="width"
+        :height="height"
+        :style="carousel")
     video(v-if="isMp4"
       class="video"
       :src="require('@/' + path.slice(2))"

@@ -10,8 +10,7 @@
         i18n(:path="content.title" tag="span")
           template(#newline)
             br
-        img(v-for="cb in content.colorBlock"
-          v-if="!cb.ref"
+        img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
           class="block__colorBlock"
           :src="require('@/assets/img/svg/color-block/' + cb.name)"
           :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
@@ -27,8 +26,7 @@
         :path="`${dir}/${locale}/${content.img.name}`"
         :width="content.img.width * rwdModifier"
         :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
-      img(v-for="cb in content.colorBlock"
-        v-if="cb.ref==='img'"
+      img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
         class="block__colorBlock"
         :src="require('@/assets/img/svg/color-block/' + cb.name)"
         :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")

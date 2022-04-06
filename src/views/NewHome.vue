@@ -5,8 +5,8 @@
       div(class="home-top")
         div(class="home-top-text")
           span(class="home-top-text__title" v-html="title")
-          span(class="home-top-text__description") {{$t('NN0461')}}
-          Animation(v-for="cb in colorBlock"
+          span(class="home-top-text__description") {{$t('NN0465')}}
+          animation(v-for="cb in colorBlock"
             :class="`home-top__colorBlock ${cb.name.replace('.json', '')}`"
             :path="'/lottie/' + cb.name")
         iframe(title="Vivipic" class="home-top__yt"
@@ -20,9 +20,9 @@
         type="theme" @openSizePopup="openSizePopup()")
       scroll-list(v-if="isLogin"
         type="mydesign")
-      scroll-list(v-if="isLogin"
-        v-for="theme in themeList"
-        type="template" :theme="theme")
+      template(v-if="isLogin")
+        scroll-list(v-for="theme in themeList"
+          type="template" :theme="theme")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -115,7 +115,7 @@ export default Vue.extend({
       isLargeDesktop: 'isLargeDesktop'
     }),
     title(): string {
-      return (i18n.t('NN0460') as string)
+      return (i18n.t('NN0464') as string)
         .replace('<blue>', '<span class="text-blue-1">')
         .replace('</blue>', '</span>')
     },
