@@ -376,7 +376,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
