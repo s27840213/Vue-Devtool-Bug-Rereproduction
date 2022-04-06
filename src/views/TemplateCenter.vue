@@ -2,7 +2,7 @@
   div(ref="body"
       class="template-center scrollbar-gray-thin"
       @scroll="handleScroll")
-    new-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
+    new-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
@@ -12,14 +12,18 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    new-header(class="mobile-show" :noSearchbar="true")
+    new-header(class="mobile-show" :noSearchbar="true" :isTop="isTop")
     div(class="template-center__search-container pc-show")
       div(class="template-center__search")
         div(class="template-center__search__title"
             :style="searchTitleStyles()")
-          span {{$t('NN0185')}}
+          i18n(path="NN0464" tag="span")
+            template(#newline)
+              br
+            template(#highlight)
+              span(class="text-blue") {{ $t('NN0465') }}
         div(class="template-center__search__text")
-          i18n(path="NN0186" tag="span")
+          i18n(path="NN0468" tag="span")
             template(#newline)
               br
         search-bar(ref="searchbar"
@@ -30,6 +34,9 @@
                   :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                   @update="handleUpdate"
                   @search="handleSearch")
+      img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
+      img(class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+      img(class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
     div(class="template-center__content")
       div(class="template-center__mobile-search mobile-show")
         search-bar(class="template-center__mobile-search__searchbar"
@@ -264,7 +271,8 @@ export default Vue.extend({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      mouseInTemplate: ''
+      mouseInTemplate: '',
+      isTop: true
     }
   },
   metaInfo(): any {
@@ -423,6 +431,8 @@ export default Vue.extend({
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= 72
       this.searchbarTop = searchbar.getBoundingClientRect().top
+      const body = this.$refs.body as HTMLElement
+      this.isTop = body.scrollTop === 0
     },
     handleUpdate(keyword: string) {
       this.searchbarKeyword = keyword
@@ -643,7 +653,7 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 440px;
+    width: 512px;
     height: 42px;
     border-radius: 3px;
     z-index: 1000;
@@ -659,7 +669,7 @@ body {
     height: 376px;
     background-size: cover;
     background-position: center center;
-    background: white;
+    position: relative;
   }
   &__search {
     display: flex;
@@ -667,7 +677,7 @@ body {
     align-items: center;
     width: fit-content;
     max-width: 90%;
-    gap: 20px;
+    gap: 24px;
     &__title {
       display: flex;
       align-items: center;
@@ -685,7 +695,8 @@ body {
       }
     }
     &__searchbar {
-      width: 440px;
+      margin-top: 8px;
+      width: 512px;
       height: 42px;
       border-radius: 3px;
       background: white;
@@ -1088,6 +1099,37 @@ body {
     height: 10vh;
     width: 100%;
   }
+}
+
+.text-blue {
+  color: setColor(blue-1);
+}
+
+.color-block {
+  position: absolute;
+  z-index: -1;
+}
+
+.vector-purple1 {
+  top: 93px;
+  right: calc((100vw - 948px) / 2);
+  width: 83.78px;
+  height: 87px;
+  transform: rotate(162.55deg);
+}
+
+.oval-lightblue1 {
+  top: 221px;
+  left: calc((100vw - 948px) / 2 + 130px);
+  width: 112px;
+  height: 112px;
+}
+
+.oval-orange2 {
+  top: 298px;
+  left: calc((100vw - 948px) / 2);
+  width: 44px;
+  height: 44px;
 }
 
 .pc-show {
