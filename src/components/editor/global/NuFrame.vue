@@ -7,7 +7,8 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
-      :config="layer")
+      :config="layer"
+      :style="layerStyles")
 </template>
 
 <script lang="ts">
@@ -25,6 +26,13 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number
+  },
+  data() {
+    return {
+      layerStyles: {
+        transfrom: 'translateZ(0)'
+      }
+    }
   },
   async created() {
     if (this.config.needFetch && this.config.designId) {
@@ -140,6 +148,5 @@ export default Vue.extend({
 .nu-frame {
   position: absolute;
   transform-style: flat;
-  overflow: hidden;
 }
 </style>

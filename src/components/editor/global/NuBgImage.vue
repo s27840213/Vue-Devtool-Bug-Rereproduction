@@ -2,10 +2,19 @@
   div(class="nu-background-image"
     :style="mainStyles"
     draggable="false")
-    div(v-if="!isColorBackground && isAdjustImage" :style="frameStyles")
-      nu-adjust-image(:src="src"
-        :styles="adjustImgStyles")
-    div(v-else :style="bgStyles")
+    div(v-show="showImageBg")
+      div(v-if="isAdjustImage" :style="frameStyles")
+        nu-adjust-image(:src="src"
+          crossOrigin='Anonymous'
+          :styles="adjustImgStyles")
+      img(v-else :src="src"
+        crossOrigin = "Anonymous"
+        draggable="false"
+        :style="imgStyles()"
+        class="body"
+        ref="body")
+      //- img(v-else :src="src" :style="imgStyles()")
+      //- div(v-else :style="bgStyles")
 </template>
 
 <script lang="ts">
@@ -17,7 +26,7 @@ import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -27,7 +36,9 @@ export default Vue.extend({
   },
   data() {
     return {
-      src: ''
+      src: '',
+      showImageBg: false,
+      stylesBuff: {} as IImage
     }
   },
   watch: {
@@ -35,8 +46,10 @@ export default Vue.extend({
       deep: true,
       handler: function() {
         if (this.isColorBackground) {
+          this.showImageBg = false
           this.src = ''
         } else {
+          this.showImageBg = true
           this.perviewAsLoading()
         }
       }
@@ -57,6 +70,7 @@ export default Vue.extend({
     if (this.userId !== 'backendRendering') {
       this.perviewAsLoading()
       const nextImg = new Image()
+      nextImg.setAttribute('crossOrigin', 'Anonymous')
       nextImg.onerror = () => {
         if (srcObj.type === 'pexels') {
           this.setBgImageSrc({
@@ -68,6 +82,7 @@ export default Vue.extend({
       }
       nextImg.onload = () => {
         const preImg = new Image()
+        preImg.setAttribute('crossOrigin', 'Anonymous')
         preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
       }
       nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
@@ -83,10 +98,8 @@ export default Vue.extend({
       getEditorViewImages: 'file/getEditorViewImages'
     }),
     ...mapState('user', ['imgSizeMap', 'userId']),
-    getPreviewSize(): number {
-      const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
-      return ImageUtils
-        .getSrcSize(this.image.config.srcObj.type, sizeMap.flatMap(e => e.key === 'smal' ? [e.size] : [])[0] as number || 150)
+    configStyles(): IImageStyle {
+      return this.image.config.styles
     },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
@@ -118,7 +131,6 @@ export default Vue.extend({
     frameStyles(): { [key: string]: string | number } {
       const { image, flipStyles } = this
       return {
-        backgroundColor: '#ffffff',
         width: `${image.config.styles.imgWidth}px`,
         height: `${image.config.styles.imgHeight}px`,
         transform: `translate(${image.posX}px, ${image.posY}px) ${flipStyles.transform}`
@@ -133,9 +145,8 @@ export default Vue.extend({
       })
     },
     bgStyles(): { [key: string]: string | number } {
-      const { image, color } = this
+      const { image } = this
       return {
-        backgroundColor: color,
         backgroundImage: `url(${this.src})`,
         width: `${image.config.styles.imgWidth}px`,
         height: `${image.config.styles.imgHeight}px`,
@@ -160,23 +171,24 @@ export default Vue.extend({
         }
       }
     },
+    imgStyles(): Partial<IImage> {
+      return this.stylesConverter()
+    },
     async perviewAsLoading() {
-      // First put a preview to this.src, then start to load the image user want. When loading finish,
-      // if user still need that image, put it to this.src to replace preview, otherwise do nothing.
       return new Promise<void>((resolve, reject) => {
         const config = this.image.config as IImage
         if (config.previewSrc) {
           this.src = config.previewSrc
           config.previewSrc = ''
-        } else {
-          this.src = ImageUtils.getSrc(config, this.getPreviewSize)
+        } else if (config.srcObj.type === 'background') {
+          this.src = ImageUtils.getSrc(this.image.config, 'prev', this.image.config.ver)
         }
         const img = new Image()
         img.setAttribute('crossOrigin', 'Anonymous')
-        const src = ImageUtils.getSrc(config)
+        const src = ImageUtils.getSrc(this.image.config)
         img.onload = () => {
           /** If after onload the img, the config.srcObj is the same, set the src. */
-          if (ImageUtils.getSrc(config) === src) {
+          if (ImageUtils.getSrc(this.image.config) === src) {
             this.src = src
           }
           resolve()
@@ -186,6 +198,13 @@ export default Vue.extend({
         }
         img.src = src
       })
+    },
+    stylesConverter(): { [key: string]: string } {
+      return {
+        width: `${this.image.config.styles.imgWidth}px`,
+        height: `${this.image.config.styles.imgHeight}px`,
+        transform: `translate(${this.image.posX}px, ${this.image.posY}px) ${this.flipStyles.transform}`
+      }
     }
   }
 })
@@ -205,4 +224,9 @@ export default Vue.extend({
     height: 100%;
   }
 }
+
+.body {
+  transition: opacity 1s;
+}
+
 </style>
