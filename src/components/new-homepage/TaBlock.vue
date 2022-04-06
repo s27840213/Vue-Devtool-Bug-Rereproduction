@@ -13,7 +13,7 @@
         img(v-for="cb in content.colorBlock"
           v-if="!cb.ref"
           class="block__colorBlock"
-          :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
+          :src="require('@/assets/img/svg/color-block/' + cb.name)"
           :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
       div(class="block-text__description text-gray-2")
         span {{$t(content.description)}}
@@ -30,7 +30,7 @@
       img(v-for="cb in content.colorBlock"
         v-if="cb.ref==='img'"
         class="block__colorBlock"
-        :src="require('@/assets/img/svg/newHomepage/' + cb.name)"
+        :src="require('@/assets/img/svg/color-block/' + cb.name)"
         :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
 </template>
 
@@ -78,7 +78,7 @@ export default Vue.extend({
     dir(): string {
       return this.content.img.name.endsWith('json')
         ? '/lottie'
-        : '@/assets/img/svg/newHomepage'
+        : '@/assets/img/svg/homepage'
     }
   }
 })

@@ -43,7 +43,7 @@ import TaBlock from '@/components/new-homepage/TaBlock.vue'
 import NuFooter from '@/components/new-homepage/NuFooter.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import _ from 'lodash'
-import blocklistData from '@/assets/json/newHomepageBlock.json'
+import blocklistData from '@/assets/json/newHomepageBlock.json' // todo rename
 
 export default Vue.extend({
   name: 'Home',
@@ -187,7 +187,6 @@ export default Vue.extend({
   text-align: center;
   // position: -webkit-sticky; // For safari < 13
   position: relative;
-  margin-top: 20px;
   &-text {
     display: flex;
     flex-direction: column;
@@ -230,6 +229,7 @@ export default Vue.extend({
   .home-top {
     min-height: 400px;
     width: 327px;
+    margin-top: 20px;
     &-text {
       &__title {
         @include text-H3
@@ -263,6 +263,7 @@ export default Vue.extend({
   .home-top {
     min-height: 724px;
     width: 768px;
+    margin-top: 160px;
     &-text {
       width: 560px; // todo ? 500 560
       &__title {
@@ -291,6 +292,7 @@ export default Vue.extend({
   .home-top {
     min-height: 724.15px;
     width: 1241px;
+    margin-top: 160px;
     &-text {
       &__title {
         @include text-H1
