@@ -21,7 +21,7 @@ div(class="settings-security")
     //-   div(class="settings-security__button") {{$tc('NN0317',2)}}
   spinner(v-if="isLoading")
   div(v-if="showVerifyPopup"
-    class="settings-security__popup-verify")
+    class="settings-security__popup-verify popup-window")
     popup-verify(type="oldPass"
       :account="account"
       @close="closePopup()")
@@ -139,16 +139,16 @@ export default Vue.extend({
     padding-bottom: 25px;
   }
   &__popup-verify {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #000000a1;
-    z-index: 999999;
+    // position: fixed;
+    // top: 0;
+    // left: 0;
+    // width: 100vw;
+    // height: 100vh;
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+    // background-color: #000000a1;
+    // z-index: 999999;
   }
 }
 </style>
