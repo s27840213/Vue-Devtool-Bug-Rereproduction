@@ -192,12 +192,14 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
     case 'admin':
       return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}`
-    case 'private':
+    case 'private': {
       // not implemented yet (may need fetching new presigned url (async))
       // params: assetId (index)
       font = brandkitUtils.getFont(assetId)
       if (!font) return ''
-      return font.signed_url?.css ?? ''
+      const cssUrl = font.signed_url?.css
+      return cssUrl ? `${cssUrl}&ver=${ver}` : ''
+    }
     case 'URL':
       return url
   }
