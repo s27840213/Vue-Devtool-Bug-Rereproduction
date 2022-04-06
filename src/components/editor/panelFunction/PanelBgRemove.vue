@@ -153,8 +153,6 @@ export default Vue.extend({
           },
           id: id
         })
-
-        console.log(id)
       }
     },
     cancel() {
