@@ -14,26 +14,25 @@
                 @search="handleSearch")
     new-header(class="mobile-show" :noSearchbar="true" :isTop="isTop")
     div(class="template-center__search-container pc-show")
-      div(class="template-center__search")
-        div(class="template-center__search__title"
-            :style="searchTitleStyles()")
-          i18n(path="NN0464" tag="span")
-            template(#newline)
-              br
-            template(#highlight)
-              span(class="text-blue") {{ $t('NN0465') }}
-        div(class="template-center__search__text")
-          i18n(path="NN0468" tag="span")
-            template(#newline)
-              br
-        search-bar(ref="searchbar"
-                  class="template-center__search__searchbar"
-                  :style="searchbarStyles()"
-                  :clear="true"
-                  :defaultKeyword="searchbarKeyword"
-                  :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
-                  @update="handleUpdate"
-                  @search="handleSearch")
+      div(class="template-center__search__title"
+          :style="searchTitleStyles()")
+        i18n(path="NN0486" tag="span")
+          template(#newline)
+            br
+          template(#highlight)
+            span(class="text-blue") {{ $t('NN0487') }}
+      div(class="template-center__search__text")
+        i18n(path="NN0490" tag="span")
+          template(#newline)
+            br
+      search-bar(ref="searchbar"
+                class="template-center__search__searchbar"
+                :style="searchbarStyles()"
+                :clear="true"
+                :defaultKeyword="searchbarKeyword"
+                :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+                @update="handleUpdate"
+                @search="handleSearch")
       img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
       img(class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
       img(class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
@@ -662,23 +661,18 @@ body {
     border: 1px solid setColor(gray-4);
   }
   &__search-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: 376px;
-    background-size: cover;
-    background-position: center center;
     position: relative;
   }
   &__search {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: fit-content;
-    max-width: 90%;
-    gap: 24px;
     &__title {
+      position: absolute;
+      bottom: 210px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 90%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -689,13 +683,22 @@ body {
       }
     }
     &__text {
+      position: absolute;
+      top: 184px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 90%;
       > span {
         @include body-LG;
         color: setColor(gray-2);
       }
     }
     &__searchbar {
-      margin-top: 8px;
+      position: absolute;
+      top: 248px;
+      left: 50%;
+      transform: translateX(-50%);
       width: 512px;
       height: 42px;
       border-radius: 3px;
@@ -1111,8 +1114,8 @@ body {
 }
 
 .vector-purple1 {
-  top: 93px;
-  right: calc((100vw - 948px) / 2);
+  top: 79px;
+  right: max(calc((100vw - 948px) / 2), 24px);
   width: 83.78px;
   height: 87px;
   transform: rotate(162.55deg);
@@ -1120,14 +1123,14 @@ body {
 
 .oval-lightblue1 {
   top: 221px;
-  left: calc((100vw - 948px) / 2 + 130px);
+  left: max(calc((100vw - 948px) / 2 + 130px), 50px);
   width: 112px;
   height: 112px;
 }
 
 .oval-orange2 {
   top: 298px;
-  left: calc((100vw - 948px) / 2);
+  left: max(calc((100vw - 948px) / 2), 32px);
   width: 44px;
   height: 44px;
 }
