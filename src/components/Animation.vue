@@ -30,44 +30,36 @@ export default Vue.extend({
       type: String,
       required: true
     },
-    test: { // to delete
-      type: Object
-    },
-    speed: {
-      type: Number,
-      required: false,
-      default: 1
-    },
     width: {
       type: Number,
-      required: false,
       default: -1
     },
     height: {
       type: Number,
-      required: false,
       default: -1
+    },
+    // The following is for lottie
+    speed: {
+      type: Number,
+      default: 1
     },
     loop: {
       type: Boolean,
-      required: false,
       default: true
     },
     autoPlay: {
       type: Boolean,
-      required: false,
       default: true
     },
     loopDelayMin: {
       type: Number,
-      required: false,
       default: 0
     },
     loopDelayMax: {
       type: Number,
-      required: false,
       default: 0
     },
+    // The following is for image carousel
     delay: {
       type: Number,
       default: 10
@@ -79,7 +71,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      name: 'lottie-animation',
       rendererSettings: {
         scaleMode: 'centerCrop',
         clearCanvas: true,
@@ -127,7 +118,7 @@ export default Vue.extend({
   methods: {
     async loadJsonData(path: string) {
       if (path.startsWith('@/')) {
-        return await require('@/' + path.slice(2)) // 之後改成讀特定資料夾下的
+        return await require('@/' + path.slice(2))
       } else {
         return await axios.get(path).then(response => {
           return response.data

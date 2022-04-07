@@ -1,8 +1,6 @@
 <template lang="pug">
-  div(class="block"
-    :style="blockStyle")
-    div(class="block-text"
-      :style="blockTextStyle")
+  div(class="block" :style="blockStyle")
+    div(class="block-text" :style="blockTextStyle")
       div(v-if="content.comingSoon"
         class="block-text__coming_soon overline-SM")
         span {{'COMING SOON'}}
@@ -16,14 +14,12 @@
           :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
       div(class="block-text__description text-gray-2")
         span {{$t(content.description)}}
-      //- need v-if?
       div(v-if="content.link && $t(content.link.text)"
         class="block-text__link text-H5")
         router-link(:to="content.link.to")
-          span {{$t(content.link.text)+ ' →'}}
-    div(class="block-img")
-      animation(
-        :path="`${dir}/${locale}/${content.img.name}`"
+          span {{$t(content.link.text) + ' →'}}
+    div(class="block-animation")
+      animation(:path="`${dir}/${locale}/${content.img.name}`"
         :width="content.img.width * rwdModifier"
         :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
       img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
@@ -87,17 +83,17 @@ export default Vue.extend({
   display: flex;
   justify-content: space-around;
   align-items: center;
+  position: -webkit-sticky; // For safari < 13
   &__colorBlock {
     position: absolute;
     z-index: -1;
   }
-  position: -webkit-sticky; // For safari < 13
 }
 .block-text {
   display: flex;
   flex-direction: column;
-  max-width: 700px;
   position: -webkit-sticky; // For safari < 13
+  margin-bottom: 10px;
   &__coming_soon {
     padding: 4px;
     color: white;
@@ -117,15 +113,15 @@ export default Vue.extend({
     margin-bottom: 10px;
   }
 }
-.block-img {
+.block-animation {
   position: relative;
 }
 @media screen and (max-width: 768px) {
-  .block{
+  .block {
     width: 375px;
     margin: 100px 0;
   }
-  .block-text{
+  .block-text {
     &__title {
       @include text-H3;
     }
@@ -135,26 +131,25 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
-  .block{
+  .block {
     width: 768px;
     margin: 150px 0;
   }
-  .block-text{
+  .block-text {
     &__title {
       @include text-H2;
     }
     &__description {
       @include body-LG;
     }
-    margin-bottom: 10px;
   }
 }
 @media screen and (min-width: 1440.02px) {
-  .block{
+  .block {
     max-width: 1200px;
     margin: 150px 0;
   }
-  .block-text{
+  .block-text {
     &__title {
       @include text-H2;
     }
