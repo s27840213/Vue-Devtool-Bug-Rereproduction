@@ -7,22 +7,23 @@
           span(class="home-top-text__title" v-html="title")
           span(class="home-top-text__description") {{$t('NN0465')}}
           animation(v-for="cb in colorBlock"
-            :class="`home-top__colorBlock ${cb.name.replace('.json', '')}`"
+            :class="`home-top-text__colorBlock ${cb.name.replace('.json', '')}`"
             :path="'/lottie/' + cb.name")
         iframe(title="Vivipic" class="home-top__yt"
-          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=1`"
-          frameborder="0" allowfullscreen allow="autoplay; encrypted-media")
-        div(class="home-top__buttom home__float-start rounded btn-primary-sm ")
+          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=1&loop=1&playlist=${ytId}`"
+          frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
+        div(class="home-top__buttom rounded btn-primary-sm")
           router-link(to="/editor"
             class="home-top__buttom__text btn-LG")
             span {{$t('NN0391')}}
-      scroll-list(v-if="!isMobile || isLogin"
-        type="theme" @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin"
-        type="mydesign")
-      template(v-if="isLogin")
-        scroll-list(v-for="theme in themeList"
-          type="template" :theme="theme")
+      div(class="home-list")
+        scroll-list(v-if="!isMobile || isLogin"
+          type="theme" @openSizePopup="openSizePopup()")
+        scroll-list(v-if="isLogin"
+          type="mydesign")
+        template(v-if="isLogin")
+          scroll-list(v-for="theme in themeList"
+            type="template" :theme="theme")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -197,10 +198,10 @@ export default Vue.extend({
     &__description {
       color: setColor(gray-2);
     }
-  }
-  &__colorBlock {
-    position: absolute;
-    z-index: -1;
+    &__colorBlock {
+      position: absolute;
+      z-index: -1;
+    }
   }
   &__buttom{
     margin-top: 25px;
@@ -251,12 +252,12 @@ export default Vue.extend({
     .oval_pink4, .oval_yellow1 {
       display: none;
     }
-  }
-  .home__float-start {
-    position: fixed;
-    width: 70%;
-    bottom: 30px;
-    z-index: 1; // a better layer? why nu-headre will not work
+    &__buttom {
+      position: fixed;
+      width: 70%;
+      bottom: 30px;
+      z-index: 1; // a better layer? why nu-headre will not work
+    }
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
