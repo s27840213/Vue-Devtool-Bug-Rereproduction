@@ -240,7 +240,7 @@ export default Vue.extend({
           resolve()
         }
         img.onerror = () => {
-          reject(new Error('cannot load the current image'))
+          reject(new Error(`cannot load the current image, src: ${this.src}`))
         }
         img.src = src
       })
