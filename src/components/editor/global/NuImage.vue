@@ -38,7 +38,8 @@ export default Vue.extend({
     layerIndex: Number,
     subLayerIndex: Number,
     inheritStyle: Object,
-    isBgImgControl: Boolean
+    isBgImgControl: Boolean,
+    imgControl: Boolean
   },
   async created() {
     this.handleInitLoad()
@@ -87,7 +88,7 @@ export default Vue.extend({
     },
     srcObj: {
       handler: function () {
-        this.perviewAsLoading()
+        !this.forRender && this.perviewAsLoading()
       },
       deep: true
     },
@@ -159,7 +160,7 @@ export default Vue.extend({
     /** This prop is used to present if this image-component is
      *  only used for rendering as image controlling */
     forRender(): boolean {
-      return this.config.forRender ?? false
+      return (this.config.forRender || this.imgControl) ?? false
     },
     uploadingImagePreviewSrc(): string {
       return this.config.previewSrc
@@ -176,9 +177,13 @@ export default Vue.extend({
       const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
       return {
-        transform: `translate(${imgX}px, ${imgY}px)`,
+        // width: this.forRender ? '100%' : `${imgWidth}px`,
+        // height: this.forRender ? '100%' : `${imgHeight}px`,
+        // // transform: `translate(${imgX}px, ${imgY}px)`,
+        // ...(!this.forRender && { transform: `translate(${imgX}px, ${imgY}px)` }),
         width: `${imgWidth}px`,
         height: `${imgHeight}px`,
+        transform: `translate(${imgX}px, ${imgY}px)`,
         ...inheritStyle
       }
     },
