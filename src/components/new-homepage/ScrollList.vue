@@ -30,14 +30,14 @@
         template(v-else-if="type === 'theme'")
           div(class="list-content-items__theme-item")
             img(class="list-content-items__theme-item-new pointer"
-              :src="require('@/assets/img/png/plus-origin.png')"
+              :src="require('@/assets/img/svg/plus-origin.svg')"
               @click="$emit('openSizePopup')")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
           div(v-for="item in themeData"
             class="list-content-items__theme-item")
             router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
               img(class="list-content-items__theme-item-preset"
-                :src="require('@/assets/img/svg/designfor/' + localUrl[item.url])"
+                :src="item.url"
                 @error="imgOnerror")
             span(class="body-XS text-gray-1") {{item.title}}
             span(class="body-XXS text-gray-3") {{item.width}} x {{item.height}}
@@ -62,7 +62,6 @@ import { mapActions, mapGetters } from 'vuex'
 import i18n from '@/i18n'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import themeUtils from '@/utils/themeUtils'
-import designUtils from '@/utils/designUtils'
 import _ from 'lodash'
 
 export default Vue.extend({
@@ -97,19 +96,7 @@ export default Vue.extend({
         5: i18n.t('NN0027'),
         7: i18n.t('NN0369'),
         9: i18n.t('NN0370')
-      } as Record<string, string>,
-      localUrl: {
-        'https://template.vivipic.com/static/theme/fb.svg': 'FBpost.svg', // todo ask mingchi to modify the return
-        'https://template.vivipic.com/static/theme/fb_cover.svg': 'FBbanner.svg',
-        'https://template.vivipic.com/static/theme/ig-post.svg': 'IGpost.svg',
-        'https://template.vivipic.com/static/theme/ig-story.svg': 'IGstory.svg',
-        'https://template.vivipic.com/static/theme/line-broadcast.svg': 'Line.svg',
-        'https://template.vivipic.com/static/theme/eco-product.svg': 'Productimage.svg',
-        'https://template.vivipic.com/static/theme/eco-banner.svg': 'Productbanner.svg',
-        'https://template.vivipic.com/static/theme/eco-detail.svg': 'Productdetail.svg',
-        'https://template.vivipic.com/static/theme/youtube_cover.svg': 'youtube.svg',
-        'https://template.vivipic.com/static/theme/google-ads.svg': 'googleda.svg'
-      }
+      } as Record<string, string>
     }
   },
   computed: {
@@ -245,7 +232,7 @@ export default Vue.extend({
 @media screen and (max-width: 768px) {
   .list-content-items__theme-item {
     &-new {
-      width: 66.5px; height: 66.5px;
+      width: 63px; height: 63px;
     }
     &-preset{
       width: 98px; height: 84px;
@@ -255,7 +242,7 @@ export default Vue.extend({
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
   .list-content-items__theme-item {
     &-new{
-      width: 95px; height: 95px;
+      width: 90px; height: 90px;
     }
     &-preset{
       width: 140px; height: 120px;
@@ -265,7 +252,7 @@ export default Vue.extend({
 @media screen and (min-width: 1440.02px) {
   .list-content-items__theme-item {
     &-new {
-      width: 95px; height: 95px;
+      width: 90px; height: 90px;
     }
     &-preset{
       width: 140px; height: 120px;
