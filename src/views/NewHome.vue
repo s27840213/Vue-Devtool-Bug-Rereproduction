@@ -10,7 +10,7 @@
             :class="`home-top__colorBlock ${cb.name.replace('.json', '')}`"
             :path="'/lottie/' + cb.name")
         iframe(title="Vivipic" class="home-top__yt"
-          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=1&loop=1&playlist=${ytId}`"
+          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=1`"
           frameborder="0" allowfullscreen)
         div(class="home-top__buttom home__float-start rounded btn-primary-sm ")
           router-link(to="/editor"
