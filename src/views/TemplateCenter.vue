@@ -52,7 +52,7 @@
                   iconHeight="18.36px"
                   iconColor="white")
       div(class="template-center__filter non-tab-show"
-          :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0'}")
+          :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
