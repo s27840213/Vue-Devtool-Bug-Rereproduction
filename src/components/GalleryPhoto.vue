@@ -13,6 +13,7 @@
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
     img(:src="previewSrc",
+      crossOrigin="Anonymous"
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
@@ -137,10 +138,13 @@ export default Vue.extend({
 
         const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
         const imgPreload = new Image()
+        imgPreload.setAttribute('crossOrigin', 'Anonymous')
         imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
         const imgPreloadPre = new Image()
+        imgPreloadPre.setAttribute('crossOrigin', 'Anonymous')
         imgPreloadPre.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'pre'))
         const imgPreloadNext = new Image()
+        imgPreloadNext.setAttribute('crossOrigin', 'Anonymous')
         imgPreloadNext.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'next'))
 
         this.setCurrDraggedPhoto({

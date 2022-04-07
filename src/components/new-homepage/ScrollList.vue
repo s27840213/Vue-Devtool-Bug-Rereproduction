@@ -25,13 +25,15 @@
         //- type theme
         template(v-if="type === 'theme'")
           div(class="list-content-items__theme-item")
-            img(:src="require('@/assets/img/png/plus-origin.png')"
+            img(class="list-content-items__theme-item-new"
+              :src="require('@/assets/img/png/plus-origin.png')"
               @click="$emit('openSizePopup')")
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
           div(v-for="item in themeData"
             class="list-content-items__theme-item")
             router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
-              img(:src="require('@/assets/img/png/designfor/' + localUrl[item.url])"
+              img(class="list-content-items__theme-item-preset"
+                :src="require('@/assets/img/svg/designfor/' + localUrl[item.url])"
                 @error="imgOnerror")
             span(class="body-XS text-gray-1") {{item.title}}
             span(class="body-XXS text-gray-3") {{item.width}} x {{item.height}}
@@ -92,16 +94,16 @@ export default Vue.extend({
         9: i18n.t('NN0370')
       } as Record<string, string>,
       localUrl: {
-        'https://template.vivipic.com/static/theme/fb.svg': 'FBpost.png', // todo ask mingchi to modify the return
-        'https://template.vivipic.com/static/theme/fb_cover.svg': 'FBbanner.png',
-        'https://template.vivipic.com/static/theme/ig-post.svg': 'IGpost.png',
-        'https://template.vivipic.com/static/theme/ig-story.svg': 'IGstory.png',
-        'https://template.vivipic.com/static/theme/line-broadcast.svg': 'Line.png',
-        'https://template.vivipic.com/static/theme/eco-product.svg': 'Productimage.png',
-        'https://template.vivipic.com/static/theme/eco-banner.svg': 'Productbanner.png',
-        'https://template.vivipic.com/static/theme/eco-detail.svg': 'Productdetail.png',
-        'https://template.vivipic.com/static/theme/youtube_cover.svg': 'youtube.png',
-        'https://template.vivipic.com/static/theme/google-ads.svg': 'googleda.png'
+        'https://template.vivipic.com/static/theme/fb.svg': 'FBpost.svg', // todo ask mingchi to modify the return
+        'https://template.vivipic.com/static/theme/fb_cover.svg': 'FBbanner.svg',
+        'https://template.vivipic.com/static/theme/ig-post.svg': 'IGpost.svg',
+        'https://template.vivipic.com/static/theme/ig-story.svg': 'IGstory.svg',
+        'https://template.vivipic.com/static/theme/line-broadcast.svg': 'Line.svg',
+        'https://template.vivipic.com/static/theme/eco-product.svg': 'Productimage.svg',
+        'https://template.vivipic.com/static/theme/eco-banner.svg': 'Productbanner.svg',
+        'https://template.vivipic.com/static/theme/eco-detail.svg': 'Productdetail.svg',
+        'https://template.vivipic.com/static/theme/youtube_cover.svg': 'youtube.svg',
+        'https://template.vivipic.com/static/theme/google-ads.svg': 'googleda.svg'
       }
     }
   },
@@ -239,6 +241,36 @@ export default Vue.extend({
           }
         }
       }
+    }
+  }
+}
+@media screen and (max-width: 768px) {
+  .list-content-items__theme-item {
+    &-new{
+      width: 66.5px; height: 66.5px;
+    }
+    &-preset{
+      width: 98px; height: 84px;
+    }
+  }
+}
+@media screen and (max-width: 1440px) and (min-width: 768.02px) {
+  .list-content-items__theme-item {
+    &-new{
+      width: 95px; height: 95px;
+    }
+    &-preset{
+      width: 140px; height: 120px;
+    }
+  }
+}
+@media screen and (min-width: 1440.02px) {
+  .list-content-items__theme-item {
+    &-new{
+      width: 95px; height: 95px;
+    }
+    &-preset{
+      width: 140px; height: 120px;
     }
   }
 }

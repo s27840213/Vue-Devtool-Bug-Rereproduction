@@ -567,17 +567,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-// .login-wrapper {
-  // position: fixed;
-  // top: 0;
-  // right: 0;
-  // bottom: 0;
-  // left: 0;
-  // background-color: #000000a1;
-  // display: flex;
-  // justify-content: center;
-  // align-items: center;
-// }
 .login {
   position: relative;
   margin: 0 auto;
