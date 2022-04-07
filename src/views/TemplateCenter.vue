@@ -2,7 +2,7 @@
   div(ref="body"
       class="template-center scrollbar-gray-thin"
       @scroll="handleScroll")
-    nu-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
+    new-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
@@ -12,24 +12,30 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    nu-header(class="mobile-show" :noSearchbar="true")
+    new-header(class="mobile-show" :noSearchbar="true" :isTop="isTop")
     div(class="template-center__search-container pc-show")
-      div(class="template-center__search")
-        div(class="template-center__search__title"
-            :style="searchTitleStyles()")
-          span {{$t('NN0185')}}
-        div(class="template-center__search__text")
-          i18n(path="NN0186" tag="span")
-            template(#newline)
-              br
-        search-bar(ref="searchbar"
-                  class="template-center__search__searchbar"
-                  :style="searchbarStyles()"
-                  :clear="true"
-                  :defaultKeyword="searchbarKeyword"
-                  :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
-                  @update="handleUpdate"
-                  @search="handleSearch")
+      div(class="template-center__search__title"
+          :style="searchTitleStyles()")
+        i18n(path="NN0486" tag="span")
+          template(#newline)
+            br
+          template(#highlight)
+            span(class="text-blue") {{ $t('NN0487') }}
+      div(class="template-center__search__text")
+        i18n(path="NN0490" tag="span")
+          template(#newline)
+            br
+      search-bar(ref="searchbar"
+                class="template-center__search__searchbar"
+                :style="searchbarStyles()"
+                :clear="true"
+                :defaultKeyword="searchbarKeyword"
+                :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+                @update="handleUpdate"
+                @search="handleSearch")
+      img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
+      img(class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+      img(class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
     div(class="template-center__content")
       div(class="template-center__mobile-search mobile-show")
         search-bar(class="template-center__mobile-search__searchbar"
@@ -210,9 +216,9 @@ import Vue from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import hashtag from '@/store/module/hashtag'
 import vClickOutside from 'v-click-outside'
-import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import NuFooter from '@/components/NuFooter.vue'
+import NewHeader from '@/components/new-homepage/NewHeader.vue'
+import NuFooter from '@/components/new-homepage/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -225,7 +231,7 @@ import generalUtils from '@/utils/generalUtils'
 export default Vue.extend({
   name: 'TemplateCenter',
   components: {
-    NuHeader,
+    NewHeader,
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
@@ -264,7 +270,8 @@ export default Vue.extend({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      mouseInTemplate: ''
+      mouseInTemplate: '',
+      isTop: true
     }
   },
   metaInfo(): any {
@@ -395,7 +402,7 @@ export default Vue.extend({
       return window.matchMedia('screen and (max-width: 767px)').matches
     },
     absoluteSearchbarStyles() {
-      return { top: `${Math.max(this.searchbarTop, 11)}px` }
+      return { top: `${Math.max(this.searchbarTop, 15)}px` }
     },
     searchbarStyles() {
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
@@ -421,8 +428,10 @@ export default Vue.extend({
     },
     handleScroll() {
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
-      this.snapToTop = searchbar.getBoundingClientRect().top <= 64
+      this.snapToTop = searchbar.getBoundingClientRect().top <= 72
       this.searchbarTop = searchbar.getBoundingClientRect().top
+      const body = this.$refs.body as HTMLElement
+      this.isTop = body.scrollTop === 0
     },
     handleUpdate(keyword: string) {
       this.searchbarKeyword = keyword
@@ -643,7 +652,7 @@ body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 440px;
+    width: 512px;
     height: 42px;
     border-radius: 3px;
     z-index: 1000;
@@ -652,39 +661,18 @@ body {
     border: 1px solid setColor(gray-4);
   }
   &__search-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: 376px;
-    background-size: cover;
-    background-position: center center;
-    background: radial-gradient(
-        21.05% 59% at 37.08% 73.01%,
-        rgba(255, 195, 139, 0.2) 47.4%,
-        rgba(255, 242, 230, 0.142) 100%
-      ),
-      radial-gradient(
-        32.87% 62.53% at 60.31% 77.79%,
-        rgba(255, 177, 173, 0.2) 56.25%,
-        rgba(202, 159, 153, 0) 92.71%
-      ),
-      linear-gradient(
-        90deg,
-        #cce9ff 0%,
-        #f5fbff 37.1%,
-        #f8fcff 69.6%,
-        #eaf4ff 100%
-      );
+    position: relative;
   }
   &__search {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: fit-content;
-    max-width: 90%;
-    gap: 20px;
     &__title {
+      position: absolute;
+      bottom: 210px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 90%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -695,18 +683,29 @@ body {
       }
     }
     &__text {
+      position: absolute;
+      top: 184px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 90%;
       > span {
         @include body-LG;
         color: setColor(gray-2);
       }
     }
     &__searchbar {
-      width: 440px;
+      position: absolute;
+      top: 248px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 512px;
       height: 42px;
       border-radius: 3px;
       background: white;
       box-sizing: border-box;
       border: 1px solid setColor(gray-4);
+      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     }
   }
   &__content {
@@ -1103,6 +1102,37 @@ body {
     height: 10vh;
     width: 100%;
   }
+}
+
+.text-blue {
+  color: setColor(blue-1);
+}
+
+.color-block {
+  position: absolute;
+  z-index: -1;
+}
+
+.vector-purple1 {
+  top: 79px;
+  right: max(calc((100vw - 948px) / 2), 24px);
+  width: 83.78px;
+  height: 87px;
+  transform: rotate(162.55deg);
+}
+
+.oval-lightblue1 {
+  top: 221px;
+  left: max(calc((100vw - 948px) / 2 + 130px), 50px);
+  width: 112px;
+  height: 112px;
+}
+
+.oval-orange2 {
+  top: 298px;
+  left: max(calc((100vw - 948px) / 2), 32px);
+  width: 44px;
+  height: 44px;
 }
 
 .pc-show {

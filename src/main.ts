@@ -13,6 +13,7 @@ import 'floating-vue/dist/style.css'
 import FloatingVue from 'floating-vue'
 import TooltipUtils from './utils/tooltipUtils'
 import VueGtm from '@gtm-support/vue2-gtm'
+import svgIconUtils from './utils/svgIconUtils'
 
 const tooltipUtils = new TooltipUtils()
 
@@ -63,7 +64,14 @@ Vue.directive('ratio-change', {
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
-requireAll(req)
+
+if (process.env.NODE_ENV !== 'production') {
+  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+    return context.default.id
+  }))
+} else {
+  requireAll(req)
+}
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {

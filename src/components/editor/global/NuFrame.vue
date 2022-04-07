@@ -140,6 +140,5 @@ export default Vue.extend({
 .nu-frame {
   position: absolute;
   transform-style: flat;
-  overflow: hidden;
 }
 </style>

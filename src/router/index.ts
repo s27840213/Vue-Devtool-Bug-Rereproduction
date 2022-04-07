@@ -5,21 +5,19 @@ import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
-import Pricing from '../views/Pricing.vue'
+import NewHome from '../views/NewHome.vue' // todo rename
 import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
+import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
-import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
-import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
-import generalUtils from '@/utils/generalUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -36,7 +34,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '',
     name: 'Home',
-    component: Home,
+    component: NewHome, // todo rename
     beforeEnter: async (to, from, next) => {
       // const locale = from.params.locale
       // if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
@@ -158,6 +156,14 @@ const routes: Array<RouteConfig> = [
     component: BrandKit
   }
 ]
+
+if (process.env.NODE_ENV !== 'production') {
+  routes.push({
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: SvgIconView
+  })
+}
 
 const router = new VueRouter({
   mode: 'history',

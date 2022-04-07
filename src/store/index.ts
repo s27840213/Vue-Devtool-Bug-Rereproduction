@@ -95,7 +95,9 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   themes: [],
   hasCopiedFormat: false,
-  inGestureToolMode: false
+  inGestureToolMode: false,
+  isMobile: false,
+  isLargeDesktop: false
 })
 
 const state = getDefaultState()
@@ -766,6 +768,14 @@ const mutations: MutationTree<IEditorState> = {
   },
   ...imgShadowMutations
 }
+
+function handleResize() {
+  state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
+  state.isLargeDesktop = window.matchMedia('screen and (min-width: 1440px)').matches
+}
+
+window.addEventListener('resize', handleResize)
+handleResize()
 
 export default new Vuex.Store({
   state,
