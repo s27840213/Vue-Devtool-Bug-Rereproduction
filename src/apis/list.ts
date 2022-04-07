@@ -21,7 +21,8 @@ class ListService {
       cache: params.cache,
       platform: params.cache ? window.location.host : null,
       // [2022.01.19] uncached: font, layout
-      all_theme: params.all_theme
+      all_theme: params.all_theme,
+      app_ver: params.app_ver // todelete
     }
 
     return axios.request<IListServiceResponse>({
@@ -92,6 +93,7 @@ class ListService {
     params.token = '1'
     params.all_theme = 1
     params.cache = true
+    params.app_ver = 1 // todelete
     return this.getList(params)
   }
 
