@@ -556,8 +556,11 @@ export default Vue.extend({
       })
     },
     handleTemplateClick(content: IContentTemplate) {
-      if (content.themes.length > 1) {
-        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
+      this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
+      const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
+        return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
+      }, [true, undefined, undefined])[0]
+      if (content.themes.length > 1 && !allSameSize) {
         if (this.isMobile()) {
           const route = this.$router.resolve({
             name: 'Editor',
