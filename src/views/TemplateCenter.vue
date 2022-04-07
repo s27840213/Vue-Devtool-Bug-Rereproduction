@@ -2,7 +2,7 @@
   div(ref="body"
       class="template-center scrollbar-gray-thin"
       @scroll="handleScroll")
-    new-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
+    new-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
@@ -12,8 +12,8 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    new-header(class="mobile-show" :noSearchbar="true" :isTop="isTop")
-    div(class="template-center__search-container pc-show")
+    new-header(class="non-tab-show" :noSearchbar="true" :isTop="true")
+    div(class="template-center__search-container")
       div(class="template-center__search__title"
           :style="searchTitleStyles()")
         i18n(path="NN0486" tag="span")
@@ -26,7 +26,7 @@
           template(#newline)
             br
       search-bar(ref="searchbar"
-                class="template-center__search__searchbar"
+                class="template-center__search__searchbar non-mobile-show"
                 :style="searchbarStyles()"
                 :clear="true"
                 :defaultKeyword="searchbarKeyword"
@@ -36,8 +36,8 @@
       img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
       img(class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
       img(class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
-    div(class="template-center__content")
-      div(class="template-center__mobile-search mobile-show")
+    div(class="template-center__mobile-search__wrapper non-tab-show")
+      div(class="template-center__mobile-search")
         search-bar(class="template-center__mobile-search__searchbar"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
@@ -51,19 +51,20 @@
                   iconWidth="22px"
                   iconHeight="18.36px"
                   iconColor="white")
-      div(class="template-center__filter pc-show")
-        hashtag-category-row(v-for="hashtag in hashtags"
-                            :list="hashtag"
-                            :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
-                            @select="handleHashtagSelect")
-      div(class="template-center__filter mobile-show"
+      div(class="template-center__filter non-tab-show"
           :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0'}")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
                             @select="handleHashtagSelect")
-      div(class="template-center__hr pc-show")
-      div(class="template-center__sorter pc-show")
+    div(class="template-center__content")
+      div(class="template-center__filter non-mobile-show")
+        hashtag-category-row(v-for="hashtag in hashtags"
+                            :list="hashtag"
+                            :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
+                            @select="handleHashtagSelect")
+      div(class="template-center__hr non-mobile-show")
+      div(class="template-center__sorter non-mobile-show")
         div(class="template-center__sorter__left")
           div(class="template-center__sorter__title") {{$t('NN0191')}}:
           div(v-for="sortingCriterium in sortingCriteria"
@@ -147,12 +148,11 @@
                   iconWidth="24px"
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                          :target="'.template-center__content'"
                           @callback="handleLoadMore")
         div(class="template-center__scroll-space")
-    nu-footer(class="pc-show")
+    nu-footer(class="non-mobile-show")
     transition(name="fade-scale")
-      div(v-if="snapToTop" class="template-center__to-top pointer pc-show" @click="scrollToTop")
+      div(v-if="snapToTop" class="template-center__to-top pointer non-mobile-show" @click="scrollToTop")
         img(:src="require('@/assets/img/svg/to_top.svg')")
     transition(name="fade-scale-center")
       div(v-if="modal === 'pages'" class="template-center__multi"
@@ -399,7 +399,7 @@ export default Vue.extend({
       getMoreTemplates: 'getMoreContent'
     }),
     isMobile(): boolean {
-      return window.matchMedia('screen and (max-width: 767px)').matches
+      return window.matchMedia('screen and (max-width: 540px)').matches
     },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 15)}px` }
@@ -644,18 +644,18 @@ body {
   @include size(100%, 100%);
   min-height: 100%;
   overflow-y: auto;
-  @media screen and (max-width: 767px) {
-    overflow: unset;
-    height: unset;
+  @media screen and (max-width: 540px) {
+    position: relative;
+    @include no-scrollbar;
   }
   &__absolute-searchbar {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 512px;
+    width: min(60vw, 512px);
     height: 42px;
     border-radius: 3px;
-    z-index: 1000;
+    z-index: 21;
     background: white;
     box-sizing: border-box;
     border: 1px solid setColor(gray-4);
@@ -699,7 +699,7 @@ body {
       top: 248px;
       left: 50%;
       transform: translateX(-50%);
-      width: 512px;
+      width: min(60vw, 512px);
       height: 42px;
       border-radius: 3px;
       background: white;
@@ -712,7 +712,7 @@ body {
     margin: auto;
     width: 80%;
     min-width: calc(100% - 48px);
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 540px) {
       min-height: 100%;
       min-width: calc(100% - 30px);
       width: calc(100% - 30px);
@@ -723,10 +723,11 @@ body {
   }
   &__filter {
     margin-top: 36px;
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 540px) {
       margin-top: unset;
       margin-left: 5px;
       transition: 0.2s ease;
+      width: calc(100% - 40px);
     }
   }
   &__hr {
@@ -785,16 +786,11 @@ body {
   }
   &__waterfall-wrapper {
     padding-bottom: 80px;
-    @media screen and (max-width: 767px) {
-      height: 100vh;
-      overflow-y: auto;
-      @include no-scrollbar;
-    }
   }
   &__waterfall {
     display: flex;
     gap: 24px;
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 540px) {
       gap: 15px;
       padding: 2px;
     }
@@ -803,7 +799,7 @@ body {
       display: flex;
       flex-direction: column;
       gap: 24px;
-      @media screen and (max-width: 767px) {
+      @media screen and (max-width: 540px) {
         gap: 15px;
       }
       &__template {
@@ -846,14 +842,25 @@ body {
     }
   }
   &__mobile-search {
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 20px;
-    width: calc(100% - 10px);
+    min-width: calc(100% - 40px);
+    width: calc(100% - 40px);
     height: 44px;
+    margin-top: 16px;
+    margin-bottom: 16px;
     display: flex;
     gap: 10px;
+    &__wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      width: 100%;
+      background-color: white;
+      z-index: 10;
+      position: -webkit-sticky;
+      position: sticky;
+      top: $header-height;
+    }
     &__searchbar {
       height: 44px;
       width: unset;
@@ -893,7 +900,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 982px;
+    width: min(982px, calc(100vw - 30px));
     height: 560px;
     background: #ffffff;
     box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
@@ -923,16 +930,16 @@ body {
       height: calc(100% - 70px);
     }
     &__content-left {
-      width: 560px;
+      width: 57%;
       height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      border: 2px solid setColor(gray-5);
+      border-right: 2px solid setColor(gray-5);
       box-sizing: border-box;
     }
     &__content-right {
-      width: calc(100% - 560px);
+      width: 47%;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -942,16 +949,20 @@ body {
       display: grid;
       margin: auto;
       margin-bottom: 20px;
-      width: 860px;
+      width: min(860px, calc(100% - 40px));
       grid-gap: 20px;
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      @media screen and (max-width: 767px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
     &__gallery-item {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 200px;
-      height: 200px;
+      max-width: 200px;
+      width: 100%;
+      aspect-ratio: 1;
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -964,8 +975,8 @@ body {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 456px;
-      height: 456px;
+      width: 67%;
+      aspect-ratio: 1;
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -974,7 +985,7 @@ body {
       background-position: center center;
     }
     &__title {
-      width: 312px;
+      width: 74%;
       height: 20px;
       text-align: left;
       > span {
@@ -986,7 +997,7 @@ body {
       margin-top: 8px;
       display: flex;
       flex-direction: column;
-      width: 312px;
+      width: 74%;
       height: 411px;
       border: 2px solid setColor(gray-5);
       border-radius: 3px;
@@ -1027,7 +1038,7 @@ body {
     }
     &__button {
       margin-top: 18px;
-      width: 240px;
+      width: 57%;
       height: 36px;
       background-color: setColor(blue-1);
       border-radius: 4px;
@@ -1065,7 +1076,7 @@ body {
       align-items: center;
       justify-content: center;
       top: $header-height / 2;
-      right: 15px;
+      right: 45px;
       width: 25px;
       height: 25px;
       z-index: 20;
@@ -1119,6 +1130,9 @@ body {
   width: 83.78px;
   height: 87px;
   transform: rotate(162.55deg);
+  @media screen and (max-width: 768px) {
+    top: 60px;
+  }
 }
 
 .oval-lightblue1 {
@@ -1165,6 +1179,12 @@ body {
 
 .non-tab-show {
   @media screen and (min-width: 541px) {
+    display: none;
+  }
+}
+
+.non-mobile-show {
+  @media screen and (max-width: 540px) {
     display: none;
   }
 }
