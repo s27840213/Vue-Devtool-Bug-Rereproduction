@@ -539,7 +539,7 @@ export default Vue.extend({
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
         this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
-        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
         this.isTemplateReady = true
       })
       generalUtils.fbq('track', 'Search', {
@@ -551,7 +551,7 @@ export default Vue.extend({
       this.getMoreTemplates().then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
         this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
-        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
         this.isTemplateReady = true
       })
     },
@@ -650,6 +650,7 @@ body {
   min-height: 100%;
   overflow-y: auto;
   @media screen and (max-width: 540px) {
+    overflow-x: hidden;
     position: relative;
     @include no-scrollbar;
   }
