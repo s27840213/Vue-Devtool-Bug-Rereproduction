@@ -1,7 +1,7 @@
 <template lang="pug">
   div(ref="body"
       class="template-center scrollbar-gray-thin"
-      @scroll="handleScroll")
+      @scroll.passive="handleScroll")
     new-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
         search-bar(v-if="snapToTop"
@@ -14,15 +14,12 @@
                 @search="handleSearch")
     new-header(class="non-tab-show" :noSearchbar="true" :isTop="true")
     div(class="template-center__search-container")
-      div(class="template-center__search__title"
-          :style="searchTitleStyles()")
-        i18n(path="NN0486" tag="span")
-          template(#newline)
-            br
-          template(#highlight)
-            span(class="text-blue") {{ $t('NN0487') }}
-      div(class="template-center__search__text")
-        i18n(path="NN0490" tag="span")
+      div(class="template-center__search__title non-mobile-show")
+        span(v-html="title")
+      div(class="template-center__search__title non-tab-show")
+        span(v-html="mobileTitle")
+      div(class="template-center__search__text non-mobile-show")
+        i18n(path="NN0488" tag="span")
           template(#newline)
             br
       search-bar(ref="searchbar"
@@ -34,9 +31,10 @@
                 @update="handleUpdate"
                 @search="handleSearch")
       img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
-      img(class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
-      img(class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
-    div(class="template-center__mobile-search__wrapper non-tab-show")
+      img(class="color-block oval-lightblue1 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+      img(class="color-block oval-orange2 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
+    div(ref="mobileSearch" class="template-center__mobile-search__wrapper non-tab-show"
+        :style="mobileSearchStyles()")
       div(class="template-center__mobile-search")
         search-bar(class="template-center__mobile-search__searchbar"
                   :clear="true"
@@ -51,6 +49,10 @@
                   iconWidth="22px"
                   iconHeight="18.36px"
                   iconColor="white")
+        transition(name="slide-up")
+          img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+        transition(name="slide-up")
+          img(v-if="!mobileSnapToTop" class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
       div(class="template-center__filter non-tab-show"
           :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
         hashtag-category-row(v-for="hashtag in hashtags"
@@ -72,11 +74,6 @@
               :class="{'selected': selectedSorting === sortingCriterium.key}"
               @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
-          //- div(class="template-center__sorter__color-title") Color
-          //- div(class="template-center__sorter__color-down")
-          //-   svg-icon(iconName="chevron-down"
-          //-           iconWidth="24px"
-          //-           iconColor="gray-2")
       div(class="template-center__waterfall-wrapper pc-lg-show")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesPC"
@@ -228,6 +225,8 @@ import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 import generalUtils from '@/utils/generalUtils'
 
+const HEADER_HEIGHT = 72
+
 export default Vue.extend({
   name: 'TemplateCenter',
   components: {
@@ -255,6 +254,7 @@ export default Vue.extend({
     return {
       snapToTop: false,
       searchbarTop: 0,
+      mobileSnapToTop: false,
       searchbarKeyword: '',
       hashtagSelections: {} as { [key: string]: { type: string, selection: string[] } },
       sortingCriteria,
@@ -388,7 +388,17 @@ export default Vue.extend({
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
-    })
+    }),
+    title(): string {
+      return `${this.$t('NN0486', { newline: '<br>' })}`
+        .replace('<blue>', '<span class="text-blue-1">')
+        .replace('</blue>', '</span>')
+    },
+    mobileTitle(): string {
+      return `${this.$t('NN0487', { newline: '<br>' })}`
+        .replace('<blue>', '<span class="text-blue-1">')
+        .replace('</blue>', '</span>')
+    }
   },
   methods: {
     ...mapActions('hashtag', {
@@ -407,15 +417,8 @@ export default Vue.extend({
     searchbarStyles() {
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
     },
-    searchTitleStyles() {
-      if (this.$i18n.locale === 'tw') {
-        return {
-          letterSpacing: '0.255em',
-          textIndent: '0.255em'
-        }
-      } else {
-        return {}
-      }
+    mobileSearchStyles() {
+      return this.mobileSnapToTop ? { zIndex: 10 } : {}
     },
     templateStyles(aspectRatio: number) {
       return { aspectRatio: `${aspectRatio}` }
@@ -428,10 +431,12 @@ export default Vue.extend({
     },
     handleScroll() {
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
-      this.snapToTop = searchbar.getBoundingClientRect().top <= 72
+      this.snapToTop = searchbar.getBoundingClientRect().top <= HEADER_HEIGHT
       this.searchbarTop = searchbar.getBoundingClientRect().top
       const body = this.$refs.body as HTMLElement
       this.isTop = body.scrollTop === 0
+      const mobileSearch = this.$refs.mobileSearch as HTMLElement | undefined
+      this.mobileSnapToTop = (mobileSearch?.getBoundingClientRect()?.top ?? 1000) <= HEADER_HEIGHT
     },
     handleUpdate(keyword: string) {
       this.searchbarKeyword = keyword
@@ -664,6 +669,9 @@ body {
     width: 100%;
     height: 376px;
     position: relative;
+    @media screen and (max-width: 540px) {
+      height: fit-content;
+    }
   }
   &__search {
     &__title {
@@ -676,6 +684,16 @@ body {
       display: flex;
       align-items: center;
       justify-content: center;
+      @media screen and (max-width: 540px) {
+        position: static;
+        transform: none;
+        margin: auto;
+        margin-top: 24px;
+        margin-bottom: 38px;
+        > span {
+          text-align: left;
+        }
+      }
       > span {
         @include text-H2;
         display: block;
@@ -842,6 +860,7 @@ body {
     }
   }
   &__mobile-search {
+    position: relative;
     min-width: calc(100% - 40px);
     width: calc(100% - 40px);
     height: 44px;
@@ -856,7 +875,6 @@ body {
       flex-direction: column;
       width: 100%;
       background-color: white;
-      z-index: 10;
       position: -webkit-sticky;
       position: sticky;
       top: $header-height;
@@ -866,7 +884,7 @@ body {
       width: unset;
       background-color: white;
       border: 1px solid setColor(gray-4);
-      border-radius: 3px;
+      border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 1;
     }
@@ -877,7 +895,7 @@ body {
       align-items: center;
       justify-content: center;
       border: 1px solid setColor(gray-4);
-      border-radius: 3px;
+      border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 0;
       flex-basis: 44px;
@@ -1115,7 +1133,7 @@ body {
   }
 }
 
-.text-blue {
+.text-blue-1 {
   color: setColor(blue-1);
 }
 
@@ -1133,6 +1151,10 @@ body {
   @media screen and (max-width: 768px) {
     top: 60px;
   }
+  @media screen and (max-width: 540px) {
+    top: 2px;
+    right: -12px;
+  }
 }
 
 .oval-lightblue1 {
@@ -1140,6 +1162,12 @@ body {
   left: max(calc((100vw - 948px) / 2 + 130px), 50px);
   width: 112px;
   height: 112px;
+  @media screen and (max-width: 540px) {
+    top: -26px;
+    left: -31px;
+    width: 101px;
+    height: 101px;
+  }
 }
 
 .oval-orange2 {
@@ -1147,6 +1175,10 @@ body {
   left: max(calc((100vw - 948px) / 2), 32px);
   width: 44px;
   height: 44px;
+  @media screen and (max-width: 540px) {
+    top: 50px;
+    left: -37px;
+  }
 }
 
 .pc-show {
@@ -1234,6 +1266,19 @@ body {
   &-enter,
   &-leave-to {
     left: 100%;
+  }
+}
+
+.slide-up {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(-100px);
   }
 }
 </style>
