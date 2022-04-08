@@ -103,6 +103,28 @@
             download-page-selection(class="ml-5 w-75"
               :defaultSelected="pageRange"
               @confirm="handleRangeConfirm")
+        template(v-if="isAdmin || onRd")
+          hr(class="popup-download__hr my-15")
+          div(class="dev-selector mb-10")
+            dropdown(class="body-3 full-width"
+                    :options="devs"
+                    @select="handleDevSelect") {{ selectedDevLabel }}
+          download-check-button(v-if="isAdmin"
+            type="checkbox"
+            class="mb-20 body-3"
+            label="使用新後端瀏覽器"
+            :default-checked="newChrome"
+            @change="({ checked }) => handleNewChrome(checked)")
+          div
+            btn(class="full-width body-3 rounded"
+              :disabled="isButtonDisabled"
+              @click.native="handleSubmit(true)")
+              svg-icon(v-if="polling"
+                class="align-middle"
+                iconName="loading"
+                iconColor="white"
+                iconWidth="20px")
+              span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
         hr(class="popup-download__hr my-15")
         download-check-button(type="checkbox"
           class="mb-20"
@@ -119,28 +141,6 @@
             iconColor="white"
             iconWidth="20px")
           span(v-else) {{$t('NN0010')}}
-      template(v-if="isAdmin || onRd")
-        hr(class="popup-download__hr my-15")
-        div(class="dev-selector mb-10")
-          dropdown(class="body-3 full-width"
-                  :options="devs"
-                  @select="handleDevSelect") {{ selectedDevLabel }}
-        download-check-button(v-if="isAdmin"
-          type="checkbox"
-          class="mb-20 body-3"
-          label="使用新後端瀏覽器"
-          :default-checked="newChrome"
-          @change="({ checked }) => handleNewChrome(checked)")
-        div
-          btn(class="full-width body-3 rounded"
-            :disabled="isButtonDisabled"
-            @click.native="handleSubmit(true)")
-            svg-icon(v-if="polling"
-              class="align-middle"
-              iconName="loading"
-              iconColor="white"
-              iconWidth="20px")
-            span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
 </template>
 
 <script lang="ts">
