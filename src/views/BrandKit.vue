@@ -71,7 +71,6 @@ export default Vue.extend({
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
     brandkitUtils.fetchFonts(this.fetchFonts)
-    themeUtils.checkThemeState()
   },
   data() {
     return {
