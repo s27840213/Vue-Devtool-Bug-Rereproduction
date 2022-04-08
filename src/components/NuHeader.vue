@@ -51,7 +51,7 @@
         //-     :placeholder="$t('NN0037')"
         //-     @search="handleSearch")
         div(v-if="!isLogin"
-          class="py-5 px-30 text-bold pointer text-blue-1"
+          class="nu-header__btn-login py-5 px-30 text-bold pointer text-blue-1"
           style="white-space: nowrap;"
           @click="goToPage('Login')") {{$tc('NN0168',2)}}
         div(v-if="!isLogin"
@@ -94,7 +94,7 @@
       //-     :iconWidth="'25px'"
       //-     @click.native="closeSearchPage")
     slot
-    transition(name="fade-up")
+    transition(name="slide-x-right")
       div(v-if="isShowMenu"
           class="nu-header__menu popup-window")
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
@@ -258,6 +258,12 @@ export default Vue.extend({
     background: setColor(blue-1);
     border-radius: 4px;
     padding: 5px 30px;
+    &-login:hover {
+      color: setColor(blue-hover);
+    }
+    &:hover {
+      background-color: setColor(blue-hover);
+    }
   }
   &__container {
     position: relative;
@@ -300,6 +306,9 @@ export default Vue.extend({
     &__link {
       color: unset;
       text-decoration: unset;
+      &:hover {
+        color: setColor(blue-hover)
+      }
     }
   }
   &__profile {
@@ -388,6 +397,7 @@ export default Vue.extend({
   }
   &__menu {
     justify-content: flex-start;
+    left: -24px;
   }
 }
 .fade {
@@ -400,7 +410,7 @@ export default Vue.extend({
     opacity: 0;
   }
 }
-.fade-up {
+.slide-x-right {
   &-enter-active, &-leave-active {
     transition: 1s;
   }
