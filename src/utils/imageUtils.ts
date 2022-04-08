@@ -89,7 +89,8 @@ class ImageUtils {
   getSrcType(src: string) {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
-    if (src.includes('template.vivipic')) return 'public'
+    if (src.includes('template.vivipic.com/background')) return 'background'
+    if (src.includes('template.vivipic.com/admin')) return 'public'
     if (src.includes('asset.vivipic')) return 'private'
     return ''
   }

@@ -1,7 +1,7 @@
 import { ITemplate } from '@/interfaces/template'
 
 class TemplateCenterUtils {
-  generateWaterfall(templates: any, columns: number): ITemplate[][] {
+  generateWaterfall(templates: any, columns: number, scale = 4): ITemplate[][] {
     const res = [] as ITemplate[][]
     const ratios = [] as number[]
     for (let i = 0; i < columns; i++) {
@@ -17,7 +17,7 @@ class TemplateCenterUtils {
       const index = this.lowestColumn(ratios)
       ratios[index] += ratio
       res[index].push({
-        url: this.getPrevUrl(cover),
+        url: this.getPrevUrl(cover, scale),
         id: cover.id,
         theme_id: cover.theme_id,
         aspect_ratio: width / height,
@@ -33,8 +33,9 @@ class TemplateCenterUtils {
     return res
   }
 
-  getPrevUrl(item: {id: string, ver: number}): string {
-    return `https://template.vivipic.com/template/${item.id}/prev_4x?ver=${item.ver}`
+  getPrevUrl(item: {id: string, ver: number}, scale = 4): string {
+    const postfix = scale === 1 ? 'prev' : `prev_${scale}x`
+    return `https://template.vivipic.com/template/${item.id}/${postfix}?ver=${item.ver}`
   }
 
   lowestColumn(ratios: number[]): number {

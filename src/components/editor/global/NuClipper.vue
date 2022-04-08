@@ -44,6 +44,15 @@ export default Vue.extend({
         }
       }
       switch (type) {
+        case 'image':
+          if (this.config.isFrame) {
+            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+          } else {
+            clipPath = layerPath
+          }
+          width = `${width}px`
+          height = `${height}px`
+          break
         case 'shape':
           width = `${this.shapeWidth}px`
           height = `${this.shapeHeight}px`

@@ -2,7 +2,7 @@
   div(class="nu-background-image"
     :style="mainStyles"
     draggable="false")
-    div(v-show="showImageBg")
+    div(v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="src"
           crossOrigin='Anonymous'
@@ -37,7 +37,6 @@ export default Vue.extend({
   data() {
     return {
       src: '',
-      showImageBg: false,
       stylesBuff: {} as IImage
     }
   },
@@ -46,10 +45,8 @@ export default Vue.extend({
       deep: true,
       handler: function() {
         if (this.isColorBackground) {
-          this.showImageBg = false
           this.src = ''
         } else {
-          this.showImageBg = true
           this.perviewAsLoading()
         }
       }
@@ -58,6 +55,7 @@ export default Vue.extend({
   async created() {
     const { srcObj } = this
     if (!srcObj || !srcObj.type) return
+
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
       const editorImg = this.getEditorViewImages

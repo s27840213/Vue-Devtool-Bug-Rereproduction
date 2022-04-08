@@ -186,12 +186,11 @@ export default Vue.extend({
           })
         }
         img.src = src
-      } else {
-        this._setBackgroundColor({
-          pageIndex: pageUtils.currFocusPageIndex,
-          color: '#ffffff'
-        })
       }
+      this._setBackgroundColor({
+        pageIndex: pageUtils.currFocusPageIndex,
+        color: '#ffffff'
+      })
     },
     closePopup() {
       popupUtils.closePopup()

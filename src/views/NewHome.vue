@@ -7,22 +7,23 @@
           span(class="home-top-text__title" v-html="title")
           span(class="home-top-text__description") {{$t('NN0465')}}
           animation(v-for="cb in colorBlock"
-            :class="`home-top__colorBlock ${cb.name.replace('.json', '')}`"
-            :path="'/lottie/' + cb.name")
+            :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
+            :path="'/lottie/' + cb")
         iframe(title="Vivipic" class="home-top__yt"
-          :src="`https://www.youtube.com/embed/?autoplay=1&mute=1&loop=1&playlist=${ytId}`"
-          frameborder="0" allowfullscreen)
-        div(class="home-top__buttom home__float-start rounded btn-primary-sm ")
+          :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
+          frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
+        div(class="home-top__buttom rounded btn-primary-sm")
           router-link(to="/editor"
             class="home-top__buttom__text btn-LG")
             span {{$t('NN0391')}}
-      scroll-list(v-if="!isMobile || isLogin"
-        type="theme" @openSizePopup="openSizePopup()")
-      scroll-list(v-if="isLogin"
-        type="mydesign")
-      template(v-if="isLogin")
-        scroll-list(v-for="theme in themeList"
-          type="template" :theme="theme")
+      div(class="home-list")
+        scroll-list(v-if="!isMobile || isLogin"
+          type="theme" @openSizePopup="openSizePopup()")
+        scroll-list(v-if="isLogin"
+          type="mydesign")
+        template(v-if="isLogin")
+          scroll-list(v-for="theme in themeList"
+            type="template" :theme="theme")
       div(class="home-block")
         ta-block(v-for="item in blocklist"
           :content="item")
@@ -43,7 +44,7 @@ import TaBlock from '@/components/new-homepage/TaBlock.vue'
 import NuFooter from '@/components/new-homepage/NuFooter.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import _ from 'lodash'
-import blocklistData from '@/assets/json/newHomepageBlock.json' // todo rename
+import blocklistData from '@/assets/json/homepageBlock.json'
 
 export default Vue.extend({
   name: 'Home',
@@ -61,10 +62,10 @@ export default Vue.extend({
       isTop: true,
       themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
       colorBlock: [
-        { name: 'vector_lightblue2.json' },
-        { name: 'vector_pink1.json' },
-        { name: 'oval_pink4.json' },
-        { name: 'oval_yellow1.json' }
+        'vector_lightblue2.json',
+        'vector_pink1.json',
+        'oval_pink4.json',
+        'oval_yellow1.json'
       ]
     }
   },
@@ -111,8 +112,7 @@ export default Vue.extend({
       isLogin: 'user/isLogin'
     }),
     ...mapState({
-      isMobile: 'isMobile',
-      isLargeDesktop: 'isLargeDesktop'
+      isMobile: 'isMobile'
     }),
     title(): string {
       return (i18n.t('NN0464') as string)
@@ -166,17 +166,13 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .home {
-  position: relative;
-  width: 100%;
   height: 100%;
-  text-align: left;
 }
 .home-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  overflow-y: scroll;
   height: calc(100% - 50px); // why 50?(gary)
 }
 .home-top{
@@ -184,27 +180,25 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  text-align: center;
-  // position: -webkit-sticky; // For safari < 13
   position: relative;
   &-text {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    text-align: center;
     &__title {
       color: setColor(gray-1);
     }
     &__description {
       color: setColor(gray-2);
     }
-  }
-  &__colorBlock {
-    position: absolute;
-    z-index: -1;
+    &__colorBlock {
+      position: absolute;
+      z-index: -1;
+    }
   }
   &__buttom{
     margin-top: 25px;
-    width: 216px; // consider padding 有沒有更好的方式？
+    width: 216px;
     height: 44px;
     box-shadow: 0px 9px 13px 0px #7190CC40;
     &__text {
@@ -246,17 +240,17 @@ export default Vue.extend({
       top: 42px; left: 14px;
     }
     .vector_pink1 {
-      top: -12px; left: 319px;
+      top: -12px; left: 299px;
     }
     .oval_pink4, .oval_yellow1 {
       display: none;
     }
-  }
-  .home__float-start {
-    position: fixed;
-    width: 70%;
-    bottom: 30px;
-    z-index: 1; // a better layer? why nu-headre will not work
+    &__buttom {
+      position: fixed;
+      width: 70%;
+      bottom: 30px;
+      z-index: 1;
+    }
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
