@@ -88,7 +88,6 @@ class ImageShadowUtils {
       this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
       let alphaVal = 1
-
       /** Calculating the spread */
       if (this.spreadBuff.spread !== spread) {
         layerInfo && this.setIsProcess(layerInfo, true)
@@ -97,9 +96,9 @@ class ImageShadowUtils {
             setTimeout(() => {
               for (let j = -spread; j <= spread && this.handlerId === handlerId; j++) {
                 const r = Math.sqrt(i * i + j * j)
-                if (r >= spread + this.SPREAD_RADIUS) {
+                if (r >= spread + this.SPREAD_RADIUS && currentEffect !== ShadowEffectType.frame) {
                   alphaVal = 0
-                } else if (r >= spread) {
+                } else if (r >= spread && currentEffect !== ShadowEffectType.frame) {
                   alphaVal = (1 - (r - spread) * _spread)
                 } else {
                   alphaVal = 1
@@ -109,7 +108,6 @@ class ImageShadowUtils {
                   this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
                 }
               }
-              console.log('i:', i)
               resolve()
             }, 0)
           })
@@ -121,7 +119,6 @@ class ImageShadowUtils {
       this.ctxT.putImageData(this.spreadBuff.data, offsetX, offsetY)
 
       if (this.handlerId === handlerId) {
-        console.log('for loop done')
         this.ctxT.globalCompositeOperation = 'source-in'
         const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
         StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
@@ -140,7 +137,12 @@ class ImageShadowUtils {
       }
     }
     this.handlerId = handlerId
-    timeout ? (this._draw = setTimeout(handler, timeout)) : await handler()
+    if (timeout) {
+      this._draw = setTimeout(handler, timeout)
+    } else {
+      await handler()
+      this.spreadBuff.spread = -1
+    }
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {

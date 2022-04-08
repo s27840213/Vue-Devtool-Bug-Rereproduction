@@ -39,7 +39,7 @@ class ImageUtils {
     }
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}`
       case 'private': {
         const images = store.getters['user/getImages'] as Array<IAssetPhoto>
         const img = images.find(img => img.assetIndex === assetId)
@@ -51,9 +51,9 @@ class ImageUtils {
         return ''
       }
       case 'unsplash':
-        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}`
+        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size || 766}`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size || 766}`
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/full`
       case 'frame':

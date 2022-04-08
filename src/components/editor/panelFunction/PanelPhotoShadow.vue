@@ -159,32 +159,43 @@ export default Vue.extend({
         }
       })
 
-      // uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
-      //   const srcObj = {
-      //     type: this.isAdmin ? 'public' : 'private',
-      //     userId: json.data.team_id,
-      //     assetId: this.isAdmin ? json.data.id : json.data.asset_index
-      //   }
-      //   const pageIndex = pageUtils.getPageIndexById(pageId)
-      //   const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-      //   if (pageIndex !== -1 && layerIndex !== -1) {
-      //     layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
-      //     layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-      //       width: newWidth,
-      //       height: newHeight,
-      //       imgWidth: newWidth,
-      //       imgHeight: newHeight,
-      //       initWidth: newWidth,
-      //       initHeight: newHeight,
-      //       imgX: 0,
-      //       imgY: 0,
-      //       x: config.styles.x - leftShadowThickness,
-      //       y: config.styles.y - topShadowThickness,
-      //       scale: 1
-      //     })
-      //     this.resetAllShadowProps(pageIndex, layerIndex)
-      //   }
-      // })
+      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
+        const srcObj = {
+          type: this.isAdmin ? 'public' : 'private',
+          userId: json.data.team_id,
+          assetId: this.isAdmin ? json.data.id : json.data.asset_index
+        }
+
+        const pageIndex = pageUtils.getPageIndexById(pageId)
+        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+        const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
+        const styles = {
+          width: newWidth,
+          height: newHeight,
+          imgWidth: newWidth,
+          imgHeight: newHeight,
+          initWidth: newWidth,
+          initHeight: newHeight,
+          imgX: 0,
+          imgY: 0,
+          x: config.styles.x - leftShadowThickness,
+          y: config.styles.y - topShadowThickness,
+          scale: 1
+        }
+        layer.srcObj = srcObj
+        Object.assign(layer.styles, styles)
+
+        const img = new Image()
+        img.crossOrigin = 'anoynous'
+        img.onload = () => {
+          if (pageIndex !== -1 && layerIndex !== -1) {
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+            layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
+            this.resetAllShadowProps(pageIndex, layerIndex)
+          }
+        }
+        img.src = imageUtils.getSrc(layer)
+      })
       imageShadowUtils.clearLayerData()
     }
   },
