@@ -117,6 +117,7 @@ export default Vue.extend({
 .mobile-menu {
   @include size(200px, 100%);
   position: relative;
+  left: calc(100% - 200px + 24px);
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;

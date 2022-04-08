@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-header")
+  div(class="nu-header" :class="{'navbar-shadow': !isTop}")
     div(class="nu-header__container")
       div
         router-link(to="/"
@@ -45,13 +45,13 @@
           div
           div
       div(class="body-2")
-        div(v-if="!isLogin")
-          search-bar(v-if="!noSearchbar"
-            class="nu-header__search"
-            :placeholder="$t('NN0037')"
-            @search="handleSearch")
+        //- div(v-if="!isLogin")
+        //-   search-bar(v-if="!noSearchbar"
+        //-     class="nu-header__search"
+        //-     :placeholder="$t('NN0037')"
+        //-     @search="handleSearch")
         div(v-if="!isLogin"
-          class="py-5 px-30 text-bold pointer text-blue-1"
+          class="nu-header__btn-login py-5 px-30 text-bold pointer text-blue-1"
           style="white-space: nowrap;"
           @click="goToPage('Login')") {{$tc('NN0168',2)}}
         div(v-if="!isLogin"
@@ -69,33 +69,34 @@
             class="nu-header__account"
             @close="() => (isAccountPopup = false)")
     div(class="nu-header__container-mobile")
-      div(class="pl-15")
-        svg-icon(v-if="!isShowSearchPage"
-          :iconName="'menu'"
-          :iconWidth="'25px'"
-          :iconColor="'gray-3'"
-          @click.native="openMenu")
-      div(class="flex-center")
+      div(class="flex-center pl-15")
         svg-icon(class="pointer"
           :iconName="'logo'"
           :iconWidth="'90px'"
           style="height: 45px;"
           @click.native="goToPage('Home')")
-      div(v-if="noSearchbar")
-      div(v-else class="pr-15 relative")
+      div(class="pr-15")
         svg-icon(v-if="!isShowSearchPage"
-          :iconName="'search'"
-          :iconColor="'gray-3'"
+          :iconName="'menu'"
           :iconWidth="'25px'"
-          @click.native="() => { isShowSearchPage = true }")
-        svg-icon(v-else
-          :iconName="'close'"
-          :iconColor="'gray-3'"
-          :iconWidth="'25px'"
-          @click.native="closeSearchPage")
+          :iconColor="'gray-1'"
+          @click.native="openMenu")
+      //- div(v-if="noSearchbar")
+      //- div(v-else class="pr-15 relative")
+      //-   svg-icon(v-if="!isShowSearchPage"
+      //-     :iconName="'search'"
+      //-     :iconColor="'gray-3'"
+      //-     :iconWidth="'25px'"
+      //-     @click.native="() => { isShowSearchPage = true }")
+      //-   svg-icon(v-else
+      //-     :iconName="'close'"
+      //-     :iconColor="'gray-3'"
+      //-     :iconWidth="'25px'"
+      //-     @click.native="closeSearchPage")
     slot
-    div(v-if="isShowMenu"
-        class="nu-header__menu")
+    transition(name="slide-x-right")
+      div(v-if="isShowMenu"
+          class="nu-header__menu popup-window")
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
           v-click-outside="() => { isShowMenu = false }")
     div(v-if="isShowSearchPage"
@@ -120,6 +121,7 @@ import Avatar from '@/components/Avatar.vue'
 import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
 import localeUtils from '@/utils/localeUtils'
+
 export default Vue.extend({
   components: {
     SearchBar,
@@ -133,7 +135,8 @@ export default Vue.extend({
   props: {
     noSearchbar: Boolean,
     noNavigation: Boolean,
-    showSearchPage: Boolean
+    showSearchPage: Boolean,
+    isTop: Boolean
   },
   data() {
     return {
@@ -237,7 +240,8 @@ export default Vue.extend({
 .nu-header {
   height: $header-height;
   background-size: cover;
-  background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+  // background: linear-gradient(90deg, #CCE9FF 0%, #F5FBFF 37.1%, #F8FCFF 69.6%, #EAF4FF 100%);
+  background: white;
   box-sizing: border-box;
   position: sticky;
   top: 0;
@@ -254,6 +258,12 @@ export default Vue.extend({
     background: setColor(blue-1);
     border-radius: 4px;
     padding: 5px 30px;
+    &-login:hover {
+      color: setColor(blue-hover);
+    }
+    &:hover {
+      background-color: setColor(blue-hover);
+    }
   }
   &__container {
     position: relative;
@@ -296,6 +306,9 @@ export default Vue.extend({
     &__link {
       color: unset;
       text-decoration: unset;
+      &:hover {
+        color: setColor(blue-hover)
+      }
     }
   }
   &__profile {
@@ -319,8 +332,7 @@ export default Vue.extend({
     @media screen and (min-width: 769px) {
       display: none;
     }
-    :nth-child(1),
-    :nth-child(3) {
+    :nth-child(2) {
       width: 25px;
       display: flex;
       align-items: center;
@@ -384,15 +396,8 @@ export default Vue.extend({
     width: 250px;
   }
   &__menu {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    background-color: #000000a1;
-    z-index: 999999;
+    justify-content: flex-start;
+    left: -24px;
   }
 }
 .fade {
@@ -404,5 +409,16 @@ export default Vue.extend({
   &-leave-to {
     opacity: 0;
   }
+}
+.slide-x-right {
+  &-enter-active, &-leave-active {
+    transition: 1s;
+  }
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+}
+.navbar-shadow {
+  border-bottom: 1px solid #EEEFF4;
 }
 </style>

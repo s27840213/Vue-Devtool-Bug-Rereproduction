@@ -1,7 +1,7 @@
 .fade-in-out {
   transition: all 1s 0.2s;
   &-enter-active {
-    &[data-transition="notification"] {
+    &[data-transition="notification"] { // Not in use
       transition: all 0.5s;
     }
     &[data-transition="modal"] {

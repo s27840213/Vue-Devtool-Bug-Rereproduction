@@ -2,7 +2,7 @@
   div(ref="body"
       class="template-center scrollbar-gray-thin"
       @scroll.passive="handleScroll")
-    new-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
+    nu-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
@@ -12,7 +12,7 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    new-header(class="non-tab-show" :noSearchbar="true" :isTop="isTop")
+    nu-header(class="non-tab-show" :noSearchbar="true" :isTop="isTop")
     div(class="template-center__search-container")
       div(class="template-center__search__title non-mobile-show")
         span(v-html="title")
@@ -214,8 +214,8 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import hashtag from '@/store/module/hashtag'
 import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
-import NewHeader from '@/components/new-homepage/NewHeader.vue'
-import NuFooter from '@/components/new-homepage/NuFooter.vue'
+import NuHeader from '@/components/NuHeader.vue'
+import NuFooter from '@/components/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -230,7 +230,7 @@ const HEADER_HEIGHT = 72
 export default Vue.extend({
   name: 'TemplateCenter',
   components: {
-    NewHeader,
+    NuHeader,
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
