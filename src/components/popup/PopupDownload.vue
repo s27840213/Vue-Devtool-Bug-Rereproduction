@@ -125,6 +125,12 @@
           dropdown(class="body-3 full-width"
                   :options="devs"
                   @select="handleDevSelect") {{ selectedDevLabel }}
+        download-check-button(v-if="isAdmin"
+          type="checkbox"
+          class="mb-20 body-3"
+          label="使用新後端瀏覽器"
+          :default-checked="false"
+          @change="({ checked }) => handleNewChrome(checked)")
         div
           btn(class="full-width body-3 rounded"
             :disabled="isButtonDisabled"
@@ -217,7 +223,8 @@ export default Vue.extend({
         { value: 6, label: 'dev5' },
         { value: 999, label: 'rd' }
       ],
-      onRd: window.location.hostname === 'rd.vivipic.com'
+      onRd: window.location.hostname === 'rd.vivipic.com',
+      newChrome: false
     }
   },
   computed: {
@@ -336,6 +343,9 @@ export default Vue.extend({
     handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
+    handleNewChrome(checked: boolean) {
+      this.newChrome = checked
+    },
     handleSubmit(useDev = false) {
       this.polling = true
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
@@ -385,7 +395,7 @@ export default Vue.extend({
       this.$emit('inprogress', true)
       console.log(this.onRd, this.selectedDev)
       DownloadUtil
-        .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.selectedDev : 0)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
