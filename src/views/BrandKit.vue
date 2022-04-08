@@ -1,23 +1,24 @@
 <template lang="pug">
-  div(class="brand-kit scrollbar-gray-thin relative"
+  div(class="brand-kit relative"
     @dragover.prevent.stop="handleDragEnter"
     @dragenter.prevent.stop="handleDragEnter"
     @dragleave.prevent.stop="handleDragLeave"
     @drop.prevent.stop="handleDrop")
     nu-header
-    div(v-if="isBrandsLoading" class="brand-kit__main")
-      svg-icon(iconName="loading"
-              iconWidth="50px"
-              iconColor="gray-3")
-    div(v-else class="brand-kit__main")
-      div(class="brand-kit__header")
-        div(class="brand-kit__selector")
-          brand-selector(@deleteItem="handleDeleteItem")
-        brand-kit-add-btn(:text="`${$t('NN0396')}`"
-                          @click.native="addNewBrand")
-      div(class="brand-kit__tab")
-        brand-kit-tab(@deleteItem="handleDeleteItem")
-    nu-footer
+    section(class="brand-kit__scroll scrollbar-gray-thin")
+      div(v-if="isBrandsLoading" class="brand-kit__main")
+        svg-icon(iconName="loading"
+                iconWidth="50px"
+                iconColor="gray-3")
+      div(v-else class="brand-kit__main")
+        div(class="brand-kit__header")
+          div(class="brand-kit__selector")
+            brand-selector(@deleteItem="handleDeleteItem")
+          brand-kit-add-btn(:text="`${$t('NN0396')}`"
+                            @click.native="addNewBrand")
+        div(class="brand-kit__tab")
+          brand-kit-tab(@deleteItem="handleDeleteItem")
+      nu-footer
     div(v-if="isOverlayed" class="dim-background"
       :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
       template(v-if="isDraggedOver")
@@ -164,7 +165,10 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .brand-kit {
   @include size(100%, 100%);
-  overflow-y: auto;
+  &__scroll {
+    height: calc(100vh - #{$header-height});
+    overflow-y: auto;
+  }
   &__main {
     min-height: calc(100vh - #{$header-height});
     padding-top: 100px;
