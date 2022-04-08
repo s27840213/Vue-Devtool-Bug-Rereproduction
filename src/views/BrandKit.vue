@@ -5,7 +5,7 @@
     @dragleave.prevent.stop="handleDragLeave"
     @drop.prevent.stop="handleDrop")
     nu-header(:isTop="isTop")
-    section(ref="content" class="brand-kit__scroll scrollbar-gray-thin")
+    section(ref="content" class="brand-kit__scroll scrollbar-gray-thin" @scroll="onScroll")
       div(v-if="isBrandsLoading" class="brand-kit__main")
         svg-icon(iconName="loading"
                 iconWidth="50px"
