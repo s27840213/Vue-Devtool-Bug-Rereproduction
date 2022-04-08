@@ -82,7 +82,7 @@ class HomeBlockData {
       description: i18n.t('NN0476'),
       link: {
         text: i18n.t('NN0477'),
-        to: '/templates?q=九宮格'
+        to: `/templates?q=${i18n.locale === 'tw' ? '九宮格' : 'storytelling'}`
       },
       img: {
         name: 'storytelling.mp4',

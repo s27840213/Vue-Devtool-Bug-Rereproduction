@@ -144,11 +144,6 @@ export default Vue.extend({
     if (i18n.locale === 'us') {
       this.themeList = _.without(this.themeList, '7')
     }
-    if (!this.isLogin) {
-      this.themeList = this.themeList.filter((val, index) => {
-        return index <= 4
-      })
-    }
   },
   methods: {
     openSizePopup() {

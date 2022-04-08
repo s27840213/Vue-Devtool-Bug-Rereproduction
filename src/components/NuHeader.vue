@@ -94,7 +94,7 @@
       //-     :iconWidth="'25px'"
       //-     @click.native="closeSearchPage")
     slot
-    transition(name="slide-x-right")
+    transition(name="fade-up")
       div(v-if="isShowMenu"
           class="nu-header__menu popup-window")
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
@@ -400,7 +400,7 @@ export default Vue.extend({
     opacity: 0;
   }
 }
-.slide-x-right {
+.fade-up {
   &-enter-active, &-leave-active {
     transition: 1s;
   }
