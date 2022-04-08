@@ -168,33 +168,33 @@ export default Vue.extend({
 
         const pageIndex = pageUtils.getPageIndexById(pageId)
         const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-        const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
-        const styles = {
-          width: newWidth,
-          height: newHeight,
-          imgWidth: newWidth,
-          imgHeight: newHeight,
-          initWidth: newWidth,
-          initHeight: newHeight,
-          imgX: 0,
-          imgY: 0,
-          x: config.styles.x - leftShadowThickness,
-          y: config.styles.y - topShadowThickness,
-          scale: 1
-        }
-        layer.srcObj = srcObj
-        Object.assign(layer.styles, styles)
-
-        const img = new Image()
-        img.crossOrigin = 'anoynous'
-        img.onload = () => {
-          if (pageIndex !== -1 && layerIndex !== -1) {
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
-            layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
-            this.resetAllShadowProps(pageIndex, layerIndex)
+        if (pageIndex !== -1 && layerIndex !== -1) {
+          const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
+          const styles = {
+            width: newWidth,
+            height: newHeight,
+            imgWidth: newWidth,
+            imgHeight: newHeight,
+            initWidth: newWidth,
+            initHeight: newHeight,
+            imgX: 0,
+            imgY: 0,
+            x: config.styles.x - leftShadowThickness,
+            y: config.styles.y - topShadowThickness,
+            scale: 1
           }
+          layer.srcObj = srcObj
+          Object.assign(layer.styles, styles)
+
+          const img = new Image()
+          img.crossOrigin = 'anoynous'
+          img.onload = () => {
+            this.resetAllShadowProps(pageIndex, layerIndex)
+            layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+          }
+          img.src = imageUtils.getSrc(layer)
         }
-        img.src = imageUtils.getSrc(layer)
       })
       imageShadowUtils.clearLayerData()
     }

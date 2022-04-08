@@ -215,7 +215,6 @@ export default Vue.extend({
     },
     currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
-      console.log(textEffect.name)
       return textEffect.name || 'none'
     },
     currentShape(): string {
