@@ -140,7 +140,7 @@ export default Vue.extend({
         }
 
         if (['tmp', 'group'].includes(type) && !contentEditable && currLayerIndex !== -1) {
-          TextPropUtils.applyPropsToAll('span', updateItem, currLayerIndex, subLayerIdx)
+          TextPropUtils.applyPropsToAll('span,paragraph', updateItem, currLayerIndex, subLayerIdx)
           tiptapUtils.updateHtml()
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           this.$nextTick(() => {
@@ -183,7 +183,7 @@ export default Vue.extend({
           //   Object.assign(start, TextUtils.selectAll(config).start)
           //   Object.assign(end, TextUtils.selectAll(config).end)
           // }
-          const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', updateItem, start, end, config as IText)
+          const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
             tiptapUtils.updateHtml(newConfig.paragraphs)
@@ -194,40 +194,15 @@ export default Vue.extend({
             layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
           }
         } else {
-          const { start } = tiptapUtils.getSelection() as { start: ISelection }
+          const { start, end } = tiptapUtils.getSelection() as { start: ISelection, end: ISelection }
           /**
            * Check if the caret is focus at <br>.
            * if so, apply the font data to the spanStyle of the corresponding p.
            */
-          const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
-          if (start.sIndex === 0 && !config.paragraphs[start.pIndex].spans[start.sIndex].text) {
-            const sStyles = tiptapUtils.generateSpanStyle(paragraphs[start.pIndex].spanStyle as string)
-            Object.assign(sStyles, updateItem)
-            Object.assign(paragraphs[start.pIndex].spans[start.sIndex].styles, updateItem)
-            Object.assign(paragraphs[start.pIndex].styles, updateItem)
-            paragraphs[start.pIndex].spanStyle = tiptapUtils.textStyles(sStyles)
-            this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs })
-            tiptapUtils.updateHtml(paragraphs)
-            tiptapUtils.focus()
-          } else {
-            tiptapUtils.agent(editor => {
-              const ranges = editor.state.selection.ranges
-              if (ranges.length > 0 && ranges[0].$from.pos !== ranges[0].$to.pos) {
-                tiptapUtils.applySpanStyle('font', this.item.id, undefined, updateItem) // font: item.id will be assigned twice but it is OK.
-              } else {
-                /**
-                 * Fix problem: caret at the end of a paragraph, the returned sIndex is not as expected.
-                 */
-                if (start.sIndex >= config.paragraphs[start.pIndex].spans.length) {
-                  start.sIndex = paragraphs[start.pIndex].spans.length - 1
-                }
-                Object.assign(paragraphs[start.pIndex].spans[start.sIndex].styles, updateItem)
-                layerUtils.updatecCurrTypeLayerProp({ paragraphs })
-                tiptapUtils.updateHtml(paragraphs)
-              }
-            })
-            isRanged && tiptapUtils.focus()
-          }
+          const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
+          this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
+          tiptapUtils.updateHtml(newConfig.paragraphs)
+          tiptapUtils.focus()
         }
 
         AssetUtils.addAssetToRecentlyUsed({

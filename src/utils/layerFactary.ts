@@ -261,15 +261,45 @@ class LayerFactary {
         }
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
-      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, undefined, (span) => {
-        if (!span.styles.font) {
-          Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()]) &&
-            (span.styles.type = 'public')
-        } else if (!span.styles.type) {
-          span.styles.type = 'public'
+      const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical,
+        (paragraph) => {
+          if (paragraph.spans.length > 0) {
+            const firstSpanStyles = paragraph.spans[0].styles
+            if (firstSpanStyles.font) {
+              paragraph.styles.font = firstSpanStyles.font
+              paragraph.styles.type = firstSpanStyles.type
+              paragraph.styles.userId = firstSpanStyles.userId
+              paragraph.styles.assetId = firstSpanStyles.assetId
+              paragraph.styles.fontUrl = firstSpanStyles.fontUrl
+            } else {
+              paragraph.styles.font = defaultFont
+              paragraph.styles.type = 'public'
+            }
+            if (paragraph.styles.spanStyle) {
+              delete paragraph.styles.spanStyle
+            }
+          } else if (paragraph.styles.spanStyle) {
+            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+            paragraph.styles.font = spanStyles.font
+            paragraph.styles.type = spanStyles.type
+            paragraph.styles.userId = spanStyles.userId
+            paragraph.styles.assetId = spanStyles.assetId
+            paragraph.styles.fontUrl = spanStyles.fontUrl
+          } else {
+            paragraph.styles.font = defaultFont
+            paragraph.styles.type = 'public'
+          }
+        },
+        (span) => {
+          if (!span.styles.font) {
+            span.styles.font = defaultFont
+            span.styles.type = 'public'
+          } else if (!span.styles.type) {
+            span.styles.type = 'public'
+          }
         }
-      })
+      )
     }
     return Object.assign(basicConfig, config)
   }

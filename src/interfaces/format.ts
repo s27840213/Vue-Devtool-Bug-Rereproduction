@@ -1,5 +1,7 @@
-import { IAdjustJsonProps } from "./adjust"
-import { IParagraphStyle, ISpanStyle } from "./layer"
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-empty-interface */
+import { IAdjustJsonProps } from './adjust'
+import { IParagraphStyle, ISpanStyle } from './layer'
 
 export interface ITextEffect {
   name: string,
@@ -21,7 +23,7 @@ export interface ITextFormat {
   spanStyle: ISpanStyle
 }
 
-export interface IImageFormat extends IAdjustJsonProps {}
+export interface IImageFormat extends IAdjustJsonProps { }
 
 export interface IFormat {
   type: 'text' | 'image',

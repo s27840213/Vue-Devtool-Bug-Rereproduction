@@ -1,4 +1,4 @@
-import { IUserFontContentData } from "./api"
+import { IUserFontContentData } from './api'
 
 /* eslint-disable camelcase */
 export interface IUploadAssetResponse {

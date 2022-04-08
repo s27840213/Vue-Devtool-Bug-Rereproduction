@@ -163,6 +163,7 @@ class TextPropUtils {
         }
         p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
       }
+      const paragraphStyles = p.styles
       for (const span of p.spans) {
         spanHandler && spanHandler(span)
         if (isVertical && span.styles.style === 'italic') {
@@ -171,6 +172,11 @@ class TextPropUtils {
         if (isVertical && span.styles.decoration === 'underline') {
           span.styles.decoration = 'none'
         }
+        span.styles.font = paragraphStyles.font as string
+        span.styles.type = paragraphStyles.type as string
+        span.styles.userId = paragraphStyles.userId as string
+        span.styles.assetId = paragraphStyles.assetId as string
+        span.styles.fontUrl = paragraphStyles.fontUrl as string
       }
     })
   }
@@ -330,6 +336,25 @@ class TextPropUtils {
 
     // Sync updating text effect if the color changed
     // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
+    return config
+  }
+
+  spanParagraphPropertyHandler(propName: string, prop: { [key: string]: string | number }, start: ISelection, end: ISelection, _config: IText): IText {
+    const config = GeneralUtils.deepCopy(_config) as IText
+    const spIndex = start.pIndex
+    const epIndex = end.pIndex
+    for (let pIndex = spIndex; pIndex <= epIndex; pIndex++) {
+      const paragraph = config.paragraphs[pIndex]
+      Object.assign(paragraph.styles, prop)
+      if (paragraph.styles.spanStyle) {
+        const spanStyle = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+        Object.assign(spanStyle, prop)
+        paragraph.styles.spanStyle = tiptapUtils.textStyles(spanStyle)
+      }
+      for (const span of paragraph.spans) {
+        Object.assign(span.styles, prop)
+      }
+    }
     return config
   }
 
@@ -1272,9 +1297,15 @@ class TextPropUtils {
     const handler = (paragraphs: IParagraph[]) => {
       paragraphs
         .forEach(p => {
-          if (propType === 'paragraph') {
+          if (propType.includes('paragraph')) {
             Object.assign(p.styles, prop)
-          } else {
+            if (p.styles.spanStyle) {
+              const spanStyle = tiptapUtils.generateSpanStyle(p.styles.spanStyle as string)
+              Object.assign(spanStyle, prop)
+              p.styles.spanStyle = tiptapUtils.textStyles(spanStyle)
+            }
+          }
+          if (propType.includes('span')) {
             p.spans.forEach(s => {
               Object.assign(s.styles, prop)
             })
