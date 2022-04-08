@@ -9,7 +9,7 @@
         :styles="adjustImgStyles"
         :style="flipStyles()")
     div(v-if="showCanvas"
-      class="canvas-wrapper"
+      class="canvas__wrapper"
       :style="canvasWrapperStyle()")
       canvas(ref="canvas")
     img(v-show="!isAdjustImage && !showCanvas"
@@ -21,6 +21,11 @@
       :src="src"
       @error="onError()"
       @load="onLoad()")
+    div(v-if="inProcess" class="canvas__process")
+      svg-icon(class="spiner"
+        :iconName="'spiner'"
+        :iconColor="'white'"
+        :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
@@ -184,10 +189,10 @@ export default Vue.extend({
      *  only used for rendering as image controlling */
     forRender(): boolean {
       return this.config.forRender ?? false
+    },
+    inProcess(): boolean {
+      return this.config.inProcess
     }
-    // cavasScale(): number {
-    //   return cavasScale
-    // }
   },
   methods: {
     ...mapActions('user', ['updateImages']),
@@ -314,7 +319,14 @@ export default Vue.extend({
         case ShadowEffectType.blur: {
           if (this.canvasImg) {
             // imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config)
-            imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config, this.config.styles.height)
+            imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config, {
+              canvasSize: this.config.styles.height,
+              layerInfo: {
+                pageIndex: this.pageIndex,
+                layerIndex: this.layerIndex,
+                subLayerIdx: this.subLayerIndex
+              }
+            })
           } else {
             const _canvasImg = new Image()
             _canvasImg.crossOrigin = 'Anonymous'
@@ -328,7 +340,14 @@ export default Vue.extend({
               this.canvasImg = _canvasImg
               imgShadowUtils.clearLayerData()
               // imgShadowUtils.draw(canvas, _canvasImg, this.config)
-              imgShadowUtils.draw(canvas, _canvasImg, this.config, this.config.styles.height)
+              imgShadowUtils.draw(canvas, _canvasImg, this.config, {
+                canvasSize: this.config.styles.height,
+                layerInfo: {
+                  pageIndex: this.pageIndex,
+                  layerIndex: this.layerIndex,
+                  subLayerIdx: this.subLayerIndex
+                }
+              })
             }
             _canvasImg.src = ImageUtils.getSrc(this.config)
           }
@@ -350,7 +369,14 @@ export default Vue.extend({
             ...effects
           }
         })
-        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config, this.config.styles.height)
+        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config, {
+          canvasSize: this.config.styles.height,
+          layerInfo: {
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex,
+            subLayerIdx: this.subLayerIndex
+          }
+        })
       })
     }
   }
@@ -370,9 +396,22 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
   }
-  .canvas-wrapper {
-    pointer-events: none;
-    flex-shrink: 0;
+  .canvas {
+    &__wrapper {
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+    &__process {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: setColor(gray-1, 0.3);
+    }
   }
   canvas {
     width: 100%;

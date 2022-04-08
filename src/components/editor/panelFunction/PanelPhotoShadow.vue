@@ -132,7 +132,10 @@ export default Vue.extend({
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
       updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
-      await imageShadowUtils.draw(updateCanvas, img, config, height, 0)
+      await imageShadowUtils.draw(updateCanvas, img, config, {
+        canvasSize: height,
+        timeout: 0
+      })
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const imgHeightInCanvas = height

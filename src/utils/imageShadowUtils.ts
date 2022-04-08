@@ -14,6 +14,11 @@ const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.5
 export const CANVAS_SIZE = 500
+export interface DrawOptions {
+  canvasSize?: number,
+  timeout?: number,
+  layerInfo?: ILayerInfo
+}
 class ImageShadowUtils {
   private readonly SPREAD_RADIUS = 1
 
@@ -40,8 +45,9 @@ class ImageShadowUtils {
     this.ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
   }
 
-  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 25) {
+  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
+    const { canvasSize = CANVAS_SIZE, timeout = 25, layerInfo } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
@@ -85,6 +91,7 @@ class ImageShadowUtils {
 
       /** Calculating the spread */
       if (this.spreadBuff.spread !== spread) {
+        layerInfo && this.setIsProcess(layerInfo, true)
         for (let i = -spread; i <= spread && this.handlerId === handlerId; i++) {
           await new Promise<void>(resolve => {
             setTimeout(() => {
@@ -100,7 +107,6 @@ class ImageShadowUtils {
                 if (alphaVal && this.ctxT) {
                   this.ctxT.globalAlpha = alphaVal
                   this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
-                  // this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + offsetX + i, y + offsetY + j, drawCanvasWidth, drawCanvasHeight)
                 }
               }
               console.log('i:', i)
@@ -110,6 +116,7 @@ class ImageShadowUtils {
         }
         this.spreadBuff.data = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
         this.spreadBuff.spread = spread
+        this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       }
       this.ctxT.putImageData(this.spreadBuff.data, offsetX, offsetY)
 
@@ -134,6 +141,13 @@ class ImageShadowUtils {
     }
     this.handlerId = handlerId
     timeout ? (this._draw = setTimeout(handler, timeout)) : await handler()
+  }
+
+  setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {
+    const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    layerUtils.updateLayerProps(pageIndex, layerIndex, {
+      inProcess: drawing
+    }, subLayerIdx)
   }
 
   clearLayerData() {
