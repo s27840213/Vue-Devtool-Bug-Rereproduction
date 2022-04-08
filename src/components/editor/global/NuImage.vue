@@ -108,7 +108,7 @@ export default Vue.extend({
     },
     shadowEffects(val) {
       if (this.$refs.canvas) {
-        !this.forRender && this.updateShadowEffect(val)
+        !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
       }
     },
     currentShadowEffect() {
@@ -306,24 +306,29 @@ export default Vue.extend({
       preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
     },
     handleNewShadowEffect() {
+      const canvas = this.$refs.canvas as HTMLCanvasElement
       const { currentEffect } = this.shadow
       switch (currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (this.canvasImg) {
-            imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
+            // imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config)
+            imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config, this.config.styles.height)
           } else {
             const _canvasImg = new Image()
             _canvasImg.crossOrigin = 'Anonymous'
             _canvasImg.onload = () => {
-              const canvas = this.$refs.canvas as HTMLCanvasElement
               const ratio = _canvasImg.naturalWidth / _canvasImg.naturalHeight
-              canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
-              canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
+              // canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
+              // canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
+              /** use the CANVAS_SIZE as the controlling-canvas-size would lead to the inconsistent between backend screenshot and frontend */
+              canvas.setAttribute('width', `${this.config.styles.width * CANVAS_SCALE}`)
+              canvas.setAttribute('height', `${this.config.styles.height * CANVAS_SCALE}`)
               this.canvasImg = _canvasImg
               imgShadowUtils.clearLayerData()
-              imgShadowUtils.draw(canvas, _canvasImg, this.config)
+              // imgShadowUtils.draw(canvas, _canvasImg, this.config)
+              imgShadowUtils.draw(canvas, _canvasImg, this.config, this.config.styles.height)
             }
             _canvasImg.src = ImageUtils.getSrc(this.config)
           }
@@ -345,7 +350,7 @@ export default Vue.extend({
             ...effects
           }
         })
-        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config)
+        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config, this.config.styles.height)
       })
     }
   }

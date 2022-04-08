@@ -179,7 +179,7 @@ export default Vue.extend({
       //       y: config.styles.y - topShadowThickness,
       //       scale: 1
       //     })
-      //     this.resetAll(pageIndex, layerIndex)
+      //     this.resetAllShadowProps(pageIndex, layerIndex)
       //   }
       // })
       imageShadowUtils.clearLayerData()
@@ -279,7 +279,7 @@ export default Vue.extend({
         }, pageIndex, layerIndex, subLayerIdx)
       }
     },
-    resetAll(pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
+    resetAllShadowProps(pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
       Object.keys(ShadowEffectType)
         .forEach(k => this.reset(k as ShadowEffectType, pageIndex, layerIndex, subLayerIdx))
       imageShadowUtils.setEffect(ShadowEffectType.none, {}, pageIndex, layerIndex, subLayerIdx)

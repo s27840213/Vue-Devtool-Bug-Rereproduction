@@ -15,20 +15,129 @@ export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.5
 export const CANVAS_SIZE = 500
 class ImageShadowUtils {
+  private readonly SPREAD_RADIUS = 1
+
   private canvasT = document.createElement('canvas')
   private ctxT = null as CanvasRenderingContext2D | null
   private _draw = undefined as number | undefined
   // @TODO
   private _drawing = false
+  private handlerId = ''
+
   private _layerData = null as {
     img: HTMLImageElement,
     config: IImage
   } | null
 
+  private spreadBuff = {
+    spread: -1,
+    data: {} as ImageData
+  }
+
   get layerData() { return this._layerData }
 
   constructor() {
     this.ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
+  }
+
+  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 25) {
+    const { styles } = config
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
+    const { effects, currentEffect } = shadow
+    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
+    if (!canvas || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
+      currentEffect === ShadowEffectType.projection)) return
+    if (this._draw) {
+      clearTimeout(this._draw)
+    }
+    if (!this._layerData) {
+      this._layerData = { img: img, config }
+    }
+
+    let offsetX = 0
+    let offsetY = 0
+    if (distance && distance > 0) {
+      offsetX = distance * mathUtils.cos(angle)
+      offsetY = distance * mathUtils.sin(angle)
+    }
+
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const scaleRatio = img.naturalWidth / _imgWidth
+    const imgRatio = _imgWidth / _imgHeight
+    const imgX = _imgX * scaleRatio
+    const imgY = _imgY * scaleRatio
+    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+    const drawCanvasHeight = canvasSize
+    const drawCanvasWidth = drawCanvasHeight * imgRatio
+    const x = (canvas.width - canvasSize * imgRatio) * 0.5
+    const y = (canvas.height - canvasSize) * 0.5
+    this.canvasT.setAttribute('width', `${canvas.width}`)
+    this.canvasT.setAttribute('height', `${canvas.height}`)
+
+    const _spread = 1 / this.SPREAD_RADIUS
+    const handlerId = generalUtils.generateRandomString(6)
+    const handler = async () => {
+      if (!this.ctxT) return
+      this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
+
+      let alphaVal = 1
+
+      /** Calculating the spread */
+      if (this.spreadBuff.spread !== spread) {
+        for (let i = -spread; i <= spread && this.handlerId === handlerId; i++) {
+          await new Promise<void>(resolve => {
+            setTimeout(() => {
+              for (let j = -spread; j <= spread && this.handlerId === handlerId; j++) {
+                const r = Math.sqrt(i * i + j * j)
+                if (r >= spread + this.SPREAD_RADIUS) {
+                  alphaVal = 0
+                } else if (r >= spread) {
+                  alphaVal = (1 - (r - spread) * _spread)
+                } else {
+                  alphaVal = 1
+                }
+                if (alphaVal && this.ctxT) {
+                  this.ctxT.globalAlpha = alphaVal
+                  this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
+                  // this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + offsetX + i, y + offsetY + j, drawCanvasWidth, drawCanvasHeight)
+                }
+              }
+              console.log('i:', i)
+              resolve()
+            }, 0)
+          })
+        }
+        this.spreadBuff.data = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
+        this.spreadBuff.spread = spread
+      }
+      this.ctxT.putImageData(this.spreadBuff.data, offsetX, offsetY)
+
+      if (this.handlerId === handlerId) {
+        console.log('for loop done')
+        this.ctxT.globalCompositeOperation = 'source-in'
+        const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
+        StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
+        this.ctxT.putImageData(imageData, 0, 0)
+
+        this.ctxT.globalAlpha = opacity / 100
+        this.ctxT.fillStyle = effects.color
+        this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
+
+        this.ctxT.globalCompositeOperation = 'source-over'
+        this.ctxT.globalAlpha = 1
+        this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(this.canvasT, 0, 0)
+      }
+    }
+    this.handlerId = handlerId
+    timeout ? (this._draw = setTimeout(handler, timeout)) : await handler()
+  }
+
+  clearLayerData() {
+    this._layerData = null
   }
 
   setEffect (effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
@@ -110,101 +219,6 @@ class ImageShadowUtils {
     }
   }
 
-  readonly SPREAD_RADIUS = 1
-  handlerId = ''
-  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, canvasSize = CANVAS_SIZE, timeout = 75) {
-    const { styles } = config
-    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
-    const { effects, currentEffect } = shadow
-    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
-    if (!canvas || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
-      currentEffect === ShadowEffectType.projection)) return
-    if (this._draw) {
-      clearTimeout(this._draw)
-    }
-    if (!this._layerData) {
-      this._layerData = { img: img, config }
-    }
-
-    let offsetX = 0
-    let offsetY = 0
-    if (distance && distance > 0) {
-      offsetX = distance * mathUtils.cos(angle)
-      offsetY = distance * mathUtils.sin(angle)
-    }
-
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    const scaleRatio = img.naturalWidth / _imgWidth
-    const imgRatio = _imgWidth / _imgHeight
-    const imgX = _imgX * scaleRatio
-    const imgY = _imgY * scaleRatio
-    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-    const drawCanvasHeight = canvasSize
-    const drawCanvasWidth = drawCanvasHeight * imgRatio
-    const x = (canvas.width - canvasSize * imgRatio) / 2
-    const y = (canvas.height - canvasSize) / 2
-    this.canvasT.setAttribute('width', `${canvas.width}`)
-    this.canvasT.setAttribute('height', `${canvas.height}`)
-
-    const _spread = 1 / this.SPREAD_RADIUS
-    const handlerId = generalUtils.generateRandomString(6)
-    const handler = async () => {
-      if (!this.ctxT) return
-      this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
-
-      let alphaVal = 1
-
-      for (let i = -spread; i <= spread && this.handlerId === handlerId; i++) {
-        await new Promise<void>(resolve => {
-          setTimeout(() => {
-            for (let j = -spread; j <= spread && this.handlerId === handlerId; j++) {
-              const r = Math.sqrt(i * i + j * j)
-              if (r >= spread + this.SPREAD_RADIUS) {
-                alphaVal = 0
-              } else if (r >= spread) {
-                alphaVal = (1 - (r - spread) * _spread)
-              } else {
-                alphaVal = 1
-              }
-              if (alphaVal && this.ctxT) {
-                this.ctxT.globalAlpha = alphaVal
-                this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + offsetX + i, y + offsetY + j, drawCanvasWidth, drawCanvasHeight)
-              }
-            }
-            console.log('i:', i)
-            resolve()
-          }, 0)
-        })
-      }
-      if (this.handlerId === handlerId) {
-        console.log('for loop done')
-        this.ctxT.globalCompositeOperation = 'source-in'
-        const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-        StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
-        this.ctxT.putImageData(imageData, 0, 0)
-
-        this.ctxT.globalAlpha = opacity / 100
-        this.ctxT.fillStyle = effects.color
-        this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
-
-        this.ctxT.globalCompositeOperation = 'source-over'
-        this.ctxT.globalAlpha = 1
-        this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(this.canvasT, 0, 0)
-      }
-    }
-    this.handlerId = handlerId
-    timeout ? (this._draw = setTimeout(handler, timeout)) : await handler()
-    console.log('already drawed')
-  }
-
-  clearLayerData() {
-    this._layerData = null
-  }
-
   getImgEdgeWidth(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -230,10 +244,6 @@ class ImageShadowUtils {
     const alphaTresh = 0
     while (!reach) {
       for (let i = 0; i < canvas.width; i++) {
-        if (!imageData[top]) {
-          console.log(top)
-          console.log(canvas.height)
-        }
         if (imageData[top][i][3] > alphaTresh) {
           reach = true
           break
