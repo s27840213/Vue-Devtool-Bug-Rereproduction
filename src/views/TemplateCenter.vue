@@ -12,7 +12,7 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    new-header(class="non-tab-show" :noSearchbar="true" :isTop="true")
+    new-header(class="non-tab-show" :noSearchbar="true" :isTop="isTop")
     div(class="template-center__search-container")
       div(class="template-center__search__title non-mobile-show")
         span(v-html="title")
