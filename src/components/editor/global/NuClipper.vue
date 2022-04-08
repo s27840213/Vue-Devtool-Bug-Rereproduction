@@ -66,7 +66,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-clipper {
   transform-style: preserve-3d;
-  overflow: hidden;
+  // overflow: hidden;
 }
 
 .layer-flip {
