@@ -5,19 +5,17 @@
         class="block-text__coming_soon overline-SM")
         span {{'COMING SOON'}}
       div(class="block-text__title")
-        i18n(:path="content.title" tag="span")
-          template(#newline)
-            br
+        span(v-html="content.title")
         img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
           class="block__colorBlock"
           :src="require('@/assets/img/svg/color-block/' + cb.name)"
           :style="{ 'top': `${cb.top * rwdModifier}px`, 'left': `${cb.left * rwdModifier}px` }")
       div(class="block-text__description text-gray-2")
-        span {{$t(content.description)}}
-      div(v-if="content.link && $t(content.link.text)"
+        span {{content.description}}
+      div(v-if="content.link && content.link.text"
         class="block-text__link text-H5")
         router-link(:to="content.link.to")
-          span {{$t(content.link.text) + ' →'}}
+          span {{content.link.text + ' →'}}
     div(class="block-animation")
       animation(:path="`${dir}/${locale}/${content.img.name}`"
         :width="content.img.width * rwdModifier"

@@ -153,12 +153,12 @@ export default Vue.extend({
     },
     delayInit(retry = 10) {
       const items = this.$refs.items as HTMLElement
-      if ((!items || items.scrollWidth === items.offsetWidth) && retry > 0) {
+      if (items && items.scrollWidth !== items.offsetWidth) {
+        this.updateIcon()
+      } else if (retry > 0) {
         setTimeout(() => {
           this.delayInit(retry - 1)
         }, 1000)
-      } else {
-        this.updateIcon()
       }
     },
     updateIcon() {

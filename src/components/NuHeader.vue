@@ -94,8 +94,9 @@
       //-     :iconWidth="'25px'"
       //-     @click.native="closeSearchPage")
     slot
-    div(v-if="isShowMenu"
-        class="nu-header__menu popup-window")
+    transition(name="slide-x-right")
+      div(v-if="isShowMenu"
+          class="nu-header__menu popup-window")
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
           v-click-outside="() => { isShowMenu = false }")
     div(v-if="isShowSearchPage"
@@ -396,6 +397,14 @@ export default Vue.extend({
   }
   &-enter,
   &-leave-to {
+    opacity: 0;
+  }
+}
+.slide-x-right {
+  &-enter-active, &-leave-active {
+    transition: 1s;
+  }
+  &-enter, &-leave-to {
     opacity: 0;
   }
 }

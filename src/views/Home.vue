@@ -44,7 +44,7 @@ import TaBlock from '@/components/homepage/TaBlock.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import PopupSize from '@/components/popup/PopupSize.vue'
 import _ from 'lodash'
-import blocklistData from '@/assets/json/homepageBlock.json'
+import blocklistData from '@/utils/homeBlockData'
 
 export default Vue.extend({
   name: 'Home',
@@ -119,8 +119,8 @@ export default Vue.extend({
         .replace('<blue>', '<span class="text-blue-1">')
         .replace('</blue>', '</span>')
     },
-    blocklist(): typeof blocklistData { // legal??
-      const blocklist = blocklistData.filter((item) => {
+    blocklist(): ReturnType<typeof blocklistData.data> {
+      const blocklist = blocklistData.data().filter((item) => {
         return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
       })
       // Set align as row, row-reverse alternately.
