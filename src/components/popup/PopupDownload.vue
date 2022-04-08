@@ -383,7 +383,6 @@ export default Vue.extend({
         fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
       }
       this.$emit('inprogress', true)
-      console.log(this.onRd, this.selectedDev)
       DownloadUtil
         .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.selectedDev : 0)
         .then(this.handleDownloadProgress)
