@@ -129,7 +129,7 @@
           type="checkbox"
           class="mb-20 body-3"
           label="使用新後端瀏覽器"
-          :default-checked="false"
+          :default-checked="newChrome"
           @change="({ checked }) => handleNewChrome(checked)")
         div
           btn(class="full-width body-3 rounded"
@@ -176,6 +176,8 @@ export default Vue.extend({
       rangeType = 'current',
       pageRange = [],
       selectedDetailPage,
+      selectedDev = 1,
+      newChrome = false,
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
     const prevInfo = {
@@ -184,7 +186,9 @@ export default Vue.extend({
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
       selectedTypeVal: selectedTypeVal || 'png',
       rangeType,
-      pageRange: rangeType === 'spec' ? pageRange : []
+      pageRange: rangeType === 'spec' ? pageRange : [],
+      selectedDev,
+      newChrome
     }
     const currentPageIndex = this.pageIndex || 0
     return {
@@ -213,7 +217,6 @@ export default Vue.extend({
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
       ] as ITypeOption[],
-      selectedDev: 1,
       devs: [
         { value: 1, label: 'dev0' },
         { value: 2, label: 'dev1' },
@@ -223,8 +226,7 @@ export default Vue.extend({
         { value: 6, label: 'dev5' },
         { value: 999, label: 'rd' }
       ],
-      onRd: window.location.hostname === 'rd.vivipic.com',
-      newChrome: false
+      onRd: window.location.hostname === 'rd.vivipic.com'
     }
   },
   computed: {
@@ -351,13 +353,15 @@ export default Vue.extend({
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
     handleSubmissionInfo() {
-      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange } = this
+      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev, newChrome } = this
       const info = {
         ...selected,
         selectedTypeVal,
         rangeType,
         pageRange,
-        selectedDetailPage
+        selectedDetailPage,
+        selectedDev,
+        newChrome
       }
       saveSubmission
         ? localStorage.setItem(submission, JSON.stringify(info))
@@ -393,7 +397,6 @@ export default Vue.extend({
         fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
       }
       this.$emit('inprogress', true)
-      console.log(this.onRd, this.selectedDev)
       DownloadUtil
         .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
         .then(this.handleDownloadProgress)
