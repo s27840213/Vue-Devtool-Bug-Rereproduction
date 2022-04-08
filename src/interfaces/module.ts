@@ -42,7 +42,11 @@ export interface IAsset {
     theme: string
     width: number
     ver: number
-  }
+  },
+  src?: string,
+  userId?: string,
+  assetId?: string,
+  fontUrl?: string
 }
 
 export interface IAssetProps {

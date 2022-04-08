@@ -57,6 +57,7 @@ import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -69,6 +70,7 @@ export default Vue.extend({
   },
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
+    brandkitUtils.fetchFonts(this.fetchFonts)
   },
   data() {
     return {
@@ -93,7 +95,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('brandkit', {
       isBrandsLoading: 'getIsBrandsLoading',
-      selectedTab: 'getSelectedTab'
+      selectedTab: 'getSelectedTab',
+      brands: 'getBrands'
     }),
     hintText(): string {
       return this.uploadHint[this.selectedTab as 'logo' | 'text']?.text ?? ''
@@ -110,7 +113,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('brandkit', {
-      fetchBrands: 'fetchBrands'
+      fetchBrands: 'fetchBrands',
+      fetchFonts: 'fetchFonts'
     }),
     addNewBrand() {
       brandkitUtils.addNewBrand()
@@ -131,7 +135,13 @@ export default Vue.extend({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-      console.log(e.dataTransfer?.files)
+      const files = e.dataTransfer?.files
+      if (this.selectedTab === 'text') {
+        if (!files) return
+        uploadUtils.uploadAsset('font', files)
+      } else {
+        console.log(files)
+      }
     },
     handleDeleteItem(item: IDeletingItem) {
       this.deleteBuffer = item

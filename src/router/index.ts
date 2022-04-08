@@ -253,8 +253,7 @@ router.beforeEach(async (to, from, next) => {
         const font = {
           type: 'public',
           face: _font.id,
-          ver: _font.ver,
-          url: ''
+          ver: _font.ver
         }
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })

@@ -29,7 +29,8 @@
                     class="color-picker"
                     v-click-outside="handleDeSelectColor"
                     :currentColor="color.color"
-                    @update="handleDragUpdate")
+                    @update="handleDragUpdate"
+                    @final="handleColorChangeEnd")
       div(class="brand-kit-color-palette__colors__color-add pointer"
         @click="handleAddColor(colorPalette.id)")
         svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
@@ -41,12 +42,14 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
 import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   data() {
     return {
       isNameEditing: false,
-      editableName: ''
+      editableName: '',
+      colorBuffer: '#000000'
     }
   },
   props: {
@@ -75,6 +78,7 @@ export default Vue.extend({
       return this.selectedColor.paletteId === paletteId && this.selectedColor.colorId === color.id
     },
     handleDeletePalette(palette: IBrandColorPalette) {
+      this.colorBuffer = '#000000'
       this.$emit('deleteItem', {
         type: 'palette',
         content: palette
@@ -84,6 +88,7 @@ export default Vue.extend({
       if (this.checkSelected(paletteId, color)) {
         this.handleDeSelectColor()
       } else {
+        this.colorBuffer = color.color
         this.$emit('selectColor', {
           paletteId,
           colorId: color.id
@@ -101,7 +106,23 @@ export default Vue.extend({
       brandkitUtils.removeColor(paletteId, color)
     },
     handleDragUpdate(color: string) {
-      brandkitUtils.updateColor(this.selectedColor.paletteId, this.selectedColor.colorId, color)
+      brandkitUtils.updateColorTemp(this.selectedColor.paletteId, this.selectedColor.colorId, color)
+    },
+    handleColorChangeEnd(color: string) {
+      const currentSelectedColor = generalUtils.deepCopy(this.selectedColor)
+      const backupColor = this.colorBuffer
+      brandkitUtils.updateColor(this.selectedColor.colorId, color).then((success) => {
+        if (success) {
+          if (this.selectedColor.colorId === currentSelectedColor.colorId && this.selectedColor.paletteId === currentSelectedColor.paletteId) {
+            this.colorBuffer = color
+          }
+        } else {
+          if (this.selectedColor.colorId === currentSelectedColor.colorId && this.selectedColor.paletteId === currentSelectedColor.paletteId) {
+            this.handleDeSelectColor()
+          }
+          brandkitUtils.updateColorTemp(currentSelectedColor.paletteId, currentSelectedColor.colorId, backupColor)
+        }
+      })
     },
     handleAddColor(id: string) {
       brandkitUtils.createColor(id)
@@ -150,14 +171,18 @@ export default Vue.extend({
     margin-left: 8px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
     color: setColor(gray-1);
+    width: 300px;
     & > span {
       @include body-MD;
       cursor: text;
       line-height: 24px;
       height: 24px;
       display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     & > input {
       height: 24px;

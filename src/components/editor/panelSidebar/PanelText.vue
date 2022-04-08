@@ -189,7 +189,7 @@ export default Vue.extend({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
-      await AssetUtils.addStanardText(config.type.toLowerCase(), config.text, i18n.locale)
+      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale)
     },
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
