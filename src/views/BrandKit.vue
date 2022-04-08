@@ -57,6 +57,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
+import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -70,6 +71,7 @@ export default Vue.extend({
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
     brandkitUtils.fetchFonts(this.fetchFonts)
+    themeUtils.checkThemeState()
   },
   data() {
     return {
