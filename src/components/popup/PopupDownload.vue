@@ -103,13 +103,13 @@
             download-page-selection(class="ml-5 w-75"
               :defaultSelected="pageRange"
               @confirm="handleRangeConfirm")
-        template(v-if="isAdmin || onRd")
+        template(v-if="isAdmin || onDev")
           hr(class="popup-download__hr my-15")
           div(class="dev-selector mb-10")
             dropdown(class="body-3 full-width"
                     :options="devs"
                     @select="handleDevSelect") {{ selectedDevLabel }}
-          download-check-button(v-if="isAdmin"
+          download-check-button(
             type="checkbox"
             class="mb-20 body-3"
             label="使用新後端瀏覽器"
@@ -191,6 +191,7 @@ export default Vue.extend({
       newChrome
     }
     const currentPageIndex = this.pageIndex || 0
+    const host = window.location.hostname
     return {
       ...prevInfo,
       currentPageIndex,
@@ -226,7 +227,7 @@ export default Vue.extend({
         { value: 6, label: 'dev5' },
         { value: 999, label: 'rd' }
       ],
-      onRd: window.location.hostname === 'rd.vivipic.com'
+      onDev: host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
     }
   },
   computed: {
@@ -398,7 +399,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo, ((this.isAdmin || this.onRd) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
