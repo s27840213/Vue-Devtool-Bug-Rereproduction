@@ -91,7 +91,7 @@ export default Vue.extend({
         return
       }
       this.previewCheckReady = false
-      imageUtils.getImageSize(this.configPreview, 150, 150).then((size) => {
+      imageUtils.getImageSize(this.configPreview, 150, 150, false).then((size) => {
         const { width, height, exists } = size
         this.imgWidth = width
         this.imgHeight = height

@@ -1,8 +1,8 @@
 <template lang="pug">
   div(ref="body"
       class="template-center scrollbar-gray-thin"
-      @scroll="handleScroll")
-    nu-header(class="pc-show" :noSearchbar="true" :noNavigation="snapToTop")
+      @scroll.passive="handleScroll")
+    new-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
@@ -12,26 +12,30 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    nu-header(class="mobile-show" :noSearchbar="true")
-    div(class="template-center__search-container pc-show")
-      div(class="template-center__search")
-        div(class="template-center__search__title"
-            :style="searchTitleStyles()")
-          span {{$t('NN0185')}}
-        div(class="template-center__search__text")
-          i18n(path="NN0186" tag="span")
-            template(#newline)
-              br
-        search-bar(ref="searchbar"
-                  class="template-center__search__searchbar"
-                  :style="searchbarStyles()"
-                  :clear="true"
-                  :defaultKeyword="searchbarKeyword"
-                  :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
-                  @update="handleUpdate"
-                  @search="handleSearch")
-    div(class="template-center__content")
-      div(class="template-center__mobile-search mobile-show")
+    new-header(class="non-tab-show" :noSearchbar="true" :isTop="isTop")
+    div(class="template-center__search-container")
+      div(class="template-center__search__title non-mobile-show")
+        span(v-html="title")
+      div(class="template-center__search__title non-tab-show")
+        span(v-html="mobileTitle")
+      div(class="template-center__search__text non-mobile-show")
+        i18n(path="NN0488" tag="span")
+          template(#newline)
+            br
+      search-bar(ref="searchbar"
+                class="template-center__search__searchbar non-mobile-show"
+                :style="searchbarStyles()"
+                :clear="true"
+                :defaultKeyword="searchbarKeyword"
+                :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
+                @update="handleUpdate"
+                @search="handleSearch")
+      img(class="color-block vector-purple1" :src="require('@/assets/img/svg/color-block/vector_purple1.svg')")
+      img(class="color-block oval-lightblue1 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+      img(class="color-block oval-orange2 non-mobile-show" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
+    div(ref="mobileSearch" class="template-center__mobile-search__wrapper non-tab-show"
+        :style="mobileSearchStyles()")
+      div(class="template-center__mobile-search")
         search-bar(class="template-center__mobile-search__searchbar"
                   :clear="true"
                   :defaultKeyword="searchbarKeyword"
@@ -45,19 +49,24 @@
                   iconWidth="22px"
                   iconHeight="18.36px"
                   iconColor="white")
-      div(class="template-center__filter pc-show")
+        transition(name="slide-up")
+          img(v-if="!mobileSnapToTop" class="color-block oval-lightblue1" :src="require('@/assets/img/svg/color-block/oval_lightblue1.svg')")
+        transition(name="slide-up")
+          img(v-if="!mobileSnapToTop" class="color-block oval-orange2" :src="require('@/assets/img/svg/color-block/oval_orange2.svg')")
+      div(class="template-center__filter non-tab-show"
+          :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0', 'pointer-events': isShowOptions ? 'initial' : 'none'}")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
                             @select="handleHashtagSelect")
-      div(class="template-center__filter mobile-show"
-          :style="{'max-height': isShowOptions ? `${82 * hashtags.length}px` : '0px', 'opacity': isShowOptions ? '1' : '0'}")
+    div(class="template-center__content")
+      div(class="template-center__filter non-mobile-show")
         hashtag-category-row(v-for="hashtag in hashtags"
                             :list="hashtag"
                             :defaultSelection="hashtagSelections[hashtag.title] ? hashtagSelections[hashtag.title].selection : []"
                             @select="handleHashtagSelect")
-      div(class="template-center__hr pc-show")
-      div(class="template-center__sorter pc-show")
+      div(class="template-center__hr non-mobile-show")
+      div(class="template-center__sorter non-mobile-show")
         div(class="template-center__sorter__left")
           div(class="template-center__sorter__title") {{$t('NN0191')}}:
           div(v-for="sortingCriterium in sortingCriteria"
@@ -65,11 +74,6 @@
               :class="{'selected': selectedSorting === sortingCriterium.key}"
               @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
-          //- div(class="template-center__sorter__color-title") Color
-          //- div(class="template-center__sorter__color-down")
-          //-   svg-icon(iconName="chevron-down"
-          //-           iconWidth="24px"
-          //-           iconColor="gray-2")
       div(class="template-center__waterfall-wrapper pc-lg-show")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesPC"
@@ -141,12 +145,11 @@
                   iconWidth="24px"
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                          :target="'.template-center__content'"
                           @callback="handleLoadMore")
         div(class="template-center__scroll-space")
-    nu-footer(class="pc-show")
+    nu-footer(class="non-mobile-show")
     transition(name="fade-scale")
-      div(v-if="snapToTop" class="template-center__to-top pointer pc-show" @click="scrollToTop")
+      div(v-if="snapToTop" class="template-center__to-top pointer non-mobile-show" @click="scrollToTop")
         img(:src="require('@/assets/img/svg/to_top.svg')")
     transition(name="fade-scale-center")
       div(v-if="modal === 'pages'" class="template-center__multi"
@@ -210,9 +213,9 @@ import Vue from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import hashtag from '@/store/module/hashtag'
 import vClickOutside from 'v-click-outside'
-import NuHeader from '@/components/NuHeader.vue'
 import SearchBar from '@/components/SearchBar.vue'
-import NuFooter from '@/components/NuFooter.vue'
+import NewHeader from '@/components/new-homepage/NewHeader.vue'
+import NuFooter from '@/components/new-homepage/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -222,10 +225,12 @@ import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 import generalUtils from '@/utils/generalUtils'
 
+const HEADER_HEIGHT = 72
+
 export default Vue.extend({
   name: 'TemplateCenter',
   components: {
-    NuHeader,
+    NewHeader,
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
@@ -249,6 +254,7 @@ export default Vue.extend({
     return {
       snapToTop: false,
       searchbarTop: 0,
+      mobileSnapToTop: false,
       searchbarKeyword: '',
       hashtagSelections: {} as { [key: string]: { type: string, selection: string[] } },
       sortingCriteria,
@@ -264,7 +270,8 @@ export default Vue.extend({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      mouseInTemplate: ''
+      mouseInTemplate: '',
+      isTop: true
     }
   },
   metaInfo(): any {
@@ -381,7 +388,17 @@ export default Vue.extend({
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
-    })
+    }),
+    title(): string {
+      return `${this.$t('NN0486', { newline: '<br>' })}`
+        .replace('<blue>', '<span class="text-blue-1">')
+        .replace('</blue>', '</span>')
+    },
+    mobileTitle(): string {
+      return `${this.$t('NN0487', { newline: '<br>' })}`
+        .replace('<blue>', '<span class="text-blue-1">')
+        .replace('</blue>', '</span>')
+    }
   },
   methods: {
     ...mapActions('hashtag', {
@@ -392,23 +409,16 @@ export default Vue.extend({
       getMoreTemplates: 'getMoreContent'
     }),
     isMobile(): boolean {
-      return window.matchMedia('screen and (max-width: 767px)').matches
+      return window.matchMedia('screen and (max-width: 540px)').matches
     },
     absoluteSearchbarStyles() {
-      return { top: `${Math.max(this.searchbarTop, 11)}px` }
+      return { top: `${Math.max(this.searchbarTop, 15)}px` }
     },
     searchbarStyles() {
       return this.snapToTop ? { opacity: 0, pointerEvents: 'none' } : {}
     },
-    searchTitleStyles() {
-      if (this.$i18n.locale === 'tw') {
-        return {
-          letterSpacing: '0.255em',
-          textIndent: '0.255em'
-        }
-      } else {
-        return {}
-      }
+    mobileSearchStyles() {
+      return this.mobileSnapToTop ? { zIndex: 10 } : {}
     },
     templateStyles(aspectRatio: number) {
       return { aspectRatio: `${aspectRatio}` }
@@ -421,8 +431,12 @@ export default Vue.extend({
     },
     handleScroll() {
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
-      this.snapToTop = searchbar.getBoundingClientRect().top <= 64
+      this.snapToTop = searchbar.getBoundingClientRect().top <= HEADER_HEIGHT
       this.searchbarTop = searchbar.getBoundingClientRect().top
+      const body = this.$refs.body as HTMLElement
+      this.isTop = body.scrollTop === 0
+      const mobileSearch = this.$refs.mobileSearch as HTMLElement | undefined
+      this.mobileSnapToTop = (mobileSearch?.getBoundingClientRect()?.top ?? 1000) <= HEADER_HEIGHT
     },
     handleUpdate(keyword: string) {
       this.searchbarKeyword = keyword
@@ -525,7 +539,7 @@ export default Vue.extend({
       this.getTemplates({ keyword: res.join(';;'), theme: themes.join(',') }).then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
         this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
-        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
         this.isTemplateReady = true
       })
       generalUtils.fbq('track', 'Search', {
@@ -537,13 +551,16 @@ export default Vue.extend({
       this.getMoreTemplates().then(() => {
         this.waterfallTemplatesPC = templateCenterUtils.generateWaterfall(this.templates, 6)
         this.waterfallTemplatesTAB = templateCenterUtils.generateWaterfall(this.templates, 3)
-        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2)
+        this.waterfallTemplatesMOBILE = templateCenterUtils.generateWaterfall(this.templates, 2, 2)
         this.isTemplateReady = true
       })
     },
     handleTemplateClick(content: IContentTemplate) {
-      if (content.themes.length > 1) {
-        this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
+      this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
+      const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
+        return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
+      }, [true, undefined, undefined])[0]
+      if (content.themes.length > 1 && !allSameSize) {
         if (this.isMobile()) {
           const route = this.$router.resolve({
             name: 'Editor',
@@ -635,59 +652,52 @@ body {
   @include size(100%, 100%);
   min-height: 100%;
   overflow-y: auto;
-  @media screen and (max-width: 767px) {
-    overflow: unset;
-    height: unset;
+  @media screen and (max-width: 540px) {
+    overflow-x: hidden;
+    position: relative;
+    @include no-scrollbar;
   }
   &__absolute-searchbar {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 440px;
+    width: min(60vw, 512px);
     height: 42px;
     border-radius: 3px;
-    z-index: 1000;
+    z-index: 21;
     background: white;
     box-sizing: border-box;
     border: 1px solid setColor(gray-4);
   }
   &__search-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: 376px;
-    background-size: cover;
-    background-position: center center;
-    background: radial-gradient(
-        21.05% 59% at 37.08% 73.01%,
-        rgba(255, 195, 139, 0.2) 47.4%,
-        rgba(255, 242, 230, 0.142) 100%
-      ),
-      radial-gradient(
-        32.87% 62.53% at 60.31% 77.79%,
-        rgba(255, 177, 173, 0.2) 56.25%,
-        rgba(202, 159, 153, 0) 92.71%
-      ),
-      linear-gradient(
-        90deg,
-        #cce9ff 0%,
-        #f5fbff 37.1%,
-        #f8fcff 69.6%,
-        #eaf4ff 100%
-      );
+    position: relative;
+    @media screen and (max-width: 540px) {
+      height: fit-content;
+    }
   }
   &__search {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: fit-content;
-    max-width: 90%;
-    gap: 20px;
     &__title {
+      position: absolute;
+      bottom: 210px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 90%;
       display: flex;
       align-items: center;
       justify-content: center;
+      @media screen and (max-width: 540px) {
+        position: static;
+        transform: none;
+        margin: auto;
+        margin-top: 24px;
+        margin-bottom: 38px;
+        > span {
+          text-align: left;
+        }
+      }
       > span {
         @include text-H2;
         display: block;
@@ -695,25 +705,36 @@ body {
       }
     }
     &__text {
+      position: absolute;
+      top: 184px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: fit-content;
+      max-width: 90%;
       > span {
         @include body-LG;
         color: setColor(gray-2);
       }
     }
     &__searchbar {
-      width: 440px;
+      position: absolute;
+      top: 248px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(60vw, 512px);
       height: 42px;
       border-radius: 3px;
       background: white;
       box-sizing: border-box;
       border: 1px solid setColor(gray-4);
+      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     }
   }
   &__content {
     margin: auto;
     width: 80%;
     min-width: calc(100% - 48px);
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 540px) {
       min-height: 100%;
       min-width: calc(100% - 30px);
       width: calc(100% - 30px);
@@ -724,10 +745,11 @@ body {
   }
   &__filter {
     margin-top: 36px;
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 540px) {
       margin-top: unset;
       margin-left: 5px;
       transition: 0.2s ease;
+      width: calc(100% - 40px);
     }
   }
   &__hr {
@@ -786,16 +808,11 @@ body {
   }
   &__waterfall-wrapper {
     padding-bottom: 80px;
-    @media screen and (max-width: 767px) {
-      height: 100vh;
-      overflow-y: auto;
-      @include no-scrollbar;
-    }
   }
   &__waterfall {
     display: flex;
     gap: 24px;
-    @media screen and (max-width: 767px) {
+    @media screen and (max-width: 540px) {
       gap: 15px;
       padding: 2px;
     }
@@ -804,7 +821,7 @@ body {
       display: flex;
       flex-direction: column;
       gap: 24px;
-      @media screen and (max-width: 767px) {
+      @media screen and (max-width: 540px) {
         gap: 15px;
       }
       &__template {
@@ -847,20 +864,31 @@ body {
     }
   }
   &__mobile-search {
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 20px;
-    width: calc(100% - 10px);
+    position: relative;
+    min-width: calc(100% - 40px);
+    width: calc(100% - 40px);
     height: 44px;
+    margin-top: 16px;
+    margin-bottom: 16px;
     display: flex;
     gap: 10px;
+    &__wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      width: 100%;
+      background-color: white;
+      position: -webkit-sticky;
+      position: sticky;
+      top: $header-height;
+    }
     &__searchbar {
       height: 44px;
       width: unset;
       background-color: white;
       border: 1px solid setColor(gray-4);
-      border-radius: 3px;
+      border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 1;
     }
@@ -871,7 +899,7 @@ body {
       align-items: center;
       justify-content: center;
       border: 1px solid setColor(gray-4);
-      border-radius: 3px;
+      border-radius: 5px;
       box-sizing: border-box;
       flex-grow: 0;
       flex-basis: 44px;
@@ -894,7 +922,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 982px;
+    width: min(982px, calc(100vw - 30px));
     height: 560px;
     background: #ffffff;
     box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
@@ -924,16 +952,16 @@ body {
       height: calc(100% - 70px);
     }
     &__content-left {
-      width: 560px;
+      width: 57%;
       height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      border: 2px solid setColor(gray-5);
+      border-right: 2px solid setColor(gray-5);
       box-sizing: border-box;
     }
     &__content-right {
-      width: calc(100% - 560px);
+      width: 47%;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -943,16 +971,20 @@ body {
       display: grid;
       margin: auto;
       margin-bottom: 20px;
-      width: 860px;
+      width: min(860px, calc(100% - 40px));
       grid-gap: 20px;
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      @media screen and (max-width: 767px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
     &__gallery-item {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 200px;
-      height: 200px;
+      max-width: 200px;
+      width: 100%;
+      aspect-ratio: 1;
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -965,8 +997,8 @@ body {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 456px;
-      height: 456px;
+      width: 67%;
+      aspect-ratio: 1;
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -975,7 +1007,7 @@ body {
       background-position: center center;
     }
     &__title {
-      width: 312px;
+      width: 74%;
       height: 20px;
       text-align: left;
       > span {
@@ -987,7 +1019,7 @@ body {
       margin-top: 8px;
       display: flex;
       flex-direction: column;
-      width: 312px;
+      width: 74%;
       height: 411px;
       border: 2px solid setColor(gray-5);
       border-radius: 3px;
@@ -1028,7 +1060,7 @@ body {
     }
     &__button {
       margin-top: 18px;
-      width: 240px;
+      width: 57%;
       height: 36px;
       background-color: setColor(blue-1);
       border-radius: 4px;
@@ -1066,7 +1098,7 @@ body {
       align-items: center;
       justify-content: center;
       top: $header-height / 2;
-      right: 15px;
+      right: 45px;
       width: 25px;
       height: 25px;
       z-index: 20;
@@ -1105,6 +1137,54 @@ body {
   }
 }
 
+.text-blue-1 {
+  color: setColor(blue-1);
+}
+
+.color-block {
+  position: absolute;
+  z-index: -1;
+}
+
+.vector-purple1 {
+  top: 79px;
+  right: max(calc((100vw - 948px) / 2), 24px);
+  width: 83.78px;
+  height: 87px;
+  transform: rotate(162.55deg);
+  @media screen and (max-width: 768px) {
+    top: 60px;
+  }
+  @media screen and (max-width: 540px) {
+    top: 2px;
+    right: -12px;
+  }
+}
+
+.oval-lightblue1 {
+  top: 221px;
+  left: max(calc((100vw - 948px) / 2 + 130px), 50px);
+  width: 112px;
+  height: 112px;
+  @media screen and (max-width: 540px) {
+    top: -26px;
+    left: -31px;
+    width: 101px;
+    height: 101px;
+  }
+}
+
+.oval-orange2 {
+  top: 298px;
+  left: max(calc((100vw - 948px) / 2), 32px);
+  width: 44px;
+  height: 44px;
+  @media screen and (max-width: 540px) {
+    top: 50px;
+    left: -37px;
+  }
+}
+
 .pc-show {
   @media screen and (max-width: 767px) {
     display: none;
@@ -1135,6 +1215,12 @@ body {
 
 .non-tab-show {
   @media screen and (min-width: 541px) {
+    display: none;
+  }
+}
+
+.non-mobile-show {
+  @media screen and (max-width: 540px) {
     display: none;
   }
 }
@@ -1184,6 +1270,19 @@ body {
   &-enter,
   &-leave-to {
     left: 100%;
+  }
+}
+
+.slide-up {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+  }
+
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+    transform: translateY(-100px);
   }
 }
 </style>

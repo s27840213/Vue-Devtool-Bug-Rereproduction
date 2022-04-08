@@ -25,7 +25,6 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
-import { IImage } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
@@ -121,8 +120,8 @@ export default Vue.extend({
       const styles = {
         width: this.config.type === 'shape' ? '' : `${width}px`,
         height: this.config.type === 'shape' ? '' : `${height}px`,
-        transform: type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
-        'transform-style': type === 'group' ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+        transform: type === 'image' ? 'none' : `translateZ(0) scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles
     },

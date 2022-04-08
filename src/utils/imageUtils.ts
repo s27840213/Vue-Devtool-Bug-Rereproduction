@@ -7,8 +7,9 @@ import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import generalUtils from './generalUtils'
+import { SrcObj } from '@/interfaces/gallery'
 
-const FORCE_UPDATE_VER = '&ver=033020221655'
+const FORCE_UPDATE_VER = '&ver=303120221747'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -31,12 +32,13 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: IImage, size?: string | number): string {
+  getSrc(config: Partial<IImage>, size?: string | number, ver?: number): string {
+    if (!config.srcObj && !config.src_obj) return ''
     if (config.previewSrc) {
       return config.previewSrc + FORCE_UPDATE_VER
     }
 
-    const { type, userId, assetId } = config.srcObj || config.src_obj || {}
+    const { type, userId, assetId } = config.srcObj || config.src_obj as SrcObj
     if (typeof size === 'undefined' && config.styles) {
       const { imgWidth, imgHeight } = config.styles
       size = this.getSrcSize(
@@ -56,7 +58,7 @@ class ImageUtils {
       case 'pexels':
         return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}&origin=true`
       case 'background':
-        return `https://template.vivipic.com/background/${assetId}/full?origin=true` + FORCE_UPDATE_VER
+        return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
       default:
@@ -87,7 +89,8 @@ class ImageUtils {
   getSrcType(src: string) {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
-    if (src.includes('template.vivipic')) return 'public'
+    if (src.includes('template.vivipic.com/background')) return 'background'
+    if (src.includes('template.vivipic.com/admin')) return 'public'
     if (src.includes('asset.vivipic')) return 'private'
     return ''
   }
@@ -337,10 +340,10 @@ class ImageUtils {
     })
   }
 
-  async getImageSize(url: string, defaultWidth: number, defaultHeight: number): Promise<{ width: number; height: number, exists: boolean }> {
+  async getImageSize(url: string, defaultWidth: number, defaultHeight: number, setAnonymous = true): Promise<{ width: number; height: number, exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image()
-      image.setAttribute('crossOrigin', 'Anonymous')
+      setAnonymous && image.setAttribute('crossOrigin', 'Anonymous')
       image.onload = () => resolve(image)
       image.onerror = () => reject(new Error('Could not load image'))
       image.src = url

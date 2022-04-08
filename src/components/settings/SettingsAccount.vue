@@ -50,13 +50,13 @@ div(class="settings-account")
         :disabled="!isChanged"
         @click.native="onConfirmClicked()") {{$t('NN0176')}}
   div(v-if="showVerifyPopup"
-    class="settings-account__popup")
+    class="settings-account__popup popup-window")
     popup-verify(type="vcode"
       :account="inputAccount"
       @close="closePopup()"
       @isVerified="verifyEmail()")
   div(v-if="showRemovePopup"
-    class="settings-account__popup")
+    class="settings-account__popup popup-window")
     popup-verify(type="removeAvatar"
       @close="closePopup()")
   spinner(v-if="isLoading")
@@ -394,16 +394,6 @@ export default Vue.extend({
     }
   }
   &__popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #000000a1;
-    z-index: 999999;
     &-remove {
       position: relative;
       width: 250px;
