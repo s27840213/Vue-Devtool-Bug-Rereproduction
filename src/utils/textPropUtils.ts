@@ -174,7 +174,6 @@ class TextPropUtils {
         span.styles.userId = paragraphStyles.userId as string
         span.styles.assetId = paragraphStyles.assetId as string
         span.styles.fontUrl = paragraphStyles.fontUrl as string
-        span.styles.size = paragraphStyles.size
       }
     })
   }

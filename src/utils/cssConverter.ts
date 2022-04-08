@@ -83,7 +83,7 @@ class CssConveter {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (prop === 'size') {
-        result[styleMap[prop]] = `${Math.floor((sourceStyles[prop] as number) * 1.333333)}px`
+        result[styleMap[prop]] = `${(sourceStyles[prop] as number) * 1.333333}px`
       } else if (prop === 'weight') {
         result[styleMap[prop]] = sourceStyles[prop] === 'bold' ? `calc(var(--base-stroke) + ${(sourceStyles.size as number) / 32}px)` : 'calc(var(--base-stroke))'
       } else if (prop === 'opacity') {
@@ -91,7 +91,7 @@ class CssConveter {
       } else if (prop === 'fontSpacing') {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (prop === 'lineHeight') {
-        result[styleMap[prop]] = `${Math.floor((sourceStyles[prop] as number) * (sourceStyles.size as number) * 1.333333)}px`
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (typeof sourceStyles[prop] !== 'undefined') {

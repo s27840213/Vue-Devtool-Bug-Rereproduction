@@ -276,7 +276,6 @@ class LayerFactary {
               paragraph.styles.font = defaultFont
               paragraph.styles.type = 'public'
             }
-            paragraph.styles.size = firstSpanStyles.size
             if (paragraph.styles.spanStyle) {
               delete paragraph.styles.spanStyle
             }
@@ -287,7 +286,6 @@ class LayerFactary {
             paragraph.styles.userId = spanStyles.userId
             paragraph.styles.assetId = spanStyles.assetId
             paragraph.styles.fontUrl = spanStyles.fontUrl
-            paragraph.styles.size = spanStyles.size
           } else {
             paragraph.styles.font = defaultFont
             paragraph.styles.type = 'public'
