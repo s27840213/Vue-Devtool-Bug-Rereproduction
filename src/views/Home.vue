@@ -13,9 +13,8 @@
           :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
           frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
         router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
-            class="home-top__buttom__text btn-LG")
-          div(class="home-top__buttom rounded btn-primary-sm")
-            span {{$t('NN0391')}}
+            class="home-top__buttom rounded btn-primary-sm btn-LG")
+          span {{$t('NN0391')}}
       div(class="home-list")
         scroll-list(v-if="!isMobile || isLogin"
           type="theme" @openSizePopup="openSizePopup()")
@@ -196,10 +195,8 @@ export default Vue.extend({
     width: 216px;
     height: 44px;
     box-shadow: 0px 9px 13px 0px #7190CC40;
-    &__text {
-      color: setColor(white);
-      text-decoration: none;
-    }
+    text-decoration: none;
+    color: setColor(white);
   }
   .vector_lightblue2 {
     width: 85px; height: 87px;
