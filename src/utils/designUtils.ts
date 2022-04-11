@@ -581,7 +581,8 @@ class DesignUtils {
            * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
            */
           store.commit('SET_assetId', generalUtils.generateAssetId())
-          const query = { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } as 
+          const query = { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } as
+            // eslint-disable-next-line camelcase
             { type: string, design_id: string, team_id: string, group_id?: string}
           if (groupId !== '') {
             query.group_id = groupId
