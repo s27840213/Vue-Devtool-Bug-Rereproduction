@@ -136,7 +136,10 @@ export default Vue.extend({
               id: `${category.title}_${idx}`,
               size: 32,
               type: 'category-font-item',
-              list: [font]
+              list: [{
+                ...font,
+                fontType: 'public'
+              }]
             }))
           ])
         }

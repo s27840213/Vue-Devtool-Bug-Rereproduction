@@ -564,7 +564,7 @@ class DesignUtils {
     }
   }
 
-  newDesignWithTemplae(width: number, height: number, json: any) {
+  newDesignWithTemplae(width: number, height: number, json: any, groupId: string) {
     console.log(json)
     assetUtils.addTemplate(json, {}, false).then(() => {
       stepsUtils.reset()
@@ -581,7 +581,12 @@ class DesignUtils {
            * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
            */
           store.commit('SET_assetId', generalUtils.generateAssetId())
-          router.replace({ query: { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } }).then(() => {
+          const query = { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId } as 
+            { type: string, design_id: string, team_id: string, group_id?: string}
+          if (groupId !== '') {
+            query.group_id = groupId
+          }
+          router.replace({ query }).then(() => {
             uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
           })
         }

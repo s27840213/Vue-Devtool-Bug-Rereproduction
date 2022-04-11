@@ -74,7 +74,7 @@
               :class="{'selected': selectedSorting === sortingCriterium.key}"
               @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
-      div(class="template-center__waterfall-wrapper pc-lg-show")
+      div(v-if="isPC" class="template-center__waterfall-wrapper")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesPC"
               class="template-center__waterfall__column")
@@ -86,7 +86,7 @@
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
                                           :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -98,7 +98,7 @@
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
                           @callback="handleLoadMore")
-      div(class="template-center__waterfall-wrapper tab-show")
+      div(v-if="!isPC && !isMobile" class="template-center__waterfall-wrapper")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesTAB"
               class="template-center__waterfall__column")
@@ -110,7 +110,7 @@
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
                                           :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -122,7 +122,7 @@
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
                           @callback="handleLoadMore")
-      div(class="template-center__waterfall-wrapper non-tab-show")
+      div(v-if="isMobile" class="template-center__waterfall-wrapper")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesMOBILE"
               class="template-center__waterfall__column")
@@ -134,7 +134,7 @@
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
                                           :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -162,15 +162,15 @@
                     iconColor="gray-2")
         div(class="template-center__multi__content")
           div(class="template-center__multi__gallery")
-            div(v-for="content in content_ids" class="template-center__multi__gallery-item"
+            div(v-for="content in contentIds" class="template-center__multi__gallery-item"
                 :style="`background-image: url(${getPrevUrl(content)})`"
                 @click="handleTemplateClick(content)")
     transition(name="fade-slide")
       div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
         div(class="template-center__mobile-multi__content")
           div(class="template-center__mobile-multi__gallery")
-            div(v-for="content in content_ids" class="template-center__mobile-multi__gallery-item"
-                :style="`background-image: url(${getPrevUrl(content)})`"
+            div(v-for="content in contentIds" class="template-center__mobile-multi__gallery-item"
+                :style="`background-image: url(${getPrevUrl(content, 2)})`"
                 @click="handleTemplateClick(content)")
             div(class="template-center__scroll-space")
     div(v-if="modal === 'mobile-pages'", class="template-center__mobile-multi__close"
@@ -266,12 +266,15 @@ export default Vue.extend({
       themes: [] as Itheme[],
       matchedThemes: [] as Itheme[],
       selectedTheme: undefined as Itheme | undefined,
-      content_ids: [] as IContentTemplate[],
+      contentIds: [] as IContentTemplate[],
+      groupId: '',
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
       mouseInTemplate: '',
-      isTop: true
+      isTop: true,
+      isMobile: false,
+      isPC: false
     }
   },
   metaInfo(): any {
@@ -372,6 +375,13 @@ export default Vue.extend({
     generalUtils.fbq('track', 'ViewContent', {
       content_type: 'TemplateCenter'
     })
+
+    window.addEventListener('resize', this.handleResize)
+
+    this.handleResize()
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
   },
   beforeCreate() {
     this.$store.registerModule('hashtag', hashtag)
@@ -408,9 +418,9 @@ export default Vue.extend({
       getTemplates: 'getThemeContent',
       getMoreTemplates: 'getMoreContent'
     }),
-    isMobile(): boolean {
-      return window.matchMedia('screen and (max-width: 540px)').matches
-    },
+    // isMobile(): boolean {
+    //   return window.matchMedia('screen and (max-width: 540px)').matches
+    // },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 15)}px` }
     },
@@ -491,8 +501,9 @@ export default Vue.extend({
           content_ids: [template.id]
         })
       } else {
-        this.content_ids = template.content_ids
-        if (this.isMobile()) {
+        this.groupId = template.id
+        this.contentIds = template.content_ids
+        if (this.isMobile) {
           this.modal = 'mobile-pages'
         } else {
           this.modal = 'pages'
@@ -561,14 +572,15 @@ export default Vue.extend({
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
       }, [true, undefined, undefined])[0]
       if (content.themes.length > 1 && !allSameSize) {
-        if (this.isMobile()) {
+        if (this.isMobile) {
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
               type: 'new-design-template',
               design_id: content.id,
               width: this.matchedThemes[0].width.toString(),
-              height: this.matchedThemes[0].height.toString()
+              height: this.matchedThemes[0].height.toString(),
+              group_id: this.groupId
             }
           })
           window.open(route.href, '_blank')
@@ -595,7 +607,8 @@ export default Vue.extend({
             type: 'new-design-template',
             design_id: content.id,
             width: format.width,
-            height: format.height
+            height: format.height,
+            group_id: this.groupId
           }
         })
         window.open(route.href, '_blank')
@@ -615,7 +628,8 @@ export default Vue.extend({
           type: 'new-design-template',
           design_id: this.contentBuffer.id,
           width: this.selectedTheme.width.toString(),
-          height: this.selectedTheme.height.toString()
+          height: this.selectedTheme.height.toString(),
+          group_id: this.groupId
         }
       })
       window.open(route.href, '_blank')
@@ -623,8 +637,12 @@ export default Vue.extend({
         content_ids: [this.contentBuffer.id]
       })
     },
-    getPrevUrl(content: IContentTemplate): string {
-      return templateCenterUtils.getPrevUrl(content)
+    handleResize() {
+      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches
+      this.isPC = window.matchMedia('screen and (min-width: 976px)').matches
+    },
+    getPrevUrl(content: IContentTemplate, scale: number): string {
+      return templateCenterUtils.getPrevUrl(content, scale)
     },
     getThemeTitle(themeId: string): string {
       const theme = this.themes.find((theme) => theme.id.toString() === themeId)

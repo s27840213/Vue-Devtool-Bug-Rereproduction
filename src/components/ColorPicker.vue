@@ -118,6 +118,7 @@ export default Vue.extend({
   },
   watch: {
     color(): void {
+      console.log('color changed')
       this.color = '#' + this.color.replaceAll(/[^a-fA-F0-9]/g, '')
       this.color = this.color.toUpperCase()
       if (this.color.indexOf('#') === -1) {
