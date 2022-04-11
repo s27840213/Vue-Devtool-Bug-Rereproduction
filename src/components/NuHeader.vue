@@ -412,7 +412,7 @@ export default Vue.extend({
 }
 .slide-x-right {
   &-enter-active, &-leave-active {
-    transition: 1s;
+    transition: 0.5s;
   }
   &-enter, &-leave-to {
     opacity: 0;
