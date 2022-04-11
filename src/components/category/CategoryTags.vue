@@ -10,7 +10,7 @@
       @click="handleNext")
       div(class="category-tags__icon")
         svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-    div(class="category-tags__items" ref="items" @scroll="handleScroll")
+    div(class="category-tags__items" ref="items" @scroll.passive="handleScroll")
       div(class="category-tags__tag") Women’s day
       div(class="category-tags__tag") Spring
       div(class="category-tags__tag") birthday
