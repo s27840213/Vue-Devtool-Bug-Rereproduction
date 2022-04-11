@@ -86,7 +86,7 @@
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
                                           :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -110,7 +110,7 @@
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
                                           :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -134,7 +134,7 @@
                 @mouseleave="handleMouseLeave(template.group_id)")
               scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
                                           :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url")
+              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
