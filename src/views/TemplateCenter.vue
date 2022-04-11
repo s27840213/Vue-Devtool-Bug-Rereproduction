@@ -74,7 +74,7 @@
               :class="{'selected': selectedSorting === sortingCriterium.key}"
               @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
-      div(class="template-center__waterfall-wrapper pc-lg-show")
+      div(v-if="isPC" class="template-center__waterfall-wrapper")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesPC"
               class="template-center__waterfall__column")
@@ -98,7 +98,7 @@
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
                           @callback="handleLoadMore")
-      div(class="template-center__waterfall-wrapper tab-show")
+      div(v-if="!isPC && !isMobile" class="template-center__waterfall-wrapper")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesTAB"
               class="template-center__waterfall__column")
@@ -122,7 +122,7 @@
                   iconColor="gray-2")
         observer-sentinel(v-if="isTemplateReady && hasNextPage"
                           @callback="handleLoadMore")
-      div(class="template-center__waterfall-wrapper non-tab-show")
+      div(v-if="isMobile" class="template-center__waterfall-wrapper")
         div(class="template-center__waterfall")
           div(v-for="waterfallTemplate in waterfallTemplatesMOBILE"
               class="template-center__waterfall__column")
@@ -271,7 +271,9 @@ export default Vue.extend({
       modal: '',
       isShowOptions: false,
       mouseInTemplate: '',
-      isTop: true
+      isTop: true,
+      isMobile: false,
+      isPC: false
     }
   },
   metaInfo(): any {
@@ -372,6 +374,10 @@ export default Vue.extend({
     generalUtils.fbq('track', 'ViewContent', {
       content_type: 'TemplateCenter'
     })
+
+    window.addEventListener('resize', this.handleResize)
+
+    this.handleResize()
   },
   beforeCreate() {
     this.$store.registerModule('hashtag', hashtag)
@@ -408,9 +414,9 @@ export default Vue.extend({
       getTemplates: 'getThemeContent',
       getMoreTemplates: 'getMoreContent'
     }),
-    isMobile(): boolean {
-      return window.matchMedia('screen and (max-width: 540px)').matches
-    },
+    // isMobile(): boolean {
+    //   return window.matchMedia('screen and (max-width: 540px)').matches
+    // },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 15)}px` }
     },
@@ -492,7 +498,7 @@ export default Vue.extend({
         })
       } else {
         this.content_ids = template.content_ids
-        if (this.isMobile()) {
+        if (this.isMobile) {
           this.modal = 'mobile-pages'
         } else {
           this.modal = 'pages'
@@ -561,7 +567,7 @@ export default Vue.extend({
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]
       }, [true, undefined, undefined])[0]
       if (content.themes.length > 1 && !allSameSize) {
-        if (this.isMobile()) {
+        if (this.isMobile) {
           const route = this.$router.resolve({
             name: 'Editor',
             query: {
@@ -622,6 +628,10 @@ export default Vue.extend({
       generalUtils.fbq('track', 'AddToWishlist', {
         content_ids: [this.contentBuffer.id]
       })
+    },
+    handleResize() {
+      this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches
+      this.isPC = window.matchMedia('screen and (min-width: 976px)').matches
     },
     getPrevUrl(content: IContentTemplate): string {
       return templateCenterUtils.getPrevUrl(content)
