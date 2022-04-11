@@ -111,7 +111,7 @@ export default Vue.extend({
     const urlParams = new URLSearchParams(window.location.search)
     const groupId = urlParams.get('group_id')
     if (!groupId) return
-    listService.getList({ type: 'group', groupId }).then(result => {
+    listService.getList({ type: 'group', groupId, cache: true }).then(result => {
       const { content } = result.data.data
       this.currentGroup = {
         group_type: 0,

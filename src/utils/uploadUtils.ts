@@ -1003,7 +1003,7 @@ class UploadUtils {
       }
 
       case GetDesignType.PRODUCT_PAGE_TEMPLATE: {
-        return listService.getList({ type: 'group', groupId: designId })
+        return listService.getList({ type: 'group', groupId: designId, cache: true })
           .then(result => {
             const { content } = result.data.data
             return new Promise<IListServiceContentData[]>((resolve) => {
