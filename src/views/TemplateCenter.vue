@@ -162,14 +162,14 @@
                     iconColor="gray-2")
         div(class="template-center__multi__content")
           div(class="template-center__multi__gallery")
-            div(v-for="content in content_ids" class="template-center__multi__gallery-item"
+            div(v-for="content in contentIds" class="template-center__multi__gallery-item"
                 :style="`background-image: url(${getPrevUrl(content)})`"
                 @click="handleTemplateClick(content)")
     transition(name="fade-slide")
       div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
         div(class="template-center__mobile-multi__content")
           div(class="template-center__mobile-multi__gallery")
-            div(v-for="content in content_ids" class="template-center__mobile-multi__gallery-item"
+            div(v-for="content in contentIds" class="template-center__mobile-multi__gallery-item"
                 :style="`background-image: url(${getPrevUrl(content, 2)})`"
                 @click="handleTemplateClick(content)")
             div(class="template-center__scroll-space")
@@ -266,7 +266,8 @@ export default Vue.extend({
       themes: [] as Itheme[],
       matchedThemes: [] as Itheme[],
       selectedTheme: undefined as Itheme | undefined,
-      content_ids: [] as IContentTemplate[],
+      contentIds: [] as IContentTemplate[],
+      groupId: '',
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
@@ -378,6 +379,9 @@ export default Vue.extend({
     window.addEventListener('resize', this.handleResize)
 
     this.handleResize()
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
   },
   beforeCreate() {
     this.$store.registerModule('hashtag', hashtag)
@@ -497,7 +501,8 @@ export default Vue.extend({
           content_ids: [template.id]
         })
       } else {
-        this.content_ids = template.content_ids
+        this.groupId = template.id
+        this.contentIds = template.content_ids
         if (this.isMobile) {
           this.modal = 'mobile-pages'
         } else {
@@ -574,7 +579,8 @@ export default Vue.extend({
               type: 'new-design-template',
               design_id: content.id,
               width: this.matchedThemes[0].width.toString(),
-              height: this.matchedThemes[0].height.toString()
+              height: this.matchedThemes[0].height.toString(),
+              group_id: this.groupId
             }
           })
           window.open(route.href, '_blank')
@@ -601,7 +607,8 @@ export default Vue.extend({
             type: 'new-design-template',
             design_id: content.id,
             width: format.width,
-            height: format.height
+            height: format.height,
+            group_id: this.groupId
           }
         })
         window.open(route.href, '_blank')
@@ -621,7 +628,8 @@ export default Vue.extend({
           type: 'new-design-template',
           design_id: this.contentBuffer.id,
           width: this.selectedTheme.width.toString(),
-          height: this.selectedTheme.height.toString()
+          height: this.selectedTheme.height.toString(),
+          group_id: this.groupId
         }
       })
       window.open(route.href, '_blank')
