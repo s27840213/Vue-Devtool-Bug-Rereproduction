@@ -274,7 +274,8 @@ export default Vue.extend({
       }
       const parameter = {
         token: this.token,
-        vcode: this.vcode
+        vcode: this.vcode,
+        type: 1
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''

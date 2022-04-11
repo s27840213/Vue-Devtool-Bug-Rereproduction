@@ -7,6 +7,8 @@ import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import layerUtils from './layerUtils'
 import localeUtils from './localeUtils'
+import textPropUtils from './textPropUtils'
+import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
 
 class LayerFactary {
@@ -114,6 +116,12 @@ class LayerFactary {
       }))
     }
 
+    if (clips.some(img => img.styles.rotate !== 0)) {
+      const img = clips.find(img => img.styles.rotate !== 0) as IImage
+      styles.rotate = img.styles.rotate
+      img.styles.rotate = 0
+    }
+
     return {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -136,8 +144,8 @@ class LayerFactary {
         initHeight: initHeight,
         zindex: styles.zindex ?? -1,
         opacity: styles.opacity || 100,
-        horizontalFlip: styles.horizontalFlip,
-        verticalFlip: styles.verticalFlip
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       },
       clips,
       decoration: decoration ? this.newShape((() => {
@@ -208,6 +216,8 @@ class LayerFactary {
                 opacity: 1,
                 font: 'normal',
                 userId: '',
+                assetId: '',
+                fontUrl: '',
                 type: 'public',
                 weight: 'normal',
                 color: '#000000',
@@ -230,6 +240,9 @@ class LayerFactary {
     /**
      * For the past structure, some text might have wrong structure
      * below fix the wrong part
+     * 1: empty span
+     * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
+     * 3: span style that has only font but no type
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -238,25 +251,55 @@ class LayerFactary {
         if (paragraphs[pidx].spans.length === 0) {
           paragraphs.splice(pidx, 1)
           pidx--
-        } else {
-          const _pidx = pidx
-          for (let sidx = 0; sidx < paragraphs[_pidx].spans.length; sidx++) {
-            if (!paragraphs[_pidx].spans[sidx].text) {
-              paragraphs[_pidx].spans.splice(sidx, 1)
+        } else if (paragraphs[pidx].spans.length > 1) {
+          for (let sidx = 0; sidx < paragraphs[pidx].spans.length; sidx++) {
+            if (!paragraphs[pidx].spans[sidx].text && paragraphs[pidx].spans.length > 1) {
+              paragraphs[pidx].spans.splice(sidx, 1)
               sidx--
-              pidx = _pidx - 1
             }
           }
         }
       }
-      config.paragraphs.forEach((p) => {
-        for (let i = 0; i < p.spans.length; i++) {
-          if (!p.spans[i].styles.font) {
-            Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-              (p.spans[i].styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+      const isVertical = basicConfig.styles.writingMode.includes('vertical')
+      const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical,
+        (paragraph) => {
+          if (paragraph.spans.length > 0) {
+            const firstSpanStyles = paragraph.spans[0].styles
+            if (firstSpanStyles.font) {
+              paragraph.styles.font = firstSpanStyles.font
+              paragraph.styles.type = firstSpanStyles.type
+              paragraph.styles.userId = firstSpanStyles.userId
+              paragraph.styles.assetId = firstSpanStyles.assetId
+              paragraph.styles.fontUrl = firstSpanStyles.fontUrl
+            } else {
+              paragraph.styles.font = defaultFont
+              paragraph.styles.type = 'public'
+            }
+            if (paragraph.styles.spanStyle) {
+              delete paragraph.styles.spanStyle
+            }
+          } else if (paragraph.styles.spanStyle) {
+            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+            paragraph.styles.font = spanStyles.font
+            paragraph.styles.type = spanStyles.type
+            paragraph.styles.userId = spanStyles.userId
+            paragraph.styles.assetId = spanStyles.assetId
+            paragraph.styles.fontUrl = spanStyles.fontUrl
+          } else {
+            paragraph.styles.font = defaultFont
+            paragraph.styles.type = 'public'
+          }
+        },
+        (span) => {
+          if (!span.styles.font) {
+            span.styles.font = defaultFont
+            span.styles.type = 'public'
+          } else if (!span.styles.type) {
+            span.styles.type = 'public'
           }
         }
-      })
+      )
     }
     return Object.assign(basicConfig, config)
   }
@@ -399,7 +442,6 @@ class LayerFactary {
     }
 
     if (config.layers === undefined) return config
-
     for (const layerIndex in config.layers) {
       config.layers[layerIndex] = this.newByLayerType(config.layers[layerIndex])
 

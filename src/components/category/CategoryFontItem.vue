@@ -94,10 +94,10 @@ export default Vue.extend({
     async setFont() {
       if (this.pending) return
       tiptapUtils.agent(editor => editor.setEditable(false))
-      const isRanged = !!this.isRanged()
+      const isRanged = this.isRanged()
       const sel = isRanged ? tiptapUtils.getSelection() as { start: ISelection, end: ISelection } : undefined
-      const start = sel?.start || {} as ISelection
-      const end = sel?.end || {} as ISelection
+      const start = sel?.start || TextUtils.getNullSel() as ISelection
+      const end = sel?.end || TextUtils.getNullSel() as ISelection
       try {
         const { id, type } = layerUtils.getCurrLayer
         const preLayerIndex = layerUtils.layerIndex
@@ -111,9 +111,19 @@ export default Vue.extend({
         }
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
+        const updateItem = {
+          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          fontUrl: this.item.fontUrl ?? '',
+          userId: this.item.userId ?? '',
+          assetId: this.item.assetId ?? '',
+          font: this.item.id
+        }
+
         await this.$store.dispatch('text/addFont', {
-          type: 'public',
-          url: '',
+          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          url: this.item.fontUrl,
+          userId: this.item.userId,
+          assetId: this.item.assetId,
           face: this.item.id,
           ver: this.item.ver
         })
@@ -129,21 +139,22 @@ export default Vue.extend({
         }
 
         if (['tmp', 'group'].includes(type) && !contentEditable && currLayerIndex !== -1) {
-          TextPropUtils.applyPropsToAll('span', { font: this.item.id }, currLayerIndex, subLayerIdx)
+          TextPropUtils.applyPropsToAll('span,paragraph', updateItem, currLayerIndex, subLayerIdx)
+          tiptapUtils.updateHtml()
           layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: false })
           this.$nextTick(() => {
             layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { active: true })
             if (subLayerIdx === -1) {
               (layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup).layers.forEach((l, index) => {
                 if (l.type !== 'text') return
-                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index)
+                TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, index, true)
               })
             } else {
-              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx)
+              TextUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, currLayerIndex, subLayerIdx, true)
             }
           })
 
-          AssetUtils.addAssetToRecentlyUsed(this.item)
+          AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
           StepsUtils.record()
           TextPropUtils.updateTextPropsState({ font: this.item.id })
           return
@@ -155,7 +166,7 @@ export default Vue.extend({
           //   Object.assign(start, TextUtils.selectAll(config).start)
           //   Object.assign(end, TextUtils.selectAll(config).end)
           // }
-          const newConfig = TextPropUtils.spanPropertyHandler('fontFamily', { font: this.item.id }, start, end, config as IText)
+          const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
             tiptapUtils.updateHtml(newConfig.paragraphs)
@@ -166,44 +177,18 @@ export default Vue.extend({
             layerUtils.updateSubLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, layerUtils.subLayerIdx, { active: false })
           }
         } else {
-          const { start } = tiptapUtils.getSelection() as { start: ISelection }
+          const { start, end } = tiptapUtils.getSelection() as { start: ISelection, end: ISelection }
           /**
            * Check if the caret is focus at <br>.
            * if so, apply the font data to the spanStyle of the corresponding p.
            */
-          const paragraphs = generalUtils.deepCopy(config.paragraphs) as IParagraph[]
-          if (start.sIndex === 0 && !config.paragraphs[start.pIndex].spans[start.sIndex].text) {
-            const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(paragraphs[start.pIndex].spanStyle as string))
-            sStyles.font = this.item.id
-            paragraphs[start.pIndex].spans[start.sIndex].styles.font = this.item.id
-            paragraphs[start.pIndex].styles.font = this.item.id
-            paragraphs[start.pIndex].spanStyle = tiptapUtils.textStyles(sStyles)
-            this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs })
-            tiptapUtils.updateHtml(paragraphs)
-            tiptapUtils.focus()
-          } else {
-            tiptapUtils.agent(editor => {
-              const ranges = editor.state.selection.ranges
-              if (ranges.length > 0 && ranges[0].$from.pos !== ranges[0].$to.pos) {
-                tiptapUtils.applySpanStyle('font', this.item.id)
-              } else {
-                /**
-                 * Fix problem: caret at the end of a paragraph, the returned sIndex is not as expected.
-                 */
-                if (start.sIndex >= config.paragraphs[start.pIndex].spans.length) {
-                  start.sIndex = paragraphs[start.pIndex].spans.length - 1
-                }
-                paragraphs[start.pIndex].spans[start.sIndex]
-                  .styles.font = this.item.id
-                layerUtils.updatecCurrTypeLayerProp({ paragraphs })
-                tiptapUtils.updateHtml(paragraphs)
-              }
-            })
-            isRanged && tiptapUtils.focus()
-          }
+          const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
+          this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
+          tiptapUtils.updateHtml(newConfig.paragraphs)
+          tiptapUtils.focus()
         }
 
-        AssetUtils.addAssetToRecentlyUsed(this.item)
+        AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
         StepsUtils.record()
         TextPropUtils.updateTextPropsState({ font: this.item.id })
       } catch (error: any) {

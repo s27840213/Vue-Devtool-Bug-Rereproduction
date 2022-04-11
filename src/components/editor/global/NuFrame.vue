@@ -57,7 +57,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    'config.needFetch': function(newVal) {
+    'config.needFetch': function (newVal) {
       if (newVal && this.config.designId) {
         const asset = {
           type: 8,

@@ -35,7 +35,9 @@ class DesignUtils {
       favorite: design.favorite > 0,
       ver: design.ver,
       thumbnail: '',
-      signedUrl: design.signed_url
+      signedUrl: design.signed_url,
+      pageNum: design.page_num,
+      polling: design.polling
     }
   }
 
@@ -510,21 +512,42 @@ class DesignUtils {
     })
   }
 
-  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string {
+  getDesignPreview(assetId: string | undefined, scale = 2 as 1 | 2 | 4, ver?: number, signedUrl?: { [key: string]: string }, page = 0): string {
+    const prevImageName = `${page}_prev${scale === 1 ? '' : `_${scale}x`}`
+    const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
     if (assetId !== undefined) {
-      const prevImageName = `0_prev${scale === 2 ? '_2x' : ''}`
-      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
       const previewUrl = `https://template.vivipic.com/${uploadUtils.loginOutput.upload_map.path}asset/design/${assetId}/${prevImageName}?ver=${verstring}`
       return previewUrl
     } else {
-      const verstring = ver?.toString() ?? generalUtils.generateRandomString(6)
-      if (signedUrl) return (scale === 2 ? signedUrl['0_prev_2x'] : signedUrl['0_prev']) + `&ver=${verstring}`
+      if (signedUrl) return signedUrl[prevImageName] + `&ver=${verstring}`
       return '' // theoretically never reach here because either assestId or signedUrl will be non-undefined
     }
   }
 
+  getDesignPreviews(pageNum: number, assetId: string | undefined, scale = 2 as 1 | 2, ver?: number, signedUrl?: { '0_prev': string, '0_prev_2x': string }): string[] {
+    return Array(pageNum).fill('').map((_, index) => this.getDesignPreview(assetId, scale, ver, signedUrl, index))
+  }
+
+  newDesignWithLoginRedirect(width: number | string = 1080, height: number | string = 1080, id: number | string | undefined = undefined) {
+    // Redirect user to editor and create new design, will be use by login redirect.
+    const query = {
+      type: 'new-design-size',
+      width: width.toString(),
+      height: id?.toString() === '7' ? width.toString() : height.toString(),
+      themeId: id ? id.toString() : undefined
+    }
+    const route = router.resolve({
+      name: 'Editor',
+      query
+    })
+    // If user been redirect more than once, it will throw Uncaught (in promise) Error. https://stackoverflow.com/a/65326844
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    router.push(route.href).catch(() => { })
+  }
+
   // Below function is used to update the page
   async newDesign(width?: number, height?: number, newDesignType?: number) {
+    store.commit('file/SET_setLayersDone')
     pageUtils.setPages([pageUtils.newPage({
       width: width ?? 1080,
       height: height ?? 1080

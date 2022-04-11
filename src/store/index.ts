@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
+import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
@@ -33,6 +33,7 @@ import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import file from '@/store/module/file'
 
 Vue.use(Vuex)
 
@@ -93,7 +94,10 @@ const getDefaultState = (): IEditorState => ({
   showGuideline: true,
   lockGuideline: false,
   themes: [],
-  hasCopiedFormat: false
+  hasCopiedFormat: false,
+  inGestureToolMode: false,
+  isMobile: false,
+  isLargeDesktop: false
 })
 
 const state = getDefaultState()
@@ -246,6 +250,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getHasCopiedFormat(state: IEditorState) {
     return state.hasCopiedFormat
+  },
+  getInGestureToolMode(state: IEditorState) {
+    return state.inGestureToolMode
   }
 }
 
@@ -343,8 +350,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
   },
-  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any }) {
+  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
+    updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
   },
   SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
@@ -391,9 +399,11 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
     state.currDraggedPhoto.srcObj = {
+      ...state.currDraggedPhoto.srcObj,
       ...photo.srcObj
     }
     state.currDraggedPhoto.styles = {
+      ...state.currDraggedPhoto.styles,
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
@@ -750,8 +760,22 @@ const mutations: MutationTree<IEditorState> = {
     const { pageIndex, subLayerIndex, layerIndex, srcObj } = data
     Object.assign((state as any).pages[pageIndex].layers[layerIndex].clips[subLayerIndex].srcObj, srcObj)
   },
+  CLEAR_state(state: IEditorState) {
+    Object.assign(state, getDefaultState())
+  },
+  SET_inGestureMode(state: IEditorState, bool: boolean) {
+    state.inGestureToolMode = bool
+  },
   ...imgShadowMutations
 }
+
+function handleResize() {
+  state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
+  state.isLargeDesktop = window.matchMedia('screen and (min-width: 1440px)').matches
+}
+
+window.addEventListener('resize', handleResize)
+handleResize()
 
 export default new Vuex.Store({
   state,
@@ -776,6 +800,7 @@ export default new Vuex.Store({
     markers,
     brandkit,
     unsplash,
-    bgRemove
+    bgRemove,
+    file
   }
 })

@@ -10,7 +10,7 @@ import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
+import { IUploadAssetFontResponse, IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
 import { EventEmitter } from 'events'
@@ -21,6 +21,7 @@ import i18n from '@/i18n'
 import logUtils from './logUtils'
 import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
+import brandkitUtils from './brandkitUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -81,7 +82,7 @@ class UploadUtils {
   get groupId(): string { return store.getters.getGroupId }
   get assetId(): string { return store.getters.getAssetId }
   get exportIds(): string { return store.state.exportIds }
-  get images(): Array<IAssetPhoto> { return store.getters['user/getImages'] }
+  get images(): Array<IAssetPhoto> { return store.getters['file/getImages'] }
   get isAdmin(): boolean { return store.getters['user/isAdmin'] }
   get isOutsourcer(): boolean { return store.getters['user/isOutsourcer'] }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -148,7 +149,7 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        if (type !== 'logo' && type !== 'font') {
+        if (type !== 'logo') {
           this.uploadAsset(type, files as FileList)
         } else {
           console.log(files)
@@ -186,8 +187,9 @@ class UploadUtils {
        */
       const img = new Image()
       img.src = evt.target?.result as string
+      img.setAttribute('crossOrigin', 'Anonymous')
       img.onload = (evt) => {
-        store.commit('user/ADD_PREVIEW', {
+        store.commit('file/ADD_PREVIEW', {
           imageFile: img,
           assetId: assetId
         })
@@ -201,7 +203,7 @@ class UploadUtils {
         let increaseInterval = undefined as any
         xhr.upload.onprogress = (event) => {
           const uploadProgress = Math.floor(event.loaded / event.total * 100)
-          store.commit('user/UPDATE_PROGRESS', {
+          store.commit('file/UPDATE_PROGRESS', {
             assetId: assetId,
             progress: uploadProgress / 2
           })
@@ -231,11 +233,11 @@ class UploadUtils {
                    * */
                   if (json.flag === 0) {
                     console.log('Successfully upload the file')
-                    store.commit('user/UPDATE_PROGRESS', {
+                    store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
@@ -255,20 +257,26 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, addToPage = false, pollingCallback?: (json: IUploadAssetResponse) => void) {
+  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, { addToPage = false, id, pollingCallback }: {
+    addToPage?: boolean,
+    id?: string,
+    pollingCallback?: (json: IUploadAssetResponse) => void
+  } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
-      const assetId = generalUtils.generateAssetId()
+      const assetId = id ?? generalUtils.generateAssetId()
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
         formData.append(key, this.loginOutput.upload_map.fields[key])
       })
       if (type === 'avatar') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
+      } else if (type === 'font') {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.locale}_original`)
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
@@ -288,7 +296,7 @@ class UploadUtils {
           const img = new Image()
           img.src = src
           img.onload = (evt) => {
-            store.commit('user/ADD_PREVIEW', {
+            store.commit('file/ADD_PREVIEW', {
               imageFile: img,
               assetId: assetId
             })
@@ -304,7 +312,7 @@ class UploadUtils {
             let increaseInterval = undefined as any
             xhr.upload.onprogress = (event) => {
               const uploadProgress = Math.floor(event.loaded / event.total * 100)
-              store.commit('user/UPDATE_PROGRESS', {
+              store.commit('file/UPDATE_PROGRESS', {
                 assetId: assetId,
                 progress: uploadProgress / 2
               })
@@ -332,12 +340,12 @@ class UploadUtils {
                       if (json.flag === 0) {
                         console.log('Successfully upload the file')
                         if (type === 'image') {
-                          store.commit('user/UPDATE_PROGRESS', {
+                          store.commit('file/UPDATE_PROGRESS', {
                             assetId: assetId,
                             progress: 100
                           })
 
-                          store.commit('user/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                          store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           if (pollingCallback) {
                             pollingCallback(json)
@@ -353,6 +361,7 @@ class UploadUtils {
             }
           }
         } else if (type === 'font') {
+          const tempId = brandkitUtils.createTempFont(assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
           xhr.onload = () => {
@@ -362,16 +371,19 @@ class UploadUtils {
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
-                  response.json().then((json: IUploadAssetResponse) => {
+                  response.json().then((json: IUploadAssetFontResponse) => {
                     if (json.flag === 0) {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
-                      store.dispatch('getAllAssets', { token: this.token })
+                      brandkitUtils.replaceFont(tempId, json.data)
+                      // store.dispatch('getAllAssets', { token: this.token })
+                      // update uploading font as real object
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
                     } else {
                       this.emitFontUploadEvent('fail')
+                      brandkitUtils.deleteFont(tempId)
                       console.log('Failed to upload the file')
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
@@ -519,7 +531,7 @@ class UploadUtils {
     }
     this.emitDesignUploadEvent('uploading')
     await this.makeXhrRequest('POST', this.loginOutput.upload_map.url, formData)
-      .then(() => {
+      .then(async () => {
         if (this.designStatusTimer !== -1) {
           clearTimeout(this.designStatusTimer)
         }
@@ -528,7 +540,7 @@ class UploadUtils {
         }, 300)
         if (putAssetDesignType !== undefined) {
           logUtils.setLog(`Put asset design (Type: ${typeMap[putAssetDesignType]})`)
-          store.dispatch('user/putAssetDesign', {
+          await store.dispatch('user/putAssetDesign', {
             assetId,
             type: putAssetDesignType
           })
@@ -830,7 +842,7 @@ class UploadUtils {
   }
 
   async updateTemplate() {
-    const pageIndex = store.getters.getMiddlemostPageIndex
+    const pageIndex = pageUtils.currFocusPageIndex
     const designId = store.getters.getPage(pageIndex).designId
     if (this.isOutsourcer) {
       const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
@@ -897,6 +909,10 @@ class UploadUtils {
       layer.active = false
     }
 
+    if (page.id) {
+      delete page.id
+    }
+
     if (page.backgroundImage.config.src) {
       const src = page.backgroundImage.config.src as string
       const type = ImageUtils.getSrcType(page.backgroundImage.config.src as any)
@@ -917,11 +933,6 @@ class UploadUtils {
     for (const [index, layer] of (page.layers as Array<ILayer>).entries()) {
       switch (layer.type) {
         case 'image':
-          if (layer.styles.scale !== 1) {
-            layer.styles.imgWidth = layer.styles.width as number
-            layer.styles.imgHeight = layer.styles.height as number
-            layer.styles.scale = 1
-          }
           layer.imgControl = false
           break
         case 'tmp': {
@@ -962,6 +973,7 @@ class UploadUtils {
     const designId = designParams.designId ?? ''
     const teamId = designParams.teamId ?? this.teamId
     this.isGettingDesign = true
+    console.log(designId, teamId)
     logUtils.setLog(`Get Design
       Type: ${type}
       DesignId: ${designId}
@@ -986,6 +998,7 @@ class UploadUtils {
          */
         jsonName = 'config.json'
         fetchTarget = designParams.fetchTarget ? `${designParams.fetchTarget}&ver=${generalUtils.generateRandomString(6)}` : `https://template.vivipic.com/admin/${teamId}/asset/design/${designId}/${jsonName}?ver=${generalUtils.generateRandomString(6)}`
+        console.log(fetchTarget)
         break
       }
 
@@ -1005,6 +1018,7 @@ class UploadUtils {
           .then(() => {
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
+            this.isGettingDesign = false
           })
       }
       case GetDesignType.NEW_DESIGN_TEMPLATE: {
@@ -1018,6 +1032,7 @@ class UploadUtils {
           /**
            * @Note remove the designId and type query if 404
            */
+          console.log('failed to get design')
           logUtils.setLog('Fail to get design')
           themeUtils.refreshTemplateState()
           router.replace({ query: Object.assign({}) })
@@ -1041,13 +1056,20 @@ class UploadUtils {
                  * @Todo add computableInfo if we need
                  */
                 // await ShapeUtils.addComputableInfo(json.layers[0])
-                store.commit('SET_assetId', designId)
+                if (router.currentRoute.query.team_id === this.teamId) {
+                  store.commit('SET_assetId', designId)
+                } else {
+                  const id = generalUtils.generateAssetId()
+                  store.commit('SET_assetId', id)
+                  router.replace({ query: Object.assign({}, router.currentRoute.query, { design_id: id, team_id: this.teamId }) })
+                }
                 /**
                  * @todo fix the filter function below
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
+                store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
                 //
@@ -1139,7 +1161,6 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
-        styles.shadow.filterId = ''
         return {
           ...general,
           imgX: styles.imgX,

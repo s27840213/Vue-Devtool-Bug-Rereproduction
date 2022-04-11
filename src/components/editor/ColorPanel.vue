@@ -41,7 +41,8 @@
       ref="colorPicker"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate")
+      @update="handleDragUpdate"
+      @final="handleChangeStop")
 </template>
 
 <script lang="ts">
@@ -141,6 +142,7 @@ export default Vue.extend({
     },
     handleColorEvent(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)
+      colorUtils.event.emit(colorUtils.currStopEvent, color)
       colorUtils.setCurrColor(color)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
     },
@@ -148,6 +150,11 @@ export default Vue.extend({
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currEvent, color)
         colorUtils.setCurrColor(color)
+      })
+    },
+    handleChangeStop(color: string) {
+      window.requestAnimationFrame(() => {
+        colorUtils.event.emit(colorUtils.currStopEvent, color)
       })
     },
     handleColorModal(): void {

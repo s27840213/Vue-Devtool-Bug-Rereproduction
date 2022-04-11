@@ -136,7 +136,10 @@ export default Vue.extend({
               id: `${category.title}_${idx}`,
               size: 32,
               type: 'category-font-item',
-              list: [font]
+              list: [{
+                ...font,
+                fontType: 'public'
+              }]
             }))
           ])
         }
@@ -166,9 +169,9 @@ export default Vue.extend({
         'getMoreCategory'
       ]
     ),
-    getFontUrl(fontID: string): string {
-      return `url("https://template.vivipic.com/font/${fontID}/font")`
-    },
+    // getFontUrl(fontID: string): string {
+    //   return `url("https://template.vivipic.com/font/${fontID}/font")`
+    // },
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },

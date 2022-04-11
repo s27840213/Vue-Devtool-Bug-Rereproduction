@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="settings")
-    nu-header
+    nu-header(:isTop="false")
     div(class="settings__content")
       sidebar(class="settings__sidebar"
         @switch="switchView"

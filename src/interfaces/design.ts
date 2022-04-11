@@ -9,7 +9,9 @@ export interface IDesign {
   lastUpdatedTime: string,
   favorite: boolean,
   ver: number,
-  signedUrl?: {[key: string]: string}
+  signedUrl?: {[key: string]: string},
+  pageNum: number,
+  polling: boolean
 }
 
 export interface IFolder {

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="function-panel scrollbar-gray"
+  div(class="function-panel scrollbar-gray-thin"
     :style="functionPanelStyles")
     div(class="function-panel__topbar")
       svg-icon(:class="{'pointer': !isInFirstStep}"
@@ -33,7 +33,6 @@
       panel-text-setting(v-if="showTextSetting" @openFontsPanel="openFontsPanel" v-on="$listeners")
       panel-text-effect-setting(v-if="showTextSetting" v-on="$listeners")
       panel-photo-setting(v-if="showPhotoSetting" v-on="$listeners")
-      //- panel-photo-shadow(v-if="showPhotoShadow" v-on="$listeners")
       panel-shape-setting(v-if="showShapeSetting" v-on="$listeners")
 </template>
 

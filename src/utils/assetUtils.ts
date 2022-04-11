@@ -20,6 +20,7 @@ import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 import { ITextState } from '@/store/text'
+import gtmUtils from './gtmUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -307,7 +308,7 @@ class AssetUtils {
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
-    const { pageIndex, styles = {} } = attrs
+    const { pageIndex, styles = {}, ver } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
@@ -331,7 +332,8 @@ class AssetUtils {
         type: 'background',
         assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
-      }
+      },
+      ver
     })
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
@@ -393,7 +395,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStanardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
+  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -542,8 +544,14 @@ class AssetUtils {
         case 1:
           this.addBackground(
             asset.urls.prev,
-            { ...attrs, styles: { width: asset.width, height: asset.height } },
-            await ImageUtils.getImageSize(asset.urls.full, asset.width ?? 0, asset.height ?? 0)
+            { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver },
+            await ImageUtils.getImageSize(ImageUtils.getSrc({
+              srcObj: {
+                type: 'background',
+                assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
+                userId: ''
+              }
+            }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
           )
           break
         case 5:
@@ -551,6 +559,7 @@ class AssetUtils {
           this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
           break
         case 6:
+          gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
@@ -576,13 +585,17 @@ class AssetUtils {
   }
 
   addAssetToRecentlyUsed(asset: IAsset) {
-    const { id, type, width, height, content_ids: contentIds, match_cover: matchCover } = asset
+    const {
+      id, type, width, height,
+      content_ids: contentIds, match_cover: matchCover,
+      src, userId, assetId, fontUrl, ver
+    } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
       const categories = GeneralUtils.deepCopy((store.state as any)[typeModule].categories)
-      const recentlyUsed = categories.find((category: IListServiceContentData) => category.title.includes('最近使用的項目'))
+      const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)
         if (assetIndex >= 0) {
@@ -594,11 +607,20 @@ class AssetUtils {
           width,
           height,
           content_ids: contentIds,
-          match_cover: matchCover
+          match_cover: matchCover,
+          src,
+          userId,
+          assetId,
+          fontUrl,
+          ver
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      listApi.addDesign(id, typeCategory)
+      const params = {} as {[key: string]: any}
+      if (typeCategory === 'font') {
+        params.is_asset = (src === 'private' || src === 'admin') ? 1 : 0
+      }
+      listApi.addDesign(id, typeCategory, params)
     }
   }
 }

@@ -9,7 +9,7 @@ div(class="bg-remove-area"
       :style="areaStyles"
       :class="{'bg-remove-area__scale-area--hideBg': !showInitImage}")
     canvas(class="bg-remove-area" ref="canvas")
-    div(class="bg-remove-area__brush" :style="brushStyle")
+    div(v-if="showBrush" class="bg-remove-area__brush" :style="brushStyle")
   div(v-if="loading" class="bg-remove-area__loading")
     svg-icon(class="spiner"
       :iconName="'spiner'"
@@ -39,6 +39,8 @@ export default Vue.extend({
       initImgCtx: undefined as unknown as CanvasRenderingContext2D,
       blurCanvas: undefined as unknown as HTMLCanvasElement,
       blurCtx: undefined as unknown as CanvasRenderingContext2D,
+      clearModeCanvas: undefined as unknown as HTMLCanvasElement,
+      clearModeCtx: undefined as unknown as CanvasRenderingContext2D,
       initImageElement: undefined as unknown as HTMLImageElement,
       imageElement: undefined as unknown as HTMLImageElement,
       initPos: { x: 0, y: 0 },
@@ -52,7 +54,12 @@ export default Vue.extend({
       isMouseDown: false,
       initImgSrc: '',
       imgSrc: '',
-      blurPx: 1
+      blurPx: 1,
+      showBrush: false,
+      stepsQueue: [] as Array<Promise<unknown>>,
+      isProcessingStepsQueue: false,
+      currCanvasImageElement: undefined as unknown as HTMLImageElement,
+      brushSteps: []
     }
   },
   created() {
@@ -69,6 +76,7 @@ export default Vue.extend({
     this.imageElement.onload = () => {
       this.initCanvas()
       this.initBlurCanvas()
+      this.initClearModeCanvas()
     }
 
     this.initImageElement = new Image()
@@ -78,6 +86,8 @@ export default Vue.extend({
       this.createInitImageCtx()
     }
     this.editorViewCanvas.addEventListener('mousedown', this.drawStart)
+    this.editorViewCanvas.addEventListener('mouseenter', this.handleBrushEnter)
+    this.editorViewCanvas.addEventListener('mouseleave', this.handleBrushLeave)
     window.addEventListener('mousemove', this.brushMoving)
     window.addEventListener('keydown', this.handleKeydown)
     this.setPrevPageScaleRatio(this.scaleRatio)
@@ -86,6 +96,8 @@ export default Vue.extend({
   destroyed() {
     window.removeEventListener('mouseup', this.drawEnd)
     window.removeEventListener('mousemove', this.brushMoving)
+    this.editorViewCanvas.removeEventListener('mouseenter', this.handleBrushEnter)
+    this.editorViewCanvas.removeEventListener('mouseleave', this.handleBrushLeave)
     this.editorViewCanvas.removeEventListener('mousedown', this.drawStart)
     window.removeEventListener('keydown', this.handleKeydown)
   },
@@ -103,7 +115,8 @@ export default Vue.extend({
       currStep: 'bgRemove/getCurrStep',
       inLastStep: 'bgRemove/inLastStep',
       inFirstStep: 'bgRemove/inFirstStep',
-      loading: 'bgRemove/getLoading'
+      loading: 'bgRemove/getLoading',
+      inGestureMode: 'getInGestureToolMode'
     }),
     size(): { width: number, height: number } {
       return {
@@ -144,6 +157,7 @@ export default Vue.extend({
     brushSize(newVal: number) {
       this.ctx.lineWidth = newVal
       this.blurCtx.lineWidth = newVal
+      this.clearModeCtx.lineWidth = newVal
       this.brushStyle.width = `${newVal + this.blurPx}px`
       this.brushStyle.height = `${newVal + this.blurPx}px`
       if (this.clearMode) {
@@ -154,6 +168,7 @@ export default Vue.extend({
     restoreInitState(newVal) {
       if (newVal) {
         this.clearCtx()
+        this.initClearModeCanvas()
         if (this.clearMode) {
           this.ctx.filter = 'none'
           this.drawImageToCtx()
@@ -162,15 +177,20 @@ export default Vue.extend({
           this.ctx.filter = 'none'
           this.drawImageToCtx()
         }
+        this.clearSteps()
         this.setRestoreInitState(false)
         this.setModifiedFlag(false)
         this.pushStep()
+
+        this.currCanvasImageElement = undefined as unknown as HTMLImageElement
       }
     },
     clearMode(newVal) {
       if (newVal) {
         this.ctx.globalCompositeOperation = 'destination-out'
         this.ctx.filter = `blur(${this.blurPx}px)`
+        this.initClearModeCanvas()
+        this.updateCurrCanvasImageElement()
       } else {
         this.ctx.globalCompositeOperation = 'source-over'
         this.ctx.filter = 'none'
@@ -178,6 +198,24 @@ export default Vue.extend({
     },
     brushColor(newVal) {
       this.brushStyle.backgroundColor = newVal
+    },
+    stepsQueue: {
+      async handler(newVal, oldVal) {
+        /** step being pushed */
+        if (this.isProcessingStepsQueue) {
+          return
+        }
+        while (this.stepsQueue.length !== 0) {
+          this.isProcessingStepsQueue = true
+          const blob = await this.stepsQueue.shift()
+          if (blob) {
+            this.addStep(blob)
+          }
+        }
+
+        this.isProcessingStepsQueue = false
+      },
+      deep: true
     }
   },
   methods: {
@@ -187,7 +225,8 @@ export default Vue.extend({
       setModifiedFlag: 'bgRemove/SET_modifiedFlag',
       addStep: 'bgRemove/ADD_step',
       setCurrStep: 'bgRemove/SET_currStep',
-      setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio'
+      setPrevPageScaleRatio: 'bgRemove/SET_prevPageScaleRatio',
+      clearSteps: 'bgRemove/CLEAR_steps'
     }),
     initCanvas() {
       this.canvas = this.$refs.canvas as HTMLCanvasElement
@@ -218,6 +257,18 @@ export default Vue.extend({
 
       this.blurCtx = ctx
     },
+    initClearModeCanvas() {
+      this.clearModeCanvas = document.createElement('canvas') as HTMLCanvasElement
+      this.clearModeCanvas.width = this.size.width
+      this.clearModeCanvas.height = this.size.height
+      const ctx = this.clearModeCanvas.getContext('2d') as CanvasRenderingContext2D
+      // set up drawing settings
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineWidth = this.brushSize
+
+      this.clearModeCtx = ctx
+    },
     createInitImageCtx() {
       this.initImgCanvas = document.createElement('canvas') as HTMLCanvasElement
       this.initImgCanvas.width = this.size.width
@@ -245,31 +296,32 @@ export default Vue.extend({
       this.setModifiedFlag(true)
     },
     drawStart(e: MouseEvent) {
-      const { x, y } = mouseUtils.getMousePosInPage(e, -1)
-      Object.assign(this.initPos, {
-        x,
-        y
-      })
-      if (this.clearMode) {
-        this.drawLine(e, this.ctx)
-      } else {
-        this.drawInResotreMode(e)
+      if (!this.inGestureMode) {
+        const { x, y } = mouseUtils.getMousePosInPage(e, -1)
+        Object.assign(this.initPos, {
+          x,
+          y
+        })
+        if (this.clearMode) {
+          this.drawInClearMode(e)
+        } else {
+          this.drawInRestoreMode(e)
+        }
+        window.addEventListener('mouseup', this.drawEnd)
+        window.addEventListener('mousemove', this.drawing)
       }
-      window.addEventListener('mouseup', this.drawEnd)
-      window.addEventListener('mousemove', this.drawing)
     },
     drawing(e: MouseEvent) {
       if (this.clearMode) {
-        this.drawLine(e, this.ctx)
+        this.drawInClearMode(e)
       } else {
-        this.drawInResotreMode(e)
+        this.drawInRestoreMode(e)
       }
     },
     drawEnd() {
       window.removeEventListener('mouseup', this.drawEnd)
       window.removeEventListener('mousemove', this.drawing)
       this._setCanvas(this.canvas)
-
       this.pushStep()
     },
     brushMoving(e: MouseEvent) {
@@ -287,7 +339,19 @@ export default Vue.extend({
         this.setCompositeOperationMode('source-over')
       }
     },
-    drawInResotreMode(e: MouseEvent) {
+    drawInClearMode(e: MouseEvent) {
+      this.setCompositeOperationMode('source-over', this.ctx)
+      this.ctx.filter = 'none'
+      this.clearCtx(this.ctx)
+      this.ctx.drawImage(this.currCanvasImageElement ?? this.imageElement, 0, 0, this.size.width, this.size.height)
+      // this.ctx.drawImage(this.imageElement, 0, 0, this.size.width, this.size.height)
+
+      this.drawLine(e, this.clearModeCtx)
+      this.setCompositeOperationMode('destination-out')
+      this.ctx.filter = `blur(${this.blurPx}px)`
+      this.ctx.drawImage(this.clearModeCanvas, 0, 0, this.size.width, this.size.height)
+    },
+    drawInRestoreMode(e: MouseEvent) {
       this.clearCtx(this.blurCtx)
       this.drawLine(e, this.blurCtx)
       this.setCompositeOperationMode('source-in', this.blurCtx)
@@ -314,9 +378,22 @@ export default Vue.extend({
         this.ctx.globalCompositeOperation = mode
       }
     },
+    getCanvasBlob(mycanvas: HTMLCanvasElement) {
+      return new Promise((resolve, reject) => {
+        mycanvas.toBlob((blob) => {
+          resolve(blob)
+        }, 'image/png')
+      })
+    },
     pushStep() {
-      const base64 = this.canvas.toDataURL()
-      this.addStep(base64)
+      /**
+       * DataUrl for png is TOO slow for the project, so I change to use the toBlob method
+       */
+      // const base64 = this.canvas.toDataURL('image/png', 0.3)
+      // this.addStep(base64)
+      const blob = this.getCanvasBlob(this.canvas)
+
+      this.stepsQueue.push(blob)
     },
     handleKeydown(e: KeyboardEvent) {
       if (!e.repeat) {
@@ -339,32 +416,52 @@ export default Vue.extend({
         }
       }
     },
+    updateCurrCanvasImageElement(blob?: Blob) {
+      if (!this.currCanvasImageElement) {
+        this.currCanvasImageElement = new Image()
+      }
+      const url = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      this.currCanvasImageElement.src = URL.createObjectURL(blob ?? this.steps[this.currStep])
+      return url
+    },
     undo() {
-      this.setCurrStep(Math.max(this.currStep - 1, 0))
-      const img = new Image()
-      img.src = this.steps[this.currStep]
-      img.onload = () => {
-        this.clearCtx()
-        this.ctx.filter = 'none'
-        this.drawImageToCtx(img)
-        if (this.clearMode) {
-          this.ctx.filter = `blur(${this.blurPx}px)`
+      if (!this.isProcessingStepsQueue) {
+        this.setCurrStep(Math.max(this.currStep - 1, 0))
+        const url = this.updateCurrCanvasImageElement()
+
+        this.currCanvasImageElement.onload = () => {
+          this.clearCtx()
+          this.clearModeCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+          this.ctx.filter = 'none'
+          this.drawImageToCtx(this.currCanvasImageElement)
+          if (this.clearMode) {
+            this.ctx.filter = `blur(${this.blurPx}px)`
+          }
+
+          URL.revokeObjectURL(url)
         }
       }
     },
     redo() {
-      this.setCurrStep(Math.min(this.currStep + 1, this.steps.length - 1))
-      const img = new Image()
-      img.src = this.steps[this.currStep]
+      if (!this.isProcessingStepsQueue) {
+        this.setCurrStep(Math.min(this.currStep + 1, this.steps.length - 1))
+        this.updateCurrCanvasImageElement()
 
-      img.onload = () => {
-        this.clearCtx()
-        this.ctx.filter = 'none'
-        this.drawImageToCtx(img)
-        if (this.clearMode) {
-          this.ctx.filter = `blur(${this.blurPx}px)`
+        this.currCanvasImageElement.onload = () => {
+          this.clearCtx()
+          this.ctx.filter = 'none'
+          this.drawImageToCtx(this.currCanvasImageElement)
+          if (this.clearMode) {
+            this.ctx.filter = `blur(${this.blurPx}px)`
+          }
         }
       }
+    },
+    handleBrushEnter() {
+      this.showBrush = true
+    },
+    handleBrushLeave() {
+      this.showBrush = false
     }
   }
 })

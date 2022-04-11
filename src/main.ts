@@ -1,4 +1,4 @@
-import Vue, { VueConstructor } from 'vue'
+import Vue from 'vue'
 import '@/globalComponents'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import App from './App.vue'
@@ -6,14 +6,14 @@ import router from './router'
 import store from './store'
 import i18n from './i18n'
 import vueColor from 'vue-color'
-import { Store } from 'vuex'
-import { IEditorState } from './store/types'
 import { RecycleScroller } from 'vue-virtual-scroller'
 import Notifications from 'vue-notification'
 import VueMeta from 'vue-meta'
 import 'floating-vue/dist/style.css'
-import FloatingVue, { VTooltip } from 'floating-vue'
+import FloatingVue from 'floating-vue'
 import TooltipUtils from './utils/tooltipUtils'
+import VueGtm from '@gtm-support/vue2-gtm'
+import svgIconUtils from './utils/svgIconUtils'
 
 const tooltipUtils = new TooltipUtils()
 
@@ -21,8 +21,16 @@ Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
 Vue.use(VueMeta)
+Vue.use(require('vue-shortkey'))
 Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
+})
+
+Vue.use(VueGtm, {
+  id: 'GTM-T7LDWBP',
+  enabled: true,
+  // display console logs debugs or not (optional)
+  debug: false
 })
 
 Vue.component('RecycleScroller', RecycleScroller)
@@ -56,7 +64,14 @@ Vue.directive('ratio-change', {
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
-requireAll(req)
+
+if (process.env.NODE_ENV !== 'production') {
+  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+    return context.default.id
+  }))
+} else {
+  requireAll(req)
+}
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {

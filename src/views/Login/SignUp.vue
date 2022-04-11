@@ -1,6 +1,6 @@
 <template lang="pug">
 div(style="position:relative;")
-  div(class="signup-wrapper")
+  div(class="signup-wrapper popup-window")
     div(v-if="currentPageIndex === 0"
       class="signup signup-p0")
       div
@@ -109,7 +109,7 @@ div(style="position:relative;")
         span {{$t('NN0304')}}
         btn(:type="'icon'"
           class="h-link"
-          @click.native="onLoginClicked()") {{$t('NN0281')}}
+          @click.native="onLoginClicked()") {{$t('NN0305')}}
     div(v-if="currentPageIndex === 2"
       class="signup")
       div(class="text-center")
@@ -151,9 +151,9 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import store from '@/store'
 import userApis from '@/apis/user'
-import Facebook from '@/utils/facebook'
 import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
+import loginUtils from '@/utils/loginUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -360,11 +360,7 @@ export default Vue.extend({
       this.isLoading = false
     },
     onCloseClicked() {
-      if (this.redirect) {
-        this.$router.push({ path: this.redirect })
-      } else {
-        this.$router.push({ name: 'Home' })
-      }
+      this.$router.push({ name: 'Home' })
     },
     async onSignUpClicked() {
       this.emailResponseError = false
@@ -404,7 +400,8 @@ export default Vue.extend({
         account: this.email,
         register: '1',
         vcode_only: '1',
-        locale: this.currLocale
+        locale: this.currLocale,
+        type: 3
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -440,7 +437,8 @@ export default Vue.extend({
       }
       const parameter = {
         account: this.email,
-        vcode: this.vcode
+        vcode: this.vcode,
+        type: 3
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       if (data.flag === 0) {
@@ -455,57 +453,16 @@ export default Vue.extend({
       this.isLoading = false
     },
     onFacebookClicked() {
-      const redirectUri = window.location.href.split('?')[0]
-      if (this.redirect) {
-        const redirectStr = JSON.stringify({
-          redirect: this.redirect,
-          platform: 'fb_vivipic'
-        })
-        window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
-      }
-      const redirectStr = JSON.stringify({
-        platform: 'fb_vivipic'
-      })
-      window.location.href = Facebook.getDialogOAuthUrl(redirectStr, redirectUri)
+      loginUtils.onFacebookClicked(this.redirect)
     },
     onGoogleClicked() {
-      let stateStr
-      if (this.redirect) {
-        stateStr = JSON.stringify({
-          redirect: this.redirect,
-          platform: 'google_vivipic'
-        })
-      } else {
-        stateStr = JSON.stringify({
-          platform: 'google_vivipic'
-        })
-      }
-      const redirectUri = window.location.href.split('?')[0]
-      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-        'scope=https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email&' +
-        'include_granted_scopes=true&' +
-        'response_type=code&' +
-        'prompt=select_account&' +
-        `state=${stateStr}&` +
-        `redirect_uri=${redirectUri}&` +
-        'client_id=466177459396-dsb6mbvvea942on6miaqk8lerub0domq.apps.googleusercontent.com'
+      loginUtils.onGoogleClicked(this.redirect)
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.signup-wrapper {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #000000a1;
-}
 .signup {
   position: relative;
   margin: 0 auto;

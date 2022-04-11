@@ -53,11 +53,11 @@
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="record-selection feature-button p-5"
-        :class="{ pointer: icon !== 'font-vertical' || !hasCurveText, active: iconIsActived(icon) }"
+        :class="{ pointer: iconClickable(icon), active: iconIsActived(icon) }"
         :key="`gp-action-icon-${index}`"
         :id="`icon-${icon}`"
         v-hint="hintMap[icon]"
-        :iconName="icon" :iconWidth="'20px'" :iconColor="icon === 'font-vertical' && hasCurveText ? 'gray-4' : 'gray-2'" @mousedown.native="onPropertyClick(icon)")
+        :iconName="icon" :iconWidth="'20px'" :iconColor="iconClickable(icon) ? 'gray-2' : 'gray-4'" @mousedown.native="onPropertyClick(icon)")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font-align')"
         class="pointer feature-button p-5"
@@ -132,6 +132,9 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
     })
+    colorUtils.onStop(ColorEventType.text, () => {
+      this.$nextTick(() => StepsUtils.record())
+    })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
       this.setParagraphProp('lineHeight', value)
@@ -168,19 +171,23 @@ export default Vue.extend({
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     },
     scale(): number {
-      const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)
-      if (layer && layer.layers) {
-        const scaleSet = layer.layers.reduce((p: Set<number>, c: ILayer) => {
-          if (c.type === 'text') { p.add(c.styles.scale) }
-          return p
-        }, new Set())
-        if (scaleSet.size === 1) {
-          const [scale] = scaleSet
-          return scale * layer.styles.scale
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer && currLayer.layers) {
+        if (subLayerIdx === -1) {
+          const scaleSet = (currLayer as IGroup).layers.reduce((p: Set<number>, c: ILayer) => {
+            if (c.type === 'text') { p.add(c.styles.scale) }
+            return p
+          }, new Set())
+          if (scaleSet.size === 1) {
+            const [scale] = scaleSet
+            return scale * currLayer.styles.scale
+          }
+          return NaN
+        } else {
+          return currLayer.styles.scale * (currLayer as IGroup).layers[subLayerIdx].styles.scale
         }
-        return NaN
       }
-      return layer ? layer.styles.scale : 1
+      return currLayer.styles.scale
     },
     fontSize(): number | string {
       if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
@@ -207,6 +214,16 @@ export default Vue.extend({
         return textShapeUtils.isCurvedText(currLayer.styles)
       }
       return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
+    },
+    isVerticalText(): boolean {
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (subLayerIdx !== -1) {
+        return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes('vertical')
+      }
+      if (currLayer.type === 'text') {
+        return (currLayer as IText).styles.writingMode.includes('vertical')
+      }
+      return false
     }
   },
   methods: {
@@ -228,6 +245,7 @@ export default Vue.extend({
       if (GeneralUtils.isValidHexColor(target.value)) {
         target.value = target.value.toUpperCase()
         this.handleColorUpdate(target.value)
+        StepsUtils.record()
       }
     },
     handleColorModal() {
@@ -260,7 +278,6 @@ export default Vue.extend({
           }
       }
       textEffectUtils.refreshColor()
-      StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
@@ -342,9 +359,11 @@ export default Vue.extend({
             this.handleSpanPropClick('weight', ['bold', 'normal'])
             break
           case 'underline':
+            if (this.isVerticalText) return
             this.handleSpanPropClick('decoration', ['underline', 'none'])
             break
           case 'italic':
+            if (this.isVerticalText) return
             this.handleSpanPropClick('style', ['italic', 'normal'])
             break
         }
@@ -369,6 +388,10 @@ export default Vue.extend({
             const paragraphs = GeneralUtils.deepCopy((l as IText).paragraphs) as IParagraph[]
             paragraphs.forEach(p => {
               p.spans.forEach(s => {
+                if ((l as IText).styles.writingMode.includes('vertical') && (
+                  (prop === 'decoration' && newPropVal === 'underline') ||
+                  (prop === 'style' && newPropVal === 'italic')
+                )) return
                 s.styles[prop] = newPropVal
               })
             })
@@ -485,7 +508,7 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
+          tiptapUtils.applySpanStyle('size', parseFloat(value))
           tiptapUtils.agent(editor => {
             LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
@@ -593,6 +616,15 @@ export default Vue.extend({
         .then(() => {
           this.$notify({ group: 'copy', text: `${this.props.color} 已複製` })
         })
+    },
+    iconClickable(icon: string): boolean {
+      if (icon === 'font-vertical') { // if there is any curveText, vertical mode is disabled
+        return !this.hasCurveText
+      }
+      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text, underline and italic are disabled
+        return !this.isVerticalText
+      }
+      return true
     }
   }
 })

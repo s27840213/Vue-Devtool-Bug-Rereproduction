@@ -209,13 +209,11 @@ export default Vue.extend({
       return effects[currentEffect].includes('color')
     },
     currentStyle(): any {
-      // const { styles } = TextEffectUtils.getCurrentLayer()
-      const { styles } = layerUtils.getCurrConfig
+      const { styles } = TextEffectUtils.getCurrentLayer()
       return styles || {}
     },
     currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
-      console.log(textEffect.name)
       return textEffect.name || 'none'
     },
     currentShape(): string {
@@ -225,9 +223,11 @@ export default Vue.extend({
   },
   mounted() {
     colorUtils.on(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
+    colorUtils.onStop(ColorEventType.textEffect, this.recordChange)
   },
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.textEffect, (color: string) => this.handleColorUpdate(color))
+    colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
     optionStyle(idx: number) {
@@ -274,7 +274,6 @@ export default Vue.extend({
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
       TextEffectUtils.setTextEffect(currentEffect, { color })
-      this.recordChange()
     },
     recordChange() {
       stepsUtils.record()

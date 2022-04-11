@@ -1,32 +1,27 @@
 <template lang="pug">
-  div(class="spinner")
+  div(class="spinner popup-window")
     div
       img(:src="require('@/assets/img/gif/rocket-loading.gif')")
-      span Loading...
+      span {{textContent}}...
 </template>
 
 <script lang="ts">
 
+import i18n from '@/i18n'
 import Vue from 'vue'
 
 export default Vue.extend({
-
+  props: {
+    textContent: {
+      type: String,
+      default: `${i18n.t('NN0454')}`
+    }
+  }
 })
 </script>
 
 <style lang="scss" scoped>
 .spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  left:0;
-  top:0;
-  background-color: #000000a1;
-  z-index: 999999;
-
   div {
     display: flex;
     justify-content: center;

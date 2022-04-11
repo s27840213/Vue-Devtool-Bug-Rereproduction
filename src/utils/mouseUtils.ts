@@ -160,31 +160,23 @@ class MouseUtils {
       width: layer.styles.width,
       height: layer.styles.height
     }
-    const ratio = {
-      width: clipperStyles.initWidth / img.width,
-      height: clipperStyles.initHeight / img.height
-    }
-
     /**
      * Below determines the img's initial width/height
      */
-    let scaleRatio: number
     const scaleImg = (scaleRatio: number) => {
       img.width *= scaleRatio
       img.height *= scaleRatio
     }
-    if (img.width > img.height) {
-      scaleRatio = ratio.height
-      scaleImg(scaleRatio)
-    } else {
-      scaleRatio = ratio.width
-      scaleImg(scaleRatio)
+    while (img.width < clipperStyles.width || img.height < clipperStyles.height) {
+      img.height < clipperStyles.height
+        ? scaleImg(clipperStyles.height / img.height) : scaleImg(clipperStyles.width / img.width)
     }
-    while (img.width < clipperStyles.initWidth || img.height < clipperStyles.initHeight) {
-      const scaleRatio = img.height < clipperStyles.initHeight ? clipperStyles.initHeight / img.height
-        : clipperStyles.initWidth / img.width
-      scaleImg(scaleRatio)
+
+    if (img.width > clipperStyles.width && img.height > clipperStyles.height) {
+      clipperStyles.width / img.width < clipperStyles.height / img.height
+        ? scaleImg(clipperStyles.height / img.height) : scaleImg(clipperStyles.width / img.width)
     }
+
     const newStyles = {
       width: clipperStyles.width,
       height: clipperStyles.height,
@@ -194,8 +186,8 @@ class MouseUtils {
       imgHeight: img.height,
       scale: clipperStyles.scale,
       rotate: clipperStyles.rotate,
-      imgX: -img.width / 2 + clipperStyles.initWidth / 2,
-      imgY: -img.height / 2 + clipperStyles.initHeight / 2,
+      imgX: -img.width / 2 + clipperStyles.width / 2,
+      imgY: -img.height / 2 + clipperStyles.height / 2,
       x: clipperStyles.x,
       y: clipperStyles.y
     }

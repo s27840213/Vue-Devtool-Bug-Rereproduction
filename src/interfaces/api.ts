@@ -119,6 +119,7 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
+  app_ver?: number // todelete
 }
 
 export interface IGroupDesignInputParams {
@@ -147,6 +148,7 @@ export interface IListServiceContentData {
   category_id: number
   list: IListServiceContentDataItem[]
   title: string
+  is_recent?: number
 }
 
 export interface IListServiceData {
@@ -197,7 +199,9 @@ export interface IUserDesignContentData {
   update_time: string,
   ver: number,
   width: number
-  signed_url?: { [key: string]: string }
+  signed_url?: { [key: string]: string },
+  page_num: number,
+  polling: boolean
 }
 
 export interface IAssetDesignParams {
@@ -253,11 +257,12 @@ export interface IUserFontContentData {
   favorite: number,
   file_ext: string,
   file_name: string,
-  id: string,
+  id?: string,
   name: string,
   team_id: string,
   update_time: string,
   ver: number,
+  font_family: string,
   signed_url?: {
     original: string,
     font: string,
@@ -274,6 +279,12 @@ export interface IPhotoServiceParams {
   type?: 'unsplash' | 'pexels'
   keyword?: string
   pageIndex?: number
+}
+
+export interface IFileParams {
+  token: string
+  type: 'image'
+  pageIndex: number
 }
 
 export interface IPhotoServiceResponse {

@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="sidebar")
-    div(class="nav scrollbar-gray")
+    div(class="nav scrollbar-gray-thin")
       div(class="nav-container")
         div(class="nav-item-new-folder")
           div(class="nav-item-new-folder__container"
@@ -73,7 +73,7 @@ export default Vue.extend({
   data() {
     return {
       ROOT: designUtils.ROOT,
-      isShowHint: true,
+      isShowHint: false,
       messageTimer: -1,
       hintTopBase: 0,
       isAllDraggedOver: false,

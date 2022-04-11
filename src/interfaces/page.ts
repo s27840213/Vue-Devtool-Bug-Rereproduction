@@ -1,14 +1,16 @@
 import { IShape, IText, IImage, IGroup, IFrame } from '@/interfaces/layer'
+import { SrcObj } from './gallery'
 
 export interface IBackgroundImage {
   config: IImage,
   posX: number,
   posY: number,
   newDisplayMode?: boolean,
-  src?: string // will be remove in the future
+  srcObj: SrcObj
 }
 export interface IPage {
   [index: string]: unknown,
+  id: string,
   width: number,
   height: number,
   backgroundColor: string,

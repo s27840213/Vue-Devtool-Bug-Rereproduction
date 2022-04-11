@@ -54,6 +54,7 @@ import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import AssetUtils, { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: {
@@ -188,17 +189,18 @@ export default Vue.extend({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
-      await AssetUtils.addStanardText(config.type.toLowerCase(), config.text, i18n.locale)
+      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale)
     },
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
     },
     loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
-      const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
-      const newFont = new FontFace(objectId, getFontUrl(objectId))
-      newFont.load().then((font) => {
-        document.fonts.add(font)
-      })
+      // const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
+      // const newFont = new FontFace(objectId, getFontUrl(objectId))
+      // newFont.load().then((font) => {
+      //   document.fonts.add(font)
+      // })
+      textUtils.loadDefaultFonts()
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
