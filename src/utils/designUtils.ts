@@ -564,33 +564,35 @@ class DesignUtils {
     }
   }
 
-  newDesignWithTemplae(width: number, height: number, json: any, groupId: string) {
+  newDesignWithTemplae(width: number, height: number, json: any, templateId:string, groupId: string) {
     console.log(json)
-    assetUtils.addTemplate(json, {}, false).then(() => {
-      stepsUtils.reset()
-      pageUtils.clearPagesInfo()
-      Vue.nextTick(() => {
-        resizeUtils.resizePage(0, json, { width, height })
-        store.commit('UPDATE_pageProps', {
-          pageIndex: 0,
-          props: { width, height }
-        })
-        themeUtils.refreshTemplateState()
-        if (this.isLogin) {
-          /**
-           * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
-           */
-          store.commit('SET_assetId', generalUtils.generateAssetId())
-          // eslint-disable-next-line camelcase
-          const query: { type: string, design_id: string, team_id: string, group_id?: string } =
-            { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId }
-          if (groupId !== '') {
-            query.group_id = groupId
-          }
-          router.replace({ query }).then(() => {
-            uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+    assetUtils.addTemplateToRecentlyUsedPure(templateId).then(() => {
+      assetUtils.addTemplate(json, {}, false).then(() => {
+        stepsUtils.reset()
+        pageUtils.clearPagesInfo()
+        Vue.nextTick(() => {
+          resizeUtils.resizePage(0, json, { width, height })
+          store.commit('UPDATE_pageProps', {
+            pageIndex: 0,
+            props: { width, height }
           })
-        }
+          themeUtils.refreshTemplateState()
+          if (this.isLogin) {
+            /**
+             * @Note using "router.replace" instead of "router.push" to prevent from adding a new history entry
+             */
+            store.commit('SET_assetId', generalUtils.generateAssetId())
+            // eslint-disable-next-line camelcase
+            const query: { type: string, design_id: string, team_id: string, group_id?: string} =
+              { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId }
+            if (groupId !== '') {
+              query.group_id = groupId
+            }
+            router.replace({ query }).then(() => {
+              uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+            })
+          }
+        })
       })
     })
   }
