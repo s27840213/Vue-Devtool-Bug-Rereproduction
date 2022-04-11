@@ -3,13 +3,6 @@
     div(v-if="isJSON"
       class="lottie"
       :style="lottieStyle" ref="lavContainer")
-    template(v-if="isImg")
-      img(v-for="index in 2"
-        class="img"
-        :src="require('@/' + path.slice(2))"
-        :width="width"
-        :height="height"
-        :style="carousel")
     video(v-if="isMp4"
       class="video"
       :src="require('@/' + path.slice(2))"
@@ -58,15 +51,6 @@ export default Vue.extend({
     loopDelayMax: {
       type: Number,
       default: 0
-    },
-    // The following is for image carousel
-    delay: {
-      type: Number,
-      default: 10
-    },
-    imgSpeed: {
-      type: Number,
-      default: 0.01
     }
   },
   data() {
@@ -82,16 +66,8 @@ export default Vue.extend({
     }
   },
   computed: {
-    carousel(): Record<string, string> {
-      return {
-        transform: `translateX(-${this.time}%)`
-      }
-    },
     isJSON():boolean {
       return this.path.endsWith('.json')
-    },
-    isImg():boolean {
-      return this.path.endsWith('.svg') || this.path.endsWith('.png') || this.path.endsWith('.jpg')
     },
     isMp4():boolean {
       return this.path.endsWith('.mp4')
@@ -103,13 +79,6 @@ export default Vue.extend({
         overflow: 'hidden',
         margin: '0 auto'
       }
-    }
-  },
-  created() {
-    if (this.isImg) {
-      setInterval(() => {
-        this.time = (this.time + this.imgSpeed) % 100
-      }, this.delay)
     }
   },
   mounted() {
@@ -173,11 +142,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.animation {
-  white-space: pre;
-  .img {
-    position: relative;
-    left: calc(50% - 50vw);
-  }
-}
 </style>

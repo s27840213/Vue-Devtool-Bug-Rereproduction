@@ -6,7 +6,7 @@ class HomeBlockData {
       title: i18n.t('NN0466', { newline: '<br>' }),
       description: i18n.t('NN0467'),
       img: {
-        name: 'tg.jpg',
+        name: 'templateGallery.json',
         width: 3000,
         height: 600
       },
@@ -156,7 +156,7 @@ class HomeBlockData {
       title: i18n.t('NN0484', { newline: '<br>' }),
       description: i18n.t('NN0485'),
       img: {
-        name: 'comment.svg',
+        name: 'comment.json',
         width: 2700,
         height: 318
       },
