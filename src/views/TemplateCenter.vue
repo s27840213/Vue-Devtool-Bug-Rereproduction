@@ -418,9 +418,6 @@ export default Vue.extend({
       getTemplates: 'getThemeContent',
       getMoreTemplates: 'getMoreContent'
     }),
-    // isMobile(): boolean {
-    //   return window.matchMedia('screen and (max-width: 540px)').matches
-    // },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 15)}px` }
     },
@@ -501,7 +498,7 @@ export default Vue.extend({
           content_ids: [template.id]
         })
       } else {
-        this.groupId = template.id
+        this.groupId = template.group_id ?? ''
         this.contentIds = template.content_ids
         if (this.isMobile) {
           this.modal = 'mobile-pages'

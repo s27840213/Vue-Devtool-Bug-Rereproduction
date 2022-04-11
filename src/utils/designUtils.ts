@@ -585,7 +585,7 @@ class DesignUtils {
             // eslint-disable-next-line camelcase
             const query: { type: string, design_id: string, team_id: string, group_id?: string} =
               { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId }
-            if (groupId !== '') {
+            if (groupId !== '' && router.currentRoute.query.group_id) {
               query.group_id = groupId
             }
             router.replace({ query }).then(() => {

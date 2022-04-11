@@ -87,6 +87,7 @@ import themeUtils from '@/utils/themeUtils'
 import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
 import _ from 'lodash'
+import listService from '@/apis/list'
 
 export default Vue.extend({
   components: {
@@ -102,9 +103,28 @@ export default Vue.extend({
     return {
       showPrompt: false,
       showTheme: false,
-      currentGroup: null,
+      currentGroup: null as IListServiceContentDataItem | null,
       scrollTop: 0
     }
+  },
+  mounted() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const groupId = urlParams.get('group_id')
+    if (!groupId) return
+    listService.getList({ type: 'group', groupId }).then(result => {
+      const { content } = result.data.data
+      this.currentGroup = {
+        group_type: 0,
+        group_id: groupId,
+        type: 6,
+        content_ids: content[0].list,
+        id: content[0].list[0].id,
+        ver: 0
+      }
+      const query = Object.assign({}, this.$route.query)
+      delete query.group_id
+      this.$router.replace({ query })
+    })
   },
   computed: {
     ...mapState(
@@ -248,7 +268,7 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
-    handleShowGroup(group: any) {
+    handleShowGroup(group: IListServiceContentDataItem) {
       this.currentGroup = group
     },
     setAllTemplate(): void {
