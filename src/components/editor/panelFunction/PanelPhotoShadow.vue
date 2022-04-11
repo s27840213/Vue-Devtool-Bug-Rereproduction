@@ -178,45 +178,45 @@ export default Vue.extend({
         this.setIsUploading(pageId, config.id as string, '')
       }
 
-      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
-        const srcObj = {
-          type: this.isAdmin ? 'public' : 'private',
-          userId: json.data.team_id,
-          assetId: this.isAdmin ? json.data.id : json.data.asset_index
-        }
+      // uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
+      //   const srcObj = {
+      //     type: this.isAdmin ? 'public' : 'private',
+      //     userId: json.data.team_id,
+      //     assetId: this.isAdmin ? json.data.id : json.data.asset_index
+      //   }
 
-        const pageIndex = pageUtils.getPageIndexById(pageId)
-        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-        if (pageIndex !== -1 && layerIndex !== -1) {
-          const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
-          const newWidth = updateCanvas.width - right - left
-          const newHeight = updateCanvas.height - top - bottom
-          const styles = {
-            width: newWidth,
-            height: newHeight,
-            imgWidth: newWidth,
-            imgHeight: newHeight,
-            initWidth: newWidth,
-            initHeight: newHeight,
-            imgX: 0,
-            imgY: 0,
-            x: config.styles.x - leftShadowThickness,
-            y: config.styles.y - topShadowThickness,
-            scale: 1
-          }
-          layer.srcObj = srcObj
-          Object.assign(layer.styles, styles)
+      //   const pageIndex = pageUtils.getPageIndexById(pageId)
+      //   const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+      //   if (pageIndex !== -1 && layerIndex !== -1) {
+      //     const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
+      //     const newWidth = updateCanvas.width - right - left
+      //     const newHeight = updateCanvas.height - top - bottom
+      //     const styles = {
+      //       width: newWidth,
+      //       height: newHeight,
+      //       imgWidth: newWidth,
+      //       imgHeight: newHeight,
+      //       initWidth: newWidth,
+      //       initHeight: newHeight,
+      //       imgX: 0,
+      //       imgY: 0,
+      //       x: config.styles.x - leftShadowThickness,
+      //       y: config.styles.y - topShadowThickness,
+      //       scale: 1
+      //     }
+      //     layer.srcObj = srcObj
+      //     Object.assign(layer.styles, styles)
 
-          const img = new Image()
-          img.crossOrigin = 'anoynous'
-          img.onload = () => {
-            this.resetAllShadowProps(pageIndex, layerIndex)
-            layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
-          }
-          img.src = imageUtils.getSrc(layer)
-        }
-      })
+      //     const img = new Image()
+      //     img.crossOrigin = 'anoynous'
+      //     img.onload = () => {
+      //       this.resetAllShadowProps(pageIndex, layerIndex)
+      //       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
+      //       layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
+      //     }
+      //     img.src = imageUtils.getSrc(layer)
+      //   }
+      // })
       imageShadowUtils.clearLayerData()
     }
   },

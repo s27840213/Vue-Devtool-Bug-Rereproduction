@@ -83,7 +83,8 @@ class ImageShadowUtils {
       // const y = (canvas.height - canvasSize) * 0.5
       const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
       const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-      const undefinedSpread = spread * Math.floor(img.naturalWidth / CANVAS_SIZE)
+      const unifiedScale = Math.floor(img.naturalWidth / CANVAS_SIZE)
+      const unifiedSpread = spread * unifiedScale
       const _spread = 1 / this.SPREAD_RADIUS
 
       let offsetX = 0
@@ -98,17 +99,17 @@ class ImageShadowUtils {
 
       let alphaVal = 1
       /** Calculating the spread */
-      if (this.spreadBuff.spread !== undefinedSpread || this.spreadBuff.effect !== currentEffect || this.spreadBuff.size !== img.naturalHeight) {
+      if (this.spreadBuff.spread !== unifiedSpread || this.spreadBuff.effect !== currentEffect || this.spreadBuff.size !== img.naturalHeight) {
         this.spreadBuff.effect = currentEffect
         layerInfo && this.setIsProcess(layerInfo, true)
-        for (let i = -undefinedSpread; i <= undefinedSpread && this.handlerId === handlerId; i++) {
+        for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
-            for (let j = -undefinedSpread; j <= undefinedSpread && this.handlerId === handlerId; j++) {
+            for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
               const r = Math.sqrt(i * i + j * j)
-              if (r >= undefinedSpread + this.SPREAD_RADIUS && currentEffect !== ShadowEffectType.frame) {
+              if (r >= unifiedSpread + this.SPREAD_RADIUS && currentEffect !== ShadowEffectType.frame) {
                 alphaVal = 0
-              } else if (r >= undefinedSpread && currentEffect !== ShadowEffectType.frame) {
-                alphaVal = (1 - (r - undefinedSpread) * _spread)
+              } else if (r >= unifiedSpread && currentEffect !== ShadowEffectType.frame) {
+                alphaVal = (1 - (r - unifiedSpread) * _spread)
               } else {
                 alphaVal = 1
               }
@@ -121,7 +122,7 @@ class ImageShadowUtils {
         }
         this.spreadBuff.data = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
         this.spreadBuff.size = img.naturalHeight
-        this.spreadBuff.spread = undefinedSpread
+        this.spreadBuff.spread = unifiedSpread
         this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       }
       this.ctxT.putImageData(this.spreadBuff.data, offsetX, offsetY)
