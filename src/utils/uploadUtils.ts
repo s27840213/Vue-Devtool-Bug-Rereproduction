@@ -1,4 +1,4 @@
-import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import generalUtils from './generalUtils'
@@ -1006,6 +1006,12 @@ class UploadUtils {
         return listService.getList({ type: 'group', groupId: designId })
           .then(result => {
             const { content } = result.data.data
+            return new Promise<IListServiceContentData[]>((resolve) => {
+              assetUtils.addTemplateToRecentlyUsedPure(content[0].list[0].id)
+                .then(() => resolve(content))
+            })
+          })
+          .then(content => {
             store.commit('SET_groupType', 1)
             return assetUtils.addGroupTemplate({
               id: '',
@@ -1077,7 +1083,7 @@ class UploadUtils {
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
-                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json, params.groupId)
+                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json, designId, params.groupId)
                 logUtils.setLog('Successfully get new design template')
                 break
               }
