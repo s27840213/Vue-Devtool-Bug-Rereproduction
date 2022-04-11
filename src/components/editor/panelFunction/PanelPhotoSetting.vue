@@ -28,13 +28,14 @@ import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
-import { IFrame, IImage } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   data() {
@@ -131,97 +132,115 @@ export default Vue.extend({
       return false
     },
     handleShow(name: string) {
-      this.show = this.show.includes(name) ? '' : name
-      if (name === 'crop') {
-        if (this.isCropping) {
-          imageUtils.setImgControlDefault()
-        } else {
-          let index
-          switch (layerUtils.getCurrLayer.type) {
-            case 'image':
-              layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
-              break
-            case 'frame':
-              index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
-              if (index >= 0) {
-                frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-              }
-              break
+      switch (name) {
+        case this.btns.find(b => b.name === 'shadow')?.show || '': {
+          const { pageIndex, layerIndex, subLayerIdx, getLayer } = layerUtils
+          const currLayer = getLayer(pageIndex, layerIndex)
+          if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
+            const isUploading = (currLayer as IGroup).layers[subLayerIdx].isUploading
+            if (isUploading) {
+              return
+            }
+          } else {
+            if (currLayer.isUploading) {
+              console.log('is uploading')
+              return
+            }
           }
+          break
         }
-        this.show = ''
-      } else if (name === 'remove-bg') {
-        const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
-
-        this.setIsProcessing(true)
-        layerUtils.updateLayerProps(pageIndex, index, {
-          inProcess: true
-        })
-
-        const targetLayer = layers[0] as IImage
-        const targetPageId = pageUtils.currFocusPage.id
-        const targetLayerId = targetLayer.id
-
-        const type = targetLayer.srcObj.type
-
-        const { imgWidth, imgHeight } = targetLayer.styles
-        const aspect = imgWidth >= imgHeight ? 0 : 1
-        const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
-        const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg')
-        this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
-          if (data.flag === 0) {
-            uploadUtils.polling(data.url, (json: any) => {
-              if (json.flag === 0 && json.data) {
-                const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
-                const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
-                if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
-                  layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                    inProcess: false
-                  })
-                  const editorView = document.querySelector('.editor-view')
-                  const { scrollTop, scrollLeft } = editorView as HTMLElement
-
-                  this.setPrevScrollPos({
-                    top: scrollTop,
-                    left: scrollLeft
-                  })
-
-                  this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
-                  this.setInBgRemoveMode(true)
-
-                  const data = imageUtils.getBgRemoveInfo(json.data, initSrc)
-                  console.log('already get the img config', imageUtils.getSrc({
-                    srcObj: {
-                      type: 'public',
-                      userId: data.teamId,
-                      assetId: data.id
-                    }
-                  } as IImage, 'larg'))
+        case 'crop':
+          if (this.isCropping) {
+            imageUtils.setImgControlDefault()
+          } else {
+            let index
+            switch (layerUtils.getCurrLayer.type) {
+              case 'image':
+                layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                break
+              case 'frame':
+                index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                if (index >= 0) {
+                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
                 }
-                return true
-              }
-              if (json.flag === 1) {
-                const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
-                const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
-
-                if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
-                  layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                    inProcess: false
-                  })
-
-                  this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
-                }
-
-                return true
-              }
-
-              return false
-            })
+                break
+            }
           }
-        })
-        this.show = ''
+          this.show = ''
+          return
+        case 'remove-bg': {
+          const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
+          this.setIsProcessing(true)
+          layerUtils.updateLayerProps(pageIndex, index, {
+            inProcess: true
+          })
+
+          const targetLayer = layers[0] as IImage
+          const targetPageId = pageUtils.currFocusPage.id
+          const targetLayerId = targetLayer.id
+
+          const type = targetLayer.srcObj.type
+
+          const { imgWidth, imgHeight } = targetLayer.styles
+          const aspect = imgWidth >= imgHeight ? 0 : 1
+          const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
+          const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg')
+          this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
+            if (data.flag === 0) {
+              uploadUtils.polling(data.url, (json: any) => {
+                if (json.flag === 0 && json.data) {
+                  const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
+                  const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+
+                  if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
+                    layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+                      inProcess: false
+                    })
+                    const editorView = document.querySelector('.editor-view')
+                    const { scrollTop, scrollLeft } = editorView as HTMLElement
+
+                    this.setPrevScrollPos({
+                      top: scrollTop,
+                      left: scrollLeft
+                    })
+
+                    this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
+                    this.setInBgRemoveMode(true)
+
+                    const data = imageUtils.getBgRemoveInfo(json.data, initSrc)
+                    console.log('already get the img config', imageUtils.getSrc({
+                      srcObj: {
+                        type: 'public',
+                        userId: data.teamId,
+                        assetId: data.id
+                      }
+                    } as IImage, 'larg'))
+                  }
+                  return true
+                }
+                if (json.flag === 1) {
+                  const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
+                  const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+
+                  if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
+                    layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+                      inProcess: false
+                    })
+
+                    this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                  }
+
+                  return true
+                }
+
+                return false
+              })
+            }
+          })
+          this.show = ''
+        }
       }
+      this.show = this.show.includes(name) ? '' : name
     },
     handleOutside(event: PointerEvent) {
       if (this.currFunctionPanelType !== 3) {

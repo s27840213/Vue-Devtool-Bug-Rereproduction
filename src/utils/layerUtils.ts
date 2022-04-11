@@ -3,7 +3,7 @@ import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
 import FocusUtils from './focusUtils'
-import { ISpecLayerData } from '@/store/types'
+import { ISpecLayerData, LayerType } from '@/store/types'
 import { IPage } from '@/interfaces/page'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
@@ -369,6 +369,30 @@ class LayerUtils {
     return this.getLayers(pageIndex).findIndex((layer: ILayer) => {
       return layer.id === id
     })
+  }
+
+  getSubLayerIndexById(pageIndex: number, layerIndex: number, id: string) {
+    const primaryLayer = this.getLayer(pageIndex, layerIndex)
+    if (primaryLayer.type === LayerType.group) {
+      return (primaryLayer as IGroup).layers
+        .findIndex(l => l.id === id)
+    }
+    if (primaryLayer.type === LayerType.frame) {
+      return (primaryLayer as IFrame).clips
+        .findIndex(img => img.id === id)
+    }
+    return -1
+  }
+
+  getLayerInfoById(pageId: string, layerId: string, subLayerId = '') {
+    const pageIndex = pageUtils.getPageIndexById(pageId)
+    const layerIndex = this.getLayerIndexById(pageIndex, layerId)
+    const subLayerIndex = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
+    return {
+      pageIndex,
+      layerIndex,
+      subLayerIndex
+    }
   }
 
   getObjectInsertionLayerIndex(layers: ILayer[], objectLayer: any) {

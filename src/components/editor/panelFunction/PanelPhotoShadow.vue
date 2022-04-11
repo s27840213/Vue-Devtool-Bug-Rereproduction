@@ -115,8 +115,7 @@ export default Vue.extend({
   data() {
     return {
       shadowPropI18nMap,
-      fieldRange,
-      update: undefined as number | undefined
+      fieldRange
     }
   },
   mounted() {
@@ -126,12 +125,26 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
-      const { config, img } = layerData
-      const { width, height, imgWidth, imgHeight } = config.styles
+      const { config, primarylayerId } = layerData
+      const { width, height, scale: prevScale } = config.styles
       const updateCanvas = document.createElement('canvas')
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
-      updateCanvas.setAttribute('width', (width * CANVAS_SCALE).toString())
-      updateCanvas.setAttribute('height', (height * CANVAS_SCALE).toString())
+      const img = new Image()
+      img.crossOrigin = 'anonynous'
+      img.src = imageUtils.getSrc(config, 1600)
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve()
+      })
+      updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
+      updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_SCALE).toString())
+
+      // @Show
+      // updateCanvas.classList.add('show')
+      // updateCanvas.style.width = `${updateCanvas.width}px`
+      // updateCanvas.style.height = `${updateCanvas.height}px`
+      // setTimeout(() => document.body.removeChild(updateCanvas), 10000)
+      // document.body.append(updateCanvas)
+
       await imageShadowUtils.draw(updateCanvas, img, config, {
         canvasSize: height,
         timeout: 0
@@ -142,8 +155,8 @@ export default Vue.extend({
       const imgWidthInCanvas = width
       const leftShadowThickness = (updateCanvas.width - imgWidthInCanvas) * 0.5 - left
       const topShadowThickness = (updateCanvas.height - imgHeightInCanvas) * 0.5 - top
-      const newWidth = updateCanvas.width - right - left
-      const newHeight = updateCanvas.height - top - bottom
+      // const newWidth = updateCanvas.width - right - left
+      // const newHeight = updateCanvas.height - top - bottom
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -159,6 +172,12 @@ export default Vue.extend({
         }
       })
 
+      if (primarylayerId) {
+        this.setIsUploading(pageId, primarylayerId, config.id as string)
+      } else {
+        this.setIsUploading(pageId, config.id as string, '')
+      }
+
       uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
         const srcObj = {
           type: this.isAdmin ? 'public' : 'private',
@@ -170,6 +189,8 @@ export default Vue.extend({
         const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
         if (pageIndex !== -1 && layerIndex !== -1) {
           const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
+          const newWidth = updateCanvas.width - right - left
+          const newHeight = updateCanvas.height - top - bottom
           const styles = {
             width: newWidth,
             height: newHeight,
@@ -191,7 +212,7 @@ export default Vue.extend({
           img.onload = () => {
             this.resetAllShadowProps(pageIndex, layerIndex)
             layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj })
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
           }
           img.src = imageUtils.getSrc(layer)
         }
@@ -297,6 +318,12 @@ export default Vue.extend({
       Object.keys(ShadowEffectType)
         .forEach(k => this.reset(k as ShadowEffectType, pageIndex, layerIndex, subLayerIdx))
       imageShadowUtils.setEffect(ShadowEffectType.none, {}, pageIndex, layerIndex, subLayerIdx)
+    },
+    setIsUploading(pageId: string, layerId: string, subLayerId: string) {
+      const { pageIndex, layerIndex, subLayerIndex } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        isUploading: true
+      }, subLayerIndex)
     }
   }
 })

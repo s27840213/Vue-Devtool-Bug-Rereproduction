@@ -335,11 +335,12 @@ export default Vue.extend({
               // canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
               // canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
               /** use the CANVAS_SIZE as the controlling-canvas-size would lead to the inconsistent between backend screenshot and frontend */
-              canvas.setAttribute('width', `${this.config.styles.width * CANVAS_SCALE}`)
-              canvas.setAttribute('height', `${this.config.styles.height * CANVAS_SCALE}`)
+              // canvas.setAttribute('width', `${this.config.styles.width * CANVAS_SCALE}`)
+              // canvas.setAttribute('height', `${this.config.styles.height * CANVAS_SCALE}`)
+              canvas.setAttribute('width', `${_canvasImg.width * CANVAS_SCALE}`)
+              canvas.setAttribute('height', `${_canvasImg.height * CANVAS_SCALE}`)
               this.canvasImg = _canvasImg
               imgShadowUtils.clearLayerData()
-              // imgShadowUtils.draw(canvas, _canvasImg, this.config)
               imgShadowUtils.draw(canvas, _canvasImg, this.config, {
                 canvasSize: this.config.styles.height,
                 layerInfo: {
@@ -349,7 +350,7 @@ export default Vue.extend({
                 }
               })
             }
-            _canvasImg.src = ImageUtils.getSrc(this.config)
+            _canvasImg.src = ImageUtils.getSrc(this.config, CANVAS_SIZE)
           }
           break
         }
