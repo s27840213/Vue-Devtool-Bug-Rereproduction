@@ -126,7 +126,7 @@ export default Vue.extend({
     const layerData = imageShadowUtils.layerData
     if (layerData) {
       const { config, primarylayerId } = layerData
-      const { width, height, scale: prevScale } = config.styles
+      const { height: _height } = config.styles
       const updateCanvas = document.createElement('canvas')
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const img = new Image()
@@ -146,17 +146,13 @@ export default Vue.extend({
       // document.body.append(updateCanvas)
 
       await imageShadowUtils.draw(updateCanvas, img, config, {
-        canvasSize: height,
+        canvasSize: _height,
         timeout: 0
       })
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
-      const imgHeightInCanvas = height
-      const imgWidthInCanvas = width
-      const leftShadowThickness = (updateCanvas.width - imgWidthInCanvas) * 0.5 - left
-      const topShadowThickness = (updateCanvas.height - imgHeightInCanvas) * 0.5 - top
-      // const newWidth = updateCanvas.width - right - left
-      // const newHeight = updateCanvas.height - top - bottom
+      const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
+      const topShadowThickness = ((updateCanvas.height - img.naturalHeight) * 0.5 - top) / img.naturalHeight
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -178,45 +174,45 @@ export default Vue.extend({
         this.setIsUploading(pageId, config.id as string, '')
       }
 
-      // uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
-      //   const srcObj = {
-      //     type: this.isAdmin ? 'public' : 'private',
-      //     userId: json.data.team_id,
-      //     assetId: this.isAdmin ? json.data.id : json.data.asset_index
-      //   }
+      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
+        const srcObj = {
+          type: this.isAdmin ? 'public' : 'private',
+          userId: json.data.team_id,
+          assetId: this.isAdmin ? json.data.id : json.data.asset_index
+        }
 
-      //   const pageIndex = pageUtils.getPageIndexById(pageId)
-      //   const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-      //   if (pageIndex !== -1 && layerIndex !== -1) {
-      //     const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
-      //     const newWidth = updateCanvas.width - right - left
-      //     const newHeight = updateCanvas.height - top - bottom
-      //     const styles = {
-      //       width: newWidth,
-      //       height: newHeight,
-      //       imgWidth: newWidth,
-      //       imgHeight: newHeight,
-      //       initWidth: newWidth,
-      //       initHeight: newHeight,
-      //       imgX: 0,
-      //       imgY: 0,
-      //       x: config.styles.x - leftShadowThickness,
-      //       y: config.styles.y - topShadowThickness,
-      //       scale: 1
-      //     }
-      //     layer.srcObj = srcObj
-      //     Object.assign(layer.styles, styles)
+        const pageIndex = pageUtils.getPageIndexById(pageId)
+        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+        if (pageIndex !== -1 && layerIndex !== -1) {
+          const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
+          const newWidth = (updateCanvas.width - right - left) / img.naturalWidth * config.styles.width
+          const newHeight = (updateCanvas.height - top - bottom) / img.naturalWidth * config.styles.width
+          const styles = {
+            width: newWidth,
+            height: newHeight,
+            imgWidth: newWidth,
+            imgHeight: newHeight,
+            initWidth: newWidth,
+            initHeight: newHeight,
+            imgX: 0,
+            imgY: 0,
+            x: config.styles.x - config.styles.imgWidth * leftShadowThickness,
+            y: config.styles.y - config.styles.imgHeight * topShadowThickness,
+            scale: 1
+          }
+          layer.srcObj = srcObj
+          Object.assign(layer.styles, styles)
 
-      //     const img = new Image()
-      //     img.crossOrigin = 'anoynous'
-      //     img.onload = () => {
-      //       this.resetAllShadowProps(pageIndex, layerIndex)
-      //       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
-      //       layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
-      //     }
-      //     img.src = imageUtils.getSrc(layer)
-      //   }
-      // })
+          const newImg = new Image()
+          newImg.crossOrigin = 'anoynous'
+          newImg.onload = () => {
+            this.resetAllShadowProps(pageIndex, layerIndex)
+            layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
+          }
+          newImg.src = imageUtils.getSrc(layer)
+        }
+      })
       imageShadowUtils.clearLayerData()
     }
   },
