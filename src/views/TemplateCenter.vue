@@ -170,7 +170,7 @@
         div(class="template-center__mobile-multi__content")
           div(class="template-center__mobile-multi__gallery")
             div(v-for="content in content_ids" class="template-center__mobile-multi__gallery-item"
-                :style="`background-image: url(${getPrevUrl(content)})`"
+                :style="`background-image: url(${getPrevUrl(content, 2)})`"
                 @click="handleTemplateClick(content)")
             div(class="template-center__scroll-space")
     div(v-if="modal === 'mobile-pages'", class="template-center__mobile-multi__close"
@@ -633,8 +633,8 @@ export default Vue.extend({
       this.isMobile = window.matchMedia('screen and (max-width: 540px)').matches
       this.isPC = window.matchMedia('screen and (min-width: 976px)').matches
     },
-    getPrevUrl(content: IContentTemplate): string {
-      return templateCenterUtils.getPrevUrl(content)
+    getPrevUrl(content: IContentTemplate, scale: number): string {
+      return templateCenterUtils.getPrevUrl(content, scale)
     },
     getThemeTitle(themeId: string): string {
       const theme = this.themes.find((theme) => theme.id.toString() === themeId)
