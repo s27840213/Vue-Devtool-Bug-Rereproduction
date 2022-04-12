@@ -1,13 +1,5 @@
-import { IUserFontContentData } from "./api"
-
-export interface IBrand {
-  id: string,
-  createTime: string,
-  name: string,
-  logos: IBrandLogo[],
-  textStyleSetting: IBrandTextStyleSetting,
-  colorPalettes: IBrandColorPalette[]
-}
+/* eslint-disable camelcase */
+import { IUserFontContentData } from './api'
 
 export interface IBrandLogo {
   name: string,
@@ -16,12 +8,6 @@ export interface IBrandLogo {
   url: string,
   width: number,
   height: number
-}
-
-export interface IBrandTextStyleSetting {
-  headingStyle: IBrandTextStyle,
-  subheadingStyle: IBrandTextStyle,
-  bodyStyle: IBrandTextStyle
 }
 
 export interface IBrandTextStyle {
@@ -37,11 +23,10 @@ export interface IBrandTextStyle {
   isDefault: boolean
 }
 
-export interface IBrandColorPalette {
-  id: string,
-  createTime: string,
-  name: string,
-  colors: IBrandColor[]
+export interface IBrandTextStyleSetting {
+  headingStyle: IBrandTextStyle,
+  subheadingStyle: IBrandTextStyle,
+  bodyStyle: IBrandTextStyle
 }
 
 export interface IBrandColor {
@@ -50,10 +35,26 @@ export interface IBrandColor {
   color: string
 }
 
+export interface IBrandColorPalette {
+  id: string,
+  createTime: string,
+  name: string,
+  colors: IBrandColor[]
+}
+
 export interface IBrandFont extends Omit<IUserFontContentData, 'create_time' | 'update_time' | 'id'> {
   createTime: string,
   updateTime: string,
   id: string
+}
+
+export interface IBrand {
+  id: string,
+  createTime: string,
+  name: string,
+  logos: IBrandLogo[],
+  textStyleSetting: IBrandTextStyleSetting,
+  colorPalettes: IBrandColorPalette[]
 }
 
 export interface IDeletingItem {
