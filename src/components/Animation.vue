@@ -3,13 +3,6 @@
     div(v-if="isJSON"
       class="lottie"
       :style="lottieStyle" ref="lavContainer")
-    template(v-if="isImg")
-      img(v-for="index in 2"
-        class="img"
-        :src="require('@/' + path.slice(2))"
-        :width="width"
-        :height="height"
-        :style="carousel")
     video(v-if="isMp4"
       class="video"
       :src="require('@/' + path.slice(2))"
@@ -30,56 +23,38 @@ export default Vue.extend({
       type: String,
       required: true
     },
-    test: { // to delete
-      type: Object
-    },
-    speed: {
-      type: Number,
-      required: false,
-      default: 1
-    },
     width: {
       type: Number,
-      required: false,
       default: -1
     },
     height: {
       type: Number,
-      required: false,
       default: -1
+    },
+    // The following is for lottie
+    speed: {
+      type: Number,
+      default: 1
     },
     loop: {
       type: Boolean,
-      required: false,
       default: true
     },
     autoPlay: {
       type: Boolean,
-      required: false,
       default: true
     },
     loopDelayMin: {
       type: Number,
-      required: false,
       default: 0
     },
     loopDelayMax: {
       type: Number,
-      required: false,
       default: 0
-    },
-    delay: {
-      type: Number,
-      default: 10
-    },
-    imgSpeed: {
-      type: Number,
-      default: 0.01
     }
   },
   data() {
     return {
-      name: 'lottie-animation',
       rendererSettings: {
         scaleMode: 'centerCrop',
         clearCanvas: true,
@@ -91,16 +66,8 @@ export default Vue.extend({
     }
   },
   computed: {
-    carousel(): Record<string, string> {
-      return {
-        transform: `translateX(-${this.time}%)`
-      }
-    },
     isJSON():boolean {
       return this.path.endsWith('.json')
-    },
-    isImg():boolean {
-      return this.path.endsWith('.svg') || this.path.endsWith('.png') || this.path.endsWith('.jpg')
     },
     isMp4():boolean {
       return this.path.endsWith('.mp4')
@@ -114,20 +81,13 @@ export default Vue.extend({
       }
     }
   },
-  created() {
-    if (this.isImg) {
-      setInterval(() => {
-        this.time = (this.time + this.imgSpeed) % 100
-      }, this.delay)
-    }
-  },
   mounted() {
     this.init()
   },
   methods: {
     async loadJsonData(path: string) {
       if (path.startsWith('@/')) {
-        return await require('@/' + path.slice(2)) // 之後改成讀特定資料夾下的
+        return await require('@/' + path.slice(2))
       } else {
         return await axios.get(path).then(response => {
           return response.data
@@ -182,11 +142,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.animation {
-  white-space: pre;
-  .img {
-    position: relative;
-    left: calc(50% - 50vw);
-  }
-}
 </style>

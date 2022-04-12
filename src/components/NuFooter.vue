@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-footer text-white")
+  div(class="nu-footer text-black")
     div(class="nu-footer__wrapper label-lg")
       svg-icon(:iconName="'logo'"
         :iconWidth="'100px'"
@@ -12,7 +12,7 @@
             span LEARN
             svg-icon(class="nu-footer__feature-icon"
               :iconName="featureExpand[0] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'white'"
+              :iconColor="'black'"
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items"
             :class="featureExpand[0] ? 'expand' : ''")
@@ -25,7 +25,7 @@
             span DISCOVER
             svg-icon(class="nu-footer__feature-icon"
               :iconName="featureExpand[1] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'white'"
+              :iconColor="'black'"
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items"
             :class="featureExpand[1] ? 'expand' : ''")
@@ -38,7 +38,7 @@
             span CREATE
             svg-icon(class="nu-footer__feature-icon"
               :iconName="featureExpand[2] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'white'"
+              :iconColor="'black'"
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items"
             :class="featureExpand[2] ? 'expand' : ''")
@@ -52,7 +52,7 @@
             span LEGAL
             svg-icon(class="nu-footer__feature-icon"
               :iconName="featureExpand[3] ? 'minus-origin' : 'plus-origin'"
-              :iconColor="'white'"
+              :iconColor="'black'"
               :iconWidth="'15px'")
           div(class="nu-footer__feature-items"
             :class="featureExpand[3] ? 'expand' : ''")
@@ -64,39 +64,40 @@
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-center")
-        span COPYRIGHT Vivipic 2021
+        span {{'COPYRIGHT Vivipic 2021 - TERMS & CONDITIONS  PRIVACY POLICY'}}
       div(class="nu-footer__bottom-right")
         a(:href="facebookPage")
           svg-icon(class="pointer"
-            :iconName="'facebook-circle'"
+            iconName="facebook-black"
             :iconWidth="'25px'")
         a(:href="igPage")
           svg-icon(class="pointer"
-            :iconName="'instagram-circle'"
+            iconName="instagram-black"
             :iconWidth="'25px'")
         a(:href="mailtoService")
           svg-icon(class="pointer"
-            :iconName="'mail-circle'"
+            iconName="email-black"
             :iconWidth="'25px'")
     div(class="nu-footer__bottom-mobile")
       div(class="nu-footer__bottom-mobile-icons")
         a(:href="facebookPage")
           svg-icon(class="pointer"
-            :iconName="'facebook-circle'"
+            iconName="facebook-black"
             :iconWidth="'25px'")
         a(:href="igPage")
           svg-icon(class="pointer ml-25"
-            :iconName="'instagram-circle'"
+            iconName="instagram-black"
             :iconWidth="'25px'")
         a(:href="mailtoService")
           svg-icon(class="pointer ml-25"
-            :iconName="'mail-circle'"
+            iconName="email-black"
             :iconWidth="'25px'")
-      div(class="nu-footer__bottom-mobile-locale")
+      div(class="nu-footer__bottom-mobile-locale"
+        :style="{ 'margin-bottom': isHome ? '80px' : 0 }")
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-mobile-copyright")
-        span COPYRIGHT Vivipic 2021
+        span {{'COPYRIGHT Vivipic 2021 - TERMS & CONDITIONS  PRIVACY POLICY'}}
 </template>
 
 <script lang="ts">
@@ -109,6 +110,12 @@ import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
 
 export default Vue.extend({
+  props: {
+    isHome: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       inputLocale: '',
@@ -128,6 +135,7 @@ export default Vue.extend({
     this.localeOptions = localeUtils.SUPPORTED_LOCALES
     this.inputLocale = this.getLocaleText(this.currLocale) as string
     this.switchUrl(this.currLocale)
+    themeUtils.checkThemeState()
   },
   watch: {
     async inputLocale() {
@@ -213,7 +221,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-footer {
   width: 100%;
-  background: #555;
+  background: white;
   &__wrapper {
     display: grid;
     grid-template-columns: 30% 70%;
@@ -291,7 +299,7 @@ export default Vue.extend({
       }
       > a,
       div {
-        color: white;
+        color: black;
         text-decoration: none;
         text-align: left;
         @include layout-mobile {
@@ -318,7 +326,7 @@ export default Vue.extend({
       justify-content: center;
       align-items: center;
       font-size: 14px;
-      color: white;
+      color: black;
     }
     &-right {
       display: grid;
@@ -338,6 +346,7 @@ export default Vue.extend({
         padding-left: 30px;
       }
       &-locale {
+        text-align: center;
         padding-top: 40px;
       }
       &-copyright {
@@ -354,10 +363,10 @@ export default Vue.extend({
   width: 40%;
   height: 30px;
   font-size: 14px;
-  color: #fff;
+  color: black;
   border-radius: 7px;
-  border: 1px #fff solid;
-  background: #555;
+  border: 1px black solid;
+  background: white;
   padding-left: 8px;
   padding-right: 5px;
 }

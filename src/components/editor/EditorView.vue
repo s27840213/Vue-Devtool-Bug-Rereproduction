@@ -4,7 +4,7 @@
       :style="brushCursorStyles()"
       @mousedown.left="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
-      @scroll="!inBgRemoveMode ? scrollUpdate() : null"
+      @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
       ref="editorView")
     div(class="editor-view__grid")

@@ -795,7 +795,7 @@ export default Vue.extend({
   }
   &__color {
     width: 100%;
-    aspect-ratio: 1;
+    padding-top: calc(100% - 3px);
     border: 1.5px solid setColor(gray-4);
     border-radius: 4px;
     box-sizing: border-box;

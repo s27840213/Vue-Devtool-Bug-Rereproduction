@@ -291,7 +291,7 @@ export default Vue.extend({
     position: relative;
   }
   &__color {
-    aspect-ratio: 1/1;
+    padding-top: 100%;
     border-radius: 4px;
     cursor: pointer;
     position: relative;

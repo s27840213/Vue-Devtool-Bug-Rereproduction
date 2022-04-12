@@ -1,4 +1,4 @@
-import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import generalUtils from './generalUtils'
@@ -10,7 +10,7 @@ import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
+import { IUploadAssetFontResponse, IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
 import { EventEmitter } from 'events'
@@ -21,6 +21,7 @@ import i18n from '@/i18n'
 import logUtils from './logUtils'
 import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
+import brandkitUtils from './brandkitUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -148,7 +149,7 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        if (type !== 'logo' && type !== 'font') {
+        if (type !== 'logo') {
           this.uploadAsset(type, files as FileList)
         } else {
           console.log(files)
@@ -274,6 +275,8 @@ class UploadUtils {
       })
       if (type === 'avatar') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
+      } else if (type === 'font') {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.locale}_original`)
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
@@ -358,6 +361,7 @@ class UploadUtils {
             }
           }
         } else if (type === 'font') {
+          const tempId = brandkitUtils.createTempFont(assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
           xhr.onload = () => {
@@ -367,16 +371,19 @@ class UploadUtils {
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
-                  response.json().then((json: IUploadAssetResponse) => {
+                  response.json().then((json: IUploadAssetFontResponse) => {
                     if (json.flag === 0) {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
-                      store.dispatch('getAllAssets', { token: this.token })
+                      brandkitUtils.replaceFont(tempId, json.data)
+                      // store.dispatch('getAllAssets', { token: this.token })
+                      // update uploading font as real object
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
                     } else {
                       this.emitFontUploadEvent('fail')
+                      brandkitUtils.deleteFont(tempId)
                       console.log('Failed to upload the file')
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
@@ -996,9 +1003,15 @@ class UploadUtils {
       }
 
       case GetDesignType.PRODUCT_PAGE_TEMPLATE: {
-        return listService.getList({ type: 'group', groupId: designId })
+        return listService.getList({ type: 'group', groupId: designId, cache: true })
           .then(result => {
             const { content } = result.data.data
+            return new Promise<IListServiceContentData[]>((resolve) => {
+              assetUtils.addTemplateToRecentlyUsedPure(content[0].list[0].id)
+                .then(() => resolve(content))
+            })
+          })
+          .then(content => {
             store.commit('SET_groupType', 1)
             return assetUtils.addGroupTemplate({
               id: '',
@@ -1070,7 +1083,7 @@ class UploadUtils {
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
-                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json)
+                designUtils.newDesignWithTemplae(Number(params.width), Number(params.height), json, designId, params.groupId)
                 logUtils.setLog('Successfully get new design template')
                 break
               }

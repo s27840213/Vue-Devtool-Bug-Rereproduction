@@ -119,6 +119,7 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
+  app_ver?: number // todelete
 }
 
 export interface IGroupDesignInputParams {
@@ -256,11 +257,12 @@ export interface IUserFontContentData {
   favorite: number,
   file_ext: string,
   file_name: string,
-  id: string,
+  id?: string,
   name: string,
   team_id: string,
   update_time: string,
   ver: number,
+  font_family: string,
   signed_url?: {
     original: string,
     font: string,

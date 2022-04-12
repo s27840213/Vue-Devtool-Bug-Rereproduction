@@ -209,13 +209,11 @@ export default Vue.extend({
       return effects[currentEffect].includes('color')
     },
     currentStyle(): any {
-      // const { styles } = TextEffectUtils.getCurrentLayer()
-      const { styles } = layerUtils.getCurrConfig
+      const { styles } = TextEffectUtils.getCurrentLayer()
       return styles || {}
     },
     currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
-      console.log(textEffect.name)
       return textEffect.name || 'none'
     },
     currentShape(): string {

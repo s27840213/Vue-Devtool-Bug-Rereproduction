@@ -171,19 +171,23 @@ export default Vue.extend({
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     },
     scale(): number {
-      const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)
-      if (layer && layer.layers) {
-        const scaleSet = layer.layers.reduce((p: Set<number>, c: ILayer) => {
-          if (c.type === 'text') { p.add(c.styles.scale) }
-          return p
-        }, new Set())
-        if (scaleSet.size === 1) {
-          const [scale] = scaleSet
-          return scale * layer.styles.scale
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer && currLayer.layers) {
+        if (subLayerIdx === -1) {
+          const scaleSet = (currLayer as IGroup).layers.reduce((p: Set<number>, c: ILayer) => {
+            if (c.type === 'text') { p.add(c.styles.scale) }
+            return p
+          }, new Set())
+          if (scaleSet.size === 1) {
+            const [scale] = scaleSet
+            return scale * currLayer.styles.scale
+          }
+          return NaN
+        } else {
+          return currLayer.styles.scale * (currLayer as IGroup).layers[subLayerIdx].styles.scale
         }
-        return NaN
       }
-      return layer ? layer.styles.scale : 1
+      return currLayer.styles.scale
     },
     fontSize(): number | string {
       if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
@@ -504,7 +508,7 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
+          tiptapUtils.applySpanStyle('size', parseFloat(value))
           tiptapUtils.agent(editor => {
             LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
