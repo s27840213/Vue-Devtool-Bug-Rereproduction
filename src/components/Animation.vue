@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import lottie from 'lottie-web'
 import axios from 'axios'
 
@@ -32,6 +33,9 @@ export default Vue.extend({
       default: -1
     },
     // The following is for lottie
+    lottieName: { // required if type is lottie
+      type: String
+    },
     speed: {
       type: Number,
       default: 1
@@ -61,8 +65,7 @@ export default Vue.extend({
         progressiveLoad: false,
         hideOnTransparent: true
       },
-      anim: null as any,
-      time: 0 as number
+      anim: null as unknown as ReturnType<typeof lottie.loadAnimation> // better way?
     }
   },
   computed: {
@@ -110,7 +113,8 @@ export default Vue.extend({
         loop: this.loop,
         autoplay: this.autoPlay,
         animationData: jsonData,
-        rendererSettings: this.rendererSettings
+        rendererSettings: this.rendererSettings,
+        assetsPath: `/lottie/${i18n.locale}/${this.lottieName}/images/`
       })
       this.$emit('AnimControl', this.anim)
       this.anim.setSpeed(this.speed)
