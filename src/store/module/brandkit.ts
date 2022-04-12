@@ -1,3 +1,4 @@
+import store from '@/store'
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -6,6 +7,7 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import { IUserFontContentData } from '@/interfaces/api'
+import { IGroup, IText } from '@/interfaces/layer'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -353,6 +355,45 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       return urlMap
     }
     return {}
+  },
+  async updatePageFonts({ dispatch }, { pageIndex }: { pageIndex: number }) {
+    const { layers } = store.state.pages[pageIndex]
+    const fontToRequest = new Set<string>()
+
+    for (const layer of layers) {
+      const targets = layer.type === 'group' ? (layer as IGroup).layers : [layer]
+
+      for (const target of targets) {
+        if (target.type === 'text') {
+          const paragraphs = (target as IText).paragraphs
+          for (const paragraph of paragraphs) {
+            if (paragraph.styles.font && paragraph.styles.type === 'private') {
+              fontToRequest.add(paragraph.styles.assetId as string)
+            }
+            for (const span of paragraph.spans) {
+              if (span.styles.font && span.styles.type === 'private') {
+                fontToRequest.add(span.styles.assetId)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    fontToRequest.delete('') // delete empty asset id
+    await dispatch('updateFonts', { assetSet: fontToRequest })
+  },
+  async updateFonts({ commit }, { assetSet }: { assetSet: Set<string> }) {
+    const assetIndexList = Array.from(assetSet)
+    const assetIndex = assetIndexList.join(',')
+    if (assetIndex.length === 0) {
+      return
+    }
+
+    const { data } = await brandkitApi.getFont(assetIndex)
+    if (data.flag === 0) {
+      commit('UPDATE_setFetchedFont', data.url_map)
+    }
   }
 }
 
@@ -494,6 +535,9 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: {[key: string]: string} }) {
     state.fetchedFonts[updateInfo.index] = updateInfo.urlMap
+  },
+  UPDATE_setFetchedFont(state: IBrandKitState, urlMap: {[key: string]: {[key: string]: string}}) {
+    Object.assign(state.fetchedFonts, urlMap)
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)

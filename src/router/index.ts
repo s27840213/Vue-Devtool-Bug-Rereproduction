@@ -78,7 +78,10 @@ const routes: Array<RouteConfig> = [
           }
           const response = await (await fetch(`https://${src}`)).json()
           await assetUtils.addTemplate(response, { pageIndex: 0 })
-          await store.dispatch('file/updatePageImages', { pageIndex: 0 })
+          await Promise.all([
+            store.dispatch('file/updatePageImages', { pageIndex: 0 }),
+            store.dispatch('brandkit/updatePageFonts', { pageIndex: 0 })
+          ])
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
         }
         next()

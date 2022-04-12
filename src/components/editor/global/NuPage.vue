@@ -411,13 +411,17 @@ export default Vue.extend({
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
     ...mapActions({
-      updatePageImages: 'file/updatePageImages'
+      updatePageImages: 'file/updatePageImages',
+      updatePageFonts: 'brandkit/updatePageFonts'
     }),
     async loadLayerImg() {
       if (!this.isOutOfBound && this.setLayersDone &&
           !this.imgLoaded && !this.imgLoading) {
         this.imgLoading = true
-        await this.updatePageImages({ pageIndex: this.pageIndex })
+        await Promise.all([
+          this.updatePageImages({ pageIndex: this.pageIndex }),
+          this.updatePageFonts({ pageIndex: this.pageIndex })
+        ])
         this.imgLoaded = true
         this.imgLoading = false
       }
