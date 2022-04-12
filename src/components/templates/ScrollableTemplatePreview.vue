@@ -90,10 +90,9 @@ export default Vue.extend({
   position: absolute;
   width: 100%;
   height: 100%;
+  top: 0;
+  left: 0;
   &__images {
-    position: absolute;
-    top: 0;
-    left: 0;
     display: flex;
     flex-direction: column;
     width: 100%;
