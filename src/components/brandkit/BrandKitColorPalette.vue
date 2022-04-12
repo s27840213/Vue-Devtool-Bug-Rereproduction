@@ -16,7 +16,7 @@
           svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
     div(class="brand-kit-color-palette__colors")
       div(v-for="(color, index) in colorPalette.colors"
-        class="brand-kit-color-palette__colors__color-wrapper relative"
+        class="brand-kit-color-palette__colors__color-wrapper"
         :class="{ selected: checkSelected(colorPalette.id, color) }")
         div(class="brand-kit-color-palette__colors__color pointer"
           :style="backgroundColorStyles(color.color)"
@@ -31,9 +31,10 @@
                     :currentColor="color.color"
                     @update="handleDragUpdate"
                     @final="handleColorChangeEnd")
-      div(class="brand-kit-color-palette__colors__color-add pointer"
+      div(class="brand-kit-color-palette__colors__color-wrapper pointer"
         @click="handleAddColor(colorPalette.id)")
-        svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
+        div(class="brand-kit-color-palette__colors__color-add")
+          svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
 </template>
 
 <script lang="ts">
@@ -206,8 +207,9 @@ export default Vue.extend({
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
     gap: 20px 10px;
     &__color-wrapper {
+      position: relative;
       width: 100%;
-      aspect-ratio: 1;
+      padding-top: 100%;
       box-sizing: border-box;
       border-radius: 10%;
       &:hover {
@@ -221,8 +223,11 @@ export default Vue.extend({
       }
     }
     &__color-add {
+      position: absolute;
       width: 100%;
-      aspect-ratio: 1;
+      height: 100%;
+      left: 0;
+      top: 0;
       box-sizing: border-box;
       border-radius: 10%;
       border: 1px solid setColor(gray-3);
@@ -234,6 +239,9 @@ export default Vue.extend({
       }
     }
     &__color {
+      position: absolute;
+      left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
       border: 2px solid setColor(gray-7);
