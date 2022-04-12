@@ -316,6 +316,14 @@ class BrandKitUtils {
     return (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.id === assetId)
   }
 
+  getFontUrlMap(assetId: string): {[key: string]: string} | undefined {
+    return store.getters['brandkit/getFontUrlMap'](assetId)
+  }
+
+  async refreshFontAsset(assetId: string): Promise<{ [key: string]: string }> {
+    return await store.dispatch('brandkit/refreshFontAsset', assetId)
+  }
+
   getFontPrevUrlByFontFamily(fontFamily: string, type: string, userId: string, assetId: string): string {
     switch (type) {
       case 'public':
@@ -323,9 +331,8 @@ class BrandKitUtils {
       case 'admin':
         return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/prev-name?ver=${generalUtils.generateRandomString(6)}`
       case 'private': {
-        const privateFont = (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.font_family === fontFamily)
-        if (!privateFont) return ''
-        return privateFont.signed_url?.['prev-name'] ?? ''
+        const urlMap = store.getters['brandkit/getFontUrlMap'](assetId) as {[key: string]: string} | undefined
+        return urlMap?.['prev-name'] ?? ''
       }
       default:
         return ''

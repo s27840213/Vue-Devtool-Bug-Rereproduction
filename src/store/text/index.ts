@@ -186,24 +186,36 @@ const actions: ActionTree<ITextState, unknown> = {
 }
 
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
-  let font: IBrandFont | undefined
   switch (type) {
     case 'public':
       return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
     case 'admin':
       return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}`
     case 'private': {
-      // not implemented yet (may need fetching new presigned url (async))
-      // params: assetId (index)
-      font = brandkitUtils.getFont(assetId)
-      if (!font) return ''
-      const cssUrl = font.signed_url?.css
-      return cssUrl ? `${cssUrl}&ver=${ver}` : ''
+      let urlMap = brandkitUtils.getFontUrlMap(assetId)
+      if (urlMap) { // if font is in font-list or has been seen before
+        const finalUrl = getCssUrl(urlMap, ver)
+        try {
+          await fetch(finalUrl) // check if the url is still valid
+          return finalUrl
+        } catch { // if the url already expires, refresh it
+          urlMap = await brandkitUtils.refreshFontAsset(assetId)
+          return getCssUrl(urlMap, ver)
+        }
+      } else { // font is not seen before, fetch it
+        urlMap = await brandkitUtils.refreshFontAsset(assetId)
+        return getCssUrl(urlMap, ver)
+      }
     }
     case 'URL':
       return url
   }
   return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+}
+
+const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
+  const cssUrl = urlMap.css
+  return cssUrl ? `${cssUrl}&ver=${ver}` : ''
 }
 
 export default {

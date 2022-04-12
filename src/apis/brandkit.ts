@@ -37,14 +37,14 @@ export default {
       }
     }))
   },
-  async getFont(assetIndex: number, token?: string, teamId?: string): Promise<any> {
+  async getFont(assetIndex: string, token?: string, teamId?: string): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
       method: 'POST',
       data: {
         token: token ?? this.getToken(),
         team_id: teamId ?? this.getTeamId(),
         type: 'font',
-        asset_list: assetIndex.toString()
+        asset_list: assetIndex
       }
     }))
   },

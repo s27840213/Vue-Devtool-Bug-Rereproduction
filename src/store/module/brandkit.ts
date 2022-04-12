@@ -14,6 +14,7 @@ interface IBrandKitState {
   isFontsLoading: boolean,
   selectedTab: string,
   fonts: IBrandFont[],
+  fetchedFonts: {[key: string]: {[key: string]: string}},
   fontsPageIndex: number
 }
 
@@ -29,6 +30,7 @@ const getDefaultState = (): IBrandKitState => ({
   isFontsLoading: false,
   selectedTab: brandkitUtils.getTabKeys()[0],
   fonts: [],
+  fetchedFonts: {},
   fontsPageIndex: 0
 })
 
@@ -54,6 +56,13 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getFontsPageIndex(state: IBrandKitState): number {
     return state.fontsPageIndex
+  },
+  getFontUrlMap(state: IBrandKitState): (assetIndex: string) => {[key: string]: string} | undefined {
+    return (assetIndex: string) => {
+      const privateFont = state.fonts.find(font => font.signed_url && font.id === assetIndex)
+      if (privateFont) return privateFont.signed_url
+      return state.fetchedFonts[assetIndex]
+    }
   }
 }
 
@@ -326,11 +335,21 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       showNetworkError()
     })
   },
-  async refreshFontAsset({ commit }, font: IBrandFont) {
-    const { data } = await brandkitApi.getFont(font.asset_index)
+  async refreshFontAsset({ commit }, font: IBrandFont | string) {
+    const assetIndex = typeof font === 'string' ? font as string : (font as IBrandFont).asset_index.toString()
+    let privateFont: IBrandFont | undefined
+    if (typeof font === 'string') {
+      privateFont = brandkitUtils.getFont(font)
+    } else {
+      privateFont = font as IBrandFont
+    }
+    const { data } = await brandkitApi.getFont(assetIndex)
     if (data.flag === 0) {
-      const urlMap = data.url_map[font.asset_index.toString()]
-      commit('UPDATE_replaceFontUrl', { font, urlMap })
+      const urlMap = data.url_map[assetIndex]
+      if (privateFont) {
+        commit('UPDATE_replaceFontUrl', { font: privateFont, urlMap })
+      }
+      commit('UPDATE_addFetchedFont', { index: assetIndex, urlMap })
       return urlMap
     }
     return {}
@@ -472,6 +491,9 @@ const mutations: MutationTree<IBrandKitState> = {
     for (const key of Object.keys(font.signed_url)) {
       (font.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
     }
+  },
+  UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: {[key: string]: string} }) {
+    state.fetchedFonts[updateInfo.index] = updateInfo.urlMap
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
