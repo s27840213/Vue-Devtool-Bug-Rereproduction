@@ -1,6 +1,6 @@
+/* eslint-disable camelcase */
 export interface IDesign {
   id: string,
-  // eslint-disable-next-line camelcase
   asset_index: number,
   name: string,
   width: number,
