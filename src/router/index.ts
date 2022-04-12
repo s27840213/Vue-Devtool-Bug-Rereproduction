@@ -11,7 +11,7 @@ import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
-import Billing from '../views/Billing.vue'
+import Payment from '../views/Payment.vue'
 import store from '@/store'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
@@ -156,9 +156,9 @@ const routes: Array<RouteConfig> = [
     component: BrandKit
   },
   {
-    path: 'billing',
-    name: 'Billing',
-    component: Billing
+    path: 'payment',
+    name: 'Payment',
+    component: Payment
   }
 ]
 
