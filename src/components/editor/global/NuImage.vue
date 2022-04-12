@@ -320,7 +320,7 @@ export default Vue.extend({
           if (this.canvasImg) {
             // imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config)
             imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config, {
-              canvasSize: this.config.styles.height,
+              coverImg: this.$refs.img as HTMLImageElement,
               layerInfo: {
                 pageIndex: this.pageIndex,
                 layerIndex: this.layerIndex,
@@ -331,18 +331,12 @@ export default Vue.extend({
             const _canvasImg = new Image()
             _canvasImg.crossOrigin = 'Anonymous'
             _canvasImg.onload = () => {
-              const ratio = _canvasImg.naturalWidth / _canvasImg.naturalHeight
-              // canvas.setAttribute('width', `${CANVAS_SIZE * ratio * CANVAS_SCALE}`)
-              // canvas.setAttribute('height', `${CANVAS_SIZE * CANVAS_SCALE}`)
-              /** use the CANVAS_SIZE as the controlling-canvas-size would lead to the inconsistent between backend screenshot and frontend */
-              // canvas.setAttribute('width', `${this.config.styles.width * CANVAS_SCALE}`)
-              // canvas.setAttribute('height', `${this.config.styles.height * CANVAS_SCALE}`)
               canvas.setAttribute('width', `${_canvasImg.width * CANVAS_SCALE}`)
               canvas.setAttribute('height', `${_canvasImg.height * CANVAS_SCALE}`)
               this.canvasImg = _canvasImg
               imgShadowUtils.clearLayerData()
               imgShadowUtils.draw(canvas, _canvasImg, this.config, {
-                canvasSize: this.config.styles.height,
+                coverImg: this.$refs.img as HTMLImageElement,
                 layerInfo: {
                   pageIndex: this.pageIndex,
                   layerIndex: this.layerIndex,
@@ -371,7 +365,7 @@ export default Vue.extend({
           }
         })
         imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config, {
-          canvasSize: this.config.styles.height,
+          coverImg: this.$refs.img as HTMLImageElement,
           layerInfo: {
             pageIndex: this.pageIndex,
             layerIndex: this.layerIndex,

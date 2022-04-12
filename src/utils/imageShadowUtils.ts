@@ -17,7 +17,8 @@ export const CANVAS_SIZE = 500
 export interface DrawOptions {
   canvasSize?: number,
   timeout?: number,
-  layerInfo?: ILayerInfo
+  layerInfo?: ILayerInfo,
+  coverImg?: HTMLImageElement
 }
 class ImageShadowUtils {
   private readonly SPREAD_RADIUS = 1
@@ -48,7 +49,7 @@ class ImageShadowUtils {
 
   async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
-    const { canvasSize = CANVAS_SIZE, timeout = 25, layerInfo } = options
+    const { timeout = 25, layerInfo, coverImg } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
@@ -75,23 +76,20 @@ class ImageShadowUtils {
       const imgY = _imgY * scaleRatio
       const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
       const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-      // const drawCanvasHeight = canvas.height / CANVAS_SCALE
-      // const drawCanvasWidth = drawCanvasHeight * imgRatio
       const drawCanvasHeight = img.naturalHeight
       const drawCanvasWidth = img.naturalWidth
-      // const x = (canvas.width - canvasSize * imgRatio) * 0.5
-      // const y = (canvas.height - canvasSize) * 0.5
       const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
       const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
       const unifiedScale = Math.floor(img.naturalWidth / CANVAS_SIZE)
       const unifiedSpread = spread * unifiedScale
-      const _spread = 1 / this.SPREAD_RADIUS
+      const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedSpread
+      const _spread = 1 / unifiedSpreadRadius
 
       let offsetX = 0
       let offsetY = 0
       if (distance && distance > 0) {
-        offsetX = distance * mathUtils.cos(angle)
-        offsetY = distance * mathUtils.sin(angle)
+        offsetX = distance * mathUtils.cos(angle) * unifiedScale
+        offsetY = distance * mathUtils.sin(angle) * unifiedScale
       }
 
       this.canvasT.width !== canvas.width && this.canvasT.setAttribute('width', `${canvas.width}`)
@@ -106,7 +104,7 @@ class ImageShadowUtils {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
               const r = Math.sqrt(i * i + j * j)
-              if (r >= unifiedSpread + this.SPREAD_RADIUS && currentEffect !== ShadowEffectType.frame) {
+              if (r >= unifiedSpread + unifiedSpreadRadius && currentEffect !== ShadowEffectType.frame) {
                 alphaVal = 0
               } else if (r >= unifiedSpread && currentEffect !== ShadowEffectType.frame) {
                 alphaVal = (1 - (r - unifiedSpread) * _spread)
@@ -131,7 +129,7 @@ class ImageShadowUtils {
         if (this.ctxT && this.handlerId === handlerId) {
           this.ctxT.globalCompositeOperation = 'source-in'
           const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
+          StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius * unifiedScale + 1)
           this.ctxT.putImageData(imageData, 0, 0)
         }
       })
@@ -143,7 +141,25 @@ class ImageShadowUtils {
 
           this.ctxT.globalCompositeOperation = 'source-over'
           this.ctxT.globalAlpha = 1
-          this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+          if (coverImg) {
+            const coverRatio = coverImg.naturalWidth / _imgWidth
+            const coverImgX = _imgX * coverRatio
+            const coverImgY = _imgY * coverRatio
+            const coverImgW = coverImg.naturalWidth * layerWidth / _imgWidth
+            const coverImgH = coverImg.naturalHeight * layerHeight / _imgHeight
+
+            // const scaleRatio = img.naturalWidth / _imgWidth
+            // const imgX = _imgX * scaleRatio
+            // const imgY = _imgY * scaleRatio
+            // const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+            // const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+            // const drawCanvasHeight = img.naturalHeight
+            // const drawCanvasWidth = img.naturalWidth
+
+            this.ctxT.drawImage(coverImg, -coverImgX, -coverImgY, coverImgW, coverImgH, x, y, drawCanvasWidth, drawCanvasHeight)
+          } else {
+            this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+          }
 
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(this.canvasT, 0, 0)

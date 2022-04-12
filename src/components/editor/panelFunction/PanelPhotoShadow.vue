@@ -145,10 +145,7 @@ export default Vue.extend({
       // setTimeout(() => document.body.removeChild(updateCanvas), 10000)
       // document.body.append(updateCanvas)
 
-      await imageShadowUtils.draw(updateCanvas, img, config, {
-        canvasSize: _height,
-        timeout: 0
-      })
+      await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0 })
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
@@ -196,8 +193,8 @@ export default Vue.extend({
             initHeight: newHeight,
             imgX: 0,
             imgY: 0,
-            x: config.styles.x - config.styles.imgWidth * leftShadowThickness,
-            y: config.styles.y - config.styles.imgHeight * topShadowThickness,
+            x: config.styles.x - config.styles.width * leftShadowThickness,
+            y: config.styles.y - config.styles.height * topShadowThickness,
             scale: 1
           }
           layer.srcObj = srcObj
