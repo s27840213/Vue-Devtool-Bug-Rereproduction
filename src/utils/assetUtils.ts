@@ -625,6 +625,10 @@ class AssetUtils {
       listApi.addDesign(id, typeCategory, params)
     }
   }
+
+  addTemplateToRecentlyUsedPure(id: string): Promise<any> {
+    return listApi.addDesign(id, 'template')
+  }
 }
 
 export default new AssetUtils()

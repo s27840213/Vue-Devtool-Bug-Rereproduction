@@ -18,7 +18,8 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const width = urlParams.get('width')
     const height = urlParams.get('height')
     const themeId = urlParams.get('themeId')
-    console.log(url, from.name)
+    const groupId = urlParams.get('group_id')
+
     if (type && designId) {
       switch (type) {
         case 'export': {
@@ -32,7 +33,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
           break
         }
         default: {
-          await uploadUtils.getDesign(type, { designId }, { width, height })
+          await uploadUtils.getDesign(type, { designId }, { width, height, groupId: groupId ?? '' })
           store.commit('file/SET_setLayersDone')
         }
       }
