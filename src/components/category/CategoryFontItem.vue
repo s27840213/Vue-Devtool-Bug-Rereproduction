@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -81,15 +81,27 @@ export default Vue.extend({
         default:
           throw new Error('Wrong layer type as Font Item applied')
       }
+    },
+    itemFontType(): string {
+      return this.item.src || this.item.fontType
     }
   },
   methods: {
+    ...mapActions('brandkit', {
+      refreshFontAsset: 'refreshFontAsset'
+    }),
     ...mapMutations('text', {
       updateTextState: 'UPDATE_STATE'
     }),
-    handleNotFound(event: Event) {
+    handleNotFound() {
+      if (this.itemFontType === 'private') {
+        this.refreshFontAsset({
+          id: this.item.assetId,
+          asset_index: this.item.asset_index
+        })
+        return
+      }
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
-      // TODO: if private, refetch signedUrl for 3 times before using fallbackSrc
       console.warn(this.item)
     },
     async setFont() {
@@ -113,7 +125,7 @@ export default Vue.extend({
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
         const updateItem = {
-          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          type: this.itemFontType, // public fonts in list-design don't have src
           fontUrl: this.item.fontUrl ?? '',
           userId: this.item.userId ?? '',
           assetId: this.item.assetId ?? '',
@@ -121,7 +133,7 @@ export default Vue.extend({
         }
 
         await this.$store.dispatch('text/addFont', {
-          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          type: this.itemFontType, // public fonts in list-design don't have src
           url: this.item.fontUrl,
           userId: this.item.userId,
           assetId: this.item.assetId,
@@ -161,7 +173,7 @@ export default Vue.extend({
             user_id: this.item.userId,
             asset_id: this.item.assetId,
             asset_index: this.item.asset_index,
-            src: this.item.src || this.item.fontType,
+            src: this.itemFontType,
             ver: this.item.ver,
             signed_url: this.item.signed_url,
             urls: {
@@ -211,7 +223,7 @@ export default Vue.extend({
           user_id: this.item.userId,
           asset_id: this.item.assetId,
           asset_index: this.item.asset_index,
-          src: this.item.src || this.item.fontType,
+          src: this.itemFontType,
           ver: this.item.ver,
           signed_url: this.item.signed_url,
           urls: {
@@ -252,7 +264,7 @@ export default Vue.extend({
       return false
     },
     getPreviewUrl(postfix: string): string {
-      switch (this.item.src || this.item.fontType) {
+      switch (this.itemFontType) {
         case 'public':
           return `${this.host}/${this.item.id}/${postfix}?ver=${this.item.ver}`
         case 'admin':

@@ -173,7 +173,7 @@ export default Vue.extend({
           size: 36,
           id: 'uploaded_font',
           type: 'title',
-          title: '上傳的字型'
+          title: `${this.$t('NN0463')}`
         }
       ]
       result = result.concat(privateFonts.map((font: IBrandFont) => {
