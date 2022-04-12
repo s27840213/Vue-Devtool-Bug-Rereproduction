@@ -132,9 +132,7 @@
                 @click="handleClickWaterfall(template)"
                 @mouseenter="handleMouseEnter(template.group_id)"
                 @mouseleave="handleMouseLeave(template.group_id)")
-              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
-                                          :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
+              img(class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -162,14 +160,14 @@
                     iconColor="gray-2")
         div(class="template-center__multi__content")
           div(class="template-center__multi__gallery")
-            div(v-for="content in content_ids" class="template-center__multi__gallery-item"
+            div(v-for="content in contentIds" class="template-center__multi__gallery-item"
                 :style="`background-image: url(${getPrevUrl(content)})`"
                 @click="handleTemplateClick(content)")
     transition(name="fade-slide")
       div(v-if="modal === 'mobile-pages'" class="template-center__mobile-multi")
         div(class="template-center__mobile-multi__content")
           div(class="template-center__mobile-multi__gallery")
-            div(v-for="content in content_ids" class="template-center__mobile-multi__gallery-item"
+            div(v-for="content in contentIds" class="template-center__mobile-multi__gallery-item"
                 :style="`background-image: url(${getPrevUrl(content, 2)})`"
                 @click="handleTemplateClick(content)")
             div(class="template-center__scroll-space")
@@ -266,7 +264,8 @@ export default Vue.extend({
       themes: [] as Itheme[],
       matchedThemes: [] as Itheme[],
       selectedTheme: undefined as Itheme | undefined,
-      content_ids: [] as IContentTemplate[],
+      contentIds: [] as IContentTemplate[],
+      groupId: '',
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
@@ -379,6 +378,9 @@ export default Vue.extend({
 
     this.handleResize()
   },
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
+  },
   beforeCreate() {
     this.$store.registerModule('hashtag', hashtag)
   },
@@ -414,9 +416,6 @@ export default Vue.extend({
       getTemplates: 'getThemeContent',
       getMoreTemplates: 'getMoreContent'
     }),
-    // isMobile(): boolean {
-    //   return window.matchMedia('screen and (max-width: 540px)').matches
-    // },
     absoluteSearchbarStyles() {
       return { top: `${Math.max(this.searchbarTop, 15)}px` }
     },
@@ -426,8 +425,8 @@ export default Vue.extend({
     mobileSearchStyles() {
       return this.mobileSnapToTop ? { zIndex: 10 } : {}
     },
-    templateStyles(aspectRatio: number) {
-      return { aspectRatio: `${aspectRatio}` }
+    templateStyles(ratio: number) {
+      return { paddingTop: `${ratio * 100}%` }
     },
     multiThemeButtonStyles() {
       return this.$i18n.locale === 'tw' ? {
@@ -497,7 +496,8 @@ export default Vue.extend({
           content_ids: [template.id]
         })
       } else {
-        this.content_ids = template.content_ids
+        this.groupId = template.group_id ?? ''
+        this.contentIds = template.content_ids
         if (this.isMobile) {
           this.modal = 'mobile-pages'
         } else {
@@ -574,7 +574,8 @@ export default Vue.extend({
               type: 'new-design-template',
               design_id: content.id,
               width: this.matchedThemes[0].width.toString(),
-              height: this.matchedThemes[0].height.toString()
+              height: this.matchedThemes[0].height.toString(),
+              group_id: this.groupId
             }
           })
           window.open(route.href, '_blank')
@@ -601,7 +602,8 @@ export default Vue.extend({
             type: 'new-design-template',
             design_id: content.id,
             width: format.width,
-            height: format.height
+            height: format.height,
+            group_id: this.groupId
           }
         })
         window.open(route.href, '_blank')
@@ -621,7 +623,8 @@ export default Vue.extend({
           type: 'new-design-template',
           design_id: this.contentBuffer.id,
           width: this.selectedTheme.width.toString(),
-          height: this.selectedTheme.height.toString()
+          height: this.selectedTheme.height.toString(),
+          group_id: this.groupId
         }
       })
       window.open(route.href, '_blank')
@@ -841,8 +844,11 @@ body {
         overflow: hidden;
         cursor: pointer;
         &__img {
+          position: absolute;
           width: 100%;
           height: 100%;
+          top: 0;
+          left: 0;
         }
         &__theme {
           position: absolute;
@@ -994,7 +1000,7 @@ body {
       align-items: center;
       max-width: 200px;
       width: 100%;
-      aspect-ratio: 1;
+      padding-top: calc(100% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -1008,7 +1014,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 67%;
-      aspect-ratio: 1;
+      padding-top: calc(100% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -1131,7 +1137,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 100%;
-      aspect-ratio: 1;
+      padding-top: calc(67% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;

@@ -20,7 +20,7 @@
           iconWidth="25px"
           iconColor="gray-3")
       div(class="list-content-items"
-        @scroll="updateIcon"
+        @scroll.passive="updateIcon"
         ref="items")
         div(v-if="isLoading")
           svg-icon(iconName="loading"

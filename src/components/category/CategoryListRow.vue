@@ -10,7 +10,7 @@
       @click="handleNext")
       div(class="category-row__icon")
         svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
-    div(class="category-row__items" ref="items" @scroll="handleScroll")
+    div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
       slot
 </template>
 

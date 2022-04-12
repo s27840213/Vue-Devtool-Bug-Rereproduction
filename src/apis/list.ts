@@ -65,7 +65,7 @@ class ListService {
       design_id: id,
       ...params
     }
-    if (!data.token) return
+    if (!data.token) return new Promise(resolve => resolve({ flag: 1 }))
     return axios.request<IListServiceResponse>({
       url: '/add-design',
       method: 'POST',
