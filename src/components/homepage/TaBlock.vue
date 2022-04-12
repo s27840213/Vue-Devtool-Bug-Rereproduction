@@ -17,7 +17,8 @@
         router-link(:to="content.link.to")
           span {{content.link.text + ' →'}}
     div(class="block-animation")
-      animation(:path="`${dir}/${locale}/${content.img.name}`"
+      animation(:path="`${dir}/${locale}/${toFile}`"
+        :lottieName="content.img.name.replace('.json', '')"
         :width="content.img.width * rwdModifier"
         :height="(content.img.height ? content.img.height : content.img.width) * rwdModifier")
       img(v-for="cb in content.colorBlock.filter((i)=>i.ref)"
@@ -71,6 +72,11 @@ export default Vue.extend({
       return this.content.img.name.endsWith('json')
         ? '/lottie'
         : '@/assets/img/svg/homepage'
+    },
+    toFile(): string {
+      return this.content.img.name.endsWith('json')
+        ? `${this.content.img.name.replace('.json', '')}/${this.content.img.name}`
+        : `${this.content.img.name}`
     }
   }
 })
