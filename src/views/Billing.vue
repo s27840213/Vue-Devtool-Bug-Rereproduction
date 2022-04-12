@@ -8,12 +8,15 @@
         :type="'primary-mid'"
         :disabled="!canGetPrime"
         @click.native="getPrime") 送出
-      div(id="prime") {{showPrime}}
+      div(id="msg") {{showPrime}}
+      span -------
+      div(id="msg") {{showPayment}}
     spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import payment from '@/apis/payment'
 
 export default Vue.extend({
   name: 'Editor',
@@ -23,6 +26,7 @@ export default Vue.extend({
     return {
       isLoading: false,
       prime: {},
+      payment: {},
       canGetPrime: false,
       TPDirect: (window as any).TPDirect
     }
@@ -103,6 +107,9 @@ export default Vue.extend({
   computed: {
     showPrime():string {
       return Object.entries(this.prime).map(this.printPrime).join('\n')
+    },
+    showPayment():string {
+      return Object.entries(this.payment).map(this.printPrime).join('\n')
     }
   },
   methods: {
@@ -114,13 +121,34 @@ export default Vue.extend({
       return `${prefix}${item.join(': ')}`
     },
     getPrime() {
+      this.prime = this.payment = ['交易中...']
+
       this.TPDirect.card.getPrime((result: any) => {
         if (result.status !== 0) {
           console.log('getPrime error')
           return
         }
         this.prime = result
-        console.log('getPrime success: ' + this.prime)
+        payment.pay({
+          type: 'tappay',
+          prime: result.card.prime,
+          card_info: JSON.stringify({
+            phone_number: '0912345678',
+            name: 'Tester',
+            email: 'Tester@gmail.com',
+            country: 'Taiwan',
+            company: '',
+            address: '',
+            invoice: ''
+          })
+        }).then((response) => {
+          this.payment = response.data
+          if (response.data.flag === 1) {
+            Vue.notify({ group: 'error', text: response.data.msg })
+          } else {
+            Vue.notify({ group: 'copy', text: 'Success' })
+          }
+        })
       })
     }
   }
@@ -139,7 +167,7 @@ export default Vue.extend({
   }
 }
 
-#prime{
+#msg{
   white-space: pre;
   text-align: left;
 }
