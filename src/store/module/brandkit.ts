@@ -6,7 +6,7 @@ import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import { IUserFontContentData } from '@/interfaces/api'
+import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
 import { IGroup, IText } from '@/interfaces/layer'
 
 interface IBrandKitState {
@@ -103,7 +103,10 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         throw new Error('fetch brands request failed')
       }
       const logos = data.logos
-      commit('SET_logos', { brandId: state.currentBrandId, logos })
+      commit('SET_logos', {
+        brandId: state.currentBrandId,
+        logos: data.logos.map((logo: IUserLogoContentData) => brandkitUtils.apiLogo2IBrandLogo(logo))
+      })
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -496,18 +499,25 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!brand) return
     brand.createTime = updateInfo.createTime
   },
-  UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+  UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: { id: string }, logo: IBrandLogo }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brandkitUtils.findInsertIndex(brand.logos, updateInfo.logo)
     brand.logos.splice(index, 0, updateInfo.logo)
   },
-  UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+  UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: { id: string }, logo: { id: string } }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.logo.id)
     if (index < 0) return
     brand.logos.splice(index, 1)
+  },
+  UPDATE_replaceLogo(state: IBrandKitState, updateInfo: { id: string, logo: IBrandLogo, brandId: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
+    if (!brand) return
+    const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.id)
+    if (index < 0) return
+    brand.logos.splice(index, 1, updateInfo.logo)
   },
   UPDATE_addPalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)

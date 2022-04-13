@@ -10,7 +10,7 @@ import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
-import { IUploadAssetFontResponse, IUploadAssetResponse } from '@/interfaces/upload'
+import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
 import { EventEmitter } from 'events'
@@ -288,7 +288,8 @@ class UploadUtils {
       } else if (type === 'font') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.locale}_original`)
       } else if (type === 'logo') {
-        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId ?? ''}/${assetId}/original`)
+        if (!brandId) return
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`)
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
@@ -440,7 +441,8 @@ class UploadUtils {
             }, 2000)
           }
         } else if (type === 'logo') {
-          // const tempId = brandkitUtils.createTempLogo(assetId)
+          if (!brandId) return
+          const tempId = brandkitUtils.createTempLogo(brandId, assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
           xhr.onload = () => {
@@ -450,15 +452,16 @@ class UploadUtils {
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
-                  response.json().then((json: IUploadAssetResponse) => {
+                  response.json().then((json: IUploadAssetLogoResponse) => {
                     if (json.flag === 0) {
                       // notify success
                       console.log('Successfully upload the file')
-                      // brandkitUtils.replaceLogo(tempId, json.data)
+                      console.log(tempId, json.data, brandId)
+                      brandkitUtils.replaceLogo(tempId, json.data, brandId)
                       console.log(json)
                     } else {
                       // notify fail
-                      // brandkitUtils.deleteFont(tempId)
+                      brandkitUtils.deleteLogo(brandId, tempId)
                       console.log('Failed to upload the file')
                     }
                   })

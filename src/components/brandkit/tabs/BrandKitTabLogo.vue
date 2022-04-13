@@ -1,5 +1,9 @@
 <template lang="pug">
-  div(class="brand-kit-tab-logo")
+  div(v-if="isLogosLoading" class="brand-kit-tab-logo")
+    svg-icon(iconName="loading"
+            iconWidth="50px"
+            iconColor="gray-3")
+  div(v-else class="brand-kit-tab-logo")
     div(class="brand-kit-tab-logo__item add pointer relative"
       @click="handleUploadLogo")
       span(class="primary") {{ $t('NN0411') }}
@@ -13,8 +17,9 @@
     div(v-for="logo in logos" class="brand-kit-tab-logo__item relative"
       :key="logo.id"
       :class="{hovered: checkMenuOpen(logo)}")
-      img(:src="logo.url" class="brand-kit-tab-logo__item__img")
-      div(class="brand-kit-tab-logo__item__more pointer"
+      svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
+      img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
+      div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
         @click="handleOpenMenu(logo)")
         div(class="brand-kit-tab-logo__item__more-container relative")
           svg-icon(iconName="more_vertical"
@@ -42,7 +47,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
@@ -54,6 +59,9 @@ export default Vue.extend({
       menuOpenLogoId: ''
     }
   },
+  mounted() {
+    brandkitUtils.fetchLogos(this.fetchLogos)
+  },
   directives: {
     clickOutside: vClickOutside.directive
   },
@@ -64,15 +72,25 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('brandkit', {
-      currentBrand: 'getCurrentBrand'
+      currentBrand: 'getCurrentBrand',
+      isLogosLoading: 'getIsLogosLoading'
     }),
     logos(): IBrandLogo[] {
       return (this.currentBrand as IBrand).logos
     }
   },
   methods: {
+    ...mapActions('brandkit', {
+      fetchLogos: 'fetchLogos'
+    }),
+    getUrl(logo: IBrandLogo): string {
+      return logo.signed_url ? logo.signed_url.midd : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${this.currentBrand.id}/${logo.id}/midd`
+    },
     checkMenuOpen(logo: IBrandLogo): boolean {
       return this.menuOpenLogoId === logo.id
+    },
+    checkUploading(logo: IBrandLogo) {
+      return logo.id.startsWith('new_')
     },
     handleOpenMenu(logo: IBrandLogo) {
       if (this.checkMenuOpen(logo)) {
@@ -85,7 +103,7 @@ export default Vue.extend({
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {
-      const url = brandkitUtils.getDownloadUrl(logo)
+      const url = brandkitUtils.getDownloadUrl(logo, this.currentBrand.id)
       const a = document.createElement('a')
       a.setAttribute('href', url)
       a.setAttribute('download', logo.name)

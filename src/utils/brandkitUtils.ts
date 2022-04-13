@@ -1,5 +1,5 @@
 import i18n from '@/i18n'
-import { IUserFontContentData } from '@/interfaces/api'
+import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import store from '@/store'
 import { STANDARD_TEXT_FONT } from './assetUtils'
@@ -29,26 +29,32 @@ class BrandKitUtils {
       createTime: (new Date(initTime)).toISOString(),
       name: '',
       logos: [{
+        team_id: '',
         name: 'logo-horizontal.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 30)).toISOString(),
-        url: require('@/assets/img/png/brandkit/logo-horizontal.png'),
-        width: 171,
-        height: 132
+        signed_url: {
+          original: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          midd: require('@/assets/img/png/brandkit/logo-horizontal.png')
+        }
       }, {
+        team_id: '',
         name: 'logo-square.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 20)).toISOString(),
-        url: require('@/assets/img/png/brandkit/logo-square.png'),
-        width: 131,
-        height: 131
+        signed_url: {
+          original: require('@/assets/img/png/brandkit/logo-square.png'),
+          midd: require('@/assets/img/png/brandkit/logo-square.png')
+        }
       }, {
+        team_id: '',
         name: 'logo-vertical.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 10)).toISOString(),
-        url: require('@/assets/img/png/brandkit/logo-vertical.png'),
-        width: 75,
-        height: 171
+        signed_url: {
+          original: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          midd: require('@/assets/img/png/brandkit/logo-vertical.png')
+        }
       }],
       textStyleSetting: {
         headingStyle: this.createDefaultTextStyle('heading'),
@@ -172,6 +178,15 @@ class BrandKitUtils {
     }
   }
 
+  createDefaultLogo(id: string): IBrandLogo {
+    return {
+      team_id: '',
+      name: '',
+      id: 'new_' + id,
+      createTime: (new Date()).toISOString()
+    }
+  }
+
   checkIsNullBrand(brand: IBrand): boolean {
     return brand.id === 'null'
   }
@@ -254,10 +269,22 @@ class BrandKitUtils {
     store.commit('brandkit/UPDATE_deleteFont', { id })
   }
 
+  deleteLogo(brandId: string, id: string) {
+    store.commit('brandkit/UPDATE_deleteLogo', { brand: { id: brandId }, logo: { id } })
+  }
+
   replaceFont(id: string, apiFont: IUserFontContentData) {
     store.commit('brandkit/UPDATE_replaceFont', {
       id,
       font: this.apiFont2IBrandFont(apiFont)
+    })
+  }
+
+  replaceLogo(id: string, apiLogo: IUserLogoContentData, brandId: string) {
+    store.commit('brandkit/UPDATE_replaceLogo', {
+      id,
+      logo: this.apiLogo2IBrandLogo(apiLogo),
+      brandId
     })
   }
 
@@ -269,6 +296,12 @@ class BrandKitUtils {
     const newFont = this.createDefaultFont(id)
     store.commit('brandkit/UPDATE_addFont', newFont)
     return newFont.id
+  }
+
+  createTempLogo(brandId: string, id: string) {
+    const newLogo = this.createDefaultLogo(id)
+    store.commit('brandkit/UPDATE_addLogo', { brand: { id: brandId }, logo: newLogo })
+    return newLogo.id
   }
 
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
@@ -423,8 +456,8 @@ class BrandKitUtils {
     return STANDARD_TEXT_FONT[locale]
   }
 
-  getDownloadUrl(logo: IBrandLogo): string {
-    return logo.url
+  getDownloadUrl(logo: IBrandLogo, brandId: string): string {
+    return logo.signed_url ? logo.signed_url.original : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${brandId}/${logo.id}/original`
   }
 
   getDisplayedBrandName(brand: IBrand): string {
@@ -443,6 +476,17 @@ class BrandKitUtils {
         return this.getDisplayedPaletteName(content as IBrandColorPalette)
       default:
         return content.name
+    }
+  }
+
+  apiLogo2IBrandLogo(logo: IUserLogoContentData): IBrandLogo {
+    const res = { ...logo } as any
+    delete res.create_time
+    delete res.asset_id
+    return {
+      ...res,
+      id: logo.id ?? logo.asset_index.toString(),
+      createTime: logo.create_time
     }
   }
 

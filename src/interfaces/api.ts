@@ -258,6 +258,26 @@ export interface IUserFontContentData {
   }
 }
 
+export interface IUserLogoContentData {
+  team_id: string,
+  id?: string,
+  asset_index: number,
+  name: string,
+  create_time: string,
+  signed_url?: {
+    full: string,
+    larg: string,
+    midd: string,
+    original: string,
+    prev: string,
+    smal: string,
+    tiny: string
+  },
+  width?: number,
+  height?: number,
+  ver: number
+}
+
 export interface IUserAssetsData {
   design: {
     content: Array<IUserDesignContentData>,
