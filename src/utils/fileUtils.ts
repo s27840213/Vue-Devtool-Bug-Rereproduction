@@ -34,7 +34,6 @@ class FileUtils {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleFileSelect(evt: any) {
   const file = evt.target.files[0]
   evt.target.removeEventListener('change', handleFileSelect, false)
