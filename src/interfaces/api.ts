@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-/* eslint-disable no-use-before-define */
 export interface IPhotoTag {
   title: string
   type: string
@@ -119,6 +118,7 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
+  app_ver?: number // todelete
 }
 
 export interface IGroupDesignInputParams {
@@ -147,6 +147,7 @@ export interface IListServiceContentData {
   category_id: number
   list: IListServiceContentDataItem[]
   title: string
+  is_recent?: number
 }
 
 export interface IListServiceData {
@@ -161,25 +162,6 @@ export interface IListServiceData {
 export interface IListServiceResponse {
   data: IListServiceData
   flag: number
-}
-
-export interface IUserAssetsData {
-  design: {
-    content: Array<IUserDesignContentData>,
-    title: string
-  },
-  font: {
-    content: Array<IUserFontContentData>,
-    title: string
-  },
-  image: {
-    content: Array<IUserImageContentData>,
-    title: string
-  },
-  video: {
-    content: Array<string>,
-    title: string
-  }
 }
 
 export interface IUserDesignContentData {
@@ -255,11 +237,12 @@ export interface IUserFontContentData {
   favorite: number,
   file_ext: string,
   file_name: string,
-  id: string,
+  id?: string,
   name: string,
   team_id: string,
   update_time: string,
   ver: number,
+  font_family: string,
   signed_url?: {
     original: string,
     font: string,
@@ -267,6 +250,25 @@ export interface IUserFontContentData {
     'prev_2x-name': string,
     'prev-sample': string,
     'prev-2x-sample': string
+  }
+}
+
+export interface IUserAssetsData {
+  design: {
+    content: Array<IUserDesignContentData>,
+    title: string
+  },
+  font: {
+    content: Array<IUserFontContentData>,
+    title: string
+  },
+  image: {
+    content: Array<IUserImageContentData>,
+    title: string
+  },
+  video: {
+    content: Array<string>,
+    title: string
   }
 }
 
@@ -278,22 +280,19 @@ export interface IPhotoServiceParams {
   pageIndex?: number
 }
 
-export interface IPhotoServiceResponse {
-  data: IPhotoServiceData
-  flag: number
+export interface IFileParams {
+  token: string
+  type: 'image'
+  pageIndex: number
 }
 
-export interface IPhotoServiceData {
-  host: string
-  preview: string
-  data: string
-  content: IPhotoServiceDataContent[]
-  next_page: number
+export interface IPhotoUserInfo {
+  name: string
+  link: string
 }
-
-export interface IPhotoServiceDataContent {
-  title: string
-  list: IPhotoItem[]
+export interface IPhotoItemInfo {
+  description: string
+  user: IPhotoUserInfo
 }
 
 export interface IPhotoItem {
@@ -307,14 +306,22 @@ export interface IPhotoItem {
   info: IPhotoItemInfo
 }
 
-export interface IPhotoItemInfo {
-  description: string
-  user: IPhotoUserInfo
+export interface IPhotoServiceDataContent {
+  title: string
+  list: IPhotoItem[]
 }
 
-export interface IPhotoUserInfo {
-  name: string
-  link: string
+export interface IPhotoServiceData {
+  host: string
+  preview: string
+  data: string
+  content: IPhotoServiceDataContent[]
+  next_page: number
+}
+
+export interface IPhotoServiceResponse {
+  data: IPhotoServiceData
+  flag: number
 }
 
 export interface IHashtagServiceContentDataTagItem {

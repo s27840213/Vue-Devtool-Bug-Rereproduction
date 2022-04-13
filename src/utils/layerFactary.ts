@@ -116,6 +116,12 @@ class LayerFactary {
       }))
     }
 
+    if (clips.some(img => img.styles.rotate !== 0)) {
+      const img = clips.find(img => img.styles.rotate !== 0) as IImage
+      styles.rotate = img.styles.rotate
+      img.styles.rotate = 0
+    }
+
     return {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
@@ -138,8 +144,8 @@ class LayerFactary {
         initHeight: initHeight,
         zindex: styles.zindex ?? -1,
         opacity: styles.opacity || 100,
-        horizontalFlip: styles.horizontalFlip,
-        verticalFlip: styles.verticalFlip
+        horizontalFlip: styles.horizontalFlip || false,
+        verticalFlip: styles.verticalFlip || false
       },
       clips,
       decoration: decoration ? this.newShape((() => {
@@ -210,6 +216,8 @@ class LayerFactary {
                 opacity: 1,
                 font: 'normal',
                 userId: '',
+                assetId: '',
+                fontUrl: '',
                 type: 'public',
                 weight: 'normal',
                 color: '#000000',
@@ -234,6 +242,7 @@ class LayerFactary {
      * below fix the wrong part
      * 1: empty span
      * 2: underline or italic w/ vertical (vertical text cannot be underlined or italic)
+     * 3: span style that has only font but no type
      */
     if (config.paragraphs) {
       const paragraphs = config.paragraphs as IParagraph[]
@@ -252,12 +261,45 @@ class LayerFactary {
         }
       }
       const isVertical = basicConfig.styles.writingMode.includes('vertical')
-      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical, undefined, (span) => {
-        if (!span.styles.font) {
-          Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale()) &&
-            (span.styles.font = STANDARD_TEXT_FONT[localeUtils.currLocale()])
+      const defaultFont = (Object.keys(STANDARD_TEXT_FONT).includes(localeUtils.currLocale())) ? STANDARD_TEXT_FONT[localeUtils.currLocale()] : STANDARD_TEXT_FONT.tw
+      textPropUtils.removeInvalidStyles(config.paragraphs, isVertical,
+        (paragraph) => {
+          if (paragraph.spans.length > 0) {
+            const firstSpanStyles = paragraph.spans[0].styles
+            if (firstSpanStyles.font) {
+              paragraph.styles.font = firstSpanStyles.font
+              paragraph.styles.type = firstSpanStyles.type
+              paragraph.styles.userId = firstSpanStyles.userId
+              paragraph.styles.assetId = firstSpanStyles.assetId
+              paragraph.styles.fontUrl = firstSpanStyles.fontUrl
+            } else {
+              paragraph.styles.font = defaultFont
+              paragraph.styles.type = 'public'
+            }
+            if (paragraph.styles.spanStyle) {
+              delete paragraph.styles.spanStyle
+            }
+          } else if (paragraph.styles.spanStyle) {
+            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+            paragraph.styles.font = spanStyles.font
+            paragraph.styles.type = spanStyles.type
+            paragraph.styles.userId = spanStyles.userId
+            paragraph.styles.assetId = spanStyles.assetId
+            paragraph.styles.fontUrl = spanStyles.fontUrl
+          } else {
+            paragraph.styles.font = defaultFont
+            paragraph.styles.type = 'public'
+          }
+        },
+        (span) => {
+          if (!span.styles.font) {
+            span.styles.font = defaultFont
+            span.styles.type = 'public'
+          } else if (!span.styles.type) {
+            span.styles.type = 'public'
+          }
         }
-      })
+      )
     }
     return Object.assign(basicConfig, config)
   }
@@ -418,8 +460,11 @@ class LayerFactary {
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
-    config.backgroundImage.id = GeneralUtils.generateRandomString(8)
-
+    const bgImgConfig = config.backgroundImage.config
+    bgImgConfig.id = GeneralUtils.generateRandomString(8)
+    if (bgImgConfig.srcObj.type && !bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
+      config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    }
     return config
   }
 

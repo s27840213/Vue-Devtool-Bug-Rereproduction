@@ -16,7 +16,7 @@
         :disabled="isProcessing"
         @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
-      v-click-outside="handleOutside"
+      ref="popup"
       :imageAdjust="currLayerAdjust"
       @update="handleAdjust" v-on="$listeners")
 </template>
@@ -24,7 +24,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import vClickOutside from 'v-click-outside'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -50,8 +49,11 @@ export default Vue.extend({
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }
   },
-  directives: {
-    clickOutside: vClickOutside.directive
+  mounted() {
+    document.addEventListener('mouseup', this.handleClick)
+  },
+  destroyed() {
+    document.removeEventListener('mouseup', this.handleClick)
   },
   components: {
     PopupAdjust,
@@ -120,7 +122,8 @@ export default Vue.extend({
       setInBgRemoveMode: 'bgRemove/SET_inBgRemoveMode',
       setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setIdInfo: 'bgRemove/SET_idInfo'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -170,6 +173,7 @@ export default Vue.extend({
           return
         case 'remove-bg': {
           const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
+
           this.setIsProcessing(true)
           layerUtils.updateLayerProps(pageIndex, index, {
             inProcess: true
@@ -178,6 +182,11 @@ export default Vue.extend({
           const targetLayer = layers[0] as IImage
           const targetPageId = pageUtils.currFocusPage.id
           const targetLayerId = targetLayer.id
+
+          this.setIdInfo({
+            pageId: targetPageId,
+            layerId: targetLayerId
+          })
 
           const type = targetLayer.srcObj.type
 
@@ -206,15 +215,6 @@ export default Vue.extend({
 
                     this.setAutoRemoveResult(imageUtils.getBgRemoveInfo(json.data, initSrc))
                     this.setInBgRemoveMode(true)
-
-                    const data = imageUtils.getBgRemoveInfo(json.data, initSrc)
-                    console.log('already get the img config', imageUtils.getSrc({
-                      srcObj: {
-                        type: 'public',
-                        userId: data.teamId,
-                        assetId: data.id
-                      }
-                    } as IImage, 'larg'))
                   }
                   return true
                 }
@@ -242,9 +242,21 @@ export default Vue.extend({
       }
       this.show = this.show.includes(name) ? '' : name
     },
-    handleOutside(event: PointerEvent) {
-      if (this.currFunctionPanelType !== 3) {
-        this.show = ''
+    handleOutside() {
+      this.show = ''
+      // const target = event.target as HTMLButtonElement
+      // const btn = this.$refs.btn as HTMLDivElement
+      // if (!btns.contains(target)) {}
+    },
+    handleClick(e: MouseEvent) {
+      if (this.show === '') return
+      if (!this.$refs.popup) return
+      const colorPanel = document.querySelector('.color-panel')
+      if (colorPanel && colorPanel.contains(e.target as Node)) {
+        return
+      }
+      if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
+        this.handleOutside()
       }
     },
     handleAdjust(adjust: any) {

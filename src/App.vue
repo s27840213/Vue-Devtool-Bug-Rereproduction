@@ -90,7 +90,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('text', ['addFont']),
     ...mapMutations('text', {
       updateDefaultFonts: 'UPDATE_DEFAULT_FONT'
     }),
@@ -147,11 +146,12 @@ export default Vue.extend({
   @include size(100%, 100%);
   position: relative;
   max-height: 100%;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   overflow: hidden;
   user-select: none;
+  text-rendering: geometricPrecision;
 }
 
 // Debug used class, won't be released in production

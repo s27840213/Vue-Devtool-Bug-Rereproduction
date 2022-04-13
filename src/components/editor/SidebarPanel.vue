@@ -5,7 +5,7 @@
       class="panel__color-panel")
         color-panel(@toggleColorPanel="toggleColorPanel"
           :alignLeft="false")
-    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text']")
+    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
       component(v-show="isSidebarPanelOpen && !isShowPagePreview && !bgRemoveMode"
         class="p-10 border-box"
         :style="panelStyles()"

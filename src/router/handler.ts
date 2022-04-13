@@ -18,7 +18,8 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const width = urlParams.get('width')
     const height = urlParams.get('height')
     const themeId = urlParams.get('themeId')
-    console.log(url, from.name)
+    const groupId = urlParams.get('group_id')
+
     if (type && designId) {
       switch (type) {
         case 'export': {
@@ -32,12 +33,16 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
           break
         }
         default: {
-          await uploadUtils.getDesign(type, { designId }, { width, height })
+          await uploadUtils.getDesign(type, { designId }, { width, height, groupId: groupId ?? '' })
           store.commit('file/SET_setLayersDone')
         }
       }
     } else if (type === 'new-design-size' && width && height) {
-      designUtils.newDesign(parseInt(width), parseInt(height), parseInt(themeId as string))
+      designUtils.newDesign(
+        parseInt(width),
+        parseInt(height === '0' ? width : height),
+        parseInt(themeId as string)
+      )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)
       }

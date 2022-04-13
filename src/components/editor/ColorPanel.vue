@@ -41,7 +41,8 @@
       ref="colorPicker"
       v-click-outside="handleColorModal"
       :currentColor="colorUtils.currColor"
-      @update="handleDragUpdate")
+      @update="handleDragUpdate"
+      @final="handleChangeStop")
 </template>
 
 <script lang="ts">
@@ -53,7 +54,7 @@ import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { ColorEventType, FunctionPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, LayerType } from '@/store/types'
 import color from '@/store/module/color'
 import tiptapUtils from '@/utils/tiptapUtils'
 
@@ -120,7 +121,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
     isShape(): boolean {
-      return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
+      return layerUtils.getCurrConfig.type === LayerType.shape
     },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
@@ -141,6 +142,7 @@ export default Vue.extend({
     },
     handleColorEvent(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)
+      colorUtils.event.emit(colorUtils.currStopEvent, color)
       colorUtils.setCurrColor(color)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color })
     },
@@ -148,6 +150,11 @@ export default Vue.extend({
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currEvent, color)
         colorUtils.setCurrColor(color)
+      })
+    },
+    handleChangeStop(color: string) {
+      window.requestAnimationFrame(() => {
+        colorUtils.event.emit(colorUtils.currStopEvent, color)
       })
     },
     handleColorModal(): void {

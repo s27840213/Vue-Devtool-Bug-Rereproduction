@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex, { GetterTree, MutationTree, ActionTree } from 'vuex'
+import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
@@ -33,6 +33,7 @@ import { Itheme } from '@/interfaces/theme'
 import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import file from '@/store/module/file'
 
 Vue.use(Vuex)
 
@@ -94,7 +95,9 @@ const getDefaultState = (): IEditorState => ({
   lockGuideline: false,
   themes: [],
   hasCopiedFormat: false,
-  inGestureToolMode: false
+  inGestureToolMode: false,
+  isMobile: false,
+  isLargeDesktop: false
 })
 
 const state = getDefaultState()
@@ -347,8 +350,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
   },
-  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any }) {
+  SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
+    updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
   },
   SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
@@ -765,6 +769,14 @@ const mutations: MutationTree<IEditorState> = {
   ...imgShadowMutations
 }
 
+function handleResize() {
+  state.isMobile = window.matchMedia('screen and (max-width: 768px)').matches
+  state.isLargeDesktop = window.matchMedia('screen and (min-width: 1440px)').matches
+}
+
+window.addEventListener('resize', handleResize)
+handleResize()
+
 export default new Vuex.Store({
   state,
   getters,
@@ -788,6 +800,7 @@ export default new Vuex.Store({
     markers,
     brandkit,
     unsplash,
-    bgRemove
+    bgRemove,
+    file
   }
 })

@@ -55,12 +55,11 @@ import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import store from '@/store'
 import layerUtils from '@/utils/layerUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { IImage } from '@/interfaces/layer'
 import { IBgRemoveInfo } from '@/interfaces/image'
-import uploadUtils from '@/utils/uploadUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
-import pageUtils from '@/utils/pageUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import pageUtils from '@/utils/pageUtils'
+import { IUploadAssetResponse } from '@/interfaces/upload'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   data() {
@@ -81,7 +80,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       isAdmin: 'user/isAdmin',
-      prevPageScaleRatio: 'bgRemove/getPrevPageScaleRatio'
+      prevPageScaleRatio: 'bgRemove/getPrevPageScaleRatio',
+      bgRemoveIdInfo: 'bgRemove/getIdInfo'
     }),
     brushSize: {
       get: () => {
@@ -123,20 +123,35 @@ export default Vue.extend({
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
-        this.setLoading(true)
-        uploadUtils.uploadAsset('image', [this.canvas.toDataURL('image/png;base64')], false, (json: IUploadAssetResponse) => {
-          layerUtils.updateLayerProps(pageIndex, index, {
-            srcObj: {
-              type: this.isAdmin ? 'public' : 'private',
-              userId: (this.autoRemoveResult as IBgRemoveInfo).teamId,
-              assetId: this.isAdmin ? json.data.id : json.data.asset_index
-            },
-            trace: 1
-          })
-          this.setLoading(false)
-          this.setInBgRemoveMode(false)
-          this.setPageScaleRatio(this.prevPageScaleRatio)
-          stepsUtils.record()
+        const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
+        const previewSrc = this.canvas.toDataURL('image/png;base64')
+        const { pageId, layerId } = this.bgRemoveIdInfo
+        const targetPageIndex = pageUtils.getPageIndexById(pageId)
+        const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+
+        layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+          previewSrc,
+          trace: 1
+        })
+
+        this.setInBgRemoveMode(false)
+        this.setPageScaleRatio(this.prevPageScaleRatio)
+
+        uploadUtils.uploadAsset('image', [previewSrc], {
+          addToPage: false,
+          pollingCallback: (json: IUploadAssetResponse) => {
+            layerUtils.updateLayerProps(pageIndex, index, {
+              srcObj: {
+                type: this.isAdmin ? 'public' : 'private',
+                userId: teamId,
+                assetId: this.isAdmin ? json.data.id : json.data.asset_index
+              },
+              trace: 1
+            })
+            this.setLoading(false)
+            stepsUtils.record()
+          },
+          id: id
         })
       }
     },

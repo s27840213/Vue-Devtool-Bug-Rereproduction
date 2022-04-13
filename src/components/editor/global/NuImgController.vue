@@ -240,18 +240,19 @@ export default Vue.extend({
     moving(event: MouseEvent) {
       this.setCursorStyle('move')
       event.preventDefault()
+      const reLayerScale = 1 / this.getLayerScale
       const baseLine = {
-        x: -this.getImgWidth / 2 + (this.config.styles.width / this.getLayerScale) / 2,
-        y: -this.getImgHeight / 2 + (this.config.styles.height / this.getLayerScale) / 2
+        x: -this.getImgWidth * 0.5 + (this.config.styles.width * reLayerScale) * 0.5,
+        y: -this.getImgHeight * 0.5 + (this.config.styles.height * reLayerScale) * 0.5
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.config.styles.width / this.getLayerScale) / 2,
-        height: (this.getImgHeight - this.config.styles.height / this.getLayerScale) / 2
+        width: (this.getImgWidth - this.config.styles.width * reLayerScale) * 0.5,
+        height: (this.getImgHeight - this.config.styles.height * reLayerScale) * 0.5
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x = (offsetPos.x / this.getLayerScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y / this.getLayerScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x * reLayerScale) * (100 / this.scaleRatio)
+      offsetPos.y = (offsetPos.y * reLayerScale) * (100 / this.scaleRatio)
       const currLayer = LayerUtils.getCurrLayer
       if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
         const primaryScale = LayerUtils.getCurrLayer.styles.scale
@@ -261,10 +262,10 @@ export default Vue.extend({
 
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width / this.getLayerScale - this.getImgWidth
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width * reLayerScale - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height / this.getLayerScale - this.getImgHeight
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height * reLayerScale - this.getImgHeight
       }
       this.updateLayerStyles({
         imgX: imgPos.x,

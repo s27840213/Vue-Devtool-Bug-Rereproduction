@@ -1,3 +1,12 @@
+/* eslint-disable camelcase */
+
+export interface IContentTemplate {
+  id: string,
+  ver: number,
+  width: number,
+  height: number,
+  themes: string[]
+}
 export interface ITemplate {
   url: string,
   id: string,
@@ -10,12 +19,4 @@ export interface ITemplate {
   content_ids: IContentTemplate[],
   group_type?: number
   group_id?: string
-}
-
-export interface IContentTemplate {
-  id: string,
-  ver: number,
-  width: number,
-  height: number,
-  themes: string[]
 }

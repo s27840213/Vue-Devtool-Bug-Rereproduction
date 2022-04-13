@@ -5,21 +5,18 @@ import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
 import MyDesign from '../views/MyDesign.vue'
 import Home from '../views/Home.vue'
-import Pricing from '../views/Pricing.vue'
 import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
+import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import store from '@/store'
-import uploadUtils from '@/utils/uploadUtils'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
-import mappingUtils from '@/utils/mappingUtils'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
-import generalUtils from '@/utils/generalUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -36,7 +33,7 @@ const routes: Array<RouteConfig> = [
   {
     path: '',
     name: 'Home',
-    component: Home,
+    component: Home, // todo rename
     beforeEnter: async (to, from, next) => {
       // const locale = from.params.locale
       // if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
@@ -54,22 +51,19 @@ const routes: Array<RouteConfig> = [
     path: 'editor',
     name: 'Editor',
     component: Editor,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: editorRouteHandler
   },
   {
     path: 'preview',
     name: 'Preview',
     component: Preview,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
-        next()
         const urlParams = new URLSearchParams(window.location.search)
         const url = urlParams.get('url')
 
         if (url) {
-          // e.g.: https://test.vivipic.com/editor?url=template.vivipic.com%2Fexport%2F9XBAb9yoKlJbzLiWNUVM%2F211123164456873giej3iKR%2Fpage_0.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
+          // e.g.: /preview?url=template.vivipic.com%2Fexport%2F<design_team_id>%2F<design_export_id>%2Fpage_<page_index>.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
           const hasToken = url.indexOf('token=') !== -1
           let tokenKey = ''
           let src = url
@@ -80,12 +74,12 @@ const routes: Array<RouteConfig> = [
             const teamId = url.substr((src + tokenKey + token + '&team_id=').length)
             store.commit('user/SET_STATE', { token, teamId })
           }
-          fetch(`https://${src}`)
-            .then(response => response.json())
-            .then(json => { assetUtils.addTemplate(json, { pageIndex: 0 }) })
-
+          const response = await (await fetch(`https://${src}`)).json()
+          await assetUtils.addTemplate(response, { pageIndex: 0 })
+          await store.dispatch('file/updatePageImages', { pageIndex: 0 })
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
         }
+        next()
       } catch (error) {
         console.log(error)
       }
@@ -96,7 +90,6 @@ const routes: Array<RouteConfig> = [
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
     component: SignUp,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -114,7 +107,6 @@ const routes: Array<RouteConfig> = [
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
     component: Login,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {
@@ -160,6 +152,14 @@ const routes: Array<RouteConfig> = [
   }
 ]
 
+if (process.env.NODE_ENV !== 'production') {
+  routes.push({
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: SvgIconView
+  })
+}
+
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -203,7 +203,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta.title || i18n.t('SE0001')
+  document.title = to.meta ? to.meta.title : i18n.t('SE0001')
 
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
@@ -249,8 +249,7 @@ router.beforeEach(async (to, from, next) => {
         const font = {
           type: 'public',
           face: _font.id,
-          ver: _font.ver,
-          url: ''
+          ver: _font.ver
         }
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })

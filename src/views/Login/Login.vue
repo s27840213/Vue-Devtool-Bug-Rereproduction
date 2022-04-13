@@ -1,6 +1,6 @@
 <template lang="pug">
 div(style="position: relative;")
-  div(class="login-wrapper")
+  div(class="login-wrapper popup-window")
     div(v-if="currentPageIndex === 0"
       class="login login-p0")
       div
@@ -449,7 +449,8 @@ export default Vue.extend({
         account: this.email,
         register: '0',
         vcode_only: '1',
-        locale: this.currLocale
+        locale: this.currLocale,
+        type: 2
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -474,7 +475,8 @@ export default Vue.extend({
         account: this.email,
         register: '0',
         vcode_only: '1',
-        locale: this.currLocale
+        locale: this.currLocale,
+        type: 2
       }
       const data = await store.dispatch('user/sendVcode', parameter)
       if (data.flag === 0) {
@@ -510,7 +512,8 @@ export default Vue.extend({
       }
       const parameter = {
         account: this.email,
-        vcode: this.vcode
+        vcode: this.vcode,
+        type: 2
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       this.vcode = ''
@@ -564,17 +567,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.login-wrapper {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: #000000a1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .login {
   position: relative;
   margin: 0 auto;

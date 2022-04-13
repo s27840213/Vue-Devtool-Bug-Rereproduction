@@ -132,6 +132,9 @@ export default Vue.extend({
     colorUtils.on(ColorEventType.text, (color: string) => {
       this.handleColorUpdate(color)
     })
+    colorUtils.onStop(ColorEventType.text, () => {
+      this.$nextTick(() => StepsUtils.record())
+    })
 
     popupUtils.on(PopupSliderEventType.lineHeight, (value: number) => {
       this.setParagraphProp('lineHeight', value)
@@ -168,19 +171,23 @@ export default Vue.extend({
       return `https://template.vivipic.com/font/${this.props.font}/prev-name`
     },
     scale(): number {
-      const layer = this.getLayer(pageUtils.currFocusPageIndex, this.layerIndex)
-      if (layer && layer.layers) {
-        const scaleSet = layer.layers.reduce((p: Set<number>, c: ILayer) => {
-          if (c.type === 'text') { p.add(c.styles.scale) }
-          return p
-        }, new Set())
-        if (scaleSet.size === 1) {
-          const [scale] = scaleSet
-          return scale * layer.styles.scale
+      const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
+      if (currLayer && currLayer.layers) {
+        if (subLayerIdx === -1) {
+          const scaleSet = (currLayer as IGroup).layers.reduce((p: Set<number>, c: ILayer) => {
+            if (c.type === 'text') { p.add(c.styles.scale) }
+            return p
+          }, new Set())
+          if (scaleSet.size === 1) {
+            const [scale] = scaleSet
+            return scale * currLayer.styles.scale
+          }
+          return NaN
+        } else {
+          return currLayer.styles.scale * (currLayer as IGroup).layers[subLayerIdx].styles.scale
         }
-        return NaN
       }
-      return layer ? layer.styles.scale : 1
+      return currLayer.styles.scale
     },
     fontSize(): number | string {
       if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
@@ -208,7 +215,7 @@ export default Vue.extend({
       }
       return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
     },
-    isVerticalText(): boolean {
+    hasOnlyVerticalText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (subLayerIdx !== -1) {
         return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes('vertical')
@@ -216,7 +223,7 @@ export default Vue.extend({
       if (currLayer.type === 'text') {
         return (currLayer as IText).styles.writingMode.includes('vertical')
       }
-      return false
+      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
     }
   },
   methods: {
@@ -238,6 +245,7 @@ export default Vue.extend({
       if (GeneralUtils.isValidHexColor(target.value)) {
         target.value = target.value.toUpperCase()
         this.handleColorUpdate(target.value)
+        StepsUtils.record()
       }
     },
     handleColorModal() {
@@ -270,7 +278,6 @@ export default Vue.extend({
           }
       }
       textEffectUtils.refreshColor()
-      StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },
     handleValueModal() {
@@ -352,11 +359,11 @@ export default Vue.extend({
             this.handleSpanPropClick('weight', ['bold', 'normal'])
             break
           case 'underline':
-            if (this.isVerticalText) return
+            if (this.hasOnlyVerticalText) return
             this.handleSpanPropClick('decoration', ['underline', 'none'])
             break
           case 'italic':
-            if (this.isVerticalText) return
+            if (this.hasOnlyVerticalText) return
             this.handleSpanPropClick('style', ['italic', 'normal'])
             break
         }
@@ -366,15 +373,16 @@ export default Vue.extend({
     },
     handleSpanPropClick(prop: string, pair: [string, string]) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = LayerUtils
+      const newPropVal = this.props[prop] === pair[0] ? pair[1] : pair[0]
       if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
         const layers = (currLayer as IGroup | ITmp).layers
-        const newPropVal = layers
-          .filter(l => l.type === 'text')
-          .every(text => {
-            return (text as IText).paragraphs.every(p => {
-              return p.spans.every(s => s.styles[prop] === pair[0])
-            })
-          }) ? pair[1] : pair[0]
+        // const newPropVal = layers
+        //   .filter(l => l.type === 'text')
+        //   .every(text => {
+        //     return (text as IText).paragraphs.every(p => {
+        //       return p.spans.every(s => s.styles[prop] === pair[0])
+        //     })
+        //   }) ? pair[1] : pair[0]
 
         layers.forEach((l, idx) => {
           if (l.type === 'text') {
@@ -392,9 +400,9 @@ export default Vue.extend({
           }
         })
       } else {
-        tiptapUtils.applySpanStyle(prop, (this.props[prop] === pair[0]) ? pair[1] : pair[0])
-        TextPropUtils.updateTextPropsState({ [prop]: (this.props[prop] === pair[0]) ? pair[1] : pair[0] })
+        tiptapUtils.applySpanStyle(prop, newPropVal)
       }
+      TextPropUtils.updateTextPropsState({ [prop]: newPropVal })
     },
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
@@ -501,7 +509,7 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
+          tiptapUtils.applySpanStyle('size', parseFloat(value))
           tiptapUtils.agent(editor => {
             LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
             StepsUtils.record()
@@ -614,8 +622,8 @@ export default Vue.extend({
       if (icon === 'font-vertical') { // if there is any curveText, vertical mode is disabled
         return !this.hasCurveText
       }
-      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text, underline and italic are disabled
-        return !this.isVerticalText
+      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text or group with only veritical texts, underline and italic are disabled
+        return !this.hasOnlyVerticalText
       }
       return true
     }

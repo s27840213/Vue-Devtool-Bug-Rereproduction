@@ -1,6 +1,7 @@
 <template lang="pug">
   img(class="pointer"
-    :src="src || fallbackSrc || `https://template.vivipic.com/background/${item.id}/prev?ver=${item.ver}`"
+    :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+    crossOrigin="Anonymous"
     draggable="false"
     @click="addBackground"
     @error="handleNotFound")
@@ -9,6 +10,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import AssetUtils from '@/utils/assetUtils'
+import imageUtils from '@/utils/imageUtils'
 
 export default Vue.extend({
   props: {
@@ -18,7 +20,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      fallbackSrc: ''
+      fallbackSrc: '',
+      imageUtils
     }
   },
   methods: {

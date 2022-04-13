@@ -2,22 +2,31 @@
   div(class="nu-background-image"
     :style="mainStyles"
     draggable="false")
-    div(v-if="!isColorBackground && isAdjustImage" :style="frameStyles")
-      nu-adjust-image(:src="src"
-        :styles="adjustImgStyles")
-    div(v-else :style="bgStyles")
+    div(v-show="!isColorBackground")
+      div(v-if="isAdjustImage" :style="frameStyles")
+        nu-adjust-image(:src="src"
+          crossOrigin='Anonymous'
+          :styles="adjustImgStyles")
+      img(v-else :src="src"
+        crossOrigin = "Anonymous"
+        draggable="false"
+        :style="imgStyles()"
+        class="body"
+        ref="body")
+      //- img(v-else :src="src" :style="imgStyles()")
+      //- div(v-else :style="bgStyles")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import cssConverter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
-import store from '@/store'
-import { IAssetPhoto } from '@/interfaces/api'
+import { SrcObj } from '@/interfaces/gallery'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 
 export default Vue.extend({
   props: {
@@ -25,39 +34,71 @@ export default Vue.extend({
     color: String,
     pageIndex: Number
   },
+  data() {
+    return {
+      src: '',
+      stylesBuff: {} as IImage
+    }
+  },
+  watch: {
+    srcObj: {
+      deep: true,
+      handler: function() {
+        if (this.isColorBackground) {
+          this.src = ''
+        } else {
+          this.perviewAsLoading()
+        }
+      }
+    }
+  },
   async created() {
-    const { srcObj } = this.image.config
+    const { srcObj } = this
     if (!srcObj || !srcObj.type) return
+
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
-      const images = store.getters['user/getImages'] as Array<IAssetPhoto>
-      const img = images.find(img => img.assetIndex === assetId)
-      if (!img) {
-        await store.dispatch('user/updateImages', { assetSet: `${assetId}` })
+      const editorImg = this.getEditorViewImages
+      if (!editorImg(assetId)) {
+        await this.updateImages({ assetSet: new Set<string>([assetId]) })
+        this.src = ImageUtils.getSrc(this.image.config)
       }
     }
-    const nextImg = new Image()
-    nextImg.onerror = () => {
-      if (srcObj.type === 'pexels') {
-        this.setBgImageSrc({
-          pageIndex: this.pageIndex,
-          srcObj: { ...srcObj, userId: 'jpeg' }
-        })
-        nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+
+    if (this.userId !== 'backendRendering') {
+      this.perviewAsLoading()
+      const nextImg = new Image()
+      nextImg.setAttribute('crossOrigin', 'Anonymous')
+      nextImg.onerror = () => {
+        if (srcObj.type === 'pexels') {
+          this.setBgImageSrc({
+            pageIndex: this.pageIndex,
+            srcObj: { ...srcObj, userId: 'jpeg' }
+          })
+          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+        }
       }
+      nextImg.onload = () => {
+        const preImg = new Image()
+        preImg.setAttribute('crossOrigin', 'Anonymous')
+        preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
+      }
+      nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+    } else {
+      this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
     }
-    nextImg.onload = () => {
-      const preImg = new Image()
-      preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
-    }
-    nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
   },
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getPageSize: 'getPageSize'
+      getPageSize: 'getPageSize',
+      getEditorViewImages: 'file/getEditorViewImages'
     }),
+    ...mapState('user', ['imgSizeMap', 'userId']),
+    configStyles(): IImageStyle {
+      return this.image.config.styles
+    },
     isColorBackground(): boolean {
       const { srcObj } = this.image.config
       return !srcObj || srcObj.assetId === ''
@@ -65,8 +106,8 @@ export default Vue.extend({
     getImgDimension(): number {
       return ImageUtils.getSignificantDimension(this.image.config.styles.width, this.image.config.styles.height) * (this.scaleRatio / 100)
     },
-    src(): string {
-      return this.isColorBackground ? '' : ImageUtils.getSrc(this.image.config)
+    srcObj(): SrcObj {
+      return this.image.config.srcObj
     },
     flipStyles(): { transform: any } {
       const { horizontalFlip, verticalFlip } = this.image.config.styles
@@ -88,7 +129,6 @@ export default Vue.extend({
     frameStyles(): { [key: string]: string | number } {
       const { image, flipStyles } = this
       return {
-        backgroundColor: '#ffffff',
         width: `${image.config.styles.imgWidth}px`,
         height: `${image.config.styles.imgHeight}px`,
         transform: `translate(${image.posX}px, ${image.posY}px) ${flipStyles.transform}`
@@ -103,9 +143,8 @@ export default Vue.extend({
       })
     },
     bgStyles(): { [key: string]: string | number } {
-      const { image, color } = this
+      const { image } = this
       return {
-        backgroundColor: color,
         backgroundImage: `url(${this.src})`,
         width: `${image.config.styles.imgWidth}px`,
         height: `${image.config.styles.imgHeight}px`,
@@ -116,29 +155,53 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('user', ['updateImages']),
+    ...mapActions('file', ['updateImages']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
-    sizeMap(width: number) {
-      if (width < 540) {
-        return 540
-      } else if (width < 800) {
-        return 800
-      } else if (width < 1080) {
-        return 1080
-      } else {
-        return 1600
-      }
-    },
-    onError() {
+    onError() { // deprecated?
       console.log('image on error')
       if (this.image.config.srcObj.type === 'private') {
         try {
-          this.updateImages({ assetSet: `${this.image.config.srcObj.assetId}` })
+          this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
         } catch (error) {
           console.log(error)
         }
+      }
+    },
+    imgStyles(): Partial<IImage> {
+      return this.stylesConverter()
+    },
+    async perviewAsLoading() {
+      return new Promise<void>((resolve, reject) => {
+        const config = this.image.config as IImage
+        if (config.previewSrc) {
+          this.src = config.previewSrc
+          config.previewSrc = ''
+        } else if (config.srcObj.type === 'background') {
+          this.src = ImageUtils.getSrc(this.image.config, 'prev', this.image.config.ver)
+        }
+        const img = new Image()
+        img.setAttribute('crossOrigin', 'Anonymous')
+        const src = ImageUtils.getSrc(this.image.config)
+        img.onload = () => {
+          /** If after onload the img, the config.srcObj is the same, set the src. */
+          if (ImageUtils.getSrc(this.image.config) === src) {
+            this.src = src
+          }
+          resolve()
+        }
+        img.onerror = () => {
+          reject(new Error('cannot load the current image'))
+        }
+        img.src = src
+      })
+    },
+    stylesConverter(): { [key: string]: string } {
+      return {
+        width: `${this.image.config.styles.imgWidth}px`,
+        height: `${this.image.config.styles.imgHeight}px`,
+        transform: `translate(${this.image.posX}px, ${this.image.posY}px) ${this.flipStyles.transform}`
       }
     }
   }
@@ -159,4 +222,9 @@ export default Vue.extend({
     height: 100%;
   }
 }
+
+.body {
+  transition: opacity 1s;
+}
+
 </style>

@@ -93,7 +93,9 @@ export default Vue.extend({
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
         if (uploadUtils.isLogin) {
-          uploadUtils.uploadAsset('image', files, true)
+          uploadUtils.uploadAsset('image', files, {
+            addToPage: true
+          })
         } else {
           modalUtils.setIsModalOpen(true)
           modalUtils.setModalInfo(`${this.$t('NN0350')}`, [], '')

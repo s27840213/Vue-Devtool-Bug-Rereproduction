@@ -171,46 +171,49 @@ export default Vue.extend({
         this.setIsUploading(pageId, config.id as string, '')
       }
 
-      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], false, (json: IUploadAssetResponse) => {
-        const srcObj = {
-          type: this.isAdmin ? 'public' : 'private',
-          userId: json.data.team_id,
-          assetId: this.isAdmin ? json.data.id : json.data.asset_index
-        }
-
-        const pageIndex = pageUtils.getPageIndexById(pageId)
-        const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
-        if (pageIndex !== -1 && layerIndex !== -1) {
-          const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
-          const newWidth = (updateCanvas.width - right - left) / img.naturalWidth * config.styles.width
-          const newHeight = (updateCanvas.height - top - bottom) / img.naturalWidth * config.styles.width
-          const styles = {
-            width: newWidth,
-            height: newHeight,
-            imgWidth: newWidth,
-            imgHeight: newHeight,
-            initWidth: newWidth,
-            initHeight: newHeight,
-            imgX: 0,
-            imgY: 0,
-            x: config.styles.x - config.styles.width * leftShadowThickness,
-            y: config.styles.y - config.styles.height * topShadowThickness,
-            scale: 1
+      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], {
+        addToPage: false,
+        pollingCallback: (json: IUploadAssetResponse) => {
+          const srcObj = {
+            type: this.isAdmin ? 'public' : 'private',
+            userId: json.data.team_id,
+            assetId: this.isAdmin ? json.data.id : json.data.asset_index
           }
-          layer.srcObj = srcObj
-          Object.assign(layer.styles, styles)
 
-          const newImg = new Image()
-          newImg.crossOrigin = 'anoynous'
-          newImg.onload = () => {
-            this.resetAllShadowProps(pageIndex, layerIndex)
-            layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
+          const pageIndex = pageUtils.getPageIndexById(pageId)
+          const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+          if (pageIndex !== -1 && layerIndex !== -1) {
+            const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
+            const newWidth = (updateCanvas.width - right - left) / img.naturalWidth * config.styles.width
+            const newHeight = (updateCanvas.height - top - bottom) / img.naturalWidth * config.styles.width
+            const styles = {
+              width: newWidth,
+              height: newHeight,
+              imgWidth: newWidth,
+              imgHeight: newHeight,
+              initWidth: newWidth,
+              initHeight: newHeight,
+              imgX: 0,
+              imgY: 0,
+              x: config.styles.x - config.styles.width * leftShadowThickness,
+              y: config.styles.y - config.styles.height * topShadowThickness,
+              scale: 1
+            }
+            layer.srcObj = srcObj
+            Object.assign(layer.styles, styles)
+
+            const newImg = new Image()
+            newImg.crossOrigin = 'anoynous'
+            newImg.onload = () => {
+              this.resetAllShadowProps(pageIndex, layerIndex)
+              layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
+            }
+            newImg.src = imageUtils.getSrc(layer)
           }
-          newImg.src = imageUtils.getSrc(layer)
+          imageShadowUtils.clearLayerData()
         }
       })
-      imageShadowUtils.clearLayerData()
     }
   },
   computed: {
@@ -279,7 +282,6 @@ export default Vue.extend({
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
       imageShadowUtils.setEffect(currentEffect, { color })
-      this.recordChange()
     },
     recordChange() {
       stepsUtils.record()

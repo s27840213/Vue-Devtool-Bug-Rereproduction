@@ -42,10 +42,15 @@ export interface IAsset {
     theme: string
     width: number
     ver: number
-  }
+  },
+  src?: string,
+  userId?: string,
+  assetId?: string,
+  fontUrl?: string
 }
 
 export interface IAssetProps {
+  ver?: number,
   pageIndex?: number
   styles?: Partial<IStyle>,
   // the following props are used for preview image during polling process

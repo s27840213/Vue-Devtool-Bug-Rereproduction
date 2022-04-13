@@ -141,25 +141,10 @@
         class="shape-setting__color"
         :style="groupColorStyles()"
         @click="selectColor(0)")
-      div(v-for="(color, index) in getColors"
+      div(v-else v-for="(color, index) in getColors"
         class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
-    //- div(v-if="getColors.length || isGrouped" class="shape-setting__title")
-    //-   span(class="shape-setting__title text-blue-1 label-lg") Color Palette
-    //-   div(class="shape-setting__colors")
-    //-     div(class="shape-setting__color rainbow" ref="rainbow"
-    //-       :style="colorPickerStyles()" @click="handleColorModalOn")
-    //-       color-picker(v-if="openColorPicker"
-    //-         class="shape-setting__color-picker"
-    //-         v-click-outside="handleColorModalOff"
-    //-         :currentColor="getColors[currSelectedColorIndex]"
-    //-         @update="handleColorUpdate")
-    //-     div(v-for="(color, index) in colorPresets"
-    //-       class="shape-setting__color palette"
-    //-       :style="paletteColorStyle(color, index)"
-    //-       @click="setColor(color, index)")
-
     //- 管理介面
     div(class="shape-setting__info")
       div(v-if="inAdminMode")
@@ -180,13 +165,6 @@
             span(class="body-1") id
             span(class="pl-15 body-2"
               @click="copyText(svgInfo.key_id)") {{svgInfo.key_id}}
-          //- div(class="shape-setting__info__line")
-          //-   span(class="body-1") 修改者
-          //-   span(class="pl-15 body-2"
-          //-     @click="copyText(svgInfo.author)") {{svgInfo.author}}
-          //- div(class="shape-setting__info__line")
-          //-   span(class="body-1") 上次更新
-          //-   span(class="pl-15 body-2") {{svgInfo.edit_time}}
           div(class="shape-setting__info__line")
             span(class="body-1") 語系
             select(class="shape-setting__info__select"
@@ -237,7 +215,6 @@ import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
-import textUtils from '@/utils/textUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design-info'
 import pageUtils from '@/utils/pageUtils'
@@ -294,34 +271,35 @@ export default Vue.extend({
   },
   mounted() {
     const currLayer = this.currLayer as IShape
-    if (currLayer.color && currLayer.color.length) {
-      colorUtils.on(ColorEventType.shape, (color: string) => {
-        this.handleColorUpdate(color)
-      })
-      colorUtils.setCurrEvent(ColorEventType.shape)
-      colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
-      this.initilizeRecord()
-      this.fetchMarkers().then(async () => {
-        const markerList = (this.categories[0] as IListServiceContentData).list
-        this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
-        for (const marker of markerList) {
-          const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
-          this.markerContentMap[marker.id] = {
-            styleArray: markerContent.styleArray,
-            svg: markerContent.svg,
-            trimWidth: markerContent.trimWidth,
-            vSize: markerContent.vSize,
-            trimOffset: markerContent.trimOffset ?? -1
-          }
+    colorUtils.on(ColorEventType.shape, (color: string) => {
+      this.handleColorUpdate(color)
+    })
+    colorUtils.onStop(ColorEventType.shape, () => {
+      this.$nextTick(() => stepsUtils.record())
+    })
+    colorUtils.setCurrEvent(ColorEventType.shape)
+    colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
+    this.initilizeRecord()
+    this.fetchMarkers().then(async () => {
+      const markerList = (this.categories[0] as IListServiceContentData).list
+      this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
+      for (const marker of markerList) {
+        const markerContent = (await AssetUtils.get(marker)).jsonData as IMarker
+        this.markerContentMap[marker.id] = {
+          styleArray: markerContent.styleArray,
+          svg: markerContent.svg,
+          trimWidth: markerContent.trimWidth,
+          vSize: markerContent.vSize,
+          trimOffset: markerContent.trimOffset ?? -1
         }
-        this.markerListReady = true
-      })
-      this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
-      this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
-      popupUtils.on(PopupSliderEventType.lineWidth, (value: number) => {
-        this.setLineWidth(value)
-      })
-    }
+      }
+      this.markerListReady = true
+    })
+    this.dashAndEdge[0] = (currLayer.dasharray ?? []).length === 0 ? 1 : 2
+    this.dashAndEdge[1] = (currLayer.linecap ?? 'butt') === 'butt' ? 3 : 4
+    popupUtils.on(PopupSliderEventType.lineWidth, (value: number) => {
+      this.setLineWidth(value)
+    })
   },
   computed: {
     ...mapGetters({
@@ -379,20 +357,19 @@ export default Vue.extend({
     getColors(): string[] {
       const layer = LayerUtils.getCurrLayer
       if (layer.type === 'shape') {
-        return (layer as IShape).color ?? []
+        return (layer as IShape).color || []
       }
       if (layer.type === 'group' || layer.type === 'tmp') {
-        const subSelectedIdx = (layer as IGroup).layers
-          .findIndex(l => l.type === 'shape' && l.active)
+        const { subLayerIdx } = LayerUtils
 
-        if (subSelectedIdx === -1) {
+        if (subLayerIdx === -1) {
           if (!this.inGrouped) {
             const layers = (layer as IGroup).layers
               .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
             return (layers.length ? layers[0].color : []) as string[]
           } else return []
         } else {
-          const colors = (layer as IGroup).layers[subSelectedIdx].color as string[]
+          const colors = (layer as IGroup).layers[subLayerIdx].color as string[]
           return colors
         }
       } else {
@@ -545,23 +522,20 @@ export default Vue.extend({
       this.openValueSelector = modalName
     },
     setColor(newColor: string, index: number) {
-      stepsUtils.record()
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const subSelectedIdx = (currLayer as IGroup).layers
-          .findIndex(l => l.type === 'shape' && (l as IShape).active)
-
-        if (subSelectedIdx === -1) {
+        const { subLayerIdx } = LayerUtils
+        if (subLayerIdx === -1) {
           for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
             if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
               const color = [newColor]
-              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, i, { color })
+              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color })
             }
           }
         } else {
-          const color = [...(currLayer as IGroup).layers[subSelectedIdx].color as string]
+          const color = [...(currLayer as IGroup).layers[subLayerIdx].color as string[]]
           color[this.currSelectedColorIndex] = newColor
-          LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subSelectedIdx, { color })
+          LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
         }
       }
       if (currLayer.type === 'shape') {
@@ -793,7 +767,7 @@ export default Vue.extend({
   }
   &__color {
     width: 100%;
-    aspect-ratio: 1;
+    padding-top: calc(100% - 3px);
     border: 1.5px solid setColor(gray-4);
     border-radius: 4px;
     box-sizing: border-box;

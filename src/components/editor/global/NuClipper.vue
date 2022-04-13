@@ -8,7 +8,6 @@
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
-import imageUtils from '@/utils/imageUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -47,6 +46,15 @@ export default Vue.extend({
         }
       }
       switch (type) {
+        case 'image':
+          if (this.config.isFrame) {
+            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+          } else {
+            clipPath = layerPath
+          }
+          width = `${width}px`
+          height = `${height}px`
+          break
         case 'shape':
           width = `${this.shapeWidth}px`
           height = `${this.shapeHeight}px`
@@ -71,6 +79,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .nu-clipper {
   transform-style: preserve-3d;
+  // overflow: hidden;
 }
 
 .layer-flip {

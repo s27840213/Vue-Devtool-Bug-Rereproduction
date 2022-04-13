@@ -151,7 +151,7 @@ class TextPropUtils {
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
       if (isVertical && p.styles.spanStyle) {
-        const pStyle = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(p.styles.spanStyle as string))
+        const pStyle = tiptapUtils.generateSpanStyle(p.styles.spanStyle as string)
         if (pStyle.style === 'italic') {
           pStyle.style = 'normal'
         }
@@ -160,6 +160,7 @@ class TextPropUtils {
         }
         p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
       }
+      const paragraphStyles = p.styles
       for (const span of p.spans) {
         spanHandler && spanHandler(span)
         if (isVertical && span.styles.style === 'italic') {
@@ -168,6 +169,11 @@ class TextPropUtils {
         if (isVertical && span.styles.decoration === 'underline') {
           span.styles.decoration = 'none'
         }
+        span.styles.font = paragraphStyles.font as string
+        span.styles.type = paragraphStyles.type as string
+        span.styles.userId = paragraphStyles.userId as string
+        span.styles.assetId = paragraphStyles.assetId as string
+        span.styles.fontUrl = paragraphStyles.fontUrl as string
       }
     })
   }
@@ -273,15 +279,17 @@ class TextPropUtils {
       if (propName === 'fontFamily') {
         for (let pidx = start.pIndex; pidx <= end.pIndex; pidx++) {
           config.paragraphs[pidx].styles.font = config.paragraphs[pidx].spans[0].styles.font
+          config.paragraphs[pidx].styles.type = config.paragraphs[pidx].spans[0].styles.type
+          config.paragraphs[pidx].styles.userId = config.paragraphs[pidx].spans[0].styles.userId
+          config.paragraphs[pidx].styles.assetId = config.paragraphs[pidx].spans[0].styles.assetId
+          config.paragraphs[pidx].styles.fontUrl = config.paragraphs[pidx].spans[0].styles.fontUrl
         }
-      }
-      if (propName !== 'fontSize') {
-        // [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
     }
     if (!TextUtils.isSel(end)) {
       const styles = config.paragraphs[start.pIndex].spans[start.sIndex].styles
-      this.noRangedHandler(styles, propName, prop[propName], config)
+      // this.noRangedHandler(styles, propName, prop[propName], config)
+      Object.assign(styles, prop)
       if (propName !== 'fontSize') {
         // [start, end] = this.spanMerger(config.paragraphs, start, end)
       }
@@ -299,30 +307,51 @@ class TextPropUtils {
       }
     }
 
-    if (TextUtils.isSel(end)) {
-      if (isStartContainerDivided) {
-        if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
-          start.sIndex++
-          start.offset = 0
-          end.sIndex++
-          end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
-        } else {
-          start.sIndex++
-        }
-      }
-    } else {
-      if (propName === 'fontFamily' || propName === 'fontSize') {
-        start.offset = 0
-        Object.assign(end, start)
-        end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
-      } else {
-        end = TextUtils.getNullSel()
-      }
-    }
-    TextUtils.updateSelection(start, end)
+    // @ Obsolete code
+    // if (TextUtils.isSel(end)) {
+    //   if (isStartContainerDivided) {
+    //     if (start.pIndex === end.pIndex && start.sIndex === end.sIndex) {
+    //       start.sIndex++
+    //       start.offset = 0
+    //       end.sIndex++
+    //       end.offset = config.paragraphs[end.pIndex].spans[end.sIndex].text.length
+    //     } else {
+    //       start.sIndex++
+    //     }
+    //   }
+    // } else {
+    //   if (propName === 'fontFamily' || propName === 'fontSize') {
+    //     if (TextUtils.isSel(start))
+    //     start.offset = 0
+    //     Object.assign(end, start)
+    //     end.offset = config.paragraphs[start.pIndex].spans[start.sIndex].text.length
+    //   } else {
+    //     end = TextUtils.getNullSel()
+    //   }
+    // }
+    // TextUtils.updateSelection(start, end)
 
     // Sync updating text effect if the color changed
     // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
+    return config
+  }
+
+  spanParagraphPropertyHandler(propName: string, prop: { [key: string]: string | number }, start: ISelection, end: ISelection, _config: IText): IText {
+    const config = GeneralUtils.deepCopy(_config) as IText
+    const spIndex = start.pIndex
+    const epIndex = end.pIndex
+    for (let pIndex = spIndex; pIndex <= epIndex; pIndex++) {
+      const paragraph = config.paragraphs[pIndex]
+      Object.assign(paragraph.styles, prop)
+      if (paragraph.styles.spanStyle) {
+        const spanStyle = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+        Object.assign(spanStyle, prop)
+        paragraph.styles.spanStyle = tiptapUtils.textStyles(spanStyle)
+      }
+      for (const span of paragraph.spans) {
+        Object.assign(span.styles, prop)
+      }
+    }
     return config
   }
 
@@ -496,6 +525,7 @@ class TextPropUtils {
       case 'fontSize':
         styles.size = value as number
         return
+      case 'font':
       case 'fontFamily':
         styles.font = value as string
         return
@@ -547,7 +577,6 @@ class TextPropUtils {
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
       Object.assign(config?.paragraphs, paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
-      console.warn(propName)
     }
   }
 
@@ -701,6 +730,9 @@ class TextPropUtils {
             for (let i = 0; i < (currLayer as IGroup).layers.length; i++) {
               if ((currLayer as IGroup).layers[i].type === 'text') {
                 const tmpLayer = (currLayer as IGroup).layers[i] as IText
+                if (['italic', 'underline'].includes(propName) && tmpLayer.styles.writingMode.includes('vertical')) {
+                  continue
+                }
                 if (propBuff === 'init') {
                   propBuff = this.propReadOfLayer(propName, tmpLayer, true)
                 } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer, true)) {
@@ -724,6 +756,9 @@ class TextPropUtils {
         for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
           if (tmpLayerGroup.layers[i].type === 'text') {
             const tmpLayer = tmpLayerGroup.layers[i] as IText
+            if (['italic', 'underline'].includes(propName) && tmpLayer.styles.writingMode.includes('vertical')) {
+              continue
+            }
             if (typeof propBuff === 'undefined') {
               propBuff = this.propReadOfLayer(propName, tmpLayer)
             } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
@@ -780,7 +815,7 @@ class TextPropUtils {
             } else {
               spanStyle = editor.storage.nuTextStyle.spanStyle
             }
-            startStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+            startStyles = tiptapUtils.generateSpanStyle(spanStyle)
           }
 
           origin = startStyles[prop]
@@ -916,7 +951,7 @@ class TextPropUtils {
         const paragraphs = tiptapJSON.content ?? []
 
         if (selection.empty) {
-          const sAttrs = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(editor.storage.nuTextStyle.spanStyle))
+          const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
           sAttrs.size += step
           editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
           editor.chain().focus().setMark('textStyle', sAttrs).run()
@@ -992,7 +1027,7 @@ class TextPropUtils {
               const pAttrs = paragraphs[i].attrs ?? {}
               pAttrs.size += step
               const spanStyle = pAttrs.spanStyle ?? ''
-              const sStyles = tiptapUtils.generateSpanStyle(tiptapUtils.str2css(spanStyle))
+              const sStyles = tiptapUtils.generateSpanStyle(spanStyle)
               sStyles.size += step
               pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
             }
@@ -1116,6 +1151,7 @@ class TextPropUtils {
       font: span ? span.styles.font : '',
       type: span ? span.styles.type : 'public',
       userId: span ? span.styles.userId : '',
+      assetId: span ? span.styles.assetId : '',
       fontUrl: span ? span.styles.fontUrl : '',
       weight: span ? span.styles.weight : '',
       size: span ? span.styles.size : NaN,
@@ -1246,9 +1282,15 @@ class TextPropUtils {
     const handler = (paragraphs: IParagraph[]) => {
       paragraphs
         .forEach(p => {
-          if (propType === 'paragraph') {
+          if (propType.includes('paragraph')) {
             Object.assign(p.styles, prop)
-          } else {
+            if (p.styles.spanStyle) {
+              const spanStyle = tiptapUtils.generateSpanStyle(p.styles.spanStyle as string)
+              Object.assign(spanStyle, prop)
+              p.styles.spanStyle = tiptapUtils.textStyles(spanStyle)
+            }
+          }
+          if (propType.includes('span')) {
             p.spans.forEach(s => {
               Object.assign(s.styles, prop)
             })

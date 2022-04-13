@@ -40,7 +40,6 @@ export default {
    * @param type - 0 for update db, 1 for update prev, 2 for update both
    * @returns
    */
-  // eslint-disable-next-line camelcase
   putAssetDesign: (token: string, team_id: string, asset_id: string, type: number): AxiosPromise => axios('/put-asset-design', {
     method: 'POST',
     data: {
@@ -76,7 +75,7 @@ export default {
       meta
     }
   }),
-  /* eslint-disable camelcase */
+
   sendVcode: (uname: string, account: string, upass: string, register: string, vcode_only: string, type: number, token: string, locale: string): AxiosPromise => axios('/send-vcode', {
     method: 'POST',
     data: {
@@ -90,12 +89,13 @@ export default {
       locale
     }
   }),
-  verifyVcode: (account: string, vcode: string, token: string): AxiosPromise => axios('/verify-vcode', {
+  verifyVcode: (account: string, vcode: string, token: string, type: number): AxiosPromise => axios('/verify-vcode', {
     method: 'POST',
     data: {
       account,
       vcode,
-      token
+      token,
+      type
     }
   }),
   updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number): AxiosPromise => axios('/update-user', {

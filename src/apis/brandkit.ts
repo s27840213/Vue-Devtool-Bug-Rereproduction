@@ -17,60 +17,84 @@ export default {
   getTeamId(): string {
     return store.getters['user/getTeamId']
   },
-  async getBrands(token: string): Promise<any> {
-    // TODO: integrate API
-    // return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-    //   method: 'POST',
-    //   data: {
-    //     type: 'design',
-    //     token,
-    //     data,
-    //     order_by: `${sortByField}:${sortByDescending ? 'desc' : 'asc'}`,
-    //     path: path,
-    //     ...params
-    //   }
-    // }))
+  async getBrands(token?: string, teamId?: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-brand', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId()
+      }
+    }))
+  },
+  async getFonts(token?: string, teamId?: string, params = {}): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId(),
+        type: 'font',
+        ...params
+      }
+    }))
+  },
+  async getFont(assetIndex: number, token?: string, teamId?: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId(),
+        type: 'font',
+        asset_list: assetIndex.toString()
+      }
+    }))
   },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)
     })
   },
-  async updateBrands(token: string, locale: string, teamId: string): Promise<any> {
-    // TODO: integrate API
-    // return await apiUtils.requestWithRetry(() => {
-    //   const payload: any = {
-    //     method: 'POST',
-    //     data: {
-    //       type: 'design',
-    //       token,
-    //       locale,
-    //       team_id: teamId,
-    //       update_type: updateType,
-    //       target
-    //     }
-    //   }
-    //   if (srcAsset != null) payload.data.src_asset = srcAsset
-    //   if (srcFolder != null) payload.data.src_folder = srcFolder
-    //   return axios('/update-asset', payload)
-    // })
-    return { data: { flag: 0 } }
-    // return new Promise<any>(resolve => {
-    //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
-    // })
-  },
-  updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void) {
-    this.updateBrands(this.getToken(), this.getLocale(), this.getUserId())
-      .then((response) => {
-        if (response.data.flag !== 0) {
-          fallbacker()
-          errorShower()
+  async updateBrands(token: string, locale: string, teamId: string, params: Partial<IBrandParams>): Promise<any> {
+    if (params.type) {
+      return await apiUtils.requestWithRetry(() => {
+        const payload: any = {
+          method: 'POST',
+          data: {
+            token,
+            locale,
+            team_id: teamId
+          }
         }
-      }).catch((error) => {
-        console.error(error)
+        Object.assign(payload.data, params)
+        return axios('/update-brand', payload)
+      })
+      // return new Promise<any>(resolve => {
+      //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
+      // })
+    } else { // for testing (not implemented APIs)
+      return { data: { flag: 0 } }
+      // return new Promise<any>(resolve => {
+      //   setTimeout(() => resolve({ data: { flag: 1 } }), 1000)
+      // })
+    }
+  },
+  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+    updater()
+    try {
+      const response = await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
+      if (response.data.flag !== 0) {
         fallbacker()
         errorShower()
-      })
-    updater()
+        return false
+      }
+      if (responseHandler) {
+        responseHandler(response.data)
+      }
+    } catch (error) {
+      console.error(error)
+      fallbacker()
+      errorShower()
+      return false
+    }
+    return true
   }
 }

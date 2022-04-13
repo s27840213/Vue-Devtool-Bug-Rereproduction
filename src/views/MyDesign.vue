@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="my-design")
-    nu-header
+    nu-header(:isTop="false")
     div(class="my-design__content")
       sidebar(@deleteItem="handleDeleteItem"
               @deleteFolder="handleDeleteFolder"
@@ -64,7 +64,7 @@
                         iconColor="gray-2")
         component(v-if="currLocation !== ''"
                   :is="mydesignView"
-                  class="design-view scrollbar-gray"
+                  class="design-view scrollbar-gray-thin"
                   @deleteItem="handleDeleteItem"
                   @clearSelection="handleClearSelection"
                   @recoverItem="handleRecoverItem"

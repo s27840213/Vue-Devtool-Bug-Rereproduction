@@ -58,7 +58,6 @@
                     iconName="favorites-fill"
                     iconWidth="20px"
                     iconColor="gray-4")
-          //- span(class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
           span(v-if="isMouseOver" class="design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
     div(class="design-item__name"
         v-click-outside="handleNameEditEnd"
@@ -327,7 +326,7 @@ export default Vue.extend({
         this.pollingStep()
       } else {
         this.pageImages = designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
-        imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight).then((size) => {
+        imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight, false).then((size) => {
           const { width, height, exists } = size
           this.imgWidth = width
           this.imgHeight = height
@@ -344,7 +343,7 @@ export default Vue.extend({
           undefined,
           this.config.signedUrl
         ),
-        this.imgWidth, this.imgHeight
+        this.imgWidth, this.imgHeight, false
       ).then((size) => {
         const { width, height, exists } = size
         this.imgWidth = width
@@ -366,7 +365,7 @@ export default Vue.extend({
     pagePollingStep(index: number, step = 0) {
       if (this.pageImages[index] !== this.previewPlaceholder) return
       const timeout = step > 14 ? 2000 : 1000
-      imageUtils.getImageSize(designUtils.getDesignPreview(this.config.id, 2, undefined, this.config.signedUrl, index), 0, 0).then((size) => {
+      imageUtils.getImageSize(designUtils.getDesignPreview(this.config.id, 2, undefined, this.config.signedUrl, index), 0, 0, false).then((size) => {
         if (size.exists) {
           this.pageImages[index] = designUtils.getDesignPreview(this.config.id, 2, this.config.ver, this.config.signedUrl, index)
         } else if (step < 35) {

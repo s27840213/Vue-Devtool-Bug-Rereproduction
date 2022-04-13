@@ -61,6 +61,7 @@ export interface ISpanStyle {
   font: string,
   type: string,
   userId: string,
+  assetId: string,
   fontUrl: string
   weight: string,
   color: string,

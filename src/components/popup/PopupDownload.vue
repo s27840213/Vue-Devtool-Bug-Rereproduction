@@ -59,7 +59,7 @@
               class="mb-10"
               group-name="product_page"
               :label="$t('NN0345')"
-              :default-checked="selectedDetailPage.noLimit"
+              :default-checked="!selectedDetailPage.noLimit"
               @change="handleDetailPageIsLimited"
               value="no-limit")
             div
@@ -67,7 +67,7 @@
                 class="mb-5"
                 group-name="product_page"
                 :label="$t('NN0346')"
-                :default-checked="!selectedDetailPage.noLimit"
+                :default-checked="selectedDetailPage.noLimit"
                 @change="handleDetailPageIsLimited"
                 value="height-limit")
               div(class="flex items-center")
@@ -103,6 +103,28 @@
             download-page-selection(class="ml-5 w-75"
               :defaultSelected="pageRange"
               @confirm="handleRangeConfirm")
+        template(v-if="isAdmin || onDev")
+          hr(class="popup-download__hr my-15")
+          div(class="dev-selector mb-10")
+            dropdown(class="body-3 full-width"
+                    :options="devs"
+                    @select="handleDevSelect") {{ selectedDevLabel }}
+          download-check-button(
+            type="checkbox"
+            class="mb-20 body-3"
+            label="使用新後端瀏覽器"
+            :default-checked="newChrome"
+            @change="({ checked }) => handleNewChrome(checked)")
+          div
+            btn(class="full-width body-3 rounded"
+              :disabled="isButtonDisabled"
+              @click.native="handleSubmit(true)")
+              svg-icon(v-if="polling"
+                class="align-middle"
+                iconName="loading"
+                iconColor="white"
+                iconWidth="20px")
+              span(v-else) {{`${$t('NN0010')} (${$t('NN0460')})`}}
         hr(class="popup-download__hr my-15")
         download-check-button(type="checkbox"
           class="mb-20"
@@ -112,7 +134,7 @@
       div
         btn(class="full-width body-3 rounded"
           :disabled="isButtonDisabled"
-          @click.native="handleSubmit")
+          @click.native="handleSubmit()")
           svg-icon(v-if="polling"
             class="align-middle"
             iconName="loading"
@@ -123,7 +145,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import { ITypeOption } from '@/interfaces/download'
 import DownloadUtil from '@/utils/downloadUtil'
@@ -154,16 +176,22 @@ export default Vue.extend({
       rangeType = 'current',
       pageRange = [],
       selectedDetailPage,
+      selectedDev = 1,
+      newChrome = false,
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
     const prevInfo = {
-      saveSubmission: !!selectedTypeVal,
+      saveSubmission: true,
+      // saveSubmission: !!selectedTypeVal,
       selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
       selectedTypeVal: selectedTypeVal || 'png',
       rangeType,
-      pageRange: rangeType === 'spec' ? pageRange : []
+      pageRange: rangeType === 'spec' ? pageRange : [],
+      selectedDev,
+      newChrome
     }
     const currentPageIndex = this.pageIndex || 0
+    const host = window.location.hostname
     return {
       ...prevInfo,
       currentPageIndex,
@@ -189,11 +217,24 @@ export default Vue.extend({
         // { id: 'svg', name: 'SVG', desc: '各種尺寸的清晰向量檔' },
         // { id: 'mp4', name: 'MP4 影片', desc: '高畫質影片' },
         // { id: 'gif', name: 'GIF', desc: '短片' }
-      ] as ITypeOption[]
+      ] as ITypeOption[],
+      devs: [
+        { value: 1, label: 'dev0' },
+        { value: 2, label: 'dev1' },
+        { value: 3, label: 'dev2' },
+        { value: 4, label: 'dev3' },
+        { value: 5, label: 'dev4' },
+        { value: 6, label: 'dev5' },
+        { value: 999, label: 'rd' }
+      ],
+      onDev: host.startsWith('rd') || host.startsWith('dev') || host.startsWith('localhost')
     }
   },
   computed: {
     ...mapState(['name', 'groupType', 'exportIds']),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     selectedType(): ITypeOption {
       const { selectedTypeVal, typeOptions } = this
       return typeOptions.find(typeOptions => typeOptions.value === selectedTypeVal) || typeOptions[0]
@@ -219,6 +260,10 @@ export default Vue.extend({
     detailPageOptionLabel(): string {
       const { selectedDetailPage, detailPageDownloadOptions = [] } = this
       return detailPageDownloadOptions.find(option => option.value === selectedDetailPage.option)?.label ?? ''
+    },
+    selectedDevLabel(): string {
+      const { selectedDev, devs } = this
+      return devs.find(option => option.value === selectedDev)?.label ?? ''
     }
   },
   mounted() {
@@ -254,7 +299,7 @@ export default Vue.extend({
             this.$router.replace({ query: Object.assign({}, this.$router.currentRoute.query, { export_ids: this.exportIds }) })
             uploadUtils.uploadDesign()
           } else {
-            this.$notify({ group: 'error', text: `設計上傳失敗，請重新點擊下載 (status: ${status})` })
+            this.$notify({ group: 'error', text: `${this.$t('NN0461')} (status: ${status})` })
             this.$emit('close')
           }
         })
@@ -277,6 +322,9 @@ export default Vue.extend({
     handleDetailPageIsLimited(data: { [key: string]: any }) {
       this.selectedDetailPage.noLimit = data.value === 'no-limit'
     },
+    handleDevSelect(data: { value: number }) {
+      this.selectedDev = data.value
+    },
     handleMaxHeight(e: Event) {
       const value = +(e.target as HTMLInputElement).value
       if (Number.isNaN(value)) {
@@ -298,24 +346,29 @@ export default Vue.extend({
     handleSubmission(checked: boolean) {
       this.saveSubmission = checked
     },
-    handleSubmit() {
+    handleNewChrome(checked: boolean) {
+      this.newChrome = checked
+    },
+    handleSubmit(useDev = false) {
       this.polling = true
-      this.exportId ? this.handleDownload() : (this.functionQueue = [this.handleDownload])
+      this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
     handleSubmissionInfo() {
-      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange } = this
+      const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev, newChrome } = this
       const info = {
         ...selected,
         selectedTypeVal,
         rangeType,
         pageRange,
-        selectedDetailPage
+        selectedDetailPage,
+        selectedDev,
+        newChrome
       }
       saveSubmission
         ? localStorage.setItem(submission, JSON.stringify(info))
         : localStorage.removeItem(submission)
     },
-    async handleDownload() {
+    async handleDownload(useDev = false) {
       this.polling = true
       const {
         exportId,
@@ -346,7 +399,7 @@ export default Vue.extend({
       }
       this.$emit('inprogress', true)
       DownloadUtil
-        .getFileUrl(fileInfo)
+        .getFileUrl(fileInfo, ((this.isAdmin || this.onDev) && useDev) ? this.selectedDev : 0, this.newChrome ? 1 : 0)
         .then(this.handleDownloadProgress)
     },
     handleDownloadProgress(response: any) {
@@ -362,7 +415,7 @@ export default Vue.extend({
           break
         case 1:
           console.log(response)
-          this.$notify({ group: 'error', text: `下載失敗，請重新下載 (${msg})` })
+          this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
           this.$emit('close')
           break
         case 2:
@@ -453,6 +506,9 @@ export default Vue.extend({
   }
   input {
     padding: 0;
+  }
+  .dev-selector {
+    display: flex;
   }
 }
 </style>

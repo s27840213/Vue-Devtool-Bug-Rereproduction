@@ -1,23 +1,24 @@
 <template lang="pug">
-  div(class="brand-kit scrollbar-gray relative"
+  div(class="brand-kit relative"
     @dragover.prevent.stop="handleDragEnter"
     @dragenter.prevent.stop="handleDragEnter"
     @dragleave.prevent.stop="handleDragLeave"
     @drop.prevent.stop="handleDrop")
-    nu-header
-    div(v-if="isBrandsLoading" class="brand-kit__main")
-      svg-icon(iconName="loading"
-              iconWidth="50px"
-              iconColor="gray-3")
-    div(v-else class="brand-kit__main")
-      div(class="brand-kit__header")
-        div(class="brand-kit__selector")
-          brand-selector(@deleteItem="handleDeleteItem")
-        brand-kit-add-btn(:text="`${$t('NN0396')}`"
-                          @click.native="addNewBrand")
-      div(class="brand-kit__tab")
-        brand-kit-tab(@deleteItem="handleDeleteItem")
-    nu-footer
+    nu-header(:isTop="isTop")
+    section(ref="content" class="brand-kit__scroll scrollbar-gray-thin" @scroll.passive="onScroll")
+      div(v-if="isBrandsLoading" class="brand-kit__main")
+        svg-icon(iconName="loading"
+                iconWidth="50px"
+                iconColor="gray-3")
+      div(v-else class="brand-kit__main")
+        div(class="brand-kit__header")
+          div(class="brand-kit__selector")
+            brand-selector(@deleteItem="handleDeleteItem")
+          brand-kit-add-btn(:text="`${$t('NN0396')}`"
+                            @click.native="addNewBrand")
+        div(class="brand-kit__tab")
+          brand-kit-tab(@deleteItem="handleDeleteItem")
+      nu-footer
     div(v-if="isOverlayed" class="dim-background"
       :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
       template(v-if="isDraggedOver")
@@ -56,6 +57,7 @@ import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
+import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -68,11 +70,13 @@ export default Vue.extend({
   },
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
+    brandkitUtils.fetchFonts(this.fetchFonts)
   },
   data() {
     return {
       isDraggedOver: false,
       isMessageShowing: false,
+      isTop: true,
       deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {
@@ -91,7 +95,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('brandkit', {
       isBrandsLoading: 'getIsBrandsLoading',
-      selectedTab: 'getSelectedTab'
+      selectedTab: 'getSelectedTab',
+      brands: 'getBrands'
     }),
     hintText(): string {
       return this.uploadHint[this.selectedTab as 'logo' | 'text']?.text ?? ''
@@ -108,7 +113,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('brandkit', {
-      fetchBrands: 'fetchBrands'
+      fetchBrands: 'fetchBrands',
+      fetchFonts: 'fetchFonts'
     }),
     addNewBrand() {
       brandkitUtils.addNewBrand()
@@ -129,7 +135,13 @@ export default Vue.extend({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-      console.log(e.dataTransfer?.files)
+      const files = e.dataTransfer?.files
+      if (this.selectedTab === 'text') {
+        if (!files) return
+        uploadUtils.uploadAsset('font', files)
+      } else {
+        console.log(files)
+      }
     },
     handleDeleteItem(item: IDeletingItem) {
       this.deleteBuffer = item
@@ -156,6 +168,9 @@ export default Vue.extend({
           break
       }
       this.handleClearDeletion()
+    },
+    onScroll() {
+      this.isTop = (this.$refs.content as HTMLElement).scrollTop === 0
     }
   }
 })
@@ -164,7 +179,10 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .brand-kit {
   @include size(100%, 100%);
-  overflow-y: auto;
+  &__scroll {
+    height: calc(100vh - #{$header-height});
+    overflow-y: auto;
+  }
   &__main {
     min-height: calc(100vh - #{$header-height});
     padding-top: 100px;
@@ -225,7 +243,7 @@ export default Vue.extend({
 }
 
 .delete-confirm {
-  background: #FFFFFF;
+  background: #ffffff;
   box-shadow: 0px 0px 12px rgba(151, 150, 150, 0.4);
   border-radius: 6px;
   padding: 20px;
@@ -259,7 +277,7 @@ export default Vue.extend({
       }
     }
     &__confirm {
-      background: #EC5858;
+      background: #ec5858;
       border-radius: 5px;
       padding: 4px 23px;
       & > span {
