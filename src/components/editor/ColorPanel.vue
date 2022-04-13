@@ -54,7 +54,7 @@ import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { ColorEventType, FunctionPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, LayerType } from '@/store/types'
 import color from '@/store/module/color'
 import tiptapUtils from '@/utils/tiptapUtils'
 
@@ -80,6 +80,7 @@ export default Vue.extend({
     return {
       vcoConfig: {
         handler: () => {
+          console.log('click outside')
           const sel = window.getSelection()
           if (sel && sel.rangeCount) {
             const target = sel?.getRangeAt(0).startContainer
@@ -121,7 +122,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
     isShape(): boolean {
-      return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
+      return layerUtils.getCurrConfig.type === LayerType.shape
     },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
@@ -158,9 +159,11 @@ export default Vue.extend({
       })
     },
     handleColorModal(): void {
+      console.log(!colorUtils.isColorPickerOpen)
       colorUtils.setIsColorPickerOpen(!colorUtils.isColorPickerOpen)
     },
     middleware(event: MouseEvent): boolean {
+      console.warn('middle')
       return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
     },
     closePanel(): void {
