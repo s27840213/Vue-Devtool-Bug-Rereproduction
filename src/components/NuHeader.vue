@@ -39,7 +39,7 @@
               class="nu-header__container__link") {{$t('NN0007')}}
           div(class="p-5 pointer"
             :class="{'text-blue-1': currentPage === 'MyDesign'}")
-            router-link(to="/billing"
+            router-link(to="/payment"
               class="nu-header__container__link") 付款測試
         div(v-else class="body-2" key="no-navigation")
           div

@@ -32,9 +32,9 @@
                   placeholder="example@vivipic.com")
           div(class="payment-input-block-field")
             label(for="country") 國家*
-            input(id="country" required
-                  v-model="userData.country"
-                  placeholder="Taiwan")
+            dropdown(id="country" required :options="country"
+                    @select="option => setCountry(option)")
+              span(class="country-label") {{userData.country}}
         btn(class="rounded" type="primary-mid"
             :disabled="!sendReady") 送出
       div(class="payment-result") 結果
@@ -46,8 +46,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import payment from '@/apis/payment'
 import NuHeader from '@/components/NuHeader.vue'
+import countryData from '@/assets/json/country.json'
 
 export default Vue.extend({
   name: 'Payment',
@@ -69,12 +71,18 @@ export default Vue.extend({
         // address: '',
         // invoice: ''
       },
+      country: countryData,
       TPDirect: (window as any).TPDirect
     }
   },
   watch: {
   },
   mounted() {
+    this.userData.country = ({
+      tw: 'Taiwan',
+      jp: 'Japan',
+      us: 'United States'
+    } as Record<string, string>)[i18n.locale]
     this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
 
     const fields = {
@@ -163,6 +171,9 @@ export default Vue.extend({
           this.recursivePrint(v, i, a, `${prefix}${item[0]}.`)).join('\n')
       }
       return `${prefix}${item.join(': ')}`
+    },
+    setCountry(option: string) {
+      this.userData.country = option
     },
     submit() {
       this.isLoading = true
