@@ -158,11 +158,11 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        if (type !== 'logo') {
-          this.uploadAsset(type, files as FileList)
-        } else {
-          console.log(files)
+        const params: { brandId?: string } = {}
+        if (type === 'logo') {
+          params.brandId = store.getters['brandkit/getCurrentBrandId']
         }
+        this.uploadAsset(type, files as FileList, params)
       }
     }, false)
   }
@@ -266,10 +266,11 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, { addToPage = false, id, pollingCallback }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, brandId }: {
     addToPage?: boolean,
     id?: string,
-    pollingCallback?: (json: IUploadAssetResponse) => void
+    pollingCallback?: (json: IUploadAssetResponse) => void,
+    brandId?: string
   } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
@@ -286,6 +287,8 @@ class UploadUtils {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
       } else if (type === 'font') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.locale}_original`)
+      } else if (type === 'logo') {
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId ?? ''}/${assetId}/original`)
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
@@ -385,8 +388,6 @@ class UploadUtils {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceFont(tempId, json.data)
-                      // store.dispatch('getAllAssets', { token: this.token })
-                      // update uploading font as real object
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
@@ -432,6 +433,33 @@ class UploadUtils {
                     } else {
                       console.log('Failed to upload the file')
                       modalUtils.setModalInfo(`${i18n.t('NN0223')}`, [], '')
+                    }
+                  })
+                }
+              })
+            }, 2000)
+          }
+        } else if (type === 'logo') {
+          // const tempId = brandkitUtils.createTempLogo(assetId)
+          xhr.open('POST', this.loginOutput.upload_map.url, true)
+          xhr.send(formData)
+          xhr.onload = () => {
+            // polling the JSON file of uploaded image
+            const interval = setInterval(() => {
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+              fetch(pollingTargetSrc).then((response) => {
+                if (response.status === 200) {
+                  clearInterval(interval)
+                  response.json().then((json: IUploadAssetResponse) => {
+                    if (json.flag === 0) {
+                      // notify success
+                      console.log('Successfully upload the file')
+                      // brandkitUtils.replaceLogo(tempId, json.data)
+                      console.log(json)
+                    } else {
+                      // notify fail
+                      // brandkitUtils.deleteFont(tempId)
+                      console.log('Failed to upload the file')
                     }
                   })
                 }

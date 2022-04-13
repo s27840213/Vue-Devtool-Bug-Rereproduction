@@ -45,6 +45,9 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   getBrands(state: IBrandKitState): IBrand[] {
     return state.brands
   },
+  getCurrentBrandId(state: IBrandKitState): string {
+    return state.currentBrandId
+  },
   getCurrentBrand(state: IBrandKitState): IBrand {
     return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? NULL_BRAND
   },
