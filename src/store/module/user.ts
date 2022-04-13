@@ -325,7 +325,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('SET_TOKEN', '')
     }
   },
-  /* eslint-disable camelcase */
+
   async sendVcode({ commit }, { uname, account, upass, register, vcode_only, type, token, locale }) {
     try {
       const { data } = await userApis.sendVcode(uname, account, upass, register, vcode_only, type, token, locale)
@@ -335,7 +335,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  /* eslint-disable camelcase */
+
   async verifyVcode({ commit }, { account, vcode, token, type }) {
     try {
       const { data } = await userApis.verifyVcode(account, vcode, token, type)
