@@ -214,8 +214,8 @@ export default Vue.extend({
   mounted() {
     logUtils.setLog('Editor mounted')
     this.clearBgRemoveState()
-    colorUtils.on('toggleColorPanel', (b: boolean) => {
-      this.colorPanelOpenState.val = b
+    colorUtils.on('closeColorPanel', () => {
+      this.colorPanelOpenState.val = false
     })
   },
   methods: {

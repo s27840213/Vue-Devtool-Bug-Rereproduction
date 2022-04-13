@@ -132,9 +132,7 @@
                 @click="handleClickWaterfall(template)"
                 @mouseenter="handleMouseEnter(template.group_id)"
                 @mouseleave="handleMouseLeave(template.group_id)")
-              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
-                                          :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
+              img(class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
               div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
               div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
                 svg-icon(iconName="multiple-file"
@@ -427,8 +425,8 @@ export default Vue.extend({
     mobileSearchStyles() {
       return this.mobileSnapToTop ? { zIndex: 10 } : {}
     },
-    templateStyles(aspectRatio: number) {
-      return { aspectRatio: `${aspectRatio}` }
+    templateStyles(ratio: number) {
+      return { paddingTop: `${ratio * 100}%` }
     },
     multiThemeButtonStyles() {
       return this.$i18n.locale === 'tw' ? {
@@ -846,8 +844,11 @@ body {
         overflow: hidden;
         cursor: pointer;
         &__img {
+          position: absolute;
           width: 100%;
           height: 100%;
+          top: 0;
+          left: 0;
         }
         &__theme {
           position: absolute;
@@ -999,7 +1000,7 @@ body {
       align-items: center;
       max-width: 200px;
       width: 100%;
-      aspect-ratio: 1;
+      padding-top: calc(100% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -1013,7 +1014,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 67%;
-      aspect-ratio: 1;
+      padding-top: calc(100% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -1136,7 +1137,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 100%;
-      aspect-ratio: 1;
+      padding-top: calc(67% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;

@@ -432,7 +432,7 @@ export default Vue.extend({
         }
         return
       }
-      colorUtils.event.emit('toggleColorPanel', false)
+      colorUtils.event.emit('closeColorPanel', false)
       this.$emit('clickSubController', this.layerIndex, this.config.type)
     },
     onDblClick() {
