@@ -281,6 +281,26 @@ class BrandKitUtils {
     })
   }
 
+  fetchLogos(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_logos', [])
+    }
+    store.commit('brandkit/SET_isLogosLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isLogosLoading', false)
+    })
+  }
+
+  fetchPalettes(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_palettes', [])
+    }
+    store.commit('brandkit/SET_isPalettesLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isPalettesLoading', false)
+    })
+  }
+
   fetchFonts(fetcher: () => Promise<void>, clear = true) {
     if (clear) {
       store.commit('brandkit/SET_fonts', [])

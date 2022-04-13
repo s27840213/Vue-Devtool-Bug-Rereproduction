@@ -26,6 +26,26 @@ export default {
       }
     }))
   },
+  async getLogos(brandId: string, token?: string, teamId?: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-logo', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId(),
+        brand_id: brandId
+      }
+    }))
+  },
+  async getPalettes(brandId: string, token?: string, teamId?: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-palette', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId(),
+        brand_id: brandId
+      }
+    }))
+  },
   async getFonts(token?: string, teamId?: string, params = {}): Promise<any> {
     return await apiUtils.requestWithRetry(() => axios('/list-asset', {
       method: 'POST',

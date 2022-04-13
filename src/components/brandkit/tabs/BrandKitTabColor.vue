@@ -2,8 +2,13 @@
   div(class="brand-kit-tab-color")
     brand-kit-add-btn(:text="`${$t('NN0404')}`"
                       @click.native="handleCreatePalette")
-    template(v-for="colorPalette in colorPalettes")
-      brand-kit-color-palette(:colorPalette="colorPalette"
+    div(v-if="isPalettesLoading")
+      svg-icon(iconName="loading"
+              iconWidth="50px"
+              iconColor="gray-3")
+    template(v-else)
+      brand-kit-color-palette(v-for="colorPalette in colorPalettes"
+                              :colorPalette="colorPalette"
                               :selectedColor="selectedColor"
                               @selectColor="handleSelectColor"
                               @deleteItem="handleDeleteItem")
@@ -11,7 +16,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue'
@@ -30,15 +35,22 @@ export default Vue.extend({
     BrandKitAddBtn,
     BrandKitColorPalette
   },
+  mounted() {
+    brandkitUtils.fetchPalettes(this.fetchPalettes)
+  },
   computed: {
     ...mapGetters('brandkit', {
-      currentBrand: 'getCurrentBrand'
+      currentBrand: 'getCurrentBrand',
+      isPalettesLoading: 'getIsPalettesLoading'
     }),
     colorPalettes(): IBrandColorPalette[] {
       return (this.currentBrand as IBrand).colorPalettes
     }
   },
   methods: {
+    ...mapActions('brandkit', {
+      fetchPalettes: 'fetchPalettes'
+    }),
     handleCreatePalette() {
       brandkitUtils.createPalette().then(id => {
         this.$nextTick(() => {

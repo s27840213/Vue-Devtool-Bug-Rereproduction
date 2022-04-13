@@ -13,6 +13,8 @@ interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
   isBrandsLoading: boolean,
+  isLogosLoading: boolean,
+  isPalettesLoading: boolean,
   isFontsLoading: boolean,
   selectedTab: string,
   fonts: IBrandFont[],
@@ -29,6 +31,8 @@ const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
   isBrandsLoading: false,
+  isLogosLoading: false,
+  isPalettesLoading: false,
   isFontsLoading: false,
   selectedTab: brandkitUtils.getTabKeys()[0],
   fonts: [],
@@ -46,6 +50,12 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
+  },
+  getIsLogosLoading(state: IBrandKitState): boolean {
+    return state.isLogosLoading
+  },
+  getIsPalettesLoading(state: IBrandKitState): boolean {
+    return state.isPalettesLoading
   },
   getIsFontsLoading(state: IBrandKitState): boolean {
     return state.isFontsLoading
@@ -78,6 +88,32 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       const brands = data.brands
       commit('SET_brands', brands)
       commit('SET_currentBrand', brands[0] ?? { id: '' })
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchLogos({ commit, state }) {
+    try {
+      const { data } = await brandkitApi.getLogos(state.currentBrandId)
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const logos = data.logos
+      commit('SET_logos', { brandId: state.currentBrandId, logos })
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchPalettes({ commit, state }) {
+    try {
+      const { data } = await brandkitApi.getPalettes(state.currentBrandId)
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const palettes = data.palettes
+      commit('SET_palettes', { brandId: state.currentBrandId, palettes })
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -401,11 +437,27 @@ const mutations: MutationTree<IBrandKitState> = {
   SET_brands(state: IBrandKitState, brands: IBrand[]) {
     state.brands = brands
   },
+  SET_logos(state: IBrandKitState, updateInfo: { brandId: string, logos: IBrandLogo[] }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
+    if (!brand) return
+    brand.logos = updateInfo.logos
+  },
+  SET_palettes(state: IBrandKitState, updateInfo: { brandId: string, palettes: IBrandColorPalette[] }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
+    if (!brand) return
+    brand.colorPalettes = updateInfo.palettes
+  },
   SET_currentBrand(state: IBrandKitState, brand: IBrand) {
     state.currentBrandId = brand.id
   },
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
+  },
+  SET_isLogosLoading(state: IBrandKitState, isLogosLoading: boolean) {
+    state.isLogosLoading = isLogosLoading
+  },
+  SET_isPalettesLoading(state: IBrandKitState, isPalettesLoading: boolean) {
+    state.isPalettesLoading = isPalettesLoading
   },
   SET_isFontsLoading(state: IBrandKitState, isFontsLoading: boolean) {
     state.isFontsLoading = isFontsLoading
@@ -492,7 +544,6 @@ const mutations: MutationTree<IBrandKitState> = {
     colorPalette.colors.splice(index, 1)
   },
   UPDATE_setColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, id: string, color: string }) {
-    console.log(updateInfo.color)
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
