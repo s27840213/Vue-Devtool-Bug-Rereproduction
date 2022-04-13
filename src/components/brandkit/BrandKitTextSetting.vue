@@ -9,7 +9,7 @@
       span(class="brand-kit-text-setting__config__title") {{ $t('NN0062') }}
       div(class="brand-kit-text-setting__config__family-size")
         div(class="property-bar pointer" @click="openFontsPanel")
-          img(:src="getFontPrev")
+          img(:src="fontPrevUrl" @error="onError")
           svg-icon(class="pointer"
             :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
         div(class="brand-kit-text-setting__config__size size-bar relative")
@@ -34,18 +34,21 @@
           :id="`icon-${icon}`"
           v-hint="hintMap[icon]"
           :iconName="icon" iconWidth="24px" iconColor="gray-2" @mousedown.native="onPropertyClick(icon)")
+      div(v-if="isFontsPanelOpen"
+        class="brand-kit-text-setting__panel-fonts"
+        v-click-outside="() => { isFontsPanelOpen = false }")
+        panel-fonts(:noTitle="true" :textStyleType="type")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import ValueSelector from '@/components/ValueSelector.vue'
-import defaultHeading from '@/assets/json/heading.json'
-import defaultSubheading from '@/assets/json/subheading.json'
-import defaultBody from '@/assets/json/body.json'
+import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import { IBrandTextStyle } from '@/interfaces/brandkit'
 import { fontSelectValue } from '@/utils/textPropUtils'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
+import { mapActions } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -53,7 +56,8 @@ export default Vue.extend({
     textStyleSetting: Object
   },
   components: {
-    ValueSelector
+    ValueSelector,
+    PanelFonts
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -75,22 +79,30 @@ export default Vue.extend({
         bold: `${this.$t('NN0101')}`,
         underline: `${this.$t('NN0102')}`,
         italic: `${this.$t('NN0103')}`
-      }
+      },
+      fontPrevUrl: ''
     }
+  },
+  mounted() {
+    this.getFontPrev()
   },
   computed: {
     textStyle(): IBrandTextStyle {
       return this.textStyleSetting[this.type + 'Style']
     },
-    getFontPrev(): string {
-      // return this.textStyle.font
-      return ''
-    },
     fontSize(): number {
       return this.textStyle.size
     }
   },
+  watch: {
+    'textStyle.fontId': function() {
+      this.getFontPrev()
+    }
+  },
   methods: {
+    ...mapActions('brandkit', {
+      refreshFontAsset: 'refreshFontAsset'
+    }),
     styleHit(iconName: string) {
       switch (iconName) {
         case 'bold':
@@ -114,6 +126,33 @@ export default Vue.extend({
         return {
           fontFamily: this.textStyle.fontId
         }
+      }
+    },
+    getFontPrev() {
+      let url = ''
+      if (this.textStyle.isDefault) {
+        url = brandkitUtils.getFontPrevUrlByFontFamily(brandkitUtils.getDefaultFontId(this.$i18n.locale), 'public', '', '')
+      } else {
+        url = brandkitUtils.getFontPrevUrlByFontFamily(this.textStyle.fontId, this.textStyle.fontType, this.textStyle.fontUserId, this.textStyle.fontAssetId)
+      }
+      if (this.textStyle.fontType === 'private' && url === '') {
+        this.refreshFont(this.textStyle.fontAssetId)
+      }
+      this.fontPrevUrl = url
+    },
+    refreshFont(assetId: string) {
+      const assetIndex = parseInt(assetId)
+      this.refreshFontAsset({
+        id: assetId,
+        asset_index: assetIndex
+      }).then((urlMap) => {
+        if (!urlMap['prev-name']) return
+        this.fontPrevUrl = urlMap['prev-name']
+      })
+    },
+    onError() {
+      if (this.textStyle.fontType === 'private') {
+        this.refreshFont(this.textStyle.fontAssetId)
       }
     },
     handleToggleConfig() {
@@ -254,9 +293,9 @@ export default Vue.extend({
       box-sizing: border-box;
       position: relative;
       > div:nth-child(1) {
-        // > img {
-        //   width: 100px;
-        // }
+        > img {
+          width: 92px;
+        }
         width: 124px;
         box-sizing: border-box;
       }
@@ -294,6 +333,16 @@ export default Vue.extend({
         border-radius: 2.5px;
       }
     }
+  }
+  &__panel-fonts {
+    position: absolute;
+    left: 0;
+    top: 120px;
+    width: 280px;
+    background-color: white;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    z-index: 2;
+    padding: 10px;
   }
 }
 </style>

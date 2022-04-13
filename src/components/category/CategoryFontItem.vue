@@ -5,7 +5,7 @@
     @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${previewUrl}}`"
+        :src="fallbackSrc || `${previewUrl}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"

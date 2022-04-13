@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
 import { IUserFontContentData } from '@/interfaces/api'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import store from '@/store'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import generalUtils from './generalUtils'
@@ -365,6 +365,25 @@ class BrandKitUtils {
       info.style.fontId = STANDARD_TEXT_FONT[i18n.locale]
       info.style.fontName = FONT_DEFAULTS[i18n.locale]
       info.style.fontType = 'public'
+    }
+  }
+
+  extractFonts(textStyleSetting: IBrandTextStyleSetting): ReturnType<typeof this.extractFontsFromStyle>[] {
+    return [
+      this.extractFontsFromStyle(textStyleSetting.headingStyle),
+      this.extractFontsFromStyle(textStyleSetting.subheadingStyle),
+      this.extractFontsFromStyle(textStyleSetting.bodyStyle)
+    ]
+  }
+
+  extractFontsFromStyle(textStyle: IBrandTextStyle): { type: string, face: string, url: string, userId: string, assetId: string, ver: number } {
+    return {
+      type: textStyle.fontType,
+      face: textStyle.fontId,
+      url: '',
+      userId: textStyle.fontUserId,
+      assetId: textStyle.fontAssetId,
+      ver: store.getters['user/getVerUni']
     }
   }
 

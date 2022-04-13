@@ -57,7 +57,7 @@ export default Vue.extend({
     }
   },
   created() {
-    textUtils.loadDefaultFonts()
+    textUtils.loadDefaultFonts(brandkitUtils.extractFonts(this.textStyleSetting))
   },
   mounted() {
     this.refreshFontUrls()

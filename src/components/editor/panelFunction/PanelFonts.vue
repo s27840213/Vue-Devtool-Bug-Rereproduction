@@ -198,6 +198,7 @@ export default Vue.extend({
             src: isAdmin ? 'admin' : 'private',
             userId: font.team_id,
             assetId: isAdmin ? font.id : font.asset_index.toString(),
+            asset_index: font.asset_index,
             signed_url: font.signed_url,
             name: font.name
           }]
