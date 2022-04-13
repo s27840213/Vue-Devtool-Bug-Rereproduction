@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export interface Itheme {
     id: number,
     width: number,
@@ -9,7 +10,6 @@ export interface Itheme {
     editHidden: number
 }
 
-/* eslint-disable camelcase */
 export interface IContentTemplate {
     key_id: string,
     index: number
@@ -22,7 +22,6 @@ export interface ICoverTheme {
     options: IContentTemplate[]
 }
 
-/* eslint-disable camelcase */
 export interface IThemeTemplate {
     key_id: string,
     theme_ids: string

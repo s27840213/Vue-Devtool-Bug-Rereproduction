@@ -167,7 +167,7 @@ export default Vue.extend({
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
-  height: calc(100% - 50px); // why 50?(gary)
+  height: calc(100% - #{$header-height});
 }
 .home-top{
   display: flex;

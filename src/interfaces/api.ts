@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-/* eslint-disable no-use-before-define */
 export interface IPhotoTag {
   title: string
   type: string
@@ -169,25 +168,6 @@ export interface IListServiceResponse {
   flag: number
 }
 
-export interface IUserAssetsData {
-  design: {
-    content: Array<IUserDesignContentData>,
-    title: string
-  },
-  font: {
-    content: Array<IUserFontContentData>,
-    title: string
-  },
-  image: {
-    content: Array<IUserImageContentData>,
-    title: string
-  },
-  video: {
-    content: Array<string>,
-    title: string
-  }
-}
-
 export interface IUserDesignContentData {
   author: string,
   color: Array<string>,
@@ -278,6 +258,25 @@ export interface IUserFontContentData {
   }
 }
 
+export interface IUserAssetsData {
+  design: {
+    content: Array<IUserDesignContentData>,
+    title: string
+  },
+  font: {
+    content: Array<IUserFontContentData>,
+    title: string
+  },
+  image: {
+    content: Array<IUserImageContentData>,
+    title: string
+  },
+  video: {
+    content: Array<string>,
+    title: string
+  }
+}
+
 export interface IPhotoServiceParams {
   token?: string
   locale?: string
@@ -292,22 +291,13 @@ export interface IFileParams {
   pageIndex: number
 }
 
-export interface IPhotoServiceResponse {
-  data: IPhotoServiceData
-  flag: number
+export interface IPhotoUserInfo {
+  name: string
+  link: string
 }
-
-export interface IPhotoServiceData {
-  host: string
-  preview: string
-  data: string
-  content: IPhotoServiceDataContent[]
-  next_page: number
-}
-
-export interface IPhotoServiceDataContent {
-  title: string
-  list: IPhotoItem[]
+export interface IPhotoItemInfo {
+  description: string
+  user: IPhotoUserInfo
 }
 
 export interface IPhotoItem {
@@ -321,14 +311,22 @@ export interface IPhotoItem {
   info: IPhotoItemInfo
 }
 
-export interface IPhotoItemInfo {
-  description: string
-  user: IPhotoUserInfo
+export interface IPhotoServiceDataContent {
+  title: string
+  list: IPhotoItem[]
 }
 
-export interface IPhotoUserInfo {
-  name: string
-  link: string
+export interface IPhotoServiceData {
+  host: string
+  preview: string
+  data: string
+  content: IPhotoServiceDataContent[]
+  next_page: number
+}
+
+export interface IPhotoServiceResponse {
+  data: IPhotoServiceData
+  flag: number
 }
 
 export interface IHashtagServiceContentDataTagItem {

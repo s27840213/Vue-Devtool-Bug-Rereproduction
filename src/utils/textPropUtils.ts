@@ -733,6 +733,9 @@ class TextPropUtils {
             for (let i = 0; i < (currLayer as IGroup).layers.length; i++) {
               if ((currLayer as IGroup).layers[i].type === 'text') {
                 const tmpLayer = (currLayer as IGroup).layers[i] as IText
+                if (['italic', 'underline'].includes(propName) && tmpLayer.styles.writingMode.includes('vertical')) {
+                  continue
+                }
                 if (propBuff === 'init') {
                   propBuff = this.propReadOfLayer(propName, tmpLayer, true)
                 } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer, true)) {
@@ -756,6 +759,9 @@ class TextPropUtils {
         for (let i = 0; i < tmpLayerGroup.layers.length; i++) {
           if (tmpLayerGroup.layers[i].type === 'text') {
             const tmpLayer = tmpLayerGroup.layers[i] as IText
+            if (['italic', 'underline'].includes(propName) && tmpLayer.styles.writingMode.includes('vertical')) {
+              continue
+            }
             if (typeof propBuff === 'undefined') {
               propBuff = this.propReadOfLayer(propName, tmpLayer)
             } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {

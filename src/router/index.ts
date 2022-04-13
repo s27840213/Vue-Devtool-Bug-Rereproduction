@@ -51,14 +51,12 @@ const routes: Array<RouteConfig> = [
     path: 'editor',
     name: 'Editor',
     component: Editor,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: editorRouteHandler
   },
   {
     path: 'preview',
     name: 'Preview',
     component: Preview,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
@@ -95,7 +93,6 @@ const routes: Array<RouteConfig> = [
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
     component: SignUp,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -113,7 +110,6 @@ const routes: Array<RouteConfig> = [
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
     component: Login,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {

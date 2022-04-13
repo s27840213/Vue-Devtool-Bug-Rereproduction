@@ -215,7 +215,7 @@ export default Vue.extend({
       }
       return (currLayer as IGroup).layers.some(l => textShapeUtils.isCurvedText(l.styles))
     },
-    isVerticalText(): boolean {
+    hasOnlyVerticalText(): boolean {
       const { getCurrLayer: currLayer, subLayerIdx } = LayerUtils
       if (subLayerIdx !== -1) {
         return ((currLayer as IGroup).layers[subLayerIdx] as IText).styles.writingMode.includes('vertical')
@@ -223,7 +223,7 @@ export default Vue.extend({
       if (currLayer.type === 'text') {
         return (currLayer as IText).styles.writingMode.includes('vertical')
       }
-      return false
+      return !(currLayer as IGroup).layers.some(l => l.type === 'text' && !(l as IText).styles.writingMode.includes('vertical'))
     }
   },
   watch: {
@@ -387,11 +387,11 @@ export default Vue.extend({
             this.handleSpanPropClick('weight', ['bold', 'normal'])
             break
           case 'underline':
-            if (this.isVerticalText) return
+            if (this.hasOnlyVerticalText) return
             this.handleSpanPropClick('decoration', ['underline', 'none'])
             break
           case 'italic':
-            if (this.isVerticalText) return
+            if (this.hasOnlyVerticalText) return
             this.handleSpanPropClick('style', ['italic', 'normal'])
             break
         }
@@ -401,15 +401,16 @@ export default Vue.extend({
     },
     handleSpanPropClick(prop: string, pair: [string, string]) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx } = LayerUtils
+      const newPropVal = this.props[prop] === pair[0] ? pair[1] : pair[0]
       if ((currLayer.type === 'group' && subLayerIdx === -1) || currLayer.type === 'tmp') {
         const layers = (currLayer as IGroup | ITmp).layers
-        const newPropVal = layers
-          .filter(l => l.type === 'text')
-          .every(text => {
-            return (text as IText).paragraphs.every(p => {
-              return p.spans.every(s => s.styles[prop] === pair[0])
-            })
-          }) ? pair[1] : pair[0]
+        // const newPropVal = layers
+        //   .filter(l => l.type === 'text')
+        //   .every(text => {
+        //     return (text as IText).paragraphs.every(p => {
+        //       return p.spans.every(s => s.styles[prop] === pair[0])
+        //     })
+        //   }) ? pair[1] : pair[0]
 
         layers.forEach((l, idx) => {
           if (l.type === 'text') {
@@ -427,9 +428,9 @@ export default Vue.extend({
           }
         })
       } else {
-        tiptapUtils.applySpanStyle(prop, (this.props[prop] === pair[0]) ? pair[1] : pair[0])
-        TextPropUtils.updateTextPropsState({ [prop]: (this.props[prop] === pair[0]) ? pair[1] : pair[0] })
+        tiptapUtils.applySpanStyle(prop, newPropVal)
       }
+      TextPropUtils.updateTextPropsState({ [prop]: newPropVal })
     },
     updateLayerProps(props: { [key: string]: string | number | boolean }) {
       const { getCurrLayer: currLayer, layerIndex, subLayerIdx, pageIndex } = LayerUtils
@@ -649,8 +650,8 @@ export default Vue.extend({
       if (icon === 'font-vertical') { // if there is any curveText, vertical mode is disabled
         return !this.hasCurveText
       }
-      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text, underline and italic are disabled
-        return !this.isVerticalText
+      if (['underline', 'italic'].includes(icon)) { // if it is single vertical text or group with only veritical texts, underline and italic are disabled
+        return !this.hasOnlyVerticalText
       }
       return true
     }
