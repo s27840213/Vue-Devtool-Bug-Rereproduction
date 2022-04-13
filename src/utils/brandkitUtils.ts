@@ -368,7 +368,7 @@ class BrandKitUtils {
     }
   }
 
-  extractFonts(textStyleSetting: IBrandTextStyleSetting): ReturnType<typeof this.extractFontsFromStyle>[] {
+  extractFonts(textStyleSetting: IBrandTextStyleSetting): { type: string, face: string, url: string, userId: string, assetId: string, ver: number }[] {
     return [
       this.extractFontsFromStyle(textStyleSetting.headingStyle),
       this.extractFontsFromStyle(textStyleSetting.subheadingStyle),
