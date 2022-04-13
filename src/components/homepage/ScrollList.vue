@@ -50,7 +50,7 @@
         template(v-else-if="type === 'template'")
           div(v-for="item in templateData"
             class="list-content-items__template-item")
-            router-link(:to="`/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`" target="_blank")
+            router-link(:to="templateUrl(item)" target="_blank")
               img(loading="lazy"
                 :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
                 :style="templateImgStyle")
@@ -169,6 +169,11 @@ export default Vue.extend({
     scroll(next: boolean) {
       const items = this.$refs.items as HTMLElement
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
+    },
+    templateUrl(item: Record<string, Record<string, string>>):string {
+      return this.theme === '7'
+        ? `editor?type=product-page-template&design_id=${item.group_id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
+        : `/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
     }
   }
 })
