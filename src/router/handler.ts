@@ -38,7 +38,11 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
         }
       }
     } else if (type === 'new-design-size' && width && height) {
-      designUtils.newDesign(parseInt(width), parseInt(height), parseInt(themeId as string))
+      designUtils.newDesign(
+        parseInt(width),
+        parseInt(height === '0' ? width : height),
+        parseInt(themeId as string)
+      )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)
       }
