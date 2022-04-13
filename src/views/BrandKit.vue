@@ -36,8 +36,10 @@
               span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
         div(class="delete-confirm__description")
           span {{ $t('NN0435') }}
-        div(class="delete-confirm__description")
+        div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
           span {{ $t('NN0436') }}
+        div(v-else class="delete-confirm__description")
+          span {{ $t('NN0459') }}
         div(class="delete-confirm__buttons")
           div(class="delete-confirm__buttons__cancel pointer"
             @click="handleClearDeletion")
@@ -58,7 +60,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
-import themeUtils from '@/utils/themeUtils'
 
 export default Vue.extend({
   name: 'BrandKit',
