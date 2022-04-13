@@ -40,7 +40,7 @@
                 :src="item.url"
                 @error="imgOnerror")
             span(class="body-XS text-gray-1") {{item.title}}
-            span(class="body-XXS text-gray-3") {{item.width}} x {{item.height}}
+            span(class="body-XXS text-gray-3") {{item.description}}
         //- type mydesign
         template(v-else-if="type === 'mydesign'")
           design-item(v-for="item in mydesignData"

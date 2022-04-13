@@ -1,6 +1,6 @@
+/* eslint-disable camelcase */
 import { IUserFontContentData } from './api'
 
-/* eslint-disable camelcase */
 export interface IUploadAssetResponse {
   flag: number,
   url?: {
