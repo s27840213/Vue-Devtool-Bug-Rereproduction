@@ -58,6 +58,7 @@ import rulerUtils from '@/utils/rulerUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
 import i18n from '@/i18n'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   name: 'Editor',
@@ -75,11 +76,14 @@ export default Vue.extend({
   data() {
     return {
       FunctionPanelType,
-      isColorPanelOpen: false,
       isSidebarPanelOpen: true,
       inputLocale: i18n.locale,
       isLoading: false,
-      isSaving: false
+      isSaving: false,
+      // isColorPanelOpen: false
+      colorPanelOpenState: {
+        val: false
+      }
     }
   },
   watch: {
@@ -121,6 +125,14 @@ export default Vue.extend({
     ...mapGetters('user', {
       token: 'getToken'
     }),
+    isColorPanelOpen: {
+      get: function(): boolean {
+        return this.colorPanelOpenState ? this.colorPanelOpenState.val : false
+      },
+      set: function (newVal: boolean) {
+        this.colorPanelOpenState.val = newVal
+      }
+    },
     isShape(): boolean {
       return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
     },
@@ -202,6 +214,9 @@ export default Vue.extend({
   mounted() {
     logUtils.setLog('Editor mounted')
     this.clearBgRemoveState()
+    colorUtils.on('toggleColorPanel', (b: boolean) => {
+      this.colorPanelOpenState.val = b
+    })
   },
   methods: {
     ...mapMutations({

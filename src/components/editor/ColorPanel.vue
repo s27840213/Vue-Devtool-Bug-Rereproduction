@@ -80,7 +80,6 @@ export default Vue.extend({
     return {
       vcoConfig: {
         handler: () => {
-          console.log('click outside')
           const sel = window.getSelection()
           if (sel && sel.rangeCount) {
             const target = sel?.getRangeAt(0).startContainer
@@ -159,11 +158,9 @@ export default Vue.extend({
       })
     },
     handleColorModal(): void {
-      console.log(!colorUtils.isColorPickerOpen)
       colorUtils.setIsColorPickerOpen(!colorUtils.isColorPickerOpen)
     },
     middleware(event: MouseEvent): boolean {
-      console.warn('middle')
       return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
     },
     closePanel(): void {
