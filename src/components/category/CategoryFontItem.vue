@@ -5,11 +5,11 @@
     @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview()}`"
+        :src="fallbackSrc || `${previewUrl}}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${getPreview2()}`"
+        :src="fallbackSrc || `${previewUrl2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
       svg-icon(v-if="props.font === item.id"
@@ -28,25 +28,30 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFont, ISelection } from '@/interfaces/text'
+import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
-import text from '@/store/text'
 import tiptapUtils from '@/utils/tiptapUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   props: {
     host: String,
     preview: String,
     preview2: String,
-    item: Object
+    item: Object,
+    textStyleType: String
   },
   data() {
     return {
-      fallbackSrc: ''
+      fallbackSrc: '',
+      previewUrl: '',
+      previewUrl2: ''
     }
+  },
+  mounted() {
+    this.refreshPreviewUrls()
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
@@ -86,6 +91,18 @@ export default Vue.extend({
       return this.item.src || this.item.fontType
     }
   },
+  watch: {
+    'item.id': {
+      handler() {
+        this.refreshPreviewUrls()
+      }
+    },
+    'item.signed_url': {
+      handler() {
+        this.refreshPreviewUrls()
+      }
+    }
+  },
   methods: {
     ...mapActions('brandkit', {
       refreshFontAsset: 'refreshFontAsset'
@@ -104,7 +121,35 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
       console.warn(this.item)
     },
-    async setFont() {
+    refreshPreviewUrls() {
+      this.previewUrl = this.getPreview()
+      this.previewUrl2 = this.getPreview2()
+    },
+    setFont() {
+      if (this.$route.name === 'BrandKit') {
+        this.setBrandkitFont()
+      } else {
+        this.setEditorFont()
+      }
+    },
+    async setBrandkitFont() {
+      await this.$store.dispatch('text/addFont', {
+        type: this.itemFontType, // public fonts in list-design don't have src
+        url: this.item.fontUrl,
+        userId: this.item.userId,
+        assetId: this.item.assetId,
+        face: this.item.id,
+        ver: this.item.ver
+      })
+      brandkitUtils.updateTextStyle(this.textStyleType, {
+        fontId: this.item.id,
+        fontUserId: this.item.userId,
+        fontAssetId: this.item.assetId,
+        fontType: this.itemFontType,
+        fontName: this.item.name
+      })
+    },
+    async setEditorFont() {
       if (this.pending) return
       tiptapUtils.agent(editor => editor.setEditable(false))
       const isRanged = this.isRanged()

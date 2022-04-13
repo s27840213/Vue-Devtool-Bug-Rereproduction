@@ -262,7 +262,9 @@ export default Vue.extend({
       })
     },
     onError() {
-      this.refreshFont(this.props.assetId)
+      if (this.props.type === 'private') {
+        this.refreshFont(this.props.assetId)
+      }
     },
     openFontsPanel() {
       this.isOpenFontPanel = true

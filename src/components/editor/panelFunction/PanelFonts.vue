@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-fonts")
-    div(class="panel-fonts__title")
+    div(v-if="!noTitle" class="panel-fonts__title")
       span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -26,7 +26,8 @@
           :host="host"
           :preview="preview"
           :preview2="preview2"
-          :item="item")
+          :item="item"
+          :textStyleType="textStyleType")
     div(class="panel-fonts__upload")
       transition(name="fade-in")
         div(v-if="['uploading', 'success'].includes(fontUploadStatus)"
@@ -52,7 +53,6 @@ import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
 
 export default Vue.extend({
@@ -61,6 +61,13 @@ export default Vue.extend({
     CategoryList,
     CategoryFontItem,
     CategoryListFont
+  },
+  props: {
+    noTitle: {
+      type: Boolean,
+      default: false
+    },
+    textStyleType: String
   },
   data() {
     return {
@@ -119,7 +126,12 @@ export default Vue.extend({
             id: `${rowItems.map(item => item.id).join('_')}`,
             size: 32,
             type: 'category-font-item',
-            list: rowItems,
+            list: rowItems.map(item => ({
+              ...item,
+              fontType: 'public',
+              userId: item.user_id,
+              assetId: item.src === 'admin' ? item.asset_id : item.asset_index?.toString()
+            })),
             sentinel: hasNextPage && idx === (list.length - 1)
           }
         })
@@ -186,7 +198,8 @@ export default Vue.extend({
             src: isAdmin ? 'admin' : 'private',
             userId: font.team_id,
             assetId: isAdmin ? font.id : font.asset_index.toString(),
-            signed_url: font.signed_url
+            signed_url: font.signed_url,
+            name: font.name
           }]
         }
       }))
