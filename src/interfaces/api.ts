@@ -118,7 +118,6 @@ export interface IListServiceParams {
   cache?: boolean
   platform?: string
   all_theme?: number
-  app_ver?: number // todelete
 }
 
 export interface IGroupDesignInputParams {
