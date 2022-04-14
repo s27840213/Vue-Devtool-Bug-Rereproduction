@@ -247,6 +247,9 @@ export default Vue.extend({
       border-radius: 0px; // to override .feature-button
       & > span {
         @include body-SM;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       &:not(.disabled):hover {
         & > .brand-selector__brand-list__item-menu-icon {
