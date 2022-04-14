@@ -23,7 +23,7 @@
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      template(v-if="((['group', 'tmp'].includes(getLayerType))) || (getLayerType === 'frame')")
+      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"

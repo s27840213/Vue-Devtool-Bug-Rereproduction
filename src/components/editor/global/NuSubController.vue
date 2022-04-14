@@ -478,28 +478,28 @@ export default Vue.extend({
         e.stopPropagation()
         if (this.isDraggedPanelPhoto && !this.currDraggedPhoto.isPreview && !this.imgBuff.cached) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
+          const clip = clips[this.layerIndex]
+
           Object.assign(this.imgBuff, {
             srcObj: {
               ...clips[this.layerIndex].srcObj
             },
             styles: {
-              imgX: clips[this.layerIndex].styles.imgX,
-              imgY: clips[this.layerIndex].styles.imgY,
-              imgWidth: clips[this.layerIndex].styles.imgWidth,
-              imgHeight: clips[this.layerIndex].styles.imgHeight,
-              horizontalFlip: clips[this.layerIndex].styles.horizontalFlip,
-              verticalFlip: clips[this.layerIndex].styles.verticalFlip
+              imgX: clip.styles.imgX,
+              imgY: clip.styles.imgY,
+              imgWidth: clip.styles.imgWidth,
+              imgHeight: clip.styles.imgHeight,
+              horizontalFlip: clip.styles.horizontalFlip,
+              verticalFlip: clip.styles.verticalFlip
             },
             cached: true
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
 
-          Object.assign(clips[this.layerIndex].srcObj, this.currDraggedPhoto.srcObj)
-          const clip = clips[this.layerIndex]
-          const {
-            imgWidth, imgHeight,
-            imgX, imgY
-          } = MouseUtils.clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
+          Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
+          const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+            .clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
+
           FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
             imgWidth,
             imgHeight,
@@ -555,18 +555,21 @@ export default Vue.extend({
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { styles, srcObj } = this.config
+        const { srcObj } = this.config
+        const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+        const clip = clips[this.layerIndex]
+
         Object.assign(this.imgBuff, {
           srcObj: {
             ...srcObj
           },
           styles: {
-            imgX: styles.imgX,
-            imgY: styles.imgY,
-            imgWidth: styles.imgWidth,
-            imgHeight: styles.imgHeight,
-            horizontalFlip: styles.horizontalFlip,
-            verticalFlip: styles.verticalFlip
+            imgX: clip.styles.imgX,
+            imgY: clip.styles.imgY,
+            imgWidth: clip.styles.imgWidth,
+            imgHeight: clip.styles.imgHeight,
+            horizontalFlip: clip.styles.horizontalFlip,
+            verticalFlip: clip.styles.verticalFlip
           },
           cached: true
         })
@@ -574,12 +577,11 @@ export default Vue.extend({
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...currLayer.srcObj }
         })
-
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
-        const {
-          imgWidth, imgHeight,
-          imgX, imgY
-        } = MouseUtils.clipperHandler(currLayer, this.config.clipPath, styles).styles
+
+        const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+          .clipperHandler(LayerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
+
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           adjust: { ...currLayer.styles.adjust },
           imgWidth,
