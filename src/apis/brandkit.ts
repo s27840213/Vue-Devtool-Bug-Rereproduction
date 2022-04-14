@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from '@/apis'
 import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
@@ -17,67 +18,53 @@ export default {
   getTeamId(): string {
     return store.getters['user/getTeamId']
   },
-  async getBrands(token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-brand', {
+  async sendApi(url: string, data: {[key: string]: any}): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios(url, {
       method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId()
-      }
+      data
     }))
+  },
+  async getBrands(token?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/list-brand', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId()
+    })
   },
   async getLogos(brandId: string, token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-logo', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        brand_id: brandId
-      }
-    }))
+    return await this.sendApi('/list-logo', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      brand_id: brandId
+    })
   },
   async getPalettes(brandId: string, token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-palette', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        brand_id: brandId
-      }
-    }))
+    return await this.sendApi('/list-palette', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      brand_id: brandId
+    })
   },
   async getFonts(token?: string, teamId?: string, params = {}): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        type: 'font',
-        ...params
-      }
-    }))
+    return await this.sendApi('/list-asset', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      type: 'font',
+      ...params
+    })
+  },
+  async getAsset(type: string, assetIndex: string, token?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/list-asset', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      type,
+      asset_list: assetIndex
+    })
   },
   async getFont(assetIndex: string, token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        type: 'font',
-        asset_list: assetIndex
-      }
-    }))
+    return await this.getAsset('font', assetIndex, token, teamId)
   },
   async getLogo(assetIndex: string, token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        type: 'logo',
-        asset_list: assetIndex
-      }
-    }))
+    return await this.getAsset('logo', assetIndex, token, teamId)
   },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
