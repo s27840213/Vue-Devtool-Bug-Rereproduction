@@ -32,7 +32,7 @@
             :class="{'text-blue-1': currentPage === 'MyDesign'}")
             router-link(to="/mydesign"
               class="nu-header__container__link") {{$t('NN0080')}}
-          //- div(v-if="isLogin && isAdmin"
+          div(v-if="isLogin && isAdmin"
             class="p-5 pointer"
             :class="{'text-blue-1': currentPage === 'BrandKit'}")
             router-link(to="/brandkit"
