@@ -4,13 +4,14 @@ import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
 import { IBrand, IBrandParams } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
+import i18n from '@/i18n'
 
 export default {
   getToken(): string {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return store.getters['user/getLocale']
+    return i18n.locale
   },
   getUserId(): string {
     return store.getters['user/getUserId']
