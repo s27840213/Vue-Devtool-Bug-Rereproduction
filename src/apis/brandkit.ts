@@ -68,6 +68,17 @@ export default {
       }
     }))
   },
+  async getLogo(assetIndex: string, token?: string, teamId?: string): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
+      method: 'POST',
+      data: {
+        token: token ?? this.getToken(),
+        team_id: teamId ?? this.getTeamId(),
+        type: 'logo',
+        asset_list: assetIndex
+      }
+    }))
+  },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)

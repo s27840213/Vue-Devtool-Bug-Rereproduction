@@ -81,7 +81,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('brandkit', {
-      fetchLogos: 'fetchLogos'
+      fetchLogos: 'fetchLogos',
+      refreshLogoAsset: 'refreshLogoAsset'
     }),
     getUrl(logo: IBrandLogo): string {
       return logo.signed_url ? logo.signed_url.midd : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${this.currentBrand.id}/${logo.id}/midd`
@@ -103,11 +104,23 @@ export default Vue.extend({
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {
-      const url = brandkitUtils.getDownloadUrl(logo, this.currentBrand.id)
-      const a = document.createElement('a')
-      a.setAttribute('href', url)
-      a.setAttribute('download', logo.name)
-      a.click()
+      const brand = this.currentBrand
+      const logoName = logo.name
+      const url = brandkitUtils.getDownloadUrl(logo, brand.id)
+      if (logo.signed_url) {
+        fetch(url).then(() => {
+          this.startDownloading(url, logoName)
+        }).catch(() => {
+          this.refreshLogoAsset({
+            brand,
+            logoAssetIndex: logo.asset_index
+          }).then((urlMap) => {
+            this.startDownloading(urlMap.original, logoName)
+          })
+        })
+      } else {
+        this.startDownloading(url, logoName)
+      }
     },
     handleDeleteLogo(logo: IBrandLogo) {
       this.menuOpenLogoId = ''
@@ -115,6 +128,12 @@ export default Vue.extend({
         type: 'logo',
         content: logo
       })
+    },
+    startDownloading(url: string, name: string) {
+      const a = document.createElement('a')
+      a.setAttribute('href', url)
+      a.setAttribute('download', name)
+      a.click()
     }
   }
 })

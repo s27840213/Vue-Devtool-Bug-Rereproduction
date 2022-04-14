@@ -398,6 +398,16 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     }
     return {}
   },
+  async refreshLogoAsset({ commit }, updateInfo: { brand: IBrand, logoAssetIndex: number }) {
+    const assetIndex = updateInfo.logoAssetIndex.toString()
+    const { data } = await brandkitApi.getLogo(assetIndex)
+    if (data.flag === 0) {
+      const urlMap = data.url_map[assetIndex]
+      commit('UPDATE_replaceLogoUrl', { brand: updateInfo.brand, assetIndex, urlMap })
+      return urlMap
+    }
+    return {}
+  },
   async updatePageFonts({ dispatch }, { pageIndex }: { pageIndex: number }) {
     const { layers } = store.state.pages[pageIndex]
     const fontToRequest = new Set<string>()
@@ -595,6 +605,15 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!font || !font.signed_url) return
     for (const key of Object.keys(font.signed_url)) {
       (font.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
+    }
+  },
+  UPDATE_replaceLogoUrl(state: IBrandKitState, updateInfo: { brand: IBrand, assetIndex: string, urlMap: {[key: string]: string} }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const logo = brand.logos.find(logo => logo.asset_index.toString() === updateInfo.assetIndex)
+    if (!logo || !logo.signed_url) return
+    for (const key of Object.keys(logo.signed_url)) {
+      (logo.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
     }
   },
   UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: {[key: string]: string} }) {

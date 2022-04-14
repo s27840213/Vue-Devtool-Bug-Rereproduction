@@ -6,6 +6,7 @@ export interface IBrandLogo {
   name: string,
   id: string,
   createTime: string,
+  asset_index: number,
   signed_url?: {
     original: string,
     midd: string

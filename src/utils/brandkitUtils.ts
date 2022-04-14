@@ -36,7 +36,8 @@ class BrandKitUtils {
         signed_url: {
           original: require('@/assets/img/png/brandkit/logo-horizontal.png'),
           midd: require('@/assets/img/png/brandkit/logo-horizontal.png')
-        }
+        },
+        asset_index: 0
       }, {
         team_id: '',
         name: 'logo-square.png',
@@ -45,7 +46,8 @@ class BrandKitUtils {
         signed_url: {
           original: require('@/assets/img/png/brandkit/logo-square.png'),
           midd: require('@/assets/img/png/brandkit/logo-square.png')
-        }
+        },
+        asset_index: 1
       }, {
         team_id: '',
         name: 'logo-vertical.png',
@@ -54,7 +56,8 @@ class BrandKitUtils {
         signed_url: {
           original: require('@/assets/img/png/brandkit/logo-vertical.png'),
           midd: require('@/assets/img/png/brandkit/logo-vertical.png')
-        }
+        },
+        asset_index: 2
       }],
       textStyleSetting: {
         headingStyle: this.createDefaultTextStyle('heading'),
@@ -183,7 +186,8 @@ class BrandKitUtils {
       team_id: '',
       name: '',
       id: 'new_' + id,
-      createTime: (new Date()).toISOString()
+      createTime: (new Date()).toISOString(),
+      asset_index: -1
     }
   }
 
