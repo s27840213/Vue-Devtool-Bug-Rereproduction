@@ -148,6 +148,23 @@ export default Vue.extend({
         fontType: this.itemFontType,
         fontName: this.item.name
       })
+      AssetUtils.addAssetToRecentlyUsed({
+        id: this.item.id,
+        type: 0,
+        user_id: this.item.userId,
+        asset_id: this.item.assetId,
+        asset_index: this.item.asset_index,
+        src: this.itemFontType,
+        ver: this.item.ver,
+        signed_url: this.item.signed_url,
+        urls: {
+          prev: '',
+          full: '',
+          larg: '',
+          original: '',
+          json: ''
+        }
+      })
     },
     async setEditorFont() {
       if (this.pending) return
