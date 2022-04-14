@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="top")
+    //- todo v-header-border
     nu-header()
     div(class="payment")
       form(class="payment-input"
@@ -174,6 +175,24 @@ export default Vue.extend({
     },
     setCountry(option: string) {
       this.userData.country = option
+    },
+    isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
+      const weight = [1, 2, 1, 2, 1, 2, 4, 1]
+      if (GUI.length !== 8) {
+        return false
+      }
+
+      const GUIsum = GUI.split('').map((item, index) => {
+        return parseInt(item) * weight[index] // Multipy by weight each
+      }).map((item) => {
+        return (item / 10 >> 0) + item % 10 // Sum of tens and units digit
+      }).reduce((sum, cur) => {
+        return sum + cur // Sum of all
+      })
+
+      return GUI[6] === '7' // Check if divisible by 5
+        ? GUIsum % 5 === 0 || (GUIsum + 1) % 5 === 0
+        : GUIsum % 5 === 0
     },
     submit() {
       this.isLoading = true
