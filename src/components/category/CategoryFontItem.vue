@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -55,6 +55,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
+    ...mapGetters('brandkit', {
+      isSettingsOpen: 'getIsSettingsOpen'
+    }),
     getCurrLayerInfo(): {
       layer: IText,
       layerIndex: number,
@@ -126,7 +129,7 @@ export default Vue.extend({
       this.previewUrl2 = this.getPreview2()
     },
     setFont() {
-      if (this.$route.name === 'BrandKit') {
+      if (this.$route.name === 'BrandKit' || (this.$route.name === 'Editor' && this.isSettingsOpen)) {
         this.setBrandkitFont()
       } else {
         this.setEditorFont()

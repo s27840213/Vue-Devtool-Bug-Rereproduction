@@ -77,7 +77,9 @@ export default Vue.extend({
   },
   mounted() {
     this.getCategories()
-    this.fetchFonts()
+    if (this.privateFonts.length === 0) {
+      this.fetchFonts()
+    }
     uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
       this.fontUploadStatus = status
     })
