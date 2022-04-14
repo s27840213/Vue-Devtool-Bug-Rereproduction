@@ -96,6 +96,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('brandkit', {
+      currentBrandId: 'getCurrentBrandId',
       isBrandsLoading: 'getIsBrandsLoading',
       selectedTab: 'getSelectedTab',
       brands: 'getBrands'
@@ -141,6 +142,9 @@ export default Vue.extend({
       if (this.selectedTab === 'text') {
         if (!files) return
         uploadUtils.uploadAsset('font', files)
+      } else if (this.selectedTab === 'logo') {
+        if (!files) return
+        uploadUtils.uploadAsset('logo', files, { brandId: this.currentBrandId })
       } else {
         console.log(files)
       }
