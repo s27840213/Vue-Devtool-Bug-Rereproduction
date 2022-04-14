@@ -172,14 +172,15 @@ export default Vue.extend({
     @include text-H4;
     line-height: unset;
     height: 39px;
-    max-width: min(260px, calc(100% - 80px));
     &.brandkit-theme {
+      max-width: 260px;
       color: setColor(bu);
       & > span:hover {
         background: setColor(blue-4);
       }
     }
     &.editor-theme {
+      max-width: calc(100% - 80px);
       color: white;
       & > input {
         background-color: transparent;
