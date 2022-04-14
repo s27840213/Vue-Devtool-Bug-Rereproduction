@@ -19,7 +19,8 @@ interface IBrandKitState {
   selectedTab: string,
   fonts: IBrandFont[],
   fetchedFonts: {[key: string]: {[key: string]: string}},
-  fontsPageIndex: number
+  fontsPageIndex: number,
+  isSettingsOpen: boolean
 }
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
@@ -37,7 +38,8 @@ const getDefaultState = (): IBrandKitState => ({
   selectedTab: brandkitUtils.getTabKeys()[0],
   fonts: [],
   fetchedFonts: {},
-  fontsPageIndex: 0
+  fontsPageIndex: 0,
+  isSettingsOpen: false
 })
 
 const state = getDefaultState()
@@ -78,6 +80,9 @@ const getters: GetterTree<IBrandKitState, unknown> = {
       if (privateFont) return privateFont.signed_url
       return state.fetchedFonts[assetIndex]
     }
+  },
+  getIsSettingsOpen(state: IBrandKitState): boolean {
+    return state.isSettingsOpen
   }
 }
 
@@ -490,6 +495,9 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_fontsPageIndex(state: IBrandKitState, fontsPageIndex: number) {
     state.fontsPageIndex = fontsPageIndex
+  },
+  SET_isSettingsOpen(state: IBrandKitState, isSettingsOpen: boolean) {
+    state.isSettingsOpen = isSettingsOpen
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand, true)

@@ -37,6 +37,7 @@
           page-preview
     tour-guide(v-if="showEditorGuide")
     spinner(v-if="isLoading || isSaving" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
+    popup-brand-settings(v-if="isBrandSettingsOpen")
 </template>
 
 <script lang="ts">
@@ -50,6 +51,7 @@ import EditorView from '@/components/editor/EditorView.vue'
 import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
+import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
@@ -71,7 +73,8 @@ export default Vue.extend({
     FunctionPanel,
     ColorPanel,
     PagePreview,
-    TourGuide
+    TourGuide,
+    PopupBrandSettings
   },
   data() {
     return {
@@ -124,6 +127,9 @@ export default Vue.extend({
     }),
     ...mapGetters('user', {
       token: 'getToken'
+    }),
+    ...mapGetters('brandkit', {
+      isBrandSettingsOpen: 'getIsSettingsOpen'
     }),
     isColorPanelOpen: {
       get: function(): boolean {

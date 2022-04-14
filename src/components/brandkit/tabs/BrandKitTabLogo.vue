@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="isLogosLoading" class="brand-kit-tab-logo")
+  div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
     svg-icon(iconName="loading"
             iconWidth="50px"
             iconColor="gray-3")
@@ -143,6 +143,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.brand-kit-tab-logo-loading {
+  display: flex;
+  justify-content: center;
+}
 .brand-kit-tab-logo {
   display: flex;
   gap: 15px;

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-brand")
+  div(class="panel-brand relative")
     div(v-if="isBrandsLoading" class="panel-brand__main")
         svg-icon(iconName="loading"
                 iconWidth="20px"
@@ -7,7 +7,8 @@
     div(v-else class="panel-brand__main")
       div(class="panel-brand__header relative")
         brand-selector(theme="editor")
-        div(class="panel-brand__settings pointer")
+        div(class="panel-brand__settings pointer"
+          @click="handleOpenSettings")
           svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
       div(class="panel-brand__tab")
         brand-kit-tab(theme="editor")
@@ -17,7 +18,7 @@
 import Vue from 'vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
@@ -40,7 +41,13 @@ export default Vue.extend({
   methods: {
     ...mapActions('brandkit', {
       fetchBrands: 'fetchBrands'
-    })
+    }),
+    ...mapMutations('brandkit', {
+      setSettingsOpen: 'SET_isSettingsOpen'
+    }),
+    handleOpenSettings() {
+      this.setSettingsOpen(true)
+    }
   }
 })
 </script>
@@ -62,6 +69,14 @@ export default Vue.extend({
   }
   &__tab {
     margin-top: 15px;
+  }
+  &__settings-popup {
+    position: absolute;
+    left: calc(100% + 20px);
+    top: 0;
+    width: 900px;
+    height: 800px;
+    background-color: white;
   }
 }
 </style>
