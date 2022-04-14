@@ -50,16 +50,19 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     navItem(): Array<{ icon: string, text: string }> {
-      return [
+      const navItems = [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}` },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}` },
         { icon: 'shape', text: `${this.$tc('NN0003', 2)}` },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
-        { icon: 'upload', text: `${this.$tc('NN0006')}` },
-        { icon: 'brand', text: `${this.$t('NN0007')}` }
+        { icon: 'upload', text: `${this.$tc('NN0006')}` }
         // { icon: 'photo', text: 'Pexels' }
       ]
+      if (window.location.hostname === 'localhost') {
+        navItems.push({ icon: 'brand', text: `${this.$t('NN0007')}` })
+      }
+      return navItems
     }
   },
   methods: {

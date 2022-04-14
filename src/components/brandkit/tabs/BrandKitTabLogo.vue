@@ -68,6 +68,9 @@ export default Vue.extend({
   watch: {
     logos() {
       this.menuOpenLogoId = ''
+    },
+    currentBrand() {
+      brandkitUtils.fetchLogos(this.fetchLogos)
     }
   },
   computed: {
