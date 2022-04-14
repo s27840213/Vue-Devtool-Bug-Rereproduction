@@ -67,6 +67,7 @@ import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import imageUtils from '@/utils/imageUtils'
 import formatUtils from '@/utils/formatUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   props: {
@@ -178,12 +179,6 @@ export default Vue.extend({
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
     isActive(val) {
-      if (val) {
-        // @todo
-        if (this.getCurrFunctionPanelType === FunctionPanelType.colorPicker && this.getLayerType === 'shape') {
-          // colorUtils.setCurrColor(this.getColors[index])
-        }
-      }
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
         if (this.getLayerType === 'text') {
@@ -437,6 +432,7 @@ export default Vue.extend({
         }
         return
       }
+      colorUtils.event.emit('closeColorPanel', false)
       this.$emit('clickSubController', this.layerIndex, this.config.type)
     },
     onDblClick() {
