@@ -172,12 +172,12 @@ export default Vue.extend({
     @include text-H4;
     line-height: unset;
     height: 39px;
+    & > span:hover {
+      background: setColor(blue-4);
+    }
     &.brandkit-theme {
       max-width: 260px;
       color: setColor(bu);
-      & > span:hover {
-        background: setColor(blue-4);
-      }
     }
     &.editor-theme {
       max-width: calc(100% - 80px);
@@ -186,7 +186,7 @@ export default Vue.extend({
         background-color: transparent;
       }
       & > span:hover {
-        background: setColor(bu);
+        color: setColor(gray-3);
       }
     }
     & > span {
@@ -215,14 +215,14 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     border-radius: 4px;
-    &.brandkit-theme:hover {
+    &:hover {
       background: setColor(blue-4);
     }
-    &.editor-theme:hover {
-      background: setColor(bu);
+    &.editor-theme:hover > svg {
+      color: setColor(gray-3);
     }
     & > svg {
-      transition: 0.2s ease;
+      transition: transform 0.2s ease;
     }
   }
   &__brand-list {

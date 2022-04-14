@@ -98,7 +98,7 @@ export default Vue.extend({
   &__tab-block {
     border-radius: 4px;
     height: fit-content;
-    &.brandkit-theme:hover {
+    &:hover {
       background-color: setColor(blue-4);
     }
     &.brandkit-theme:not(:hover).selected {
@@ -109,11 +109,9 @@ export default Vue.extend({
         }
       }
     }
-    &.editor-theme:hover {
-      background-color: setColor(bu);
-    }
     &.editor-theme:not(:hover).selected {
       .brand-kit-tab__tab-name {
+        color: white;
         border-bottom: 6px solid setColor(blue-1);
       }
     }
@@ -122,15 +120,10 @@ export default Vue.extend({
     margin: 10px;
     margin-bottom: 0px;
     padding-bottom: 10px;
+    color: setColor(gray-3);
     &-text {
       @include text-H5;
       transition: 0.3s ease;
-    }
-    &.brandkit-theme {
-      color: setColor(gray-3);
-    }
-    &.editor-theme {
-      color: white;
     }
   }
   &__content {
