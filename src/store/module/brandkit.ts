@@ -233,7 +233,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async removeLogo({ commit }, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateApiWrapper(async () => {
+      return await brandkitApi.deleteLogo(logo.asset_index.toString())
+    }, () => {
       commit('UPDATE_deleteLogo', { brand: currentBrand, logo })
     }, () => {
       commit('UPDATE_addLogo', { brand: currentBrand, logo })

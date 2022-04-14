@@ -81,6 +81,9 @@ export default {
   async deleteFont(assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
     return await this.deleteAsset('font', assetIndex, token, locale, teamId)
   },
+  async deleteLogo(assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
+    return await this.deleteAsset('logo', assetIndex, token, locale, teamId)
+  },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)
