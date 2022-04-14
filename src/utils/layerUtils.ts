@@ -387,11 +387,11 @@ class LayerUtils {
   getLayerInfoById(pageId: string, layerId: string, subLayerId = '') {
     const pageIndex = pageUtils.getPageIndexById(pageId)
     const layerIndex = this.getLayerIndexById(pageIndex, layerId)
-    const subLayerIndex = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
+    const subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
     return {
       pageIndex,
       layerIndex,
-      subLayerIndex
+      subLayerIdx
     }
   }
 

@@ -31,6 +31,7 @@ class ImageShadowUtils {
   private _layerData = null as {
     img: HTMLImageElement,
     config: IImage,
+    /** This identifier is used to indexing the sub-layer */
     primarylayerId?: string
   } | null
 

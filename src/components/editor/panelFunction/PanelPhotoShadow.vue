@@ -106,6 +106,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from '@/utils/pageUtils'
 import imageUtils from '@/utils/imageUtils'
+import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
 
 export default Vue.extend({
   components: {
@@ -180,8 +181,10 @@ export default Vue.extend({
             assetId: this.isAdmin ? json.data.id : json.data.asset_index
           }
 
-          const pageIndex = pageUtils.getPageIndexById(pageId)
-          const layerIndex = layerUtils.getLayerIndexById(pageIndex, config.id || '')
+          const { pageIndex, layerIndex, subLayerIdx } = primarylayerId
+            ? layerUtils.getLayerInfoById(pageId, primarylayerId, config.id as string)
+            : layerUtils.getLayerInfoById(pageId, config.id as string, '')
+
           if (pageIndex !== -1 && layerIndex !== -1) {
             const layer = generalUtils.deepCopy(layerUtils.getLayer(pageIndex, layerIndex)) as IImage
             const newWidth = (updateCanvas.width - right - left) / img.naturalWidth * config.styles.width
@@ -205,9 +208,31 @@ export default Vue.extend({
             const newImg = new Image()
             newImg.crossOrigin = 'anoynous'
             newImg.onload = () => {
-              this.resetAllShadowProps(pageIndex, layerIndex)
-              layerUtils.updateLayerStyles(pageIndex, layerIndex, styles)
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false })
+              this.resetAllShadowProps(pageIndex, layerIndex, subLayerIdx)
+              console.log(generalUtils.deepCopy(calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)))
+              layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false }, subLayerIdx)
+              console.log(generalUtils.deepCopy(calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)))
+              if (subLayerIdx !== 1) {
+                /** Handle the primary layer size update */
+                layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+                  ...calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)
+                })
+                const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+                const leftMargin = primaryLayer.layers.find(l => l.styles.x < 0)?.styles.x ?? 0
+                const topMargin = primaryLayer.layers.find(l => l.styles.y < 0)?.styles.y ?? 0
+                console.log(leftMargin)
+                console.log(topMargin)
+                if (leftMargin || topMargin) {
+                  primaryLayer.layers
+                    .forEach((l, i) => {
+                      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+                        x: l.styles.x + -leftMargin,
+                        y: l.styles.y + -topMargin
+                      }, i)
+                    })
+                }
+              }
             }
             newImg.src = imageUtils.getSrc(layer)
           }
@@ -315,10 +340,10 @@ export default Vue.extend({
       imageShadowUtils.setEffect(ShadowEffectType.none, {}, pageIndex, layerIndex, subLayerIdx)
     },
     setIsUploading(pageId: string, layerId: string, subLayerId: string) {
-      const { pageIndex, layerIndex, subLayerIndex } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+      const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
       layerUtils.updateLayerProps(pageIndex, layerIndex, {
         isUploading: true
-      }, subLayerIndex)
+      }, subLayerIdx)
     }
   }
 })
