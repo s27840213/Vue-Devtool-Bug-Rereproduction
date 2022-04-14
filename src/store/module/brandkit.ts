@@ -350,7 +350,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
   },
   async removeFont({ commit }, font: IBrandFont) {
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateApiWrapper(async () => {
+      return await brandkitApi.deleteFont(font.asset_index.toString())
+    }, () => {
       commit('UPDATE_deleteFont', font)
     }, () => {
       commit('UPDATE_addFont', font)

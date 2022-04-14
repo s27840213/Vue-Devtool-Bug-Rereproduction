@@ -66,6 +66,20 @@ export default {
   async getLogo(assetIndex: string, token?: string, teamId?: string): Promise<any> {
     return await this.getAsset('logo', assetIndex, token, teamId)
   },
+  async deleteAsset(type: string, assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/update-asset', {
+      type,
+      token: token ?? this.getToken(),
+      locale: locale ?? this.getLocale(),
+      team_id: teamId ?? this.getTeamId(),
+      update_type: 'delete',
+      target: 1,
+      src_asset: assetIndex
+    })
+  },
+  async deleteFont(assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
+    return await this.deleteAsset('font', assetIndex, token, locale, teamId)
+  },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
       setTimeout(() => resolve([brandkitUtils.createDefaultBrand()]), 1000)
@@ -95,10 +109,10 @@ export default {
       // })
     }
   },
-  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+  async updateApiWrapper(apiSender: () => Promise<any>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
     updater()
     try {
-      const response = await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
+      const response = await apiSender()
       if (response.data.flag !== 0) {
         fallbacker()
         errorShower()
@@ -114,5 +128,10 @@ export default {
       return false
     }
     return true
+  },
+  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+    return await this.updateApiWrapper(async () => {
+      return await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
+    }, updater, fallbacker, errorShower, responseHandler)
   }
 }
