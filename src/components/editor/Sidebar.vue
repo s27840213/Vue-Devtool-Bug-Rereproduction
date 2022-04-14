@@ -56,8 +56,8 @@ export default Vue.extend({
         { icon: 'shape', text: `${this.$tc('NN0003', 2)}` },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
-        { icon: 'upload', text: `${this.$tc('NN0006')}` }
-        // { icon: 'brand', text: `${this.$t('NN0007')}` },
+        { icon: 'upload', text: `${this.$tc('NN0006')}` },
+        { icon: 'brand', text: `${this.$t('NN0007')}` }
         // { icon: 'photo', text: 'Pexels' }
       ]
     }

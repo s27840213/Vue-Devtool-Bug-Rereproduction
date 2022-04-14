@@ -1,6 +1,8 @@
 <template lang="pug">
-  div(class="brand-selector relative")
-    div(class="brand-selector__brand-name")
+  div(class="brand-selector relative"
+    :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'")
+    div(class="brand-selector__brand-name"
+      :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'")
       input(v-if="isNameEditing"
         ref="brandName"
         v-model="editableName"
@@ -10,10 +12,11 @@
       span(v-else
         @click="handleNameClick") {{ brandName }}
     div(class="brand-selector__dropdown pointer"
+      :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'"
       @click="isBrandListOpen = true")
       svg-icon(iconName="chevron-down"
         :style="dropdownStyles()"
-        iconWidth="24px" iconColor="bu")
+        iconWidth="24px" :iconColor="theme === 'editor' ? 'white' : 'bu'")
     transition(name="fade-slide")
       div(v-if="isBrandListOpen"
         v-click-outside="() => { isBrandListOpen = false }"
@@ -47,6 +50,12 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand } from '@/interfaces/brandkit'
 
 export default Vue.extend({
+  props: {
+    theme: {
+      type: String,
+      default: 'brandkit'
+    }
+  },
   data() {
     return {
       isNameEditing: false,
@@ -150,16 +159,35 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .brand-selector {
-  margin-left: 12px;
   display: flex;
   gap: 12px;
   align-items: center;
+  &.brandkit-theme {
+    margin-left: 12px;
+  }
+  &.editor-theme {
+    margin-left: 2px;
+  }
   &__brand-name {
     @include text-H4;
     line-height: unset;
-    color: setColor(bu);
     height: 39px;
-    max-width: 260px;
+    max-width: min(260px, calc(100% - 80px));
+    &.brandkit-theme {
+      color: setColor(bu);
+      & > span:hover {
+        background: setColor(blue-4);
+      }
+    }
+    &.editor-theme {
+      color: white;
+      & > input {
+        background-color: transparent;
+      }
+      & > span:hover {
+        background: setColor(bu);
+      }
+    }
     & > span {
       display: block;
       padding: 2px;
@@ -168,9 +196,6 @@ export default Vue.extend({
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      &:hover {
-        background: setColor(blue-4);
-      }
     }
     & > input {
       padding: 2px;
@@ -189,8 +214,11 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     border-radius: 4px;
-    &:hover {
+    &.brandkit-theme:hover {
       background: setColor(blue-4);
+    }
+    &.editor-theme:hover {
+      background: setColor(bu);
     }
     & > svg {
       transition: 0.2s ease;

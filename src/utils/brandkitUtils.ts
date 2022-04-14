@@ -11,6 +11,12 @@ const TAB_NAMES = {
   text: 'NN0400'
 }
 
+const SIDEBAR_TAB_NAMES = {
+  logo: 'NN0493',
+  color: 'NN0494',
+  text: 'NN0495'
+}
+
 const FONT_DEFAULTS = {
   tw: '思源黑體-標準',
   us: 'Roboto-Regular',
@@ -204,8 +210,8 @@ class BrandKitUtils {
     }))
   }
 
-  getTabNames(): { [key: string]: string } {
-    return TAB_NAMES
+  getTabNames(theme: string): { [key: string]: string } {
+    return theme === 'editor' ? SIDEBAR_TAB_NAMES : TAB_NAMES
   }
 
   getTabKeys(): string[] {
