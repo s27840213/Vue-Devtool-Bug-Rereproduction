@@ -11,11 +11,18 @@
     div(v-if="notNullBrand" class="brand-kit-tab__content")
       component(:is="`brand-kit-tab-${selectedTab}${theme === 'editor' ? '-sidebar' : ''}`" @deleteItem="handleDeleteItem")
     div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect")
-      div
-        img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
-      span(class="brand-kit-tab__disconnect__title") {{$t('NN0456')}}
-      span(class="brand-kit-tab__disconnect__description1") {{$t('NN0457')}}
-      span(class="brand-kit-tab__disconnect__description2") {{$t('NN0458')}}
+      template(v-if="theme === 'editor'")
+        div
+          img(class="brand-kit-tab__disconnect__sidebar-image" :src="require('@/assets/img/png/brandkit/disconnect.png')")
+        span(class="brand-kit-tab__disconnect__sidebar-title") {{$t('NN0456')}}
+        span(class="brand-kit-tab__disconnect__sidebar-description1") {{$t('NN0457')}}
+        span(class="brand-kit-tab__disconnect__sidebar-description2") {{$t('NN0458')}}
+      template(v-else)
+        div
+          img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
+        span(class="brand-kit-tab__disconnect__title") {{$t('NN0456')}}
+        span(class="brand-kit-tab__disconnect__description1") {{$t('NN0457')}}
+        span(class="brand-kit-tab__disconnect__description2") {{$t('NN0458')}}
 </template>
 
 <script lang="ts">
@@ -148,6 +155,24 @@ export default Vue.extend({
       margin-top: 14px;
       @include text-H5;
       color: setColor(gray-2);
+    }
+    &__sidebar-image {
+      transform: scale(0.7);
+    }
+    &__sidebar-title {
+      margin-top: 69px;
+      @include text-H2;
+      color: setColor(blue-1);
+    }
+    &__sidebar-description1 {
+      margin-top: 23px;
+      @include body-XL;
+      color: setColor(gray-4);
+    }
+    &__sidebar-description2 {
+      margin-top: 24px;
+      @include text-H5;
+      color: setColor(gray-5);
     }
   }
 }
