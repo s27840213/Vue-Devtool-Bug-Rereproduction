@@ -32,6 +32,7 @@
           function-panel(@toggleColorPanel="toggleColorPanel")
           transition(name="panel-up")
             color-panel(v-if="isColorPanelOpen"
+              class="content__panel__color-panel"
               @toggleColorPanel="toggleColorPanel")
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
@@ -52,7 +53,7 @@ import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
@@ -61,6 +62,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
 import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   name: 'Editor',
@@ -223,6 +225,9 @@ export default Vue.extend({
     colorUtils.on('closeColorPanel', () => {
       this.colorPanelOpenState.val = false
     })
+    if (this.isAdmin) {
+      brandkitUtils.fetchBrands(this.fetchBrands)
+    }
   },
   methods: {
     ...mapMutations({
@@ -230,6 +235,9 @@ export default Vue.extend({
       _setAdminMode: 'user/SET_ADMIN_MODE',
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
+    }),
+    ...mapActions({
+      fetchBrands: 'brandkit/fetchBrands'
     }),
     setAdminMode() {
       this._setAdminMode(!this.adminMode)
@@ -293,6 +301,13 @@ export default Vue.extend({
     height: 100%;
     display: grid;
     grid-template-columns: 1fr;
+    &__color-panel {
+      height: 50%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: setZindex('color-panel');
+    }
   }
 
   &__pages {

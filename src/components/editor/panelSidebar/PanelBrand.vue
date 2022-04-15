@@ -1,9 +1,9 @@
 <template lang="pug">
   div(class="panel-brand relative")
     div(v-if="isBrandsLoading" class="panel-brand__main")
-        svg-icon(iconName="loading"
-                iconWidth="20px"
-                iconColor="white")
+      svg-icon(iconName="loading"
+              iconWidth="20px"
+              iconColor="white")
     div(v-else class="panel-brand__main")
       div(class="panel-brand__header relative")
         brand-selector(theme="editor")
@@ -18,16 +18,12 @@
 import Vue from 'vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import brandkitUtils from '@/utils/brandkitUtils'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: {
     BrandSelector,
     BrandKitTab
-  },
-  mounted() {
-    brandkitUtils.fetchBrands(this.fetchBrands)
   },
   data() {
     return {
@@ -39,9 +35,6 @@ export default Vue.extend({
     })
   },
   methods: {
-    ...mapActions('brandkit', {
-      fetchBrands: 'fetchBrands'
-    }),
     ...mapMutations('brandkit', {
       setSettingsOpen: 'SET_isSettingsOpen'
     }),

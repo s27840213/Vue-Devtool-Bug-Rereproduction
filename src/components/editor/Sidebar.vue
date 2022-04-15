@@ -47,7 +47,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isAdmin: 'user/isAdmin'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       const navItems = [
@@ -59,7 +60,7 @@ export default Vue.extend({
         { icon: 'upload', text: `${this.$tc('NN0006')}` }
         // { icon: 'photo', text: 'Pexels' }
       ]
-      if (window.location.hostname === 'localhost') {
+      if (this.isAdmin && window.location.hostname === 'localhost') { // TODO: remove localhost when ready to test
         navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
       }
       return navItems

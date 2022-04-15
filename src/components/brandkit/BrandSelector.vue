@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="brand-selector relative"
-    :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'")
+    :class="`${theme}-theme`")
     div(class="brand-selector__brand-name"
-      :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'")
+      :class="`${theme}-theme`")
       input(v-if="isNameEditing"
         ref="brandName"
         v-model="editableName"
@@ -12,11 +12,12 @@
       span(v-else
         @click="handleNameClick") {{ brandName }}
     div(class="brand-selector__dropdown pointer"
-      :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'"
+      :class="`${theme}-theme`"
       @click="isBrandListOpen = true")
-      svg-icon(iconName="chevron-down"
+      svg-icon(:class="`${theme}-theme`"
         :style="dropdownStyles()"
-        iconWidth="24px" :iconColor="theme === 'editor' ? 'white' : 'bu'")
+        iconName="chevron-down"
+        iconWidth="24px")
     transition(name="fade-slide")
       div(v-if="isBrandListOpen"
         v-click-outside="() => { isBrandListOpen = false }"
@@ -168,6 +169,9 @@ export default Vue.extend({
   &.editor-theme {
     margin-left: 2px;
   }
+  &.panel-theme {
+    margin-left: 1px;
+  }
   &__brand-name {
     @include text-H4;
     line-height: unset;
@@ -187,6 +191,22 @@ export default Vue.extend({
       }
       & > span:hover {
         color: setColor(gray-3);
+      }
+    }
+    &.panel-theme {
+      @include text-H6;
+      max-width: calc(100% - 110px);
+      color: white;
+      height: 24px;
+      & > input {
+        padding: 0px;
+        background-color: transparent;
+      }
+      & > span {
+        padding: 0px;
+        &:hover {
+          color: setColor(gray-3);
+        }
       }
     }
     & > span {
@@ -218,7 +238,13 @@ export default Vue.extend({
     &:hover {
       background: setColor(blue-4);
     }
-    &.editor-theme:hover > svg {
+    &.editor-theme > svg, &.panel-theme > svg {
+      color: white;
+    }
+    &.brandkit-theme > svg {
+      color: setColor(bu);
+    }
+    &.editor-theme:hover > svg, &.panel-theme:hover > svg {
       color: setColor(gray-3);
     }
     & > svg {
