@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import VueRouter, { NavigationGuardNext, Route, RouteConfig } from 'vue-router'
+import VueRouter, { NavigationGuardNext, RawLocation, Route, RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
@@ -28,6 +28,35 @@ const MOBILE_ROUTES = [
   'MobileWarning',
   'Preview'
 ]
+
+// Ingore some normal router console error
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location: RawLocation):Promise<Route> {
+  return (originalPush.call(this, location) as unknown as Promise<Route>)
+    .catch(err => {
+      switch (err.name) {
+        case 'NavigationDuplicated':
+          break
+        default:
+          console.error(err)
+      }
+      return err
+    })
+}
+
+const originalReplace = VueRouter.prototype.replace
+VueRouter.prototype.replace = function repalce(location: RawLocation):Promise<Route> {
+  return (originalReplace.call(this, location) as unknown as Promise<Route>)
+    .catch(err => {
+      switch (err.name) {
+        case 'NavigationDuplicated':
+          break
+        default:
+          console.error(err)
+      }
+      return err
+    })
+}
 
 const routes: Array<RouteConfig> = [
   {
