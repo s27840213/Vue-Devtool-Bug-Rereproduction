@@ -60,7 +60,7 @@ export default Vue.extend({
         // { icon: 'photo', text: 'Pexels' }
       ]
       if (window.location.hostname === 'localhost') {
-        navItems.push({ icon: 'brand', text: `${this.$t('NN0007')}` })
+        navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
       }
       return navItems
     }
