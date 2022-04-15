@@ -12,3 +12,9 @@ export interface ICurrSubSelectedInfo {
   index: number
   type: string
 }
+
+export interface IFooterTab {
+  icon: string,
+  text: string,
+  panelType?: string
+}

@@ -92,6 +92,9 @@ export default Vue.extend({
         'keyword'
       ]
     ),
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapGetters({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultBgColors',

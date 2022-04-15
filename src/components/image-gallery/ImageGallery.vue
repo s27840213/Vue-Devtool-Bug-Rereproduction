@@ -54,6 +54,7 @@ export default Vue.extend({
     }
   },
   data() {
+    console.log(generalUtils.isMobile())
     return {
       nextIndex: 0,
       rows: [] as any[],

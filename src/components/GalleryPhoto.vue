@@ -37,6 +37,7 @@ import { IAssetPhoto } from '@/interfaces/api'
 import networkUtils from '@/utils/networkUtils'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',

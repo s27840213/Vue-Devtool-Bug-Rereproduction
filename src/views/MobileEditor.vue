@@ -6,20 +6,10 @@
           mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
               //- div(class="content__panel" :style="panelStyles()")
               //-   mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
-      mobile-panel(v-if="currActivePanel !== 'none'" :currActivePanel="currActivePanel")
+      mobile-panel(v-if="currActivePanel !== 'none'"
+        :currActivePanel="currActivePanel"
+        @switchTab="switchTab")
     footer-tabs(@switchTab="switchTab" :currTab="currActivePanel")
-    //- mobile-sidebar(:isSidebarPanelOpen="isSidebarPanelOpen"
-    //-   @toggleSidebarPanel="toggleSidebarPanel")
-    //- section(style="height: 100%;")
-    //-   div(class="content")
-    //-     sidebar-panel(:isSidebarPanelOpen="isSidebarPanelOpen")
-    //-     div(class="content__main")
-    //-       div(class="content__editor")
-    //-         mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
-    //-         mobile-scale-ratio-editor(:style="scaleRatioEditorPos"
-    //-           @toggleSidebarPanel="toggleSidebarPanel")
-    //-         div(class="content__panel" :style="panelStyles()")
-    //-           mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
 </template>
 
 <script lang="ts">
@@ -140,6 +130,7 @@ export default Vue.extend({
       if (this.currActivePanel === panelType) {
         this.currActivePanel = 'none'
       } else {
+        console.log(panelType)
         this.currActivePanel = panelType
       }
     }

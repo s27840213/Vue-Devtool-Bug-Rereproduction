@@ -1,12 +1,23 @@
 <template lang="pug">
   div(class="header-bar")
-    svg-icon(class="nu-footer__feature-icon"
+    svg-icon(class="header-bar__feature-icon"
       :iconName="'chevron-left'"
       :iconColor="'white'"
-      :iconWidth="'15px'")
+      :iconWidth="'20px'"
+      @click.native="goHome()")
+    div(class="header-bar__right")
+      svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
+        :iconName="tab"
+        :iconColor="'white'"
+        :iconWidth="'20px'"
+        @click.native="handleIconAction(tab)")
 </template>
 <script lang="ts">
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
+import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import mappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   components: {
@@ -15,6 +26,96 @@ export default Vue.extend({
   },
   data() {
     return {
+      homeTabs: ['resize', 'all-pages', 'download', 'more']
+    }
+  },
+  computed: {
+    ...mapGetters({
+      currSidebarPanel: 'getCurrFunctionPanelType',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      InBgRemoveLastStep: 'bgRemove/inLastStep'
+    }),
+    layerTabs(): Array<string> {
+      return ['copy', this.isLocked ? 'lock' : 'unlock', 'trash']
+    },
+    rightTabs(): Array<string> {
+      if (this.selectedLayerNum > 0) {
+        return this.layerTabs
+      } else {
+        return this.homeTabs
+      }
+    },
+    selectedLayerNum(): number {
+      return this.currSelectedInfo.layers.length
+    },
+    isLocked(): boolean {
+      return layerUtils.getTmpLayer().locked
+    },
+    isGroup(): boolean {
+      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+    },
+    showPhotoTabs(): boolean {
+      return !this.inBgRemoveMode && !this.isLocked &&
+        this.targetIs('image') && this.singleTargetType()
+    },
+    showFontTabs(): boolean {
+      return !this.inBgRemoveMode && !this.isLocked &&
+        this.targetIs('text') && this.singleTargetType()
+    },
+    groupTypes(): Set<string> {
+      const groupLayer = this.currSelectedInfo.layers[0] as IGroup
+      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+        return layer.type
+      })
+      return new Set(types)
+    },
+    hasSubSelectedLayer(): boolean {
+      return this.currSubSelectedInfo.index !== -1
+    },
+    subLayerType(): string {
+      return this.currSubSelectedInfo.type
+    },
+    isFrameImage(): boolean {
+      const { layers, types } = this.currSelectedInfo
+      const frameLayer = layers[0] as IFrame
+      return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
+    }
+  },
+  methods: {
+    targetIs(type: string): boolean {
+      if (this.isGroup) {
+        if (this.hasSubSelectedLayer) {
+          return this.subLayerType === type
+        } else {
+          return this.groupTypes.has(type)
+        }
+      } else {
+        if (this.currSelectedInfo.types.has('frame') && type === 'image') {
+          return this.isFrameImage
+        }
+        return this.currSelectedInfo.types.has(type)
+      }
+    },
+    singleTargetType(): boolean {
+      if (this.isGroup) {
+        if (this.hasSubSelectedLayer) {
+          return true
+        } else {
+          return this.groupTypes.size === 1
+        }
+      } else {
+        return this.currSelectedInfo.types.size === 1
+      }
+    },
+    goHome() {
+      this.$router.push({ name: 'Home' })
+    },
+    handleIconAction(icon: string) {
+      mappingUtils.mappingIconAction(icon)
     }
   }
 })
@@ -24,5 +125,18 @@ export default Vue.extend({
 .header-bar {
   @include size(100%, 40px);
   background-color: setColor(nav);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 16px;
+  box-sizing: border-box;
+
+  &__right {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: auto;
+    grid-auto-columns: auto;
+    column-gap: 24px;
+  }
 }
 </style>

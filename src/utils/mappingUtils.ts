@@ -135,7 +135,15 @@ class MappingUtils {
         const currSelecteInfo = store.getters.getCurrSelectedInfo
         const currSelectedIndex = store.getters.getCurrSelectedIndex
         const isLocked = store.getters.getLayer(currSelecteInfo.pageIndex, currSelecteInfo.index).locked
-        layerUtils.updateLayerProps(currSelecteInfo.pageIndex, currSelectedIndex, { locked: !isLocked })
+        layerUtils.updateLayerProps(currSelecteInfo.pageIndex, currSelectedIndex, { locked: true })
+        stepsUtils.record()
+        break
+      }
+      case 'lock': {
+        const currSelecteInfo = store.getters.getCurrSelectedInfo
+        const currSelectedIndex = store.getters.getCurrSelectedIndex
+        const isLocked = store.getters.getLayer(currSelecteInfo.pageIndex, currSelecteInfo.index).locked
+        layerUtils.updateLayerProps(currSelecteInfo.pageIndex, currSelectedIndex, { locked: false })
         stepsUtils.record()
         break
       }
