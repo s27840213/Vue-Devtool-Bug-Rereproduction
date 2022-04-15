@@ -9,7 +9,7 @@ export interface IBrandLogo {
   asset_index: number,
   signed_url?: {
     original: string,
-    midd: string
+    tiny: string
   }
 }
 

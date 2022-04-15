@@ -88,7 +88,7 @@ export default Vue.extend({
       refreshLogoAsset: 'refreshLogoAsset'
     }),
     getUrl(logo: IBrandLogo): string {
-      return logo.signed_url ? logo.signed_url.midd : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${this.currentBrand.id}/${logo.id}/midd`
+      return logo.signed_url ? logo.signed_url.tiny : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${this.currentBrand.id}/${logo.id}/tiny`
     },
     checkMenuOpen(logo: IBrandLogo): boolean {
       return this.menuOpenLogoId === logo.id

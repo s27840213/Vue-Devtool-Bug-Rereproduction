@@ -41,7 +41,7 @@ class BrandKitUtils {
         createTime: (new Date(initTime + 30)).toISOString(),
         signed_url: {
           original: require('@/assets/img/png/brandkit/logo-horizontal.png'),
-          midd: require('@/assets/img/png/brandkit/logo-horizontal.png')
+          tiny: require('@/assets/img/png/brandkit/logo-horizontal.png')
         },
         asset_index: 0
       }, {
@@ -51,7 +51,7 @@ class BrandKitUtils {
         createTime: (new Date(initTime + 20)).toISOString(),
         signed_url: {
           original: require('@/assets/img/png/brandkit/logo-square.png'),
-          midd: require('@/assets/img/png/brandkit/logo-square.png')
+          tiny: require('@/assets/img/png/brandkit/logo-square.png')
         },
         asset_index: 1
       }, {
@@ -61,7 +61,7 @@ class BrandKitUtils {
         createTime: (new Date(initTime + 10)).toISOString(),
         signed_url: {
           original: require('@/assets/img/png/brandkit/logo-vertical.png'),
-          midd: require('@/assets/img/png/brandkit/logo-vertical.png')
+          tiny: require('@/assets/img/png/brandkit/logo-vertical.png')
         },
         asset_index: 2
       }],
