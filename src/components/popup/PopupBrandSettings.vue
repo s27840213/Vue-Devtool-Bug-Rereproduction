@@ -3,7 +3,7 @@
     div(class="dim-background under")
     div(class="popup-brand-settings__window")
       div(class="popup-brand-settings__wrapper relative")
-        div(class="brand-kit relative scrollbar-gray-thin"
+        div(class="brand-kit relative"
           @dragover.prevent.stop="handleDragEnter"
           @dragenter.prevent.stop="handleDragEnter"
           @dragleave.prevent.stop="handleDragLeave"
@@ -217,7 +217,7 @@ export default Vue.extend({
 }
 .brand-kit {
   @include size(100%, 100%);
-  overflow-y: auto;
+  @include hide-scrollbar-white;
   &__main {
     padding-top: 30px;
     padding-left: 24px;

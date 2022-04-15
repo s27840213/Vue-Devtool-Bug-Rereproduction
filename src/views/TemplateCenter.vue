@@ -1,6 +1,6 @@
 <template lang="pug">
   div(ref="body"
-      class="template-center scrollbar-gray-thin"
+      class="template-center"
       @scroll.passive="handleScroll")
     nu-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
       transition(name="slide")
@@ -664,7 +664,7 @@ body {
 .template-center {
   @include size(100%, 100%);
   min-height: 100%;
-  overflow-y: auto;
+  @include hide-scrollbar-white;
   @media screen and (max-width: 540px) {
     overflow-x: hidden;
     position: relative;

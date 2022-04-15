@@ -5,7 +5,7 @@
     @dragleave.prevent.stop="handleDragLeave"
     @drop.prevent.stop="handleDrop")
     nu-header(:isTop="isTop")
-    section(ref="content" class="brand-kit__scroll scrollbar-gray-thin" @scroll.passive="onScroll")
+    section(ref="content" class="brand-kit__scroll" @scroll.passive="onScroll")
       div(v-if="isBrandsLoading" class="brand-kit__main")
         svg-icon(iconName="loading"
                 iconWidth="50px"
@@ -187,7 +187,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   &__scroll {
     height: calc(100vh - #{$header-height});
-    overflow-y: auto;
+    @include hide-scrollbar-white;
   }
   &__main {
     min-height: calc(100vh - #{$header-height});

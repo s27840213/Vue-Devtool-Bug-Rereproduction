@@ -64,7 +64,7 @@
                         iconColor="gray-2")
         component(v-if="currLocation !== ''"
                   :is="mydesignView"
-                  class="design-view scrollbar-gray-thin"
+                  class="design-view"
                   @deleteItem="handleDeleteItem"
                   @clearSelection="handleClearSelection"
                   @recoverItem="handleRecoverItem"

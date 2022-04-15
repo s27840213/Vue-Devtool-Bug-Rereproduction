@@ -377,7 +377,7 @@ export default Vue.extend({
 .folder-design-view {
   text-align: left;
   font-family: NotoSansTC;
-  overflow-y: auto;
+  @include hide-scrollbar-white;
   > div {
     margin-left: 55px;
     margin-right: 65px;
