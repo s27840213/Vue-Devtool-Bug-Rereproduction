@@ -84,6 +84,9 @@ export default Vue.extend({
   watch: {
     rawFonts() {
       this.refreshFontUrls()
+    },
+    currentBrand() {
+      textUtils.loadDefaultFonts(brandkitUtils.extractFonts(this.textStyleSetting))
     }
   },
   methods: {
