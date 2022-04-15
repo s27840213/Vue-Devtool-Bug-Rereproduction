@@ -22,7 +22,11 @@
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
       template(v-if="isAdmin")
-        brand-selector(theme="panel")
+        div(class="relative")
+          brand-selector(theme="panel")
+          div(class="color-panel__brand-settings pointer"
+          @click="handleOpenSettings")
+            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
         template(v-if="isPalettesLoading")
           div(class="color-panel__colors mb-10 mt-10")
             svg-icon(iconName="loading"
@@ -164,11 +168,15 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       updateDocumentColors: 'UPDATE_documentColors',
-      setCurrFunctionPanel: 'SET_currFunctionPanelType'
+      setCurrFunctionPanel: 'SET_currFunctionPanelType',
+      setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes'
     }),
+    handleOpenSettings() {
+      this.setSettingsOpen(true)
+    },
     colorStyles(color: string) {
       return {
         backgroundColor: color
@@ -255,6 +263,14 @@ export default Vue.extend({
     padding-top: 10px;
     height: calc(100% - 140px);
     @include hide-scrollbar;
+  }
+  &__brand-settings {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
   }
   &__btn {
     position: absolute;
