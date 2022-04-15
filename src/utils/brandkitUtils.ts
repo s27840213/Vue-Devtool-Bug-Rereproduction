@@ -13,8 +13,8 @@ const TAB_NAMES = {
 
 const SIDEBAR_TAB_NAMES = {
   logo: 'NN0493',
-  color: 'NN0494',
-  text: 'NN0495'
+  color: 'NN0495',
+  text: 'NN0494'
 }
 
 const FONT_DEFAULTS = {
