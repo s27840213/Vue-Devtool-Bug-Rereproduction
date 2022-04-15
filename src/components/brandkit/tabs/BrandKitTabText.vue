@@ -74,8 +74,7 @@ export default Vue.extend({
       fontsPageIndex: 'getFontsPageIndex'
     }),
     ...mapGetters('user', {
-      isAdmin: 'isAdmin',
-      teamId: 'getTeamId'
+      isAdmin: 'isAdmin'
     }),
     textStyleSetting(): IBrandTextStyleSetting {
       return (this.currentBrand as IBrand).textStyleSetting

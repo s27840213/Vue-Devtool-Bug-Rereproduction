@@ -466,6 +466,14 @@ class BrandKitUtils {
     return STANDARD_TEXT_FONT[locale]
   }
 
+  getDefaultFontName(locale: string): string {
+    return FONT_DEFAULTS[locale]
+  }
+
+  getDefaultFontSize(type: string): number {
+    return this.createDefaultTextStyle(type).size
+  }
+
   getDownloadUrl(logo: IBrandLogo, brandId: string): string {
     return logo.signed_url ? logo.signed_url.original : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${brandId}/${logo.id}/original`
   }

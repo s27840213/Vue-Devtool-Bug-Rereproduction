@@ -49,6 +49,7 @@ import { fontSelectValue } from '@/utils/textPropUtils'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions } from 'vuex'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   props: {
@@ -118,15 +119,16 @@ export default Vue.extend({
       return this.textStyle.isDefault ? `${this.$t('NN0403', { textType })}` : brandkitUtils.composeSettingText(this.textStyle, textType)
     },
     getFontStyles() {
-      if (this.textStyle.isDefault) {
-        return {
-          fontFamily: brandkitUtils.getDefaultFontId(this.$i18n.locale)
-        }
-      } else {
-        return {
-          fontFamily: this.textStyle.fontId
-        }
-      }
+      const { textStyle } = this
+      const res = tiptapUtils.textStylesRaw({
+        weight: textStyle.bold ? 'bold' : 'normal',
+        style: textStyle.italic ? 'italic' : 'normal',
+        decoration: textStyle.underline ? 'underline' : 'none',
+        size: textStyle.size
+      })
+      delete res['font-size']
+      res.fontFamily = textStyle.isDefault ? brandkitUtils.getDefaultFontId(this.$i18n.locale) : textStyle.fontId
+      return res
     },
     getFontPrev() {
       let url = ''
@@ -249,6 +251,7 @@ export default Vue.extend({
     background: #F3F6FA;
     border-radius: 4px;
     padding: 8px 0px;
+    --base-stroke: 0px;
     & > span {
       font-style: normal;
       font-weight: normal;
