@@ -103,7 +103,7 @@ class DesignUtils {
   }
 
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
-    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
+    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : new Date()
     return {
       id: isROOT ? this.ROOT : generalUtils.generateAssetId() + '_new',
       name,
