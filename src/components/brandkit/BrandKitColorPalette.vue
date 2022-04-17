@@ -219,6 +219,7 @@ export default Vue.extend({
         }
       }
       &.selected {
+        padding-top: calc(100% - 2px);
         border: 1px solid setColor(blue-1);
       }
     }
