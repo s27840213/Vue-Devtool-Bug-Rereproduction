@@ -6,8 +6,9 @@
       svg-icon(iconName="loading"
               iconWidth="50px"
               iconColor="gray-3")
-    template(v-else)
+    transition-group(v-else class="brand-kit-tab-color__palettes" name="list" tag="div")
       brand-kit-color-palette(v-for="colorPalette in colorPalettes"
+                              :key="colorPalette.id"
                               :colorPalette="colorPalette"
                               :selectedColor="selectedColor"
                               @selectColor="handleSelectColor"
@@ -83,5 +84,25 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   gap: 20px;
+  &__palettes {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 }
+
+.list {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+    z-index: 10;
+  }
+
+  &-enter,
+  &-leave-to {
+    transform: translateX(-30%);
+    opacity: 0;
+  }
+}
+
 </style>

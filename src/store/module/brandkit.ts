@@ -353,7 +353,6 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async updateColorTemp({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    console.log('tmp')
     commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
   },
   async removeFont({ commit }, font: IBrandFont) {

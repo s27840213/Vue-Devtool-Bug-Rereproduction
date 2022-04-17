@@ -1,31 +1,40 @@
 <template lang="pug">
   div(class="brand-kit-tab-text")
-    div(class="brand-kit-tab-text__font-column")
-      div(class="brand-kit-tab-text__font-column__item add pointer")
-        div(class="brand-kit-tab-text__font-column__upload-icon")
-          svg-icon(iconName="cloud-upload" iconWidth="32px" iconColor="gray-1")
-        div(class="brand-kit-tab-text__font-column__upload-hint" @click="handleUploadFont")
-          span {{ $t('NN0402') }}
-      div(v-for="font in fonts" class="brand-kit-tab-text__font-column__item pointer relative")
-        template(v-if="checkUploading(font)")
-          div(class="brand-kit-tab-text__font-column__font-img loading")
-            svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
-          div(class="brand-kit-tab-text__font-column__font-img loading")
-            svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
-        template(v-else)
-          div(class="brand-kit-tab-text__font-column__font-img")
-            img(:src="font.namePrevUrl" @error="onError(font)")
-          div(class="brand-kit-tab-text__font-column__font-img")
-            img(:src="font.textPrevUrl")
-          svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
-                  iconName="trash" iconWidth="24px" iconColor="gray-2"
-                  @click.native="handleDeleteFont(font)")
-      div(v-if="isFontsLoading" class="brand-kit-tab-text__font-column__loading")
-        svg-icon(iconName="loading"
-                  iconWidth="50px"
-                  iconColor="gray-3")
-      observer-sentinel(v-if="!isFontsLoading && fontsPageIndex >= 0"
-                      @callback="handleLoadMore")
+    transition-group(class="brand-kit-tab-text__font-column" name="font-list" tag="div")
+      template(v-for="font in renderedFonts")
+        div(v-if="font === 'add'"
+          class="brand-kit-tab-text__font-column__item add pointer"
+          key="add")
+          div(class="brand-kit-tab-text__font-column__upload-icon")
+            svg-icon(iconName="cloud-upload" iconWidth="32px" iconColor="gray-1")
+          div(class="brand-kit-tab-text__font-column__upload-hint" @click="handleUploadFont")
+            span {{ $t('NN0402') }}
+        div(v-else-if="font === 'loading'"
+          class="brand-kit-tab-text__font-column__loading no-trans"
+          key="loading")
+          svg-icon(iconName="loading"
+                    iconWidth="50px"
+                    iconColor="gray-3")
+        observer-sentinel(v-else-if="font === 'sentinel'"
+                        class="no-trans"
+                        key="sentinel"
+                        @callback="handleLoadMore")
+        div(v-else
+          class="brand-kit-tab-text__font-column__item pointer relative"
+          :key="font.id.replace('new_', '')")
+          template(v-if="checkUploading(font)")
+            div(class="brand-kit-tab-text__font-column__font-img loading")
+              svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
+            div(class="brand-kit-tab-text__font-column__font-img loading")
+              svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
+          template(v-else)
+            div(class="brand-kit-tab-text__font-column__font-img")
+              img(:src="font.namePrevUrl" @error="onError(font)")
+            div(class="brand-kit-tab-text__font-column__font-img")
+              img(:src="font.textPrevUrl")
+            svg-icon(class="brand-kit-tab-text__font-column__trash-icon"
+                    iconName="trash" iconWidth="24px" iconColor="gray-2"
+                    @click.native="handleDeleteFont(font)")
     div(class="brand-kit-tab-text__style-column")
       brand-kit-text-setting(class="brand-kit-tab-text__style-column__item"
                             type="heading" :textStyleSetting="textStyleSetting")
@@ -78,6 +87,15 @@ export default Vue.extend({
     }),
     textStyleSetting(): IBrandTextStyleSetting {
       return (this.currentBrand as IBrand).textStyleSetting
+    },
+    renderedFonts(): (IUrledFont | string)[] {
+      const res = ['add', ...this.fonts]
+      if (this.isFontsLoading) {
+        res.push('loading')
+      } else if (this.fontsPageIndex >= 0) {
+        res.push('sentinel')
+      }
+      return res
     }
   },
   watch: {
@@ -210,6 +228,23 @@ export default Vue.extend({
     flex-grow: 1;
     &__item {
       width: 100%;
+    }
+  }
+}
+
+.font-list {
+  &-enter-active,
+  &-leave-active {
+    &:not(.no-trans) {
+      transition: 0.3s ease;
+    }
+  }
+
+  &-enter,
+  &-leave-to {
+    &:not(.no-trans) {
+      transform: translateX(-30%);
+      opacity: 0;
     }
   }
 }

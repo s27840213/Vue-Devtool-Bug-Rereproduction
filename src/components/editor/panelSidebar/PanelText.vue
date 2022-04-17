@@ -6,6 +6,21 @@
       :defaultKeyword="keyword"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
+    template(v-if="isAdmin")
+      div(class="panel-text__brand-header relative")
+        brand-selector(theme="panel" :defaultOption="true")
+        div(class="panel-text__brand-settings pointer"
+        @click="handleOpenSettings")
+          svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
+    div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText[0].list"
+        :key="config.type"
+        draggable="true"
+        @dragstart="standardTextDrag($event, config)")
+      btn(
+        class="panel-text__text-button mb-10"
+        :type="`text-${config.type.toLowerCase()}`"
+        :fontFamily="localeFont()"
+        @click.native="handleAddText(config)") {{ config.text }}
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -14,7 +29,7 @@
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
-      template(v-slot:default-text="{ list }")
+      //- template(v-slot:default-text="{ list }")
         div(class="panel-text__text-button-wrapper" v-for="config in list"
             :key="config.type"
             draggable="true"
@@ -45,13 +60,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import i18n from '@/i18n'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import AssetUtils, { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import AssetUtils from '@/utils/assetUtils'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
 import textUtils from '@/utils/textUtils'
@@ -61,7 +77,8 @@ export default Vue.extend({
     SearchBar,
     CategoryList,
     CategoryListRows,
-    CategoryTextItem
+    CategoryTextItem,
+    BrandSelector
   },
   data() {
     return {
@@ -71,7 +88,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getLayersNum: 'getLayersNum'
+      getLayersNum: 'getLayersNum',
+      isAdmin: 'user/isAdmin'
     }),
     ...mapState(
       'textStock',
@@ -138,8 +156,10 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.listDefaultText
-        .concat(this.listCategories)
+      // return this.listDefaultText
+      //   .concat(this.listCategories)
+      //   .concat(this.listResult)
+      return this.listCategories
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
@@ -172,6 +192,9 @@ export default Vue.extend({
         'getMoreContent'
       ]
     ),
+    ...mapMutations({
+      setSettingsOpen: 'brandkit/SET_isSettingsOpen'
+    }),
     async handleSearch(keyword: string) {
       this.resetContent()
       if (keyword) {
@@ -191,15 +214,13 @@ export default Vue.extend({
     async handleAddText(config: { type: string, text: string }) {
       await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale)
     },
+    handleOpenSettings() {
+      this.setSettingsOpen(true)
+    },
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
     },
-    loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
-      // const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
-      // const newFont = new FontFace(objectId, getFontUrl(objectId))
-      // newFont.load().then((font) => {
-      //   document.fonts.add(font)
-      // })
+    loadDefaultFonts() {
       textUtils.loadDefaultFonts()
     },
     handleScrollTop(event: Event) {
@@ -228,6 +249,18 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  &__brand-header {
+    margin-top: 10px;
+    margin-bottom: 13px;
+  }
+  &__brand-settings {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
   &__item {
     width: 145px;
     height: 145px;
@@ -251,7 +284,7 @@ export default Vue.extend({
     text-align: left;
   }
   &__text-button {
-    width: calc(100% - 10px);
+    width: 100%;
     background-color: setColor(gray-2);
     border-radius: 3px;
   }
