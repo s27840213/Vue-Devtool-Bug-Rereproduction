@@ -300,6 +300,11 @@ class UploadUtils {
               imageFile: img,
               assetId: assetId
             })
+            store.commit('file/SET_UPLOADING_IMGS', {
+              id: assetId,
+              adding: true,
+              pageIndex: pageUtils.currFocusPageIndex
+            })
             if (addToPage) {
               assetUtils.addImage(img.src, img.width / img.height, {
                 pageIndex: pageUtils.currFocusPageIndex,
@@ -344,9 +349,9 @@ class UploadUtils {
                             assetId: assetId,
                             progress: 100
                           })
-
                           store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
+                          store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                           if (pollingCallback) {
                             pollingCallback(json)
                           }
@@ -1335,7 +1340,7 @@ class UploadUtils {
     }
   }
 
-  uploadExportJSON(exportId: string, json?: any) {
+  uploadExportJSON(exportId: string, json?: any | string) {
     return new Promise((resolve) => {
       const formData = new FormData()
       Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
@@ -1353,24 +1358,8 @@ class UploadUtils {
         UserId: ${this.userId}
         Url: ${this.loginOutput.upload_map.path}export/${exportId}/page.json`)
 
-      // ref: uploadUtils.ts:L466
-      const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
-        const newPage = this.default(generalUtils.deepCopy(page)) as IPage
-        for (const [i, layer] of newPage.layers.entries()) {
-          if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
-            newPage.layers[i] = this.layerInfoFilter(layer)
-          } else if (layer.type !== 'shape') {
-            newPage.layers[i] = this.layerInfoFilter(layer)
-          }
-        }
-        newPage.backgroundImage.config.imgControl = false
-        newPage.width = parseInt(newPage.width.toString(), 10)
-        newPage.height = parseInt(newPage.height.toString(), 10)
-        return newPage
-      })
-
       // this.resetControlStates(pagesJSON)
-      const blob = new Blob([JSON.stringify(pagesJSON)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify(this.getPageJson(json))], { type: 'application/json' })
       if (formData.has('file')) {
         formData.set('file', blob)
       } else {
@@ -1380,6 +1369,25 @@ class UploadUtils {
       xhr.open('POST', this.loginOutput.upload_map.url, true)
       xhr.send(formData)
     })
+  }
+
+  getPageJson(json?: any): any {
+    // ref: uploadUtils.ts:L466
+    const pagesJSON = (generalUtils.deepCopy(json || store.getters.getPages)).map((page: IPage) => {
+      const newPage = this.default(generalUtils.deepCopy(page)) as IPage
+      for (const [i, layer] of newPage.layers.entries()) {
+        if (layer.type === 'shape' && (layer.designId || layer.category === 'D' || layer.category === 'E')) {
+          newPage.layers[i] = this.layerInfoFilter(layer)
+        } else if (layer.type !== 'shape') {
+          newPage.layers[i] = this.layerInfoFilter(layer)
+        }
+      }
+      newPage.backgroundImage.config.imgControl = false
+      newPage.width = parseInt(newPage.width.toString(), 10)
+      newPage.height = parseInt(newPage.height.toString(), 10)
+      return newPage
+    })
+    return pagesJSON
   }
 
   makeXhrRequest(method: string, url: string, data: FormData) {

@@ -75,6 +75,7 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     primaryLayerIndex: Number,
+    primaryLayer: Object,
     snapUtils: Object,
     type: String,
     isMoved: Boolean
@@ -111,7 +112,7 @@ export default Vue.extend({
       e.preventDefault()
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
-    this.parentId = this.getPrimaryLayer.id as string
+    this.parentId = this.primaryLayer.id as string
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -154,9 +155,6 @@ export default Vue.extend({
     getLayerScale(): number {
       return this.config.styles.scale
     },
-    getPrimaryLayer(): IGroup | IFrame {
-      return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IGroup | IFrame
-    },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
@@ -168,7 +166,7 @@ export default Vue.extend({
       return textShape && textShape.name === 'curve'
     },
     primaryScale(): number {
-      return LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      return this.primaryLayer.styles.scale
     },
     isDraggedPanelPhoto(): boolean {
       return this.currDraggedPhoto.srcObj.type !== ''
@@ -235,7 +233,7 @@ export default Vue.extend({
   },
   destroyed() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
-    if (this.getLayerType === 'text' && this.getPrimaryLayer && this.getPrimaryLayer.id === this.parentId) {
+    if (this.getLayerType === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     }
@@ -294,14 +292,14 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      this.isPrimaryActive = this.getPrimaryLayer.active
+      this.isPrimaryActive = this.primaryLayer.active
 
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
       if (this.getLayerType === 'text') {
-        this.posDiff.x = this.getPrimaryLayer.styles.x
-        this.posDiff.y = this.getPrimaryLayer.styles.y
+        this.posDiff.x = this.primaryLayer.styles.x
+        this.posDiff.y = this.primaryLayer.styles.y
         if (this.isActive && this.contentEditable) return
         else if (!this.isActive) {
           this.isControlling = true
@@ -316,8 +314,8 @@ export default Vue.extend({
     },
     onMouseup() {
       if (this.getLayerType === 'text') {
-        this.posDiff.x = this.getPrimaryLayer.styles.x - this.posDiff.x
-        this.posDiff.y = this.getPrimaryLayer.styles.y - this.posDiff.y
+        this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
+        this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         }
@@ -326,16 +324,16 @@ export default Vue.extend({
       this.isControlling = false
     },
     positionStyles() {
-      const { horizontalFlip, verticalFlip } = this.getPrimaryLayer.styles
+      const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
       let { x, y } = this.config.styles
 
       if (this.type === 'frame' && horizontalFlip) {
-        const layerCenterline = this.getPrimaryLayer.styles.width / 2
+        const layerCenterline = this.primaryLayer.styles.width / 2
         const subLayerCenterline = this.getLayerPos.x + this.getLayerWidth / 2
         x += (layerCenterline - subLayerCenterline) * 2
       }
       if (this.type === 'frame' && verticalFlip) {
-        const layerCenterline = this.getPrimaryLayer.styles.height / 2
+        const layerCenterline = this.primaryLayer.styles.height / 2
         const subLayerCenterline = this.getLayerPos.y + this.getLayerHeight / 2
         y += (layerCenterline - subLayerCenterline) * 2
       }
@@ -475,33 +473,33 @@ export default Vue.extend({
       }
     },
     onFrameDragEnter(e: DragEvent) {
-      const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
+      const { primaryLayer } = this
       if (!primaryLayer.locked) {
         e.stopPropagation()
         if (this.isDraggedPanelPhoto && !this.currDraggedPhoto.isPreview && !this.imgBuff.cached) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
+          const clip = clips[this.layerIndex]
+
           Object.assign(this.imgBuff, {
             srcObj: {
               ...clips[this.layerIndex].srcObj
             },
             styles: {
-              imgX: clips[this.layerIndex].styles.imgX,
-              imgY: clips[this.layerIndex].styles.imgY,
-              imgWidth: clips[this.layerIndex].styles.imgWidth,
-              imgHeight: clips[this.layerIndex].styles.imgHeight,
-              horizontalFlip: clips[this.layerIndex].styles.horizontalFlip,
-              verticalFlip: clips[this.layerIndex].styles.verticalFlip
+              imgX: clip.styles.imgX,
+              imgY: clip.styles.imgY,
+              imgWidth: clip.styles.imgWidth,
+              imgHeight: clip.styles.imgHeight,
+              horizontalFlip: clip.styles.horizontalFlip,
+              verticalFlip: clip.styles.verticalFlip
             },
             cached: true
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
 
-          Object.assign(clips[this.layerIndex].srcObj, this.currDraggedPhoto.srcObj)
-          const clip = clips[this.layerIndex]
-          const {
-            imgWidth, imgHeight,
-            imgX, imgY
-          } = MouseUtils.clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
+          Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
+          const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+            .clipperHandler(this.currDraggedPhoto, clip.clipPath, clip.styles).styles
+
           FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
             imgWidth,
             imgHeight,
@@ -533,6 +531,9 @@ export default Vue.extend({
           userId: ''
         }
       })
+      if (this.primaryLayer.locked) {
+        this.$emit('onSubDrop', { e })
+      }
     },
     undo() {
       ShortcutUtils.undo().then(() => {
@@ -554,18 +555,21 @@ export default Vue.extend({
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { styles, srcObj } = this.config
+        const { srcObj } = this.config
+        const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+        const clip = clips[this.layerIndex]
+
         Object.assign(this.imgBuff, {
           srcObj: {
             ...srcObj
           },
           styles: {
-            imgX: styles.imgX,
-            imgY: styles.imgY,
-            imgWidth: styles.imgWidth,
-            imgHeight: styles.imgHeight,
-            horizontalFlip: styles.horizontalFlip,
-            verticalFlip: styles.verticalFlip
+            imgX: clip.styles.imgX,
+            imgY: clip.styles.imgY,
+            imgWidth: clip.styles.imgWidth,
+            imgHeight: clip.styles.imgHeight,
+            horizontalFlip: clip.styles.horizontalFlip,
+            verticalFlip: clip.styles.verticalFlip
           },
           cached: true
         })
@@ -573,12 +577,11 @@ export default Vue.extend({
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...currLayer.srcObj }
         })
-
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
-        const {
-          imgWidth, imgHeight,
-          imgX, imgY
-        } = MouseUtils.clipperHandler(currLayer, this.config.clipPath, styles).styles
+
+        const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+          .clipperHandler(LayerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
+
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           adjust: { ...currLayer.styles.adjust },
           imgWidth,
@@ -624,7 +627,7 @@ export default Vue.extend({
       if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
-        groupUtils.set(this.pageIndex, newIndex, [this.getPrimaryLayer])
+        groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
         StepsUtils.record()
         this.imgBuff.cached = true
