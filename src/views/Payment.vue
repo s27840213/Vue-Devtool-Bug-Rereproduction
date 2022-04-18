@@ -27,15 +27,15 @@
                   v-model="userData.phone_number"
                   placeholder="09xxxxxxxx")
           div(class="payment-input-block-field")
-            label(for="mail") e-mail*
-            input(id="mail" required type="email"
-                  v-model="userData.mail"
+            label(for="email") e-mail*
+            input(id="email" required type="email"
+                  v-model="userData.email"
                   placeholder="example@vivipic.com")
           div(class="payment-input-block-field")
             label(for="country") 國家*
             dropdown(id="country" required :options="country"
                     @select="option => setCountry(option)")
-              span(class="country-label") {{userData.country}}
+              span(class="country-label") {{userCountryName}}
         btn(class="rounded" type="primary-mid"
             :disabled="!sendReady") 送出
       div(class="payment-result") 結果
@@ -50,7 +50,7 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import payment from '@/apis/payment'
 import NuHeader from '@/components/NuHeader.vue'
-import countryData from '@/assets/json/country.json'
+import countryData from '@/assets/json/countries.json'
 
 export default Vue.extend({
   name: 'Payment',
@@ -66,12 +66,13 @@ export default Vue.extend({
       userData: {
         name: '',
         phone_number: '',
-        mail: '',
+        email: '',
         country: ''
         // company: '',
         // address: '',
         // invoice: ''
       },
+      userCountryName: '',
       country: countryData,
       TPDirect: (window as any).TPDirect
     }
@@ -79,11 +80,17 @@ export default Vue.extend({
   watch: {
   },
   mounted() {
-    this.userData.country = ({
-      tw: 'Taiwan',
-      jp: 'Japan',
-      us: 'United States'
-    } as Record<string, string>)[i18n.locale]
+    switch (i18n.locale) {
+      case 'tw':
+        this.userData.country = 'TW'; this.userCountryName = 'Taiwan'
+        break
+      case 'jp':
+        this.userData.country = 'JP'; this.userCountryName = 'Japan'
+        break
+      case 'us':
+        this.userData.country = 'US'; this.userCountryName = 'United States'
+        break
+    }
     this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
 
     const fields = {
@@ -173,8 +180,9 @@ export default Vue.extend({
       }
       return `${prefix}${item.join(': ')}`
     },
-    setCountry(option: string) {
-      this.userData.country = option
+    setCountry(option: Record<string, string>) {
+      this.userData.country = option.value
+      this.userCountryName = option.label
     },
     isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
       const weight = [1, 2, 1, 2, 1, 2, 4, 1]
@@ -200,9 +208,9 @@ export default Vue.extend({
 
       this.TPDirect.card.getPrime((result: any) => {
         if (result.status !== 0) {
-          this.prime = this.payment = ['getPrime error']
+          this.prime = this.payment = [result.msg]
           this.isLoading = false
-          Vue.notify({ group: 'error', text: 'getPrime error' }) // todo throw exception
+          Vue.notify({ group: 'error', text: result.msg }) // todo throw exception
           return
         }
 
