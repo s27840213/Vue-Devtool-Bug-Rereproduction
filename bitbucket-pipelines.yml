@@ -372,7 +372,7 @@ pipelines:
                     S3_BUCKET: $AWS_BUCKET_DEV0
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=* --include=index.html"
-                    DELETE_FLAG: 'true'
+                    DELETE_FLAG: 'true' 
           - step:
               name: "create pull request"
               trigger: manual
