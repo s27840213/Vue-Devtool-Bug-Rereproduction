@@ -8,7 +8,7 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @click.left.stop="onClickEvent($event)"
-            @drop="onDrop($event)"
+            @drop.prevent="onDrop($event)"
             @dragenter="onDragEnter($event)"
             @dragleave="onDragLeave($event)"
             @mouseenter="onFrameMouseEnter($event)"
@@ -464,12 +464,16 @@ export default Vue.extend({
       }
     },
     onDrop(e: DragEvent) {
-      switch (this.type) {
-        case 'frame':
-          this.getLayerType === 'image' && this.onFrameDrop(e)
-          return
-        case 'group':
-          this.getLayerType === 'image' && this.dragUitls.onImgDrop(e)
+      if (!this.currDraggedPhoto.srcObj.type) {
+        // Propagated to NuController.vue onDrop()
+      } else {
+        switch (this.type) {
+          case 'frame':
+            this.getLayerType === 'image' && this.onFrameDrop(e)
+            return
+          case 'group':
+            this.getLayerType === 'image' && this.dragUitls.onImgDrop(e)
+        }
       }
     },
     onFrameDragEnter(e: DragEvent) {
