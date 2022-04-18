@@ -12,6 +12,7 @@ import { IGroup, IText } from '@/interfaces/layer'
 interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
+  isDefaultSelected: boolean,
   isBrandsLoading: boolean,
   isLogosLoading: boolean,
   isPalettesLoading: boolean,
@@ -31,6 +32,7 @@ const showNetworkError = () => {
 const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
+  isDefaultSelected: false,
   isBrandsLoading: false,
   isLogosLoading: false,
   isPalettesLoading: false,
@@ -52,6 +54,9 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getCurrentBrand(state: IBrandKitState): IBrand {
     return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? NULL_BRAND
+  },
+  getIsDefaultSelected(state: IBrandKitState): boolean {
+    return state.isDefaultSelected
   },
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
@@ -473,6 +478,9 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_currentBrand(state: IBrandKitState, brand: IBrand) {
     state.currentBrandId = brand.id
+  },
+  SET_isDefaultSelected(state: IBrandKitState, isDefaultSelected: boolean) {
+    state.isDefaultSelected = isDefaultSelected
   },
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading

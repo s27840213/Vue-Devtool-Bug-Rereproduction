@@ -116,8 +116,8 @@ class DragUtils {
       }
 
       if (data.type === 'standardText') {
-        const { textType, text, locale } = data
-        assetUtils.addStandardText(textType, text, locale, pageIndex, { styles })
+        const { textType, text, locale, spanStyles } = data
+        assetUtils.addStandardText(textType, text, locale, pageIndex, { styles }, spanStyles)
       } else {
         if (data.type === 6) {
           const currPage = pageUtils.currFocusPage

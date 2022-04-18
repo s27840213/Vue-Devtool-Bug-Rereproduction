@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { captureException } from '@sentry/browser'
 import store from '@/store'
-import { IListServiceContentDataItem, IListServiceContentData, IAssetPhoto } from '@/interfaces/api'
+import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import TemplateUtils from './templateUtils'
 import pageUtils from './pageUtils'
@@ -10,7 +10,7 @@ import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import GeneralUtils from './generalUtils'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
@@ -19,7 +19,6 @@ import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
-import { ITextState } from '@/store/text'
 import gtmUtils from './gtmUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
@@ -395,7 +394,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
+  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -414,6 +413,10 @@ class AssetUtils {
 
         if (attrs.styles) {
           Object.assign(textLayer.styles, attrs.styles)
+        }
+
+        if (spanStyles) {
+          Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
         }
 
         TextUtils.resetTextField(textLayer, targePageIndex, field)
