@@ -38,7 +38,7 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        scale: 1,
+        scale: width / initWidth,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
@@ -60,7 +60,10 @@ class LayerFactary {
     }
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
-    return Object.assign(basicConfig, config)
+
+    basicConfig.styles.scale = basicConfig.styles.width / basicConfig.styles.initWidth
+    const image = Object.assign(basicConfig, config)
+    return image
   }
 
   newFrame(config: IFrame): IFrame {

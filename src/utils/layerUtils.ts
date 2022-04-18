@@ -15,6 +15,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { ITiptapSelection } from '@/interfaces/text'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
+import generalUtils from './generalUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }

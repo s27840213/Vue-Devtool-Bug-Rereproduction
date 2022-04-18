@@ -348,7 +348,8 @@ export default Vue.extend({
                 }
               })
             }
-            _canvasImg.src = ImageUtils.getSrc(this.config, CANVAS_SIZE)
+            _canvasImg.src = ImageUtils.getSrc(this.config,
+              ['private', 'public'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE)
           }
           break
         }

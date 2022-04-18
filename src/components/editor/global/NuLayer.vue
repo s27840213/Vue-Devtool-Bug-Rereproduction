@@ -30,6 +30,7 @@ import imageUtils from '@/utils/imageUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import SquareLoading from '@/components/global/SqureLoading.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {

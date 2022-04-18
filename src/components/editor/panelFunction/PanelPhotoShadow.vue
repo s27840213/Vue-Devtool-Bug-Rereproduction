@@ -132,7 +132,7 @@ export default Vue.extend({
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const img = new Image()
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, 1600)
+      img.src = imageUtils.getSrc(config, ['public', 'private'].includes(config.srcObj.type) ? 'larg' : 1600)
       await new Promise<void>((resolve) => {
         img.onload = () => resolve()
       })
@@ -204,16 +204,17 @@ export default Vue.extend({
             }
             layer.srcObj = srcObj
             Object.assign(layer.styles, styles)
+            console.log(subLayerIdx)
 
             const newImg = new Image()
             newImg.crossOrigin = 'anoynous'
             newImg.onload = () => {
               this.resetAllShadowProps(pageIndex, layerIndex, subLayerIdx)
-              console.log(generalUtils.deepCopy(calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)))
+              // console.log(generalUtils.deepCopy(calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)))
               layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
               layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, isUploading: false }, subLayerIdx)
-              console.log(generalUtils.deepCopy(calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)))
-              if (subLayerIdx !== 1) {
+              // console.log(generalUtils.deepCopy(calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)))
+              if (subLayerIdx !== -1) {
                 /** Handle the primary layer size update */
                 layerUtils.updateLayerStyles(pageIndex, layerIndex, {
                   ...calcTmpProps((layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers)
@@ -239,6 +240,7 @@ export default Vue.extend({
           imageShadowUtils.clearLayerData()
         }
       })
+      // imageShadowUtils.clearLayerData()
     }
   },
   computed: {

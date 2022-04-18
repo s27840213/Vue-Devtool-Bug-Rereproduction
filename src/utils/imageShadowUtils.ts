@@ -13,7 +13,7 @@ type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.5
-export const CANVAS_SIZE = 500
+export const CANVAS_SIZE = 510
 export interface DrawOptions {
   canvasSize?: number,
   timeout?: number,
@@ -68,6 +68,7 @@ class ImageShadowUtils {
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
+      console.log('start drawing')
       if (!this.ctxT) return
       this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
 
@@ -81,9 +82,11 @@ class ImageShadowUtils {
       const drawCanvasWidth = img.naturalWidth
       const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
       const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-      const unifiedScale = Math.floor(img.naturalWidth / CANVAS_SIZE)
+
+      // const unifiedScale = Math.floor(img.naturalWidth / CANVAS_SIZE)
+      const unifiedScale = img.naturalWidth / CANVAS_SIZE
       const unifiedSpread = spread * unifiedScale
-      const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedSpread
+      const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
 
       let offsetX = 0
@@ -130,7 +133,7 @@ class ImageShadowUtils {
         if (this.ctxT && this.handlerId === handlerId) {
           this.ctxT.globalCompositeOperation = 'source-in'
           const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius * unifiedScale + 1)
+          StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, Math.floor(radius * unifiedScale) + 1)
           this.ctxT.putImageData(imageData, 0, 0)
         }
       })
