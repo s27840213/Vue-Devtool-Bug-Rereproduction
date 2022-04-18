@@ -104,15 +104,23 @@ pipelines:
             deployment: dev0
             trigger: manual
             script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
+              - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV0
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+                  EXTRA_ARGS: "--exclude=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV0
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+                  DELETE_FLAG: 'true' 
         - step:
             name: "create pull request"
             trigger: manual
