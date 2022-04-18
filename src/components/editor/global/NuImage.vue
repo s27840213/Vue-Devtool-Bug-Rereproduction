@@ -21,11 +21,11 @@
       :src="src"
       @error="onError()"
       @load="onLoad()")
-    div(v-if="inProcess" class="canvas__process")
-      svg-icon(class="spiner"
-        :iconName="'spiner'"
-        :iconColor="'white'"
-        :iconWidth="'150px'")
+    //- div(v-if="inProcess" class="canvas__process")
+    //-   svg-icon(class="spiner"
+    //-     :iconName="'spiner'"
+    //-     :iconColor="'white'"
+    //-     :iconWidth="'150px'")
 </template>
 
 <script lang="ts">
@@ -332,14 +332,14 @@ export default Vue.extend({
               }
             })
           } else {
-            const _canvasImg = new Image()
-            _canvasImg.crossOrigin = 'Anonymous'
-            _canvasImg.onload = () => {
-              canvas.setAttribute('width', `${_canvasImg.width * CANVAS_SCALE}`)
-              canvas.setAttribute('height', `${_canvasImg.height * CANVAS_SCALE}`)
-              this.canvasImg = _canvasImg
+            const previewImg = new Image()
+            previewImg.crossOrigin = 'Anonymous'
+            previewImg.onload = () => {
+              canvas.setAttribute('width', `${previewImg.width * CANVAS_SCALE}`)
+              canvas.setAttribute('height', `${previewImg.height * CANVAS_SCALE}`)
+              this.canvasImg = previewImg
               imgShadowUtils.clearLayerData()
-              imgShadowUtils.draw(canvas, _canvasImg, this.config, {
+              imgShadowUtils.draw(canvas, previewImg, this.config, {
                 coverImg: this.$refs.img as HTMLImageElement,
                 layerInfo: {
                   pageIndex: this.pageIndex,
@@ -348,7 +348,7 @@ export default Vue.extend({
                 }
               })
             }
-            _canvasImg.src = ImageUtils.getSrc(this.config,
+            previewImg.src = ImageUtils.getSrc(this.config,
               ['private', 'public'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE)
           }
           break

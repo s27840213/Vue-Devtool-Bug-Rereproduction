@@ -116,13 +116,15 @@ export default Vue.extend({
   data() {
     return {
       shadowPropI18nMap,
-      fieldRange
+      fieldRange,
+      notUpload: true
     }
   },
   mounted() {
     colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
   },
   async beforeDestroy() {
+    if (this.notUpload) return
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
@@ -139,14 +141,7 @@ export default Vue.extend({
       updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
       updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_SCALE).toString())
 
-      // @Show
-      // updateCanvas.classList.add('show')
-      // updateCanvas.style.width = `${updateCanvas.width}px`
-      // updateCanvas.style.height = `${updateCanvas.height}px`
-      // setTimeout(() => document.body.removeChild(updateCanvas), 10000)
-      // document.body.append(updateCanvas)
-
-      await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0 })
+      await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0, uploading: true })
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
@@ -222,8 +217,6 @@ export default Vue.extend({
                 const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
                 const leftMargin = primaryLayer.layers.find(l => l.styles.x < 0)?.styles.x ?? 0
                 const topMargin = primaryLayer.layers.find(l => l.styles.y < 0)?.styles.y ?? 0
-                console.log(leftMargin)
-                console.log(topMargin)
                 if (leftMargin || topMargin) {
                   primaryLayer.layers
                     .forEach((l, i) => {

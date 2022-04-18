@@ -18,13 +18,24 @@ export interface DrawOptions {
   canvasSize?: number,
   timeout?: number,
   layerInfo?: ILayerInfo,
-  coverImg?: HTMLImageElement
+  coverImg?: HTMLImageElement,
+  uploading?: boolean
 }
 class ImageShadowUtils {
   private readonly SPREAD_RADIUS = 1
 
+  /**
+   * canvasT used to draw the corresponding size of the input image,
+   * as a temporarily operating canvas.
+   */
   private canvasT = document.createElement('canvas')
   private ctxT = null as CanvasRenderingContext2D | null
+  /**
+   * canvasMaxSize used to handle/draw the parametera as blur or offset...,
+   * as a parameter unified canvas for different size of image.
+   */
+  private canvasMaxSize = document.createElement('canvas')
+  private ctxMaxSize = null as CanvasRenderingContext2D | null
   private _draw = undefined as number | undefined
   private handlerId = ''
 
@@ -46,11 +57,14 @@ class ImageShadowUtils {
 
   constructor() {
     this.ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
+    this.ctxMaxSize = this.canvasMaxSize.getContext('2d') as CanvasRenderingContext2D
+    this.canvasMaxSize.classList.add('show')
+    this.canvasMaxSize.style.top = '0'
   }
 
   async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
-    const { timeout = 25, layerInfo, coverImg } = options
+    const { timeout = 25, layerInfo, coverImg, uploading } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
@@ -69,8 +83,10 @@ class ImageShadowUtils {
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
       console.log('start drawing')
-      if (!this.ctxT) return
-      this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
+      const { canvasT, ctxT, canvasMaxSize, ctxMaxSize } = this
+      if (!ctxT || !ctxMaxSize) return
+      ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+      ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
@@ -83,21 +99,13 @@ class ImageShadowUtils {
       const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
       const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
 
-      // const unifiedScale = Math.floor(img.naturalWidth / CANVAS_SIZE)
-      const unifiedScale = img.naturalWidth / CANVAS_SIZE
+      const unifiedScale = img.width / CANVAS_SIZE
       const unifiedSpread = spread * unifiedScale
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
 
-      let offsetX = 0
-      let offsetY = 0
-      if (distance && distance > 0) {
-        offsetX = distance * mathUtils.cos(angle) * unifiedScale
-        offsetY = distance * mathUtils.sin(angle) * unifiedScale
-      }
-
-      this.canvasT.width !== canvas.width && this.canvasT.setAttribute('width', `${canvas.width}`)
-      this.canvasT.height !== canvas.height && this.canvasT.setAttribute('height', `${canvas.height}`)
+      canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
+      canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
 
       let alphaVal = 1
       /** Calculating the spread */
@@ -115,59 +123,80 @@ class ImageShadowUtils {
               } else {
                 alphaVal = 1
               }
-              if (alphaVal && this.ctxT) {
-                this.ctxT.globalAlpha = alphaVal
-                this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
+              if (alphaVal) {
+                ctxT.globalAlpha = alphaVal
+                ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
               }
             }
           })
         }
-        this.spreadBuff.data = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
+        ctxT.globalAlpha = 1
+        this.spreadBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
         this.spreadBuff.size = img.naturalHeight
         this.spreadBuff.spread = unifiedSpread
         this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
+      } else {
+        ctxT.putImageData(this.spreadBuff.data, 0, 0)
       }
-      this.ctxT.putImageData(this.spreadBuff.data, offsetX, offsetY)
 
       await this.asyncProcessing(() => {
-        if (this.ctxT && this.handlerId === handlerId) {
-          this.ctxT.globalCompositeOperation = 'source-in'
-          const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, Math.floor(radius * unifiedScale) + 1)
-          this.ctxT.putImageData(imageData, 0, 0)
+        if (this.handlerId === handlerId) {
+          if (!uploading) {
+            const mappingScale = 1600 / CANVAS_SIZE
+            canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
+            canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
+          } else {
+            canvasMaxSize.setAttribute('width', `${canvas.width}`)
+            canvasMaxSize.setAttribute('height', `${canvas.height}`)
+          }
+          // @show
+          this.canvasMaxSize.style.width = `${this.canvasMaxSize.width}px`
+          this.canvasMaxSize.style.height = `${this.canvasMaxSize.height}px`
+
+          ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
+          ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+          const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+          StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius) + 1)
+          ctxMaxSize.putImageData(imageData, 0, 0)
+
+          // ctxT.globalCompositeOperation = 'source-in'
+          // const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
+          // StackBlur.imageDataRGBA(imageData, 0, 0, canvasT.width, canvasT.height, Math.floor(radius * unifiedScale) + 1)
+          // ctxT.putImageData(imageData, 0, 0)
         }
       })
-      await this.asyncProcessing(() => {
-        if (this.ctxT && this.handlerId === handlerId) {
-          this.ctxT.globalAlpha = opacity / 100
-          this.ctxT.fillStyle = effects.color
-          this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
 
-          this.ctxT.globalCompositeOperation = 'source-over'
-          this.ctxT.globalAlpha = 1
+      await this.asyncProcessing(() => {
+        if (ctxT && this.handlerId === handlerId) {
+          const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) : 0
+          const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) : 0
+          ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, offsetX, offsetY, canvasT.width, canvasT.height)
+
+          ctxT.globalCompositeOperation = 'source-in'
+          ctxT.globalAlpha = opacity / 100
+          ctxT.fillStyle = effects.color
+          ctxT.fillRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+          ctxT.globalAlpha = 1
+
+          ctxT.globalCompositeOperation = 'source-over'
           if (coverImg) {
             const coverRatio = coverImg.naturalWidth / _imgWidth
             const coverImgX = _imgX * coverRatio
             const coverImgY = _imgY * coverRatio
             const coverImgW = coverImg.naturalWidth * layerWidth / _imgWidth
             const coverImgH = coverImg.naturalHeight * layerHeight / _imgHeight
-
-            // const scaleRatio = img.naturalWidth / _imgWidth
-            // const imgX = _imgX * scaleRatio
-            // const imgY = _imgY * scaleRatio
-            // const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-            // const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-            // const drawCanvasHeight = img.naturalHeight
-            // const drawCanvasWidth = img.naturalWidth
-
-            this.ctxT.drawImage(coverImg, -coverImgX, -coverImgY, coverImgW, coverImgH, x, y, drawCanvasWidth, drawCanvasHeight)
+            ctxT.drawImage(coverImg, -coverImgX, -coverImgY, coverImgW, coverImgH, x, y, drawCanvasWidth, drawCanvasHeight)
           } else {
-            this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+            ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
           }
 
           ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(this.canvasT, 0, 0)
+          ctx.drawImage(canvasT, 0, 0)
         }
+
+        // document.body.append(this.canvasMaxSize)
+        ctxT.restore()
+        ctxMaxSize.restore()
       })
     }
     this.handlerId = handlerId
@@ -178,86 +207,6 @@ class ImageShadowUtils {
       this.spreadBuff.spread = -1
     }
   }
-
-  // async handler() {
-  //   if (!this.ctxT) return
-  //   this.ctxT.clearRect(0, 0, this.canvasT.width, this.canvasT.height)
-
-  //   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-  //   const scaleRatio = img.naturalWidth / _imgWidth
-  //   const imgRatio = _imgWidth / _imgHeight
-  //   const imgX = _imgX * scaleRatio
-  //   const imgY = _imgY * scaleRatio
-  //   const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-  //   const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-  //   const drawCanvasHeight = canvasSize
-  //   const drawCanvasWidth = drawCanvasHeight * imgRatio
-  //   const x = (canvas.width - canvasSize * imgRatio) * 0.5
-  //   const y = (canvas.height - canvasSize) * 0.5
-  //   const _spread = 1 / this.SPREAD_RADIUS
-
-  //   let offsetX = 0
-  //   let offsetY = 0
-  //   if (distance && distance > 0) {
-  //     offsetX = distance * mathUtils.cos(angle)
-  //     offsetY = distance * mathUtils.sin(angle)
-  //   }
-
-  //   this.canvasT.width !== canvas.width && this.canvasT.setAttribute('width', `${canvas.width}`)
-  //   this.canvasT.height !== canvas.height && this.canvasT.setAttribute('height', `${canvas.height}`)
-
-  //   let alphaVal = 1
-  //   /** Calculating the spread */
-  //   if (this.spreadBuff.spread !== spread || this.spreadBuff.effect !== currentEffect) {
-  //     this.spreadBuff.effect = currentEffect
-  //     layerInfo && this.setIsProcess(layerInfo, true)
-  //     for (let i = -spread; i <= spread && this.handlerId === handlerId; i++) {
-  //       await this.asyncProcessing(() => {
-  //         for (let j = -spread; j <= spread && this.handlerId === handlerId; j++) {
-  //           const r = Math.sqrt(i * i + j * j)
-  //           if (r >= spread + this.SPREAD_RADIUS && currentEffect !== ShadowEffectType.frame) {
-  //             alphaVal = 0
-  //           } else if (r >= spread && currentEffect !== ShadowEffectType.frame) {
-  //             alphaVal = (1 - (r - spread) * _spread)
-  //           } else {
-  //             alphaVal = 1
-  //           }
-  //           if (alphaVal && this.ctxT) {
-  //             this.ctxT.globalAlpha = alphaVal
-  //             this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
-  //           }
-  //         }
-  //       })
-  //     }
-  //     this.spreadBuff.data = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-  //     this.spreadBuff.spread = spread
-  //     this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
-  //   }
-  //   this.ctxT.putImageData(this.spreadBuff.data, offsetX, offsetY)
-
-  //   await this.asyncProcessing(() => {
-  //     if (this.ctxT && this.handlerId === handlerId) {
-  //       this.ctxT.globalCompositeOperation = 'source-in'
-  //       const imageData = this.ctxT.getImageData(0, 0, this.canvasT.width, this.canvasT.height)
-  //       StackBlur.imageDataRGBA(imageData, 0, 0, this.canvasT.width, this.canvasT.height, radius + 1)
-  //       this.ctxT.putImageData(imageData, 0, 0)
-  //     }
-  //   })
-  //   await this.asyncProcessing(() => {
-  //     if (this.ctxT && this.handlerId === handlerId) {
-  //       this.ctxT.globalAlpha = opacity / 100
-  //       this.ctxT.fillStyle = effects.color
-  //       this.ctxT.fillRect(0, 0, canvas.width, canvas.height)
-
-  //       this.ctxT.globalCompositeOperation = 'source-over'
-  //       this.ctxT.globalAlpha = 1
-  //       this.ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
-
-  //       ctx.clearRect(0, 0, canvas.width, canvas.height)
-  //       ctx.drawImage(this.canvasT, 0, 0)
-  //     }
-  //   })
-  // }
 
   async asyncProcessing(cb: () => void) {
     return new Promise<void>(resolve => {
@@ -582,12 +531,12 @@ export const fieldRange = {
   shadow: {
     distance: { max: 50, min: 0, weighting: 1 },
     angle: { max: 180, min: -180, weighting: 1 },
-    radius: { max: 60, min: 0, weighting: 1 },
+    radius: { max: 100, min: 0, weighting: 1 },
     opacity: { max: 100, min: 0, weighting: 1 },
     spread: { max: 30, min: 0, weighting: 1 }
   },
   blur: {
-    radius: { max: 60, min: 0, weighting: 2 },
+    radius: { max: 100, min: 0, weighting: 2 },
     spread: { max: 30, min: 5, weighting: 0.72 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
@@ -601,7 +550,7 @@ export const fieldRange = {
   frame: {
     spread: { max: 30, min: 0, weighting: 0.72 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    radius: { max: 60, min: 0, weighting: 2 }
+    radius: { max: 100, min: 0, weighting: 2 }
   },
   projection: {
     spread: { max: 100, min: 0, weighting: 0.5 },
