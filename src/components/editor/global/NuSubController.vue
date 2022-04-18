@@ -99,7 +99,7 @@ export default Vue.extend({
         srcObj: { type: string, assetId: string | number, userId: string },
         cached: boolean
       },
-      dragUitls: new DragUtils(this.primaryLayerIndex, this.layerIndex),
+      dragUtils: new DragUtils(this.primaryLayerIndex, this.layerIndex),
       isPrimaryActive: false
     }
   },
@@ -451,7 +451,7 @@ export default Vue.extend({
           this.getLayerType === 'image' && this.onFrameDragEnter(e)
           return
         case 'group':
-          this.getLayerType === 'image' && this.dragUitls.onImageDragEnter(e, this.config as IImage)
+          this.getLayerType === 'image' && this.dragUtils.onImageDragEnter(e, this.config as IImage)
       }
     },
     onDragLeave(e: DragEvent) {
@@ -460,7 +460,7 @@ export default Vue.extend({
           this.getLayerType === 'image' && this.onFrameDragLeave(e)
           return
         case 'group':
-          this.getLayerType === 'image' && this.dragUitls.onImageDragLeave(e)
+          this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
       }
     },
     onDrop(e: DragEvent) {
@@ -472,7 +472,7 @@ export default Vue.extend({
             this.getLayerType === 'image' && this.onFrameDrop(e)
             return
           case 'group':
-            this.getLayerType === 'image' && this.dragUitls.onImgDrop(e)
+            this.getLayerType === 'image' && this.dragUtils.onImgDrop(e)
         }
       }
     },
