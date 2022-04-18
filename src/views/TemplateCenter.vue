@@ -1014,7 +1014,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 67%;
-      padding-top: calc(100% - 2px);
+      padding-top: calc(67% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -1137,7 +1137,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 100%;
-      padding-top: calc(67% - 2px);
+      padding-top: calc(100% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
