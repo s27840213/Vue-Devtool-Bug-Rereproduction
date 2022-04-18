@@ -30,13 +30,10 @@ export default Vue.extend({
     layerIndex: Number,
     pageIndex: Number,
     primaryLayerIndex: Number,
+    primaryLayer: Object,
     forRender: {
       type: Boolean,
       default: false
-    },
-    primaryLayerType: {
-      type: String,
-      default: ''
     }
   },
   data() {
@@ -87,6 +84,9 @@ export default Vue.extend({
     },
     getImgHeight(): number {
       return this.config.styles.imgHeight
+    },
+    primaryLayerType(): string {
+      return this.primaryLayer.type
     },
     getLayerScale(): number {
       /** only the image in frame use the scale to strech */
@@ -145,6 +145,15 @@ export default Vue.extend({
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
+    controllerStyles() {
+      const zindex = 0
+      return {
+        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.width}px`,
+        height: `${this.config.styles.height}px`,
+        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
+      }
+    },
     imgControllerPosHandler(): ICoordinate {
       const angleInRad = this.getLayerRotate * Math.PI / 180
       const rectCenter = {
@@ -190,15 +199,6 @@ export default Vue.extend({
       }
 
       return imgControllerPos
-    },
-    controllerStyles() {
-      const zindex = 0
-      return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
-      }
     },
     updateLayerProps(prop: { [key: string]: string | boolean | number }) {
       if (typeof this.primaryLayerIndex !== 'undefined') {

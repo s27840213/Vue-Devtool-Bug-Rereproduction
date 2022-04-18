@@ -4,7 +4,7 @@
       :iconName="'download'"
       :iconWidth="'18px'"
       :type="'primary-sm'"
-      :disabled="inprogress || inBgRemoveMode"
+      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0"
       class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
       span(v-if="!inprogress") {{$t('NN0010')}}
@@ -35,7 +35,8 @@ export default Vue.extend({
     ...mapGetters({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       isLogin: 'user/isLogin',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      uploadingImgs: 'file/getUploadingImgs'
     })
   },
   methods: {
@@ -50,6 +51,7 @@ export default Vue.extend({
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(this.$t('NN0323') as string, [], '')
       }
+      console.log(this.show)
     }
   }
 })

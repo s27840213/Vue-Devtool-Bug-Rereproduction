@@ -16,6 +16,7 @@ interface IPhotoState {
   initialized: boolean,
   setLayersDone: boolean
   pageIndex: number,
+  uploadingAssets: Array<{ id: string, pageIndex: number }>
 }
 
 const getDefaultState = (): IPhotoState => ({
@@ -25,7 +26,8 @@ const getDefaultState = (): IPhotoState => ({
   pending: true,
   initialized: false,
   setLayersDone: false,
-  pageIndex: 0
+  pageIndex: 0,
+  uploadingAssets: []
 })
 
 const state = getDefaultState()
@@ -259,6 +261,16 @@ const mutations: MutationTree<IPhotoState> = {
     state.myfileImages[targetIndex].id = isAdmin ? assetId : undefined
     state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
     state.editorViewImages[data[0].assetIndex] = data[0].urls
+  },
+  SET_UPLOADING_IMGS(state: IPhotoState, { id, adding, pageIndex }) {
+    if (adding) {
+      state.uploadingAssets.push({ id, pageIndex })
+    } else {
+      const index = state.uploadingAssets.findIndex(e => e.id === id)
+      if (index !== -1) {
+        state.uploadingAssets.splice(index, 1)
+      }
+    }
   }
 }
 
@@ -274,6 +286,9 @@ const getters: GetterTree<IPhotoState, any> = {
   },
   getEditorViewImages: (state) => (assetId: string | undefined = undefined) => {
     return assetId ? state.editorViewImages[assetId] : state.editorViewImages
+  },
+  getUploadingImgs(state): Array<{ id: string, pageIndex: number }> {
+    return state.uploadingAssets
   }
 }
 

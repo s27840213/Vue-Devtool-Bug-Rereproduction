@@ -62,7 +62,7 @@
         svg-icon(class="pointer mt-10"
           v-if="getPageCount > 1" :iconName="'trash'" :iconWidth="`${15}px`" :iconColor="'gray-2'"
           @click.native="deletePage()")
-    template(v-if="(!isOutOfBound && imgLoaded) || hasEditingText")
+    template(v-if="!isOutOfBound || hasEditingText")
       div(class='pages-wrapper'
           :class="`nu-page-${pageIndex}`"
           :style="wrapperStyles()"
@@ -133,7 +133,7 @@
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
                                     :primaryLayerIndex="currSelectedInfo.index"
-                                    :primaryLayerType="getCurrLayer.type"
+                                    :primaryLayer="getCurrLayer"
                                     :forRender="true"
                                     :config="getCurrSubSelectedLayerShown")
             template(v-else-if="getCurrLayer.type === 'image'")
@@ -197,7 +197,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapGetters, mapState, mapActions } from 'vuex'
+import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
 import MouseUtils from '@/utils/mouseUtils'
@@ -237,8 +237,6 @@ export default Vue.extend({
       initialPageHeight: 0,
       isShownResizerHint: false,
       isResizingPage: false,
-      imgLoaded: false,
-      imgLoading: false,
       pageIsHover: false,
       ImageUtils,
       layerUtils,
@@ -268,11 +266,6 @@ export default Vue.extend({
     this.$nextTick(() => {
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
-    if (!this.isOutOfBound && this.setLayersDone) {
-      // Will be trigger if user go to B design after go to A design
-      // or after developer modify NuPage.vue and re-yarn serve.
-      this.loadLayerImg()
-    }
   },
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
@@ -288,8 +281,7 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline',
-      setLayersDone: 'file/getSetLayersDone'
+      lockGuideline: 'getLockGuideline'
     }),
     getCurrLayer(): ILayer {
       return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
@@ -385,18 +377,6 @@ export default Vue.extend({
         this.getClosestSnaplines()
       },
       deep: true
-    },
-    isOutOfBound(newVal: boolean) {
-      // If user see this page, request private url.
-      if (!newVal) {
-        this.loadLayerImg()
-      }
-    },
-    setLayersDone(newVal: boolean) {
-      // First page will not trigger watch isOutOfBound, so trigger it when uploadUtils call SET_pages.
-      if (newVal) {
-        this.loadLayerImg()
-      }
     }
   },
   methods: {
@@ -410,18 +390,6 @@ export default Vue.extend({
       setSidebarType: 'SET_currSidebarPanelType',
       setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
     }),
-    ...mapActions({
-      updatePageImages: 'file/updatePageImages'
-    }),
-    async loadLayerImg() {
-      if (!this.isOutOfBound && this.setLayersDone &&
-          !this.imgLoaded && !this.imgLoading) {
-        this.imgLoading = true
-        await this.updatePageImages({ pageIndex: this.pageIndex })
-        this.imgLoaded = true
-        this.imgLoading = false
-      }
-    },
     styles(type: string) {
       return type === 'content' ? {
         width: `${this.config.width}px`,

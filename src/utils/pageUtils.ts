@@ -3,6 +3,7 @@ import { IBgRemoveInfo } from '@/interfaces/image'
 import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import Vue from 'vue'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
@@ -344,7 +345,6 @@ class PageUtils {
     const targetHeight = this.inBgRemoveMode ? this.autoRemoveResult.height : this.currFocusPageSize.height
     const resizeRatio = Math.min(editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)), editorViewBox.clientHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
 
-    editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
@@ -353,6 +353,9 @@ class PageUtils {
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
+    Vue.nextTick(() => {
+      editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
+    })
   }
 
   fillPage() {

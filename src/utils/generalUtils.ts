@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import modalUtils from './modalUtils'

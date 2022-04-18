@@ -42,7 +42,7 @@
     div(ref="nameblock"
         class="folder-item__name"
         :folderid="config.id"
-        v-click-outside="handleNameEditEnd")
+        v-click-outside="() => { isNameEditing && handleNameEditEnd() }")
       input(ref="name"
             v-if="isNameEditing"
             v-model="editableName"

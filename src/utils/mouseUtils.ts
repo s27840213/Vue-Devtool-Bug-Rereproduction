@@ -92,7 +92,8 @@ class MouseUtils {
     const dropData = e.dataTransfer ? e.dataTransfer.getData('data') : null
     if (dropData === null || typeof dropData !== 'string') return
     const data = JSON.parse(dropData)
-    const target = e.target as HTMLElement
+    // const target = e.target as HTMLElement
+    const target = document.querySelector(`.nu-page-${pageIndex}`) as HTMLElement
     const targetPos = {
       x: target.getBoundingClientRect().x,
       y: target.getBoundingClientRect().y

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import VueRouter, { NavigationGuardNext, Route, RouteConfig } from 'vue-router'
+import VueRouter, { NavigationGuardNext, RawLocation, Route, RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
@@ -37,6 +37,35 @@ const MOBILE_ROUTES = [
   'MobileTextTyping'
 ]
 
+// Ingore some normal router console error
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location: RawLocation):Promise<Route> {
+  return (originalPush.call(this, location) as unknown as Promise<Route>)
+    .catch(err => {
+      switch (err.name) {
+        case 'NavigationDuplicated':
+          break
+        default:
+          console.error(err)
+      }
+      return err
+    })
+}
+
+const originalReplace = VueRouter.prototype.replace
+VueRouter.prototype.replace = function repalce(location: RawLocation):Promise<Route> {
+  return (originalReplace.call(this, location) as unknown as Promise<Route>)
+    .catch(err => {
+      switch (err.name) {
+        case 'NavigationDuplicated':
+          break
+        default:
+          console.error(err)
+      }
+      return err
+    })
+}
+
 const routes: Array<RouteConfig> = [
   {
     path: '',
@@ -59,7 +88,6 @@ const routes: Array<RouteConfig> = [
     path: 'editor',
     name: 'Editor',
     component: Editor,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: editorRouteHandler
   },
   {
@@ -73,7 +101,6 @@ const routes: Array<RouteConfig> = [
     path: 'preview',
     name: 'Preview',
     component: Preview,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         const urlParams = new URLSearchParams(window.location.search)
@@ -107,7 +134,6 @@ const routes: Array<RouteConfig> = [
     name: 'SignUp',
     props: route => ({ redirect: route.query.redirect }),
     component: SignUp,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         if (store.getters['user/isLogin']) {
@@ -125,7 +151,6 @@ const routes: Array<RouteConfig> = [
     name: 'Login',
     props: route => ({ redirect: route.query.redirect }),
     component: Login,
-    // eslint-disable-next-line space-before-function-paren
     beforeEnter: async (to, from, next) => {
       try {
         if (to.query.type) {

@@ -460,8 +460,11 @@ class LayerFactary {
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
-    config.backgroundImage.id = GeneralUtils.generateRandomString(8)
-
+    const bgImgConfig = config.backgroundImage.config
+    bgImgConfig.id = GeneralUtils.generateRandomString(8)
+    if (bgImgConfig.srcObj.type && !bgImgConfig.srcObj.userId && !bgImgConfig.srcObj.assetId) {
+      config.backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
+    }
     return config
   }
 
