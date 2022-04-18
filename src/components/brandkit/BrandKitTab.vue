@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="brand-kit-tab")
+  div(class="brand-kit-tab" :class="{sidebar: theme === 'editor'}")
     div(class="brand-kit-tab__header"
       :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'")
       div(v-for="tab in tabs" class="brand-kit-tab__tab-block pointer"
@@ -8,7 +8,7 @@
         div(class="brand-kit-tab__tab-name"
           :class="theme === 'editor' ? 'editor-theme' : 'brandkit-theme'")
           span(class="brand-kit-tab__tab-name-text") {{ $t(tabNames[tab]) }}
-    div(v-if="notNullBrand" class="brand-kit-tab__content")
+    div(v-if="notNullBrand" class="brand-kit-tab__content" :class="{sidebar: theme === 'editor'}")
       component(:is="`brand-kit-tab-${selectedTab}${theme === 'editor' ? '-sidebar' : ''}`" @deleteItem="handleDeleteItem")
     div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect")
       template(v-if="theme === 'editor'")
@@ -87,6 +87,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .brand-kit-tab {
+  &.sidebar {
+    height: 100%;
+  }
   &__header {
     display: flex;
     gap: 20px;
@@ -128,6 +131,9 @@ export default Vue.extend({
   }
   &__content {
     margin-top: 30px;
+    &.sidebar {
+      height: calc(100% - 135px);
+    }
   }
   &__disconnect {
     display: flex;

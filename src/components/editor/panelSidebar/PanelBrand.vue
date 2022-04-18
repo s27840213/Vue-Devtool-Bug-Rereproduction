@@ -52,6 +52,12 @@ export default Vue.extend({
   &__header {
     width: 100%;
   }
+  &__main {
+    @include size(100%, 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
   &__settings {
     position: absolute;
     width: 24px;
@@ -61,7 +67,7 @@ export default Vue.extend({
     transform: translateY(-50%);
   }
   &__tab {
-    margin-top: 15px;
+    @include size(100%, 100%);
   }
   &__settings-popup {
     position: absolute;

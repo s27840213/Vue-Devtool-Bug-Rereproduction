@@ -1,62 +1,70 @@
 <template lang="pug">
-  //- div(v-if="isLogosLoading" class="brand-kit-tab-logo")
+  div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
     svg-icon(iconName="loading"
-            iconWidth="50px"
+            iconWidth="24px"
             iconColor="gray-3")
-  div(v-else class="brand-kit-tab-logo")
-    //- div(class="brand-kit-tab-logo__item add pointer relative"
-      @click="handleUploadLogo")
-      span(class="primary") {{ $t('NN0411') }}
-      i18n(class="secondary" path="NN0412" tag="span")
-        template(#newline)
-          br
-      svg-icon(class="hover"
-              iconName="plus-origin"
-              iconWidth="16px"
-              iconColor="gray-2")
-    //- div(v-for="logo in logos" class="brand-kit-tab-logo__item relative"
-      :key="logo.id"
-      :class="{hovered: checkMenuOpen(logo)}")
-      svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
-      img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
-      div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
-        @click="handleOpenMenu(logo)")
-        div(class="brand-kit-tab-logo__item__more-container relative")
-          svg-icon(iconName="more_vertical"
-                  iconWidth="24px"
-                  iconColor="gray-2")
-          div(v-if="checkMenuOpen(logo)"
-            class="brand-kit-tab-logo__item__menu"
-            v-click-outside="() => { menuOpenLogoId = '' }")
-            div(class="brand-kit-tab-logo__item__menu__name")
-              span {{ logo.name }}
-            div(class="brand-kit-tab-logo__item__menu__hr")
-            div(class="brand-kit-tab-logo__item__menu__row pointer"
-              @click="handleDownload(logo)")
-              svg-icon(iconName="download"
+  recycle-scroller(v-else
+    class="brand-kit-tab-logo"
+    :items="rows")
+    template(v-slot="{ item }")
+      observer-sentinel(v-if="item.sentinel"
+        target=".brand-kit-tab-logo"
+        @callback="handleLoadMore(item)")
+      transition-group(class="brand-kit-tab-logo__row" name="logo-list" tag="div")
+        div(v-for="logo in item.list"
+          class="brand-kit-tab-logo__item  relative"
+          :class="{hovered: checkMenuOpen(logo)}"
+          :style="imageStyle(logo.preview)"
+          :key="logo.id.replace('new_', '')")
+          svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
+          img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
+          div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
+            @click="handleOpenMenu(logo)")
+            div(class="brand-kit-tab-logo__item__more-container relative")
+              svg-icon(iconName="more_vertical"
                       iconWidth="24px"
                       iconColor="gray-2")
-              span {{ $t('NN0010') }}
-            div(class="brand-kit-tab-logo__item__menu__row pointer"
-              @click="handleDeleteLogo(logo)")
-              svg-icon(iconName="trash"
-                      iconWidth="24px"
-                      iconColor="gray-2")
-              span {{ $t('NN0034') }}
+              div(v-if="checkMenuOpen(logo)"
+                class="brand-kit-tab-logo__item__menu"
+                v-click-outside="() => { menuOpenLogoId = '' }")
+                div(class="brand-kit-tab-logo__item__menu__name")
+                  span {{ logo.name }}
+                div(class="brand-kit-tab-logo__item__menu__hr")
+                div(class="brand-kit-tab-logo__item__menu__row pointer"
+                  @click="handleDownload(logo)")
+                  svg-icon(iconName="download"
+                          iconWidth="24px"
+                          iconColor="gray-2")
+                  span {{ $t('NN0010') }}
+                //- div(class="brand-kit-tab-logo__item__menu__row pointer"
+                //-   @click="handleDeleteLogo(logo)")
+                //-   svg-icon(iconName="trash"
+                //-           iconWidth="24px"
+                //-           iconColor="gray-2")
+                //-   span {{ $t('NN0034') }}
+    //- template(#after)
+      div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
+        svg-icon(iconName="loading"
+                iconWidth="24px"
+                iconColor="gray-3")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
+import GalleryUtils from '@/utils/galleryUtils'
 
 export default Vue.extend({
   data() {
     return {
-      menuOpenLogoId: ''
+      menuOpenLogoId: '',
+      rows: [] as any[],
+      galleryUtils: new GalleryUtils(300, 100, 15)
     }
   },
   mounted() {
@@ -65,9 +73,16 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
+  components: {
+    ObserverSentinel
+  },
   watch: {
     logos() {
       this.menuOpenLogoId = ''
+      this.logosUpdate()
+    },
+    currentBrand() {
+      brandkitUtils.fetchLogos(this.fetchLogos)
     }
   },
   computed: {
@@ -85,13 +100,34 @@ export default Vue.extend({
       refreshLogoAsset: 'refreshLogoAsset'
     }),
     getUrl(logo: IBrandLogo): string {
-      return logo.signed_url ? logo.signed_url.tiny : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${this.currentBrand.id}/${logo.id}/tiny`
+      return brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
     },
     checkMenuOpen(logo: IBrandLogo): boolean {
       return this.menuOpenLogoId === logo.id
     },
     checkUploading(logo: IBrandLogo) {
       return logo.id.startsWith('new_')
+    },
+    logosUpdate() {
+      this.rows = this.galleryUtils
+        .generateForLogo(this.logos)
+        .map((row, idx) => ({
+          list: row,
+          id: `row_${idx}`,
+          sentinel: false,
+          index: idx,
+          size: (row[0].preview?.height ?? 0) + this.galleryUtils.margin
+        }))
+    },
+    imageStyle(preview: any) {
+      return {
+        width: `${preview.width}px`,
+        height: `${preview.height}px`
+      }
+    },
+    handleLoadMore(item: any): void {
+      item.sentinel = false
+      this.$emit('loadMore')
     },
     handleOpenMenu(logo: IBrandLogo) {
       if (this.checkMenuOpen(logo)) {
@@ -106,7 +142,7 @@ export default Vue.extend({
     handleDownload(logo: IBrandLogo) {
       const brand = this.currentBrand
       const logoName = logo.name
-      const url = brandkitUtils.getDownloadUrl(logo, brand.id)
+      const url = brandkitUtils.getLogoUrl(logo, brand.id, 'original')
       if (logo.signed_url) {
         fetch(url).then(() => {
           this.startDownloading(url, logoName)
@@ -140,59 +176,37 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.brand-kit-tab-logo {
+.brand-kit-tab-logo-loading {
   display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
+  justify-content: center;
+}
+.brand-kit-tab-logo {
+  height: 100%;
+  line-height: 0;
+  text-align: left;
+  box-sizing: border-box;
+  margin-right: -10px; // Push scrollbar to outside
+  padding-right: 10px;
+  @media not all and (min-resolution:.001dpcm){ // For safari only
+    @supports (-webkit-appearance:none) {
+      padding-right: 0;
+    }
+  }
+  @include hide-scrollbar;
+  &__row {
+    display: flex;
+    justify-content: space-between;
+  }
   &__item {
-    height: 100px;
-    min-width: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid setColor(gray-4);
-    box-sizing: border-box;
-    border-radius: 4px;
-    &.add {
-      // width: 100px;
-      display: flex;
-      flex-direction: column;
-      padding: 25px 30px;
-      border: 1px dashed setColor(gray-4);
-      & > .hover {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: none;
-        z-index: 1;
-      }
-      &:hover {
-        background-color: setColor(blue-4);
-        border: 1px solid setColor(blue-4);
-        & > span.primary, & > span.secondary {
-          color: setColor(blue-4);
-        }
-        & > .hover {
-          display: block;
-        }
-      }
-      & > span.primary {
-        @include body-SM;
-        color: setColor(gray-2);
-      }
-      & > span.secondary {
-        @include body-XS;
-        color: setColor(gray-3);
-      }
-    }
     &__img {
       height: 100%;
       width: auto;
     }
-    &:not(.add):hover, &.hovered {
+    &:hover, &.hovered {
       background-color: rgba(setColor(gray-4), 0.5);
-      border: 1px solid setColor(gray-4);
       & > img {
         opacity: 0.5;
       }
@@ -263,6 +277,19 @@ export default Vue.extend({
         }
       }
     }
+  }
+}
+
+.logo-list {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+  }
+
+  &-enter,
+  &-leave-to {
+    transform: translateY(-30%);
+    opacity: 0;
   }
 }
 </style>

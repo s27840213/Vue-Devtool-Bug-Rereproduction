@@ -83,7 +83,9 @@ export default Vue.extend({
       isLogosLoading: 'getIsLogosLoading'
     }),
     logos(): (IBrandLogo | string)[] {
-      return ['add', ...(this.currentBrand as IBrand).logos]
+      const res = ['add', ...(this.currentBrand as IBrand).logos]
+      console.log(res)
+      return res
     }
   },
   methods: {
@@ -92,7 +94,7 @@ export default Vue.extend({
       refreshLogoAsset: 'refreshLogoAsset'
     }),
     getUrl(logo: IBrandLogo): string {
-      return logo.signed_url ? logo.signed_url.tiny : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${this.currentBrand.id}/${logo.id}/tiny`
+      return brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
     },
     checkMenuOpen(logo: IBrandLogo): boolean {
       return this.menuOpenLogoId === logo.id
@@ -113,7 +115,7 @@ export default Vue.extend({
     handleDownload(logo: IBrandLogo) {
       const brand = this.currentBrand
       const logoName = logo.name
-      const url = brandkitUtils.getDownloadUrl(logo, brand.id)
+      const url = brandkitUtils.getLogoUrl(logo, brand.id, 'original')
       if (logo.signed_url) {
         fetch(url).then(() => {
           this.startDownloading(url, logoName)

@@ -10,6 +10,12 @@ export interface IBrandLogo {
   signed_url?: {
     original: string,
     tiny: string
+  },
+  width: number,
+  height: number,
+  preview?: {
+    width: number,
+    height: number
   }
 }
 

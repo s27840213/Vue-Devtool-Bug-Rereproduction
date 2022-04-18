@@ -456,9 +456,7 @@ class UploadUtils {
                     if (json.flag === 0) {
                       // notify success
                       console.log('Successfully upload the file')
-                      console.log(tempId, json.data, brandId)
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
-                      console.log(json)
                     } else {
                       // notify fail
                       brandkitUtils.deleteLogo(brandId, tempId)
