@@ -6,7 +6,7 @@
     div(class="brand-kit-color-palette__colors")
       div(v-for="(color, index) in colorPalette.colors"
         class="brand-kit-color-palette__colors__color-wrapper")
-        div(class="brand-kit-color-palette__colors__color pointer"
+        div(class="brand-kit-color-palette__colors__color"
           :style="backgroundColorStyles(color.color)")
 </template>
 

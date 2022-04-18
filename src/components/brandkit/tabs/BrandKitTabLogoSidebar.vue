@@ -8,12 +8,12 @@
       observer-sentinel(v-if="item.sentinel"
         target=".brand-kit-tab-logo"
         @callback="handleLoadMore(item)")
-      transition-group(class="brand-kit-tab-logo__row" name="logo-list" tag="div")
+      div(class="brand-kit-tab-logo__row")
         div(v-for="logo in item.list"
-          class="brand-kit-tab-logo__item  relative"
+          class="brand-kit-tab-logo__item pointer relative"
           :class="{hovered: checkMenuOpen(logo)}"
           :style="imageStyle(logo.preview)"
-          :key="logo.id.replace('new_', '')")
+          :key="logo.id")
           svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
           img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
     template(#after)
@@ -38,7 +38,7 @@ export default Vue.extend({
     return {
       menuOpenLogoId: '',
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(300, 100, 15)
+      galleryUtils: new GalleryUtils(300, 100, 5)
     }
   },
   mounted() {
@@ -179,19 +179,6 @@ export default Vue.extend({
       height: 100%;
       width: auto;
     }
-  }
-}
-
-.logo-list {
-  &-enter-active,
-  &-leave-active {
-    transition: 0.3s ease;
-  }
-
-  &-enter,
-  &-leave-to {
-    transform: translateY(-30%);
-    opacity: 0;
   }
 }
 </style>
