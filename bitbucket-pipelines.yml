@@ -34,71 +34,146 @@ pipelines:
             deployment: dev5
             trigger: manual
             script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
+              - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV5
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+                  EXTRA_ARGS: "--exclude=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV5
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV5
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  DELETE_FLAG: "true"
         - step:
             name: "dev4 Gary"
             deployment: dev4
             trigger: manual
             script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
+              - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV4
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+                  EXTRA_ARGS: "--exclude=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV4
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV4
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  DELETE_FLAG: "true"
         - step:
             name: "dev3 HsingChi"
             deployment: dev3
             trigger: manual
             script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
+              - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV3
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+                  EXTRA_ARGS: "--exclude=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV3
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV3
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  DELETE_FLAG: "true"
         - step:
             name: "dev2 TingAn"
             deployment: dev2
             trigger: manual
             script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
+              - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV2
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+                  EXTRA_ARGS: "--exclude=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV2
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV2
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  DELETE_FLAG: "true"
         - step:
             name: "dev1 Nathan"
             deployment: dev1
             trigger: manual
             script:
-              - pipe: atlassian/aws-s3-deploy:0.5.0
+              - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
                   AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                   AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV1
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                #no cache for test environment (since free cloudflare can not remove cache by host)
+                  EXTRA_ARGS: "--exclude=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV1
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $AWS_BUCKET_DEV1
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  DELETE_FLAG: "true"
         - step:
             name: "dev0"
             deployment: dev0
@@ -127,7 +202,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV0
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                  DELETE_FLAG: 'true' 
+                  DELETE_FLAG: "true"
         - step:
             name: "create pull request"
             trigger: manual
@@ -166,15 +241,30 @@ pipelines:
           deployment: test
           trigger: manual
           script:
-            - pipe: atlassian/aws-s3-deploy:0.5.0
+            - pipe: atlassian/aws-s3-deploy:1.1.0
               variables:
                 AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                 AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                 S3_BUCKET: $AWS_BUCKET_TEST
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-              #no cache for test environment (since free cloudflare can not remove cache by host)
+                EXTRA_ARGS: "--exclude=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_TEST
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                S3_BUCKET: $AWS_BUCKET_TEST
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                DELETE_FLAG: "true"
             - pipe: atlassian/email-notify:0.4.5
               variables:
                 USERNAME: "nuphoto.mail@gmail.com"
@@ -188,15 +278,30 @@ pipelines:
           deployment: staging
           trigger: manual
           script:
-            - pipe: atlassian/aws-s3-deploy:0.5.0
+            - pipe: atlassian/aws-s3-deploy:1.1.0
               variables:
                 AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_EDIT
                 AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_EDIT
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_EDIT
                 S3_BUCKET: $AWS_BUCKET_EDIT
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-            #remove cache in cloudflare after successfully sync S3
+                EXTRA_ARGS: "--exclude=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_EDIT
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_EDIT
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_EDIT
+                S3_BUCKET: $AWS_BUCKET_EDIT
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_EDIT
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_EDIT
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_EDIT
+                S3_BUCKET: $AWS_BUCKET_EDIT
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                DELETE_FLAG: "true"
             - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
             - pipe: atlassian/email-notify:0.4.5
               variables:
@@ -211,15 +316,30 @@ pipelines:
           deployment: production
           trigger: manual
           script:
-            - pipe: atlassian/aws-s3-deploy:0.5.0
+            - pipe: atlassian/aws-s3-deploy:1.1.0
               variables:
                 AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_PROD
                 AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_PROD
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_PROD
                 S3_BUCKET: $AWS_BUCKET_PROD
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-            #remove cache in cloudflare after successfully sync S3
+                EXTRA_ARGS: "--exclude=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_PROD
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_PROD
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_PROD
+                S3_BUCKET: $AWS_BUCKET_PROD
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_PROD
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_PROD
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_PROD
+                S3_BUCKET: $AWS_BUCKET_PROD
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                DELETE_FLAG: "true"
             - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
     develop:
       - parallel:
@@ -254,15 +374,30 @@ pipelines:
               deployment: rd
               trigger: manual
               script:
-                - pipe: atlassian/aws-s3-deploy:0.5.0
+                - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_RD
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                  #no cache for test environment (since free cloudflare can not remove cache by host)
+                    EXTRA_ARGS: "--exclude=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_RD
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_RD
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "create pull request"
               trigger: manual
@@ -301,71 +436,146 @@ pipelines:
               deployment: dev5
               trigger: manual
               script:
-                - pipe: atlassian/aws-s3-deploy:0.5.0
+                - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV5
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                  #no cache for test environment (since free cloudflare can not remove cache by host)
+                    EXTRA_ARGS: "--exclude=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV5
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV5
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "dev4 Gary"
               deployment: dev4
               trigger: manual
               script:
-                - pipe: atlassian/aws-s3-deploy:0.5.0
+                - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV4
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                  #no cache for test environment (since free cloudflare can not remove cache by host)
+                    EXTRA_ARGS: "--exclude=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV4
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV4
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "dev3 HsingChi"
               deployment: dev3
               trigger: manual
               script:
-                - pipe: atlassian/aws-s3-deploy:0.5.0
+                - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV3
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                  #no cache for test environment (since free cloudflare can not remove cache by host)
+                    EXTRA_ARGS: "--exclude=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV3
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV3
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "dev2 TingAn"
               deployment: dev2
               trigger: manual
               script:
-                - pipe: atlassian/aws-s3-deploy:0.5.0
+                - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV2
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                  #no cache for test environment (since free cloudflare can not remove cache by host)
+                    EXTRA_ARGS: "--exclude=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV2
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV2
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "dev1 Nathan"
               deployment: dev1
               trigger: manual
               script:
-                - pipe: atlassian/aws-s3-deploy:0.5.0
+                - pipe: atlassian/aws-s3-deploy:1.1.0
                   variables:
                     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV1
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--delete" #remove files or objects from the target that are not present in the source
-                  #no cache for test environment (since free cloudflare can not remove cache by host)
+                    EXTRA_ARGS: "--exclude=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV1
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=* --include=index.html"
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV1
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "dev0"
               deployment: dev0
@@ -387,7 +597,14 @@ pipelines:
                     S3_BUCKET: $AWS_BUCKET_DEV0
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=* --include=index.html"
-                    DELETE_FLAG: 'true' 
+                - pipe: atlassian/aws-s3-deploy:1.1.0
+                  variables:
+                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
+                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                    S3_BUCKET: $AWS_BUCKET_DEV0
+                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    DELETE_FLAG: "true"
           - step:
               name: "create pull request"
               trigger: manual
