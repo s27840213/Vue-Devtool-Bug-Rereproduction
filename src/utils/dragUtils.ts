@@ -121,17 +121,22 @@ class DragUtils {
       } else {
         if (data.type === 6) {
           const currPage = pageUtils.currFocusPage
-          const aspectRatio = data.match_cover.height / data.match_cover.width
+          const newPageIndex = data.groupChildId ? data.content_ids.findIndex((content: any) => content.id === data.groupChildId) : 0
+          const aspectRatio = data.content_ids[newPageIndex].height / data.content_ids[newPageIndex].width
           const resize = {
             width: currPage.width,
             height: currPage.width * aspectRatio
           }
-          assetUtils.addAsset(data, {
-            styles,
-            pageIndex,
-            // for template
-            ...(data.type === 6 && resize)
-          })
+
+          if (data.groupChildId) { // For group template
+            assetUtils.addGroupTemplate(data, data.groupChildId, resize)
+          } else {
+            assetUtils.addAsset(data, {
+              styles,
+              pageIndex,
+              ...(data.type === 6 && resize) // for template
+            })
+          }
         } else {
           assetUtils.addAsset(data, {
             styles,

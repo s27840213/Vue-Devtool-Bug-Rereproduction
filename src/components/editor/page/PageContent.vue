@@ -2,12 +2,14 @@
 div(class="overflow-container"
     :style="styles()")
   div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
-    div(:class="['page-content']"
+    div(v-if="imgLoaded"
+        :class="['page-content']"
         :style="styles()"
         ref="page-content"
         @drop.prevent="onDrop"
-        @dragover.prevent,
-        @dragenter.prevent,
+        @dragover.prevent
+        @dragenter.prevent
+        @contextmenu.prevent
         @click.right.stop="onRightClick"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
@@ -24,12 +26,14 @@ div(class="overflow-container"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer")
+    template(v-else)
+      div(class='pages-loading')
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import imageUtils from '@/utils/imageUtils'
-import { mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import mouseUtils from '@/utils/mouseUtils'
@@ -57,20 +61,29 @@ export default Vue.extend({
   },
   data() {
     return {
+      imgLoaded: false,
+      imgLoading: false,
       pageIsHover: false
     }
   },
   computed: {
-
+    ...mapGetters({
+      setLayersDone: 'file/getSetLayersDone'
+    })
   },
   mounted() {
-    const pageContent = this.$refs['page-content'] as HTMLElement
-    /**
-     * Prevent the context menu from showing up when right click or Ctrl + left click on controller
-     */
-    pageContent.addEventListener('contextmenu', (e: MouseEvent) => {
-      e.preventDefault()
-    }, false)
+    if (this.setLayersDone) {
+      this.loadLayerImg()
+    }
+  },
+  watch: {
+    setLayersDone(newVal: boolean) {
+      // When first page mounted, its layers is not ready,
+      // so trigger loadLayerImg when uploadUtils call SET_pages.
+      if (newVal) {
+        this.loadLayerImg()
+      }
+    }
   },
   methods: {
     ...mapMutations({
@@ -81,6 +94,17 @@ export default Vue.extend({
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page'
     }),
+    ...mapActions({
+      updatePageImages: 'file/updatePageImages'
+    }),
+    async loadLayerImg() {
+      if (this.setLayersDone && !this.imgLoaded && !this.imgLoading) {
+        this.imgLoading = true
+        await this.updatePageImages({ pageIndex: this.pageIndex })
+        this.imgLoaded = true
+        this.imgLoading = false
+      }
+    },
     onDrop(e: DragEvent) {
       if (!navigator.onLine) {
         networkUtils.notifyNetworkError()
@@ -151,5 +175,10 @@ export default Vue.extend({
   box-sizing: border-box;
   background-repeat: no-repeat;
   transform-style: preserve-3d;
+}
+
+.pages-loading {
+  width: 100%; height: 100%;
+  background-color: setColor(gray-4);
 }
 </style>
