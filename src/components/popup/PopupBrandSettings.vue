@@ -46,7 +46,8 @@
                 div(class="delete-confirm__buttons__confirm pointer"
                   @click="handleConfirmDeletion")
                   span {{ $t('NN0437') }}
-        div(class="popup-brand-settings__close pointer"
+        div(v-if="!isOverlayed"
+          class="popup-brand-settings__close pointer"
           @click="handleCloseSettings")
           svg-icon(iconName="close" iconColor="gray-1" iconWidth="36px")
 </template>
@@ -236,7 +237,7 @@ export default Vue.extend({
 
 .dim-background {
   @include size(100%, 100%);
-  position: absolute;
+  position: fixed;
   top: 0px;
   left: 0px;
   background: rgba(0, 0, 0, 0.3);
