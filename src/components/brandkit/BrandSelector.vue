@@ -227,8 +227,11 @@ export default Vue.extend({
         padding: 0px;
         background-color: transparent;
       }
-      &.hover > span {
+      & > span {
         padding: 0px;
+        cursor: initial;
+      }
+      &.hover > span {
         &:hover {
           color: setColor(gray-3);
         }
