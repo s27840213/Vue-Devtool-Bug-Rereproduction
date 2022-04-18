@@ -1,11 +1,9 @@
 <template lang="pug">
-  div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
+  //- div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
     svg-icon(iconName="loading"
             iconWidth="24px"
             iconColor="gray-3")
-  recycle-scroller(v-else
-    class="brand-kit-tab-logo"
-    :items="rows")
+  recycle-scroller(class="brand-kit-tab-logo" :items="rows")
     template(v-slot="{ item }")
       observer-sentinel(v-if="item.sentinel"
         target=".brand-kit-tab-logo"
@@ -18,31 +16,7 @@
           :key="logo.id.replace('new_', '')")
           svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
           img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
-          div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
-            @click="handleOpenMenu(logo)")
-            div(class="brand-kit-tab-logo__item__more-container relative")
-              svg-icon(iconName="more_vertical"
-                      iconWidth="24px"
-                      iconColor="gray-2")
-              div(v-if="checkMenuOpen(logo)"
-                class="brand-kit-tab-logo__item__menu"
-                v-click-outside="() => { menuOpenLogoId = '' }")
-                div(class="brand-kit-tab-logo__item__menu__name")
-                  span {{ logo.name }}
-                div(class="brand-kit-tab-logo__item__menu__hr")
-                div(class="brand-kit-tab-logo__item__menu__row pointer"
-                  @click="handleDownload(logo)")
-                  svg-icon(iconName="download"
-                          iconWidth="24px"
-                          iconColor="gray-2")
-                  span {{ $t('NN0010') }}
-                //- div(class="brand-kit-tab-logo__item__menu__row pointer"
-                //-   @click="handleDeleteLogo(logo)")
-                //-   svg-icon(iconName="trash"
-                //-           iconWidth="24px"
-                //-           iconColor="gray-2")
-                //-   span {{ $t('NN0034') }}
-    //- template(#after)
+    template(#after)
       div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
         svg-icon(iconName="loading"
                 iconWidth="24px"
@@ -204,78 +178,6 @@ export default Vue.extend({
     &__img {
       height: 100%;
       width: auto;
-    }
-    &:hover, &.hovered {
-      background-color: rgba(setColor(gray-4), 0.5);
-      & > img {
-        opacity: 0.5;
-      }
-      & > div {
-        display: flex;
-      }
-    }
-    &__more {
-      position: absolute;
-      top: 4px;
-      right: 5px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: white;
-      border-radius: 2px;
-      &-container {
-        width: 24px;
-        height: 24px;
-      }
-    }
-    &__menu {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 8px 0px;
-      top: calc(100% + 10px);
-      left: 0;
-      width: 216px;
-      position: absolute;
-      background: white;
-      box-shadow: 0px 4px 4px rgba(151, 150, 150, 0.25);
-      border-radius: 5px;
-      z-index: 1;
-      cursor: initial;
-      &__name {
-        height: 25px;
-        padding: 0px 8px;
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        & > span {
-          @include caption-LG;
-          text-align: left;
-          display: block;
-        }
-      }
-      &__hr {
-        margin: auto;
-        height: 1px;
-        width: calc(100% - 16px);
-        background-color: setColor(gray-4);
-      }
-      &__row {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 0px 4px 10px;
-        &:hover {
-          background-color: setColor(blue-4);
-        }
-        & > span {
-          @include body-SM;
-          line-height: 25px;
-          height: 25px;
-          display: block;
-          color: setColor(gray-1);
-        }
-      }
     }
   }
 }

@@ -132,7 +132,7 @@ export default Vue.extend({
   &__content {
     margin-top: 30px;
     &.sidebar {
-      height: calc(100% - 135px);
+      height: calc(100% - 150px);
     }
   }
   &__disconnect {

@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="brand-kit-tab-color")
-    div(v-if="isPalettesLoading")
+    div(v-if="isPalettesLoading" class="loading")
       svg-icon(iconName="loading"
               iconWidth="24px"
               iconColor="gray-3")
@@ -49,5 +49,23 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
+  line-height: 0;
+  text-align: left;
+  box-sizing: border-box;
+  margin-right: -10px; // Push scrollbar to outside
+  padding-right: 10px;
+  @media not all and (min-resolution:.001dpcm){ // For safari only
+    @supports (-webkit-appearance:none) {
+      padding-right: 0;
+    }
+  }
+  @include hide-scrollbar;
+}
+
+.loading {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 </style>
