@@ -469,8 +469,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     await dispatch('updateFonts', { assetSet: fontToRequest })
   },
   async updateFonts({ commit }, { assetSet }: { assetSet: Set<string> }) {
-    const assetIndexList = Array.from(assetSet)
+    const assetIndexList = _.difference(Array.from(assetSet), Object.keys(state.fetchedFonts))
     const assetIndex = assetIndexList.join(',')
+
     if (assetIndex.length === 0) {
       return
     }
