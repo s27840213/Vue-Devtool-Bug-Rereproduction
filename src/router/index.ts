@@ -107,7 +107,8 @@ const routes: Array<RouteConfig> = [
           await assetUtils.addTemplate(response, { pageIndex: 0 })
           await Promise.all([
             store.dispatch('file/updatePageImages', { pageIndex: 0 }),
-            store.dispatch('brandkit/updatePageFonts', { pageIndex: 0 })
+            store.dispatch('brandkit/updatePageFonts', { pageIndex: 0 }),
+            store.dispatch('brandkit/updatePageLogos', { pageIndex: 0 })
           ])
           store.commit('user/SET_STATE', { userId: 'backendRendering' })
         }

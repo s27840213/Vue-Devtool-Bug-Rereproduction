@@ -96,14 +96,16 @@ export default Vue.extend({
     }),
     ...mapActions({
       updatePageImages: 'file/updatePageImages',
-      updatePageFonts: 'brandkit/updatePageFonts'
+      updatePageFonts: 'brandkit/updatePageFonts',
+      updatePageLogos: 'brandkit/updatePageLogos'
     }),
     async loadLayerImg() {
       if (this.setLayersDone && !this.imgLoaded && !this.imgLoading) {
         this.imgLoading = true
         await Promise.all([
           this.updatePageImages({ pageIndex: this.pageIndex }),
-          this.updatePageFonts({ pageIndex: this.pageIndex })
+          this.updatePageFonts({ pageIndex: this.pageIndex }),
+          this.updatePageLogos({ pageIndex: this.pageIndex })
         ])
         this.imgLoaded = true
         this.imgLoading = false

@@ -156,14 +156,22 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('file', ['updateImages']),
+    ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
     onError() { // deprecated?
       console.log('image on error')
+      let updater
       if (this.image.config.srcObj.type === 'private') {
+        updater = async () => await this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
+      }
+      if (this.image.config.srcObj.type === 'logo-private') {
+        updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
+      }
+      if (updater !== undefined) {
         try {
-          this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
+          updater()
         } catch (error) {
           console.log(error)
         }

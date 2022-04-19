@@ -7,7 +7,11 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
-import { IGroup, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IText } from '@/interfaces/layer'
+import { SrcObj } from '@/interfaces/gallery'
+import userApis from '@/apis/user'
+import _ from 'lodash'
+import apiUtils from '@/utils/apiUtils'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -21,7 +25,8 @@ interface IBrandKitState {
   fonts: IBrandFont[],
   fetchedFonts: {[key: string]: {[key: string]: string}},
   fontsPageIndex: number,
-  isSettingsOpen: boolean
+  isSettingsOpen: boolean,
+  editorViewLogos: Record<string, Record<string, string>>,
 }
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
@@ -41,8 +46,13 @@ const getDefaultState = (): IBrandKitState => ({
   fonts: [],
   fetchedFonts: {},
   fontsPageIndex: 0,
-  isSettingsOpen: false
+  isSettingsOpen: false,
+  editorViewLogos: {}
 })
+
+function isPrivate(srcObj: SrcObj): string {
+  return (srcObj && srcObj.type === 'logo-private') ? srcObj.assetId.toString() : ''
+}
 
 const state = getDefaultState()
 const getters: GetterTree<IBrandKitState, unknown> = {
@@ -88,6 +98,9 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getIsSettingsOpen(state: IBrandKitState): boolean {
     return state.isSettingsOpen
+  },
+  getEditorViewLogos: (state: IBrandKitState) => (assetId: string | undefined = undefined) => {
+    return assetId ? state.editorViewLogos[assetId] : state.editorViewLogos
   }
 }
 
@@ -112,11 +125,18 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       if (data.flag !== 0) {
         throw new Error('fetch brands request failed')
       }
-      const logos = data.logos
+      const logos = data.logos.map((logo: IUserLogoContentData) => brandkitUtils.apiLogo2IBrandLogo(logo))
       commit('SET_logos', {
         brandId: state.currentBrandId,
-        logos: data.logos.map((logo: IUserLogoContentData) => brandkitUtils.apiLogo2IBrandLogo(logo))
+        logos
       })
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const logo of logos) {
+          data[logo.asset_index] = logo.signed_url
+        }
+        commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data))
+      }
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -459,6 +479,49 @@ const actions: ActionTree<IBrandKitState, unknown> = {
     if (data.flag === 0) {
       commit('UPDATE_setFetchedFont', data.url_map)
     }
+  },
+  async updatePageLogos({ dispatch }, { pageIndex }: { pageIndex: number }) {
+    const { layers, backgroundImage } = store.state.pages[pageIndex]
+    const logoToRequest = new Set<string>()
+
+    logoToRequest.add(isPrivate(backgroundImage.config.srcObj))
+    for (const layer of layers) {
+      const targets = layer.type === 'group' ? (layer as IGroup).layers : [layer]
+
+      for (const target of targets) {
+        switch (target.type) {
+          case 'image':
+            logoToRequest.add(isPrivate((target as IImage).srcObj))
+            break
+          case 'frame':
+            for (const clip of (target as IFrame).clips) {
+              logoToRequest.add(isPrivate(clip.srcObj))
+            }
+            break
+        }
+      }
+    }
+
+    logoToRequest.delete('') // delete empty asset id
+    await dispatch('updateLogos', { assetSet: logoToRequest })
+  },
+  async updateLogos({ commit }, { assetSet }) {
+    // Request unknown private image url
+    // If you want to reduce redundant update asset, assetSet should be Set<string>.
+    // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
+
+    const token = userApis.getToken()
+    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewLogos))
+    assetSet = Array.from(assetSet).join(',')
+    if (assetSet.length === 0) {
+      return
+    }
+
+    await apiUtils.requestWithRetry(() => userApis.getAllAssets(token, {
+      asset_list: assetSet
+    })).then((data) => {
+      commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data.data.url_map))
+    })
   }
 }
 
@@ -505,6 +568,9 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_isSettingsOpen(state: IBrandKitState, isSettingsOpen: boolean) {
     state.isSettingsOpen = isSettingsOpen
+  },
+  SET_editorViewLogos(state: IBrandKitState, editorViewLogos: Record<string, Record<string, string>>) {
+    state.editorViewLogos = editorViewLogos
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand, true)
