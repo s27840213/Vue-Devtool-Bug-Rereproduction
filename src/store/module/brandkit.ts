@@ -91,8 +91,6 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getFontUrlMap(state: IBrandKitState): (assetIndex: string) => {[key: string]: string} | undefined {
     return (assetIndex: string) => {
-      const privateFont = state.fonts.find(font => font.signed_url && font.id === assetIndex)
-      if (privateFont) return privateFont.signed_url
       return state.fetchedFonts[assetIndex]
     }
   },
@@ -161,8 +159,16 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       if (data.flag !== 0) {
         throw new Error('fetch fonts request failed')
       }
+      const fonts = data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)) as IBrandFont[]
       commit('SET_fontsPageIndex', data.next_page)
-      commit('SET_fonts', data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)))
+      commit('SET_fonts', fonts)
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const font of fonts) {
+          data[font.asset_index] = font.signed_url
+        }
+        commit('UPDATE_setFetchedFont', data)
+      }
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -178,8 +184,16 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       if (data.flag !== 0) {
         throw new Error('fetch fonts request failed')
       }
+      const newFonts = data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)) as IBrandFont[]
       commit('SET_fontsPageIndex', data.next_page)
-      commit('SET_fonts', getters.getFonts.concat(data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font))))
+      commit('SET_fonts', getters.getFonts.concat(newFonts))
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const font of newFonts) {
+          data[font.asset_index] = font.signed_url
+        }
+        commit('UPDATE_setFetchedFont', data)
+      }
     } catch (error) {
       console.error(error)
       showNetworkError()

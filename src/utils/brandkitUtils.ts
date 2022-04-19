@@ -440,7 +440,7 @@ class BrandKitUtils {
       case 'admin':
         return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/prev-name?ver=${generalUtils.generateRandomString(6)}`
       case 'private': {
-        const urlMap = store.getters['brandkit/getFontUrlMap'](assetId) as {[key: string]: string} | undefined
+        const urlMap = this.getFontUrlMap(assetId) as {[key: string]: string} | undefined
         return urlMap?.['prev-name'] ?? ''
       }
       default:
