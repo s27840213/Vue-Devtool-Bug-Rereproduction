@@ -27,7 +27,6 @@ export interface IUserModule {
   isAuthenticated: boolean,
   account: string,
   upassUpdate: string,
-  locale: string,
   subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
@@ -53,7 +52,6 @@ const getDefaultState = (): IUserModule => ({
   isAuthenticated: false,
   account: '',
   upassUpdate: '',
-  locale: '',
   subscribe: 1,
   userAssets: {
     design: {
@@ -104,9 +102,6 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getUpassUpdate(state) {
     return state.upassUpdate
-  },
-  getLocale(state) {
-    return state.locale
   },
   getSubscribe(state) {
     return state.subscribe

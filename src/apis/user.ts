@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import axios from '@/apis'
+import i18n from '@/i18n'
 import { IGroupDesignInputParams, IUpdateAssetParams } from '@/interfaces/api'
 import { SrcObj } from '@/interfaces/gallery'
 import store from '@/store'
@@ -12,7 +13,7 @@ export default {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return store.getters['user/getLocale']
+    return i18n.locale
   },
   getTeamId(): string {
     return store.getters['user/getTeamId']

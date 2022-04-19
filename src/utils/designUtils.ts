@@ -103,7 +103,7 @@ class DesignUtils {
   }
 
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
-    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : Date.now()
+    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : new Date()
     return {
       id: isROOT ? this.ROOT : generalUtils.generateAssetId() + '_new',
       name,
@@ -540,9 +540,7 @@ class DesignUtils {
       name: 'Editor',
       query
     })
-    // If user been redirect more than once, it will throw Uncaught (in promise) Error. https://stackoverflow.com/a/65326844
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    router.push(route.href).catch(() => { })
+    router.push(route.href)
   }
 
   // Below function is used to update the page

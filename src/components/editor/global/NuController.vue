@@ -23,7 +23,7 @@
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      template(v-if="((['group', 'tmp'].includes(getLayerType))) || (getLayerType === 'frame')")
+      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -34,13 +34,11 @@
               :pageIndex="pageIndex"
               :layerIndex="index"
               :primaryLayerIndex="layerIndex"
-              :primaryLayerType="config.type"
+              :primaryLayer="config"
               :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"
-              @drop="onDrop($event)"
-              @dragenter="dragEnter($event, index)"
-              @dragleave="dragLeave($event, index)"
+              @onSubDrop="onSubDrop"
               @clickSubController="clickSubController"
               @dblSubController="dblSubController")
       template(v-if="config.type === 'text' && isActive")
@@ -962,7 +960,6 @@ export default Vue.extend({
       ControlUtils.updateLayerPos(this.pageIndex, this.layerIndex, trans.x, trans.y)
       // scale from center
       if (altPressed) {
-        console.log('calc scale offset')
         const currCenter = mathUtils.getCenter(this.config.styles)
         const initCenter = mathUtils.getCenter(Object.assign({}, this.initSize, this.initTranslate))
         const scaleOffset = {
@@ -1413,6 +1410,10 @@ export default Vue.extend({
         })
       }
     },
+    onSubDrop(attrs: unknown = {}) {
+      const { e } = attrs as { e: DragEvent }
+      e && this.onDrop(e)
+    },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.isCurveText ? this.curveTextSizeRefresh(this.config) : this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
@@ -1592,10 +1593,10 @@ export default Vue.extend({
         }
       })
     },
-    dragEnter(e: DragEvent, subLayerIdx = -1) {
+    dragEnter(e: DragEvent) {
       this.getLayerType === 'image' && this.dragUtils.onImageDragEnter(e, this.config as IImage)
     },
-    dragLeave(e: DragEvent, subLayerIdx = -1) {
+    dragLeave(e: DragEvent) {
       this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
     },
     handleScaleOffset(e: KeyboardEvent) {

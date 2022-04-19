@@ -62,6 +62,38 @@ Vue.directive('ratio-change', {
   }
 })
 
+Vue.directive('header-border', {
+  /**
+   * Useage: nu-header(v-header-border),
+   * nu-header(v-header-border="true"),
+   * nu-header(v-header-border="'.template-center'")
+   * 預設偵測被加上v-header-border(簡稱header)的下一個元素
+   * (簡稱target)是否在最高的位置，若是則不顯示邊框，若不是則
+   * 顯示，target可以使用CSS語法選擇，第一個結果會成為target
+   * 也可以直接給true指定永久顯示
+  */
+  bind(el, binding) {
+    if (binding.value === true) {
+      el.classList.add('navbar-shadow')
+    } else {
+      Vue.nextTick(() => {
+        const target = binding.value
+          ? document.querySelector(binding.value)
+          : el.nextElementSibling
+
+        target.addEventListener('scroll', (e: Event) => {
+          const target = e.target as Element
+          if (target?.scrollTop === 0) {
+            el.classList.remove('navbar-shadow')
+          } else {
+            el.classList.add('navbar-shadow')
+          }
+        }, { passive: true })
+      })
+    }
+  }
+})
+
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)
 
