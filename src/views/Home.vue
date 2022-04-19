@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="home" :style="homeStyle")
-    nu-header(:isTop="isTop")
-    div(class="home-content" ref="content" @scroll.passive="onScroll")
+    nu-header(v-header-border)
+    div(class="home-content")
       div(class="home-top")
         div(class="home-top-text")
           span(class="home-top-text__title" v-html="title")
@@ -58,7 +58,6 @@ export default Vue.extend({
   data() {
     return {
       showSizePopup: false,
-      isTop: true,
       themeList: ['1,2', '3', '8', '6', '5', '7', '9'],
       colorBlock: [
         'vector_lightblue2.json',
@@ -150,9 +149,6 @@ export default Vue.extend({
     },
     closeSizePopup() {
       this.showSizePopup = false
-    },
-    onScroll() {
-      this.isTop = (this.$refs.content as HTMLElement).scrollTop === 0
     }
   }
 })
