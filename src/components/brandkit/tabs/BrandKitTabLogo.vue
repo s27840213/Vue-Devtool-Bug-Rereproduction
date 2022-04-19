@@ -83,9 +83,7 @@ export default Vue.extend({
       isLogosLoading: 'getIsLogosLoading'
     }),
     logos(): (IBrandLogo | string)[] {
-      const res = ['add', ...(this.currentBrand as IBrand).logos]
-      console.log(res)
-      return res
+      return ['add', ...(this.currentBrand as IBrand).logos]
     }
   },
   methods: {
