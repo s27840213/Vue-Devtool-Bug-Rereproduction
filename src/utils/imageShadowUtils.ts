@@ -64,7 +64,7 @@ class ImageShadowUtils {
 
   async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
-    const { timeout = 25, layerInfo, coverImg, uploading } = options
+    const { timeout = 25, layerInfo, coverImg } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
@@ -87,6 +87,7 @@ class ImageShadowUtils {
       if (!ctxT || !ctxMaxSize) return
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+      layerInfo && this.setIsProcess(layerInfo, true)
 
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
@@ -111,7 +112,6 @@ class ImageShadowUtils {
       /** Calculating the spread */
       if (this.spreadBuff.spread !== unifiedSpread || this.spreadBuff.effect !== currentEffect || this.spreadBuff.size !== img.naturalHeight) {
         this.spreadBuff.effect = currentEffect
-        layerInfo && this.setIsProcess(layerInfo, true)
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
@@ -134,14 +134,13 @@ class ImageShadowUtils {
         this.spreadBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
         this.spreadBuff.size = img.naturalHeight
         this.spreadBuff.spread = unifiedSpread
-        this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       } else {
         ctxT.putImageData(this.spreadBuff.data, 0, 0)
       }
 
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
-          if (!uploading) {
+          if (timeout) {
             const mappingScale = 1600 / CANVAS_SIZE
             canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
             canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
@@ -149,28 +148,20 @@ class ImageShadowUtils {
             canvasMaxSize.setAttribute('width', `${canvas.width}`)
             canvasMaxSize.setAttribute('height', `${canvas.height}`)
           }
-          // @show
-          this.canvasMaxSize.style.width = `${this.canvasMaxSize.width}px`
-          this.canvasMaxSize.style.height = `${this.canvasMaxSize.height}px`
 
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
           StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius) + 1)
-          ctxMaxSize.putImageData(imageData, 0, 0)
-
-          // ctxT.globalCompositeOperation = 'source-in'
-          // const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-          // StackBlur.imageDataRGBA(imageData, 0, 0, canvasT.width, canvasT.height, Math.floor(radius * unifiedScale) + 1)
-          // ctxT.putImageData(imageData, 0, 0)
+          const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
+          const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
+          ctxMaxSize.putImageData(imageData, offsetX, offsetY)
         }
       })
 
       await this.asyncProcessing(() => {
         if (ctxT && this.handlerId === handlerId) {
-          const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) : 0
-          const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) : 0
-          ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, offsetX, offsetY, canvasT.width, canvasT.height)
+          ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
           ctxT.globalCompositeOperation = 'source-in'
           ctxT.globalAlpha = opacity / 100
@@ -194,9 +185,9 @@ class ImageShadowUtils {
           ctx.drawImage(canvasT, 0, 0)
         }
 
-        // document.body.append(this.canvasMaxSize)
         ctxT.restore()
         ctxMaxSize.restore()
+        this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       })
     }
     this.handlerId = handlerId
