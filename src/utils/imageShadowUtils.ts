@@ -29,13 +29,11 @@ class ImageShadowUtils {
    * as a temporarily operating canvas.
    */
   private canvasT = document.createElement('canvas')
-  private ctxT = null as CanvasRenderingContext2D | null
   /**
    * canvasMaxSize used to handle/draw the parametera as blur or offset...,
    * as a parameter unified canvas for different size of image.
    */
   private canvasMaxSize = document.createElement('canvas')
-  private ctxMaxSize = null as CanvasRenderingContext2D | null
   private _draw = undefined as number | undefined
   private handlerId = ''
 
@@ -43,7 +41,8 @@ class ImageShadowUtils {
     img: HTMLImageElement,
     config: IImage,
     /** This identifier is used to indexing the sub-layer */
-    primarylayerId?: string
+    primarylayerId?: string,
+    isTransparentBg: boolean
   } | null
 
   private spreadBuff = {
@@ -54,13 +53,6 @@ class ImageShadowUtils {
   }
 
   get layerData() { return this._layerData }
-
-  constructor() {
-    this.ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
-    this.ctxMaxSize = this.canvasMaxSize.getContext('2d') as CanvasRenderingContext2D
-    this.canvasMaxSize.classList.add('show')
-    this.canvasMaxSize.style.top = '0'
-  }
 
   async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
@@ -74,7 +66,11 @@ class ImageShadowUtils {
       clearTimeout(this._draw)
     }
     if (!this._layerData) {
-      this._layerData = { img, config }
+      const { canvasT } = this
+      const ctxT = canvasT.getContext('2d')
+      ctxT && ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
+      const isTransparentBg = this.isTransparentBg(canvasT)
+      this._layerData = { img, config, isTransparentBg }
       if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
         this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
       }
@@ -83,11 +79,12 @@ class ImageShadowUtils {
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
       console.log('start drawing')
-      const { canvasT, ctxT, canvasMaxSize, ctxMaxSize } = this
+      const { canvasT, canvasMaxSize } = this
+      const ctxT = canvasT.getContext('2d')
+      const ctxMaxSize = canvasMaxSize.getContext('2d')
       if (!ctxT || !ctxMaxSize) return
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-      layerInfo && this.setIsProcess(layerInfo, true)
 
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
@@ -111,14 +108,15 @@ class ImageShadowUtils {
       let alphaVal = 1
       /** Calculating the spread */
       if (this.spreadBuff.spread !== unifiedSpread || this.spreadBuff.effect !== currentEffect || this.spreadBuff.size !== img.naturalHeight) {
+        layerInfo && this.setIsProcess(layerInfo, true)
         this.spreadBuff.effect = currentEffect
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
               const r = Math.sqrt(i * i + j * j)
-              if (r >= unifiedSpread + unifiedSpreadRadius && currentEffect !== ShadowEffectType.frame) {
+              if (r >= unifiedSpread + unifiedSpreadRadius && (currentEffect !== ShadowEffectType.frame || this.layerData?.isTransparentBg)) {
                 alphaVal = 0
-              } else if (r >= unifiedSpread && currentEffect !== ShadowEffectType.frame) {
+              } else if (r >= unifiedSpread && (currentEffect !== ShadowEffectType.frame || this.layerData?.isTransparentBg)) {
                 alphaVal = (1 - (r - unifiedSpread) * _spread)
               } else {
                 alphaVal = 1
@@ -134,6 +132,7 @@ class ImageShadowUtils {
         this.spreadBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
         this.spreadBuff.size = img.naturalHeight
         this.spreadBuff.spread = unifiedSpread
+        this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       } else {
         ctxT.putImageData(this.spreadBuff.data, 0, 0)
       }
@@ -152,7 +151,7 @@ class ImageShadowUtils {
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius) + 1)
+          StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.25) + 1)
           const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
           const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
           ctxMaxSize.putImageData(imageData, offsetX, offsetY)
@@ -187,7 +186,6 @@ class ImageShadowUtils {
 
         ctxT.restore()
         ctxMaxSize.restore()
-        this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       })
     }
     this.handlerId = handlerId
@@ -206,6 +204,28 @@ class ImageShadowUtils {
         resolve()
       }, 0)
     })
+  }
+
+  isTransparentBg(canvas: HTMLCanvasElement): boolean {
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const { width, height } = canvas
+    const data = ctx.getImageData(0, 0, width, height).data
+      .reduce((arr, val, i) => {
+        if (i % 4 === 0) {
+          arr.push([val])
+        } else {
+          arr[arr.length - 1].push(val)
+        }
+        return arr
+      }, [] as Array<Array<number>>)
+
+    console.log(data.length)
+    console.log(width)
+    console.log(height)
+    const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
+    console.log(generalUtils.deepCopy(pivots))
+    console.log('pivots.some(p => p[3] === 0)', pivots.some(p => p[3] === 0))
+    return pivots.some(p => p[3] === 0)
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {

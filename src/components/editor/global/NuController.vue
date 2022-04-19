@@ -695,27 +695,28 @@ export default Vue.extend({
       if (this.isActive) {
         e.preventDefault()
         this.setCursorStyle('move')
-        if (!this.config.moved) {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
-        }
-        const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
-        const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
-        GroupUtils.movingTmp(
-          this.pageIndex,
-          {
-            x: moveOffset.offsetX,
-            y: moveOffset.offsetY
+        window.requestAnimationFrame(() => {
+          if (!this.config.moved) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
           }
-        )
-        const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-        this.$emit('getClosestSnaplines')
-        const totalOffset = {
-          x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-          y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
-        }
-        this.initialPos.x += totalOffset.x
-        this.initialPos.y += totalOffset.y
-
+          const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
+          const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+          GroupUtils.movingTmp(
+            this.pageIndex,
+            {
+              x: moveOffset.offsetX,
+              y: moveOffset.offsetY
+            }
+          )
+          const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+          this.$emit('getClosestSnaplines')
+          const totalOffset = {
+            x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+            y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+          }
+          this.initialPos.x += totalOffset.x
+          this.initialPos.y += totalOffset.y
+        })
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
