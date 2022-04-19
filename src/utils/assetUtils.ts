@@ -456,7 +456,8 @@ class AssetUtils {
       srcObj: {
         type,
         userId: ImageUtils.getUserId(url, type),
-        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type))
+        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type)),
+        brandId: ImageUtils.getBrandId(url, type)
       },
       styles: {
         x,

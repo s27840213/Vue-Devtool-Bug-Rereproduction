@@ -962,7 +962,8 @@ class UploadUtils {
       page.backgroundImage.config.srcObj = {
         type,
         userId: ImageUtils.getUserId(src, type),
-        assetId: ImageUtils.getAssetId(src, type)
+        assetId: ImageUtils.getAssetId(src, type),
+        brandId: ImageUtils.getBrandId(src, type)
       }
       delete page.backgroundImage.config.src
     }

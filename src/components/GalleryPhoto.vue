@@ -7,7 +7,7 @@
       :checkedValues="checkedAssets"
       :disabled="isUploading"
       @update="handleCheck")
-    svg-icon(v-if="!inFilePanel" class="pointer gallery-photo__more"
+    svg-icon(v-if="!inFilePanel && !inLogoPanel" class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
       :iconName="'more_vertical'"
       :iconColor="'gray-2'"
@@ -18,7 +18,7 @@
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
       @dragend="dragEnd"
-      @click="hasCheckedAssets ? modifyCheckedAssets(photo.assetIndex) : addImage(photo)")
+      @click="(hasCheckedAssets && inFilePanel) ? modifyCheckedAssets(photo.assetIndex) : addImage(photo)")
     div(v-if="isUploading"
         class="gallery-photo__progress")
       div(class="gallery-photo__progress-bar"
@@ -44,6 +44,10 @@ export default Vue.extend({
     photo: Object,
     vendor: String,
     inFilePanel: {
+      type: Boolean,
+      default: false
+    },
+    inLogoPanel: {
       type: Boolean,
       default: false
     }
@@ -81,8 +85,8 @@ export default Vue.extend({
       return this.getPageSize(pageUtils.currFocusPageIndex)
     },
     previewSrc(): string {
-      const { inFilePanel, photo, vendor } = this
-      if (inFilePanel || photo.urls) return photo.urls.tiny || photo.urls.thumb
+      const { inFilePanel, inLogoPanel, photo, vendor } = this
+      if (inFilePanel || inLogoPanel || photo.urls) return photo.urls.tiny || photo.urls.thumb
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
@@ -90,8 +94,8 @@ export default Vue.extend({
       return imageUtils.appendRandomQuery(imageUtils.getSrc(data, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] || 150))
     },
     fullSrc(): string {
-      const { inFilePanel, photo, vendor } = this
-      if (inFilePanel || photo.urls) return photo.urls.full
+      const { inFilePanel, inLogoPanel, photo, vendor } = this
+      if (inFilePanel || inLogoPanel || photo.urls) return photo.urls.full
       const data = {
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
@@ -126,7 +130,8 @@ export default Vue.extend({
         const srcObj = {
           type,
           userId: imageUtils.getUserId(src, type),
-          assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : imageUtils.getAssetId(src, type)
+          assetId: (!this.isAdmin && photo.assetIndex) ? photo.assetIndex : imageUtils.getAssetId(src, type),
+          brandId: imageUtils.getBrandId(src, type)
         }
 
         new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
@@ -175,8 +180,8 @@ export default Vue.extend({
         photoAspectRatio,
         {
           pageIndex: pageUtils.currFocusPageIndex,
-          ...(this.inFilePanel && !photo.id && { assetIndex: photo.assetIndex }),
-          ...(this.inFilePanel && photo.id && { assetId: photo.id }),
+          ...((this.inFilePanel || this.inLogoPanel) && !photo.id && { assetIndex: photo.assetIndex }),
+          ...((this.inFilePanel || this.inLogoPanel) && photo.id && { assetId: photo.id }),
           // The following props is used for preview image during polling process
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }

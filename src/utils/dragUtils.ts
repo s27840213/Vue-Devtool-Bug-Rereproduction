@@ -156,7 +156,7 @@ class DragUtils {
     layerIndex: number,
     subLayerIdx: number,
     styles: Partial<IImageStyle>,
-    srcObj: { type: string, assetId: string | number, userId: string }
+    srcObj: { type: string, assetId: string | number, userId: string, brandId?: string }
   } = {
       layerIndex: -1,
       subLayerIdx: -1,

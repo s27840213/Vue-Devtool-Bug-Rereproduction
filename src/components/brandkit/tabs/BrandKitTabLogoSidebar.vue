@@ -9,13 +9,18 @@
         target=".brand-kit-tab-logo"
         @callback="handleLoadMore(item)")
       div(class="brand-kit-tab-logo__row")
-        div(v-for="logo in item.list"
-          class="brand-kit-tab-logo__item pointer relative"
-          :class="{hovered: checkMenuOpen(logo)}"
-          :style="imageStyle(logo.preview)"
-          :key="logo.id")
-          svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
-          img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
+        template(v-for="logo in item.list")
+          div(v-if="checkUploading(logo)"
+            class="brand-kit-tab-logo__item pointer relative"
+            :style="imageStyle(logo.preview)"
+            :key="logo.id")
+            svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
+          gallery-photo(v-else
+            :style="imageStyle(logo.preview)"
+            :photo="addPerviewUrl(logo)"
+            vendor="logo"
+            :inLogoPanel="true"
+            :key="logo.id")
     template(#after)
       div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
         svg-icon(iconName="loading"
@@ -30,13 +35,12 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
-import uploadUtils from '@/utils/uploadUtils'
 import GalleryUtils from '@/utils/galleryUtils'
+import { IPhoto, IPhotoItem } from '@/interfaces/api'
 
 export default Vue.extend({
   data() {
     return {
-      menuOpenLogoId: '',
       rows: [] as any[],
       galleryUtils: new GalleryUtils(300, 100, 5)
     }
@@ -48,11 +52,11 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   components: {
-    ObserverSentinel
+    ObserverSentinel,
+    GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
   },
   watch: {
     logos() {
-      this.menuOpenLogoId = ''
       this.logosUpdate()
     },
     currentBrand() {
@@ -63,6 +67,9 @@ export default Vue.extend({
     ...mapGetters('brandkit', {
       currentBrand: 'getCurrentBrand',
       isLogosLoading: 'getIsLogosLoading'
+    }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
     }),
     logos(): IBrandLogo[] {
       return (this.currentBrand as IBrand).logos
@@ -75,9 +82,6 @@ export default Vue.extend({
     }),
     getUrl(logo: IBrandLogo): string {
       return brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
-    },
-    checkMenuOpen(logo: IBrandLogo): boolean {
-      return this.menuOpenLogoId === logo.id
     },
     checkUploading(logo: IBrandLogo) {
       return logo.id.startsWith('new_')
@@ -99,51 +103,30 @@ export default Vue.extend({
         height: `${preview.height}px`
       }
     },
+    addPerviewUrl(logo: IBrandLogo): any {
+      const { isAdmin } = this
+      return {
+        id: isAdmin ? logo.id : undefined,
+        assetIndex: logo.asset_index,
+        type: isAdmin ? 'logo-public' : 'logo-private',
+        ver: logo.ver,
+        width: logo.width,
+        height: logo.height,
+        preview: logo.preview,
+        urls: {
+          prev: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'prev'),
+          full: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'full'),
+          larg: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'larg'),
+          original: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'original'),
+          midd: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'midd'),
+          smal: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'smal'),
+          tiny: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
+        }
+      }
+    },
     handleLoadMore(item: any): void {
       item.sentinel = false
       this.$emit('loadMore')
-    },
-    handleOpenMenu(logo: IBrandLogo) {
-      if (this.checkMenuOpen(logo)) {
-        this.menuOpenLogoId = ''
-      } else {
-        this.menuOpenLogoId = logo.id
-      }
-    },
-    handleUploadLogo() {
-      uploadUtils.chooseAssets('logo')
-    },
-    handleDownload(logo: IBrandLogo) {
-      const brand = this.currentBrand
-      const logoName = logo.name
-      const url = brandkitUtils.getLogoUrl(logo, brand.id, 'original')
-      if (logo.signed_url) {
-        fetch(url).then(() => {
-          this.startDownloading(url, logoName)
-        }).catch(() => {
-          this.refreshLogoAsset({
-            brand,
-            logoAssetIndex: logo.asset_index
-          }).then((urlMap) => {
-            this.startDownloading(urlMap.original, logoName)
-          })
-        })
-      } else {
-        this.startDownloading(url, logoName)
-      }
-    },
-    handleDeleteLogo(logo: IBrandLogo) {
-      this.menuOpenLogoId = ''
-      this.$emit('deleteItem', {
-        type: 'logo',
-        content: logo
-      })
-    },
-    startDownloading(url: string, name: string) {
-      const a = document.createElement('a')
-      a.setAttribute('href', url)
-      a.setAttribute('download', name)
-      a.click()
     }
   }
 })

@@ -8,7 +8,12 @@ export interface IBrandLogo {
   createTime: string,
   asset_index: number,
   signed_url?: {
+    full: string,
+    larg: string,
+    midd: string,
     original: string,
+    prev: string,
+    smal: string,
     tiny: string
   },
   width: number,
@@ -16,7 +21,8 @@ export interface IBrandLogo {
   preview?: {
     width: number,
     height: number
-  }
+  },
+  ver: number
 }
 
 export interface IBrandTextStyle {

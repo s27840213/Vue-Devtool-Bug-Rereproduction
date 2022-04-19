@@ -19,9 +19,7 @@ class LayerFactary {
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
       previewSrc: config.previewSrc,
       srcObj: {
-        tpye: config.srcObj.type,
-        userId: config.srcObj.userId,
-        assetId: config.srcObj.assetId
+        ...config.srcObj
       },
       id: config.id || GeneralUtils.generateRandomString(8),
       clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,

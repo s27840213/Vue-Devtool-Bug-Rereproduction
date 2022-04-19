@@ -41,36 +41,54 @@ class BrandKitUtils {
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 30)).toISOString(),
         signed_url: {
+          full: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          larg: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          midd: require('@/assets/img/png/brandkit/logo-horizontal.png'),
           original: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          prev: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          smal: require('@/assets/img/png/brandkit/logo-horizontal.png'),
           tiny: require('@/assets/img/png/brandkit/logo-horizontal.png')
         },
         asset_index: 0,
         width: 171,
-        height: 132
+        height: 132,
+        ver: 0
       }, {
         team_id: '',
         name: 'logo-square.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 20)).toISOString(),
         signed_url: {
+          full: require('@/assets/img/png/brandkit/logo-square.png'),
+          larg: require('@/assets/img/png/brandkit/logo-square.png'),
+          midd: require('@/assets/img/png/brandkit/logo-square.png'),
           original: require('@/assets/img/png/brandkit/logo-square.png'),
+          prev: require('@/assets/img/png/brandkit/logo-square.png'),
+          smal: require('@/assets/img/png/brandkit/logo-square.png'),
           tiny: require('@/assets/img/png/brandkit/logo-square.png')
         },
         asset_index: 1,
         width: 131,
-        height: 131
+        height: 131,
+        ver: 0
       }, {
         team_id: '',
         name: 'logo-vertical.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 10)).toISOString(),
         signed_url: {
+          full: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          larg: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          midd: require('@/assets/img/png/brandkit/logo-vertical.png'),
           original: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          prev: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          smal: require('@/assets/img/png/brandkit/logo-vertical.png'),
           tiny: require('@/assets/img/png/brandkit/logo-vertical.png')
         },
         asset_index: 2,
         width: 75,
-        height: 171
+        height: 171,
+        ver: 0
       }],
       textStyleSetting: {
         headingStyle: this.createDefaultTextStyle('heading'),
@@ -202,7 +220,8 @@ class BrandKitUtils {
       createTime: (new Date()).toISOString(),
       asset_index: -1,
       width: 24,
-      height: 24
+      height: 24,
+      ver: 0
     }
   }
 
@@ -501,7 +520,7 @@ class BrandKitUtils {
     return this.createDefaultTextStyle(type).size
   }
 
-  getLogoUrl(logo: IBrandLogo, brandId: string, size: 'tiny' | 'original'): string {
+  getLogoUrl(logo: IBrandLogo, brandId: string, size: 'prev' | 'full' | 'larg' | 'midd' | 'smal' | 'tiny' | 'original'): string {
     return logo.signed_url ? logo.signed_url[size] : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${brandId}/${logo.id}/${size}`
   }
 
