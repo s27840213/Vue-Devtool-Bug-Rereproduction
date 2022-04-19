@@ -225,7 +225,7 @@ export default Vue.extend({
     colorUtils.on('closeColorPanel', () => {
       this.colorPanelOpenState.val = false
     })
-    if (this.isAdmin) {
+    if (brandkitUtils.isBrandkitAvailable) {
       brandkitUtils.fetchBrands(this.fetchBrands)
     }
   },

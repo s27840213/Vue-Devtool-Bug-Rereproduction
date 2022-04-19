@@ -29,6 +29,11 @@ interface Item {
 }
 
 class BrandKitUtils {
+  get isBrandkitAvailable(): boolean {
+    return store.getters['user/isAdmin']
+    // return true // for testing private assets
+  }
+
   createTestingDefaultBrand(): IBrand {
     const initTime = Date.now()
     return {

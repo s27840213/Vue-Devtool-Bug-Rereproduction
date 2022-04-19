@@ -21,7 +21,7 @@
             class="pointer color-panel__color"
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
-      template(v-if="isAdmin")
+      template(v-if="isBrandkitAvailable")
         div(class="relative")
           brand-selector(theme="panel")
           div(class="color-panel__brand-settings pointer"
@@ -128,7 +128,7 @@ export default Vue.extend({
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setCurrFunctionPanel(FunctionPanelType.colorPicker)
-    if (this.isAdmin) {
+    if (this.isBrandkitAvailable) {
       brandkitUtils.fetchPalettes(this.fetchPalettes)
     }
   },
@@ -138,7 +138,7 @@ export default Vue.extend({
   },
   watch: {
     currentBrand() {
-      if (this.isAdmin) {
+      if (this.isBrandkitAvailable) {
         brandkitUtils.fetchPalettes(this.fetchPalettes)
       }
     }
@@ -148,10 +148,12 @@ export default Vue.extend({
       documentColors: 'color/getDocumentColors',
       defaultColors: 'color/getDefaultColors',
       currSelectedInfo: 'getCurrSelectedInfo',
-      isAdmin: 'user/isAdmin',
       currentBrand: 'brandkit/getCurrentBrand',
       isPalettesLoading: 'brandkit/getIsPalettesLoading'
     }),
+    isBrandkitAvailable(): boolean {
+      return brandkitUtils.isBrandkitAvailable
+    },
     isShape(): boolean {
       return layerUtils.getCurrConfig.type === LayerType.shape
     },

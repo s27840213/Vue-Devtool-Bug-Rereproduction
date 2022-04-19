@@ -7,13 +7,13 @@
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
-      template(v-if="isAdmin")
+      template(v-if="isBrandkitAvailable")
         div(class="panel-text__brand-header relative")
           brand-selector(theme="panel" :defaultOption="true")
           div(class="panel-text__brand-settings pointer"
           @click="handleOpenSettings")
             svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
-      template(v-if="!isAdmin || isDefaultSelected")
+      template(v-if="!isBrandkitAvailable || isDefaultSelected")
         div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
             :key="config.type"
             draggable="true"
@@ -95,7 +95,6 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getLayersNum: 'getLayersNum',
-      isAdmin: 'user/isAdmin',
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
     }),
@@ -110,11 +109,14 @@ export default Vue.extend({
         'keyword'
       ]
     ),
+    isBrandkitAvailable(): boolean {
+      return brandkitUtils.isBrandkitAvailable
+    },
     textStyleSetting(): IBrandTextStyleSetting {
       return (this.currentBrand as IBrand).textStyleSetting
     },
     extractFonts(): ReturnType<typeof brandkitUtils.extractFonts> {
-      return this.isAdmin ? brandkitUtils.extractFonts(this.textStyleSetting) : []
+      return this.isBrandkitAvailable ? brandkitUtils.extractFonts(this.textStyleSetting) : []
     },
     listDefaultText(): { type: string, text: VueI18n.TranslateResult }[] {
       return [{
@@ -260,7 +262,7 @@ export default Vue.extend({
     },
     getSpanStyles(type: string): {[key: string]: string | number} {
       let styles = {} as {[key: string]: string | number}
-      if (this.isAdmin && !this.isDefaultSelected) {
+      if (this.isBrandkitAvailable && !this.isDefaultSelected) {
         const textStyle = this.getTextStyle(type)
         styles = {
           weight: textStyle.bold ? 'bold' : 'normal',

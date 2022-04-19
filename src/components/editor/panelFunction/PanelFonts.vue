@@ -14,7 +14,7 @@
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
+      template(v-if="pending || isMoreFontsLoading" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
             iconColor="gray-1"
@@ -54,6 +54,7 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -72,12 +73,13 @@ export default Vue.extend({
   data() {
     return {
       FileUtils,
-      fontUploadStatus: 'none'
+      fontUploadStatus: 'none',
+      isMoreFontsLoading: false
     }
   },
   mounted() {
     this.getCategories()
-    if (this.privateFonts.length === 0) {
+    if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
     uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
@@ -116,6 +118,9 @@ export default Vue.extend({
       getLayer: 'getLayer',
       assetFonts: 'user/getAssetFonts'
     }),
+    isBrandkitAvailable(): boolean {
+      return brandkitUtils.isBrandkitAvailable
+    },
     listResult(): any[] {
       const { hasNextPage, keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
@@ -169,7 +174,7 @@ export default Vue.extend({
             }))
           ])
         }
-        if (category.is_recent === 1) {
+        if (category.is_recent === 1 && this.isBrandkitAvailable) {
           result = result.concat(this.listAssets)
         }
       })
@@ -195,6 +200,7 @@ export default Vue.extend({
           id: `${font.id}`,
           size: 32,
           type: 'category-font-item',
+          moreType: 'asset',
           list: [{
             id: font.font_family,
             src: isAdmin ? 'admin' : 'private',
@@ -262,7 +268,14 @@ export default Vue.extend({
       document.head.appendChild(style)
       TextUtils.updateFontFace({ name: fontName, face: fontName, loaded: true })
     },
-    handleLoadMore() {
+    handleLoadMore(moreType: string | undefined) {
+      if (moreType === 'asset') {
+        this.isMoreFontsLoading = true
+        this.fetchMoreFonts().then(() => {
+          this.isMoreFontsLoading = false
+        })
+        return
+      }
       const { keyword } = this
       keyword ? this.getMoreContent() : this.getMoreCategory()
     },

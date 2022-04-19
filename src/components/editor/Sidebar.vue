@@ -29,6 +29,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import Avatar from '@/components/Avatar.vue'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -47,8 +48,7 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      isAdmin: 'user/isAdmin'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     navItem(): Array<{ icon: string, text: string }> {
       const navItems = [
@@ -60,7 +60,7 @@ export default Vue.extend({
         { icon: 'upload', text: `${this.$tc('NN0006')}` }
         // { icon: 'photo', text: 'Pexels' }
       ]
-      if (this.isAdmin) {
+      if (brandkitUtils.isBrandkitAvailable) {
         navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
       }
       return navItems
