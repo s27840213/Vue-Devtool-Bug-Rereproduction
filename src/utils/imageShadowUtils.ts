@@ -219,12 +219,7 @@ class ImageShadowUtils {
         return arr
       }, [] as Array<Array<number>>)
 
-    console.log(data.length)
-    console.log(width)
-    console.log(height)
     const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
-    console.log(generalUtils.deepCopy(pivots))
-    console.log('pivots.some(p => p[3] === 0)', pivots.some(p => p[3] === 0))
     return pivots.some(p => p[3] === 0)
   }
 

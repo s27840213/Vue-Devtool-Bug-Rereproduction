@@ -238,7 +238,6 @@ export default Vue.extend({
           imageShadowUtils.clearLayerData()
         }
       })
-      // imageShadowUtils.clearLayerData()
     }
   },
   computed: {
