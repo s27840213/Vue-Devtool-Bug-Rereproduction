@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import lottie from 'lottie-web'
+import lottie, { AnimationItem } from 'lottie-web'
 import axios from 'axios'
 
 export default Vue.extend({
@@ -61,7 +61,7 @@ export default Vue.extend({
         progressiveLoad: false,
         hideOnTransparent: true
       },
-      anim: null as any,
+      anim: null as unknown as AnimationItem,
       time: 0 as number
     }
   },

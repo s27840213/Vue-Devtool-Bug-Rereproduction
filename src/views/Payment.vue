@@ -3,9 +3,11 @@
     //- todo v-header-border
     nu-header()
     div(class="payment")
-      form(class="payment-input"
-          @submit.prevent="submit")
-        div(class="payment-input-block") 信用卡資訊
+      form(class="payment-input" @submit.prevent)
+        //- Use v-for instead
+        div(class="payment-input-block" ) Stripe信用卡資訊
+          div(class="payment-input-block-field" id="stripe")
+        div(class="payment-input-block") Tappay信用卡資訊
           div(class="payment-input-block-field")
             label(for="card-number") 信用卡號*
             div(id="card-number")
@@ -36,8 +38,10 @@
             dropdown(id="country" required :options="country"
                     @select="option => setCountry(option)")
               span(class="country-label") {{userCountryName}}
+        div(class="btn rounded" type="primary-mid"
+            @click="stripeSubmit()") 送出(Stripe)
         btn(class="rounded" type="primary-mid"
-            :disabled="!sendReady") 送出
+            :disabled="!sendReady" @click="submit()") 送出(Tappay)
       div(class="payment-result") 結果
         div(class="payment-result__msg") {{showPrime}}
         hr
@@ -48,6 +52,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
+import { loadStripe, Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js'
 import payment from '@/apis/payment'
 import NuHeader from '@/components/NuHeader.vue'
 import countryData from '@/assets/json/countries.json'
@@ -61,6 +66,8 @@ export default Vue.extend({
     return {
       isLoading: false,
       primeReady: false,
+      stripe: null as unknown as Stripe,
+      stripeElement: null as unknown as StripeElements,
       prime: {}, // todelete
       payment: {}, // todelete
       userData: {
@@ -91,6 +98,17 @@ export default Vue.extend({
         this.userData.country = 'US'; this.userCountryName = 'United States'
         break
     }
+    loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr')
+      .then((stripe) => {
+        this.stripe = stripe as Stripe
+        this.stripeElement = this.stripe.elements({
+          clientSecret: 'seti_1KppzxJuHmbesNZItzzNJy9G_secret_LWtnjxN1FqK7D0Yh5n8zIWDXbPcJuxf'
+        })
+        const stripePayment = this.stripeElement.create('payment', {
+          fields: { billingDetails: { address: { country: 'never' } } }
+        })
+        stripePayment.mount('#stripe')
+      })
     this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
 
     const fields = {
@@ -201,6 +219,21 @@ export default Vue.extend({
       return GUI[6] === '7' // Check if divisible by 5
         ? GUIsum % 5 === 0 || (GUIsum + 1) % 5 === 0
         : GUIsum % 5 === 0
+    },
+    stripeSubmit() {
+      console.log('stripe submit')
+      this.stripe.confirmSetup({
+        elements: this.stripeElement,
+        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userData.country } } } },
+        redirect: 'if_required'
+      }).then((result) => {
+        console.log('stripe res', result)
+        if (result.error) {
+          Vue.notify({ group: 'error', text: result.error.code })
+        } else {
+          Vue.notify({ group: 'copy', text: result.setupIntent.status })
+        }
+      })
     },
     submit() {
       this.isLoading = true
