@@ -70,6 +70,23 @@ export default Vue.extend({
   },
   mounted() {
     this.refreshFontUrls()
+    uploadUtils.onFontUploadStatus((status) => {
+      if (status === 'success') {
+        this.$notify({
+          group: 'copy',
+          text: `${this.$t('NN0135')}`
+        })
+      }
+      if (status === 'fail') {
+        this.$notify({
+          group: 'error',
+          text: `${this.$t('NN0137')}`
+        })
+      }
+    })
+  },
+  destroyed() {
+    uploadUtils.offFontUploadStatus()
   },
   components: {
     BrandKitTextSetting,

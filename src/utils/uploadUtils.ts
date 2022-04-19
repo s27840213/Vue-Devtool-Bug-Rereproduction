@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
@@ -111,7 +112,6 @@ class UploadUtils {
     if (this.eventHash.fontUploadStatus) {
       delete this.eventHash.fontUploadStatus
     }
-    this.event.on('fontUploadStatus', callback)
     this.eventHash.fontUploadStatus = callback
     this.event.on('fontUploadStatus', callback)
   }
@@ -459,11 +459,17 @@ class UploadUtils {
                   clearInterval(interval)
                   response.json().then((json: IUploadAssetLogoResponse) => {
                     if (json.flag === 0) {
-                      // notify success
+                      Vue.notify({
+                        group: 'copy',
+                        text: `${i18n.t('NN0135')}`
+                      })
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
                     } else {
-                      // notify fail
+                      Vue.notify({
+                        group: 'error',
+                        text: `${i18n.t('NN0137')}`
+                      })
                       brandkitUtils.deleteLogo(brandId, tempId)
                       console.log('Failed to upload the file')
                     }

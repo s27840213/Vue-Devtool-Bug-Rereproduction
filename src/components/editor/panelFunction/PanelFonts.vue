@@ -28,7 +28,7 @@
           :preview2="preview2"
           :item="item"
           :textStyleType="textStyleType")
-    div(class="panel-fonts__upload")
+    //- div(class="panel-fonts__upload")
       transition(name="fade-in")
         div(v-if="['uploading', 'success'].includes(fontUploadStatus)"
             class="panel-fonts__upload-status")
@@ -37,8 +37,8 @@
             :iconWidth="'30px'"
             :iconColor="'green-2'")
           span {{fontUploadStatus === 'uploading' ? `${$t('NN0136')}` : `${$t('NN0135')}`}}
-      //- btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
-      //-   :disabled="fontUploadStatus === 'uploading'") Upload Font
+      btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
+        :disabled="fontUploadStatus === 'uploading'") Upload Font
 </template>
 
 <script lang="ts">
@@ -73,7 +73,6 @@ export default Vue.extend({
   data() {
     return {
       FileUtils,
-      fontUploadStatus: 'none',
       isMoreFontsLoading: false
     }
   },
@@ -82,13 +81,9 @@ export default Vue.extend({
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
-    uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
-      this.fontUploadStatus = status
-    })
   },
   destroyed() {
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
-    uploadUtils.offFontUploadStatus()
   },
   computed: {
     ...mapState(
@@ -195,7 +190,9 @@ export default Vue.extend({
           title: `${this.$t('NN0463')}`
         }
       ]
-      result = result.concat(privateFonts.map((font: IBrandFont) => {
+      result = result.concat((privateFonts as IBrandFont[]).filter((font) => {
+        return !font.id.startsWith('new_')
+      }).map((font) => {
         return {
           id: `${font.id}`,
           size: 32,
@@ -220,9 +217,6 @@ export default Vue.extend({
     list(): any[] {
       return this.listCategories.concat(this.listResult)
     },
-    uploadStatusIcon(): string {
-      return this.fontUploadStatus === 'uploading' ? 'loading' : 'check'
-    },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any font for "${this.keyword}".` : ''
     }
@@ -243,9 +237,6 @@ export default Vue.extend({
         'fetchMoreFonts'
       ]
     ),
-    // getFontUrl(fontID: string): string {
-    //   return `url("https://template.vivipic.com/font/${fontID}/font")`
-    // },
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
