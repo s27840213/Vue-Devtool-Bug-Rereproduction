@@ -21,6 +21,7 @@ import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 import { ITextState } from '@/store/text'
 import gtmUtils from './gtmUtils'
+import editorUtils from './editorUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -418,6 +419,7 @@ class AssetUtils {
 
         TextUtils.resetTextField(textLayer, targePageIndex, field)
         LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
+        editorUtils.setCloseMobilePanelFlag(true)
       })
       .catch(() => {
         console.log('Cannot find the file')
@@ -555,6 +557,8 @@ class AssetUtils {
               }
             }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
           )
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 5:
         case 9:
@@ -563,18 +567,28 @@ class AssetUtils {
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 7:
           this.addText(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 8:
           this.addFrame(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 10:
           this.addLine(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 11:
           this.addBasicShape(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)

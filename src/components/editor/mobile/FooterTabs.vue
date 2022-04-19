@@ -1,13 +1,14 @@
 <template lang="pug">
   div(class="footer-tabs")
     div(class="footer-tabs__item" v-for="(tab, index) in tabs"
+        :class="{'click-disabled': (tab.disabled || isLocked)}"
         @click="handleTabAction(tab)")
       svg-icon(class="mb-5"
         :iconName="tab.icon"
-        :iconColor="currTab ===  tab.panelType ? 'blue-1' :'white'"
+        :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
         :iconWidth="'20px'")
       span(class="text-body-4 no-wrap"
-      :class="(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+      :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -42,26 +43,37 @@ export default Vue.extend({
         { icon: 'shape', text: `${this.$t('NN0003')}`, panelType: 'object' },
         { icon: 'bg', text: `${this.$t('NN0004')}`, panelType: 'background' },
         { icon: 'text', text: `${this.$t('NN0005')}`, panelType: 'text' },
-        { icon: 'upload', text: `${this.$t('NN0006')}`, panelType: 'file' }
-        // { panelType: 'brand', text: `${this.$t('NN0007')}` }
+        { icon: 'upload', text: `${this.$t('NN0006')}`, panelType: 'file' },
+        { panelType: 'brand', text: `${this.$t('NN0007')}`, disabled: true }
       ] as Array<IFooterTab>,
       photoTabs: [
         mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background' },
+        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'photo' },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
         { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background' },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text' }
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,
       fontTabs: [
         mainMenu,
-        { icon: 'font', text: `${this.$t('NN0353')}`, panelType: 'photo' }
+        { icon: 'font', text: `${this.$t('NN0353')}`, panelType: 'fonts' },
+        { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
+        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo' },
+        { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object', disabled: true },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
+        { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background' },
+        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>
     }
   },

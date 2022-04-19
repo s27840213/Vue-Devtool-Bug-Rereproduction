@@ -3,6 +3,7 @@ import store from '@/store'
 import stepsUtils from './stepsUtils'
 class OrderUtils {
   bringToFront() {
+    console.log('bring to front')
     store.commit('UPDATE_layerOrder', {
       type: 'front'
     })

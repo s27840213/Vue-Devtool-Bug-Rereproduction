@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-fonts")
-    div(class="panel-fonts__title")
+    div(v-if="showTitle" class="panel-fonts__title")
       span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -52,7 +52,6 @@ import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -60,6 +59,12 @@ export default Vue.extend({
     CategoryList,
     CategoryFontItem,
     CategoryListFont
+  },
+  props: {
+    showTitle: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {

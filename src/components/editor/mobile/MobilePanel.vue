@@ -20,7 +20,7 @@
     keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
       component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
         class="border-box"
-        :is="`panel-${currActivePanel}`")
+        v-bind="dynamicBindProps")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -36,6 +36,12 @@ import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
 import PanelOpacity from '@/components/editor/panelMobile/PanelOpacity.vue'
+import PanelOrder from '@/components/editor/panelMobile/PanelOrder.vue'
+import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
+import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
+import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
+import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 
@@ -61,7 +67,12 @@ export default Vue.extend({
     ColorPanel,
     PanelPosition,
     PanelFlip,
-    PanelOpacity
+    PanelOpacity,
+    PanelOrder,
+    PanelFonts,
+    PanelFontSize,
+    PanelFontFormat,
+    PanelFontSpacing
   },
   data() {
     return {
@@ -74,10 +85,10 @@ export default Vue.extend({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'font-format', 'font-spacing'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'font-spacing'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -104,12 +115,25 @@ export default Vue.extend({
         'row-gap': this.hideDynamicComp ? '0px' : '20px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43'
       }
+    },
+    dynamicBindProps(): { [index: string]: any } {
+      const defaultVal = {
+        is: `panel-${this.currActivePanel}`
+      }
+
+      if (this.currActivePanel === 'fonts') {
+        return Object.assign(defaultVal, {
+          showTitle: false
+        })
+      } else {
+        return defaultVal
+      }
     }
   },
   methods: {
-    // closeMobilePanel() {
-    //   this.$emit('switchTab', 'none')
-    // }
+    closeMobilePanel() {
+      this.$emit('switchTab', 'none')
+    }
   }
 })
 </script>

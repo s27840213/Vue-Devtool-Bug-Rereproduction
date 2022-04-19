@@ -16,5 +16,6 @@ export interface ICurrSubSelectedInfo {
 export interface IFooterTab {
   icon: string,
   text: string,
-  panelType?: string
+  panelType?: string,
+  disabled?: boolean
 }

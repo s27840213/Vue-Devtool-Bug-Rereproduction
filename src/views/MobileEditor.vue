@@ -45,10 +45,12 @@ export default Vue.extend({
       isLoading: false,
       isSaving: false,
       currActivePanel: 'none'
-      // isSidebarPanelOpen: false
     }
   },
   computed: {
+    ...mapState({
+      closeMobilePanelFlag: 'closeMobilePanelFlag'
+    }),
     ...mapState('user', [
       'role',
       'adminMode',
@@ -106,6 +108,15 @@ export default Vue.extend({
       ) : (this.currSelectedInfo.types.has('text'))
     }
   },
+  watch: {
+    closeMobilePanelFlag(newVal) {
+      console.log(newVal)
+      if (newVal) {
+        this.setCloseMobilePanelFlag(false)
+        this.currActivePanel = 'none'
+      }
+    }
+  },
   beforeRouteLeave(to, from, next) {
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
@@ -124,13 +135,13 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
-      _setAdminMode: 'user/SET_ADMIN_MODE'
+      _setAdminMode: 'user/SET_ADMIN_MODE',
+      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
     }),
     switchTab(panelType: string) {
       if (this.currActivePanel === panelType) {
         this.currActivePanel = 'none'
       } else {
-        console.log(panelType)
         this.currActivePanel = panelType
       }
     }

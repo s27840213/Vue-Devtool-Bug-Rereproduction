@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IImage } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
@@ -65,6 +65,9 @@ export default Vue.extend({
     this.online = navigator.onLine
   },
   computed: {
+    ...mapState({
+      closeMobilePanelFlag: 'closeMobilePanelFlag'
+    }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
@@ -105,7 +108,8 @@ export default Vue.extend({
       addCheckedAssets: 'file/ADD_CHECKED_ASSETS',
       deleteCheckedAssets: 'file/DELETE_CHECKED_ASSETS',
       updateCheckedAssets: 'file/UPDATE_CHECKED_ASSETS',
-      setCurrDraggedPhoto: 'SET_currDraggedPhoto'
+      setCurrDraggedPhoto: 'SET_currDraggedPhoto',
+      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
     }),
     dragStart(e: DragEvent, photo: any) {
       if (!this.online) {
@@ -182,6 +186,9 @@ export default Vue.extend({
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
       )
+      if (generalUtils.isMobile()) {
+        this.setCloseMobilePanelFlag(true)
+      }
     },
     showPhotoInfo(evt: Event) {
       const { vendor } = this

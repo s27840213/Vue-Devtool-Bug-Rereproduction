@@ -67,7 +67,8 @@ export interface IEditorState {
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
   isMobile: boolean
-  isLargeDesktop: boolean
+  isLargeDesktop: boolean,
+  closeMobilePanelFlag: boolean
 }
 
 export enum SidebarPanelType {

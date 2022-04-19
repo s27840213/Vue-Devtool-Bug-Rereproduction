@@ -20,7 +20,7 @@
         @click.right.stop="!isMobile() && onRightClick"
         @contextmenu="handleContextMenu"
         @mousedown.left="moveStart"
-        @touchstart="moveStart"
+        @touchstart.prevent="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")

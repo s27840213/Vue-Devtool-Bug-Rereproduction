@@ -1,16 +1,17 @@
-
 .input {
-	&__slider{
+	&__slider {
 		&--range {
+			appearance: none;
 			display: block;
 			margin: auto;
-			appearance: none;
 			outline: none;
 			background: none;
+
 			&::-webkit-slider-runnable-track {
 				height: 2px;
 				background-color: setColor(gray-4);
 			}
+
 			&::-webkit-slider-thumb {
 				appearance: none;
 				width: 15px;
@@ -22,12 +23,18 @@
 				margin-top: -6.5px;
 				position: relative;
 			}
+
+			&::-webkit-progress-bar {
+				background-color: setColor(blue-1);
+			}
+
 			&::-moz-range-track {
 				background-color: setColor(gray-4);
 			}
 		}
+
 		&--text {
-      box-sizing: border-box;
+			box-sizing: border-box;
 			text-align: center;
 			border: 1px solid setColor(gray-4);
 			color: setColor(gray-3);

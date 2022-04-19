@@ -1,14 +1,13 @@
 <template lang="pug">
   div(class="mobile-slider")
     div
-      span(class="mobile-slider__name text-gray-3 body-2") {{$t('NN0030')}}
+      span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{name}}
       input(class="mobile-slider__text body-2 text-gray-2"
-        v-if="!noText"
         type="number"
-        v-model.number="value"
+        v-model.number="propsVal"
         @change="handleChangeStop")
     input(class="mobile-slider__range-input input__slider--range"
-      v-model.number="value"
+      v-model.number="propsVal"
       :max="max"
       :min="min"
       :step="step"
@@ -18,28 +17,53 @@
 </template>
 
 <script lang="ts">
-import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
   data() {
     return {
-      step: 1,
-      min: 0,
-      max: 100
     }
   },
   props: {
-    propName: String
-  },
-  created() {
-    const { min, max } = mappingUtils.mappingMinMax(this.propName)
-
-    this.min = min
-    this.max = max
+    name: String,
+    value: {
+      type: Number,
+      required: true
+    },
+    min: {
+      type: Number,
+      required: true
+    },
+    max: {
+      type: Number,
+      required: true
+    },
+    step: {
+      default: 1,
+      type: Number
+    },
+    /**
+     * @param key - use to identify the target we want to update
+     */
+    propKey: {
+      type: String,
+      default: ''
+    }
   },
   computed: {
+    propsVal: {
+      get(): number {
+        return this.value
+      },
+      set(val: number): void {
+        if (this.propKey !== '') {
+          this.$emit(`update:${this.propKey}`, val)
+        } else {
+          this.$emit('update', val)
+        }
+      }
+    }
   },
   methods: {
     handleChangeStop() {
@@ -57,6 +81,7 @@ export default Vue.extend({
   grid-template-columns: 1fr;
   row-gap: 10px;
   padding: 0.375rem 0.625rem;
+  box-sizing: border-box;
 
   > div:nth-child(1) {
     display: flex;
@@ -69,6 +94,11 @@ export default Vue.extend({
     border: 1px solid setColor(gray-4);
     color: setColor(gray-3);
     border-radius: 0.25rem;
+    width: 60px;
+  }
+
+  &__range-input {
+    margin-top: 12px;
   }
 }
 </style>

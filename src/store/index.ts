@@ -98,7 +98,8 @@ const getDefaultState = (): IEditorState => ({
   hasCopiedFormat: false,
   inGestureToolMode: false,
   isMobile: false,
-  isLargeDesktop: false
+  isLargeDesktop: false,
+  closeMobilePanelFlag: false
 })
 
 const state = getDefaultState()
@@ -772,6 +773,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_inGestureMode(state: IEditorState, bool: boolean) {
     state.inGestureToolMode = bool
+  },
+  SET_closeMobilePanelFlag(state: IEditorState, bool: boolean) {
+    state.closeMobilePanelFlag = bool
   },
   ...imgShadowMutations
 }
