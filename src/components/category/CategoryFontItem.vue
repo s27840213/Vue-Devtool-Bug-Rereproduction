@@ -250,7 +250,12 @@ export default Vue.extend({
             }
           })
           StepsUtils.record()
-          TextPropUtils.updateTextPropsState({ font: this.item.id })
+          TextPropUtils.updateTextPropsState({
+            font: this.item.id,
+            type: this.itemFontType,
+            assetId: this.item.assetId,
+            userId: this.item.userId
+          })
           return
         }
 
@@ -300,7 +305,12 @@ export default Vue.extend({
           }
         })
         StepsUtils.record()
-        TextPropUtils.updateTextPropsState({ font: this.item.id })
+        TextPropUtils.updateTextPropsState({
+          font: this.item.id,
+          type: this.itemFontType,
+          assetId: this.item.assetId,
+          userId: this.item.userId
+        })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)
