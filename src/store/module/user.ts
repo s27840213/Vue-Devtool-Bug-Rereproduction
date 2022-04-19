@@ -27,7 +27,6 @@ export interface IUserModule {
   isAuthenticated: boolean,
   account: string,
   upassUpdate: string,
-  locale: string,
   subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
@@ -53,7 +52,6 @@ const getDefaultState = (): IUserModule => ({
   isAuthenticated: false,
   account: '',
   upassUpdate: '',
-  locale: '',
   subscribe: 1,
   userAssets: {
     design: {
@@ -104,9 +102,6 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getUpassUpdate(state) {
     return state.upassUpdate
-  },
-  getLocale(state) {
-    return state.locale
   },
   getSubscribe(state) {
     return state.subscribe
@@ -325,7 +320,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('SET_TOKEN', '')
     }
   },
-  /* eslint-disable camelcase */
+
   async sendVcode({ commit }, { uname, account, upass, register, vcode_only, type, token, locale }) {
     try {
       const { data } = await userApis.sendVcode(uname, account, upass, register, vcode_only, type, token, locale)
@@ -335,7 +330,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       return Promise.reject(error)
     }
   },
-  /* eslint-disable camelcase */
+
   async verifyVcode({ commit }, { account, vcode, token, type }) {
     try {
       const { data } = await userApis.verifyVcode(account, vcode, token, type)

@@ -64,7 +64,9 @@ export default Vue.extend({
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
       dataTransfer.setDragImage((event.target as HTMLImageElement), 0, 0)
-      dataTransfer.setData('data', JSON.stringify(this.item))
+      dataTransfer.setData('data', JSON.stringify(this.groupItem
+        ? Object.assign(this.groupItem, { groupChildId: this.item.id })
+        : this.item))
     },
     addTemplate() {
       console.log('Add template')

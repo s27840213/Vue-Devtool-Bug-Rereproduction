@@ -2,13 +2,14 @@ import axios from '@/apis'
 import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
 import { IDesign, IFolder } from '@/interfaces/design'
+import i18n from '@/i18n'
 
 export default {
   getToken(): string {
     return store.getters['user/getToken']
   },
   getLocale(): string {
-    return store.getters['user/getLocale']
+    return i18n.locale
   },
   getUserId(): string {
     return store.getters['user/getUserId']

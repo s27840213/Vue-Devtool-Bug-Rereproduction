@@ -54,7 +54,7 @@ import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { ColorEventType, FunctionPanelType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, LayerType } from '@/store/types'
 import color from '@/store/module/color'
 import tiptapUtils from '@/utils/tiptapUtils'
 
@@ -121,7 +121,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
     isShape(): boolean {
-      return this.currSelectedInfo.types.has('shape') && this.currSelectedInfo.layers.length === 1
+      return layerUtils.getCurrConfig.type === LayerType.shape
     },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
