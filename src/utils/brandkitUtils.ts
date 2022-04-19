@@ -322,7 +322,7 @@ class BrandKitUtils {
     const logo = this.apiLogo2IBrandLogo(apiLogo)
     if (logo.width === undefined || logo.height === undefined) {
       const url = this.getLogoUrl(logo, brandId, 'original')
-      imageUtils.getImageSize(url, 24, 24, false).then(size => {
+      imageUtils.getImageSize(url, 24, 24).then(size => {
         if (!size.exists) {
           this.deleteLogo(brandId, id)
         } else {
@@ -521,7 +521,7 @@ class BrandKitUtils {
   }
 
   getLogoUrl(logo: IBrandLogo, brandId: string, size: 'prev' | 'full' | 'larg' | 'midd' | 'smal' | 'tiny' | 'original'): string {
-    return logo.signed_url ? logo.signed_url[size] : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${brandId}/${logo.id}/${size}`
+    return logo.signed_url ? logo.signed_url[size] : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${brandId}/${logo.id}/${size}?origin=true&ver=${logo.ver}`
   }
 
   getDisplayedBrandName(brand: IBrand): string {
