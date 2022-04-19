@@ -60,7 +60,7 @@ export default Vue.extend({
         { icon: 'upload', text: `${this.$tc('NN0006')}` }
         // { icon: 'photo', text: 'Pexels' }
       ]
-      if (this.isAdmin && window.location.hostname === 'localhost') { // TODO: remove localhost when ready to test
+      if (this.isAdmin) {
         navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
       }
       return navItems

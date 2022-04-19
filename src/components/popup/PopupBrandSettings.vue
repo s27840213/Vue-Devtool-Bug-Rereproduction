@@ -219,6 +219,7 @@ export default Vue.extend({
 .brand-kit {
   @include size(100%, 100%);
   @include hide-scrollbar-white;
+  overflow-x: auto;
   &__main {
     padding-top: 30px;
     padding-left: 24px;
