@@ -1,3 +1,4 @@
+// to-delete
 <template lang="pug">
   div(class="top")
     //- todo v-header-border

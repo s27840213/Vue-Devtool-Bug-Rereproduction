@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import VueRouter, { NavigationGuardNext, RawLocation, Route, RouteConfig } from 'vue-router'
+import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
@@ -11,7 +11,7 @@ import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
-import Payment from '../views/Payment.vue'
+import Pricing from '../views/Pricing.vue'
 import store from '@/store'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
@@ -181,9 +181,9 @@ const routes: Array<RouteConfig> = [
     component: BrandKit
   },
   {
-    path: 'payment',
-    name: 'Payment',
-    component: Payment
+    path: 'pricing',
+    name: 'Pricing',
+    component: Pricing
   }
 ]
 
