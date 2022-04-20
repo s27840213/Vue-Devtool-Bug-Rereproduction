@@ -503,9 +503,9 @@ class BrandKitUtils {
 
   getUpdateStyleAPIEncoding(style: Partial<IBrandTextStyle>): string {
     const pairs = Object.entries(style).map(([key, value]) => {
-      return `${key}@${value}`
+      return `${key}@${value}@`
     })
-    pairs.push('isDefault@false')
+    pairs.push('isDefault@false@')
     return pairs.join(',')
   }
 
