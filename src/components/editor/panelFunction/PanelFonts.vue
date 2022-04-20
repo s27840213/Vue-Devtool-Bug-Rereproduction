@@ -14,7 +14,7 @@
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
     category-list(:list="list"
       @loadMore="handleLoadMore")
-      template(v-if="pending || isMoreFontsLoading" #after)
+      template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
             iconColor="gray-1"
@@ -72,8 +72,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      FileUtils,
-      isMoreFontsLoading: false
+      FileUtils
     }
   },
   mounted() {
@@ -211,6 +210,7 @@ export default Vue.extend({
       }))
       if (result.length) {
         result[result.length - 1].sentinel = fontsPageIndex >= 0
+        // result[result.length - 1].sentinel = fontsPageIndex >= 0
       }
       return result
     },
@@ -261,10 +261,7 @@ export default Vue.extend({
     },
     handleLoadMore(moreType: string | undefined) {
       if (moreType === 'asset') {
-        this.isMoreFontsLoading = true
-        this.fetchMoreFonts().then(() => {
-          this.isMoreFontsLoading = false
-        })
+        this.fetchMoreFonts()
         return
       }
       const { keyword } = this
