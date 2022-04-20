@@ -174,7 +174,7 @@ export default Vue.extend({
         url: this.faqPage,
         text: i18n.t('NN0147')
       }, {
-        condition: this.isLogin && this.isAdmin,
+        condition: this.isLogin, // todo: modify condition
         name: 'Pricing',
         url: '/pricing',
         text: 'Pricing' // todo: i18n
