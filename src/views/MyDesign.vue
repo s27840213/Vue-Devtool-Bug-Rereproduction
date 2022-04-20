@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="my-design")
-    nu-header(:isTop="false")
+    nu-header(v-header-border="true")
     div(class="my-design__content")
       sidebar(@deleteItem="handleDeleteItem"
               @deleteFolder="handleDeleteFolder"

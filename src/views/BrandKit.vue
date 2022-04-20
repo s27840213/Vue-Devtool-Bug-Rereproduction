@@ -4,8 +4,8 @@
     @dragenter.prevent.stop="handleDragEnter"
     @dragleave.prevent.stop="handleDragLeave"
     @drop.prevent.stop="handleDrop")
-    nu-header(:isTop="isTop")
-    section(ref="content" class="brand-kit__scroll" @scroll.passive="onScroll")
+    nu-header(v-header-border)
+    section(class="brand-kit__scroll")
       div(v-if="isBrandsLoading" class="brand-kit__main")
         svg-icon(iconName="loading"
                 iconWidth="50px"
@@ -78,7 +78,6 @@ export default Vue.extend({
     return {
       isDraggedOver: false,
       isMessageShowing: false,
-      isTop: true,
       deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {
@@ -174,9 +173,6 @@ export default Vue.extend({
           break
       }
       this.handleClearDeletion()
-    },
-    onScroll() {
-      this.isTop = (this.$refs.content as HTMLElement).scrollTop === 0
     }
   }
 })

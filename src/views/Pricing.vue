@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="pricing")
-    nu-header(:isTop="false")
+    nu-header(v-header-border="true")
     div(class="pricing-content")
       div(class="pricing-header")
         img(:src="require('@/assets/img/png/pricing/header.png')")

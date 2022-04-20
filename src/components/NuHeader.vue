@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-header" :class="{'navbar-shadow': !isTop}")
+  div(class="nu-header")
     div(class="nu-header__container")
       div
         router-link(to="/"
@@ -11,39 +11,11 @@
             style="height: 50px;")
       transition(name="fade" mode="out-in")
         div(v-if="!noNavigation" class="body-2" key="navigation")
-          div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'Home'}")
-            router-link(to="/"
-              class="nu-header__container__link") {{$t('NN0144')}}
-          div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'TemplateCenter'}")
-            router-link(to="/templates"
-              class="nu-header__container__link") {{$t('NN0145')}}
-          div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'Toturial'}")
-            a(:href="tutorialPage"
-              class="nu-header__container__link") {{$t('NN0146')}}
-          div(class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'Faq'}")
-            a(:href="faqPage"
-              class="nu-header__container__link") {{$t('NN0147')}}
-          div(v-if="isLogin"
-            class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'MyDesign'}")
-            router-link(to="/mydesign"
-              class="nu-header__container__link") {{$t('NN0080')}}
-          div(v-if="isLogin && isAdmin"
-            class="p-5 pointer"
-            :class="{'text-blue-1': currentPage === 'BrandKit'}")
-            router-link(to="/brandkit"
-              class="nu-header__container__link") {{$t('NN0007')}}
+          div(v-for="item in navItems")
+            div(v-if="item.condition" class="p-5 pointer"
+                :class="{'text-blue-1': currentPage === item.name}")
+              router-link(:to="item.url" class="nu-header__container__link") {{item.text}}
         div(v-else class="body-2" key="no-navigation")
-          div
-          div
-          div
-          div
-          div
-          div
       div(class="body-2")
         //- div(v-if="!isLogin")
         //-   search-bar(v-if="!noSearchbar"
@@ -121,6 +93,9 @@ import Avatar from '@/components/Avatar.vue'
 import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import StepsUtils from '@/utils/stepsUtils'
 import localeUtils from '@/utils/localeUtils'
+import i18n from '@/i18n'
+import VueI18n from 'vue-i18n'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -135,8 +110,7 @@ export default Vue.extend({
   props: {
     noSearchbar: Boolean,
     noNavigation: Boolean,
-    showSearchPage: Boolean,
-    isTop: Boolean
+    showSearchPage: Boolean
   },
   data() {
     return {
@@ -179,22 +153,60 @@ export default Vue.extend({
     currLocale(): string {
       return localeUtils.currLocale()
     },
+    navItems(): Record<string, string | boolean | VueI18n.TranslateResult>[] {
+      return [{
+        condition: true,
+        name: 'Home',
+        url: '/',
+        text: i18n.t('NN0144')
+      }, {
+        condition: true,
+        name: 'TemplateCenter',
+        url: '/templates',
+        text: i18n.t('NN0145')
+      }, {
+        condition: true,
+        name: 'Toturial',
+        url: this.tutorialPage,
+        text: i18n.t('NN0146')
+      }, {
+        condition: true,
+        name: 'Faq',
+        url: this.faqPage,
+        text: i18n.t('NN0147')
+      // }, {
+      //   condition: this.isLogin && this.isAdmin, // todo: modify condition
+      //   name: 'Pricing',
+      //   url: '/pricing',
+      //   text: 'Pricing' // todo: i18n
+      }, {
+        condition: this.isLogin,
+        name: 'MyDesign',
+        url: '/mydesign',
+        text: i18n.t('NN0080')
+      }, {
+        condition: this.isLogin && brandkitUtils.isBrandkitAvailable,
+        name: 'BrandKit',
+        url: '/brandkit',
+        text: i18n.t('NN0007')
+      }]
+    },
     tutorialPage(): string {
       if (this.currLocale === 'tw') {
-        return 'https://blog.vivipic.com/tw/tutorial/'
+        return '//blog.vivipic.com/tw/tutorial/'
       } else if (this.currLocale === 'us') {
-        return 'https://blog.vivipic.com/us-tutorial/'
+        return '//blog.vivipic.com/us-tutorial/'
       } else {
-        return 'https://www.facebook.com/vivipic' + this.currLocale
+        return '//www.facebook.com/vivipic' + this.currLocale
       }
     },
     faqPage(): string {
       if (this.currLocale === 'tw') {
-        return 'https://blog.vivipic.com/tw/faq/'
+        return '//blog.vivipic.com/tw/faq/'
       } else if (this.currLocale === 'us') {
-        return 'https://blog.vivipic.com/us-faq/'
+        return '//blog.vivipic.com/us-faq/'
       } else {
-        return 'https://www.facebook.com/vivipic' + this.currLocale
+        return '//www.facebook.com/vivipic' + this.currLocale
       }
     }
   },

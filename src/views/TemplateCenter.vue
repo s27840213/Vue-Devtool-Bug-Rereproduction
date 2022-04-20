@@ -2,7 +2,7 @@
   div(ref="body"
       class="template-center"
       @scroll.passive="handleScroll")
-    nu-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" :isTop="isTop")
+    nu-header(class="non-mobile-show" :noSearchbar="true" :noNavigation="snapToTop" v-header-border="'.template-center'")
       transition(name="slide")
         search-bar(v-if="snapToTop"
                 :style="absoluteSearchbarStyles()"
@@ -12,7 +12,7 @@
                 :placeholder="`${$t('NN0092', {target: $tc('NN0001',1)})}`"
                 @update="handleUpdate"
                 @search="handleSearch")
-    nu-header(class="non-tab-show" :noSearchbar="true" :isTop="isTop")
+    nu-header(class="non-tab-show" :noSearchbar="true" v-header-border="'.template-center'")
     div(class="template-center__search-container")
       div(class="template-center__search__title non-mobile-show")
         span(v-html="title")
@@ -270,7 +270,6 @@ export default Vue.extend({
       modal: '',
       isShowOptions: false,
       mouseInTemplate: '',
-      isTop: true,
       isMobile: false,
       isPC: false
     }
@@ -438,8 +437,6 @@ export default Vue.extend({
       const searchbar = (this.$refs.searchbar as any).$el as HTMLElement
       this.snapToTop = searchbar.getBoundingClientRect().top <= HEADER_HEIGHT
       this.searchbarTop = searchbar.getBoundingClientRect().top
-      const body = this.$refs.body as HTMLElement
-      this.isTop = body.scrollTop === 0
       const mobileSearch = this.$refs.mobileSearch as HTMLElement | undefined
       this.mobileSnapToTop = (mobileSearch?.getBoundingClientRect()?.top ?? 1000) <= HEADER_HEIGHT
     },
@@ -1014,7 +1011,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 67%;
-      padding-top: calc(100% - 2px);
+      padding-top: calc(67% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
@@ -1137,7 +1134,7 @@ body {
       justify-content: center;
       align-items: center;
       width: 100%;
-      padding-top: calc(67% - 2px);
+      padding-top: calc(100% - 2px);
       background: white;
       border: 1px solid setColor(gray-5);
       box-sizing: border-box;
