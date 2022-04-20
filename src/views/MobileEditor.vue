@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="mobile-editor")
     div(class="mobile-editor__top")
-      header-tabs
+      header-tabs(@switchTab="switchTab"
+        :currTab="currActivePanel")
       div(class="mobile-editor__content")
           mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
               //- div(class="content__panel" :style="panelStyles()")

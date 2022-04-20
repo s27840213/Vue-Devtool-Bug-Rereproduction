@@ -7,10 +7,11 @@
       @click.native="goHome()")
     div(class="header-bar__right")
       svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
-        :iconName="tab"
-        :iconColor="'white'"
+        :class="{'click-disabled': (tab.disabled || isLocked)}"
+        :iconName="tab.icon"
+        :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.icon ? 'blue-1' :'white'"
         :iconWidth="'20px'"
-        @click.native="handleIconAction(tab)")
+        @click.native="handleIconAction(tab.icon)")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -23,10 +24,19 @@ export default Vue.extend({
   components: {
   },
   props: {
+    currTab: {
+      default: 'none',
+      type: String
+    }
   },
   data() {
     return {
-      homeTabs: ['resize', 'all-pages', 'download', 'more']
+      homeTabs: [
+        { icon: 'resize', disabled: true },
+        { icon: 'all-pages', disabled: true },
+        { icon: 'download' },
+        { icon: 'more' }
+      ]
     }
   },
   computed: {
@@ -39,10 +49,14 @@ export default Vue.extend({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
-    layerTabs(): Array<string> {
-      return ['copy', this.isLocked ? 'lock' : 'unlock', 'trash']
+    layerTabs(): Array<{ icon: string, disabled?: boolean }> {
+      return [
+        { icon: 'copy' },
+        { icon: this.isLocked ? 'lock' : 'unlock' },
+        { icon: 'trash' }
+      ]
     },
-    rightTabs(): Array<string> {
+    rightTabs(): Array<{ icon: string, disabled?: boolean }> {
       if (this.selectedLayerNum > 0) {
         return this.layerTabs
       } else {
@@ -115,7 +129,18 @@ export default Vue.extend({
       this.$router.push({ name: 'Home' })
     },
     handleIconAction(icon: string) {
-      mappingUtils.mappingIconAction(icon)
+      console.log(icon)
+      switch (icon) {
+        case 'download':
+        case 'more': {
+          this.$emit('switchTab', icon)
+          break
+        }
+        default: {
+          mappingUtils.mappingIconAction(icon)
+          break
+        }
+      }
     }
   }
 })

@@ -15,7 +15,7 @@
             iconColor="white"
             iconWidth="20px")
       template(v-slot:default-background-colors)
-        div
+        div(ref="colorBlock")
           div(class="text-left py-5 text-white") {{$t('NN0017')}}
           div(class="panel-bg__colors")
             div(class="panel-bg__color"
@@ -110,6 +110,7 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
+        // size: (this.$refs.colorBlock as HTMLElement).style.height
         size: 150
       }]
     },

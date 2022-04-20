@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="mobile-panel p-10"
+  div(class="mobile-panel p-15"
       :style="panelStyle")
     div(class="mobile-panel__top-section")
       div(class="mobile-panel__drag-bar"
@@ -17,10 +17,12 @@
           :iconName="'check-circle'"
           :iconColor="'white'"
           :iconWidth="'20px'")
-    keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
-      component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
-        class="border-box"
-        v-bind="dynamicBindProps")
+    div(class="mobile-panel__bottom-section")
+      keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
+        component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
+          class="border-box"
+          v-bind="dynamicBindProps"
+          @close="closeMobilePanel")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -41,6 +43,8 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
@@ -72,7 +76,9 @@ export default Vue.extend({
     PanelFonts,
     PanelFontSize,
     PanelFontFormat,
-    PanelFontSpacing
+    PanelFontSpacing,
+    PopupDownload,
+    PanelMore
   },
   data() {
     return {
@@ -85,10 +91,10 @@ export default Vue.extend({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'font-format', 'font-spacing'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'font-format', 'font-spacing', 'download', 'more'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'font-spacing'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'font-spacing', 'download', 'more'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -112,8 +118,9 @@ export default Vue.extend({
     panelStyle(): { [index: string]: string } {
       return {
         height: this.fixSize ? 'initial' : '100%',
-        'row-gap': this.hideDynamicComp ? '0px' : '20px',
-        backgroundColor: this.whiteTheme ? 'white' : '#2C2F43'
+        'row-gap': this.hideDynamicComp ? '0px' : '10px',
+        backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
+        ...(this.fixSize && { 'max-height': '80%' })
       }
     },
     dynamicBindProps(): { [index: string]: any } {
@@ -121,12 +128,21 @@ export default Vue.extend({
         is: `panel-${this.currActivePanel}`
       }
 
-      if (this.currActivePanel === 'fonts') {
-        return Object.assign(defaultVal, {
-          showTitle: false
-        })
-      } else {
-        return defaultVal
+      switch (this.currActivePanel) {
+        case 'fonts': {
+          return Object.assign(defaultVal, {
+            showTitle: false
+          })
+        }
+        case 'download': {
+          return {
+            is: 'popup-download',
+            hideContainer: true
+          }
+        }
+        default: {
+          return defaultVal
+        }
       }
     }
   },
@@ -166,6 +182,13 @@ export default Vue.extend({
       justify-content: space-between;
       align-items: center;
     }
+  }
+
+  &__bottom-section {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    @include no-scrollbar;
   }
 
   &__title {
