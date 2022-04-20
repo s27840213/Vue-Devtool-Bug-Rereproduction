@@ -245,7 +245,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     getFontPrev() {
-      const url = brandkitUtils.getFontPrevUrlByFontFamily(this.props.font, this.props.type, this.props.userId, this.props.assetId)
+      const url = brandkitUtils.getFontPrevUrlByFontFamily(this.props.font, this.props.type, this.props.userId, this.props.assetId, 'prev-name')
       if (this.props.type === 'private' && url === '') {
         this.refreshFont(this.props.assetId)
       }

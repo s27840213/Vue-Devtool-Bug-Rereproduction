@@ -210,7 +210,6 @@ export default Vue.extend({
       }))
       if (result.length) {
         result[result.length - 1].sentinel = fontsPageIndex >= 0
-        // result[result.length - 1].sentinel = fontsPageIndex >= 0
       }
       return result
     },

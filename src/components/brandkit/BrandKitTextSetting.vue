@@ -133,9 +133,9 @@ export default Vue.extend({
     getFontPrev() {
       let url = ''
       if (this.textStyle.isDefault) {
-        url = brandkitUtils.getFontPrevUrlByFontFamily(brandkitUtils.getDefaultFontId(this.$i18n.locale), 'public', '', '')
+        url = brandkitUtils.getFontPrevUrlByFontFamily(brandkitUtils.getDefaultFontId(this.$i18n.locale), 'public', '', '', 'prev-name')
       } else {
-        url = brandkitUtils.getFontPrevUrlByFontFamily(this.textStyle.fontId, this.textStyle.fontType, this.textStyle.fontUserId, this.textStyle.fontAssetId)
+        url = brandkitUtils.getFontPrevUrlByFontFamily(this.textStyle.fontId, this.textStyle.fontType, this.textStyle.fontUserId, this.textStyle.fontAssetId, 'prev-name')
       }
       if (this.textStyle.fontType === 'private' && url === '') {
         this.refreshFont(this.textStyle.fontAssetId)

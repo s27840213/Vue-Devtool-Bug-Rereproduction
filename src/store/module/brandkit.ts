@@ -712,9 +712,7 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!brand) return
     const logo = brand.logos.find(logo => logo.asset_index.toString() === updateInfo.assetIndex)
     if (!logo || !logo.signed_url) return
-    for (const key of Object.keys(logo.signed_url)) {
-      (logo.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
-    }
+    (logo.signed_url as any) = updateInfo.urlMap
   },
   UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: {[key: string]: string} }) {
     state.fetchedFonts[updateInfo.index] = updateInfo.urlMap

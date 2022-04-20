@@ -195,13 +195,10 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       let urlMap = brandkitUtils.getFontUrlMap(assetId)
       if (urlMap) { // if font is in font-list or has been seen before
         const finalUrl = getCssUrl(urlMap, ver)
-        try {
-          await fetch(finalUrl) // check if the url is still valid
-          return finalUrl
-        } catch { // if the url already expires, refresh it
-          urlMap = await brandkitUtils.refreshFontAsset(assetId)
-          return getCssUrl(urlMap, ver)
-        }
+        const response = await fetch(finalUrl) // check if the url is still valid
+        if (response.ok) return finalUrl
+        urlMap = await brandkitUtils.refreshFontAsset(assetId)
+        return getCssUrl(urlMap, ver)
       } else { // font is not seen before, fetch it
         urlMap = await brandkitUtils.refreshFontAsset(assetId)
         return getCssUrl(urlMap, ver)

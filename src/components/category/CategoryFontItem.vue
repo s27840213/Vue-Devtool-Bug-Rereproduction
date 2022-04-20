@@ -5,11 +5,11 @@
     @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${previewUrl}`"
+        :src="fallbackSrc || `${getPreview}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${previewUrl2}`"
+        :src="fallbackSrc || `${getPreview2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
       svg-icon(v-if="props.font === item.id"
@@ -45,19 +45,20 @@ export default Vue.extend({
   },
   data() {
     return {
-      fallbackSrc: '',
-      previewUrl: '',
-      previewUrl2: ''
+      fallbackSrc: ''
     }
-  },
-  mounted() {
-    this.refreshPreviewUrls()
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
     ...mapGetters('brandkit', {
       isSettingsOpen: 'getIsSettingsOpen'
     }),
+    getPreview(): string {
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-name')
+    },
+    getPreview2(): string {
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-sample')
+    },
     getCurrLayerInfo(): {
       layer: IText,
       layerIndex: number,
@@ -94,18 +95,6 @@ export default Vue.extend({
       return this.item.src || this.item.fontType
     }
   },
-  watch: {
-    'item.id': {
-      handler() {
-        this.refreshPreviewUrls()
-      }
-    },
-    'item.signed_url': {
-      handler() {
-        this.refreshPreviewUrls()
-      }
-    }
-  },
   methods: {
     ...mapActions('brandkit', {
       refreshFontAsset: 'refreshFontAsset'
@@ -123,10 +112,6 @@ export default Vue.extend({
       }
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
       console.warn(this.item)
-    },
-    refreshPreviewUrls() {
-      this.previewUrl = this.getPreview()
-      this.previewUrl2 = this.getPreview2()
     },
     setFont() {
       if (this.$route.name === 'BrandKit' || (this.$route.name === 'Editor' && this.isSettingsOpen)) {
@@ -337,23 +322,6 @@ export default Vue.extend({
         return sel.getRangeAt(0).toString()
       }
       return false
-    },
-    getPreviewUrl(postfix: string): string {
-      switch (this.itemFontType) {
-        case 'public':
-          return `${this.host}/${this.item.id}/${postfix}?ver=${this.item.ver}`
-        case 'admin':
-          return `https://template.vivipic.com/admin/${this.item.userId}/asset/font/${this.item.assetId}/${postfix}?ver=${this.item.ver}`
-        case 'private':
-          return this.item.signed_url?.[postfix]
-      }
-      return ''
-    },
-    getPreview(): string {
-      return this.getPreviewUrl(this.preview)
-    },
-    getPreview2(): string {
-      return this.getPreviewUrl(this.preview2)
     }
   }
 })
