@@ -37,7 +37,7 @@ pipenv shell
 
 ### 6. Run !!!
 ```
-python get_translate.py
+python get_translation.py
 ```
 
 
