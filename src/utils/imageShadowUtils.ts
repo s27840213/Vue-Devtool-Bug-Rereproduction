@@ -19,7 +19,8 @@ export interface DrawOptions {
   timeout?: number,
   layerInfo?: ILayerInfo,
   coverImg?: HTMLImageElement,
-  uploading?: boolean
+  uploading?: boolean,
+  cb?: () => void
 }
 class ImageShadowUtils {
   private readonly SPREAD_RADIUS = 1
@@ -56,11 +57,11 @@ class ImageShadowUtils {
 
   async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
-    const { timeout = 25, layerInfo, coverImg } = options
+    const { timeout = 25, layerInfo, coverImg, cb } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
-    if (!canvas || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
+    if (!canvas || !canvas.width || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
       currentEffect === ShadowEffectType.projection)) return
     if (this._draw) {
       clearTimeout(this._draw)
@@ -68,6 +69,8 @@ class ImageShadowUtils {
     if (!this._layerData) {
       const { canvasT } = this
       const ctxT = canvasT.getContext('2d')
+      canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
+      canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
       ctxT && ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
       const isTransparentBg = this.isTransparentBg(canvasT)
       this._layerData = { img, config, isTransparentBg }
@@ -151,7 +154,7 @@ class ImageShadowUtils {
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.25) + 1)
+          StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.5) + 1)
           const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
           const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
           ctxMaxSize.putImageData(imageData, offsetX, offsetY)
@@ -187,6 +190,7 @@ class ImageShadowUtils {
         ctxT.restore()
         ctxMaxSize.restore()
       })
+      cb && cb()
     }
     this.handlerId = handlerId
     if (timeout) {
@@ -413,10 +417,10 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          distance: 0,
-          angle: 0,
-          radius: 9,
-          spread: 3,
+          distance: 60,
+          angle: 45,
+          radius: 70,
+          spread: 15,
           opacity: 70
         }
         break
@@ -433,8 +437,8 @@ class ImageShadowUtils {
       }
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
-          radius: 10,
-          spread: 5,
+          radius: 50,
+          spread: 15,
           opacity: 55
         }
         break
@@ -535,7 +539,7 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 50, min: 0, weighting: 1 },
+    distance: { max: 100, min: 0, weighting: 1 },
     angle: { max: 180, min: -180, weighting: 1 },
     radius: { max: 100, min: 0, weighting: 1 },
     opacity: { max: 100, min: 0, weighting: 1 },

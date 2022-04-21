@@ -8,11 +8,12 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
+    //- div(
     div(v-if="showCanvas"
       class="canvas__wrapper"
       :style="canvasWrapperStyle()")
       canvas(ref="canvas")
-    img(v-show="!isAdjustImage && !showCanvas"
+    img(v-show="!isAdjustImage && !isCanvasReady"
       ref="img"
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
@@ -72,7 +73,8 @@ export default Vue.extend({
       isOnError: false,
       src: '',
       canvasScale: CANVAS_SCALE,
-      canvasImg: undefined as undefined | HTMLImageElement
+      canvasImg: undefined as undefined | HTMLImageElement,
+      isCanvasReady: false
     }
   },
   watch: {
@@ -121,6 +123,11 @@ export default Vue.extend({
         this.handleNewShadowEffect()
       } else if (!this.forRender) {
         this.$nextTick(() => this.handleNewShadowEffect())
+      }
+    },
+    showCanvas(val) {
+      if (!val) {
+        this.isCanvasReady = false
       }
     }
   },
@@ -221,7 +228,8 @@ export default Vue.extend({
       return {
         width: `${this.config.styles.initWidth * this.canvasScale}px`,
         height: `${this.config.styles.initHeight * this.canvasScale}px`,
-        transform: `scale(${this.config.styles.scale})`
+        transform: `scale(${this.config.styles.scale})`,
+        display: this.isCanvasReady ? 'block' : 'none'
       }
     },
     flipStyles() {
@@ -322,7 +330,6 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (this.canvasImg) {
-            // imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config)
             imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config, {
               coverImg: this.$refs.img as HTMLImageElement,
               layerInfo: {
@@ -345,6 +352,9 @@ export default Vue.extend({
                   pageIndex: this.pageIndex,
                   layerIndex: this.layerIndex,
                   subLayerIdx: this.subLayerIndex
+                },
+                cb: () => {
+                  this.isCanvasReady = true
                 }
               })
             }
@@ -360,6 +370,7 @@ export default Vue.extend({
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
+      if (!this.canvasImg) return
       const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
       window.requestAnimationFrame(() => {
@@ -392,6 +403,7 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   &__picture {
+    position: absolute;
     object-fit: cover;
     width: 100%;
     height: 100%;

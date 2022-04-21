@@ -232,7 +232,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta ? to.meta.title : i18n.t('SE0001')
+  document.title = to.meta?.title || i18n.t('SE0001')
 
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {

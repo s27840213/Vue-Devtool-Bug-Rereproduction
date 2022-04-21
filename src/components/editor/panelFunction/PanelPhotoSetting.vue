@@ -2,13 +2,14 @@
   div(class="photo-setting")
     span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
     div(class="photo-setting__grid mb-5")
-      btn(v-for="btn in btns"
-        class="full-width"
-        :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
-        type="gray-mid"
-        ref="btn"
-        :key="btn.name"
-        @click.native="handleShow(btn.show)") {{ btn.label }}
+      template(v-for="btn in btns")
+        btn(v-if="!btn.condition || btn.condition()"
+          class="full-width"
+          :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
+          type="gray-mid"
+          ref="btn"
+          :key="btn.name"
+          @click.native="handleShow(btn.show)") {{ btn.label }}
       btn(v-if="isImage && isAdmin && !isFrame"
         class="full-width"
         type="gray-mid"
@@ -44,7 +45,7 @@ export default Vue.extend({
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
         { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
-        { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow' }
+        { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow', condition: (): boolean => layerUtils.getCurrLayer.type === LayerType.image }
       ],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }

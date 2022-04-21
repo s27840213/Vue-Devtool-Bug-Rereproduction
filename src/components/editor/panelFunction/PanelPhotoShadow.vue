@@ -119,7 +119,7 @@ export default Vue.extend({
     return {
       shadowPropI18nMap,
       fieldRange,
-      notUpload: false
+      notUpload: true
     }
   },
   mounted() {
