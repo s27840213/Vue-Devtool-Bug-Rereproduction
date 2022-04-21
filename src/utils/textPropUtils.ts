@@ -760,8 +760,8 @@ class TextPropUtils {
               continue
             }
             if (typeof propBuff === 'undefined') {
-              propBuff = this.propReadOfLayer(propName, tmpLayer)
-            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
+              propBuff = this.propReadOfLayer(propName, tmpLayer, true)
+            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer, true)) {
               return undefined
             }
           }
