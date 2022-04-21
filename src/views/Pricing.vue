@@ -15,7 +15,7 @@
             hr
           div(class="pricing-plan-left__bottom")
             div(v-for="item in ['TMP0006', 'TMP0007', 'TMP0008', 'TMP0009']")
-              img
+              svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
           div(class="pricing-plan-right-period")
@@ -27,12 +27,14 @@
             span {{$t('TMP0013')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
-          span(v-if="item === true") O
-          span(v-else-if="item === false") -
+          svg-icon(v-if="item === true" iconName="feature-true")
           span(v-else) {{item}}
       div(class="pricing-faq")
-        span(class="pricing-faq__title") {{$t('TMP0024')}}
-        span(class="pricing-faq__description") {{$t('TMP0025')}}
+        span(class="pricing-faq__title") {{$t('TMP0027')}}
+        details(v-for="item in faqs")
+          summary {{item.Q}}
+            svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
+          p {{item.A}}
       nu-footer
 </template>
 
@@ -52,13 +54,23 @@ export default Vue.extend({
     return {
       compareTable: [
         i18n.t('TMP0014'), i18n.t('TMP0015'), i18n.t('TMP0016'),
-        i18n.t('TMP0017'), false, true,
+        i18n.t('TMP0017'), '-', true,
         i18n.t('TMP0018'), true, true,
         i18n.t('TMP0019'), true, true,
         i18n.t('TMP0020'), '1GB', '100GB',
         i18n.t('TMP0021'), true, true,
-        i18n.t('TMP0022'), false, true,
-        i18n.t('TMP0023'), false, true
+        i18n.t('TMP0022'), '-', true,
+        i18n.t('TMP0023'), '-', true,
+        i18n.t('TMP0024'), true, true,
+        i18n.t('TMP0025'), true, true,
+        i18n.t('TMP0026'), true, true
+      ],
+      faqs: [
+        { Q: i18n.t('TMP0028'), A: i18n.t('TMP0029') },
+        { Q: i18n.t('TMP0030'), A: i18n.t('TMP0031') },
+        { Q: i18n.t('TMP0032'), A: i18n.t('TMP0033') },
+        { Q: i18n.t('TMP0034'), A: i18n.t('TMP0035') },
+        { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') }
       ]
     }
   },
@@ -91,7 +103,6 @@ export default Vue.extend({
 .pricing-top {
   display: flex;
   flex-direction: column;
-  // text-align: center;
   margin: 110px 0;
   &__title {
     @include text-H2;
@@ -146,6 +157,11 @@ export default Vue.extend({
       grid-template-columns: 1fr 1fr;
       margin-top: 20px;
       color: setColor(gray-2);
+      div {
+        display: flex;
+        align-items: center;
+      }
+      span { margin-left: 12px; }
     }
   }
   &-right {
@@ -162,9 +178,8 @@ export default Vue.extend({
       background-color: setColor(gray-5);
       border-radius: 16px;
     }
-    &-price {
-
-    }
+    // &-price {
+    // }
     &-buy {
       width: 80%;
       border-radius: 8px;
@@ -179,7 +194,9 @@ export default Vue.extend({
   @include body-MD;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
+  width: 960px;
   margin: 78px 0;
+  text-align: left;
   div {
     display: flex;
     justify-content: center;
@@ -197,14 +214,31 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 1024px;
   &__title {
     @include text-H2;
     color: setColor(nav);
     margin-bottom: 20px;
   }
-  &__description {
-    @include body-LG;
-    color: setColor(gray-2);
+  details {
+    width: 100%;
+    text-align: left;
+    margin-top: 20px;
+    summary {
+      @include text-H6;
+      display: flex;
+      justify-content: space-between;
+      color: setColor(gray-1);
+      list-style: none;
+      border-bottom: 1px solid setColor(gray-4);
+      padding-bottom: 20px;
+    }
+    p {
+      @include body-MD; // set default?
+      color: setColor(gray-2);
+      margin-top: 20px;
+    }
   }
+  details[open] >summary >svg { transform: scaleY(-1); }
 }
 </style>
