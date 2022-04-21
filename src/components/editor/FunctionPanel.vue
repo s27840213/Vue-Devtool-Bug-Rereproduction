@@ -165,8 +165,10 @@ export default Vue.extend({
         !this.currSelectedInfo.types.has('frame') // for frame
     },
     showShapeSetting(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
-        this.targetIs('shape') && this.singleTargetType()
+      const { currLayerType } = this.layerType
+      const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
+      const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || currLayerType === LayerType.frame
+      return stateCondition && typeConditon
     },
     isSuperUser(): boolean {
       return generalUtils.isSuperUser
