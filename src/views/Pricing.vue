@@ -23,7 +23,7 @@
             span {{$t('TMP0011')}}
           div(class="pricing-plan-right-price")
             span {{$t('TMP0012')}}
-          btn(class="pricing-plan-right-buy" type="light-lg")
+          btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
             span {{$t('TMP0013')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
@@ -35,7 +35,10 @@
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
           p {{item.A}}
+      popup-payment(initView="step1" @close="closePopup()")
       nu-footer
+      //- div(v-if="showPopup" class="popup-window")
+      //-   popup-payment(@close="closePopup()")
 </template>
 
 <script lang="ts">
@@ -43,15 +46,18 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import PopupPayment from '@/components/popup/PopupPayment.vue'
 
 export default Vue.extend({
   name: 'Pricing',
   components: {
     NuHeader,
-    NuFooter
+    NuFooter,
+    PopupPayment
   },
   data() {
     return {
+      showPopup: false,
       compareTable: [
         i18n.t('TMP0014'), i18n.t('TMP0015'), i18n.t('TMP0016'),
         i18n.t('TMP0017'), '-', true,
@@ -82,6 +88,8 @@ export default Vue.extend({
     }
   },
   methods: {
+    openPopup() { this.showPopup = true },
+    closePopup() { this.showPopup = false }
   }
 })
 </script>
@@ -145,7 +153,7 @@ export default Vue.extend({
       @include overline-LG;
       display: flex;
       color: setColor(blue-1);
-      hr {
+      >hr {
         width: 521px;
         border: 0.5px solid rgba(18, 17, 39, 0.12);
         margin: auto
@@ -157,7 +165,7 @@ export default Vue.extend({
       grid-template-columns: 1fr 1fr;
       margin-top: 20px;
       color: setColor(gray-2);
-      div {
+      >div {
         display: flex;
         align-items: center;
       }
@@ -197,17 +205,17 @@ export default Vue.extend({
   width: 960px;
   margin: 78px 0;
   text-align: left;
-  div {
+  >div {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 60px;
   }
-  div:nth-child(1)    { @include text-H6; }
-  div:nth-child(3)    { @include text-H5; }
-  div:nth-child(3n)   { background-color: setColor(blue-4); }
-  div:nth-child(3n+1) { justify-content: flex-start; }
-  div:nth-child(n+4)  { border-bottom: 1px solid setColor(gray-4); }
+  >div:nth-child(1)    { @include text-H6; }
+  >div:nth-child(3)    { @include text-H5; }
+  >div:nth-child(3n)   { background-color: setColor(blue-4); }
+  >div:nth-child(3n+1) { justify-content: flex-start; }
+  >div:nth-child(n+4)  { border-bottom: 1px solid setColor(gray-4); }
 }
 
 .pricing-faq {
@@ -220,11 +228,11 @@ export default Vue.extend({
     color: setColor(nav);
     margin-bottom: 20px;
   }
-  details {
+  >details {
     width: 100%;
     text-align: left;
     margin-top: 20px;
-    summary {
+    >summary {
       @include text-H6;
       display: flex;
       justify-content: space-between;
@@ -233,12 +241,12 @@ export default Vue.extend({
       border-bottom: 1px solid setColor(gray-4);
       padding-bottom: 20px;
     }
-    p {
+    >p {
       @include body-MD; // set default?
       color: setColor(gray-2);
       margin-top: 20px;
     }
   }
-  details[open] >summary >svg { transform: scaleY(-1); }
+  >details[open] >summary >svg { transform: scaleY(-1); }
 }
 </style>
