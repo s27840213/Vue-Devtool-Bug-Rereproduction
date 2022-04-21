@@ -143,7 +143,6 @@ export default Vue.extend({
   text-align: left;
   box-sizing: border-box;
   margin-right: -10px; // Push scrollbar to outside
-  padding-right: 10px;
   @media not all and (min-resolution:.001dpcm){ // For safari only
     @supports (-webkit-appearance:none) {
       padding-right: 0;
