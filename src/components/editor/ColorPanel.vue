@@ -26,7 +26,7 @@
           brand-selector(theme="panel")
           div(class="color-panel__brand-settings pointer"
           @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
+            svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
         template(v-if="isPalettesLoading")
           div(class="color-panel__colors mb-10 mt-10")
             svg-icon(iconName="loading"

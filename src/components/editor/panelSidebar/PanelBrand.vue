@@ -9,7 +9,7 @@
         brand-selector(theme="editor")
         div(class="panel-brand__settings pointer"
           @click="handleOpenSettings")
-          svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
+          svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
       div(class="panel-brand__tab")
         brand-kit-tab(theme="editor")
 </template>

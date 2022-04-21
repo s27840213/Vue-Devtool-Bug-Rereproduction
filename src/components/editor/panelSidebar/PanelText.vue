@@ -12,7 +12,7 @@
           brand-selector(theme="panel" :defaultOption="true")
           div(class="panel-text__brand-settings pointer"
           @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
+            svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
       template(v-if="!isBrandkitAvailable || isDefaultSelected")
         div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
             :key="config.type"
