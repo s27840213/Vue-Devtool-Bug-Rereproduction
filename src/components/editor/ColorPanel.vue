@@ -71,9 +71,7 @@ import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { ColorEventType, FunctionPanelType, LayerType } from '@/store/types'
-import color from '@/store/module/color'
-import tiptapUtils from '@/utils/tiptapUtils'
+import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 
@@ -128,7 +126,7 @@ export default Vue.extend({
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setCurrFunctionPanel(FunctionPanelType.colorPicker)
-    if (this.isBrandkitAvailable) {
+    if (this.isColorPanelHandling) {
       brandkitUtils.fetchPalettes(this.fetchPalettes)
     }
   },
@@ -138,7 +136,7 @@ export default Vue.extend({
   },
   watch: {
     currentBrand() {
-      if (this.isBrandkitAvailable) {
+      if (this.isColorPanelHandling) {
         brandkitUtils.fetchPalettes(this.fetchPalettes)
       }
     }
@@ -149,10 +147,15 @@ export default Vue.extend({
       defaultColors: 'color/getDefaultColors',
       currSelectedInfo: 'getCurrSelectedInfo',
       currentBrand: 'brandkit/getCurrentBrand',
-      isPalettesLoading: 'brandkit/getIsPalettesLoading'
+      selectedTab: 'brandkit/getSelectedTab',
+      isPalettesLoading: 'brandkit/getIsPalettesLoading',
+      currPanel: 'getCurrSidebarPanelType'
     }),
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
+    },
+    isColorPanelHandling(): boolean {
+      return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
     },
     isShape(): boolean {
       return layerUtils.getCurrConfig.type === LayerType.shape

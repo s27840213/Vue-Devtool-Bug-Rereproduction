@@ -27,6 +27,11 @@ export default Vue.extend({
   mounted() {
     brandkitUtils.fetchPalettes(this.fetchPalettes)
   },
+  watch: {
+    currentBrand() {
+      brandkitUtils.fetchPalettes(this.fetchPalettes)
+    }
+  },
   computed: {
     ...mapGetters('brandkit', {
       currentBrand: 'getCurrentBrand',
