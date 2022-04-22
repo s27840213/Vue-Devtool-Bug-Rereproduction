@@ -430,7 +430,7 @@ export default Vue.extend({
         return
       }
       colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type)
+      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onDblClick() {
       if (this.type === 'tmp') {
@@ -626,7 +626,7 @@ export default Vue.extend({
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
+        FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }
       const controller = this.$refs.body as HTMLElement

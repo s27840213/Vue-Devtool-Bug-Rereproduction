@@ -289,7 +289,7 @@ class Controller {
     const SIZE_LIMIT = 30
     switch (config.category) {
       case 'A': {
-        console.log('shape of category A should not have resizer!')
+        console.warn('shape of category A should not have resizer!')
         break
       }
       case 'B': {

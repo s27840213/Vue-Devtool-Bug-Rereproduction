@@ -13,6 +13,7 @@
 <script lang="ts">
 import { ILayer, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
@@ -28,6 +29,7 @@ export default Vue.extend({
         layerUtils.updateSelectedLayerProps(this.pageIndex, idx, { editing: false })
       }
     }
+    textPropUtils.updateTextPropsState()
   },
   computed: {
     ...mapGetters({
