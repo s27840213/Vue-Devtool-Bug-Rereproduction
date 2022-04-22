@@ -14,7 +14,7 @@
               svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
             gallery-photo(v-else
               :style="imageStyle(logo.preview)"
-              :photo="addPerviewUrl(logo)"
+              :photo="addPerviewUrl(item.brandId, logo)"
               vendor="logo"
               :inLogoPanel="true"
               :key="logo.id")
@@ -77,9 +77,6 @@ export default Vue.extend({
       fetchLogos: 'fetchLogos',
       refreshLogoAsset: 'refreshLogoAsset'
     }),
-    getUrl(logo: IBrandLogo): string {
-      return brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
-    },
     checkUploading(logo: IBrandLogo) {
       return logo.id.startsWith('new_')
     },
@@ -91,7 +88,8 @@ export default Vue.extend({
           id: `row_${idx}`,
           sentinel: false,
           index: idx,
-          size: (row[0].preview?.height ?? 0) + this.galleryUtils.margin
+          size: (row[0].preview?.height ?? 0) + this.galleryUtils.margin,
+          brandId: this.currentBrand.id
         }))
     },
     imageStyle(preview: any) {
@@ -100,7 +98,7 @@ export default Vue.extend({
         height: `${preview.height}px`
       }
     },
-    addPerviewUrl(logo: IBrandLogo): any {
+    addPerviewUrl(brandId: string, logo: IBrandLogo): any {
       const { isAdmin } = this
       return {
         id: isAdmin ? logo.id : undefined,
@@ -111,13 +109,13 @@ export default Vue.extend({
         height: logo.height,
         preview: logo.preview,
         urls: {
-          prev: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'prev'),
-          full: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'full'),
-          larg: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'larg'),
-          original: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'original'),
-          midd: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'midd'),
-          smal: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'smal'),
-          tiny: brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
+          prev: brandkitUtils.getLogoUrl(logo, brandId, 'prev'),
+          full: brandkitUtils.getLogoUrl(logo, brandId, 'full'),
+          larg: brandkitUtils.getLogoUrl(logo, brandId, 'larg'),
+          original: brandkitUtils.getLogoUrl(logo, brandId, 'original'),
+          midd: brandkitUtils.getLogoUrl(logo, brandId, 'midd'),
+          smal: brandkitUtils.getLogoUrl(logo, brandId, 'smal'),
+          tiny: brandkitUtils.getLogoUrl(logo, brandId, 'tiny')
         }
       }
     },
