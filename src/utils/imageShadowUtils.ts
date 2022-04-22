@@ -7,6 +7,7 @@ import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffec
 import imageUtils from './imageUtils'
 import * as StackBlur from 'stackblur-canvas'
 import store from '@/store'
+import { imageDataRGBA } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
 
@@ -154,7 +155,21 @@ class ImageShadowUtils {
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-          StackBlur.imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.5) + 1)
+
+          imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.5) + 1)
+
+          // for (let i = 0; i < imageData.data.length; i += 4) {
+          //   const pixel = imageData.data
+          //   const radn = 10000
+          //   // const radn = (mathUtils.randnBm() - 0.5) * 1 + 1
+          //   // i % 20000 === 0 && console.warn('radn', radn)
+          //   // i % 20000 === 0 && console.log(pixel[i])
+          //   pixel[i] = Math.min(pixel[i] * radn, 255)
+          //   // i % 20000 === 0 && console.log(pixel[i])
+          //   pixel[i + 1] = Math.min(pixel[i + 1] * radn, 255)
+          //   pixel[i + 2] = Math.min(pixel[i + 2] * radn, 255)
+          // }
+
           const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
           const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
           ctxMaxSize.putImageData(imageData, offsetX, offsetY)
