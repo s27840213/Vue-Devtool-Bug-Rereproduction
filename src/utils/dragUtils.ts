@@ -66,9 +66,9 @@ class DragUtils {
      */
     const previewIsImg = (e.target as HTMLElement).tagName === 'IMG'
     wrapper.appendChild(previewIsImg ? dragImage : (() => {
-      let div = e.target as Node
-      while (div.nodeName !== 'BUTTON' && div) {
-        div = div.firstChild ?? div
+      let div: Node | null = e.target as Node
+      while (div && div.nodeName !== 'BUTTON') {
+        div = div.firstChild
       }
       !div && (div = e.target as Node)
       const span = div.lastChild?.cloneNode(true) as HTMLElement
@@ -76,7 +76,8 @@ class DragUtils {
       span.setAttribute('style',
         'color: black;' +
         'position: absolute;' +
-        `transform: translate(${offsetX}px, ${offsetY}px);`
+        `transform: translate(${offsetX}px, ${offsetY}px);` +
+        'white-space: nowrap'
       )
       return span
     })())

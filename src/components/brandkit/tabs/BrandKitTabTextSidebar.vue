@@ -1,17 +1,14 @@
 <template lang="pug">
   div(class="brand-kit-tab-text")
-    div(class="brand-kit-tab-text__setting")
-      span(class="brand-kit-tab-text__title heading" :style="getFontStyles('heading')") {{ MAPPING['heading'] }}
+    div(v-for="type in Object.keys(MAPPING)"
+      class="brand-kit-tab-text__setting pointer"
+      draggable="true"
+      @dragstart="standardTextDrag($event, type)"
+      @click="handleAddText(type)")
+      span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
       br
-      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName('heading')} / ${getFontSize('heading')}px` }}
-    div(class="brand-kit-tab-text__setting")
-      span(class="brand-kit-tab-text__title subheading" :style="getFontStyles('subheading')") {{ MAPPING['subheading'] }}
-      br
-      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName('subheading')} / ${getFontSize('subheading')}px` }}
-    div(class="brand-kit-tab-text__setting")
-      span(class="brand-kit-tab-text__title body" :style="getFontStyles('body')") {{ MAPPING['body'] }}
-      br
-      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName('body')} / ${getFontSize('body')}px` }}
+      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}
+      span(style="display: none") {{ MAPPING[type] }}
 </template>
 
 <script lang="ts">
@@ -21,6 +18,8 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import assetUtils from '@/utils/assetUtils'
+import DragUtils from '@/utils/dragUtils'
 
 export default Vue.extend({
   data() {
@@ -71,6 +70,39 @@ export default Vue.extend({
     getFontSize(type: string): number {
       const textStyle = this.getTextStyle(type)
       return textStyle.size
+    },
+    getSpanStyles(type: string): {[key: string]: string | number} {
+      let styles = {} as {[key: string]: string | number}
+      const textStyle = this.getTextStyle(type)
+      styles = {
+        weight: textStyle.bold ? 'bold' : 'normal',
+        style: textStyle.italic ? 'italic' : 'normal',
+        decoration: textStyle.underline ? 'underline' : 'none',
+        size: textStyle.size
+      }
+      if (!textStyle.isDefault) {
+        Object.assign(styles, {
+          font: textStyle.fontId,
+          type: textStyle.fontType ?? 'public',
+          userId: textStyle.fontUserId ?? '',
+          assetId: textStyle.fontAssetId ?? ''
+        })
+      }
+      return styles
+    },
+    handleAddText(type: string) {
+      assetUtils.addStandardText(type, this.MAPPING[type], this.$i18n.locale, undefined, undefined, this.getSpanStyles(type))
+    },
+    standardTextDrag(e: DragEvent, type: string) {
+      new DragUtils().itemDragStart(e, 'standardText', {
+        textType: type,
+        text: this.MAPPING[type],
+        locale: this.$i18n.locale,
+        spanStyles: this.getSpanStyles(type)
+      }, {
+        offsetX: 20,
+        offsetY: 30
+      })
     }
   }
 })
