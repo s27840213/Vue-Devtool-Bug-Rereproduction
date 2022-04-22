@@ -67,27 +67,41 @@ export default Vue.extend({
     },
     handleSetColor(color: string) {
       const type = this.applicable
+      let pageIndex = 0
       switch (type) {
         case 'text':
-          this.handleSetTextColor(color)
+          pageIndex = this.handleSetTextColor(color)
           break
         case 'shape':
-          this.handleSetShapeColor(color)
+          pageIndex = this.handleSetShapeColor(color)
           break
+        default:
+          return
       }
+      stepsUtils.record()
+      colorUtils.setCurrColor(color)
+      this.updateDocumentColors({ pageIndex, color })
     },
-    handleSetTextColor(color: string) {
+    handleSetTextColor(color: string): number {
       const { layerIndex, pageIndex, subLayerIdx } = layerUtils
       textPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
       tiptapUtils.updateHtml()
-      stepsUtils.record()
-      colorUtils.setCurrColor(color)
       textEffectUtils.refreshColor()
       textPropUtils.updateTextPropsState({ color })
-      this.updateDocumentColors({ pageIndex, color })
+      return pageIndex
     },
-    handleSetShapeColor(color: string) {
-      console.log('shape')
+    handleSetShapeColor(color: string): number {
+      const { getCurrLayer: currLayer, layerIndex, pageIndex, subLayerIdx } = layerUtils
+      if (subLayerIdx === -1) {
+        const shapeColor = [...(currLayer as IShape).color]
+        shapeColor[0] = color
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { color: shapeColor })
+      } else {
+        const shapeColor = [...(currLayer as IGroup).layers[subLayerIdx].color as string[]]
+        shapeColor[0] = color
+        layerUtils.updateSelectedLayerProps(pageIndex, subLayerIdx, { color: shapeColor })
+      }
+      return pageIndex
     }
   }
 })
