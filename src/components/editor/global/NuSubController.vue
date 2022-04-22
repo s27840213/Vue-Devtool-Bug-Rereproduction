@@ -430,7 +430,7 @@ export default Vue.extend({
         return
       }
       colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type)
+      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onDblClick() {
       if (this.type === 'tmp') {

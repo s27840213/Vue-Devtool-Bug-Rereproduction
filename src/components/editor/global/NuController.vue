@@ -592,7 +592,7 @@ export default Vue.extend({
     },
     moveStart(e: MouseEvent) {
       this.movingByControlPoint = false
-      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
+      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && !this.contentEditable
       if (!this.isLocked) {
         e.stopPropagation()
       }
@@ -1526,11 +1526,13 @@ export default Vue.extend({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    clickSubController(targetIndex: number, type: string) {
+    clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
       if (!this.isActive) {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
+        // moveStart will handle the following:
+        // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
         return
       }
+      if (selectionMode) return
       let updateSubLayerProps = null as any
       let layers = null as any
       switch (this.getLayerType) {
@@ -1554,20 +1556,26 @@ export default Vue.extend({
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
-    dblSubController(targetIndex: number) {
+    dblSubController(targetIndex: number, selectionMode: boolean) {
       let updateSubLayerProps = null as any
       switch (this.getLayerType) {
         case 'group':
+          if (!(this.config as IGroup).layers[targetIndex].active) {
+            return
+          }
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case 'frame':
+          if (
+            !(this.config as IFrame).clips[targetIndex].active ||
+            (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame'
+          ) {
+            return
+          }
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
           break
         default:
           return
-      }
-      if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
-        return
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
     },

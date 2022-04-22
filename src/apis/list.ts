@@ -81,8 +81,9 @@ class ListService {
 
   getLayout (params: IListServiceParams) {
     params.type = 'layout'
-    params.token = '1'
-    params.cache = true
+    // layout has recently-used list, cannot be cached.
+    // params.token = '1'
+    // params.cache = true
     return this.getList(params)
   }
 

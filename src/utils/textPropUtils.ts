@@ -763,8 +763,8 @@ class TextPropUtils {
               continue
             }
             if (typeof propBuff === 'undefined') {
-              propBuff = this.propReadOfLayer(propName, tmpLayer)
-            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
+              propBuff = this.propReadOfLayer(propName, tmpLayer, true)
+            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer, true)) {
               return undefined
             }
           }
@@ -1181,7 +1181,6 @@ class TextPropUtils {
       'assetId',
       'userId',
       'color',
-      'opacity',
       'weight',
       'style',
       'decoration',
@@ -1234,10 +1233,6 @@ class TextPropUtils {
         }
         case 'color': {
           value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
-          break
-        }
-        case 'opacity': {
-          value = (currLayer as IText).styles.opacity
           break
         }
         case 'decoration': {
