@@ -103,7 +103,6 @@ export default Vue.extend({
       if (this.rows.length) {
         this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
       }
-      console.log(this.rows)
     },
     imageStyle(preview: any) {
       return {
