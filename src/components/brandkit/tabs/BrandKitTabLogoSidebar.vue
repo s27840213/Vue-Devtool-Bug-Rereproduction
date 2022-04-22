@@ -1,8 +1,4 @@
 <template lang="pug">
-  //- div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
-    svg-icon(iconName="loading"
-            iconWidth="24px"
-            iconColor="gray-3")
   recycle-scroller(class="brand-kit-tab-logo" :items="rows")
     template(v-slot="{ item }")
       observer-sentinel(v-if="item.sentinel"
