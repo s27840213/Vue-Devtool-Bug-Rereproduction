@@ -642,6 +642,13 @@ const mutations: MutationTree<IEditorState> = {
       Object.assign(clipsLayer[targetIndex].styles, styles)
     }
   },
+  SET_frameDecorColors(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIdx: number, payload: any }) {
+    const { pageIndex, layerIndex, subLayerIdx, payload } = data
+    const { decorationColors, decorationTopColors } = payload
+    const targetLayer = subLayerIdx === -1 ? state.pages[pageIndex].layers[layerIndex] : (state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx]
+    decorationColors && ((targetLayer.decoration as IShape).color = decorationColors)
+    decorationTopColors && ((targetLayer.decorationTop as IShape).color = decorationTopColors)
+  },
   SET_subFrameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data
     const groupLayer = state.pages[pageIndex].layers[primaryLayerIndex] as IGroup
