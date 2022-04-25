@@ -11,14 +11,14 @@
       div(class="payment-left-content")
         template(v-if="view === 'step1'")
           div(v-for="radio in [$t('TMP0010'), $t('TMP0011')]"
-              class="payment-left-content-period"
-              :checked="period === radio")
-            radio-btn(class="payment-left-content-period__radio"
-                      :isSelected="period === radio"
-                      :formatKey="radio" circleColor="gray-4"
-                      @select="selectPeriod")
+              class="payment-left-content-period pointer"
+              :isSelected="period === radio" @click="selectPeriod(radio)")
+            svg-icon(iconWidth="20px"
+                    :iconName="period === radio ? 'radio-checked' : 'radio'"
+                    :iconColor="period === radio ? 'white' : 'gray-4'")
             span {{radio}}
         template(v-if="view === 'step2'")
+          PaymentField(@paid="paid")
         template(v-if="view === 'step3'")
         template(v-if="view === 'cancel1'")
         template(v-if="view === 'cancel2'")
@@ -26,8 +26,8 @@
         btn(v-for="button in buttons" type="primary-lg"
             class="payment-left-button???" @click.native="button.func()")
           span {{button.text}}
-        div(v-if="showButtonDescription"
-            class="payment-left-button__description") {{$t('TMP0042')}}
+        //- div(v-if="showButtonDescription"
+        //-     class="payment-left-button__description") {{$t('TMP0042')}}
     //- move to jpg folder, compress?
     img(class="payment-right" src="@/assets/img/svg/pricing/remover.jpg")
     img(v-if="view === 'finish'" class="payment-finish"
@@ -39,12 +39,13 @@
 import Vue from 'vue'
 import i18n from '@/i18n'
 import vClickOutside from 'v-click-outside'
-import RadioBtn from '@/components/global/RadioBtn.vue'
+import PaymentField from '@/components/PaymentField.vue'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   name: 'PopupPayment',
   components: {
-    RadioBtn
+    PaymentField
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -64,12 +65,22 @@ export default Vue.extend({
       title: '',
       description: '',
       buttons: [{}],
-      showButtonDescription: false,
+      // showButtonDescription: false,
       // User data
-      period: i18n.t('TMP0010')
+      period: i18n.t('TMP0010'),
+      payReady: false
+    }
+  },
+  watch: {
+    userCountry() {
+      this.totalStep = this.isTW ? 3 : 2
     }
   },
   computed: {
+    ...mapGetters({
+      userCountry: 'payment/getuserCountry',
+      isTW: 'payment/isTW'
+    })
   },
   mounted() {
     this.changeView(this.initView)
@@ -88,17 +99,19 @@ export default Vue.extend({
             text: i18n.t('TMP0041') as string,
             func: () => this.changeView('step2')
           }]
-          this.showButtonDescription = true
+          // this.showButtonDescription = true
           break
         case 'step2':
           this.currentStep = 2
           this.title = i18n.t('TMP0043') as string
           this.description = ''
-          this.buttons = [{
-            text: i18n.t('TMP0044') as string,
-            func: () => this.changeView('finish')
-          }]
-          this.showButtonDescription = false
+          this.buttons = [
+            // {
+            //   text: i18n.t('TMP0044') as string,
+            //   func: () => this.changeView('finish')
+            // }
+          ]
+          // this.showButtonDescription = false
           break
         case 'step3':
           this.currentStep = 3
@@ -113,6 +126,9 @@ export default Vue.extend({
         case 'cancel2':
           break
       }
+    },
+    paid(countryCode: string) {
+      countryCode === 'TW' ? this.changeView('step3') : this.changeView('finish')
     },
     selectPeriod(key: string) { this.period = key },
     closePopup() {
@@ -141,7 +157,8 @@ export default Vue.extend({
 }
 
 .payment-left {
-  width: 50%;
+  width: calc(50% - 80px);
+  padding: 40px;
   &-top {
     @include body-MD;
     color: setColor(gray-1);
@@ -159,15 +176,16 @@ export default Vue.extend({
   display: grid;
   grid-template-columns: 40px 1fr;
   align-items: center;
-  width: 320px;
-  height: 72px;
+  width: 300px;
+  height: 52px;
   margin: 16px 0;
+  padding: 10px;
   border: 1px solid setColor(gray-3);
   border-radius: 4px;
-  &:checked {
+  &[isSelected] {
     background-color: setColor(blue-1);
+    color: white;
   }
-  &__radio { margin: 10px; }
 }
 
 .payment-right {
