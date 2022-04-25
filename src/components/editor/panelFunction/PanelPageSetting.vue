@@ -814,9 +814,6 @@ export default Vue.extend({
       this.formatList = []
       this.recentlyUsed = []
       this.getCategories().then(() => {
-        /**
-         * @Todo TingAn -handle the sizz missing problem when intergate the i18n
-         */
         for (const category of this.categories as IListServiceContentData[]) {
           if (category.title === `${this.$t('NN0025')}`) {
             this.formatList = category.list.map(item => ({

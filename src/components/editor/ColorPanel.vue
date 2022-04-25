@@ -123,6 +123,9 @@ export default Vue.extend({
     isShape(): boolean {
       return layerUtils.getCurrConfig.type === LayerType.shape
     },
+    isFrame(): boolean {
+      return layerUtils.getCurrConfig.type === LayerType.frame
+    },
     isText(): boolean {
       return this.currSelectedInfo.types.has('text') && this.currSelectedInfo.layers.length === 1
     },
@@ -161,7 +164,7 @@ export default Vue.extend({
       colorUtils.setIsColorPickerOpen(!colorUtils.isColorPickerOpen)
     },
     middleware(event: MouseEvent): boolean {
-      return this.isShape ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
+      return this.isShape || this.isFrame ? (event.target as HTMLElement).className !== 'shape-setting__color' : true
     },
     closePanel(): void {
       this.$emit('toggleColorPanel', false)
