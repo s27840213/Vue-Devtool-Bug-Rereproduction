@@ -1,10 +1,12 @@
 <template lang="pug">
   div(class="sidebar")
     div(class="logo")
-      svg-icon(class="pointer"
-        :iconName="'logo-icon'"
-        :iconWidth="'30px'"
-        @click.native="goToPage('Home')")
+      router-link(to="/"
+        style="height: 30px;"
+        :style="inBgRemoveMode ? {pointerEvents: 'none'} : {}")
+        svg-icon(class="pointer"
+          :iconName="'logo-icon'"
+          :iconWidth="'30px'")
     div(class="nav")
       div(class="nav-container")
         div(class="nav-item pointer"

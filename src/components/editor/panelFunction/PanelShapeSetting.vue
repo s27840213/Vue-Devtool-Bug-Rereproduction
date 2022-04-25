@@ -202,7 +202,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import GeneralValueSelector from '@/components/GeneralValueSelector.vue'
 import LayerUtils from '@/utils/layerUtils'
-import { IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
 import { IListServiceContentData } from '@/interfaces/api'
 import AssetUtils from '@/utils/assetUtils'
@@ -210,7 +210,7 @@ import { IMarker } from '@/interfaces/shape'
 import MarkerIcon from '@/components/global/MarkerIcon.vue'
 import LabelWithRange from '@/components/LabelWithRange.vue'
 import controlUtils from '@/utils/controlUtils'
-import { ColorEventType, PopupSliderEventType } from '@/store/types'
+import { ColorEventType, LayerType, PopupSliderEventType } from '@/store/types'
 import colorUtils, { getDocumentColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import MappingUtils from '@/utils/mappingUtils'
@@ -218,6 +218,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import designApis from '@/apis/design-info'
 import pageUtils from '@/utils/pageUtils'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   components: {
@@ -356,25 +357,38 @@ export default Vue.extend({
     },
     getColors(): string[] {
       const layer = LayerUtils.getCurrLayer
-      if (layer.type === 'shape') {
-        return (layer as IShape).color || []
-      }
-      if (layer.type === 'group' || layer.type === 'tmp') {
-        const { subLayerIdx } = LayerUtils
-
-        if (subLayerIdx === -1) {
-          if (!this.inGrouped) {
-            const layers = (layer as IGroup).layers
-              .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
-            return (layers.length ? layers[0].color : []) as string[]
-          } else return []
-        } else {
-          const colors = (layer as IGroup).layers[subLayerIdx].color as string[]
-          return colors
+      switch (layer.type) {
+        case 'shape':
+          return (layer as IShape).color || []
+        case 'tmp':
+        case 'group': {
+          const { subLayerIdx } = LayerUtils
+          if (subLayerIdx === -1) {
+            if (!this.inGrouped) {
+              const layers = (layer as IGroup).layers
+                .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
+              return (layers.length ? layers[0].color : []) as string[]
+            } else return []
+          } else {
+            const subLayer = (layer as IGroup).layers[subLayerIdx]
+            if (subLayer.type === LayerType.frame) {
+              const { decoration, decorationTop } = subLayer as unknown as IFrame
+              return [...(decoration?.color || []), ...(decorationTop?.color || [])]
+            }
+            if (subLayer.type === LayerType.shape) {
+              const colors = (subLayer as IShape).color
+              return colors
+            }
+            return []
+          }
         }
-      } else {
-        console.error('Wrong with the right-side-panel color')
-        return []
+        case 'frame': {
+          const { decoration, decorationTop } = LayerUtils.getCurrLayer as IFrame
+          return [...(decoration?.color || []), ...(decorationTop?.color || [])]
+        }
+        default:
+          console.error('Wrong with the right-side-panel color')
+          return []
       }
     },
     isLine(): boolean {
@@ -523,30 +537,67 @@ export default Vue.extend({
     },
     setColor(newColor: string, index: number) {
       const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        const { subLayerIdx } = LayerUtils
-        if (subLayerIdx === -1) {
-          for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-            if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-              const color = [newColor]
-              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color })
+      switch (currLayer.type) {
+        case 'shape': {
+          const color = [...this.getColors]
+          color[this.currSelectedColorIndex] = newColor
+          const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
+          if (record) {
+            record.value = index
+          }
+          LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+          break
+        }
+        case 'tmp':
+        case 'group': {
+          const { subLayerIdx } = LayerUtils
+          if (subLayerIdx === -1) {
+            for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
+              if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+                LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+              }
+            }
+          } else {
+            const subLayerType = LayerUtils.getCurrConfig.type
+            if (subLayerType === 'frame') {
+              this.handleFrameColorUpdate(newColor)
+            }
+            if (subLayerType === 'shape') {
+              const color = [...this.getColors]
+              color[this.currSelectedColorIndex] = newColor
+              LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
             }
           }
+          break
+        }
+        case 'frame':
+          this.handleFrameColorUpdate(newColor)
+      }
+    },
+    handleFrameColorUpdate(newColor: string) {
+      const { decoration, decorationTop } = LayerUtils.getCurrConfig as IFrame
+      let color = [] as Array<string>
+      let key = ''
+      if (decoration && decorationTop && decoration.color.length && decorationTop.color.length) {
+        if (this.currSelectedColorIndex <= decoration.color.length - 1) {
+          key = 'decorationColors'
+          color = [...decoration.color]
+          color[this.currSelectedIndex] = newColor
         } else {
-          const color = [...(currLayer as IGroup).layers[subLayerIdx].color as string[]]
-          color[this.currSelectedColorIndex] = newColor
-          LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
+          key = 'decorationTopColors'
+          color = [...decorationTop.color]
+          color[this.currSelectedColorIndex - decoration.color.length] = newColor
         }
-      }
-      if (currLayer.type === 'shape') {
-        const color = [...(currLayer as IShape).color]
+      } else {
+        decoration && decoration.color.length && (key = 'decorationColors') && (color = [...decoration.color])
+        decorationTop && decorationTop.color.length && (key = 'decorationTopColors') && (color = [...decorationTop.color])
         color[this.currSelectedColorIndex] = newColor
-        const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
-        if (record) {
-          record.value = index
-        }
-        LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
       }
+      frameUtils.updateFrameDecorColor({
+        pageIndex: LayerUtils.pageIndex,
+        layerIndex: LayerUtils.layerIndex,
+        subLayerIdx: LayerUtils.subLayerIdx
+      }, { [key]: color })
     },
     setLineWidth(value: number) {
       const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))

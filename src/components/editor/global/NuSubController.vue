@@ -96,8 +96,7 @@ export default Vue.extend({
       parentId: '',
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
-        srcObj: { type: string, assetId: string | number, userId: string },
-        cached: boolean
+        srcObj: { type: string, assetId: string | number, userId: string }
       },
       dragUtils: new DragUtils(this.primaryLayerIndex, this.layerIndex),
       isPrimaryActive: false
@@ -431,7 +430,7 @@ export default Vue.extend({
         return
       }
       colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type)
+      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onDblClick() {
       if (this.type === 'tmp') {
@@ -480,7 +479,7 @@ export default Vue.extend({
       const { primaryLayer } = this
       if (!primaryLayer.locked) {
         e.stopPropagation()
-        if (this.isDraggedPanelPhoto && !this.currDraggedPhoto.isPreview && !this.imgBuff.cached) {
+        if (this.isDraggedPanelPhoto && !this.currDraggedPhoto.isPreview) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           const clip = clips[this.layerIndex]
 
@@ -495,8 +494,7 @@ export default Vue.extend({
               imgHeight: clip.styles.imgHeight,
               horizontalFlip: clip.styles.horizontalFlip,
               verticalFlip: clip.styles.verticalFlip
-            },
-            cached: true
+            }
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
 
@@ -518,16 +516,14 @@ export default Vue.extend({
     onFrameDragLeave(e: DragEvent) {
       e.stopPropagation()
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
-      if (this.isDraggedPanelPhoto && this.imgBuff.cached && !primaryLayer.locked) {
+      if (this.isDraggedPanelPhoto && !primaryLayer.locked) {
         FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
-        this.imgBuff.cached = false
       }
     },
     onFrameDrop(e: DragEvent) {
       e.stopPropagation()
       StepsUtils.record()
-      this.imgBuff.cached = false
       this.setCurrDraggedPhoto({
         srcObj: {
           type: '',
@@ -574,8 +570,7 @@ export default Vue.extend({
             imgHeight: clip.styles.imgHeight,
             horizontalFlip: clip.styles.horizontalFlip,
             verticalFlip: clip.styles.verticalFlip
-          },
-          cached: true
+          }
         })
 
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
@@ -601,7 +596,7 @@ export default Vue.extend({
     },
     onFrameMouseLeave(e: MouseEvent) {
       if (this.isDraggedPanelPhoto) return
-      if (!this.imgBuff.cached || this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
+      if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
       e.stopPropagation()
@@ -620,7 +615,6 @@ export default Vue.extend({
           horizontalFlip: false,
           verticalFlip: false
         })
-        this.imgBuff.cached = false
       }
       const controller = this.$refs.body as HTMLElement
       controller.removeEventListener('mouseup', this.onFrameMouseUp)
@@ -632,9 +626,8 @@ export default Vue.extend({
         LayerUtils.deleteLayer(LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
-        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { active: true })
+        FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
-        this.imgBuff.cached = true
       }
       const controller = this.$refs.body as HTMLElement
       controller.removeEventListener('mouseup', this.onFrameMouseUp)

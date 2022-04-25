@@ -161,6 +161,7 @@ import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
 
 const LAYER_SIZE_MIN = 10
+const MIN_THINKNESS = 5
 const RESIZER_SHOWN_MIN = 4000
 
 export default Vue.extend({
@@ -613,7 +614,7 @@ export default Vue.extend({
     },
     moveStart(e: MouseEvent) {
       this.movingByControlPoint = false
-      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])
+      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && !this.contentEditable
       if (!this.isLocked) {
         e.stopPropagation()
       }
@@ -1186,19 +1187,17 @@ export default Vue.extend({
       const diff = MouseUtils.getMouseRelPoint(event, this.initialPos)
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(event)
 
-      const [dx, dy] = [diff.x / (this.scaleRatio / 100), diff.y / (this.scaleRatio / 100)]
+      const [dx, dy] = [diff.x / (this.scaleRatio * 0.01), diff.y / (this.scaleRatio * 0.01)]
 
       const offsetMultiplier = altPressed ? 2 : 1
-      const offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0
-      const offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
+      let offsetWidth = this.control.isHorizon ? this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * offsetMultiplier : 0
+      let offsetHeight = this.control.isHorizon ? 0 : this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * offsetMultiplier
       if (offsetWidth === 0 && offsetHeight === 0) return
 
       width = offsetWidth + initWidth
       height = offsetHeight + initHeight
-      if (width <= 5 || height <= 5) {
-        width = width <= 5 ? 5 : width
-        height = height <= 5 ? 5 : height
-      }
+      width = width < MIN_THINKNESS ? MIN_THINKNESS : width
+      height = height < MIN_THINKNESS ? MIN_THINKNESS : height
 
       const offsetSize = {
         width: width - initWidth,
@@ -1208,11 +1207,15 @@ export default Vue.extend({
       const scale = this.getLayerScale
       switch (this.getLayerType) {
         case 'image':
+          width === MIN_THINKNESS && (offsetWidth = MIN_THINKNESS - initWidth)
+          height === MIN_THINKNESS && (offsetHeight = MIN_THINKNESS - initHeight)
           ImageUtils.imgResizeHandler(width, height, offsetWidth, offsetHeight)
           break
         case 'shape': {
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
           if (this.config.category === 'E') {
+            width === MIN_THINKNESS && (width = MIN_THINKNESS * 4)
+            height === MIN_THINKNESS && (height = MIN_THINKNESS * 4)
             ControlUtils.updateShapeVSize(this.pageIndex, this.layerIndex, [width, height])
           }
           break
@@ -1498,7 +1501,7 @@ export default Vue.extend({
 
       if (widthLimit === -1) {
         const pageSize = (this.$parent.$el as HTMLElement)
-          .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio / 100)
+          .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 
         let layerPos = this.getLayerPos[isVertical ? 'y' : 'x'] - (currTextSize - getSize()) / 2
@@ -1581,11 +1584,13 @@ export default Vue.extend({
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
     },
-    clickSubController(targetIndex: number, type: string) {
+    clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
       if (!this.isActive) {
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
+        // moveStart will handle the following:
+        // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
         return
       }
+      if (selectionMode) return
       let updateSubLayerProps = null as any
       let layers = null as any
       switch (this.getLayerType) {
@@ -1609,20 +1614,26 @@ export default Vue.extend({
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
-    dblSubController(targetIndex: number) {
+    dblSubController(targetIndex: number, selectionMode: boolean) {
       let updateSubLayerProps = null as any
       switch (this.getLayerType) {
         case 'group':
+          if (!(this.config as IGroup).layers[targetIndex].active) {
+            return
+          }
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case 'frame':
+          if (
+            !(this.config as IFrame).clips[targetIndex].active ||
+            (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame'
+          ) {
+            return
+          }
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
           break
         default:
           return
-      }
-      if (this.getLayerType === 'frame' && (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame') {
-        return
       }
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
     },

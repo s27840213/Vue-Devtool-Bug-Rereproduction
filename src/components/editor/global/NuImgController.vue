@@ -90,7 +90,7 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       /** only the image in frame use the scale to strech */
-      return this.primaryLayerType === 'frame' ? this.config.styles.scale : 1
+      return this.primaryLayer && this.primaryLayerType === 'frame' ? this.config.styles.scale : 1
     },
     getLayerRotate(): number {
       return this.config.styles.rotate

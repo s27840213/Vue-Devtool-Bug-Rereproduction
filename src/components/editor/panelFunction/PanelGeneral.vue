@@ -162,6 +162,11 @@ export default Vue.extend({
       this.setOpacity(value)
     })
   },
+  watch: {
+    opacity(newVal) {
+      popupUtils.setSliderConfig(Object.assign({ value: newVal, noText: false }, MappingUtils.mappingMinMax('opacity')))
+    }
+  },
   methods: {
     mappingIcons(type: string): string[] {
       return MappingUtils.mappingIconSet(type)
