@@ -64,7 +64,7 @@ export default Vue.extend({
         mainMenu,
         { icon: 'font', text: `${this.$t('NN0353')}`, panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
-        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo' },
+        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo', disabled: true },
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
@@ -77,7 +77,7 @@ export default Vue.extend({
       ] as Array<IFooterTab>,
       objectTabs: [
         mainMenu,
-        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo' },
+        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo', disabled: true },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },

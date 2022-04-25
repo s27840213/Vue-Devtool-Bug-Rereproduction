@@ -1,4 +1,4 @@
-<template lang="pug">z
+<template lang="pug">
   div(class="panel-more")
     div(class="panel-more__page-name")
       input(class="body-1 text-gray-2" type="text"
@@ -10,8 +10,7 @@
       svg-icon(:iconName="'pen'"
         :iconWidth="'20px'"
         :iconColor="'gray-2'"
-        class="upload-cloud ml-10"
-        v-hint="statusHint")
+        class="upload-cloud ml-10")
     hr(class="panel-more__hr")
     div(class="panel-more__item" @click="save()")
       span(class="body-2 pointer") {{$t('NN0009')}}

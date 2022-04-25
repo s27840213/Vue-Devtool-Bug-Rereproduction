@@ -9,11 +9,10 @@
       div(class="pointer"
         @mousedown="fontSizeStepping(step)") +
     input(class="panel-font-size__range-input input__slider--range"
-      v-model.number="propsVal"
+      v-model.number="fontSize"
       max="144"
       min="1"
       step="1"
-      v-ratio-change
       type="range"
       @mouseup="handleChangeStop")
 </template>
@@ -60,16 +59,37 @@ export default Vue.extend({
       }
       return currLayer.styles.scale
     },
-    fontSize(): number | string {
-      if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
-        return '--'
+    fontSize: {
+      get(): number | string {
+        if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
+          return '--'
+        }
+        return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+      },
+      set(value: number): void {
+        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
+        tiptapUtils.applySpanStyle('size', value)
+        tiptapUtils.agent(editor => {
+          layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
+          stepsUtils.record()
+        })
+        textPropUtils.updateTextPropsState({ fontSize: value.toString() })
+        textEffectUtils.refreshSize()
       }
-      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
+    },
+    step(): number {
+      // const config = LayerUtils.getCurrConfig
+      // return 1 / config.styles.scale
+      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
+      let scale = currLayer.styles.scale
+      if (subLayerIdx !== -1) {
+        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
+      }
+      return 1 / scale
     }
   },
   methods: {
     updateLayerOpacity(val: number) {
-      console.log('update')
       layerUtils.updateLayerOpacity(val)
     },
     fontSizeStepping(step: number, tickInterval = 100) {

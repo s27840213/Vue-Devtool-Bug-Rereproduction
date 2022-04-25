@@ -6,14 +6,14 @@
         :class="{'visible-hidden': panelTitle !== ''}")
       div
         svg-icon(class="mobile-panel__left-btn"
-          :class="{'visible-hidden': showLeftBtn}"
+          :class="{'visible-hidden': true}"
           iconName="check-circle"
           :iconColor="'white'"
           :iconWidth="'20px'")
         span(class="mobile-panel__title"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
         svg-icon(class="mobile-panel__right-btn"
-          :class="{'visible-hidden': showLeftBtn}"
+          :class="{'visible-hidden': true}"
           :iconName="'check-circle'"
           :iconColor="'white'"
           :iconWidth="'20px'")
