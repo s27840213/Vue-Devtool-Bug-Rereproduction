@@ -19,7 +19,6 @@ export interface DrawOptions {
   canvasSize?: number,
   timeout?: number,
   layerInfo?: ILayerInfo,
-  coverImg?: HTMLImageElement,
   uploading?: boolean,
   cb?: () => void
 }
@@ -47,8 +46,9 @@ class ImageShadowUtils {
     isTransparentBg: boolean
   } | null
 
-  private spreadBuff = {
+  private dataBuff = {
     spread: -1,
+    radius: -1,
     effect: ShadowEffectType.none as ShadowEffectType,
     size: -1,
     data: {} as ImageData
@@ -56,28 +56,20 @@ class ImageShadowUtils {
 
   get layerData() { return this._layerData }
 
-  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
-    const { styles } = config
-    const { timeout = 25, layerInfo, coverImg, cb } = options
-    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
-    const { effects, currentEffect } = shadow
-    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IImageMatchedEffect
-    // if (!canvas || !canvas.width || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
-    //   currentEffect === ShadowEffectType.projection)) return
-    this.drawingInit(canvas, img, config, options.layerInfo)
-  }
-
   private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, layerInfo?: ILayerInfo) {
     if (!this._layerData) {
       const { canvasT } = this
       const ctxT = canvasT.getContext('2d')
       canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
-      ctxT && ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
-      const isTransparentBg = this.isTransparentBg(canvasT)
-      this._layerData = { img, config, isTransparentBg }
-      if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
-        this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+      if (ctxT) {
+        ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
+        const isTransparentBg = this.isTransparentBg(canvasT)
+        this._layerData = { img, config, isTransparentBg }
+        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+        if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
+          this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+        }
       }
     }
     if (this._draw) {
@@ -85,9 +77,100 @@ class ImageShadowUtils {
     }
   }
 
+  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
+    // const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IImageMatchedEffect
+    if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
+    const { timeout = 25 } = options
+    this.drawingInit(canvas, img, config, options.layerInfo)
+    const handlerId = generalUtils.generateRandomString(6)
+    setTimeout(() => {
+      this.imageMathcedHandler(canvas, img, config, handlerId, options)
+    }, timeout)
+    this.handlerId = handlerId
+  }
+
+  async imageMathcedHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, options: DrawOptions = {}) {
+    const { canvasT, canvasMaxSize } = this
+    const ctxT = canvasT.getContext('2d')
+    const ctxMaxSize = canvasMaxSize.getContext('2d')
+
+    if (!ctxT || !ctxMaxSize) return
+    ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+    ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+
+    const { styles } = config
+    const { timeout = 25, layerInfo, cb } = options
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
+    const { effects, currentEffect } = shadow
+    const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
+
+    layerInfo && this.setIsProcess(layerInfo, true)
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const scaleRatio = img.naturalWidth / _imgWidth
+    const imgX = _imgX * scaleRatio
+    const imgY = _imgY * scaleRatio
+    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+    const drawCanvasHeight = img.naturalHeight * size * 0.01
+    const drawCanvasWidth = img.naturalWidth * size * 0.01
+    const blurImgX = (canvas.width - drawCanvasWidth) * 0.5
+    const blurImgY = (canvas.height - drawCanvasHeight) * 0.5
+    const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+    const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+
+    canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
+    canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
+
+    await this.asyncProcessing(() => {
+      if (this.handlerId === handlerId) {
+        ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasWidth, drawCanvasHeight)
+        /** timeout is 0 as in the uploading phase */
+        if (!(this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size)) {
+          if (timeout) {
+            const mappingScale = 1600 / img.naturalWidth
+            canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
+            canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
+          } else {
+            canvasMaxSize.setAttribute('width', `${canvas.width}`)
+            canvasMaxSize.setAttribute('height', `${canvas.height}`)
+          }
+          ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
+          const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+          imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.7) + 1)
+
+          this.dataBuff.effect = ShadowEffectType.imageMatched
+          this.dataBuff.radius = radius
+          this.dataBuff.size = size
+          this.dataBuff.data = imageData
+        }
+      }
+    })
+
+    await this.asyncProcessing(() => {
+      if (this.handlerId === handlerId) {
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
+        ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
+
+        ctxT.clearRect(0, 0, canvas.width, canvas.height)
+        ctxT.globalAlpha = opacity * 0.01
+        ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
+        ctxT.globalAlpha = 1
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(canvasT, 0, 0)
+      }
+
+      ctxT.restore()
+      ctxMaxSize.restore()
+      this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
+    })
+    cb && cb()
+  }
+
   async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
-    const { timeout = 25, layerInfo, coverImg, cb } = options
+    const { timeout = 25, layerInfo, cb } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
@@ -125,9 +208,9 @@ class ImageShadowUtils {
 
       let alphaVal = 1
       /** Calculating the spread */
-      if (this.spreadBuff.spread !== unifiedSpread || this.spreadBuff.effect !== currentEffect || this.spreadBuff.size !== img.naturalHeight) {
+      if (this.dataBuff.spread !== unifiedSpread || this.dataBuff.effect !== currentEffect || this.dataBuff.size !== img.naturalHeight) {
         layerInfo && this.setIsProcess(layerInfo, true)
-        this.spreadBuff.effect = currentEffect
+        this.dataBuff.effect = currentEffect
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
@@ -147,12 +230,12 @@ class ImageShadowUtils {
           })
         }
         ctxT.globalAlpha = 1
-        this.spreadBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-        this.spreadBuff.size = img.naturalHeight
-        this.spreadBuff.spread = unifiedSpread
+        this.dataBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
+        this.dataBuff.size = img.naturalHeight
+        this.dataBuff.spread = unifiedSpread
         this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       } else {
-        ctxT.putImageData(this.spreadBuff.data, 0, 0)
+        ctxT.putImageData(this.dataBuff.data, 0, 0)
       }
 
       await this.asyncProcessing(() => {
@@ -188,14 +271,8 @@ class ImageShadowUtils {
           ctxT.globalAlpha = 1
 
           ctxT.globalCompositeOperation = 'source-over'
-          if (coverImg) {
-            const coverRatio = coverImg.naturalWidth / _imgWidth
-            const coverImgX = _imgX * coverRatio
-            const coverImgY = _imgY * coverRatio
-            const coverImgW = coverImg.naturalWidth * layerWidth / _imgWidth
-            const coverImgH = coverImg.naturalHeight * layerHeight / _imgHeight
-            ctxT.drawImage(coverImg, -coverImgX, -coverImgY, coverImgW, coverImgH, x, y, drawCanvasWidth, drawCanvasHeight)
-          } else {
+          /** only draw the origin image over the canvas as uploading */
+          if (!timeout) {
             ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
           }
 
@@ -213,7 +290,7 @@ class ImageShadowUtils {
       this._draw = setTimeout(handler, timeout)
     } else {
       await handler()
-      this.spreadBuff.spread = -1
+      this.dataBuff.spread = -1
     }
   }
 

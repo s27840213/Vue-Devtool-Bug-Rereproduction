@@ -204,7 +204,7 @@ export default Vue.extend({
             Object.assign(target.styles, styles)
 
             const newImg = new Image()
-            newImg.crossOrigin = 'anoynous'
+            newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
               this.resetAllShadowProps(pageIndex, layerIndex, subLayerIdx)
               layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)

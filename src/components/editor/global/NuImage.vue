@@ -8,12 +8,12 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
-    //- div(
     div(v-if="showCanvas"
       class="canvas__wrapper"
       :style="canvasWrapperStyle()")
       canvas(ref="canvas")
-    img(v-show="!isAdjustImage && !isCanvasReady"
+    //- img(v-show="!isAdjustImage && !isCanvasReady"
+    img(v-show="!isAdjustImage"
       ref="img"
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
@@ -40,7 +40,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import imgShadowUtils, { CANVAS_SCALE, CANVAS_SIZE } from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import { LayerType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -73,7 +73,7 @@ export default Vue.extend({
       isOnError: false,
       src: '',
       canvasScale: CANVAS_SCALE,
-      canvasImg: undefined as undefined | HTMLImageElement,
+      canvasShadowImg: undefined as undefined | HTMLImageElement,
       isCanvasReady: false
     }
   },
@@ -137,6 +137,13 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    layerInfo(): ILayerInfo {
+      return {
+        pageIndex: this.pageIndex,
+        layerIndex: this.layerIndex,
+        subLayerIdx: this.subLayerIndex
+      }
+    },
     getImgDimension(): number {
       const { type } = this.config.srcObj
       const { imgWidth, imgHeight } = this.config.styles
@@ -185,6 +192,12 @@ export default Vue.extend({
     },
     currentShadowEffect(): ShadowEffectType {
       return this.shadow.currentEffect
+    },
+    canvas: {
+      get(): HTMLCanvasElement | undefined {
+        return this.$refs.canvas as HTMLCanvasElement | undefined
+      },
+      cache: false
     },
     scale(): number {
       return this.config.styles.scale
@@ -324,15 +337,18 @@ export default Vue.extend({
       }
     },
     handleNewShadowEffect() {
-      const canvas = this.$refs.canvas as HTMLCanvasElement
+      const { canvas, layerInfo } = this
+      if (!canvas) {
+        return
+      }
+
       const { currentEffect } = this.shadow
       switch (currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
-          if (this.canvasImg) {
-            imgShadowUtils.draw(canvas, this.canvasImg as HTMLImageElement, this.config, {
-              coverImg: this.$refs.img as HTMLImageElement,
+          if (this.canvasShadowImg) {
+            imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
               layerInfo: {
                 pageIndex: this.pageIndex,
                 layerIndex: this.layerIndex,
@@ -343,17 +359,12 @@ export default Vue.extend({
             const previewImg = new Image()
             previewImg.crossOrigin = 'Anonymous'
             previewImg.onload = () => {
-              canvas.setAttribute('width', `${previewImg.width * CANVAS_SCALE}`)
-              canvas.setAttribute('height', `${previewImg.height * CANVAS_SCALE}`)
-              this.canvasImg = previewImg
+              canvas.setAttribute('width', `${previewImg.naturalWidth * CANVAS_SCALE}`)
+              canvas.setAttribute('height', `${previewImg.naturalHeight * CANVAS_SCALE}`)
+              this.canvasShadowImg = previewImg
               imgShadowUtils.clearLayerData()
               imgShadowUtils.draw(canvas, previewImg, this.config, {
-                coverImg: this.$refs.img as HTMLImageElement,
-                layerInfo: {
-                  pageIndex: this.pageIndex,
-                  layerIndex: this.layerIndex,
-                  subLayerIdx: this.subLayerIndex
-                },
+                layerInfo,
                 cb: () => {
                   this.isCanvasReady = true
                 }
@@ -364,16 +375,32 @@ export default Vue.extend({
           }
           break
         }
-        case ShadowEffectType.imageMatched:
+        case ShadowEffectType.imageMatched: {
+          const img = this.$refs.img as HTMLImageElement
+          if (canvas.width !== img.naturalWidth * CANVAS_SCALE) {
+            canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
+            canvas.setAttribute('height', `${img.naturalHeight * CANVAS_SCALE}`)
+          }
+          imgShadowUtils.clearLayerData()
+          imgShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
+            layerInfo,
+            cb: () => {
+              this.isCanvasReady = true
+            }
+          })
+          break
+        }
         case ShadowEffectType.projection:
         case ShadowEffectType.none:
-          this.canvasImg = undefined
+          this.canvasShadowImg = undefined
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
-      if (!this.canvasImg) return
-      const { layerIndex, pageIndex, subLayerIndex: subLayerIdx } = this
-      const layerInfo = { pageIndex, layerIndex, subLayerIdx }
+      const { layerInfo, canvas } = this
+      if (!canvas) {
+        return
+      }
+
       window.requestAnimationFrame(() => {
         this.UPDATE_shadowEffect({
           layerInfo,
@@ -381,14 +408,29 @@ export default Vue.extend({
             ...effects
           }
         })
-        imgShadowUtils.draw(this.$refs.canvas as HTMLCanvasElement, this.canvasImg as HTMLImageElement, this.config, {
-          coverImg: this.$refs.img as HTMLImageElement,
-          layerInfo: {
-            pageIndex: this.pageIndex,
-            layerIndex: this.layerIndex,
-            subLayerIdx: this.subLayerIndex
+        switch (this.currentShadowEffect) {
+          case ShadowEffectType.shadow:
+          case ShadowEffectType.blur:
+          case ShadowEffectType.frame: {
+            if (this.canvasShadowImg) {
+              imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
+                layerInfo
+              })
+            }
+            break
           }
-        })
+          case ShadowEffectType.imageMatched: {
+            imgShadowUtils.drawImageMatchedShadow(canvas, this.$refs.img as HTMLImageElement, this.config, {
+              layerInfo
+            })
+            break
+          }
+          case ShadowEffectType.projection:
+          case ShadowEffectType.none:
+            break
+          default:
+            generalUtils.assertUnreachable(this.currentShadowEffect)
+        }
       })
     }
   }
