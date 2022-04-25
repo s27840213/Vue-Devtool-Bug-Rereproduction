@@ -12,18 +12,18 @@ It will replace prefix and add/sub the number below.
 # 0. Make sure you don't have any other git changes to prevent mess up
 # 1. Replace with your prefix
 PREFIX_BEFORE = "TMP"
-PREFIX_AFTER = "NN"
+PREFIX_AFTER = "TMP"
 # 2. Spicify serial range you want to replace.
 SERIAL_START = 1
 SERIAL_END = 9999
 # 3. Replace with the serial number difference between TMP and NN,
 #    can accept negative interger
-SERIAL_DIFFERENCE = 400
+SERIAL_DIFFERENCE = 5
 # 4. Choose which file extension you want to replace
 FILE_EXTENSION = [
   ".vue",
   ".ts",
-  ".json"
+  # ".json"
 ]
 # 5. CD to this folder and run this script by `python3 i18n_rename.py`
 
@@ -38,15 +38,19 @@ for ext in FILE_EXTENSION:
     with open(file_path, mode="r") as file:
       lines = file.readlines()
       for i in range(len(lines)):
-        while re.search(f"{PREFIX_BEFORE}\d{{4}}", lines[i]):
-          serial = int(re.search(f"{PREFIX_BEFORE}(\d{{4}})", lines[i]).group(1))
+        start = 0
+        
+        while re.search(f"{PREFIX_BEFORE}\d{{4}}", lines[i][start:]):
+          serial = int(re.search(f"{PREFIX_BEFORE}(\d{{4}})", lines[i][start:]).group(1))
           if not (SERIAL_START <= serial <= SERIAL_END):
             break
 
-          lines[i] = lines[i].replace(
+          lines[i] = lines[i][:start] + lines[i][start:].replace(
             f"{PREFIX_BEFORE}{str(serial).rjust(4, '0')}",
             f"{PREFIX_AFTER}{str(serial + SERIAL_DIFFERENCE).rjust(4, '0')}"
           )
+
+          start = re.search(f"{PREFIX_BEFORE}(\d{{4}})", lines[i][start:]).span()[0] + start + 1
           count+=1
           
     # Write back

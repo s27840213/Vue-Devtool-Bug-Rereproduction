@@ -249,7 +249,7 @@ export default Vue.extend({
         }
 
         this.prime = result
-        payment.pay({
+        payment.tappayAdd({
           type: 'tappay',
           prime: result.card.prime,
           card_info: JSON.stringify(this.userData)

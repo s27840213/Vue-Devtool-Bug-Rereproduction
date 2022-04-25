@@ -9,8 +9,7 @@
       div(class="field__tappay-ccv" id="card-ccv")
     div(:class="{hidden: isTW}" id="stripe")
     btn(class="rounded" type="primary-lg"
-        :disabled="!payReady" @click.native="submit()") {{$t('TMP0041')}}
-    span {{$t('TMP0042')}}
+        :disabled="!payReady" @click.native="submit()") {{submitText}}
 </template>
 
 <script lang="ts">
@@ -44,14 +43,19 @@ export default Vue.extend({
     userCountry() {
       if (!this.isTW) {
         this.stripeInit()
+      } else {
+        this.submit = this.tappaySubmit
       }
     }
   },
   computed: {
     ...mapGetters({
-      userCountry: 'payment/getuserCountry',
+      userCountry: 'payment/getUserCountry',
       isTW: 'payment/isTW'
-    })
+    }),
+    submitText(): string {
+      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0044')) as string
+    }
   },
   mounted() {
     switch (i18n.locale) {
@@ -69,7 +73,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setUserCountry: 'payment/SET_userCountry'
+      setUserCountry: 'payment/SET_userCountry',
+      setPrime: 'payment/SET_prime'
     }),
     setCountry(option: Record<string, string>) {
       this.setUserCountry(option)
@@ -104,7 +109,7 @@ export default Vue.extend({
         if (result.error) {
           Vue.notify({ group: 'error', text: result.error.code })
         } else {
-          this.$emit('paid', this.userCountry.value)
+          this.$emit('paid')
           Vue.notify({ group: 'copy', text: result.setupIntent.status })
         }
       })
@@ -157,17 +162,8 @@ export default Vue.extend({
           return
         }
 
-        payment.pay({
-          type: 'tappay',
-          prime: result.card.prime,
-          card_info: JSON.stringify({})
-        }).then((response) => {
-          if (response.data.flag === 1) {
-            Vue.notify({ group: 'error', text: response.data.msg })
-          } else {
-            Vue.notify({ group: 'copy', text: 'Success' })
-          }
-        })
+        this.setPrime(result.card.prime)
+        this.$emit('paid')
       })
     }
   }
@@ -175,6 +171,12 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.field {
+  >button {
+    width: 100%;
+  }
+}
+
 .field__tappay {
   display: grid;
   grid-template-columns: 1fr 1fr;
