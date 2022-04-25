@@ -73,7 +73,7 @@
             @mouseup="recordChange"
             v-ratio-change
             type="range")
-        div(v-if="!['none', 'halo'].includes(currentEffect)"
+        div(v-if="!['none', 'imageMatched'].includes(currentEffect)"
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
@@ -119,7 +119,7 @@ export default Vue.extend({
     return {
       shadowPropI18nMap,
       fieldRange,
-      notUpload: false
+      notUpload: true
     }
   },
   mounted() {
@@ -265,7 +265,7 @@ export default Vue.extend({
         none: [],
         shadow: imageShadowUtils.getKeysOf(ShadowEffectType.shadow),
         blur: imageShadowUtils.getKeysOf(ShadowEffectType.blur),
-        halo: imageShadowUtils.getKeysOf(ShadowEffectType.halo),
+        imageMatched: imageShadowUtils.getKeysOf(ShadowEffectType.imageMatched),
         frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
         projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
       }

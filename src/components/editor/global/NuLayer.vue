@@ -9,7 +9,6 @@
       nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
         component(:is="`nu-${config.type}`" :config="config" class="transition-none"
         :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
-    div(v-if="appendShadowEffect" class="img-shadow-effect" :style="shadowStyles()")
     div(v-if="config.inProcess" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
@@ -72,11 +71,6 @@ export default Vue.extend({
     },
     getCos(): number {
       return MathUtils.cos(this.config.styles.rotate)
-    },
-    appendShadowEffect(): boolean {
-      const { config } = this
-      if (config.type !== LayerType.image || !config.styles.shadow) return false
-      return [ShadowEffectType.projection, ShadowEffectType.halo].includes(config.styles.shadow.currentEffect)
     }
   },
   methods: {
@@ -101,14 +95,8 @@ export default Vue.extend({
           )
           break
         }
-        case LayerType.image: {
-          // imageShadowUtils.handleShadowStyles(this.config, styles, this.imgControl)
-        }
       }
       return styles
-    },
-    shadowStyles() {
-      return imageShadowUtils.convertShadowEffect(this.config)
     },
     scaleStyles() {
       let { width, height } = this.config.styles

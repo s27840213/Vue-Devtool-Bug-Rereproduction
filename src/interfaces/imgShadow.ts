@@ -1,7 +1,7 @@
 export enum ShadowEffectType {
   none = 'none',
   shadow = 'shadow',
-  halo = 'halo',
+  imageMatched = 'imageMatched',
   frame = 'frame',
   projection = 'projection',
   blur = 'blur',
@@ -26,7 +26,7 @@ export interface IFrameEffect {
   spread: number,
   opacity: number
 }
-export interface IHaloEffect {
+export interface IImageMatchedEffect {
   [key: string]: number
   size: number,
   distance: number,
@@ -49,7 +49,7 @@ export interface IShadowEffects {
   shadow?: IShadowEffect,
   blur?: IBlurEffect,
   frame?: IFrameEffect,
-  halo?: IHaloEffect,
+  imageMatched?: IImageMatchedEffect,
   projection?: IProjectionEffect
 }
 export interface IShadowProps {

@@ -154,7 +154,8 @@ export default Vue.extend({
         .some(val => typeof val === 'number' && val !== 0)
     },
     showCanvas(): boolean {
-      return [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(this.currentShadowEffect)
+      // return [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(this.currentShadowEffect)
+      return this.currentShadowEffect !== ShadowEffectType.none
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -363,7 +364,7 @@ export default Vue.extend({
           }
           break
         }
-        case ShadowEffectType.halo:
+        case ShadowEffectType.imageMatched:
         case ShadowEffectType.projection:
         case ShadowEffectType.none:
           this.canvasImg = undefined

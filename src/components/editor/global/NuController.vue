@@ -1510,7 +1510,7 @@ export default Vue.extend({
       }
       switch (this.getLayerType) {
         case LayerType.image:
-          if (![ShadowEffectType.frame, ShadowEffectType.halo, ShadowEffectType.shadow]
+          if (![ShadowEffectType.frame, ShadowEffectType.imageMatched, ShadowEffectType.shadow]
             .includes(this.config.styles.shadow.currentEffect)) {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
           }

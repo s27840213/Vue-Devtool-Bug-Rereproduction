@@ -1,15 +1,15 @@
-import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, ILayer } from '@/interfaces/layer'
 import { ILayerInfo, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
-import { IBlurEffect, IFrameEffect, IHaloEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFrameEffect, IImageMatchedEffect, IProjectionEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import imageUtils from './imageUtils'
 import * as StackBlur from 'stackblur-canvas'
 import store from '@/store'
 import { imageDataRGBA } from './stackblur'
 
-type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IHaloEffect | IProjectionEffect
+type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IProjectionEffect
 
 const HALO_Y_OFFSET = 70 as const
 export const HALO_SPREAD_LIMIT = 80
@@ -56,17 +56,18 @@ class ImageShadowUtils {
 
   get layerData() { return this._layerData }
 
-  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
+  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     const { styles } = config
     const { timeout = 25, layerInfo, coverImg, cb } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
-    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
-    if (!canvas || !canvas.width || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
-      currentEffect === ShadowEffectType.projection)) return
-    if (this._draw) {
-      clearTimeout(this._draw)
-    }
+    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IImageMatchedEffect
+    // if (!canvas || !canvas.width || (currentEffect === ShadowEffectType.none || currentEffect === ShadowEffectType.halo ||
+    //   currentEffect === ShadowEffectType.projection)) return
+    this.drawingInit(canvas, img, config, options.layerInfo)
+  }
+
+  private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, layerInfo?: ILayerInfo) {
     if (!this._layerData) {
       const { canvasT } = this
       const ctxT = canvasT.getContext('2d')
@@ -79,6 +80,19 @@ class ImageShadowUtils {
         this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
       }
     }
+    if (this._draw) {
+      clearTimeout(this._draw)
+    }
+  }
+
+  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
+    const { styles } = config
+    const { timeout = 25, layerInfo, coverImg, cb } = options
+    const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
+    const { effects, currentEffect } = shadow
+    const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
+    if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) return
+    this.drawingInit(canvas, img, config, options.layerInfo)
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
@@ -155,20 +169,7 @@ class ImageShadowUtils {
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-
           imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.5) + 1)
-
-          // for (let i = 0; i < imageData.data.length; i += 4) {
-          //   const pixel = imageData.data
-          //   const radn = 10000
-          //   // const radn = (mathUtils.randnBm() - 0.5) * 1 + 1
-          //   // i % 20000 === 0 && console.warn('radn', radn)
-          //   // i % 20000 === 0 && console.log(pixel[i])
-          //   pixel[i] = Math.min(pixel[i] * radn, 255)
-          //   // i % 20000 === 0 && console.log(pixel[i])
-          //   pixel[i + 1] = Math.min(pixel[i + 1] * radn, 255)
-          //   pixel[i + 2] = Math.min(pixel[i + 2] * radn, 255)
-          // }
 
           const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
           const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
@@ -177,7 +178,7 @@ class ImageShadowUtils {
       })
 
       await this.asyncProcessing(() => {
-        if (ctxT && this.handlerId === handlerId) {
+        if (this.handlerId === handlerId) {
           ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
           ctxT.globalCompositeOperation = 'source-in'
@@ -288,7 +289,7 @@ class ImageShadowUtils {
       ? shadow.effects[shadow.currentEffect] : {}
 
     switch (shadow.currentEffect) {
-      case ShadowEffectType.halo: {
+      case ShadowEffectType.imageMatched: {
         const { radius, distance, angle, size, opacity } = effect as ShadowEffects
         const x = distance * mathUtils.cos(angle)
         const y = distance * mathUtils.sin(angle)
@@ -464,8 +465,8 @@ class ImageShadowUtils {
           opacity: 100
         }
         break
-      case ShadowEffectType.halo:
-        (effect as IHaloEffect) = {
+      case ShadowEffectType.imageMatched:
+        (effect as IImageMatchedEffect) = {
           distance: 9,
           angle: 30,
           radius: 14,
@@ -527,7 +528,7 @@ export const shadowPropI18nMap = {
     opacity: 'NN0427',
     _effectName: 'NN0418'
   },
-  halo: {
+  imageMatched: {
     distance: 'NN0431',
     angle: 'NN0432',
     size: 'NN0422',
@@ -565,7 +566,7 @@ export const fieldRange = {
     spread: { max: 30, min: 5, weighting: 0.72 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
-  halo: {
+  imageMatched: {
     distance: { max: 100, min: 0, weighting: 2 },
     angle: { max: 180, min: -180, weighting: 2 },
     size: { max: 200, min: 50, weighting: 0.01 },
