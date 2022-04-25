@@ -7,9 +7,9 @@
       @click.native="goHome()")
     div(class="header-bar__right")
       svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
-        :class="{'click-disabled': (tab.disabled || isLocked)}"
+        :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
         :iconName="tab.icon"
-        :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.icon ? 'blue-1' :'white'"
+        :iconColor="((tab.disabled || isLocked) && tab.icon !== 'lock') ? 'gray-2' : currTab ===  tab.icon ? 'blue-1' :'white'"
         :iconWidth="'20px'"
         @click.native="handleIconAction(tab.icon)")
 </template>
@@ -129,7 +129,6 @@ export default Vue.extend({
       this.$router.push({ name: 'Home' })
     },
     handleIconAction(icon: string) {
-      console.log(icon)
       switch (icon) {
         case 'download':
         case 'more': {

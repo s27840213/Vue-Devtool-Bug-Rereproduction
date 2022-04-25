@@ -55,7 +55,7 @@ export default Vue.extend({
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object' },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object' },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
         { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background' },
         { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
@@ -74,6 +74,15 @@ export default Vue.extend({
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
         { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background' },
         { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+      ] as Array<IFooterTab>,
+      objectTabs: [
+        mainMenu,
+        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo' },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
       ] as Array<IFooterTab>
     }
   },
@@ -94,6 +103,8 @@ export default Vue.extend({
       } else if (this.showFontTabs) {
         // this.$emit('switchTab', 'none')
         return this.fontTabs
+      } else if (this.showShapeSetting) {
+        return this.objectTabs
       } else {
         return this.homeTabs
       }
@@ -146,6 +157,12 @@ export default Vue.extend({
     showFontTabs(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('text') && this.singleTargetType()
+    },
+    showShapeSetting(): boolean {
+      const { getCurrConfig } = layerUtils
+      const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
+      const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || getCurrConfig.type === LayerType.frame
+      return stateCondition && typeConditon
     },
     isSuperUser(): boolean {
       return generalUtils.isSuperUser
