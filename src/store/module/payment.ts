@@ -64,6 +64,12 @@ const actions: ActionTree<IPaymentState, unknown> = {
       plan_id: '',
       is_bundle: state.isBundle
     })
+  },
+  switchToBundle() {
+    console.log('switchToBundle')
+  },
+  cancleSubscription() {
+    console.log('cancel')
   }
 }
 

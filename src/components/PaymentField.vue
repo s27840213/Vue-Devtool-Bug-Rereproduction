@@ -172,8 +172,13 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .field {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   >button {
+    @include btn-LG;
     width: 100%;
+    margin-top: auto;
   }
 }
 
@@ -187,9 +192,7 @@ export default Vue.extend({
     border-radius: 4px;
     padding: 10px;
   }
-  &-card {
-    grid-column: 1 / 3;
-  }
+  &-card { grid-column: 1 / 3; }
 }
 
 .hidden {

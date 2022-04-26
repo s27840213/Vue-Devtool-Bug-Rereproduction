@@ -12,33 +12,38 @@
         div(class="payment-left-top__title") {{title}}
         div(v-if="description" class="payment-left-top__description") {{description}}
       div(class="payment-left-content")
-        template(v-if="view === 'step1'")
+        template(v-if="['step1', 'switch'].includes(view)")
           div(v-for="p in periodInput" :isSelected="p.type === userPeriod"
               class="payment-left-content-period pointer"
               @click="setPeriod(p.isBundle)")
             svg-icon(iconWidth="20px"
                     :iconName="p.type === userPeriod ? 'radio-checked' : 'radio'"
                     :iconColor="p.type === userPeriod ? 'white' : 'gray-4'")
-            span {{p.name}}
+            span {{p.label}}
         template(v-if="view === 'step2'")
           PaymentField(@paid="paid")
         template(v-if="view === 'step3'")
           input(v-for="inv in invoiceInput" :type="inv.type"
                 :value="invoice[inv.name]" @input="setInvoice(inv.name, $event)"
-                class="payment-left-content-invoice pointer" :placeholder="inv.ph")
+                class="payment-left-content-invoice" :placeholder="inv.ph")
         template(v-if="view === 'cancel1'")
-          div(v-for="can in cancel1")
+          div(v-for="can in cancel1" class="payment-left-content-cancel")
             svg-icon(iconName="pro" iconWidth="24px")
             span {{can}}
         template(v-if="view === 'cancel2'")
-          div(v-for="can in cancel2")
-            //- todo radio-btn
+          div(v-for="can in cancel2" class="payment-left-content-cancel")
+            radio-btn(:isSelected="cancelReason === can"
+                      :formatKey="can" circleColor="gray-4"
+                      @select="selectCancelReason(can)")
             span {{can}}
+          input(class="payment-left-content-cancel__other"
+                v-model="otherReason" :placeholder="$t('TMP0062')")
+      p(v-if="view === 'step1'"
+        class="payment-left-button-description") {{$t('TMP0042')}}
       div(class="payment-left-button")
         btn(v-for="button in buttons" type="primary-lg"
             @click.native="button.func()")
           span {{button.text}}
-        p(v-if="view === 'step1'") {{$t('TMP0042')}}
     //- move to jpg folder, compress?
     img(class="payment-right" :src="require(`@/assets/img/svg/pricing/${img}`)")
     img(v-if="view === 'finish'" class="payment-finish"
@@ -49,14 +54,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/PaymentField.vue'
-import { mapGetters, mapMutations } from 'vuex'
+import RadioBtn from '@/components/global/RadioBtn.vue'
 
 export default Vue.extend({
   name: 'PopupPayment',
   components: {
-    PaymentField
+    PaymentField,
+    RadioBtn
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -75,20 +82,20 @@ export default Vue.extend({
       totalStep: 0,
       title: '',
       description: '',
-      buttons: [{}],
+      buttons: [{}] as {text: string, func: ()=>void}[],
       img: 'remover.jpg',
-      // View constant
+      // View constant // split to other js?
       periodInput: [{
-        name: i18n.t('TMP0010'),
+        label: i18n.t('TMP0010'),
         type: 'monthly',
         isBundle: 0
       }, {
-        name: i18n.t('TMP0011'),
+        label: i18n.t('TMP0011'),
         type: 'yearly',
         isBundle: 1
       }],
       invoiceInput: [{
-        name: 'email',
+        label: 'email',
         type: 'email',
         ph: 'Email'
       }, {
@@ -117,7 +124,9 @@ export default Vue.extend({
         i18n.t('TMP0059'),
         i18n.t('TMP0060'),
         i18n.t('TMP0061')
-      ]
+      ],
+      cancelReason: '', // todo move to store
+      otherReason: ''
     }
   },
   watch: {
@@ -132,7 +141,7 @@ export default Vue.extend({
       isTW: 'payment/isTW'
     }),
     showPreStep(): boolean {
-      return ['step2', 'step3', 'cancel2'].includes(this.view)
+      return ['step2', 'step3'].includes(this.view)
     },
     invoice():Record<string, string> {
       return this.$store.state.payment.invoice
@@ -142,13 +151,16 @@ export default Vue.extend({
     this.changeView(this.initView)
   },
   methods: {
+    ...mapActions({
+      tappayAdd: 'payment/tappayAdd',
+      switchToBundle: 'payment/switchToBundle',
+      cancleSubscription: 'payment/cancleSubscription'
+    }),
     ...mapMutations({
-      setPeriod: 'payment/SET_isBundle',
-      tappayAdd: 'payment/tappayAdd'
+      setIsBundle: 'payment/SET_isBundle'
     }),
     changeView(name: string) {
       this.view = name
-      console.log('view', name)
       switch (name) {
         case 'step1':
           this.currentStep = 1
@@ -159,6 +171,7 @@ export default Vue.extend({
             text: i18n.t('TMP0041') as string,
             func: () => this.changeView('step2')
           }]
+          this.img = 'remover.jpg'
           break
         case 'step2':
           this.currentStep = 2
@@ -179,15 +192,15 @@ export default Vue.extend({
           }]
           break
         case 'finish':
-          this.totalStep = 0
           break
         case 'switch':
           this.title = i18n.t('TMP0045') as string
           this.description = i18n.t('TMP0046') as string
           this.buttons = [{
-            text: i18n.t('TMP0047') as string
-            // func: () => this.changeView('step2') // todo
+            text: i18n.t('TMP0047') as string,
+            func: () => this.switchToBundle()
           }]
+          this.setIsBundle(1)
           break
         case 'cancel1':
           this.title = i18n.t('TMP0048') as string
@@ -201,33 +214,30 @@ export default Vue.extend({
           break
         case 'cancel2':
           this.title = i18n.t('TMP0055') as string
-          // this.buttons.func = () => ??? // todo
+          this.buttons[1].func = () => this.cancleSubscription()
           break
       }
+    },
+    preStep() {
+      if (this.view === 'step2') this.changeView('step1')
+      else if (this.view === 'step3') this.changeView('step2')
     },
     setInvoice(key: string, event: InputEvent) {
       this.$store.commit('payment/SET_invoice',
         Object.assign(this.invoice, { [key]: (event.target as HTMLInputElement).value })
       )
     },
-    preStep() {
-      switch (this.view) {
-        case 'step2':
-          this.changeView('step1')
-          break
-        case 'step3':
-          this.changeView('step2')
-          break
-        case 'cancel2':
-          this.changeView('cancle1')
-          break
-      }
-    },
     paid() { // rename?
-      this.userCountry.value === 'TW' ? this.changeView('step3') : this.changeView('finish')
+      this.isTW ? this.changeView('step3') : this.changeView('finish')
+    },
+    setPeriod(isBundle: boolean) {
+      if (this.view === 'step1') { this.setIsBundle(isBundle) }
+    },
+    selectCancelReason(can: string) {
+      this.cancelReason = can
     },
     closePopup() {
-      this.changeView('step1') // todelete
+      // this.changeView('cancel1') // todelete
       this.$emit('close')
     }
   }
@@ -241,8 +251,8 @@ export default Vue.extend({
   width: 900px;
   height: 800px;
   flex-shrink: 0;
-  background-color: white;
-  overflow: auto;
+  background-color: white; // ?
+  overflow: auto; // ?
   text-align: left;
   &__close {
     position: absolute;
@@ -255,39 +265,56 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
   width: calc(50% - 40px);
-  padding: 20px;
+  padding: 140px 20px 160px 20px;
   &-top {
     @include body-MD;
-    align-self: flex-start;
+    width: 100%;
+    position: relative;
     color: setColor(gray-1);
     &__step {
       display: flex;
       align-items: center;
+      position: absolute;
+      top: -60px;
       >svg { margin-right: 15px; }
     }
     &__title {
       @include text-H4;
-      margin: 28px 0 16px;
+      margin-bottom: 16px;
     }
   }
-  &-button {
+  &-content {
     width: 90%;
-    text-align: center;
+    height: 100%;
+  }
+  &-button-description {
+    position: relative;
+    top: 120px;
+  }
+  &-button {
+    // margin-top: auto;
+    display: flex;
+    flex-direction: row-reverse;
+    width: 90%;
     >button {
+      @include btn-LG;
       width: 100%;
       border-radius: 4px;
+    }
+    >button:nth-child(2) {
+      background-color: transparent;
+      color: setColor(blue-1);
     }
   }
 }
 
-.payment-left-content { width: 90%; }
-
-.payment-left-content-period{
+.payment-left-content-period {
   display: grid;
   grid-template-columns: 40px 1fr;
   align-items: center;
-  height: 52px;
+  height: 52px; // ?
   margin: 16px 0;
   padding: 10px;
   border: 1px solid setColor(gray-3);
@@ -298,18 +325,32 @@ export default Vue.extend({
   }
 }
 
-.payment-left-content-invoice{
+.payment-left-content-invoice {
   @include body-SM;
   width: calc(100% - 22px);
-  height: 20px;
+  // height: 20px; // ask kitty
   margin: 5px 0;
   padding: 10px;
   border: 1px solid setColor(gray-3);
   border-radius: 4px;
 }
 
-.payment-right {
-  width: 50%;
+.payment-left-content-cancel {
+  @include body-MD;
+  display: flex;
+  >svg, >div {
+    flex-shrink: 0;
+    margin-right: 15px;
+  }
+  &__other {
+    @include body-SM; // ask kitty
+    width: calc(100% - 22px);
+    height: 20px; // ask kitty
+    margin: 5px 0; // ask kitty
+    padding: 10px;
+    border: 1px solid setColor(gray-3);
+    border-radius: 4px;
+  }
 }
 
 .payment-finish {

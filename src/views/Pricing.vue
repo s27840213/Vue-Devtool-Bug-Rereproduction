@@ -35,10 +35,10 @@
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
           p {{item.A}}
-      popup-payment(initView="step1" @close="closePopup()")
+      //- popup-payment(initView="step1" @close="closePopup()")
       nu-footer
-      //- div(v-if="showPopup" class="popup-window")
-      //-   popup-payment(@close="closePopup()")
+      div(v-if="showPopup" class="popup-window")
+        popup-payment(initView="step1" @close="closePopup()" class="pricing-payment")
 </template>
 
 <script lang="ts">
