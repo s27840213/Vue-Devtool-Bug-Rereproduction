@@ -248,8 +248,8 @@ export default Vue.extend({
 .payment {
   display: flex;
   position: relative;
-  width: 900px;
-  height: 800px;
+  width: min(100vw, 112.5vh);
+  height: min(88.88vw, 100vh);
   flex-shrink: 0;
   background-color: white; // ?
   overflow: auto; // ?
@@ -267,7 +267,7 @@ export default Vue.extend({
   align-items: center;
   position: relative;
   width: calc(50% - 40px);
-  padding: 140px 20px 160px 20px;
+  padding: 17.5% 20px 20% 20px;
   &-top {
     @include body-MD;
     width: 100%;
@@ -290,8 +290,8 @@ export default Vue.extend({
     height: 100%;
   }
   &-button-description {
-    position: relative;
-    top: 120px;
+    position: absolute;
+    bottom: 15%
   }
   &-button {
     // margin-top: auto;

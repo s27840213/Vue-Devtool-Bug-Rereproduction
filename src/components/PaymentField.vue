@@ -100,19 +100,20 @@ export default Vue.extend({
     },
     stripeSubmit() {
       console.log('stripe submit')
-      this.stripe.confirmSetup({
-        elements: this.stripeElement,
-        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountry.value } } } },
-        redirect: 'if_required'
-      }).then((result) => {
-        console.log('stripe res', result)
-        if (result.error) {
-          Vue.notify({ group: 'error', text: result.error.code })
-        } else {
-          this.$emit('paid')
-          Vue.notify({ group: 'copy', text: result.setupIntent.status })
-        }
-      })
+      // this.stripe.confirmSetup({
+      //   elements: this.stripeElement,
+      //   confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountry.value } } } },
+      //   redirect: 'if_required'
+      // }).then((result) => {
+      //   console.log('stripe res', result)
+      //   if (result.error) {
+      //     Vue.notify({ group: 'error', text: result.error.code })
+      //   } else {
+      //     this.$emit('paid')
+      //     Vue.notify({ group: 'copy', text: result.setupIntent.status })
+      //   }
+      // })
+      this.$emit('paid')
     },
     tappayInit() {
       this.payReady = false
