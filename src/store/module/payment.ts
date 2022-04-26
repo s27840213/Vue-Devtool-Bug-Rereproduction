@@ -65,8 +65,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: state.isBundle
     })
   },
-  switchToBundle() {
+  switchToBundle({ commit }) {
     console.log('switchToBundle')
+    commit('SET_isBundle', 1 - state.isBundle)
   },
   cancleSubscription() {
     console.log('cancel')
@@ -95,9 +96,12 @@ const getters: GetterTree<IPaymentState, any> = {
   getPrime(state) {
     return state.prime
   },
-  getPeriod(state) {
-    return state.isBundle ? 'yearly' : 'monthly'
+  getIsBundle(state) {
+    return state.isBundle
   },
+  // getPeriod(state) {
+  //   return state.isBundle ? 'yearly' : 'monthly'
+  // },
   getInvoice(state) {
     return state.invoice
   },

@@ -137,9 +137,12 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       userCountry: 'payment/getUserCountry',
-      userPeriod: 'payment/getPeriod',
+      isBundle: 'payment/getIsBundle',
       isTW: 'payment/isTW'
     }),
+    userPeriod():string {
+      return (this.view === 'switch' ? 1 - this.isBundle : this.isBundle) ? 'yearly' : 'monthly'
+    },
     showPreStep(): boolean {
       return ['step2', 'step3'].includes(this.view)
     },
@@ -198,9 +201,11 @@ export default Vue.extend({
           this.description = i18n.t('TMP0046') as string
           this.buttons = [{
             text: i18n.t('TMP0047') as string,
-            func: () => this.switchToBundle()
+            func: () => {
+              this.switchToBundle()
+              this.closePopup() // refresh or double check?
+            }
           }]
-          this.setIsBundle(1)
           break
         case 'cancel1':
           this.title = i18n.t('TMP0048') as string
@@ -214,7 +219,10 @@ export default Vue.extend({
           break
         case 'cancel2':
           this.title = i18n.t('TMP0055') as string
-          this.buttons[1].func = () => this.cancleSubscription()
+          this.buttons[1].func = () => {
+            this.cancleSubscription()
+            this.closePopup() // refresh or double check?
+          }
           break
       }
     },
@@ -248,8 +256,8 @@ export default Vue.extend({
 .payment {
   display: flex;
   position: relative;
-  width: min(100vw, 112.5vh);
-  height: min(88.88vw, 100vh);
+  width: min(90vw, 101.25vh);
+  height: min(80vw, 90vh);
   flex-shrink: 0;
   background-color: white; // ?
   overflow: auto; // ?

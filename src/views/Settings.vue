@@ -8,6 +8,8 @@
       section(class="settings__view")
         settings-account(v-if="currentView === 'account'")
         settings-security(v-if="currentView === 'security'")
+        settings-payment(v-if="currentView === 'payment'")
+        settings-bill(v-if="currentView === 'bill'")
 </template>
 
 <script lang="ts">
@@ -17,6 +19,7 @@ import Sidebar from '@/components/settings/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
+import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 
 export default Vue.extend({
   name: 'Settings',
@@ -27,7 +30,8 @@ export default Vue.extend({
     Sidebar,
     NuHeader,
     SettingsAccount,
-    SettingsSecurity
+    SettingsSecurity,
+    SettingsPayment
   },
   data() {
     return {
@@ -63,7 +67,7 @@ export default Vue.extend({
   max-height: 100%;
   &__content {
     position: relative;
-    height: calc(100% - 50px);
+    height: calc(100% - #{$header-height});
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: auto 1fr;

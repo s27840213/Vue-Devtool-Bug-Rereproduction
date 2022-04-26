@@ -9,25 +9,20 @@
           div(class="profile-text body-4")
             div {{showUname}}
             div(class="text-gray-3") {{showAccount}}
-        div(class="nav-container__option"
-          :class="{'selected': subPath === 'account'}")
-          router-link(to="/settings/account"
-            class="nav-container__option__link")
-            svg-icon(:iconName="'settings'"
-              :iconWidth="'15px'"
-              :iconColor="'gray-2'")
-            span {{$tc('NN0165', 1)}}
-        div(class="nav-container__option"
-          :class="{'selected': subPath === 'security'}")
-          router-link(to="/settings/security"
-            class="nav-container__option__link")
-            svg-icon(:iconName="'lock'"
-              :iconWidth="'15px'"
-              :iconColor="'gray-2'")
-            span {{$tc('NN0166', 1)}}
+        template(v-for="view in viewList")
+          hr(v-if="view.name === 'hr'")
+          div(v-else class="nav-container__option"
+              :class="{'selected': subPath === view.name}")
+            router-link(:to="`/settings/${view.name}`"
+              class="nav-container__option__link")
+              svg-icon(:iconName="view.icon"
+                :iconWidth="'15px'"
+                :iconColor="'gray-2'")
+              span {{view.label}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
+import i18n from '@/i18n'
 import router from '@/router'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
@@ -41,7 +36,26 @@ export default Vue.extend({
   },
   data() {
     return {
-      optionSelected: ''
+      optionSelected: '',
+      viewList: [{
+        name: 'account',
+        label: i18n.tc('NN0165', 1),
+        icon: 'settings'
+      }, {
+        name: 'security',
+        label: i18n.tc('NN0166', 1),
+        icon: 'lock'
+      }, {
+        name: 'hr'
+      }, {
+        name: 'payment',
+        label: i18n.t('TMP0063'),
+        icon: 'pro'
+      }, {
+        name: 'bill',
+        label: i18n.t('TMP0064'),
+        icon: 'invoice'
+      }]
     }
   },
   created() {
@@ -85,6 +99,9 @@ export default Vue.extend({
         case 'security':
           targetPath = '/settings/security'
           break
+        case 'payment':
+          targetPath = '/settings/payment'
+          break
       }
       router.replace({ path: targetPath })
     }
@@ -116,6 +133,11 @@ export default Vue.extend({
   width: fit-content;
   min-width: 100%;
   padding-top: 30px;
+  >hr {
+    width: 90%;
+    margin-right: 0;
+    border: 0.5px solid setColor(gray-4);
+  }
   &__profile {
     display: flex;
     padding-left: 10px;
