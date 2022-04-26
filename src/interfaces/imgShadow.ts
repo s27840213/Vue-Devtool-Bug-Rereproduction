@@ -3,7 +3,7 @@ export enum ShadowEffectType {
   shadow = 'shadow',
   imageMatched = 'imageMatched',
   frame = 'frame',
-  projection = 'projection',
+  floating = 'floating',
   blur = 'blur',
 }
 export interface IShadowEffect {
@@ -34,13 +34,13 @@ export interface IImageMatchedEffect {
   radius: number,
   opacity: number
 }
-export interface IProjectionEffect {
+export interface IFloatingEffect {
   [key: string]: number
-  spread: number,
   radius: number,
   x: number,
   y: number,
   opacity: number,
+  thinkness: number
   size: number
 }
 
@@ -50,7 +50,7 @@ export interface IShadowEffects {
   blur?: IBlurEffect,
   frame?: IFrameEffect,
   imageMatched?: IImageMatchedEffect,
-  projection?: IProjectionEffect
+  floating?: IFloatingEffect
 }
 export interface IShadowProps {
   currentEffect: ShadowEffectType,

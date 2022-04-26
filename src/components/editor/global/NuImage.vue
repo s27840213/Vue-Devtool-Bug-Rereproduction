@@ -8,7 +8,7 @@
         :src="src"
         :styles="adjustImgStyles"
         :style="flipStyles()")
-    div(v-if="showCanvas"
+    div(v-if="showCanvas && !isAdjustImage"
       class="canvas__wrapper"
       :style="canvasWrapperStyle()")
       canvas(ref="canvas")
@@ -38,7 +38,7 @@ import frameUtils from '@/utils/frameUtils'
 import { IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
-import imgShadowUtils, { CANVAS_SCALE, CANVAS_SIZE } from '@/utils/imageShadowUtils'
+import imgShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, CANVAS_SIZE } from '@/utils/imageShadowUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ILayerInfo, LayerType } from '@/store/types'
 
@@ -241,7 +241,7 @@ export default Vue.extend({
     canvasWrapperStyle() {
       return {
         width: `${this.config.styles.initWidth * this.canvasScale}px`,
-        height: `${this.config.styles.initHeight * this.canvasScale}px`,
+        height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating ? CANVAS_FLOATING_SCALE : this.canvasScale)}px`,
         transform: `scale(${this.config.styles.scale})`,
         display: this.isCanvasReady ? 'block' : 'none'
       }
@@ -341,7 +341,7 @@ export default Vue.extend({
       if (!canvas) {
         return
       }
-
+      imgShadowUtils.clearLayerData()
       const { currentEffect } = this.shadow
       switch (currentEffect) {
         case ShadowEffectType.shadow:
@@ -362,7 +362,6 @@ export default Vue.extend({
               canvas.setAttribute('width', `${previewImg.naturalWidth * CANVAS_SCALE}`)
               canvas.setAttribute('height', `${previewImg.naturalHeight * CANVAS_SCALE}`)
               this.canvasShadowImg = previewImg
-              imgShadowUtils.clearLayerData()
               imgShadowUtils.draw(canvas, previewImg, this.config, {
                 layerInfo,
                 cb: () => {
@@ -381,7 +380,6 @@ export default Vue.extend({
             canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
             canvas.setAttribute('height', `${img.naturalHeight * CANVAS_SCALE}`)
           }
-          imgShadowUtils.clearLayerData()
           imgShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
             layerInfo,
             cb: () => {
@@ -390,7 +388,20 @@ export default Vue.extend({
           })
           break
         }
-        case ShadowEffectType.projection:
+        case ShadowEffectType.floating: {
+          const img = this.$refs.img as HTMLImageElement
+          if (canvas.height !== img.naturalHeight * CANVAS_FLOATING_SCALE) {
+            canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
+            canvas.setAttribute('height', `${img.naturalHeight * CANVAS_FLOATING_SCALE}`)
+          }
+          imgShadowUtils.drawFloatingShadow(canvas, img, this.config, {
+            layerInfo,
+            cb: () => {
+              this.isCanvasReady = true
+            }
+          })
+          break
+        }
         case ShadowEffectType.none:
           this.canvasShadowImg = undefined
       }
@@ -411,21 +422,23 @@ export default Vue.extend({
         switch (this.currentShadowEffect) {
           case ShadowEffectType.shadow:
           case ShadowEffectType.blur:
-          case ShadowEffectType.frame: {
+          case ShadowEffectType.frame:
             if (this.canvasShadowImg) {
               imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
                 layerInfo
               })
             }
             break
-          }
-          case ShadowEffectType.imageMatched: {
+          case ShadowEffectType.imageMatched:
             imgShadowUtils.drawImageMatchedShadow(canvas, this.$refs.img as HTMLImageElement, this.config, {
               layerInfo
             })
             break
-          }
-          case ShadowEffectType.projection:
+          case ShadowEffectType.floating:
+            imgShadowUtils.drawFloatingShadow(canvas, this.$refs.img as HTMLImageElement, this.config, {
+              layerInfo
+            })
+            break
           case ShadowEffectType.none:
             break
           default:

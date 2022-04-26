@@ -96,7 +96,7 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, LayerType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils, { CANVAS_SCALE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import imageShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
@@ -132,7 +132,6 @@ export default Vue.extend({
     if (layerData) {
       const { config, primarylayerId } = layerData
       const { height: _height } = config.styles
-      const updateCanvas = document.createElement('canvas')
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const img = new Image()
       img.crossOrigin = 'anonynous'
@@ -140,11 +139,29 @@ export default Vue.extend({
       await new Promise<void>((resolve) => {
         img.onload = () => resolve()
       })
+
+      const updateCanvas = document.createElement('canvas')
       updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
       updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_SCALE).toString())
 
-      await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0 })
-
+      switch (config.styles.shadow.currentEffect) {
+        case ShadowEffectType.shadow:
+        case ShadowEffectType.blur:
+        case ShadowEffectType.frame:
+          await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0 })
+          break
+        case ShadowEffectType.imageMatched:
+          await imageShadowUtils.drawImageMatchedShadow(updateCanvas, img, config, { timeout: 0 })
+          break
+        case ShadowEffectType.floating:
+          updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_FLOATING_SCALE).toString())
+          await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0 })
+          break
+        case ShadowEffectType.none:
+          return
+        default:
+          generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
+      }
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
       const topShadowThickness = ((updateCanvas.height - img.naturalHeight) * 0.5 - top) / img.naturalHeight
@@ -152,13 +169,13 @@ export default Vue.extend({
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
       uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
-      const ctx = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
+      const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
 
       const drawnImg = new Image()
       drawnImg.src = updateCanvas.toDataURL('image/png;base64', 1)
       await new Promise<void>((resolve) => {
         drawnImg.onload = () => {
-          ctx.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
+          ctxUpload.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
           resolve()
         }
       })
@@ -199,7 +216,7 @@ export default Vue.extend({
               imgY: 0,
               scale: 1,
               x: target.styles.x - target.styles.width * leftShadowThickness,
-              y: target.styles.y - target.styles.height * topShadowThickness
+              y: target.styles.y - target.styles.height * (this.currentEffect === ShadowEffectType.floating ? 0 : topShadowThickness)
             }
             target.srcObj = srcObj
             Object.assign(target.styles, styles)
@@ -268,7 +285,7 @@ export default Vue.extend({
         blur: imageShadowUtils.getKeysOf(ShadowEffectType.blur),
         imageMatched: imageShadowUtils.getKeysOf(ShadowEffectType.imageMatched),
         frame: imageShadowUtils.getKeysOf(ShadowEffectType.frame),
-        projection: imageShadowUtils.getKeysOf(ShadowEffectType.projection)
+        floating: imageShadowUtils.getKeysOf(ShadowEffectType.floating)
       }
     }
   },
