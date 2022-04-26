@@ -115,8 +115,6 @@ class ImageShadowUtils {
     const drawCanvasWidth = img.naturalWidth * size * 0.01
     const blurImgX = (canvas.width - drawCanvasWidth) * 0.5
     const blurImgY = (canvas.height - drawCanvasHeight) * 0.5
-    const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-    const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
 
     canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
     canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
@@ -134,6 +132,7 @@ class ImageShadowUtils {
             canvasMaxSize.setAttribute('width', `${canvas.width}`)
             canvasMaxSize.setAttribute('height', `${canvas.height}`)
           }
+          // ctxT.roundRect(0, 0, 200, 100, 8);
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
           imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.7) + 1)

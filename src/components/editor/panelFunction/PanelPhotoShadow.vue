@@ -119,7 +119,7 @@ export default Vue.extend({
     return {
       shadowPropI18nMap,
       fieldRange,
-      notUpload: true
+      notUpload: false
     }
   },
   mounted() {
@@ -171,6 +171,7 @@ export default Vue.extend({
 
       uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], {
         addToPage: false,
+        needCompressed: false,
         pollingCallback: (json: IUploadAssetResponse) => {
           const srcObj = {
             type: this.isAdmin ? 'public' : 'private',
