@@ -37,7 +37,7 @@
                       @select="selectCancelReason(can)")
             span {{can}}
           input(class="payment-left-content-cancel__other"
-                v-model="otherReason" :placeholder="$t('TMP0062')")
+                v-model="otherReason" :placeholder="$t('TMP0065')")
       p(v-if="view === 'step1'"
         class="payment-left-button-description") {{$t('TMP0042')}}
       div(class="payment-left-button")
@@ -97,33 +97,33 @@ export default Vue.extend({
       invoiceInput: [{
         label: 'email',
         type: 'email',
-        ph: 'Email'
+        ph: i18n.tc('NN0173', 1)
       }, {
         name: 'name',
         type: 'text',
-        ph: '姓名'
+        ph: i18n.t('NN0172')
       }, {
         name: 'phone',
         type: 'tel',
-        ph: '電話號碼'
+        ph: i18n.t('TMP0045')
       }, {
         name: 'GUI',
         type: 'text',
-        ph: '統一編號(選填)'
+        ph: i18n.t('TMP0046')
       }],
       cancel1: [
-        i18n.t('TMP0049'),
-        i18n.t('TMP0050'),
-        i18n.t('TMP0051'),
-        i18n.t('TMP0052')
+        i18n.t('TMP0052'),
+        i18n.t('TMP0053'),
+        i18n.t('TMP0054'),
+        i18n.t('TMP0055')
       ],
       cancel2: [
-        i18n.t('TMP0056'),
-        i18n.t('TMP0057'),
-        i18n.t('TMP0058'),
         i18n.t('TMP0059'),
         i18n.t('TMP0060'),
-        i18n.t('TMP0061')
+        i18n.t('TMP0061'),
+        i18n.t('TMP0062'),
+        i18n.t('TMP0063'),
+        i18n.t('TMP0064')
       ],
       cancelReason: '', // todo move to store
       otherReason: ''
@@ -185,9 +185,9 @@ export default Vue.extend({
           break
         case 'step3':
           this.currentStep = 3
-          this.title = '發票資訊'
+          this.title = i18n.t('TMP0044') as string
           this.buttons = [{
-            text: i18n.t('TMP0044') as string,
+            text: i18n.t('TMP0047') as string,
             func: () => {
               this.tappayAdd()
               this.changeView('finish')
@@ -197,10 +197,10 @@ export default Vue.extend({
         case 'finish':
           break
         case 'switch':
-          this.title = i18n.t('TMP0045') as string
-          this.description = i18n.t('TMP0046') as string
+          this.title = i18n.t('TMP0048') as string
+          this.description = i18n.t('TMP0049') as string
           this.buttons = [{
-            text: i18n.t('TMP0047') as string,
+            text: i18n.t('TMP0050') as string,
             func: () => {
               this.switchToBundle()
               this.closePopup() // refresh or double check?
@@ -208,17 +208,17 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0048') as string
+          this.title = i18n.t('TMP0051') as string
           this.buttons = [{
-            text: i18n.t('TMP0054') as string,
+            text: i18n.t('TMP0057') as string,
             func: () => this.closePopup()
           }, {
-            text: i18n.t('TMP0053') as string,
+            text: i18n.t('TMP0056') as string,
             func: () => this.changeView('cancel2')
           }]
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0055') as string
+          this.title = i18n.t('TMP0058') as string
           this.buttons[1].func = () => {
             this.cancleSubscription()
             this.closePopup() // refresh or double check?
