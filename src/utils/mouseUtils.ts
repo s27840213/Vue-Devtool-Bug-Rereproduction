@@ -11,34 +11,45 @@ import groupUtils from './groupUtils'
 import zindexUtils from './zindexUtils'
 import AssetUtils from './assetUtils'
 import generalUtils from './generalUtils'
-import FrameUtils from './frameUtils'
-import { drop } from 'lodash'
-import { Layer } from 'konva/types/Layer'
-import page from '@/store/module/page'
-import imageUtils from './imageUtils'
-import pageUtils from './pageUtils'
-import uploadUtils from './uploadUtils'
-
 class MouseUtils {
-  getMouseAbsPoint(e: MouseEvent) {
-    return { x: e.clientX, y: e.clientY }
+  private getEventType(e: MouseEvent | TouchEvent | PointerEvent) {
+    if (e.type.includes('pointer')) {
+      return 'pointer'
+    } else if (e.type.includes('mouse')) {
+      return 'mouse'
+    } else {
+      return 'touch'
+    }
   }
 
-  getMouseRelPoint(e: MouseEvent, target: HTMLElement | { x: number, y: number }) {
+  getMouseAbsPoint(e: MouseEvent | TouchEvent | PointerEvent) {
+    const type = this.getEventType(e)
+    const x = type === 'pointer' ? (e as PointerEvent).clientX : type === 'mouse' ? (e as MouseEvent).clientX : (e as TouchEvent).touches[0].clientX
+    const y = type === 'pointer' ? (e as PointerEvent).clientY : type === 'mouse' ? (e as MouseEvent).clientY : (e as TouchEvent).touches[0].clientY
+    return {
+      x,
+      y
+    }
+  }
+
+  getMouseRelPoint(e: MouseEvent | TouchEvent | PointerEvent, target: HTMLElement | { x: number, y: number }) {
     let x: number
     let y: number
+    const type = this.getEventType(e)
+    const clientX = type === 'pointer' ? (e as PointerEvent).clientX : type === 'mouse' ? (e as MouseEvent).clientX : (e as TouchEvent).touches[0].clientX
+    const clientY = type === 'pointer' ? (e as PointerEvent).clientY : type === 'mouse' ? (e as MouseEvent).clientY : (e as TouchEvent).touches[0].clientY
     if (target instanceof HTMLElement) {
       const rect = target.getBoundingClientRect()
-      x = e.clientX + target.scrollLeft - rect.left
-      y = e.clientY + target.scrollTop - rect.top
+      x = clientX + target.scrollLeft - rect.left
+      y = clientY + target.scrollTop - rect.top
     } else {
-      x = e.clientX - target.x
-      y = e.clientY - target.y
+      x = clientX - target.x
+      y = clientY - target.y
     }
     return { x, y }
   }
 
-  getMousePosInPage(e: MouseEvent, pageIndex: number): { x: number, y: number } {
+  getMousePosInPage(e: MouseEvent | TouchEvent | PointerEvent, pageIndex: number): { x: number, y: number } {
     const target = store.getters['bgRemove/getInBgRemoveMode'] ? document.getElementsByClassName('bg-remove-area')[0] as HTMLElement : document.getElementsByClassName(`nu-page-${pageIndex}`)[0] as HTMLElement
     const mouseRelPos = this.getMouseRelPoint(e, target)
     return {

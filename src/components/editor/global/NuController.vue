@@ -17,12 +17,14 @@
         @dragenter="dragEnter($event)"
         @dragleave="dragLeave($event)"
         @dragover.prevent
-        @click.right.stop="onRightClick"
-        @contextmenu.prevent
-        @mousedown.left="moveStart"
+        @click.right.stop="!isMobile() && onRightClick"
+        @contextmenu="handleContextMenu"
+        @pointerdown.prevent="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
+      //- @mousedown.left="moveStart"
+      //- @touchstart.prevent="moveStart"
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
@@ -151,6 +153,7 @@ import pageUtils from '@/utils/pageUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
+import eventUtils from '@/utils/eventUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -591,11 +594,11 @@ export default Vue.extend({
     hintStyles() {
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
-    moveStart(e: MouseEvent) {
+    moveStart(event: MouseEvent | PointerEvent) {
       this.movingByControlPoint = false
-      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && !this.contentEditable
+      const inSelectionMode = generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) && !this.contentEditable
       if (!this.isLocked) {
-        e.stopPropagation()
+        event.stopPropagation()
       }
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
@@ -605,7 +608,7 @@ export default Vue.extend({
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
             dragging: true
           })
-          const targetClassList = (e.target as HTMLElement).classList
+          const targetClassList = (event.target as HTMLElement).classList
           const isMoveBar = targetClassList.contains('control-point__move-bar')
           const isMover = targetClassList.contains('control-point__mover')
           if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
@@ -624,10 +627,9 @@ export default Vue.extend({
             }
             if (!this.config.locked) {
               this.isControlling = true
-              this.initialPos = MouseUtils.getMouseAbsPoint(e)
-              window.addEventListener('mouseup', this.moveEnd)
-              window.addEventListener('mousemove', this.moving)
-              // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+              this.initialPos = MouseUtils.getMouseAbsPoint(event)
+              eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+              eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.moving)
             }
             return
           }
@@ -646,10 +648,9 @@ export default Vue.extend({
           }
       }
       if (!this.config.locked && !inSelectionMode) {
-        this.initialPos = MouseUtils.getMouseAbsPoint(e)
-        window.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
-        // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+        eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.moving)
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -682,12 +683,11 @@ export default Vue.extend({
         }
       }
     },
-    moving(e: MouseEvent) {
+    moving(e: MouseEvent | TouchEvent | PointerEvent) {
       this.isControlling = true
       if (this.isImgControl) {
-        window.removeEventListener('mouseup', this.moveEnd)
-        window.removeEventListener('mousemove', this.moving)
-        // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+        eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.moving)
         return
       }
       if (this.isActive) {
@@ -773,9 +773,8 @@ export default Vue.extend({
         }
         this.isControlling = false
         this.setCursorStyle('')
-        window.removeEventListener('mouseup', this.moveEnd)
-        window.removeEventListener('mousemove', this.moving)
-        // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+        eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.moving)
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
