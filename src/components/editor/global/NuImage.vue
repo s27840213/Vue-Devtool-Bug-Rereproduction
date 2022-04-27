@@ -351,6 +351,10 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (this.canvasShadowImg) {
+            if (canvas.width !== this.canvasShadowImg.naturalWidth * CANVAS_SCALE) {
+              canvas.setAttribute('width', `${this.canvasShadowImg.naturalWidth * CANVAS_SCALE}`)
+              canvas.setAttribute('height', `${this.canvasShadowImg.naturalHeight * CANVAS_SCALE}`)
+            }
             imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
               layerInfo: {
                 pageIndex: this.pageIndex,

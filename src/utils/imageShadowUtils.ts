@@ -24,7 +24,6 @@ export interface DrawOptions {
 }
 class ImageShadowUtils {
   private readonly SPREAD_RADIUS = 1
-
   /**
    * canvasT used to draw the corresponding size of the input image,
    * as a temporarily operating canvas.
@@ -60,9 +59,11 @@ class ImageShadowUtils {
     if (!this._layerData) {
       const { canvasT } = this
       const ctxT = canvasT.getContext('2d')
-      canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
-      canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
-      if (ctxT) {
+      if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
+        canvasT.setAttribute('width', `${canvas.width}`)
+        canvasT.setAttribute('height', `${canvas.height}`)
+      }
+      if (ctxT && [ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
         const isTransparentBg = this.isTransparentBg(canvasT)
         this._layerData = { img, config, isTransparentBg }
@@ -109,8 +110,10 @@ class ImageShadowUtils {
 
     layerInfo && this.setIsProcess(layerInfo, true)
 
-    canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
-    canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
+    if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
+      canvasT.setAttribute('width', `${canvas.width}`)
+      canvasT.setAttribute('height', `${canvas.height}`)
+    }
 
     // document.body.append(canvasMaxSize)
     // setTimeout(() => document.body.removeChild(canvasMaxSize), 15000)
@@ -178,9 +181,9 @@ class ImageShadowUtils {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
+        layerInfo && this.setIsProcess(layerInfo, false)
+        console.log('floating final')
       }
-
-      this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
     })
     cb && cb()
   }
@@ -227,8 +230,10 @@ class ImageShadowUtils {
     const blurImgX = (canvas.width - drawCanvasWidth) * 0.5
     const blurImgY = (canvas.height - drawCanvasHeight) * 0.5
 
-    canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
-    canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
+    if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
+      canvasT.setAttribute('width', `${canvas.width}`)
+      canvasT.setAttribute('height', `${canvas.height}`)
+    }
 
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
@@ -274,9 +279,8 @@ class ImageShadowUtils {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
+        layerInfo && this.setIsProcess(layerInfo, false)
       }
-
-      this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
     })
     cb && cb()
   }
@@ -292,7 +296,6 @@ class ImageShadowUtils {
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
-      console.log('start drawing')
       const { canvasT, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
       const ctxMaxSize = canvasMaxSize.getContext('2d')
@@ -300,6 +303,7 @@ class ImageShadowUtils {
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
+      layerInfo && this.setIsProcess(layerInfo, true)
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
       const imgX = _imgX * scaleRatio
@@ -316,13 +320,14 @@ class ImageShadowUtils {
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
 
-      canvasT.width !== canvas.width && canvasT.setAttribute('width', `${canvas.width}`)
-      canvasT.height !== canvas.height && canvasT.setAttribute('height', `${canvas.height}`)
+      if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
+        canvasT.setAttribute('width', `${canvas.width}`)
+        canvasT.setAttribute('height', `${canvas.height}`)
+      }
 
       let alphaVal = 1
       /** Calculating the spread */
       if (this.dataBuff.spread !== unifiedSpread || this.dataBuff.effect !== currentEffect || this.dataBuff.size !== img.naturalHeight) {
-        layerInfo && this.setIsProcess(layerInfo, true)
         this.dataBuff.effect = currentEffect
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
@@ -346,7 +351,6 @@ class ImageShadowUtils {
         this.dataBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
         this.dataBuff.size = img.naturalHeight
         this.dataBuff.spread = unifiedSpread
-        this.handlerId === handlerId && layerInfo && this.setIsProcess(layerInfo, false)
       } else {
         ctxT.putImageData(this.dataBuff.data, 0, 0)
       }
@@ -376,6 +380,8 @@ class ImageShadowUtils {
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
           ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
+          console.log('canvasT.height', canvasT.height)
+          console.log('canvas.height', canvas.height)
 
           ctxT.globalCompositeOperation = 'source-in'
           ctxT.globalAlpha = opacity / 100
@@ -386,15 +392,18 @@ class ImageShadowUtils {
           ctxT.globalCompositeOperation = 'source-over'
           /** only draw the origin image over the canvas as uploading */
           if (!timeout) {
+            ctxT.save()
+            ctxT.filter = 'url(#filter__RWeW0)'
             ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+            ctxT.restore()
           }
 
+          // ctx.filter = 'url(#filter__RWeW0)'
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
+          layerInfo && this.setIsProcess(layerInfo, false)
+          console.log('draw final')
         }
-
-        ctxT.restore()
-        ctxMaxSize.restore()
       })
       cb && cb()
     }
