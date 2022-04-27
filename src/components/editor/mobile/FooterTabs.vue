@@ -48,7 +48,7 @@ export default Vue.extend({
       ] as Array<IFooterTab>,
       photoTabs: [
         mainMenu,
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo' },
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo', disabled: true },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },

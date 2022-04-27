@@ -83,9 +83,12 @@
             class="control-point scaler"
             :key="index"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
-            @pointerdown.left.stop.prevent="scaleStart")
-        div(v-for="(resizer, index) in resizer(controlPoints)"
-            @mousedown.left.stop="resizeStart($event)")
+            @mousedown.left.stop="scaleStart"
+            @touchstart.prevent.stop="scaleStart")
+        template(v-if="!isMobile")
+          div(v-for="(resizer, index) in resizer(controlPoints)"
+            @mousedown.left.stop="resizeStart($event)"
+            @touchstart.prevent.stop="resizeStart($event)")
           div(class="control-point__resize-bar"
               :key="index"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
