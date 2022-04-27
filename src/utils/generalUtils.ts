@@ -147,6 +147,10 @@ class GeneralUtils {
     a.click()
   }
 
+  isMobile(): boolean {
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
+  }
+
   assertUnreachable(_: never): never {
     throw new Error("Didn't expect to get here")
   }

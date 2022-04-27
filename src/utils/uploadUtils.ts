@@ -281,7 +281,8 @@ class UploadUtils {
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original-rb')}`)
+      // formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original-rb')}`)
+      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('original')}`)
       formData.append('x-amz-meta-tn', needCompressed ? this.userId : `${this.userId},1`)
       const xhr = new XMLHttpRequest()
 
