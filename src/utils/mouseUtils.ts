@@ -17,8 +17,11 @@ class MouseUtils {
       return 'pointer'
     } else if (e.type.includes('mouse')) {
       return 'mouse'
-    } else {
+    } else if (e.type.includes('touch')) {
       return 'touch'
+    } else {
+      // default
+      return 'mouse'
     }
   }
 

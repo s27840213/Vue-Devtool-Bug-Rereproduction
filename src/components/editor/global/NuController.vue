@@ -17,14 +17,12 @@
         @dragenter="dragEnter($event)"
         @dragleave="dragLeave($event)"
         @dragover.prevent
-        @click.right.stop="!isMobile() && onRightClick"
-        @contextmenu="handleContextMenu"
+        @click.right.stop="onRightClick"
+        @contextmenu.prevent
         @pointerdown.prevent="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      //- @mousedown.left="moveStart"
-      //- @touchstart.prevent="moveStart"
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
@@ -84,7 +82,7 @@
             class="control-point scaler"
             :key="index"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
-            @mousedown.left.stop="scaleStart")
+            @pointerdown.left.stop.prevent="scaleStart")
         div(v-for="(resizer, index) in resizer(controlPoints)"
             @mousedown.left.stop="resizeStart($event)")
           div(class="control-point__resize-bar"
@@ -213,8 +211,8 @@ export default Vue.extend({
     }
   },
   beforeDestroy() {
-    window.removeEventListener('mouseup', this.moveEnd)
-    window.removeEventListener('mousemove', this.moving)
+    eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+    eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.moving)
     // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
@@ -319,6 +317,9 @@ export default Vue.extend({
     },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
+    },
+    isMobile(): boolean {
+      return generalUtils.isMobile()
     }
   },
   watch: {
@@ -370,8 +371,8 @@ export default Vue.extend({
     /**
      * While image is setted to frame, these event-listener should be removed
      */
-    window.removeEventListener('mouseup', this.moveEnd)
-    window.removeEventListener('mousemove', this.moving)
+    eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+    eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.moving)
     this.isControlling = false
     this.setCursorStyle('')
     this.setMoving(false)
@@ -782,7 +783,7 @@ export default Vue.extend({
 
       this.$emit('clearSnap')
     },
-    scaleStart(event: MouseEvent) {
+    scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
 
@@ -809,10 +810,10 @@ export default Vue.extend({
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
       this.currCursorStyling(event)
-      document.documentElement.addEventListener('mousemove', this.scaling, false)
-      document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
-      document.documentElement.addEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.addEventListener('keydown', this.handleScaleOffset)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.scaling)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
+      window.addEventListener('keyup', this.handleScaleOffset)
+      window.addEventListener('keydown', this.handleScaleOffset)
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
@@ -974,10 +975,10 @@ export default Vue.extend({
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.scaling, false)
-      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
-      document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.scaling)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
+      window.removeEventListener('keyup', this.handleScaleOffset)
+      window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
@@ -1003,8 +1004,8 @@ export default Vue.extend({
       this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
 
       this.currCursorStyling(event)
-      document.documentElement.addEventListener('mousemove', this.lineEndMoving, false)
-      document.documentElement.addEventListener('mouseup', this.lineEndMoveEnd, false)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.lineEndMoving)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.lineEndMoveEnd)
     },
     lineEndMoving(event: MouseEvent) {
       event.preventDefault()
@@ -1039,8 +1040,8 @@ export default Vue.extend({
       StepsUtils.record()
 
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
-      document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.lineEndMoving)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.lineEndMoveEnd)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
@@ -1069,10 +1070,10 @@ export default Vue.extend({
       this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
         this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
 
-      document.documentElement.addEventListener('mousemove', this.resizing)
-      document.documentElement.addEventListener('mouseup', this.resizeEnd)
-      document.documentElement.addEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.addEventListener('keydown', this.handleScaleOffset)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.resizing)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.resizeEnd)
+      window.addEventListener('keyup', this.handleScaleOffset)
+      window.addEventListener('keydown', this.handleScaleOffset)
       switch (this.getLayerType) {
         case 'shape':
           if (this.config.category === 'B') {
@@ -1235,10 +1236,10 @@ export default Vue.extend({
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.resizing)
-      document.documentElement.removeEventListener('mouseup', this.resizeEnd)
-      document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.resizing)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.resizeEnd)
+      window.removeEventListener('keyup', this.handleScaleOffset)
+      window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent) {
@@ -1261,8 +1262,8 @@ export default Vue.extend({
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
-      window.addEventListener('mousemove', this.rotating)
-      window.addEventListener('mouseup', this.rotateEnd)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.rotating)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.rotateEnd)
     },
     rotating(event: MouseEvent) {
       if (!this.config.moved) {
@@ -1301,8 +1302,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('')
-      window.removeEventListener('mousemove', this.rotating)
-      window.removeEventListener('mouseup', this.rotateEnd)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.rotating)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.rotateEnd)
       this.$emit('setFocus')
     },
     lineRotateStart(event: MouseEvent) {
@@ -1326,8 +1327,8 @@ export default Vue.extend({
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
-      window.addEventListener('mousemove', this.lineRotating)
-      window.addEventListener('mouseup', this.lineRotateEnd)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.lineRotating)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.lineRotateEnd)
     },
     lineRotating(event: MouseEvent) {
       if (!this.config.moved) {
@@ -1369,8 +1370,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('')
-      window.removeEventListener('mousemove', this.lineRotating)
-      window.removeEventListener('mouseup', this.lineRotateEnd)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerMove, this.lineRotating)
+      eventUtils.removeointerEvent(eventUtils.EventType.pointerUp, this.lineRotateEnd)
       this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
@@ -1394,7 +1395,7 @@ export default Vue.extend({
         document.body.style.cursor = cursor
       }
     },
-    currCursorStyling(e: MouseEvent) {
+    currCursorStyling(e: MouseEvent | TouchEvent | PointerEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
@@ -1612,7 +1613,7 @@ export default Vue.extend({
           // custome emit event will not contain the keypress information, so we need to manually append it
           altKey: e.altKey
         })
-        document.documentElement.dispatchEvent(event)
+        window.dispatchEvent(event)
       }
     }
     // scrollUpdate() {

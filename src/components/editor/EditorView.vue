@@ -6,6 +6,7 @@
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
+      @contextmenu.prevent
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
