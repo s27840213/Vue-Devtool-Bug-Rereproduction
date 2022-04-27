@@ -3,7 +3,7 @@
     nu-header(v-header-border)
     div(class="pricing-content")
       div(class="pricing-top")
-        span(class="pricing-top__title" v-html="title")
+        span(class="pricing-top__title" v-html="$t('TMP0001')")
         span(class="pricing-top__description") {{$t('TMP0002')}}
       div(class="pricing-plan")
         div(class="pricing-plan-left")
@@ -34,7 +34,7 @@
         details(v-for="item in faqs")
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-          p {{item.A}}
+          p(v-html="item.A")
       //- popup-payment(initView="step1" @close="closePopup()")
       nu-footer
       div(v-if="showPopup" class="popup-window")
@@ -78,13 +78,6 @@ export default Vue.extend({
         { Q: i18n.t('TMP0034'), A: i18n.t('TMP0035') },
         { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') }
       ]
-    }
-  },
-  computed: {
-    title(): string { // Reuse?
-      return (i18n.t('TMP0001') as string)
-        .replace('<blue>', '<span class="text-blue-1">')
-        .replace('</blue>', '</span>')
     }
   },
   methods: {

@@ -54,7 +54,7 @@ export default Vue.extend({
       isTW: 'payment/isTW'
     }),
     submitText(): string {
-      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0044')) as string
+      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0047')) as string
     }
   },
   mounted() {

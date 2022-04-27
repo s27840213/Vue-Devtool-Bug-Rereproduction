@@ -46,8 +46,8 @@
           span {{button.text}}
     //- move to jpg folder, compress?
     img(class="payment-right" :src="require(`@/assets/img/svg/pricing/${img}`)")
-    img(v-if="view === 'finish'" class="payment-finish"
-        src="@/assets/img/svg/pricing/finish.svg")
+    div(v-if="view === 'finish'" class="payment-finish")
+      animation(path="/lottie/us/pro.json")
 
 </template>
 
@@ -58,12 +58,14 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
+import Animation from '@/components/Animation.vue'
 
 export default Vue.extend({
   name: 'PopupPayment',
   components: {
     PaymentField,
-    RadioBtn
+    RadioBtn,
+    Animation
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -362,8 +364,16 @@ export default Vue.extend({
 }
 
 .payment-finish {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
-  left: 10%;
-  width: 80%;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  .animation {
+    width: min(80vh, 80vw);
+    height: min(80vh, 80vw);
+  }
 }
 </style>

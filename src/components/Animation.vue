@@ -33,7 +33,7 @@ export default Vue.extend({
       default: -1
     },
     // The following is for lottie
-    lottieName: { // required if type is lottie
+    lottieName: { // required if type is lottie and source image in /image folder
       type: String
     },
     speed: {

@@ -4,7 +4,7 @@
     div(class="home-content")
       div(class="home-top")
         div(class="home-top-text")
-          span(class="home-top-text__title" v-html="title")
+          span(class="home-top-text__title" v-html="$t('NN0464')")
           span(class="home-top-text__description") {{$t('NN0465')}}
           animation(v-for="cb in colorBlock"
             :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
@@ -112,11 +112,6 @@ export default Vue.extend({
     ...mapState({
       isMobile: 'isMobile'
     }),
-    title(): string {
-      return (i18n.t('NN0464') as string)
-        .replace('<blue>', '<span class="text-blue-1">')
-        .replace('</blue>', '</span>')
-    },
     blocklist(): ReturnType<typeof blocklistData.data> {
       const blocklist = blocklistData.data().filter((item) => {
         return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')

@@ -11,6 +11,11 @@ interface IPaymentState {
     phone: string
     GUI: string
   }
+  nextPrice: string
+  nextPaidDate: string
+  bgrmCredit: number
+  lastFour: string
+  expireDate: string
 }
 
 const getDefaultState = (): IPaymentState => ({
@@ -22,7 +27,12 @@ const getDefaultState = (): IPaymentState => ({
     name: '',
     phone: '',
     GUI: ''
-  }
+  },
+  nextPrice: '$8.99',
+  nextPaidDate: 'May 14, 2022',
+  bgrmCredit: 88,
+  lastFour: '4242',
+  expireDate: '06/2028'
 })
 
 const state = getDefaultState()

@@ -1,81 +1,102 @@
 <template lang="pug">
   div(class="sp")
-    div(class="sp-plan")
+    div(class="sp-free")
+      p(class="text-blue-1")            {{$t('TMP0068')}}
+      svg-icon(iconName="free")
+    div(class="sp-pro")
       p(class="text-blue-1")            {{$t('TMP0068')}}
       svg-icon(iconName="pro")
-      span(class="body-SM")             {{$t('TMP0070')}}
-      span(class="body-SM")             {{$t('TMP0071')}}
-      span(class="text-blue-1 body-SM"
+      span(class="body-SM")             {{$t('TMP0070', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
+      span(class="body-SM"        v-html="$t('TMP0071', { price: nextPrice, date: nextPaidDate  })")
+      span(class="text-blue-1 body-SM pointer"
           @click="switchPeriod()")      {{$t('TMP0072', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
-      span(class="text-gray-3 body-SM"
+      span(class="text-gray-3 body-SM pointer"
           @click="cancelSub()")         {{$t('TMP0073')}}
       p(class="text-blue-1")            {{$t('TMP0074')}}
-      p {{$t('TMP0075')}}
+      span(                       v-html="$t('TMP0075', { amount: bgrmCredit, date: nextPaidDate })")
       span(class="body-XS")             {{$t('TMP0076')}}
       p(class="text-blue-1")            {{$t('TMP0077')}}
       span(class="body-XS")             {{$t('TMP0078')}}
+    hr
     div(class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0079')}}
-      span(class="body-SM")             {{$t('TMP0080')}}
-      p(class="text-blue-1 body-SM")    {{$t('TMP0081')}}
+      span(class="body-SM")             {{`···· ···· ···· ${lastFour}  ${$t('TMP0080')} ${expireDate}`}}
+      p(class="text-blue-1 body-SM"
+        @click="openCardPopup()")       {{$t('TMP0081')}}
+    hr
     div(class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0082')}}
-      p {{$tc('NN0173', 1)}}
-      p {{$t('TMP0083')}}
-      p {{$t('NN0172')}}
-      p {{$t('TMP0084')}}
-      p {{$t('TMP0085')}}
-      p {{$t('TMP0086')}}
-      p {{$t('TMP0087')}}
-      p {{$t('TMP0088')}}
-      p {{$t('TMP0087')}}
-      p {{$t('TMP0089')}}
-      p {{$t('TMP0090')}}
-      p {{$t('TMP0090')}}
-      p {{$t('TMP0091')}}
-      p {{$t('TMP0092')}}
-      p {{$t('TMP0092')}}
-    div(v-if="showPopup" class="popup-window")
-      popup-payment(:initView="paymentView" @close="closePopup()")
+      span                              {{$tc('NN0173', 1)}}
+      input(:placeholder="$t('TMP0083')")
+      span                              {{$t('NN0172')}}
+      input(:placeholder="$t('TMP0084')")
+      span                              {{$t('TMP0085')}}
+      input(:placeholder="$t('TMP0086')")
+      span                              {{$t('TMP0087', { number: 1 })}}
+      input(:placeholder="$t('TMP0088')")
+      span                              {{$t('TMP0087', { number: 2 })}}
+      input(:placeholder="$t('TMP0089')")
+      span                              {{$t('TMP0090')}}
+      input(:placeholder="$t('TMP0090')")
+      span                              {{$t('TMP0091')}}
+      span                              {{$t('TMP0092')}}
+      input(:placeholder="$t('TMP0092')")
+    div(v-if="showCardPopup" class="popup-window")
+      payment-field(@close="closeCardPopup()")
+    div(v-if="showPaymentPopup" class="popup-window")
+      popup-payment(:initView="paymentView" @close="closePaymentPopup()")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
+import PaymentField from '@/components/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 
 export default Vue.extend({
   name: 'SettingsPayment',
   components: {
+    PaymentField,
     PopupPayment
   },
   props: {
   },
   data() {
     return {
-      showPopup: false,
+      showCardPopup: false,
+      showPaymentPopup: false,
       paymentView: ''
     }
   },
   computed: {
     ...mapGetters({
       isBundle: 'payment/getIsBundle'
-    })
+    }),
+    ...mapState('payment', [
+      'nextPrice',
+      'nextPaidDate',
+      'bgrmCredit',
+      'lastFour',
+      'expireDate'
+    ])
   },
   // mounted() {
   // },
   methods: {
-    openPopup() { this.showPopup = true },
-    closePopup() { this.showPopup = false },
+    openCardPopup() { this.showCardPopup = true },
+    closeCardPopup() { this.showCardPopup = false },
+    openPaymentPopup() { this.showPaymentPopup = true },
+    closePaymentPopup() { this.showPaymentPopup = false },
     switchPeriod() {
       this.paymentView = 'switch'
-      this.showPopup = true
+      this.showPaymentPopup = true
     },
     cancelSub() {
       this.paymentView = 'cancel1'
-      this.showPopup = true
+      this.showPaymentPopup = true
     }
+
   }
 })
 </script>
@@ -83,14 +104,31 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .sp {
   padding: 60px 13% 20px 13%;
-  &-plan, &-detail, &-info {
+  &-free, &-pro, &-detail, &-info {
+    @include body-MD;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
+  >hr {
+    width: 100%;
+    border: 0.5px solid setColor(gray-4);
+  }
 }
 
-.payment-plan {
-  @include body-MD
+.sp-info {
+  >span {
+    color: setColor(gray-3);
+  }
+  >input {
+    @include body-SM;
+    width: 330px;
+    height: 20px; // ask kitty
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid setColor(gray-4);
+    border-radius: 4px;
+    color: setColor(gray-2);
+  }
 }
 </style>
