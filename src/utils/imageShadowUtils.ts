@@ -460,6 +460,7 @@ class ImageShadowUtils {
       const { shadow } = layer.styles
       const { effects } = shadow
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        adjust: {},
         shadow: {
           currentEffect: effect,
           effects: {

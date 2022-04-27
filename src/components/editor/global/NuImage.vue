@@ -1,32 +1,29 @@
 <template lang="pug">
   div(class="nu-image"
-    :style="styles()"
+    :style="styles"
     draggable="false")
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
-        :class="{ 'layer-flip': flippedAnimation }"
         :src="src"
         :styles="adjustImgStyles"
-        :style="flipStyles()")
+        :style="imgStyles")
     div(v-if="showCanvas && !isAdjustImage"
       class="canvas__wrapper"
-      :style="canvasWrapperStyle()")
+      :style="canvasWrapperStyle")
       canvas(ref="canvas")
-    //- img(v-show="!isAdjustImage && !isCanvasReady"
-    img(v-show="!isAdjustImage"
-      ref="img"
-      :style="flipStyles()"
-      :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
-      draggable="false"
-      crossOrigin="Anonymous"
-      :src="src"
-      @error="onError()"
-      @load="onLoad()")
-    //- div(v-if="inProcess" class="canvas__process")
-    //-   svg-icon(class="spiner"
-    //-     :iconName="'spiner'"
-    //-     :iconColor="'white'"
-    //-     :iconWidth="'150px'")
+    div(v-show="!isAdjustImage"
+      class="img-wrapper"
+      :style="imgWrapperstyle")
+      div(class='nu-image__picture'
+        :style="imgStyles")
+        img(ref="img"
+          :style="flipStyles"
+          :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+          draggable="false"
+          crossOrigin="Anonymous"
+          :src="src"
+          @error="onError()"
+          @load="onLoad()")
 </template>
 
 <script lang="ts">
@@ -73,8 +70,7 @@ export default Vue.extend({
       isOnError: false,
       src: '',
       canvasScale: CANVAS_SCALE,
-      canvasShadowImg: undefined as undefined | HTMLImageElement,
-      isCanvasReady: false
+      canvasShadowImg: undefined as undefined | HTMLImageElement
     }
   },
   watch: {
@@ -124,11 +120,6 @@ export default Vue.extend({
       } else if (!this.forRender) {
         this.$nextTick(() => this.handleNewShadowEffect())
       }
-    },
-    showCanvas(val) {
-      if (!val) {
-        this.isCanvasReady = false
-      }
     }
   },
   components: { NuAdjustImage },
@@ -142,6 +133,58 @@ export default Vue.extend({
         pageIndex: this.pageIndex,
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
+      }
+    },
+    styles(): any {
+      const { width, height } = this.config.styles
+      const { inheritStyle = {} } = this
+      return this.showCanvas ? {
+        width: `${width}px`,
+        height: `${height}px`,
+        ...inheritStyle
+      } : {
+        ...inheritStyle
+      }
+    },
+    canvasWrapperStyle(): any {
+      return {
+        width: `${this.config.styles.initWidth * this.canvasScale}px`,
+        height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating ? CANVAS_FLOATING_SCALE : this.canvasScale)}px`,
+        transform: `scale(${this.config.styles.scale})`
+      }
+    },
+    imgWrapperstyle(): any {
+      let clipPath = ''
+      if (this.currentShadowEffect !== ShadowEffectType.none) {
+        const { height, width } = this.config.styles
+        clipPath = `path('M0,0h${width}v${height}h${-width}z`
+      }
+      return {
+        clipPath
+      }
+    },
+    imgStyles(): any {
+      const { imgX, imgY, imgHeight, imgWidth } = this.config.styles
+      return {
+        transform: `translate(${imgX}px, ${imgY}px)`,
+        width: `${imgWidth}px`,
+        height: `${imgHeight}px`
+      }
+    },
+    flipStyles(): any {
+      const { horizontalFlip, verticalFlip } = this.config.styles
+      let scaleX = horizontalFlip ? -1 : 1
+      let scaleY = verticalFlip ? -1 : 1
+
+      if (typeof this.subLayerIndex !== 'undefined') {
+        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
+          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
+          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
+        }
+      }
+      return {
+        transform: `scale(${scaleX}, ${scaleY})`
       }
     },
     getImgDimension(): number {
@@ -224,46 +267,6 @@ export default Vue.extend({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
-    styles() {
-      const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles
-      const { inheritStyle = {} } = this
-      return this.showCanvas ? {
-        width: `${width}px`,
-        height: `${height}px`,
-        ...inheritStyle
-      } : {
-        width: `${imgWidth}px`,
-        height: `${imgHeight}px`,
-        transform: `translate(${imgX}px, ${imgY}px)`,
-        ...inheritStyle
-      }
-    },
-    canvasWrapperStyle() {
-      return {
-        width: `${this.config.styles.initWidth * this.canvasScale}px`,
-        height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating ? CANVAS_FLOATING_SCALE : this.canvasScale)}px`,
-        transform: `scale(${this.config.styles.scale})`,
-        display: this.isCanvasReady ? 'block' : 'none'
-      }
-    },
-    flipStyles() {
-      const { styles } = this.config
-      const { horizontalFlip, verticalFlip } = styles
-      let scaleX = horizontalFlip ? -1 : 1
-      let scaleY = verticalFlip ? -1 : 1
-
-      if (typeof this.subLayerIndex !== 'undefined') {
-        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
-          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
-          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
-        }
-      }
-
-      return {
-        transform: `scaleX(${scaleX}) scaleY(${scaleY})`
-      }
-    },
     onError() {
       this.isOnError = true
       if (this.config.srcObj.type === 'private') {
@@ -363,10 +366,7 @@ export default Vue.extend({
               canvas.setAttribute('height', `${previewImg.naturalHeight * CANVAS_SCALE}`)
               this.canvasShadowImg = previewImg
               imgShadowUtils.draw(canvas, previewImg, this.config, {
-                layerInfo,
-                cb: () => {
-                  this.isCanvasReady = true
-                }
+                layerInfo
               })
             }
             previewImg.src = ImageUtils.getSrc(this.config,
@@ -381,10 +381,7 @@ export default Vue.extend({
             canvas.setAttribute('height', `${img.naturalHeight * CANVAS_SCALE}`)
           }
           imgShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
-            layerInfo,
-            cb: () => {
-              this.isCanvasReady = true
-            }
+            layerInfo
           })
           break
         }
@@ -395,10 +392,7 @@ export default Vue.extend({
             canvas.setAttribute('height', `${img.naturalHeight * CANVAS_FLOATING_SCALE}`)
           }
           imgShadowUtils.drawFloatingShadow(canvas, img, this.config, {
-            layerInfo,
-            cb: () => {
-              this.isCanvasReady = true
-            }
+            layerInfo
           })
           break
         }
@@ -455,14 +449,19 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+
   &__picture {
-    position: absolute;
     object-fit: cover;
+    position: absolute;
+    top: 0px;
+    left: 0px;
     width: 100%;
-    height: 100%;
+    height:100%;
   }
   .canvas {
     &__wrapper {
@@ -482,6 +481,13 @@ export default Vue.extend({
     }
   }
   canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .img-wrapper {
+    position: absolute;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: 100%;
   }
