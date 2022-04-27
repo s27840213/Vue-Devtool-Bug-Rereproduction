@@ -1,13 +1,15 @@
 <template lang="pug">
   div(class="field")
-    dropdown(class="mb-20" :options="countryData"
-            @select="option => setCountry(option)")
-      span(class="country-label") {{userCountry.label}}
-    div(:class="{hidden: !isTW}" class="field__tappay")
-      div(class="field__tappay-card" id="card-number")
-      div(class="field__tappay-date" id="card-date")
-      div(class="field__tappay-ccv" id="card-ccv")
-    div(:class="{hidden: isTW}" id="stripe")
+    span(class="field__title") {{isChange ? $t('TMP0081') : ''}}
+    div(class="field-content")
+      dropdown(v-if="!isChange" class="mb-20" :options="countryData"
+              @select="option => setCountry(option)")
+        span(class="country-label") {{userCountry.label}}
+      div(:class="{hidden: !isTW}" class="field__tappay")
+        div(class="field__tappay-card" id="card-number")
+        div(class="field__tappay-date" id="card-date")
+        div(class="field__tappay-ccv" id="card-ccv")
+      div(:class="{hidden: isTW}" id="stripe")
     btn(class="rounded" type="primary-lg"
         :disabled="!payReady" @click.native="submit()") {{submitText}}
 </template>
@@ -18,7 +20,6 @@ import i18n from '@/i18n'
 import { mapGetters, mapMutations } from 'vuex'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
-import payment from '@/apis/payment'
 import countryData from '@/assets/json/countries.json'
 
 export default Vue.extend({
@@ -26,6 +27,10 @@ export default Vue.extend({
   components: {
   },
   props: {
+    isChange: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -137,7 +142,7 @@ export default Vue.extend({
         styles: {
           input: {
             color: '#969BAB',
-            'font-size': '20px'
+            'font-size': '16px'
           },
           ':focus': {
             color: 'black'
@@ -175,11 +180,17 @@ export default Vue.extend({
 .field {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   height: 100%;
+  &__title { // move to html?
+    @include text-H6;
+    color: setColor(gray-2);
+    // margin-bottom: 50px;
+  }
   >button {
     @include btn-LG;
-    width: 100%;
-    margin-top: auto;
+    // width: 100%;
+    // margin-top: auto;
   }
 }
 

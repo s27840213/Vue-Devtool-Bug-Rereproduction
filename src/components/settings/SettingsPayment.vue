@@ -1,11 +1,15 @@
 <template lang="pug">
   div(class="sp")
-    div(class="sp-free")
+    div(v-if="!isPro" class="sp-free")
       p(class="text-blue-1")            {{$t('TMP0068')}}
       svg-icon(iconName="free")
-    div(class="sp-pro")
+      btn(class="rounded" type="primary-lg" @click.native="togglePro()")
+        span {{$t('TMP0069')}}
+    div(v-if="isPro" class="sp-pro")
       p(class="text-blue-1")            {{$t('TMP0068')}}
-      svg-icon(iconName="pro")
+      //- todelete @click
+      svg-icon(iconName="pro"
+              @click.native="togglePro()")
       span(class="body-SM")             {{$t('TMP0070', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
       span(class="body-SM"        v-html="$t('TMP0071', { price: nextPrice, date: nextPaidDate  })")
       span(class="text-blue-1 body-SM pointer"
@@ -18,13 +22,13 @@
       p(class="text-blue-1")            {{$t('TMP0077')}}
       span(class="body-XS")             {{$t('TMP0078')}}
     hr
-    div(class="sp-detail")
+    div(v-if="isPro" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0079')}}
       span(class="body-SM")             {{`···· ···· ···· ${lastFour}  ${$t('TMP0080')} ${expireDate}`}}
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0081')}}
-    hr
-    div(class="sp-info")
+    hr(v-if="isPro")
+    div(v-if="isPro" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0082')}}
       span                              {{$tc('NN0173', 1)}}
       input(:placeholder="$t('TMP0083')")
@@ -41,8 +45,9 @@
       span                              {{$t('TMP0091')}}
       span                              {{$t('TMP0092')}}
       input(:placeholder="$t('TMP0092')")
-    div(v-if="showCardPopup" class="popup-window")
-      payment-field(@close="closeCardPopup()")
+    div(v-if="showCardPopup" class="popup-window" )
+      div(class="sp-field" v-click-outside="closeCardPopup")
+        payment-field(isChange)
     div(v-if="showPaymentPopup" class="popup-window")
       popup-payment(:initView="paymentView" @close="closePaymentPopup()")
 </template>
@@ -50,7 +55,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 
@@ -59,6 +65,9 @@ export default Vue.extend({
   components: {
     PaymentField,
     PopupPayment
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   props: {
   },
@@ -74,6 +83,7 @@ export default Vue.extend({
       isBundle: 'payment/getIsBundle'
     }),
     ...mapState('payment', [
+      'isPro',
       'nextPrice',
       'nextPaidDate',
       'bgrmCredit',
@@ -84,6 +94,9 @@ export default Vue.extend({
   // mounted() {
   // },
   methods: {
+    ...mapActions({
+      togglePro: 'payment/togglePro' // todelete
+    }),
     openCardPopup() { this.showCardPopup = true },
     closeCardPopup() { this.showCardPopup = false },
     openPaymentPopup() { this.showPaymentPopup = true },
@@ -113,7 +126,12 @@ export default Vue.extend({
   >hr {
     width: 100%;
     border: 0.5px solid setColor(gray-4);
+    margin: 14px 0;
   }
+}
+
+.sp-free {
+  >button { @include btn-LG; }
 }
 
 .sp-info {
@@ -130,5 +148,12 @@ export default Vue.extend({
     border-radius: 4px;
     color: setColor(gray-2);
   }
+}
+
+.sp-field{
+  width: 440px;
+  height: 400px;
+  padding: 20px 60px 40px 60px;
+  background-color: white;
 }
 </style>

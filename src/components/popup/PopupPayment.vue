@@ -11,7 +11,7 @@
           span {{$t('TMP0038')}} {{currentStep}} of {{totalStep}}
         div(class="payment-left-top__title") {{title}}
         div(v-if="description" class="payment-left-top__description") {{description}}
-      div(class="payment-left-content")
+      div(class="payment-left-content" :view="view")
         template(v-if="['step1', 'switch'].includes(view)")
           div(v-for="p in periodInput" :isSelected="p.type === userPeriod"
               class="payment-left-content-period pointer"
@@ -258,8 +258,8 @@ export default Vue.extend({
 .payment {
   display: flex;
   position: relative;
-  width: min(90vw, 101.25vh);
-  height: min(80vw, 90vh);
+  width: min(792px, min(90vw, 101.25vh));
+  height: min(704px, min(80vw, 90vh));
   flex-shrink: 0;
   background-color: white; // ?
   overflow: auto; // ?
@@ -274,20 +274,21 @@ export default Vue.extend({
 .payment-left {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   width: calc(50% - 40px);
-  padding: 17.5% 20px 20% 20px;
+  padding: 12% 20px 15% 20px;
+  &-top, &-content, &-button { width: 100%; }
   &-top {
     @include body-MD;
-    width: 100%;
     position: relative;
     color: setColor(gray-1);
     &__step {
       display: flex;
       align-items: center;
       position: absolute;
-      top: -60px;
+      top: -40px;
       >svg { margin-right: 15px; }
     }
     &__title {
@@ -295,19 +296,15 @@ export default Vue.extend({
       margin-bottom: 16px;
     }
   }
-  &-content {
-    width: 90%;
-    height: 100%;
-  }
+  &-content[view='step2'] { height: 100%; }
   &-button-description {
     position: absolute;
-    bottom: 15%
+    bottom: 9%
   }
   &-button {
     // margin-top: auto;
-    display: flex;
-    flex-direction: row-reverse;
-    width: 90%;
+    // display: flex;
+    // flex-direction: column;
     >button {
       @include btn-LG;
       width: 100%;

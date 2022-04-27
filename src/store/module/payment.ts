@@ -11,6 +11,7 @@ interface IPaymentState {
     phone: string
     GUI: string
   }
+  isPro: boolean,
   nextPrice: string
   nextPaidDate: string
   bgrmCredit: number
@@ -28,6 +29,7 @@ const getDefaultState = (): IPaymentState => ({
     phone: '',
     GUI: ''
   },
+  isPro: false,
   nextPrice: '$8.99',
   nextPaidDate: 'May 14, 2022',
   bgrmCredit: 88,
@@ -81,6 +83,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
   },
   cancleSubscription() {
     console.log('cancel')
+  },
+  togglePro({ commit }) { // todelete
+    commit('SET_isPro', !state.isPro)
   }
 }
 
@@ -96,6 +101,9 @@ const mutations: MutationTree<IPaymentState> = {
   },
   SET_invoice(state: IPaymentState, invoice) {
     state.invoice = invoice
+  },
+  SET_isPro(state: IPaymentState, isPro) {
+    state.isPro = isPro
   }
 }
 
