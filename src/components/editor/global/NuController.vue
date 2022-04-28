@@ -414,6 +414,8 @@ export default Vue.extend({
       const tooShort = this.getLayerHeight * this.scaleRatio < RESIZER_SHOWN_MIN
       const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
+        case 'image':
+          return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
         case 'text':
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
@@ -432,8 +434,6 @@ export default Vue.extend({
           resizers = ControlUtils.shapeCategorySorter(resizers, this.config.category, this.config.scaleType)
           break
         case 'tmp':
-          resizers = []
-          break
         case 'group':
           resizers = []
           break

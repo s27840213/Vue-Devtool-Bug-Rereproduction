@@ -143,13 +143,17 @@ export default Vue.extend({
         height: `${height}px`,
         ...inheritStyle
       } : {
+        // Fix the safari rendering bug, add the following code can fix it...
+        transform: 'translate(0,0)',
         ...inheritStyle
       }
     },
     canvasWrapperStyle(): any {
       return {
         width: `${this.config.styles.initWidth * this.canvasScale}px`,
-        height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating ? CANVAS_FLOATING_SCALE : this.canvasScale)}px`,
+        height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating &&
+          this.config.styles.height / this.config.styles.width < 1
+          ? CANVAS_FLOATING_SCALE : CANVAS_SCALE)}px`,
         transform: `scale(${this.config.styles.scale})`
       }
     },
@@ -391,10 +395,10 @@ export default Vue.extend({
         }
         case ShadowEffectType.floating: {
           const img = this.$refs.img as HTMLImageElement
-          if (canvas.height !== img.naturalHeight * CANVAS_FLOATING_SCALE) {
-            canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
-            canvas.setAttribute('height', `${img.naturalHeight * CANVAS_FLOATING_SCALE}`)
-          }
+          const height = this.config.styles.height / this.config.styles.width < 1
+            ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
+          canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
+          canvas.setAttribute('height', `${height}`)
           imgShadowUtils.drawFloatingShadow(canvas, img, this.config, {
             layerInfo
           })

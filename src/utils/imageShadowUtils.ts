@@ -12,9 +12,9 @@ type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedE
 
 const FLOATING_Y_OFFSET = 75
 export const HALO_SPREAD_LIMIT = 80
-export const CANVAS_SCALE = 1.5
+export const CANVAS_SCALE = 1.8
 export const CANVAS_SIZE = 510
-export const CANVAS_FLOATING_SCALE = 1.8
+export const CANVAS_FLOATING_SCALE = 2.2
 export interface DrawOptions {
   canvasSize?: number,
   timeout?: number,
@@ -63,9 +63,10 @@ class ImageShadowUtils {
         canvasT.setAttribute('width', `${canvas.width}`)
         canvasT.setAttribute('height', `${canvas.height}`)
       }
-      if (ctxT && [ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
+      if (ctxT) {
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
-        const isTransparentBg = this.isTransparentBg(canvasT)
+        const isTransparentBg = [ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)
+          ? this.isTransparentBg(canvasT) : false
         this._layerData = { img, config, isTransparentBg }
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
@@ -114,17 +115,18 @@ class ImageShadowUtils {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
     }
-
     // document.body.append(canvasMaxSize)
     // setTimeout(() => document.body.removeChild(canvasMaxSize), 15000)
-
+    const mappingScale = 1600 / img.naturalWidth
+    const canvasMaxW = canvas.width * mappingScale
+    const canvasMaxH = canvas.height * mappingScale
+    const ellipseX = canvasMaxW * 0.5
+    /** const ellipseY = (canvasMaxH - canvasMaxH / CANVAS_FLOATING_SCALE) * 0.5 + canvasMaxH / CANVAS_FLOATING_SCALE + FLOATING_Y_OFFSET * mappingScale  */
+    const ellipseY = canvasMaxH * (0.5 + 0.5 / (_imgHeight / _imgWidth < 1 ? CANVAS_FLOATING_SCALE : CANVAS_SCALE)) + FLOATING_Y_OFFSET * mappingScale
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
         /** timeout is 0 as in the uploading phase */
         if (!(this.dataBuff.effect === ShadowEffectType.floating && this.dataBuff.radius === radius && this.dataBuff.size === size)) {
-          const mappingScale = 1600 / img.naturalWidth
-          const canvasMaxW = canvas.width * mappingScale
-          const canvasMaxH = canvas.height * mappingScale
           if (timeout) {
             canvasMaxSize.width !== canvasMaxW && canvasMaxSize.setAttribute('width', `${canvasMaxW}`)
             canvasMaxSize.height !== canvasMaxH && canvasMaxSize.setAttribute('height', `${canvasMaxH}`)
@@ -138,8 +140,7 @@ class ImageShadowUtils {
             canvasMaxSize.setAttribute('width', `${canvas.width}`)
             canvasMaxSize.setAttribute('height', `${canvas.height}`)
           }
-          const ellipseX = canvasMaxW * 0.5
-          const ellipseY = (canvasMaxH - canvasMaxH / CANVAS_FLOATING_SCALE) * 0.5 + canvasMaxH / CANVAS_FLOATING_SCALE + FLOATING_Y_OFFSET * mappingScale
+
           const shadowSize = 100
           ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * shadowSize * (size * 0.01 + 2), shadowSize * (0.5 + thinkness * 0.005), 0, 0, Math.PI * 2)
           ctxMaxSize.fill()
@@ -156,7 +157,8 @@ class ImageShadowUtils {
 
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5, y)
+        const rangeY = canvasMaxH - ellipseY - 300
+        ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5, y * 0.01 * rangeY)
 
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalCompositeOperation = 'source-in'
@@ -395,7 +397,6 @@ class ImageShadowUtils {
             ctxT.restore()
           }
 
-          // ctx.filter = 'url(#filter__N1Zeh)'
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
           layerInfo && this.setIsProcess(layerInfo, false)
@@ -780,7 +781,7 @@ export const fieldRange = {
     thinkness: { max: 100, min: 0 },
     size: { max: 200, min: 50 },
     x: { max: 100, min: -100, weighting: 0.5 },
-    y: { max: 25, min: -100, weighting: 0.5 }
+    y: { max: 100, min: -100, weighting: 0.5 }
   }
 } as any
 
