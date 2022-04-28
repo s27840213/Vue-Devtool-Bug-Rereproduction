@@ -5,7 +5,7 @@
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
         :class="{ 'layer-flip': flippedAnimation }"
-        :src="src"
+        :src="finalSrc"
         :styles="adjustImgStyles"
         :style="flipStyles()")
     img(v-show="!isAdjustImage"
@@ -14,7 +14,7 @@
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
       crossOrigin="Anonymous"
-      :src="src"
+      :src="finalSrc"
       @error="onError()"
       @load="onLoad()")
 </template>
@@ -164,6 +164,12 @@ export default Vue.extend({
     },
     uploadingImagePreviewSrc(): string {
       return this.config.previewSrc
+    },
+    finalSrc(): string {
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(this.src)
+      }
+      return this.src
     }
   },
   methods: {

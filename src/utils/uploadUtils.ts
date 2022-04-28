@@ -266,10 +266,11 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, brandId }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId }: {
     addToPage?: boolean,
     id?: string,
     pollingCallback?: (json: IUploadAssetResponse) => void,
+    needCompressed?: boolean,
     brandId?: string
   } = {}) {
     if (type === 'font') {
@@ -293,8 +294,9 @@ class UploadUtils {
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original-rb')}`)
-      formData.append('x-amz-meta-tn', this.userId)
+      // formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original-rb')}`)
+      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent('original')}`)
+      formData.append('x-amz-meta-tn', needCompressed ? this.userId : `${this.userId},1`)
       const xhr = new XMLHttpRequest()
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
@@ -1138,7 +1140,7 @@ class UploadUtils {
             }
           }).then(() => {
             this.isGettingDesign = false
-            pageUtils.fitPage()
+            // pageUtils.fitPage()
           })
         }
       })

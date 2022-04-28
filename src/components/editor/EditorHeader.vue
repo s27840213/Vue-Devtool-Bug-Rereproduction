@@ -8,9 +8,11 @@
         template(#logIn)
           a(:href="`/login?redirect=${path}`") {{$tc('NN0168',1)}}
     template(v-else)
-      span(class="body-3 pointer hover-effect" @click="goToPage('MyDesign')") {{$t('NN0080')}}
+      router-link(to="/mydesign" class="body-3 pointer hover-effect a-reset") {{$t('NN0080')}}
       span(class="body-3 pointer") {{`${!folderInfo.isRoot ? '/...': ''}`}}
-      span(v-if="folderInfo.parentFolder" class="body-3 pointer hover-effect" @click="goToParentFolder()") {{`/${folderInfo.parentFolder}`}}
+      router-link(v-if="folderInfo.parentFolder"
+        :to="`/mydesign/${this.folderInfo.path.split(',').join('&')}`"
+        class="body-3 pointer hover-effect a-reset") {{`/${folderInfo.parentFolder}`}}
       span(class="body-3 ml-10 mr-5") /
       input(class="body-3 text-gray-2" type="text"
         :placeholder="`${$t('NN0079')}`"
@@ -113,16 +115,6 @@ export default Vue.extend({
     ...mapMutations({
       _setPages: 'SET_pages'
     }),
-    goToPage(pageName: string, queryString = '') {
-      if (queryString) {
-        this.$router.push({ name: pageName, query: { search: queryString } })
-      } else {
-        this.$router.push({ name: pageName })
-      }
-    },
-    goToParentFolder() {
-      this.$router.push({ path: `/mydesign/${this.folderInfo.path.split(',').join('&')}` })
-    },
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
@@ -187,5 +179,10 @@ export default Vue.extend({
   &:hover {
     color: setColor(blue-1);
   }
+}
+
+.a-reset {
+  color: unset;
+  text-decoration: unset;
 }
 </style>

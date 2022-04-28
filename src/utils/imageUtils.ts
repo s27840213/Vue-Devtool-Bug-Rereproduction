@@ -437,6 +437,22 @@ class ImageUtils {
       return `${src}?ver=${generalUtils.generateRandomString(6)}`
     }
   }
+
+  appendCompQuery(src: string): string {
+    if (src.includes('comp=0')) return src
+    if (src.includes('?')) {
+      return `${src}&comp=0`
+    } else {
+      return `${src}?comp=0`
+    }
+  }
+
+  appendCompQueryForVivipic(src: string): string {
+    if (src.includes('asset.vivipic.com') || src.includes('template.vivipic.com')) {
+      return this.appendCompQuery(src)
+    }
+    return src
+  }
 }
 
 export default new ImageUtils()
