@@ -182,7 +182,6 @@ class ImageShadowUtils {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
         layerInfo && this.setIsProcess(layerInfo, false)
-        console.log('floating final')
       }
     })
     cb && cb()
@@ -380,8 +379,6 @@ class ImageShadowUtils {
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
           ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
-          console.log('canvasT.height', canvasT.height)
-          console.log('canvas.height', canvas.height)
 
           ctxT.globalCompositeOperation = 'source-in'
           ctxT.globalAlpha = opacity / 100
@@ -393,16 +390,15 @@ class ImageShadowUtils {
           /** only draw the origin image over the canvas as uploading */
           if (!timeout) {
             ctxT.save()
-            ctxT.filter = 'url(#filter__RWeW0)'
+            // ctxT.filter = 'url(#filter__RWeW0)'
             ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
             ctxT.restore()
           }
 
-          // ctx.filter = 'url(#filter__RWeW0)'
+          // ctx.filter = 'url(#filter__N1Zeh)'
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
           layerInfo && this.setIsProcess(layerInfo, false)
-          console.log('draw final')
         }
       })
       cb && cb()
