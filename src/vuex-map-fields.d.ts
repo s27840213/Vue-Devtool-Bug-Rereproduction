@@ -194,7 +194,9 @@ declare module 'vuex-map-fields' {
     mutationType:string
   }
   export  function createHelpers(helperOptions:HelperOptions): NamespacedMappers;
-  //----
+
+  export default _default;
+  //---- End
   
   //---- From https://github.com/maoberlehner/vuex-map-fields/pull/137/commits/30818675137df73e82d72e29b45a458997a44c36#diff-093ad82a25aee498b11febf1cdcb6546e4d223ffcb49ed69cc275ac27ce0ccce
   export function getField(state: any): (path: any) => any;
@@ -212,7 +214,7 @@ declare module 'vuex-map-fields' {
       mapFields: (...params: any[]) => any;
       mapMultiRowFields: (...params: any[]) => any;
   };
-  //----
+  //---- End
   
   //---- From https://github.com/maoberlehner/vuex-map-fields/issues/75#issuecomment-976451210
   interface Mapper<R> {
@@ -229,7 +231,5 @@ declare module 'vuex-map-fields' {
 
   export const mapFields: Mapper<Computed>
     & MapperWithNamespace<Computed>
-  //----
-
-  export default _default;
+  //---- End
 }

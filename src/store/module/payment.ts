@@ -3,7 +3,7 @@ import { getField, updateField } from 'vuex-map-fields'
 import payment from '@/apis/payment'
 
 interface IPaymentState {
-  userCountry: { value: string, label: string }
+  userCountry: string
   isBundle: number
   prime: string
   invoice: {
@@ -21,7 +21,7 @@ interface IPaymentState {
 }
 
 const getDefaultState = (): IPaymentState => ({
-  userCountry: { value: '', label: '' },
+  userCountry: '',
   isBundle: 0,
   prime: '',
   invoice: {
@@ -69,11 +69,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
     // })
   },
   stripeInit() {
-    payment.stripeInit({ country: state.userCountry.value })
+    payment.stripeInit({ country: state.userCountry })
   },
   stripeAdd() {
     payment.stripeAdd({
-      country: state.userCountry.value,
+      country: state.userCountry,
       plan_id: '',
       is_bundle: state.isBundle
     })
@@ -130,7 +130,7 @@ const getters: GetterTree<IPaymentState, any> = {
     return isLegalGUI(state.invoice.GUI)
   },
   isTW(state) {
-    return state.userCountry.value === 'TW'
+    return state.userCountry === 'TW'
   }
 }
 

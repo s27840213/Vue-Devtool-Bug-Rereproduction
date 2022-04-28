@@ -1,17 +1,23 @@
 <template lang="pug">
   div(class="field")
-    span(class="field__title") {{isChange ? $t('TMP0081') : ''}}
+    span(class="field__title") {{isChange ? $t('TMP0083') : ''}}
     div(class="field-content")
       //- dropdown(v-if="!isChange" class="mb-20" :options="countryData"
       //-         @select="option => setCountry(option)")
       //-   span(class="country-label") {{userCountry.label}}
-      options(v-if="!isChange" class="mb-20" :options="countryData" v-model="userCountry")
-      span {{userCountry}}
+      options(v-if="!isChange" class="mb-10"
+              :options="countryData" v-model="userCountry")
       div(:class="{hidden: !isTW}" class="field__tappay")
         div(class="field__tappay-card" id="card-number")
         div(class="field__tappay-date" id="card-date")
         div(class="field__tappay-ccv" id="card-ccv")
       div(:class="{hidden: isTW}" id="stripe")
+      div(class="field-content__info")
+        span {{$t('TMP0044')}}
+        span {{'USD 12.89'}}
+      div(class="field-content__info")
+        span {{$t('TMP0045')}}
+        span {{'USD 0.00'}}
     btn(class="rounded" type="primary-lg"
         :disabled="!payReady" @click.native="submit()") {{submitText}}
 </template>
@@ -72,7 +78,7 @@ export default Vue.extend({
       userCountry: 'userCountry'
     }),
     submitText(): string {
-      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0047')) as string
+      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0049')) as string
     }
   },
   mounted() {
@@ -218,6 +224,11 @@ export default Vue.extend({
     padding: 10px;
   }
   &-card { grid-column: 1 / 3; }
+}
+
+.field-content__info {
+  display: flex;
+  justify-content: space-between;
 }
 
 .hidden {
