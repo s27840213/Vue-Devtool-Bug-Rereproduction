@@ -1,4 +1,5 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
+import { getField, updateField } from 'vuex-map-fields'
 import payment from '@/apis/payment'
 
 interface IPaymentState {
@@ -90,6 +91,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
 }
 
 const mutations: MutationTree<IPaymentState> = {
+  updateField,
   SET_userCountry(state: IPaymentState, userCountry) {
     state.userCountry = userCountry
   },
@@ -108,6 +110,7 @@ const mutations: MutationTree<IPaymentState> = {
 }
 
 const getters: GetterTree<IPaymentState, any> = {
+  getField,
   getUserCountry(state) {
     return state.userCountry
   },

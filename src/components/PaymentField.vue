@@ -20,10 +20,16 @@
 import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapGetters, mapMutations } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
 import countryData from '@/assets/json/countries.json'
+
+const { mapFields } = createHelpers({
+  getterType: 'payment/getField',
+  mutationType: 'payment/updateField'
+})
 
 export default Vue.extend({
   name: 'PaymentField',
@@ -59,8 +65,11 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      userCountry: 'payment/getUserCountry',
+      // userCountry: 'payment/getUserCountry',
       isTW: 'payment/isTW'
+    }),
+    ...mapFields({
+      userCountry: 'userCountry'
     }),
     submitText(): string {
       return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0047')) as string
@@ -69,25 +78,25 @@ export default Vue.extend({
   mounted() {
     switch (i18n.locale) {
       case 'tw':
-        this.setUserCountry({ value: 'TW', label: 'Taiwan' })
+        this.userCountry = 'TW'
         break
       case 'jp':
-        this.setUserCountry({ value: 'JP', label: 'Japan' })
+        this.userCountry = 'JP'
         break
       case 'us':
-        this.setUserCountry({ value: 'US', label: 'United States' })
+        this.userCountry = 'US'
         break
     }
     this.tappayInit()
   },
   methods: {
     ...mapMutations({
-      setUserCountry: 'payment/SET_userCountry',
+      // setUserCountry: 'payment/SET_userCountry',
       setPrime: 'payment/SET_prime'
     }),
-    setCountry(option: Record<string, string>) {
-      this.setUserCountry(option)
-    },
+    // setCountry(option: Record<string, string>) {
+    //   this.setUserCountry(option)
+    // },
     async stripeInit() {
       if (this.stripe) return
 
