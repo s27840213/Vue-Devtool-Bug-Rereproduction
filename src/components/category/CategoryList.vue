@@ -4,7 +4,7 @@
       observer-sentinel(v-if="item.sentinel"
         :key="item.id"
         :target="`.category-list_${item.type}`"
-        @callback="onLoadMore")
+        @callback="onLoadMore(item.moreType)")
       slot(:name="item.type"
         :list="item.list"
         :title="item.title")
@@ -36,8 +36,8 @@ export default Vue.extend({
     ObserverSentinel
   },
   methods: {
-    onLoadMore() {
-      this.$emit('loadMore')
+    onLoadMore(moreType: string | undefined) {
+      this.$emit('loadMore', moreType)
     }
   }
 })

@@ -174,6 +174,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('file', ['updateImages']),
+    ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
@@ -213,9 +214,16 @@ export default Vue.extend({
     },
     onError() {
       this.isOnError = true
+      let updater
       if (this.config.srcObj.type === 'private') {
+        updater = async () => await this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      }
+      if (this.config.srcObj.type === 'logo-private') {
+        updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      }
+      if (updater !== undefined) {
         try {
-          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
+          updater().then(() => {
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {

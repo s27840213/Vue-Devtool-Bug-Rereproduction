@@ -53,7 +53,7 @@ class ListService {
 
   getFont (params: IListServiceParams) {
     params.type = 'font'
-    params.fontList = 1
+    params.fontList = 2
     return this.getList(params)
   }
 

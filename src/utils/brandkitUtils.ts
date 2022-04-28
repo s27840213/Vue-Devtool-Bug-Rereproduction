@@ -1,14 +1,21 @@
 import i18n from '@/i18n'
-import { IUserFontContentData } from '@/interfaces/api'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
+import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import store from '@/store'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import generalUtils from './generalUtils'
+import imageUtils from './imageUtils'
 
 const TAB_NAMES = {
   logo: 'NN0399',
   color: 'NN0401',
   text: 'NN0400'
+}
+
+const SIDEBAR_TAB_NAMES = {
+  logo: 'NN0493',
+  color: 'NN0495',
+  text: 'NN0494'
 }
 
 const FONT_DEFAULTS = {
@@ -22,6 +29,11 @@ interface Item {
 }
 
 class BrandKitUtils {
+  get isBrandkitAvailable(): boolean {
+    return store.getters['user/isAdmin']
+    // return true // for testing private assets
+  }
+
   createTestingDefaultBrand(): IBrand {
     const initTime = Date.now()
     return {
@@ -29,26 +41,59 @@ class BrandKitUtils {
       createTime: (new Date(initTime)).toISOString(),
       name: '',
       logos: [{
+        team_id: '',
         name: 'logo-horizontal.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 30)).toISOString(),
-        url: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+        signed_url: {
+          full: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          larg: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          midd: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          original: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          prev: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          smal: require('@/assets/img/png/brandkit/logo-horizontal.png'),
+          tiny: require('@/assets/img/png/brandkit/logo-horizontal.png')
+        },
+        asset_index: 0,
         width: 171,
-        height: 132
+        height: 132,
+        ver: 0
       }, {
+        team_id: '',
         name: 'logo-square.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 20)).toISOString(),
-        url: require('@/assets/img/png/brandkit/logo-square.png'),
+        signed_url: {
+          full: require('@/assets/img/png/brandkit/logo-square.png'),
+          larg: require('@/assets/img/png/brandkit/logo-square.png'),
+          midd: require('@/assets/img/png/brandkit/logo-square.png'),
+          original: require('@/assets/img/png/brandkit/logo-square.png'),
+          prev: require('@/assets/img/png/brandkit/logo-square.png'),
+          smal: require('@/assets/img/png/brandkit/logo-square.png'),
+          tiny: require('@/assets/img/png/brandkit/logo-square.png')
+        },
+        asset_index: 1,
         width: 131,
-        height: 131
+        height: 131,
+        ver: 0
       }, {
+        team_id: '',
         name: 'logo-vertical.png',
         id: generalUtils.generateAssetId(),
         createTime: (new Date(initTime + 10)).toISOString(),
-        url: require('@/assets/img/png/brandkit/logo-vertical.png'),
+        signed_url: {
+          full: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          larg: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          midd: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          original: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          prev: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          smal: require('@/assets/img/png/brandkit/logo-vertical.png'),
+          tiny: require('@/assets/img/png/brandkit/logo-vertical.png')
+        },
+        asset_index: 2,
         width: 75,
-        height: 171
+        height: 171,
+        ver: 0
       }],
       textStyleSetting: {
         headingStyle: this.createDefaultTextStyle('heading'),
@@ -172,6 +217,19 @@ class BrandKitUtils {
     }
   }
 
+  createDefaultLogo(id: string): IBrandLogo {
+    return {
+      team_id: '',
+      name: '',
+      id: 'new_' + id,
+      createTime: (new Date()).toISOString(),
+      asset_index: -1,
+      width: 24,
+      height: 24,
+      ver: 0
+    }
+  }
+
   checkIsNullBrand(brand: IBrand): boolean {
     return brand.id === 'null'
   }
@@ -185,8 +243,8 @@ class BrandKitUtils {
     }))
   }
 
-  getTabNames(): { [key: string]: string } {
-    return TAB_NAMES
+  getTabNames(theme: string): { [key: string]: string } {
+    return theme === 'editor' ? SIDEBAR_TAB_NAMES : TAB_NAMES
   }
 
   getTabKeys(): string[] {
@@ -254,11 +312,41 @@ class BrandKitUtils {
     store.commit('brandkit/UPDATE_deleteFont', { id })
   }
 
+  deleteLogo(brandId: string, id: string) {
+    store.commit('brandkit/UPDATE_deleteLogo', { brand: { id: brandId }, logo: { id } })
+  }
+
   replaceFont(id: string, apiFont: IUserFontContentData) {
     store.commit('brandkit/UPDATE_replaceFont', {
       id,
       font: this.apiFont2IBrandFont(apiFont)
     })
+  }
+
+  replaceLogo(id: string, apiLogo: IUserLogoContentData, brandId: string) {
+    const logo = this.apiLogo2IBrandLogo(apiLogo)
+    if (logo.width === undefined || logo.height === undefined) {
+      const url = this.getLogoUrl(logo, brandId, 'original')
+      imageUtils.getImageSize(url, 24, 24).then(size => {
+        if (!size.exists) {
+          this.deleteLogo(brandId, id)
+        } else {
+          logo.width = size.width
+          logo.height = size.height
+          store.commit('brandkit/UPDATE_replaceLogo', {
+            id,
+            logo,
+            brandId
+          })
+        }
+      })
+    } else {
+      store.commit('brandkit/UPDATE_replaceLogo', {
+        id,
+        logo,
+        brandId
+      })
+    }
   }
 
   async updateTextStyle(type: string, style: Partial<IBrandTextStyle>) {
@@ -271,6 +359,12 @@ class BrandKitUtils {
     return newFont.id
   }
 
+  createTempLogo(brandId: string, id: string) {
+    const newLogo = this.createDefaultLogo(id)
+    store.commit('brandkit/UPDATE_addLogo', { brand: { id: brandId }, logo: newLogo })
+    return newLogo.id
+  }
+
   fetchBrands(fetcher: () => Promise<void>, clear = true) {
     if (clear) {
       store.commit('brandkit/SET_brands', [])
@@ -278,6 +372,26 @@ class BrandKitUtils {
     store.commit('brandkit/SET_isBrandsLoading', true)
     fetcher().then(() => {
       store.commit('brandkit/SET_isBrandsLoading', false)
+    })
+  }
+
+  fetchLogos(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_logos', [])
+    }
+    store.commit('brandkit/SET_isLogosLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isLogosLoading', false)
+    })
+  }
+
+  fetchPalettes(fetcher: () => Promise<void>, clear = true) {
+    if (clear) {
+      store.commit('brandkit/SET_palettes', [])
+    }
+    store.commit('brandkit/SET_isPalettesLoading', true)
+    fetcher().then(() => {
+      store.commit('brandkit/SET_isPalettesLoading', false)
     })
   }
 
@@ -312,6 +426,34 @@ class BrandKitUtils {
     return colorPalettes.find(palette => palette.id === paletteId)
   }
 
+  getFont(assetId: string): IBrandFont | undefined {
+    return (store.getters['brandkit/getFonts'] as IBrandFont[]).find(font => font.id === assetId)
+  }
+
+  getFontUrlMap(assetId: string): {[key: string]: string} | undefined {
+    return store.getters['brandkit/getFontUrlMap'](assetId)
+  }
+
+  async refreshFontAsset(assetId: string): Promise<{ [key: string]: string }> {
+    return await store.dispatch('brandkit/refreshFontAsset', assetId)
+  }
+
+  getFontPrevUrlByFontFamily(fontFamily: string, type: string, userId: string, assetId: string, postfix: 'prev-name' | 'prev-sample'): string {
+    switch (type) {
+      case 'public':
+        return `https://template.vivipic.com/font/${fontFamily}/${postfix}?ver=${generalUtils.generateRandomString(6)}`
+      case 'admin':
+        return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/${postfix}?ver=${generalUtils.generateRandomString(6)}`
+      case 'private': {
+        const urlMap = this.getFontUrlMap(assetId) as {[key: string]: string} | undefined
+        const url = urlMap?.[postfix]
+        return url ? `${url}&ver=${generalUtils.generateRandomString(6)}` : ''
+      }
+      default:
+        return ''
+    }
+  }
+
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
     return {
       ...(colors[colors.length - 1] ?? this.createDefaultColor()),
@@ -341,11 +483,30 @@ class BrandKitUtils {
     }
   }
 
+  extractFonts(textStyleSetting: IBrandTextStyleSetting): ReturnType<BrandKitUtils['extractFontsFromStyle']>[] {
+    return [
+      this.extractFontsFromStyle(textStyleSetting.headingStyle),
+      this.extractFontsFromStyle(textStyleSetting.subheadingStyle),
+      this.extractFontsFromStyle(textStyleSetting.bodyStyle)
+    ]
+  }
+
+  extractFontsFromStyle(textStyle: IBrandTextStyle): { type: string, face: string, url: string, userId: string, assetId: string, ver: number } {
+    return {
+      type: textStyle.fontType,
+      face: textStyle.fontId,
+      url: '',
+      userId: textStyle.fontUserId,
+      assetId: textStyle.fontAssetId,
+      ver: store.getters['user/getVerUni']
+    }
+  }
+
   getUpdateStyleAPIEncoding(style: Partial<IBrandTextStyle>): string {
     const pairs = Object.entries(style).map(([key, value]) => {
-      return `${key}@${value}`
+      return `${key}@${value}@`
     })
-    pairs.push('isDefault@false')
+    pairs.push('isDefault@false@')
     return pairs.join(',')
   }
 
@@ -357,8 +518,16 @@ class BrandKitUtils {
     return STANDARD_TEXT_FONT[locale]
   }
 
-  getDownloadUrl(logo: IBrandLogo): string {
-    return logo.url
+  getDefaultFontName(locale: string): string {
+    return FONT_DEFAULTS[locale]
+  }
+
+  getDefaultFontSize(type: string): number {
+    return this.createDefaultTextStyle(type).size
+  }
+
+  getLogoUrl(logo: IBrandLogo, brandId: string, size: 'prev' | 'full' | 'larg' | 'midd' | 'smal' | 'tiny' | 'original'): string {
+    return logo.signed_url ? logo.signed_url[size] : `https://template.vivipic.com/admin/${logo.team_id}/asset/logo/${brandId}/${logo.id}/${size}?origin=true&ver=${logo.ver}`
   }
 
   getDisplayedBrandName(brand: IBrand): string {
@@ -377,6 +546,17 @@ class BrandKitUtils {
         return this.getDisplayedPaletteName(content as IBrandColorPalette)
       default:
         return content.name
+    }
+  }
+
+  apiLogo2IBrandLogo(logo: IUserLogoContentData): IBrandLogo {
+    const res = { ...logo } as any
+    delete res.create_time
+    delete res.asset_id
+    return {
+      ...res,
+      id: logo.id ?? logo.asset_index.toString(),
+      createTime: logo.create_time
     }
   }
 

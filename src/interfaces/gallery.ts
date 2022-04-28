@@ -1,3 +1,5 @@
+import { IBrandLogo } from './brandkit'
+
 export interface Urls {
   full: string,
   raw: string,
@@ -21,8 +23,14 @@ export interface RowData {
   sumOfWidth: number
 }
 
+export interface LogoRowData {
+  imgs: IBrandLogo[],
+  sumOfWidth: number
+}
+
 export interface SrcObj {
   type: string,
   userId: string,
-  assetId: string | number
+  assetId: string | number,
+  brandId?: string
 }

@@ -98,6 +98,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import localeUtils from '@/utils/localeUtils'
 import i18n from '@/i18n'
 import VueI18n from 'vue-i18n'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -186,11 +187,11 @@ export default Vue.extend({
         name: 'MyDesign',
         url: '/mydesign',
         text: i18n.t('NN0080')
-      // }, {
-      //   condition: this.isLogin && this.isAdmin,
-      //   name: 'BrandKit',
-      //   url: '/brandkit',
-      //   text: i18n.t('NN0007')
+      }, {
+        condition: this.isLogin && brandkitUtils.isBrandkitAvailable,
+        name: 'BrandKit',
+        url: '/brandkit',
+        text: i18n.t('NN0007')
       }]
     },
     tutorialPage(): string {

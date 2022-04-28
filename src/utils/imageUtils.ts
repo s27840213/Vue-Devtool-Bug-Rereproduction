@@ -38,7 +38,7 @@ class ImageUtils {
       return config.previewSrc + FORCE_UPDATE_VER
     }
 
-    const { type, userId, assetId } = config.srcObj || config.src_obj as SrcObj
+    const { type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj
     if (typeof size === 'undefined' && config.styles) {
       const { imgWidth, imgHeight } = config.styles
       size = this.getSrcSize(
@@ -52,6 +52,12 @@ class ImageUtils {
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
         return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
+      }
+      case 'logo-public':
+        return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true` + FORCE_UPDATE_VER
+      case 'logo-private': {
+        const editorLogo = store.getters['brandkit/getEditorViewLogos']
+        return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
       }
       case 'unsplash':
         return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}&origin=true`
@@ -90,13 +96,18 @@ class ImageUtils {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
     if (src.includes('template.vivipic.com/background')) return 'background'
-    if (src.includes('template.vivipic.com/admin')) return 'public'
-    if (src.includes('asset.vivipic')) return 'private'
+    if (src.includes('template.vivipic.com/admin')) {
+      return src.includes('logo') ? 'logo-public' : 'public'
+    }
+    if (src.includes('asset.vivipic')) {
+      return src.includes('logo') ? 'logo-private' : 'private'
+    }
     return ''
   }
 
   getUserId(src: string, type: string) {
     switch (type) {
+      case 'logo-public':
       case 'public': {
         const keyStart = 'admin/'
         const keyEnd = '/asset'
@@ -112,6 +123,12 @@ class ImageUtils {
 
   getAssetId(src: string, type: string) {
     switch (type) {
+      case 'logo-public': {
+        const keyStart = 'logo/'
+        const keyEnd = '/full'
+        const brandIdAndAssetId = src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf(keyEnd))
+        return brandIdAndAssetId.split('/')[1]
+      }
       case 'public': {
         const keyStart = 'image/'
         const keyEnd = '/full'
@@ -131,11 +148,18 @@ class ImageUtils {
         const keyStart = 'background/'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
       }
+      case 'logo-private':
       case 'private':
         return src
       default:
         return ''
     }
+  }
+
+  getBrandId(src: string, type: string): string | undefined {
+    if (type !== 'logo-public') return
+    const tokens = src.split('/')
+    return tokens[tokens.length - 3]
   }
 
   setImgControlDefault() {
