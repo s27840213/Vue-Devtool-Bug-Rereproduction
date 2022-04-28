@@ -42,17 +42,15 @@ for ext in FILE_EXTENSION:
         
         while re.search(f"{PREFIX_BEFORE}\d{{4}}", lines[i][start:]):
           serial = int(re.search(f"{PREFIX_BEFORE}(\d{{4}})", lines[i][start:]).group(1))
-          if not (SERIAL_START <= serial <= SERIAL_END):
-            break
-
-          lines[i] = lines[i][:start] + lines[i][start:].replace(
-            f"{PREFIX_BEFORE}{str(serial).rjust(4, '0')}",
-            f"{PREFIX_AFTER}{str(serial + SERIAL_DIFFERENCE).rjust(4, '0')}"
-          )
+          
+          if (SERIAL_START <= serial <= SERIAL_END):
+            lines[i] = lines[i][:start] + lines[i][start:].replace(
+              f"{PREFIX_BEFORE}{str(serial).rjust(4, '0')}",
+              f"{PREFIX_AFTER}{str(serial + SERIAL_DIFFERENCE).rjust(4, '0')}"
+            )
+            count+=1
 
           start = re.search(f"{PREFIX_BEFORE}(\d{{4}})", lines[i][start:]).span()[0] + start + 1
-          count+=1
-          
     # Write back
     with open(file_path, mode="w") as file:
       file.writelines(lines)
