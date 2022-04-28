@@ -41,9 +41,10 @@ class ImageUtils {
     const { type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj
     if (typeof size === 'undefined' && config.styles) {
       const { imgWidth, imgHeight } = config.styles
+      const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
       size = this.getSrcSize(
         type,
-        config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio / 100 : 0
+        config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
       )
     }
     switch (type) {

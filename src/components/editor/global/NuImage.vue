@@ -184,10 +184,6 @@ export default Vue.extend({
       const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
       return {
-        // width: this.forRender ? '100%' : `${imgWidth}px`,
-        // height: this.forRender ? '100%' : `${imgHeight}px`,
-        // // transform: `translate(${imgX}px, ${imgY}px)`,
-        // ...(!this.forRender && { transform: `translate(${imgX}px, ${imgY}px)` }),
         width: `${imgWidth}px`,
         height: `${imgHeight}px`,
         transform: `translate(${imgX}px, ${imgY}px)`,
@@ -234,13 +230,13 @@ export default Vue.extend({
       this.isOnError = false
     },
     async perviewAsLoading() {
+      if (this.uploadingImagePreviewSrc) {
+        return
+      }
       /**
        *  First put a preview to this.src, then start to load the right-sized-image.
        *  As loading finished, if the right-sized-image is still need, put it to the image src to replace preview, otherwise doing nothing.
        **/
-      if (this.uploadingImagePreviewSrc) {
-        return
-      }
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
