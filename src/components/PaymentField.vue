@@ -2,9 +2,11 @@
   div(class="field")
     span(class="field__title") {{isChange ? $t('TMP0081') : ''}}
     div(class="field-content")
-      dropdown(v-if="!isChange" class="mb-20" :options="countryData"
-              @select="option => setCountry(option)")
-        span(class="country-label") {{userCountry.label}}
+      //- dropdown(v-if="!isChange" class="mb-20" :options="countryData"
+      //-         @select="option => setCountry(option)")
+      //-   span(class="country-label") {{userCountry.label}}
+      options(v-if="!isChange" class="mb-20" :options="countryData" v-model="userCountry")
+      span {{userCountry}}
       div(:class="{hidden: !isTW}" class="field__tappay")
         div(class="field__tappay-card" id="card-number")
         div(class="field__tappay-date" id="card-date")
@@ -18,19 +20,21 @@
 import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapGetters, mapMutations } from 'vuex'
+import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
 import countryData from '@/assets/json/countries.json'
 
 export default Vue.extend({
   name: 'PaymentField',
-  components: {
-  },
   props: {
     isChange: {
       type: Boolean,
       default: false
     }
+  },
+  components: {
+    Options
   },
   data() {
     return {

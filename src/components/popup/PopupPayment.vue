@@ -12,6 +12,7 @@
         div(class="payment-left-top__title") {{title}}
         div(v-if="description" class="payment-left-top__description") {{description}}
       div(class="payment-left-content" :view="view")
+        //- switch(view)
         template(v-if="['step1', 'switch'].includes(view)")
           div(v-for="p in periodInput" :isSelected="p.type === userPeriod"
               class="payment-left-content-period pointer"

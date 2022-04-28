@@ -69,8 +69,6 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
-  props: {
-  },
   data() {
     return {
       showCardPopup: false,
@@ -91,8 +89,6 @@ export default Vue.extend({
       'expireDate'
     ])
   },
-  // mounted() {
-  // },
   methods: {
     ...mapActions({
       togglePro: 'payment/togglePro' // todelete
@@ -109,7 +105,6 @@ export default Vue.extend({
       this.paymentView = 'cancel1'
       this.showPaymentPopup = true
     }
-
   }
 })
 </script>
@@ -151,8 +146,8 @@ export default Vue.extend({
 }
 
 .sp-field{
-  width: 440px;
-  height: 400px;
+  width: 320px;
+  height: 300px;
   padding: 20px 60px 40px 60px;
   background-color: white;
 }
