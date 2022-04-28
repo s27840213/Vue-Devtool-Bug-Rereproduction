@@ -156,7 +156,6 @@ export default Vue.extend({
         case ShadowEffectType.floating: {
           const height = config.styles.height / config.styles.width < 1
             ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
-          console.log(height)
           updateCanvas.setAttribute('height', (height).toString())
           await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0 })
           break

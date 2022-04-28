@@ -10,7 +10,7 @@ import { imageDataRGBA } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
-const FLOATING_Y_OFFSET = 75
+const FLOATING_Y_OFFSET = 150
 export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.8
 export const CANVAS_SIZE = 510
@@ -122,7 +122,7 @@ class ImageShadowUtils {
     const canvasMaxH = canvas.height * mappingScale
     const ellipseX = canvasMaxW * 0.5
     /** const ellipseY = (canvasMaxH - canvasMaxH / CANVAS_FLOATING_SCALE) * 0.5 + canvasMaxH / CANVAS_FLOATING_SCALE + FLOATING_Y_OFFSET * mappingScale  */
-    const ellipseY = canvasMaxH * (0.5 + 0.5 / (_imgHeight / _imgWidth < 1 ? CANVAS_FLOATING_SCALE : CANVAS_SCALE)) + FLOATING_Y_OFFSET * mappingScale
+    const ellipseY = canvasMaxH * (0.5 + 0.5 / (layerHeight / layerWidth < 1 ? CANVAS_FLOATING_SCALE : CANVAS_SCALE)) + FLOATING_Y_OFFSET
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
         /** timeout is 0 as in the uploading phase */
@@ -175,8 +175,8 @@ class ImageShadowUtils {
           const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
           const drawCanvasHeight = img.naturalHeight
           const drawCanvasWidth = img.naturalWidth
-          const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-          const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+          const x = canvas.width * (0.5 - 0.5 / CANVAS_SCALE)
+          const y = canvas.height * (0.5 - 0.5 / (layerHeight / layerWidth < 1 ? CANVAS_FLOATING_SCALE : CANVAS_SCALE))
           ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
         }
 
@@ -273,8 +273,8 @@ class ImageShadowUtils {
         ctxT.globalAlpha = 1
 
         if (!timeout) {
-          const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-          const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+          const x = canvas.width * (0.5 - 0.5 / CANVAS_SCALE)
+          const y = canvas.height * (0.5 - 0.5 / CANVAS_SCALE)
           ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
         }
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
@@ -313,8 +313,12 @@ class ImageShadowUtils {
       const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
       const drawCanvasHeight = img.naturalHeight
       const drawCanvasWidth = img.naturalWidth
-      const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-      const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+      /**
+        * const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+        * const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
+        */
+      const x = canvas.width * (0.5 - 0.5 / CANVAS_SCALE)
+      const y = canvas.height * (0.5 - 0.5 / CANVAS_SCALE)
 
       const unifiedScale = img.width / CANVAS_SIZE
       const unifiedSpread = spread * unifiedScale
