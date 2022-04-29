@@ -38,7 +38,7 @@
                       @select="selectCancelReason(can)")
             span {{can}}
           input(class="payment-left-content-cancel__other"
-                v-model="otherReason" :placeholder="$t('TMP0067')")
+                v-model="otherReason" :placeholder="$t('TMP0069')")
       p(v-if="view === 'step1'"
         class="payment-left-button-description") {{$t('TMP0042')}}
       div(class="payment-left-button")
@@ -112,21 +112,21 @@ export default Vue.extend({
       }, {
         name: 'GUI',
         type: 'text',
-        ph: i18n.t('TMP0048')
+        ph: i18n.t('TMP0049')
       }],
       cancel1: [
-        i18n.t('TMP0054'),
-        i18n.t('TMP0055'),
         i18n.t('TMP0056'),
-        i18n.t('TMP0057')
+        i18n.t('TMP0057'),
+        i18n.t('TMP0058'),
+        i18n.t('TMP0059')
       ],
       cancel2: [
-        i18n.t('TMP0061'),
-        i18n.t('TMP0062'),
         i18n.t('TMP0063'),
         i18n.t('TMP0064'),
         i18n.t('TMP0065'),
-        i18n.t('TMP0066')
+        i18n.t('TMP0066'),
+        i18n.t('TMP0067'),
+        i18n.t('TMP0068')
       ],
       cancelReason: '', // todo move to store
       otherReason: ''
@@ -190,7 +190,7 @@ export default Vue.extend({
           this.currentStep = 3
           this.title = i18n.t('TMP0046') as string
           this.buttons = [{
-            text: i18n.t('TMP0049') as string,
+            text: i18n.t('TMP0051') as string,
             func: () => {
               this.tappayAdd()
               this.changeView('finish')
@@ -200,10 +200,10 @@ export default Vue.extend({
         case 'finish':
           break
         case 'switch':
-          this.title = i18n.t('TMP0050') as string
-          this.description = i18n.t('TMP0051') as string
+          this.title = i18n.t('TMP0052') as string
+          this.description = i18n.t('TMP0053') as string
           this.buttons = [{
-            text: i18n.t('TMP0052') as string,
+            text: i18n.t('TMP0054') as string,
             func: () => {
               this.switchToBundle()
               this.closePopup() // refresh or double check?
@@ -211,18 +211,18 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0053') as string
+          this.title = i18n.t('TMP0055') as string
           this.buttons = [{
-            text: i18n.t('TMP0059') as string,
+            text: i18n.t('TMP0061') as string,
             func: () => this.closePopup()
           }, {
-            text: i18n.t('TMP0058') as string,
+            text: i18n.t('TMP0060') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0060') as string
+          this.title = i18n.t('TMP0062') as string
           this.buttons[1].func = () => {
             this.cancleSubscription()
             this.closePopup() // refresh or double check?

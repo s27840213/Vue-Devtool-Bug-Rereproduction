@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="field")
-    span(class="field__title") {{isChange ? $t('TMP0083') : ''}}
+    span(class="field__title") {{isChange ? $t('TMP0085') : ''}}
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountry")
@@ -77,7 +77,7 @@ export default Vue.extend({
       nextPaidDate: 'nextPaidDate'
     }),
     submitText(): string {
-      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0049')) as string
+      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0051')) as string
     }
   },
   mounted() {
