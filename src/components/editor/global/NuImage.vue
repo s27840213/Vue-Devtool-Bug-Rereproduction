@@ -25,7 +25,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IStyle } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import imgShadowUtils from '@/utils/imageShadowUtils'
@@ -58,37 +58,20 @@ export default Vue.extend({
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
-        const { type } = this.config.srcObj
-        if (type === 'background') return
-
-        const preLoadImg = (preLoadType: 'pre' | 'next') => {
-          return new Promise<void>((resolve, reject) => {
-            const img = new Image()
-            img.setAttribute('crossOrigin', 'Anonymous')
-
-            img.onload = () => resolve()
-            img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-            img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType)))
-          })
-        }
-
-        const imgElement = this.$refs.img as HTMLImageElement
-        imgElement.onload = async () => {
-          if (newVal > oldVal) {
-            await preLoadImg('next')
-            preLoadImg('pre')
-          } else {
-            await preLoadImg('pre')
-            preLoadImg('next')
-          }
-        }
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
-      }
+      this.handleDimensionUpdate(newVal, oldVal)
+    },
+    parentLayerDimension(newVal, oldVal) {
+      this.handleDimensionUpdate(newVal, oldVal)
     },
     srcObj: {
       handler: function () {
-        !this.forRender && this.perviewAsLoading()
+        if (!this.forRender) {
+          if (typeof this.subLayerIndex !== 'undefined') {
+            this.handleDimensionUpdate(this.parentLayerDimension, 0)
+          } else {
+            this.perviewAsLoading()
+          }
+        }
       },
       deep: true
     },
@@ -170,6 +153,10 @@ export default Vue.extend({
         return ImageUtils.appendCompQueryForVivipic(this.src)
       }
       return this.src
+    },
+    parentLayerDimension(): number {
+      const { width, height } = this.config.parentLayerStyles || {}
+      return ImageUtils.getSrcSize(this.config.srcObj.type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
     }
   },
   methods: {
@@ -255,9 +242,36 @@ export default Vue.extend({
         img.src = src
       })
     },
+    handleDimensionUpdate(newVal: number, oldVal: number) {
+      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
+        const { type } = this.config.srcObj
+        if (type === 'background') return
+
+        const imgElement = this.$refs.img as HTMLImageElement
+        imgElement.onload = async () => {
+          if (newVal > oldVal) {
+            await this.preLoadImg('next', newVal)
+            this.preLoadImg('pre', newVal)
+          } else {
+            await this.preLoadImg('pre', newVal)
+            this.preLoadImg('next', newVal)
+          }
+        }
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, newVal))
+      }
+    },
+    async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image()
+        img.setAttribute('crossOrigin', 'Anonymous')
+
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
+      })
+    },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-
       if (this.userId !== 'backendRendering') {
         await this.perviewAsLoading()
         const preImg = new Image()
