@@ -1,8 +1,8 @@
 <template lang="pug">
-  select(class="select" autofocus :value="value"
+  select(class="select" :value="value" autofocus required
         @input="$emit('input', $event.target.value)")
-    option(v-for="op in options"
-          class="option" :value="op.value || op") {{op.label || op}}
+    option(v-if="ph" value="" disabled hidden selected) {{ph}}
+    option(v-for="op in options" :value="op.value || op") {{op.label || op}}
 </template>
 
 <script lang="ts">
@@ -10,26 +10,20 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'Options',
-  components: {
-  },
   props: {
     options: {
-      type: [], // todo
+      type: Array,
       required: true
     },
+    // Use v-model to two way bindings this props.
     value: {
       default: ''
+    },
+    // To use placeholder, you need to pass ph.
+    // And keep initial v-model value as empty string or null.
+    ph: {
+      type: String
     }
-  },
-  data() {
-    return {
-    }
-  },
-  computed: {
-  },
-  // mounted() {
-  // },
-  methods: {
   }
 })
 </script>
@@ -38,10 +32,12 @@ export default Vue.extend({
 .select {
   @include body-SM;
   height: 40px;
-  padding: 8px 10px;
-  background-color: white;
+  padding: 6px 10px;
   border: 1px solid setColor(gray-4);
   border-radius: 4px;
+  &:invalid { // For placeholder text color
+    color: setColor(gray-3);
+  }
   // Remove safari glass effect and add self-defined arrow to all browser. https://stackoverflow.com/a/57510283
   -webkit-appearance: none;
   -moz-appearance: none;

@@ -30,10 +30,11 @@
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0084')}}
-      span                              {{$tc('NN0173', 1)}}
-      input(:placeholder="$t('TMP0085')")
+      options(class="mb-10" :options="countryData" v-model="userCountry")
       span                              {{$t('NN0172')}}
       input(:placeholder="$t('TMP0086')")
+      span                              {{$tc('NN0173', 1)}}
+      input(:placeholder="$t('TMP0085')")
       span                              {{$t('TMP0087')}}
       input(:placeholder="$t('TMP0088')")
       span                              {{$t('TMP0089', { number: 1 })}}
@@ -42,7 +43,7 @@
       input(:placeholder="$t('TMP0091')")
       span                              {{$t('TMP0092')}}
       input(:placeholder="$t('TMP0092')")
-      span                              {{$t('TMP0093')}}
+      options(class="mb-10" :options="stateData" v-model="testState" :ph="$t('TMP0093')")
       span                              {{$t('TMP0094')}}
       input(:placeholder="$t('TMP0094')")
     div(v-if="showCardPopup" class="popup-window" )
@@ -56,13 +57,23 @@
 import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
+import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
+import countryData from '@/assets/json/countries.json'
+import stateData from '@/assets/json/us_state.json'
+
+const { mapFields } = createHelpers({
+  getterType: 'payment/getField',
+  mutationType: 'payment/updateField'
+})
 
 export default Vue.extend({
   name: 'SettingsPayment',
   components: {
+    Options,
     PaymentField,
     PopupPayment
   },
@@ -71,14 +82,20 @@ export default Vue.extend({
   },
   data() {
     return {
+      countryData,
+      stateData,
       showCardPopup: false,
       showPaymentPopup: false,
-      paymentView: ''
+      paymentView: '',
+      testState: null // todelete
     }
   },
   computed: {
     ...mapGetters({
       isBundle: 'payment/getIsBundle'
+    }),
+    ...mapFields({
+      userCountry: 'userCountry'
     }),
     ...mapState('payment', [
       'isPro',
@@ -133,6 +150,7 @@ export default Vue.extend({
   >span {
     color: setColor(gray-3);
   }
+  >select { width: 350px; }
   >input {
     @include body-SM;
     width: 330px;

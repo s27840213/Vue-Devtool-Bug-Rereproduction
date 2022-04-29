@@ -1,5 +1,6 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
+import i18n from '@/i18n'
 import payment from '@/apis/payment'
 
 interface IPaymentState {
@@ -39,6 +40,18 @@ const getDefaultState = (): IPaymentState => ({
 })
 
 const state = getDefaultState()
+
+switch (i18n.locale) {
+  case 'tw':
+    state.userCountry = 'TW'
+    break
+  case 'jp':
+    state.userCountry = 'JP'
+    break
+  case 'us':
+    state.userCountry = 'US'
+    break
+}
 
 function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
   const weight = [1, 2, 1, 2, 1, 2, 4, 1]

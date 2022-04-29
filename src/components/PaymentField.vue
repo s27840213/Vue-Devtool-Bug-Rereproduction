@@ -2,20 +2,18 @@
   div(class="field")
     span(class="field__title") {{isChange ? $t('TMP0083') : ''}}
     div(class="field-content")
-      //- dropdown(v-if="!isChange" class="mb-20" :options="countryData"
-      //-         @select="option => setCountry(option)")
-      //-   span(class="country-label") {{userCountry.label}}
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountry")
       div(:class="{hidden: !isTW}" class="field__tappay")
         div(class="field__tappay-card" id="card-number")
         div(class="field__tappay-date" id="card-date")
         div(class="field__tappay-ccv" id="card-ccv")
-      div(:class="{hidden: isTW}" id="stripe")
-      div(class="field-content__info")
-        span {{$t('TMP0044')}}
+      div(:class="{hidden: isTW}" id="stripe" class="stripe")
+        svg-icon(iconName="loading" iconColor="gray-1")
+      div(v-if="!isChange" class="field-content__info")
+        span {{$t('TMP0044', {date: nextPaidDate})}}
         span {{'USD 12.89'}}
-      div(class="field-content__info")
+      div(v-if="!isChange" class="field-content__info-today")
         span {{$t('TMP0045')}}
         span {{'USD 0.00'}}
     btn(class="rounded" type="primary-lg"
@@ -75,24 +73,15 @@ export default Vue.extend({
       isTW: 'payment/isTW'
     }),
     ...mapFields({
-      userCountry: 'userCountry'
+      userCountry: 'userCountry',
+      nextPaidDate: 'nextPaidDate'
     }),
     submitText(): string {
       return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0049')) as string
     }
   },
   mounted() {
-    switch (i18n.locale) {
-      case 'tw':
-        this.userCountry = 'TW'
-        break
-      case 'jp':
-        this.userCountry = 'JP'
-        break
-      case 'us':
-        this.userCountry = 'US'
-        break
-    }
+    !this.isTW && this.stripeInit()
     this.tappayInit()
   },
   methods: {
@@ -104,6 +93,7 @@ export default Vue.extend({
     //   this.setUserCountry(option)
     // },
     async stripeInit() {
+      console.log('stripe', this.stripe)
       if (this.stripe) return
 
       this.payReady = false
@@ -226,9 +216,19 @@ export default Vue.extend({
   &-card { grid-column: 1 / 3; }
 }
 
-.field-content__info {
+.stripe {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+.field-content {
+  &__info, &__info-today {
+    @include body-SM;
+    color: setColor(gray-1);
+    display: flex;
+    justify-content: space-between;
+  }
+  &__info-today { @include overline-LG; }
 }
 
 .hidden {

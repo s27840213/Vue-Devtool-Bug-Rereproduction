@@ -226,6 +226,7 @@ export default Vue.extend({
             this.cancleSubscription()
             this.closePopup() // refresh or double check?
           }
+          this.img = 'brandkit.jpg'
           break
       }
     },
@@ -247,10 +248,7 @@ export default Vue.extend({
     selectCancelReason(can: string) {
       this.cancelReason = can
     },
-    closePopup() {
-      // this.changeView('cancel1') // todelete
-      this.$emit('close')
-    }
+    closePopup() { this.$emit('close') }
   }
 })
 </script>
