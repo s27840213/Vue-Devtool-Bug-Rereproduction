@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { IAssetPhoto, IGroupDesignInputParams, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
@@ -10,7 +11,7 @@ import groupUtils from './groupUtils'
 import modalUtils from './modalUtils'
 import assetUtils from './assetUtils'
 import stepsUtils from './stepsUtils'
-import { IUploadAssetFontResponse, IUploadAssetResponse } from '@/interfaces/upload'
+import { IUploadAssetFontResponse, IUploadAssetLogoResponse, IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from './pageUtils'
 import router from '@/router'
 import { EventEmitter } from 'events'
@@ -108,11 +109,19 @@ class UploadUtils {
   }
 
   onFontUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
+    if (this.eventHash.fontUploadStatus) {
+      delete this.eventHash.fontUploadStatus
+    }
+    this.eventHash.fontUploadStatus = callback
     this.event.on('fontUploadStatus', callback)
   }
 
   emitFontUploadEvent(status: 'none' | 'uploading' | 'success' | 'fail') {
     this.event.emit('fontUploadStatus', status)
+  }
+
+  offFontUploadStatus() {
+    this.event.off('fontUploadStatus', this.eventHash.fontUploadStatus)
   }
 
   onDesignUploadStatus(callback: (status: 'none' | 'uploading' | 'success' | 'fail') => void) {
@@ -149,11 +158,11 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
-        if (type !== 'logo') {
-          this.uploadAsset(type, files as FileList)
-        } else {
-          console.log(files)
+        const params: { brandId?: string } = {}
+        if (type === 'logo') {
+          params.brandId = store.getters['brandkit/getCurrentBrandId']
         }
+        this.uploadAsset(type, files as FileList, params)
       }
     }, false)
   }
@@ -257,10 +266,12 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar', files: FileList | Array<string>, { addToPage = false, id, pollingCallback }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId }: {
     addToPage?: boolean,
     id?: string,
-    pollingCallback?: (json: IUploadAssetResponse) => void
+    pollingCallback?: (json: IUploadAssetResponse) => void,
+    needCompressed?: boolean,
+    brandId?: string
   } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
@@ -277,11 +288,14 @@ class UploadUtils {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/original`)
       } else if (type === 'font') {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/${i18n.locale}_original`)
+      } else if (type === 'logo') {
+        if (!brandId) return
+        formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${brandId}/${assetId}/original`)
       } else {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
-      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original-rb')}`)
-      formData.append('x-amz-meta-tn', this.userId)
+      formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original')}`)
+      formData.append('x-amz-meta-tn', needCompressed ? this.userId : `${this.userId},1`)
       const xhr = new XMLHttpRequest()
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
@@ -372,7 +386,7 @@ class UploadUtils {
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
-              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json`
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
               fetch(pollingTargetSrc).then((response) => {
                 if (response.status === 200) {
                   clearInterval(interval)
@@ -381,8 +395,6 @@ class UploadUtils {
                       this.emitFontUploadEvent('success')
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceFont(tempId, json.data)
-                      // store.dispatch('getAllAssets', { token: this.token })
-                      // update uploading font as real object
                       setTimeout(() => {
                         this.emitFontUploadEvent('none')
                       }, 2000)
@@ -428,6 +440,39 @@ class UploadUtils {
                     } else {
                       console.log('Failed to upload the file')
                       modalUtils.setModalInfo(`${i18n.t('NN0223')}`, [], '')
+                    }
+                  })
+                }
+              })
+            }, 2000)
+          }
+        } else if (type === 'logo') {
+          if (!brandId) return
+          const tempId = brandkitUtils.createTempLogo(brandId, assetId)
+          xhr.open('POST', this.loginOutput.upload_map.url, true)
+          xhr.send(formData)
+          xhr.onload = () => {
+            // polling the JSON file of uploaded image
+            const interval = setInterval(() => {
+              const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
+              fetch(pollingTargetSrc).then((response) => {
+                if (response.status === 200) {
+                  clearInterval(interval)
+                  response.json().then((json: IUploadAssetLogoResponse) => {
+                    if (json.flag === 0) {
+                      Vue.notify({
+                        group: 'copy',
+                        text: `${i18n.t('NN0135')}`
+                      })
+                      console.log('Successfully upload the file')
+                      brandkitUtils.replaceLogo(tempId, json.data, brandId)
+                    } else {
+                      Vue.notify({
+                        group: 'error',
+                        text: `${i18n.t('NN0137')}`
+                      })
+                      brandkitUtils.deleteLogo(brandId, tempId)
+                      console.log('Failed to upload the file')
                     }
                   })
                 }
@@ -924,7 +969,8 @@ class UploadUtils {
       page.backgroundImage.config.srcObj = {
         type,
         userId: ImageUtils.getUserId(src, type),
-        assetId: ImageUtils.getAssetId(src, type)
+        assetId: ImageUtils.getAssetId(src, type),
+        brandId: ImageUtils.getBrandId(src, type)
       }
       delete page.backgroundImage.config.src
     }
@@ -1093,7 +1139,7 @@ class UploadUtils {
             }
           }).then(() => {
             this.isGettingDesign = false
-            pageUtils.fitPage()
+            // pageUtils.fitPage()
           })
         }
       })

@@ -5,7 +5,7 @@
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
         :class="{ 'layer-flip': flippedAnimation }"
-        :src="src"
+        :src="finalSrc"
         :styles="adjustImgStyles"
         :style="flipStyles()")
     img(v-show="!isAdjustImage"
@@ -14,7 +14,7 @@
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
       crossOrigin="Anonymous"
-      :src="src"
+      :src="finalSrc"
       @error="onError()"
       @load="onLoad()")
 </template>
@@ -164,10 +164,17 @@ export default Vue.extend({
     },
     uploadingImagePreviewSrc(): string {
       return this.config.previewSrc
+    },
+    finalSrc(): string {
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(this.src)
+      }
+      return this.src
     }
   },
   methods: {
     ...mapActions('file', ['updateImages']),
+    ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       UPDATE_shadowEffectState: 'UPDATE_shadowEffectState',
@@ -177,10 +184,6 @@ export default Vue.extend({
       const { imgWidth, imgHeight, imgX, imgY } = this.config.styles
       const { inheritStyle = {} } = this
       return {
-        // width: this.forRender ? '100%' : `${imgWidth}px`,
-        // height: this.forRender ? '100%' : `${imgHeight}px`,
-        // // transform: `translate(${imgX}px, ${imgY}px)`,
-        // ...(!this.forRender && { transform: `translate(${imgX}px, ${imgY}px)` }),
         width: `${imgWidth}px`,
         height: `${imgHeight}px`,
         transform: `translate(${imgX}px, ${imgY}px)`,
@@ -207,9 +210,16 @@ export default Vue.extend({
     },
     onError() {
       this.isOnError = true
+      let updater
       if (this.config.srcObj.type === 'private') {
+        updater = async () => await this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      }
+      if (this.config.srcObj.type === 'logo-private') {
+        updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      }
+      if (updater !== undefined) {
         try {
-          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
+          updater().then(() => {
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
@@ -220,13 +230,13 @@ export default Vue.extend({
       this.isOnError = false
     },
     async perviewAsLoading() {
+      if (this.uploadingImagePreviewSrc) {
+        return
+      }
       /**
        *  First put a preview to this.src, then start to load the right-sized-image.
        *  As loading finished, if the right-sized-image is still need, put it to the image src to replace preview, otherwise doing nothing.
        **/
-      if (this.uploadingImagePreviewSrc) {
-        return
-      }
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))

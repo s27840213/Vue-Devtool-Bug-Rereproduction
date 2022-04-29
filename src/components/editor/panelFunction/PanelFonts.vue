@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-fonts")
-    div(class="panel-fonts__title")
+    div(v-if="!noTitle" class="panel-fonts__title")
       span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(class="panel-fonts__close pointer"
         :iconName="'close'"
@@ -26,8 +26,9 @@
           :host="host"
           :preview="preview"
           :preview2="preview2"
-          :item="item")
-    div(class="panel-fonts__upload")
+          :item="item"
+          :textStyleType="textStyleType")
+    //- div(class="panel-fonts__upload")
       transition(name="fade-in")
         div(v-if="['uploading', 'success'].includes(fontUploadStatus)"
             class="panel-fonts__upload-status")
@@ -36,8 +37,8 @@
             :iconWidth="'30px'"
             :iconColor="'green-2'")
           span {{fontUploadStatus === 'uploading' ? `${$t('NN0136')}` : `${$t('NN0135')}`}}
-      //- btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
-      //-   :disabled="fontUploadStatus === 'uploading'") Upload Font
+      btn(class="full-width" :type="'primary-mid'" @click.native="uploadFont()"
+        :disabled="fontUploadStatus === 'uploading'") Upload Font
 </template>
 
 <script lang="ts">
@@ -52,7 +53,8 @@ import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
+import { IBrandFont } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -61,17 +63,23 @@ export default Vue.extend({
     CategoryFontItem,
     CategoryListFont
   },
+  props: {
+    noTitle: {
+      type: Boolean,
+      default: false
+    },
+    textStyleType: String
+  },
   data() {
     return {
-      FileUtils,
-      fontUploadStatus: 'none'
+      FileUtils
     }
   },
   mounted() {
     this.getCategories()
-    uploadUtils.onFontUploadStatus((status: 'none' | 'uploading' | 'success' | 'fail') => {
-      this.fontUploadStatus = status
-    })
+    if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
+      this.fetchFonts()
+    }
   },
   destroyed() {
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
@@ -91,12 +99,22 @@ export default Vue.extend({
     ),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
+    ...mapGetters('brandkit', {
+      privateFonts: 'getFonts',
+      fontsPageIndex: 'getFontsPageIndex'
+    }),
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer',
       assetFonts: 'user/getAssetFonts'
     }),
+    isBrandkitAvailable(): boolean {
+      return brandkitUtils.isBrandkitAvailable
+    },
     listResult(): any[] {
       const { hasNextPage, keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
@@ -109,7 +127,12 @@ export default Vue.extend({
             id: `${rowItems.map(item => item.id).join('_')}`,
             size: 32,
             type: 'category-font-item',
-            list: rowItems,
+            list: rowItems.map(item => ({
+              ...item,
+              fontType: 'public',
+              userId: item.user_id,
+              assetId: item.src === 'admin' ? item.asset_id : item.asset_index?.toString()
+            })),
             sentinel: hasNextPage && idx === (list.length - 1)
           }
         })
@@ -138,10 +161,15 @@ export default Vue.extend({
               type: 'category-font-item',
               list: [{
                 ...font,
-                fontType: 'public'
+                fontType: 'public',
+                userId: font.user_id,
+                assetId: font.src === 'admin' ? font.asset_id : font.asset_index?.toString()
               }]
             }))
           ])
+        }
+        if (category.is_recent === 1 && this.isBrandkitAvailable) {
+          result = result.concat(this.listAssets)
         }
       })
       if (result.length) {
@@ -149,11 +177,44 @@ export default Vue.extend({
       }
       return result
     },
+    listAssets(): any[] {
+      const { isAdmin, fontsPageIndex, privateFonts, keyword } = this
+      let result = [] as any[]
+      if (keyword) return result
+      result = [
+        {
+          size: 36,
+          id: 'uploaded_font',
+          type: 'title',
+          title: `${this.$t('NN0463')}`
+        }
+      ]
+      result = result.concat((privateFonts as IBrandFont[]).filter((font) => {
+        return !font.id.startsWith('new_')
+      }).map((font) => {
+        return {
+          id: `${font.id}`,
+          size: 32,
+          type: 'category-font-item',
+          moreType: 'asset',
+          list: [{
+            id: font.font_family,
+            src: isAdmin ? 'admin' : 'private',
+            userId: font.team_id,
+            assetId: isAdmin ? font.id : font.asset_index.toString(),
+            asset_index: font.asset_index,
+            signed_url: font.signed_url,
+            name: font.name
+          }]
+        }
+      }))
+      if (result.length) {
+        result[result.length - 1].sentinel = fontsPageIndex >= 0
+      }
+      return result
+    },
     list(): any[] {
       return this.listCategories.concat(this.listResult)
-    },
-    uploadStatusIcon(): string {
-      return this.fontUploadStatus === 'uploading' ? 'loading' : 'check'
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any font for "${this.keyword}".` : ''
@@ -169,9 +230,12 @@ export default Vue.extend({
         'getMoreCategory'
       ]
     ),
-    // getFontUrl(fontID: string): string {
-    //   return `url("https://template.vivipic.com/font/${fontID}/font")`
-    // },
+    ...mapActions('brandkit',
+      [
+        'fetchFonts',
+        'fetchMoreFonts'
+      ]
+    ),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
@@ -194,7 +258,11 @@ export default Vue.extend({
       document.head.appendChild(style)
       TextUtils.updateFontFace({ name: fontName, face: fontName, loaded: true })
     },
-    handleLoadMore() {
+    handleLoadMore(moreType: string | undefined) {
+      if (moreType === 'asset') {
+        this.fetchMoreFonts()
+        return
+      }
       const { keyword } = this
       keyword ? this.getMoreContent() : this.getMoreCategory()
     },

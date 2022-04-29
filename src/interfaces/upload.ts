@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { IUserFontContentData } from './api'
+import { IUserFontContentData, IUserLogoContentData } from './api'
 
 export interface IUploadAssetResponse {
   flag: number,
@@ -32,4 +32,9 @@ export interface IUploadAssetResponse {
 export interface IUploadAssetFontResponse {
   flag: number,
   data: IUserFontContentData
+}
+
+export interface IUploadAssetLogoResponse {
+  flag: number,
+  data: IUserLogoContentData
 }

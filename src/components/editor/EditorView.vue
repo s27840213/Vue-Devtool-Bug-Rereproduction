@@ -6,6 +6,7 @@
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
+      @contextmenu.prevent
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
@@ -69,7 +70,6 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {

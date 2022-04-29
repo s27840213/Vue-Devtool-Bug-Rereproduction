@@ -6,16 +6,15 @@
       :defaultKeyword="keyword"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    category-list(ref="list"
-      :list="list"
-      @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-      template(v-slot:default-text="{ list }")
-        div(class="panel-text__text-button-wrapper" v-for="config in list"
+    template(v-if="!keyword")
+      template(v-if="isBrandkitAvailable")
+        div(class="panel-text__brand-header relative")
+          brand-selector(theme="panel" :defaultOption="true")
+          div(class="panel-text__brand-settings pointer"
+          @click="handleOpenSettings")
+            svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
+      template(v-if="!isBrandkitAvailable || isDefaultSelected")
+        div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
             :key="config.type"
             draggable="true"
             @dragstart="standardTextDrag($event, config)")
@@ -24,6 +23,24 @@
             :type="`text-${config.type.toLowerCase()}`"
             :fontFamily="localeFont()"
             @click.native="handleAddText(config)") {{ config.text }}
+      template(v-else)
+        div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
+            :key="config.type"
+            draggable="true"
+            @dragstart="standardTextDrag($event, config)")
+          btn(
+            class="panel-text__text-button mb-10"
+            :style="getFontStyles(config.type.toLowerCase())"
+            :type="`text-${config.type.toLowerCase()}`"
+            @click.native="handleAddText(config)") {{ config.text }}
+    category-list(ref="list"
+      :list="list"
+      @loadMore="handleLoadMore")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -45,23 +62,29 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
 import i18n from '@/i18n'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
-import AssetUtils, { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
+import BrandSelector from '@/components/brandkit/BrandSelector.vue'
+import AssetUtils from '@/utils/assetUtils'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
 import textUtils from '@/utils/textUtils'
+import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import brandkitUtils from '@/utils/brandkitUtils'
+import VueI18n from 'vue-i18n'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
     CategoryListRows,
-    CategoryTextItem
+    CategoryTextItem,
+    BrandSelector
   },
   data() {
     return {
@@ -71,7 +94,9 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getLayersNum: 'getLayersNum'
+      getLayersNum: 'getLayersNum',
+      isDefaultSelected: 'brandkit/getIsDefaultSelected',
+      currentBrand: 'brandkit/getCurrentBrand'
     }),
     ...mapState(
       'textStock',
@@ -84,24 +109,25 @@ export default Vue.extend({
         'keyword'
       ]
     ),
-    listDefaultText(): any[] {
-      const { keyword } = this
-      if (keyword) { return [] }
-      const key = 'default-text'
+    isBrandkitAvailable(): boolean {
+      return brandkitUtils.isBrandkitAvailable
+    },
+    textStyleSetting(): IBrandTextStyleSetting {
+      return (this.currentBrand as IBrand).textStyleSetting
+    },
+    extractFonts(): ReturnType<typeof brandkitUtils.extractFonts> {
+      return this.isBrandkitAvailable ? brandkitUtils.extractFonts(this.textStyleSetting) : []
+    },
+    listDefaultText(): { type: string, text: VueI18n.TranslateResult }[] {
       return [{
-        type: key,
-        id: key,
-        size: 174,
-        list: [{
-          type: 'Heading',
-          text: this.$t('NN0011')
-        }, {
-          type: 'Subheading',
-          text: this.$t('NN0012')
-        }, {
-          type: 'Body',
-          text: this.$t('NN0013')
-        }]
+        type: 'Heading',
+        text: this.$t('NN0011')
+      }, {
+        type: 'Subheading',
+        text: this.$t('NN0012')
+      }, {
+        type: 'Body',
+        text: this.$t('NN0013')
       }]
     },
     listCategories(): any[] {
@@ -138,8 +164,7 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.listDefaultText
-        .concat(this.listCategories)
+      return this.listCategories
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
@@ -149,7 +174,7 @@ export default Vue.extend({
   async mounted() {
     await this.getCategories()
     this.getContent()
-    this.loadDefaultFonts()
+    textUtils.loadDefaultFonts(this.extractFonts)
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -162,6 +187,11 @@ export default Vue.extend({
   destroyed() {
     this.resetContent()
   },
+  watch: {
+    currentBrand() {
+      textUtils.loadDefaultFonts(this.extractFonts)
+    }
+  },
   methods: {
     ...mapActions('textStock',
       [
@@ -172,6 +202,24 @@ export default Vue.extend({
         'getMoreContent'
       ]
     ),
+    ...mapMutations({
+      setSettingsOpen: 'brandkit/SET_isSettingsOpen'
+    }),
+    getTextStyle(type: string): IBrandTextStyle {
+      return (this.textStyleSetting as any)[`${type}Style`]
+    },
+    getFontStyles(type: string): { [key: string]: string } {
+      const textStyle = this.getTextStyle(type)
+      const res = tiptapUtils.textStylesRaw({
+        weight: textStyle.bold ? 'bold' : 'normal',
+        style: textStyle.italic ? 'italic' : 'normal',
+        decoration: textStyle.underline ? 'underline' : 'none',
+        size: textStyle.size
+      })
+      delete res['font-size']
+      res.fontFamily = textStyle.isDefault ? brandkitUtils.getDefaultFontId(this.$i18n.locale) : textStyle.fontId
+      return res
+    },
     async handleSearch(keyword: string) {
       this.resetContent()
       if (keyword) {
@@ -189,18 +237,13 @@ export default Vue.extend({
       this.getMoreContent()
     },
     async handleAddText(config: { type: string, text: string }) {
-      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale)
+      await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale, undefined, undefined, this.getSpanStyles(config.type.toLowerCase()))
+    },
+    handleOpenSettings() {
+      this.setSettingsOpen(true)
     },
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
-    },
-    loadDefaultFonts(objectId = 'OOcHgnEpk9RHYBOiWllz') {
-      // const getFontUrl = (fontID: string): string => `url("https://template.vivipic.com/font/${fontID}/font")`
-      // const newFont = new FontFace(objectId, getFontUrl(objectId))
-      // newFont.load().then((font) => {
-      //   document.fonts.add(font)
-      // })
-      textUtils.loadDefaultFonts()
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
@@ -210,11 +253,33 @@ export default Vue.extend({
       new DragUtils().itemDragStart(e, 'standardText', {
         textType: textType.toLowerCase(),
         text,
-        locale: i18n.locale
+        locale: i18n.locale,
+        spanStyles: this.getSpanStyles(textType.toLowerCase())
       }, {
         offsetX: 20,
         offsetY: 30
       })
+    },
+    getSpanStyles(type: string): {[key: string]: string | number} {
+      let styles = {} as {[key: string]: string | number}
+      if (this.isBrandkitAvailable && !this.isDefaultSelected) {
+        const textStyle = this.getTextStyle(type)
+        styles = {
+          weight: textStyle.bold ? 'bold' : 'normal',
+          style: textStyle.italic ? 'italic' : 'normal',
+          decoration: textStyle.underline ? 'underline' : 'none',
+          size: textStyle.size
+        }
+        if (!textStyle.isDefault) {
+          Object.assign(styles, {
+            font: textStyle.fontId,
+            type: textStyle.fontType ?? 'public',
+            userId: textStyle.fontUserId ?? '',
+            assetId: textStyle.fontAssetId ?? ''
+          })
+        }
+      }
+      return styles
     }
   }
 })
@@ -228,6 +293,18 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  &__brand-header {
+    margin-top: 10px;
+    margin-bottom: 13px;
+  }
+  &__brand-settings {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+  }
   &__item {
     width: 145px;
     height: 145px;
@@ -251,9 +328,10 @@ export default Vue.extend({
     text-align: left;
   }
   &__text-button {
-    width: calc(100% - 10px);
+    width: 100%;
     background-color: setColor(gray-2);
     border-radius: 3px;
+    --base-stroke: 0px;
   }
 }
 </style>

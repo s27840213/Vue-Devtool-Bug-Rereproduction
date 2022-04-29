@@ -151,7 +151,8 @@ export default Vue.extend({
             this.setLoading(false)
             stepsUtils.record()
           },
-          id: id
+          id: id,
+          needCompressed: false
         })
       }
     },

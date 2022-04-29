@@ -19,9 +19,7 @@ class LayerFactary {
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
       previewSrc: config.previewSrc,
       srcObj: {
-        tpye: config.srcObj.type,
-        userId: config.srcObj.userId,
-        assetId: config.srcObj.assetId
+        ...config.srcObj
       },
       id: config.id || GeneralUtils.generateRandomString(8),
       clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,
@@ -268,13 +266,16 @@ class LayerFactary {
             const firstSpanStyles = paragraph.spans[0].styles
             if (firstSpanStyles.font) {
               paragraph.styles.font = firstSpanStyles.font
-              paragraph.styles.type = firstSpanStyles.type
-              paragraph.styles.userId = firstSpanStyles.userId
-              paragraph.styles.assetId = firstSpanStyles.assetId
-              paragraph.styles.fontUrl = firstSpanStyles.fontUrl
+              paragraph.styles.type = firstSpanStyles.type ?? 'public'
+              paragraph.styles.userId = firstSpanStyles.userId ?? ''
+              paragraph.styles.assetId = firstSpanStyles.assetId ?? ''
+              paragraph.styles.fontUrl = firstSpanStyles.fontUrl ?? ''
             } else {
               paragraph.styles.font = defaultFont
               paragraph.styles.type = 'public'
+              paragraph.styles.userId = ''
+              paragraph.styles.assetId = ''
+              paragraph.styles.fontUrl = ''
             }
             if (paragraph.styles.spanStyle) {
               delete paragraph.styles.spanStyle
@@ -282,21 +283,16 @@ class LayerFactary {
           } else if (paragraph.styles.spanStyle) {
             const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
             paragraph.styles.font = spanStyles.font
-            paragraph.styles.type = spanStyles.type
-            paragraph.styles.userId = spanStyles.userId
-            paragraph.styles.assetId = spanStyles.assetId
-            paragraph.styles.fontUrl = spanStyles.fontUrl
+            paragraph.styles.type = spanStyles.type ?? 'public'
+            paragraph.styles.userId = spanStyles.userId ?? ''
+            paragraph.styles.assetId = spanStyles.assetId ?? ''
+            paragraph.styles.fontUrl = spanStyles.fontUrl ?? ''
           } else {
             paragraph.styles.font = defaultFont
             paragraph.styles.type = 'public'
-          }
-        },
-        (span) => {
-          if (!span.styles.font) {
-            span.styles.font = defaultFont
-            span.styles.type = 'public'
-          } else if (!span.styles.type) {
-            span.styles.type = 'public'
+            paragraph.styles.userId = ''
+            paragraph.styles.assetId = ''
+            paragraph.styles.fontUrl = ''
           }
         }
       )

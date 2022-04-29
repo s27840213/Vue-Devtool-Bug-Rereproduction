@@ -1,3 +1,4 @@
+import store from '@/store'
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
 import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -5,16 +6,27 @@ import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import { IUserFontContentData } from '@/interfaces/api'
+import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
+import { IFrame, IGroup, IImage, IText } from '@/interfaces/layer'
+import { SrcObj } from '@/interfaces/gallery'
+import userApis from '@/apis/user'
+import _ from 'lodash'
+import apiUtils from '@/utils/apiUtils'
 
 interface IBrandKitState {
   brands: IBrand[],
   currentBrandId: string,
+  isDefaultSelected: boolean,
   isBrandsLoading: boolean,
+  isLogosLoading: boolean,
+  isPalettesLoading: boolean,
   isFontsLoading: boolean,
   selectedTab: string,
   fonts: IBrandFont[],
-  fontsPageindex: number
+  fetchedFonts: {[key: string]: {[key: string]: string}},
+  fontsPageIndex: number,
+  isSettingsOpen: boolean,
+  editorViewLogos: Record<string, Record<string, string>>,
 }
 
 const NULL_BRAND = brandkitUtils.createNullBrand()
@@ -25,23 +37,45 @@ const showNetworkError = () => {
 const getDefaultState = (): IBrandKitState => ({
   brands: [],
   currentBrandId: '',
+  isDefaultSelected: false,
   isBrandsLoading: false,
+  isLogosLoading: false,
+  isPalettesLoading: false,
   isFontsLoading: false,
   selectedTab: brandkitUtils.getTabKeys()[0],
   fonts: [],
-  fontsPageindex: 0
+  fetchedFonts: {},
+  fontsPageIndex: 0,
+  isSettingsOpen: false,
+  editorViewLogos: {}
 })
+
+function isPrivate(srcObj: SrcObj): string {
+  return (srcObj && srcObj.type === 'logo-private') ? srcObj.assetId.toString() : ''
+}
 
 const state = getDefaultState()
 const getters: GetterTree<IBrandKitState, unknown> = {
   getBrands(state: IBrandKitState): IBrand[] {
     return state.brands
   },
+  getCurrentBrandId(state: IBrandKitState): string {
+    return state.currentBrandId
+  },
   getCurrentBrand(state: IBrandKitState): IBrand {
     return brandkitUtils.findBrand(state.brands, state.currentBrandId) ?? state.brands[0] ?? NULL_BRAND
   },
+  getIsDefaultSelected(state: IBrandKitState): boolean {
+    return state.isDefaultSelected
+  },
   getIsBrandsLoading(state: IBrandKitState): boolean {
     return state.isBrandsLoading
+  },
+  getIsLogosLoading(state: IBrandKitState): boolean {
+    return state.isLogosLoading
+  },
+  getIsPalettesLoading(state: IBrandKitState): boolean {
+    return state.isPalettesLoading
   },
   getIsFontsLoading(state: IBrandKitState): boolean {
     return state.isFontsLoading
@@ -53,7 +87,18 @@ const getters: GetterTree<IBrandKitState, unknown> = {
     return state.fonts
   },
   getFontsPageIndex(state: IBrandKitState): number {
-    return state.fontsPageindex
+    return state.fontsPageIndex
+  },
+  getFontUrlMap(state: IBrandKitState): (assetIndex: string) => {[key: string]: string} | undefined {
+    return (assetIndex: string) => {
+      return state.fetchedFonts[assetIndex]
+    }
+  },
+  getIsSettingsOpen(state: IBrandKitState): boolean {
+    return state.isSettingsOpen
+  },
+  getEditorViewLogos: (state: IBrandKitState) => (assetId: string | undefined = undefined) => {
+    return assetId ? state.editorViewLogos[assetId] : state.editorViewLogos
   }
 }
 
@@ -72,14 +117,58 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       showNetworkError()
     }
   },
+  async fetchLogos({ commit, state }) {
+    try {
+      const { data } = await brandkitApi.getLogos(state.currentBrandId)
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const logos = data.logos.map((logo: IUserLogoContentData) => brandkitUtils.apiLogo2IBrandLogo(logo))
+      commit('SET_logos', {
+        brandId: state.currentBrandId,
+        logos
+      })
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const logo of logos) {
+          data[logo.asset_index] = logo.signed_url
+        }
+        commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data))
+      }
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchPalettes({ commit, state }) {
+    try {
+      const { data } = await brandkitApi.getPalettes(state.currentBrandId)
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const palettes = data.palettes
+      commit('SET_palettes', { brandId: state.currentBrandId, palettes })
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
   async fetchFonts({ commit }) {
     try {
       const { data } = await brandkitApi.getFonts()
       if (data.flag !== 0) {
         throw new Error('fetch fonts request failed')
       }
+      const fonts = data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)) as IBrandFont[]
       commit('SET_fontsPageIndex', data.next_page)
-      commit('SET_fonts', data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)))
+      commit('SET_fonts', fonts)
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const font of fonts) {
+          data[font.asset_index] = font.signed_url
+        }
+        commit('UPDATE_setFetchedFont', data)
+      }
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -95,8 +184,16 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       if (data.flag !== 0) {
         throw new Error('fetch fonts request failed')
       }
+      const newFonts = data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font)) as IBrandFont[]
       commit('SET_fontsPageIndex', data.next_page)
-      commit('SET_fonts', getters.getFonts.concat(data.data.font.content.map((font: IUserFontContentData) => brandkitUtils.apiFont2IBrandFont(font))))
+      commit('SET_fonts', getters.getFonts.concat(newFonts))
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const font of newFonts) {
+          data[font.asset_index] = font.signed_url
+        }
+        commit('UPDATE_setFetchedFont', data)
+      }
     } catch (error) {
       console.error(error)
       showNetworkError()
@@ -180,7 +277,9 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async removeLogo({ commit }, logo: IBrandLogo) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateApiWrapper(async () => {
+      return await brandkitApi.deleteLogo(logo.asset_index.toString())
+    }, () => {
       commit('UPDATE_deleteLogo', { brand: currentBrand, logo })
     }, () => {
       commit('UPDATE_addLogo', { brand: currentBrand, logo })
@@ -293,11 +392,12 @@ const actions: ActionTree<IBrandKitState, unknown> = {
   async updateColorTemp({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
     if (!currentBrand) return
-    console.log('tmp')
     commit('UPDATE_setColor', { brand: currentBrand, ...updateInfo })
   },
   async removeFont({ commit }, font: IBrandFont) {
-    brandkitApi.updateBrandsWrapper({}, () => {
+    brandkitApi.updateApiWrapper(async () => {
+      return await brandkitApi.deleteFont(font.asset_index.toString())
+    }, () => {
       commit('UPDATE_deleteFont', font)
     }, () => {
       commit('UPDATE_addFont', font)
@@ -326,12 +426,117 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       showNetworkError()
     })
   },
-  async refreshFontAsset({ commit }, font: IBrandFont) {
-    const { data } = await brandkitApi.getFont(font.asset_index)
-    if (data.flag === 0) {
-      const urlMap = data.url_map[font.asset_index.toString()]
-      commit('UPDATE_replaceFontUrl', { font, urlMap })
+  async refreshFontAsset({ commit }, font: IBrandFont | string) {
+    const assetIndex = typeof font === 'string' ? font as string : (font as IBrandFont).asset_index.toString()
+    let privateFont: IBrandFont | undefined
+    if (typeof font === 'string') {
+      privateFont = brandkitUtils.getFont(font)
+    } else {
+      privateFont = font as IBrandFont
     }
+    const { data } = await brandkitApi.getFont(assetIndex)
+    if (data.flag === 0) {
+      const urlMap = data.url_map[assetIndex]
+      if (privateFont) {
+        commit('UPDATE_replaceFontUrl', { font: privateFont, urlMap })
+      }
+      commit('UPDATE_addFetchedFont', { index: assetIndex, urlMap })
+      return urlMap
+    }
+    return {}
+  },
+  async refreshLogoAsset({ commit }, updateInfo: { brand: IBrand, logoAssetIndex: number }) {
+    const assetIndex = updateInfo.logoAssetIndex.toString()
+    const { data } = await brandkitApi.getLogo(assetIndex)
+    if (data.flag === 0) {
+      const urlMap = data.url_map[assetIndex]
+      commit('UPDATE_replaceLogoUrl', { brand: updateInfo.brand, assetIndex, urlMap })
+      return urlMap
+    }
+    return {}
+  },
+  async updatePageFonts({ dispatch }, { pageIndex }: { pageIndex: number }) {
+    const { layers } = store.state.pages[pageIndex]
+    const fontToRequest = new Set<string>()
+
+    for (const layer of layers) {
+      const targets = layer.type === 'group' ? (layer as IGroup).layers : [layer]
+
+      for (const target of targets) {
+        if (target.type === 'text') {
+          const paragraphs = (target as IText).paragraphs
+          for (const paragraph of paragraphs) {
+            if (paragraph.styles.font && paragraph.styles.type === 'private') {
+              fontToRequest.add(paragraph.styles.assetId as string)
+            }
+            for (const span of paragraph.spans) {
+              if (span.styles.font && span.styles.type === 'private') {
+                fontToRequest.add(span.styles.assetId)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    fontToRequest.delete('') // delete empty asset id
+    await dispatch('updateFonts', { assetSet: fontToRequest })
+  },
+  async updateFonts({ commit }, { assetSet }: { assetSet: Set<string> }) {
+    const assetIndexList = _.difference(Array.from(assetSet), Object.keys(state.fetchedFonts))
+    const assetIndex = assetIndexList.join(',')
+
+    if (assetIndex.length === 0) {
+      return
+    }
+
+    const { data } = await brandkitApi.getFont(assetIndex)
+    if (data.flag === 0) {
+      commit('UPDATE_setFetchedFont', data.url_map)
+    }
+  },
+  async updatePageLogos({ dispatch }, { pageIndex }: { pageIndex: number }) {
+    const { layers, backgroundImage } = store.state.pages[pageIndex]
+    const logoToRequest = new Set<string>()
+
+    logoToRequest.add(isPrivate(backgroundImage.config.srcObj))
+    for (const layer of layers) {
+      const targets = layer.type === 'group' ? (layer as IGroup).layers : [layer]
+
+      for (const target of targets) {
+        switch (target.type) {
+          case 'image':
+            logoToRequest.add(isPrivate((target as IImage).srcObj))
+            break
+          case 'frame':
+            for (const clip of (target as IFrame).clips) {
+              logoToRequest.add(isPrivate(clip.srcObj))
+            }
+            break
+        }
+      }
+    }
+
+    logoToRequest.delete('') // delete empty asset id
+    await dispatch('updateLogos', { assetSet: logoToRequest })
+  },
+  async updateLogos({ commit }, { assetSet }) {
+    // Request unknown private image url
+    // If you want to reduce redundant update asset, assetSet should be Set<string>.
+    // If you want to force update expired image, assetSet should be Set<number>, therefore diff will not take effect.
+
+    const token = userApis.getToken()
+    assetSet = _.difference(Array.from(assetSet), Object.keys(state.editorViewLogos))
+    assetSet = Array.from(assetSet).join(',')
+    if (assetSet.length === 0) {
+      return
+    }
+
+    await apiUtils.requestWithRetry(() => userApis.getAllAssets(token, {
+      asset_list: assetSet
+    })).then((data) => {
+      commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data.data.url_map))
+    })
   }
 }
 
@@ -339,11 +544,30 @@ const mutations: MutationTree<IBrandKitState> = {
   SET_brands(state: IBrandKitState, brands: IBrand[]) {
     state.brands = brands
   },
+  SET_logos(state: IBrandKitState, updateInfo: { brandId: string, logos: IBrandLogo[] }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
+    if (!brand) return
+    brand.logos = updateInfo.logos
+  },
+  SET_palettes(state: IBrandKitState, updateInfo: { brandId: string, palettes: IBrandColorPalette[] }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
+    if (!brand) return
+    brand.colorPalettes = updateInfo.palettes
+  },
   SET_currentBrand(state: IBrandKitState, brand: IBrand) {
     state.currentBrandId = brand.id
   },
+  SET_isDefaultSelected(state: IBrandKitState, isDefaultSelected: boolean) {
+    state.isDefaultSelected = isDefaultSelected
+  },
   SET_isBrandsLoading(state: IBrandKitState, isBrandsLoading: boolean) {
     state.isBrandsLoading = isBrandsLoading
+  },
+  SET_isLogosLoading(state: IBrandKitState, isLogosLoading: boolean) {
+    state.isLogosLoading = isLogosLoading
+  },
+  SET_isPalettesLoading(state: IBrandKitState, isPalettesLoading: boolean) {
+    state.isPalettesLoading = isPalettesLoading
   },
   SET_isFontsLoading(state: IBrandKitState, isFontsLoading: boolean) {
     state.isFontsLoading = isFontsLoading
@@ -354,8 +578,14 @@ const mutations: MutationTree<IBrandKitState> = {
   SET_fonts(state: IBrandKitState, fonts: IBrandFont[]) {
     state.fonts = fonts
   },
-  SET_fontsPageIndex(state: IBrandKitState, fontsPageindex: number) {
-    state.fontsPageindex = fontsPageindex
+  SET_fontsPageIndex(state: IBrandKitState, fontsPageIndex: number) {
+    state.fontsPageIndex = fontsPageIndex
+  },
+  SET_isSettingsOpen(state: IBrandKitState, isSettingsOpen: boolean) {
+    state.isSettingsOpen = isSettingsOpen
+  },
+  SET_editorViewLogos(state: IBrandKitState, editorViewLogos: Record<string, Record<string, string>>) {
+    state.editorViewLogos = editorViewLogos
   },
   UPDATE_addBrand(state: IBrandKitState, brand: IBrand) {
     const index = brandkitUtils.findInsertIndex(state.brands, brand, true)
@@ -379,18 +609,25 @@ const mutations: MutationTree<IBrandKitState> = {
     if (!brand) return
     brand.createTime = updateInfo.createTime
   },
-  UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+  UPDATE_addLogo(state: IBrandKitState, updateInfo: { brand: { id: string }, logo: IBrandLogo }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brandkitUtils.findInsertIndex(brand.logos, updateInfo.logo)
     brand.logos.splice(index, 0, updateInfo.logo)
   },
-  UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: IBrand, logo: IBrandLogo }) {
+  UPDATE_deleteLogo(state: IBrandKitState, updateInfo: { brand: { id: string }, logo: { id: string } }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.logo.id)
     if (index < 0) return
     brand.logos.splice(index, 1)
+  },
+  UPDATE_replaceLogo(state: IBrandKitState, updateInfo: { id: string, logo: IBrandLogo, brandId: string }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brandId)
+    if (!brand) return
+    const index = brand.logos.findIndex(logo_ => logo_.id === updateInfo.id)
+    if (index < 0) return
+    brand.logos.splice(index, 1, updateInfo.logo)
   },
   UPDATE_addPalette(state: IBrandKitState, updateInfo: { brand: IBrand, palette: IBrandColorPalette }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
@@ -430,7 +667,6 @@ const mutations: MutationTree<IBrandKitState> = {
     colorPalette.colors.splice(index, 1)
   },
   UPDATE_setColor(state: IBrandKitState, updateInfo: { brand: IBrand, paletteId: string, id: string, color: string }) {
-    console.log(updateInfo.color)
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
     if (!brand) return
     const colorPalette = brand.colorPalettes.find(palette => palette.id === updateInfo.paletteId)
@@ -470,6 +706,19 @@ const mutations: MutationTree<IBrandKitState> = {
     for (const key of Object.keys(font.signed_url)) {
       (font.signed_url as any)[key] = updateInfo.urlMap[key] ?? ''
     }
+  },
+  UPDATE_replaceLogoUrl(state: IBrandKitState, updateInfo: { brand: IBrand, assetIndex: string, urlMap: {[key: string]: string} }) {
+    const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
+    if (!brand) return
+    const logo = brand.logos.find(logo => logo.asset_index.toString() === updateInfo.assetIndex)
+    if (!logo || !logo.signed_url) return
+    (logo.signed_url as any) = updateInfo.urlMap
+  },
+  UPDATE_addFetchedFont(state: IBrandKitState, updateInfo: { index: string, urlMap: {[key: string]: string} }) {
+    state.fetchedFonts[updateInfo.index] = updateInfo.urlMap
+  },
+  UPDATE_setFetchedFont(state: IBrandKitState, urlMap: {[key: string]: {[key: string]: string}}) {
+    Object.assign(state.fetchedFonts, urlMap)
   },
   UPDATE_updateTextStyle(state: IBrandKitState, updateInfo: { brand: IBrand, type: string, style: any }) {
     const brand = brandkitUtils.findBrand(state.brands, updateInfo.brand.id)
