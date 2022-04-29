@@ -46,7 +46,7 @@
             @click.native="button.func()")
           span {{button.text}}
     //- move to jpg folder, compress?
-    img(class="payment-right" :src="require(`@/assets/img/svg/pricing/${img}`)")
+    img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
     div(v-if="view === 'finish'" class="payment-finish")
       animation(path="/lottie/us/pro.json")
 
@@ -219,6 +219,7 @@ export default Vue.extend({
             text: i18n.t('TMP0058') as string,
             func: () => this.changeView('cancel2')
           }]
+          this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
           this.title = i18n.t('TMP0060') as string

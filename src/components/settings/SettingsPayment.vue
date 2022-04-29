@@ -4,7 +4,7 @@
       p(class="text-blue-1")            {{$t('TMP0070')}}
       svg-icon(iconName="free")
       btn(class="rounded" type="primary-lg" @click.native="togglePro()")
-        span {{$t('TMP0071')}}
+        span                            {{$t('TMP0071')}}
     div(v-if="isPro" class="sp-pro")
       p(class="text-blue-1")            {{$t('TMP0070')}}
       //- todelete @click
@@ -29,23 +29,39 @@
         @click="openCardPopup()")       {{$t('TMP0083')}}
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
+      //- todo reuse
+      p(class="text-blue-1")            {{$t('TMP0084')}}
+      span                              {{$tc('NN0173', 1)}}
+      input(                :placeholder="$t('TMP0085')")
+      span                              {{$t('NN0172')}}
+      input(                :placeholder="$t('TMP0086')")
+      span                              {{$t('TMP0047')}}
+      input(                :placeholder="$t('')")
+      span                              {{$t('TMP0048')}}
+      input(                :placeholder="$t('')")
+      btn(type="primary-sm")            {{$t('NN0176')}}
+    div(v-if="isPro" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0084')}}
       options(class="mb-10" :options="countryData" v-model="userCountry")
-      span                              {{$t('NN0172')}}
-      input(:placeholder="$t('TMP0086')")
       span                              {{$tc('NN0173', 1)}}
-      input(:placeholder="$t('TMP0085')")
+      input(                :placeholder="$t('TMP0085')")
+      span                              {{$t('NN0172')}}
+      input(                :placeholder="$t('TMP0086')")
       span                              {{$t('TMP0087')}}
-      input(:placeholder="$t('TMP0088')")
+      input(                :placeholder="$t('TMP0088')")
       span                              {{$t('TMP0089', { number: 1 })}}
-      input(:placeholder="$t('TMP0090')")
+      input(                :placeholder="$t('TMP0090')")
       span                              {{$t('TMP0089', { number: 2 })}}
-      input(:placeholder="$t('TMP0091')")
+      input(                :placeholder="$t('TMP0091')")
       span                              {{$t('TMP0092')}}
-      input(:placeholder="$t('TMP0092')")
-      options(class="mb-10" :options="stateData" v-model="testState" :ph="$t('TMP0093')")
-      span                              {{$t('TMP0094')}}
-      input(:placeholder="$t('TMP0094')")
+      input(                :placeholder="$t('TMP0092')")
+      div(class="sp-info__half")
+        span
+        span                            {{$t('TMP0094')}}
+        options(class="mb-10" :options="stateData"
+                v-model="testState"  :ph="$t('TMP0093')")
+        input(              :placeholder="$t('TMP0094')")
+      btn(type="primary-sm")            {{$t('NN0176')}}
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
         payment-field(isChange)
@@ -147,11 +163,12 @@ export default Vue.extend({
 }
 
 .sp-info {
-  >span {
+  width: 350px;
+  span {
+    @include body-SM;
     color: setColor(gray-3);
   }
-  >select { width: 350px; }
-  >input {
+  input {
     @include body-SM;
     width: 330px;
     height: 20px; // ask kitty
@@ -161,6 +178,15 @@ export default Vue.extend({
     border-radius: 4px;
     color: setColor(gray-2);
   }
+  &__half {
+    display: grid;
+    grid-template-columns: 170px 170px;
+    column-gap: 10px;
+    text-align: left;
+    >select, >input { margin: 10px 0; }
+    >input { width: 150px; }
+  }
+  >button { margin: 20px 0 0 auto; }
 }
 
 .sp-field{
