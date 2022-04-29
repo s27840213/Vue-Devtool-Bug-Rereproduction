@@ -20,6 +20,7 @@ import NuHeader from '@/components/NuHeader.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
+import SettingsBill from '@/components/settings/SettingsBill.vue'
 
 export default Vue.extend({
   name: 'Settings',
@@ -31,7 +32,8 @@ export default Vue.extend({
     NuHeader,
     SettingsAccount,
     SettingsSecurity,
-    SettingsPayment
+    SettingsPayment,
+    SettingsBill
   },
   data() {
     return {

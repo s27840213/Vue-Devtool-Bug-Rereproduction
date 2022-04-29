@@ -53,7 +53,7 @@ export default Vue.extend({
         icon: 'pro'
       }, {
         name: 'bill',
-        label: i18n.t('TMP0071'),
+        label: i18n.t('TMP0096'),
         icon: 'invoice'
       }]
     }
