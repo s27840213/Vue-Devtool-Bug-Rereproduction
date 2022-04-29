@@ -188,7 +188,6 @@ export default Vue.extend({
       } else {
         this.setIsUploading(pageId, config.id as string, '', true)
       }
-
       uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 1)], {
         addToPage: false,
         needCompressed: false,

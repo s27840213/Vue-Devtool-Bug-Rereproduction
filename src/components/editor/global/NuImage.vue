@@ -4,8 +4,7 @@
     draggable="false")
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
-<<<<<<< HEAD
-        :src="src"
+        :src="finalSrc"
         :styles="adjustImgStyles"
         :style="imgStyles")
     div(v-if="showCanvas && !isAdjustImage"
@@ -22,24 +21,9 @@
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
           draggable="false"
           crossOrigin="Anonymous"
-          :src="src"
+          :src="finalSrc"
           @error="onError()"
           @load="onLoad()")
-=======
-        :class="{ 'layer-flip': flippedAnimation }"
-        :src="finalSrc"
-        :styles="adjustImgStyles"
-        :style="flipStyles()")
-    img(v-show="!isAdjustImage"
-      ref="img"
-      :style="flipStyles()"
-      :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
-      draggable="false"
-      crossOrigin="Anonymous"
-      :src="finalSrc"
-      @error="onError()"
-      @load="onLoad()")
->>>>>>> 89ad9b9c6732bbc1f6de2580047d07532310a572
 </template>
 
 <script lang="ts">
@@ -149,10 +133,14 @@ export default Vue.extend({
     },
     canvasWrapperStyle(): any {
       return {
-        width: `${this.config.styles.initWidth * this.canvasScale}px`,
-        height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating &&
+        width: `${this.config.styles.width * CANVAS_SCALE}px`,
+        height: `${this.config.styles.height * (this.currentShadowEffect === ShadowEffectType.floating &&
           this.config.styles.height / this.config.styles.width < 1
           ? CANVAS_FLOATING_SCALE : CANVAS_SCALE)}px`,
+        // width: `${this.config.styles.initWidth * CANVAS_SCALE}px`,
+        // height: `${this.config.styles.initHeight * (this.currentShadowEffect === ShadowEffectType.floating &&
+        //   this.config.styles.height / this.config.styles.width < 1
+        //   ? CANVAS_FLOATING_SCALE : CANVAS_SCALE)}px`,
         transform: `scale(${this.config.styles.scale})`
       }
     },
@@ -390,6 +378,7 @@ export default Vue.extend({
     handleNewShadowEffect() {
       const { canvas, layerInfo } = this
       if (!canvas) {
+        console.warn('there is no cnavas!')
         return
       }
       imgShadowUtils.clearLayerData()
@@ -416,6 +405,11 @@ export default Vue.extend({
             previewImg.onload = () => {
               canvas.setAttribute('width', `${previewImg.naturalWidth * CANVAS_SCALE}`)
               canvas.setAttribute('height', `${previewImg.naturalHeight * CANVAS_SCALE}`)
+              // const { width, imgWidth, height, imgHeight } = this.config.styles
+              // const canvasW = previewImg.naturalWidth * width / imgWidth * CANVAS_SCALE
+              // const canvasH = previewImg.naturalHeight * height / imgHeight * CANVAS_SCALE
+              // canvas.setAttribute('width', `${canvasW}`)
+              // canvas.setAttribute('height', `${canvasH}`)
               this.canvasShadowImg = previewImg
               imgShadowUtils.draw(canvas, previewImg, this.config, {
                 layerInfo
