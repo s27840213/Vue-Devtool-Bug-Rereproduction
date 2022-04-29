@@ -79,7 +79,7 @@ class CssConveter {
     return { transform: `scale(${horizontalFlip ? -1 : 1}, ${verticalFlip ? -1 : 1})` }
   }
 
-  convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle): { [key: string]: string } {
+  convertFontStyle(sourceStyles: IStyle | ITextStyle | IParagraphStyle | ISpanStyle | { [key: string]: string | number }): { [key: string]: string } {
     const result: { [key: string]: string } = {}
     fontProps.forEach(prop => {
       if (prop === 'size') {

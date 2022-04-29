@@ -183,7 +183,14 @@ export default function (this: any) {
         preview2 = '',
         next_page: nextPage = 0
       } = objects || {}
-      state.content = content.find(content => content.list.length) || {}
+      const assetContent = content.filter(content => content.title === 'asset')
+      const publicContent = content.filter(content => content.title !== 'asset')
+      state.content = {
+        title: content[0]?.title ?? '',
+        list: assetContent.flatMap(content => content.list).concat(
+          publicContent.flatMap(content => content.list)
+        )
+      }
       state.host = host.endsWith('/') ? host.slice(0, -1) : host
       state.data = data
       state.preview = preview
@@ -193,7 +200,7 @@ export default function (this: any) {
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
-      const { list: newList = [] } = objects.content.find(content => content.list.length) || {}
+      const newList = objects.content.flatMap(content => content.list)
       state.content = {
         ...state.content,
         list: list.concat(newList)

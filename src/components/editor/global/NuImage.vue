@@ -4,6 +4,7 @@
     draggable="false")
     template(v-if="isAdjustImage")
       nu-adjust-image(v-show="isAdjustImage"
+<<<<<<< HEAD
         :src="src"
         :styles="adjustImgStyles"
         :style="imgStyles")
@@ -24,6 +25,21 @@
           :src="src"
           @error="onError()"
           @load="onLoad()")
+=======
+        :class="{ 'layer-flip': flippedAnimation }"
+        :src="finalSrc"
+        :styles="adjustImgStyles"
+        :style="flipStyles()")
+    img(v-show="!isAdjustImage"
+      ref="img"
+      :style="flipStyles()"
+      :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
+      draggable="false"
+      crossOrigin="Anonymous"
+      :src="finalSrc"
+      @error="onError()"
+      @load="onLoad()")
+>>>>>>> 89ad9b9c6732bbc1f6de2580047d07532310a572
 </template>
 
 <script lang="ts">
@@ -32,7 +48,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IStyle } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import imgShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, CANVAS_SIZE } from '@/utils/imageShadowUtils'
@@ -75,37 +91,20 @@ export default Vue.extend({
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
-        const { type } = this.config.srcObj
-        if (type === 'background') return
-
-        const preLoadImg = (preLoadType: 'pre' | 'next') => {
-          return new Promise<void>((resolve, reject) => {
-            const img = new Image()
-            img.setAttribute('crossOrigin', 'Anonymous')
-
-            img.onload = () => resolve()
-            img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-            img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, newVal, preLoadType)))
-          })
-        }
-
-        const imgElement = this.$refs.img as HTMLImageElement
-        imgElement.onload = async () => {
-          if (newVal > oldVal) {
-            await preLoadImg('next')
-            preLoadImg('pre')
-          } else {
-            await preLoadImg('pre')
-            preLoadImg('next')
-          }
-        }
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
-      }
+      this.handleDimensionUpdate(newVal, oldVal)
+    },
+    parentLayerDimension(newVal, oldVal) {
+      this.handleDimensionUpdate(newVal, oldVal)
     },
     srcObj: {
       handler: function () {
-        !this.forRender && this.perviewAsLoading()
+        if (!this.forRender) {
+          if (typeof this.subLayerIndex !== 'undefined') {
+            this.handleDimensionUpdate(this.parentLayerDimension, 0)
+          } else {
+            this.perviewAsLoading()
+          }
+        }
       },
       deep: true
     },
@@ -263,19 +262,37 @@ export default Vue.extend({
     },
     uploadingImagePreviewSrc(): string {
       return this.config.previewSrc
+    },
+    finalSrc(): string {
+      if (this.$route.name === 'Preview') {
+        return ImageUtils.appendCompQueryForVivipic(this.src)
+      }
+      return this.src
+    },
+    parentLayerDimension(): number {
+      const { width, height } = this.config.parentLayerStyles || {}
+      return ImageUtils.getSrcSize(this.config.srcObj.type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
     }
   },
   methods: {
     ...mapActions('file', ['updateImages']),
+    ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       setIsProcessing: 'bgRemove/SET_isProcessing'
     }),
     onError() {
       this.isOnError = true
+      let updater
       if (this.config.srcObj.type === 'private') {
+        updater = async () => await this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      }
+      if (this.config.srcObj.type === 'logo-private') {
+        updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      }
+      if (updater !== undefined) {
         try {
-          this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) }).then(() => {
+          updater().then(() => {
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
@@ -286,13 +303,13 @@ export default Vue.extend({
       this.isOnError = false
     },
     async perviewAsLoading() {
+      if (this.uploadingImagePreviewSrc) {
+        return
+      }
       /**
        *  First put a preview to this.src, then start to load the right-sized-image.
        *  As loading finished, if the right-sized-image is still need, put it to the image src to replace preview, otherwise doing nothing.
        **/
-      if (this.uploadingImagePreviewSrc) {
-        return
-      }
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
@@ -311,9 +328,36 @@ export default Vue.extend({
         img.src = src
       })
     },
+    handleDimensionUpdate(newVal: number, oldVal: number) {
+      if (!this.isOnError && this.uploadingImagePreviewSrc === undefined) {
+        const { type } = this.config.srcObj
+        if (type === 'background') return
+
+        const imgElement = this.$refs.img as HTMLImageElement
+        imgElement.onload = async () => {
+          if (newVal > oldVal) {
+            await this.preLoadImg('next', newVal)
+            this.preLoadImg('pre', newVal)
+          } else {
+            await this.preLoadImg('pre', newVal)
+            this.preLoadImg('next', newVal)
+          }
+        }
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, newVal))
+      }
+    },
+    async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image()
+        img.setAttribute('crossOrigin', 'Anonymous')
+
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
+      })
+    },
     async handleInitLoad() {
       const { type } = this.config.srcObj
-
       if (this.userId !== 'backendRendering') {
         await this.perviewAsLoading()
         const preImg = new Image()

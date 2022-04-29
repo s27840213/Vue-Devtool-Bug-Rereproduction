@@ -2,12 +2,27 @@
 import { IUserFontContentData } from './api'
 
 export interface IBrandLogo {
+  team_id: string,
   name: string,
   id: string,
   createTime: string,
-  url: string,
+  asset_index: number,
+  signed_url?: {
+    full: string,
+    larg: string,
+    midd: string,
+    original: string,
+    prev: string,
+    smal: string,
+    tiny: string
+  },
   width: number,
-  height: number
+  height: number,
+  preview?: {
+    width: number,
+    height: number
+  },
+  ver: number
 }
 
 export interface IBrandTextStyle {
