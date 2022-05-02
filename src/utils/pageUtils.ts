@@ -406,6 +406,10 @@ class PageUtils {
     }
     return {}
   }
+
+  hasDesignId(pageIndex: number) {
+    return this.getPage(pageIndex).designId !== ''
+  }
 }
 
 const pageUtils = new PageUtils()
