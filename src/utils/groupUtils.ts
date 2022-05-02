@@ -143,6 +143,7 @@ class GroupUtils {
       const tmpIndex = this.currSelectedInfo.index
       this.reset()
       this.set(tmpPageIndex, tmpIndex, targetLayer.layers)
+      stepsUtils.record()
     }
   }
 

@@ -588,12 +588,12 @@ export default Vue.extend({
       }
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
-      stepsUtils.record()
       if (index === 0) {
         this.handleLineDash(value)
       } else {
         this.handleLineEdge(value)
       }
+      stepsUtils.record()
       this.$set(this.dashAndEdge, index, value)
     },
     handleLineDash(dash: number) {
@@ -611,12 +611,12 @@ export default Vue.extend({
       )
     },
     handleBasicShapeFilledUpdate(index: number, filled: number) {
-      stepsUtils.record()
       LayerUtils.updateLayerProps(
         pageUtils.currFocusPageIndex,
         this.currSelectedIndex,
         { filled: filled === 1 }
       )
+      stepsUtils.record()
     },
     handleBasicShapeCorRadPercentUpdate(value: number) {
       const corRadPercentage = value
@@ -632,7 +632,6 @@ export default Vue.extend({
       )
     },
     handleStartMarkerUpdate(index: number, value: string) {
-      stepsUtils.record()
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
@@ -653,9 +652,9 @@ export default Vue.extend({
           markerId: [value, currLayer.markerId?.[1] ?? 'none']
         }
       )
+      stepsUtils.record()
     },
     handleEndMarkerUpdate(index: number, value: string) {
-      stepsUtils.record()
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
@@ -676,6 +675,7 @@ export default Vue.extend({
           markerId: [currLayer.markerId?.[0] ?? 'none', value]
         }
       )
+      stepsUtils.record()
     },
     makeSlots(markerIds: string[]): { marker: string, name: string }[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))

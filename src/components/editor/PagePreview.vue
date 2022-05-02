@@ -20,6 +20,7 @@ import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewP
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
 import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   data() {
@@ -52,6 +53,7 @@ export default Vue.extend({
     }),
     addPage() {
       this._addPage(pageUtils.newPage({}))
+      stepsUtils.record()
     }
   }
 })
