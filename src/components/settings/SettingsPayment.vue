@@ -40,7 +40,7 @@
       span                              {{$t('TMP0049')}}
       input(                :placeholder="$t('TMP0050')")
       btn(type="primary-sm")            {{$t('NN0176')}}
-    div(v-if="isPro && !isTW" class="sp-info")
+    div(v-if="isPro && isUS" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0085')}}
       options(class="mb-10" :options="countryData" v-model="userCountry")
       span                              {{$tc('NN0173', 1)}}
@@ -49,18 +49,30 @@
       input(                :placeholder="$t('TMP0087')")
       span                              {{$t('TMP0088')}}
       input(                :placeholder="$t('TMP0089')")
-      span                              {{$t('TMP0090', { number: 1 })}}
-      input(                :placeholder="$t('TMP0091')")
-      span                              {{$t('TMP0090', { number: 2 })}}
-      input(                :placeholder="$t('TMP0092')")
-      span                              {{$t('TMP0093')}}
+      span                              {{$t('TMP0092', { number: 1 })}}
       input(                :placeholder="$t('TMP0093')")
+      span                              {{$t('TMP0092', { number: 2 })}}
+      input(                :placeholder="$t('TMP0094')")
+      span                              {{$t('TMP0095')}}
+      input(                :placeholder="$t('TMP0095')")
       div(class="sp-info__half")
         span
-        span                            {{$t('TMP0095')}}
+        span                            {{$t('TMP0097')}}
         options(class="mb-10" :options="stateData"
-                v-model="testState"  :ph="$t('TMP0094')")
-        input(              :placeholder="$t('TMP0095')")
+                v-model="testState"  :ph="$t('TMP0096')")
+        input(              :placeholder="$t('TMP0097')")
+      btn(type="primary-sm")            {{$t('NN0176')}}
+    div(v-if="isPro && !isTW && !isUS" class="sp-info")
+      p(class="text-blue-1")            {{$t('TMP0085')}}
+      options(class="mb-10" :options="countryData" v-model="userCountry")
+      span                              {{$tc('NN0173', 1)}}
+      input(                :placeholder="$t('TMP0086')")
+      span                              {{$t('NN0172')}}
+      input(                :placeholder="$t('TMP0087')")
+      span                              {{$t('TMP0088')}}
+      input(                :placeholder="$t('TMP0089')")
+      span                              {{$t('TMP0090')}}
+      input(                :placeholder="$t('TMP0091')")
       btn(type="primary-sm")            {{$t('NN0176')}}
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
@@ -109,7 +121,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       isBundle: 'payment/getIsBundle',
-      isTW: 'payment/isTW'
+      isTW: 'payment/isTW',
+      isUS: 'payment/isUS'
     }),
     ...mapFields({
       userCountry: 'userCountry'

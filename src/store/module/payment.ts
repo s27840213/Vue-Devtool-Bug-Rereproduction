@@ -144,6 +144,9 @@ const getters: GetterTree<IPaymentState, any> = {
   },
   isTW(state) {
     return state.userCountry === 'TW'
+  },
+  isUS(state) {
+    return state.userCountry === 'US'
   }
 }
 
