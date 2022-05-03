@@ -14,12 +14,15 @@ const FLOATING_Y_OFFSET = 150
 export const HALO_SPREAD_LIMIT = 80
 export const CANVAS_SCALE = 1.8
 export const CANVAS_SIZE = 510
+export const CANVAS_SPACE = 400
 export const CANVAS_FLOATING_SCALE = 2.2
 export interface DrawOptions {
   canvasSize?: number,
   timeout?: number,
   layerInfo?: ILayerInfo,
   uploading?: boolean,
+  drawCanvasW?: number,
+  drawCanvasH?: number,
   cb?: () => void
 }
 class ImageShadowUtils {
@@ -42,7 +45,8 @@ class ImageShadowUtils {
     config: IImage,
     /** This identifier is used to indexing the sub-layer */
     primarylayerId?: string,
-    isTransparentBg: boolean
+    isTransparentBg: boolean,
+    options?: DrawOptions
   } | null
 
   private dataBuff = {
@@ -50,12 +54,13 @@ class ImageShadowUtils {
     radius: -1,
     size: -1,
     effect: ShadowEffectType.none as ShadowEffectType,
+    layerIdentifier: '' as string,
     data: {} as ImageData
   }
 
   get layerData() { return this._layerData }
 
-  private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, layerInfo?: ILayerInfo) {
+  private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
     if (!this._layerData) {
       const { canvasT } = this
       const ctxT = canvasT.getContext('2d')
@@ -69,8 +74,16 @@ class ImageShadowUtils {
           ? this.isTransparentBg(canvasT) : false
         this._layerData = { img, config, isTransparentBg }
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+
+        const { layerInfo } = options || {}
         if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
           this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+        }
+        if (options) {
+          this._layerData.options = {
+            ...this._layerData.options,
+            ...options
+          }
         }
       }
     }
@@ -82,7 +95,7 @@ class ImageShadowUtils {
   async drawFloatingShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
     const { timeout = 25 } = options
-    this.drawingInit(canvas, img, config, options.layerInfo)
+    this.drawingInit(canvas, img, config, options)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
@@ -193,7 +206,7 @@ class ImageShadowUtils {
     // const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IImageMatchedEffect
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
     const { timeout = 25 } = options
-    this.drawingInit(canvas, img, config, options.layerInfo)
+    this.drawingInit(canvas, img, config, options)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
@@ -286,14 +299,14 @@ class ImageShadowUtils {
     cb && cb()
   }
 
-  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
+  async draw(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
     const { styles } = config
-    const { timeout = 25, layerInfo, cb } = options
+    const { timeout = 25, layerInfo, cb } = options || {}
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) return
-    this.drawingInit(canvas, img, config, options.layerInfo)
+    this.drawingInit(canvas, img, config, options)
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
@@ -311,19 +324,22 @@ class ImageShadowUtils {
       const imgY = _imgY * scaleRatio
       const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
       const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-      const drawCanvasHeight = img.naturalHeight
-      const drawCanvasWidth = img.naturalWidth
-      /**
-        * const x = canvas.width * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-        * const y = canvas.height * (CANVAS_SCALE - 1) / CANVAS_SCALE * 0.5
-        */
-      const x = canvas.width * (0.5 - 0.5 / CANVAS_SCALE)
-      const y = canvas.height * (0.5 - 0.5 / CANVAS_SCALE)
+      let { drawCanvasW, drawCanvasH } = options || {}
+      if (!drawCanvasH || !drawCanvasW) {
+        drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0
+        drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0
+      }
+      const x = (canvas.width - drawCanvasW) * 0.5
+      const y = (canvas.height - drawCanvasH) * 0.5
 
-      const unifiedScale = img.width / CANVAS_SIZE
-      const unifiedSpread = spread * unifiedScale
+      const unifiedScale = img.naturalWidth / CANVAS_SIZE
+      const unifiedSpread = spread * unifiedScale * (CANVAS_SIZE / Math.max(layerWidth, layerHeight))
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
+      const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
+      console.log(canvas.width)
+      console.log(canvas.height)
+      console.log(unifiedSpread)
 
       if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
         canvasT.setAttribute('width', `${canvas.width}`)
@@ -332,7 +348,7 @@ class ImageShadowUtils {
 
       let alphaVal = 1
       /** Calculating the spread */
-      if (this.dataBuff.spread !== unifiedSpread || this.dataBuff.effect !== currentEffect || this.dataBuff.size !== img.naturalHeight) {
+      if (this.dataBuff.spread !== unifiedSpread || this.dataBuff.effect !== currentEffect || this.dataBuff.layerIdentifier !== layerIdentifier) {
         this.dataBuff.effect = currentEffect
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
@@ -347,15 +363,15 @@ class ImageShadowUtils {
               }
               if (alphaVal) {
                 ctxT.globalAlpha = alphaVal
-                ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasWidth, drawCanvasHeight)
+                ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasW as number, drawCanvasH as number)
               }
             }
           })
         }
         ctxT.globalAlpha = 1
         this.dataBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-        this.dataBuff.size = img.naturalHeight
         this.dataBuff.spread = unifiedSpread
+        this.dataBuff.layerIdentifier = layerIdentifier
       } else {
         ctxT.putImageData(this.dataBuff.data, 0, 0)
       }
@@ -374,13 +390,22 @@ class ImageShadowUtils {
           ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-          imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.5) + 1)
+          imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.shadow.radius.weighting) + 1)
 
-          const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 2 : 0
-          const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 2 : 0
+          const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.shadow.distance.weighting : 0
+          const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.shadow.distance.weighting : 0
           ctxMaxSize.putImageData(imageData, offsetX, offsetY)
         }
       })
+
+      // canvasMaxSize.style.width = (canvasMaxSize.width / 4).toString() + 'px'
+      // canvasMaxSize.style.height = (canvasMaxSize.height / 4).toString() + 'px'
+      // canvasMaxSize.style.position = 'absolute'
+      // canvasMaxSize.style.zIndex = '1000'
+      // canvasMaxSize.style.top = '0'
+
+      // document.body.append(canvasMaxSize)
+      // setTimeout(() => document.body.removeChild(canvasMaxSize), 15000)
 
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
@@ -396,8 +421,7 @@ class ImageShadowUtils {
           /** only draw the origin image over the canvas as uploading */
           if (!timeout) {
             ctxT.save()
-            // ctxT.filter = 'url(#filter__RWeW0)'
-            ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+            ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
             ctxT.restore()
           }
 
@@ -467,9 +491,12 @@ class ImageShadowUtils {
       : layerUtils.getLayer(pageIndex, layerIndex) as IImage
 
     if (layer.type === LayerType.image) {
-      const { shadow } = layer.styles
+      const { shadow, width, height } = layer.styles
       const { effects } = shadow
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        initWidth: width,
+        initHeight: height,
+        scale: 1,
         adjust: {},
         shadow: {
           currentEffect: effect,
@@ -756,9 +783,9 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 1 },
+    distance: { max: 100, min: 0, weighting: 1.5 },
     angle: { max: 180, min: -180, weighting: 1 },
-    radius: { max: 100, min: 0, weighting: 1 },
+    radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 1 },
     spread: { max: 30, min: 0, weighting: 1 }
   },

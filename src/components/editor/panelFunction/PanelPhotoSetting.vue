@@ -45,7 +45,18 @@ export default Vue.extend({
         { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
         { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
-        { name: 'shadow', label: `${this.$t('NN0429')}`, show: 'panel-photo-shadow', condition: (): boolean => layerUtils.getCurrLayer.type === LayerType.image }
+        {
+          name: 'shadow',
+          label: `${this.$t('NN0429')}`,
+          show: 'panel-photo-shadow',
+          condition: (): boolean => {
+            const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
+            if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
+              return (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image
+            }
+            return currLayer.type === LayerType.image
+          }
+        }
       ],
       bgRemoveBtn: { label: `${this.$t('NN0043')}`, show: 'remove-bg' }
     }

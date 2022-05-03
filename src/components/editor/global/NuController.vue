@@ -1149,12 +1149,13 @@ export default Vue.extend({
         height: height - initHeight
       }
 
-      const scale = this.getLayerScale
+      let scale = this.getLayerScale
       switch (this.getLayerType) {
         case 'image':
           width === MIN_THINKNESS && (offsetWidth = MIN_THINKNESS - initWidth)
           height === MIN_THINKNESS && (offsetHeight = MIN_THINKNESS - initHeight)
           ImageUtils.imgResizeHandler(width, height, offsetWidth, offsetHeight)
+          scale = 1
           break
         case 'shape': {
           [width, height] = ControlUtils.resizeShapeHandler(this.config, this.scale, this.initSize, width, height)
