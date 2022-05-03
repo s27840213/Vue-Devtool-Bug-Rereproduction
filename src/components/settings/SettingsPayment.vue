@@ -109,7 +109,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       isBundle: 'payment/getIsBundle',
-      isTW: 'isTW'
+      isTW: 'payment/isTW'
     }),
     ...mapFields({
       userCountry: 'userCountry'
