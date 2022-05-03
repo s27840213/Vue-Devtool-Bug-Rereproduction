@@ -96,7 +96,7 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, LayerType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import imageShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
@@ -131,7 +131,6 @@ export default Vue.extend({
     const layerData = imageShadowUtils.layerData
     if (layerData) {
       const { config, primarylayerId } = layerData
-      const { height: _height } = config.styles
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const img = new Image()
       img.crossOrigin = 'anonynous'
@@ -141,21 +140,41 @@ export default Vue.extend({
       })
 
       const updateCanvas = document.createElement('canvas')
-      updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
-      updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_SCALE).toString())
+
+      const { width, height, imgWidth, imgHeight } = config.styles
+      const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
+      // const canvasRatio = _canvasH / _canvasW
+      // const _canvasW = (width + CANVAS_SPACE * spaceScale)
+      // const _canvasH = (height + CANVAS_SPACE * spaceScale)
+      // const canvasW = _canvasW >= _canvasH ? 1600 : 1600 / canvasRatio
+      // const canvasH = _canvasW < _canvasH ? 1600 : 1600 * canvasRatio
+      // const drawCanvasW = width * canvasW / _canvasW
+      // const drawCanvasH = height * canvasH / _canvasH
+      const drawCanvasW = width / imgWidth * img.naturalWidth
+      const drawCanvasH = height / imgHeight * img.naturalHeight
+      const _canvasW = (drawCanvasW + CANVAS_SPACE * spaceScale)
+      const _canvasH = (drawCanvasH + CANVAS_SPACE * spaceScale)
+      // const canvasW = _canvasW >= _canvasH ? 1600 : 1600 / canvasRatio
+      // const canvasH = _canvasW < _canvasH ? 1600 : 1600 * canvasRatio
+      updateCanvas.setAttribute('width', `${_canvasW}`)
+      updateCanvas.setAttribute('height', `${_canvasH}`)
 
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
-        case ShadowEffectType.frame:
-          await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0 })
+        case ShadowEffectType.frame: {
+          await imageShadowUtils.draw(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
+        }
         case ShadowEffectType.imageMatched:
+          updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
+          updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_SCALE).toString())
           await imageShadowUtils.drawImageMatchedShadow(updateCanvas, img, config, { timeout: 0 })
           break
         case ShadowEffectType.floating: {
           const height = config.styles.height / config.styles.width < 1
             ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
+          updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
           updateCanvas.setAttribute('height', (height).toString())
           await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0 })
           break
@@ -165,9 +184,12 @@ export default Vue.extend({
         default:
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
+
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
-      const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
-      const topShadowThickness = ((updateCanvas.height - img.naturalHeight) * 0.5 - top) / img.naturalHeight
+      const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
+      const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
+      // const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
+      // const topShadowThickness = ((updateCanvas.height - img.naturalHeight) * 0.5 - top) / img.naturalHeight
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -205,8 +227,8 @@ export default Vue.extend({
           if (pageIndex !== -1 && layerIndex !== -1) {
             const layer = layerUtils.getLayer(pageIndex, layerIndex)
             const target = generalUtils.deepCopy(subLayerIdx === -1 ? layer : (layer as IGroup).layers[subLayerIdx]) as IImage
-            const newWidth = (updateCanvas.width - right - left) / img.naturalWidth * config.styles.width
-            const newHeight = (updateCanvas.height - top - bottom) / img.naturalWidth * config.styles.width
+            const newWidth = (updateCanvas.width - right - left) / drawCanvasW * config.styles.width
+            const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * config.styles.height
             const styles = {
               width: newWidth,
               height: newHeight,

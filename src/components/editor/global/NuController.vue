@@ -457,6 +457,13 @@ export default Vue.extend({
       return resizers
     },
     scaler(scalers: any) {
+      // switch (this.config.type) {
+      //   case LayerType.image:
+      //     if (this.config.styles.shadow.currentEffect !== ShadowEffectType.none) {
+      //       return []
+      //     }
+      //     break
+      // }
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth * this.scaleRatio < LIMIT

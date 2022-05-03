@@ -332,14 +332,13 @@ class ImageShadowUtils {
       const x = (canvas.width - drawCanvasW) * 0.5
       const y = (canvas.height - drawCanvasH) * 0.5
 
-      const unifiedScale = img.naturalWidth / CANVAS_SIZE
-      const unifiedSpread = spread * unifiedScale * (CANVAS_SIZE / Math.max(layerWidth, layerHeight))
+      // const unifiedScale = img.naturalWidth / CANVAS_SIZE
+      const unifiedScale = Math.max(drawCanvasW, drawCanvasH) / Math.max(layerWidth, layerHeight) * config.styles.scale
+      const unifiedSpread = spread * unifiedScale
+      // const unifiedSpread = spread * unifiedScale * (CANVAS_SIZE / (Math.max(layerWidth, layerHeight) / config.styles.scale))
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
       const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
-      console.log(canvas.width)
-      console.log(canvas.height)
-      console.log(unifiedSpread)
 
       if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
         canvasT.setAttribute('width', `${canvas.width}`)
