@@ -9,7 +9,7 @@
         settings-account(v-if="currentView === 'account'")
         settings-security(v-if="currentView === 'security'")
         settings-payment(v-if="currentView === 'payment'")
-        settings-bill(v-if="currentView === 'bill'")
+        settings-bill(v-if="currentView === 'billing'")
 </template>
 
 <script lang="ts">

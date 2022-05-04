@@ -23,7 +23,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import router from '@/router'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 
@@ -52,7 +51,7 @@ export default Vue.extend({
         label: i18n.t('TMP0070'),
         icon: 'pro'
       }, {
-        name: 'bill',
+        name: 'billing',
         label: i18n.t('TMP0098'),
         icon: 'invoice'
       }]
@@ -83,27 +82,6 @@ export default Vue.extend({
     },
     subPath(): string {
       return this.$route.path.split('/settings/')[1] || 'account'
-    }
-  },
-  methods: {
-    switchNav(view: string): void {
-      if (this.optionSelected === view) {
-        return
-      }
-      this.optionSelected = view
-      let targetPath = '/settings/account'
-      switch (view) {
-        case 'account':
-          targetPath = '/settings/account'
-          break
-        case 'security':
-          targetPath = '/settings/security'
-          break
-        case 'payment':
-          targetPath = '/settings/payment'
-          break
-      }
-      router.replace({ path: targetPath })
     }
   }
 })
