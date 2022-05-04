@@ -382,55 +382,50 @@ export default Vue.extend({
         return
       }
       imgShadowUtils.clearLayerData()
+      const { width, height } = this.config.styles
+      const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
+      const _canvasW = (width + CANVAS_SPACE * spaceScale)
+      const _canvasH = (height + CANVAS_SPACE * spaceScale)
+      const canvasRatio = _canvasH / _canvasW
+      const canvasW = _canvasW >= _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
+      const canvasH = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
+      const drawCanvasW = width * canvasW / _canvasW
+      const drawCanvasH = height * canvasH / _canvasH
+
+      // const drawCanvasW = width >= height ? CANVAS_SIZE : CANVAS_SIZE * width / height
+      // const drawCanvasH = height > width ? CANVAS_SIZE : CANVAS_SIZE * height / width
+      // const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
+      // const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
+      // const _canvasW = canvasW * CANVAS_SIZE / Math.max(width, height)
+      // const _canvasH = canvasH * CANVAS_SIZE / Math.max(width, height)
+
+      this.canvasSize.width = _canvasW
+      this.canvasSize.height = _canvasH
+
+      canvas.setAttribute('width', `${canvasW}`)
+      canvas.setAttribute('height', `${canvasH}`)
+
       const { currentEffect } = this.shadow
       switch (currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (this.canvasShadowImg) {
-            const { width, height } = this.config.styles
-            const spaceScale = width / CANVAS_SIZE
-            const _canvasW = (width + CANVAS_SPACE * spaceScale)
-            const _canvasH = (height + CANVAS_SPACE * spaceScale)
-            const canvasRatio = _canvasH / _canvasW
-            const canvasW = _canvasW > _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
-            const canvasH = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
-            this.canvasSize.width = _canvasW
-            this.canvasSize.height = _canvasH
-            canvas.setAttribute('width', `${canvasW}`)
-            canvas.setAttribute('height', `${canvasH}`)
             imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
-              layerInfo: {
-                pageIndex: this.pageIndex,
-                layerIndex: this.layerIndex,
-                subLayerIdx: this.subLayerIndex
-              },
-              drawCanvasW: width * canvasW / _canvasW,
-              drawCanvasH: height * canvasH / _canvasH
+              drawCanvasW,
+              drawCanvasH,
+              layerInfo
             })
           } else {
             const previewImg = new Image()
             previewImg.crossOrigin = 'Anonymous'
             previewImg.onload = () => {
-              const { width, height } = this.config.styles
-              const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
-              const _canvasW = (width + CANVAS_SPACE * spaceScale)
-              const _canvasH = (height + CANVAS_SPACE * spaceScale)
-              const canvasRatio = _canvasH / _canvasW
-              const canvasW = _canvasW >= _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
-              const canvasH = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
-              this.canvasSize.width = _canvasW
-              this.canvasSize.height = _canvasH
-              console.log(_canvasW)
-              console.log(_canvasH)
-              this.canvasShadowImg = previewImg
-              canvas.setAttribute('width', `${canvasW}`)
-              canvas.setAttribute('height', `${canvasH}`)
               imgShadowUtils.draw(canvas, previewImg, this.config, {
-                drawCanvasW: width * canvasW / _canvasW,
-                drawCanvasH: height * canvasH / _canvasH,
+                drawCanvasW,
+                drawCanvasH,
                 layerInfo
               })
+              this.canvasShadowImg = previewImg
             }
             previewImg.src = ImageUtils.getSrc(this.config,
               ['private', 'public'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE)
@@ -439,23 +434,23 @@ export default Vue.extend({
         }
         case ShadowEffectType.imageMatched: {
           const img = this.$refs.img as HTMLImageElement
-          if (canvas.width !== img.naturalWidth * CANVAS_SCALE) {
-            canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
-            canvas.setAttribute('height', `${img.naturalHeight * CANVAS_SCALE}`)
-          }
           imgShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
+            drawCanvasW,
+            drawCanvasH,
             layerInfo
           })
           break
         }
         case ShadowEffectType.floating: {
           const img = this.$refs.img as HTMLImageElement
-          const height = this.config.styles.height / this.config.styles.width < 1
-            ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
-          canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
-          canvas.setAttribute('height', `${height}`)
+          // const height = this.config.styles.height / this.config.styles.width < 1
+          //   ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
+          // canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
+          // canvas.setAttribute('height', `${height}`)
           imgShadowUtils.drawFloatingShadow(canvas, img, this.config, {
-            layerInfo
+            layerInfo,
+            drawCanvasW,
+            drawCanvasH
           })
           break
         }
@@ -553,6 +548,7 @@ export default Vue.extend({
     align-items: center;
     width: 100%;
     height: 100%;
+    // display: none;
   }
 }
 

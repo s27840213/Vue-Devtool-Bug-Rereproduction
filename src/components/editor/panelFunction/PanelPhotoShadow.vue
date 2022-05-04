@@ -142,22 +142,14 @@ export default Vue.extend({
       const updateCanvas = document.createElement('canvas')
 
       const { width, height, imgWidth, imgHeight } = config.styles
-      const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
-      // const canvasRatio = _canvasH / _canvasW
-      // const _canvasW = (width + CANVAS_SPACE * spaceScale)
-      // const _canvasH = (height + CANVAS_SPACE * spaceScale)
-      // const canvasW = _canvasW >= _canvasH ? 1600 : 1600 / canvasRatio
-      // const canvasH = _canvasW < _canvasH ? 1600 : 1600 * canvasRatio
-      // const drawCanvasW = width * canvasW / _canvasW
-      // const drawCanvasH = height * canvasH / _canvasH
       const drawCanvasW = width / imgWidth * img.naturalWidth
       const drawCanvasH = height / imgHeight * img.naturalHeight
-      const _canvasW = (drawCanvasW + CANVAS_SPACE * spaceScale)
-      const _canvasH = (drawCanvasH + CANVAS_SPACE * spaceScale)
-      // const canvasW = _canvasW >= _canvasH ? 1600 : 1600 / canvasRatio
-      // const canvasH = _canvasW < _canvasH ? 1600 : 1600 * canvasRatio
-      updateCanvas.setAttribute('width', `${_canvasW}`)
-      updateCanvas.setAttribute('height', `${_canvasH}`)
+      const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3) * (img.width / imgWidth)
+      // const spaceScale = Math.max((drawCanvasH > drawCanvasW ? drawCanvasH : drawCanvasW) / CANVAS_SIZE, 0.3)
+      const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
+      const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
+      updateCanvas.setAttribute('width', `${canvasW}`)
+      updateCanvas.setAttribute('height', `${canvasH}`)
 
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
@@ -167,16 +159,12 @@ export default Vue.extend({
           break
         }
         case ShadowEffectType.imageMatched:
-          updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
-          updateCanvas.setAttribute('height', (img.naturalHeight * CANVAS_SCALE).toString())
-          await imageShadowUtils.drawImageMatchedShadow(updateCanvas, img, config, { timeout: 0 })
+          await imageShadowUtils.drawImageMatchedShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         case ShadowEffectType.floating: {
-          const height = config.styles.height / config.styles.width < 1
-            ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
-          updateCanvas.setAttribute('width', (img.naturalWidth * CANVAS_SCALE).toString())
-          updateCanvas.setAttribute('height', (height).toString())
-          await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0 })
+          // const canvasH = drawCanvasH + 0.5 * CANVAS_SPACE * spaceScale
+          // updateCanvas.setAttribute('height', `${canvasH}`)
+          await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         }
         case ShadowEffectType.none:
@@ -184,6 +172,15 @@ export default Vue.extend({
         default:
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
+
+      updateCanvas.style.width = (updateCanvas.width / 4).toString() + 'px'
+      updateCanvas.style.height = (updateCanvas.height / 4).toString() + 'px'
+      updateCanvas.style.position = 'absolute'
+      updateCanvas.style.zIndex = '1000'
+      updateCanvas.style.top = '0'
+
+      document.body.append(updateCanvas)
+      setTimeout(() => document.body.removeChild(updateCanvas), 15000)
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
