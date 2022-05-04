@@ -136,15 +136,22 @@ class ImageShadowUtils {
       canvasT.setAttribute('height', `${canvas.height}`)
     }
 
-    const mappingScale = 1600 / Math.max(drawCanvasW, drawCanvasH)
+    // const mappingScale = 1600 / Math.max(drawCanvasW, drawCanvasH)
+    const mappingScale = layerWidth > layerHeight
+      ? (layerWidth / _imgWidth) * 1600 / drawCanvasW
+      : (layerHeight / _imgHeight) * 1600 / drawCanvasH
+
+    console.warn('mapping scale', mappingScale)
     const canvasMaxW = canvas.width * mappingScale
     const canvasMaxH = canvas.height * mappingScale
     const ellipseX = canvasMaxW * 0.5
+    console.log(canvasMaxH)
+    console.log(drawCanvasH * mappingScale)
     /** const ellipseY = (canvasMaxH - canvasMaxH / CANVAS_FLOATING_SCALE) * 0.5 + canvasMaxH / CANVAS_FLOATING_SCALE + FLOATING_Y_OFFSET * mappingScale  */
-    let ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
-    if (!timeout) {
-      ellipseY = ((canvas.height - drawCanvasH) * 0.25 + drawCanvasH) * mappingScale
-    }
+    // let ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
+    // const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
+    const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
+    console.log(ellipseY)
     const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
@@ -152,18 +159,8 @@ class ImageShadowUtils {
         if (!(this.dataBuff.effect === ShadowEffectType.floating && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
           canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
           canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-          // canvasMaxSize.width !== canvasMaxW && canvasMaxSize.setAttribute('width', `${canvasMaxW}`)
-          // canvasMaxSize.height !== canvasMaxH && canvasMaxSize.setAttribute('height', `${canvasMaxH}`)
-
-          // document.body.append(canvasMaxSize)
-          // setTimeout(() => document.body.removeChild(canvasMaxSize), 15000)
-          // canvasMaxSize.style.width = (canvasMaxSize.width / 4).toString() + 'px'
-          // canvasMaxSize.style.height = (canvasMaxSize.height / 4).toString() + 'px'
-          // canvasMaxSize.style.position = 'absolute'
-          // canvasMaxSize.style.zIndex = '1000'
-          // canvasMaxSize.style.top = '0'
-
-          ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * FLOATING_SHADOW_SIZE * (size * 0.01 + 2), FLOATING_SHADOW_SIZE * (0.5 + thinkness * 0.005), 0, 0, Math.PI * 2)
+          const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
+          ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * shadowSize * (size * 0.01 + 2), shadowSize * (0.5 + thinkness * 0.005), 0, 0, Math.PI * 2)
           ctxMaxSize.fill()
           const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
           imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.7) + 1)
@@ -179,10 +176,8 @@ class ImageShadowUtils {
 
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        // const rangeY = canvasMaxH - ellipseY - FLOATING_SHADOW_SIZE * 2
         const rangeY = 100
-        // ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5, y * 0.01 * rangeY)
-        ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5, y * 2)
+        ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5 * layerWidth / _imgWidth, y * 2 * layerWidth / _imgWidth)
 
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalCompositeOperation = 'source-in'
@@ -200,7 +195,7 @@ class ImageShadowUtils {
           const drawCanvasHeight = drawCanvasH as number
           const drawCanvasWidth = drawCanvasW as number
           const x = (canvasT.width - drawCanvasWidth) * 0.5
-          const y = 0
+          const y = (canvasT.height - drawCanvasHeight) * 0.5
           ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
         }
 
