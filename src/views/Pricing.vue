@@ -22,7 +22,7 @@
             span {{$t('TMP0010')}}
             span {{$t('TMP0011')}}
           div(class="pricing-plan-right-price")
-            span {{$t('TMP0012')}}
+            span {{plans[isBundle].now}}{{$t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
             span {{$t('TMP0013')}}
       div(class="pricing-compare")
@@ -43,6 +43,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapActions, mapState } from 'vuex'
 import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
@@ -80,7 +81,19 @@ export default Vue.extend({
       ]
     }
   },
+  computed: {
+    ...mapState('payment', {
+      plans: 'plans',
+      isBundle: 'isBundle'
+    })
+  },
+  async mounted() {
+    this.getPrice()
+  },
   methods: {
+    ...mapActions('payment', [
+      'getPrice'
+    ]),
     openPopup() { this.showPopup = true },
     closePopup() { this.showPopup = false }
   }

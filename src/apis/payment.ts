@@ -4,6 +4,17 @@ import { AxiosPromise } from 'axios'
 import i18n from '@/i18n'
 
 class Payment {
+  planList (): AxiosPromise {
+    return axios.request<any>({
+      url: '/billing-info',
+      method: 'POST',
+      data: {
+        locale: i18n.locale,
+        type: 'list'
+      }
+    })
+  }
+
   tappayAdd (params: any): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',
@@ -18,7 +29,7 @@ class Payment {
     })
   }
 
-  stripeInit (params: any): AxiosPromise { // todo retype
+  stripeInit (): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',
       method: 'POST',
@@ -26,8 +37,7 @@ class Payment {
         token: authToken().token || '',
         locale: i18n.locale,
         type: 'stripe',
-        action: 'init',
-        ...params // country?
+        action: 'init'
       }
     })
   }
@@ -40,8 +50,21 @@ class Payment {
         token: authToken().token || '',
         locale: i18n.locale,
         type: 'stripe',
-        action: 'add',
-        ...params // plan_id, is_bundle,
+        action: 'add_card',
+        ...params // country, plan_id, is_bundle,
+      }
+    })
+  }
+
+  cancel (reason: string): AxiosPromise {
+    return axios.request<any>({
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        action: 'cancel',
+        reason: reason
       }
     })
   }

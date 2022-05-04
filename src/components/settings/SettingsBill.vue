@@ -99,7 +99,10 @@ export default Vue.extend({
   methods: {
     pdf() {
       const invoice = document.getElementById('bill-invoice')
-      const opt = { jsPDF: { format: [160, 226.42] } }
+      const opt = {
+        html2canvas: { scale: 5 },
+        jsPDF: { format: [160, 226.42] }
+      }
       html2pdf().set(opt).from(invoice).toPdf().save()
     }
   }

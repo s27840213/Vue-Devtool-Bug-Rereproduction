@@ -171,23 +171,23 @@ declare module 'vuex-map-fields' {
     mapActions: Mapper<ActionMethod> & FunctionMapper<Dispatch, ActionMethod>;
   }
   
-  export  const mapState: Mapper<Computed>
-    & MapperWithNamespace<Computed>
-    & MapperForState
-    & MapperForStateWithNamespace;
+  // export  const mapState: Mapper<Computed>
+  //   & MapperWithNamespace<Computed>
+  //   & MapperForState
+  //   & MapperForStateWithNamespace;
   
-  export  const mapMutations: Mapper<MutationMethod>
-    & MapperWithNamespace<MutationMethod>
-    & FunctionMapper<Commit, MutationMethod>
-    & FunctionMapperWithNamespace<Commit, MutationMethod>;
+  // export  const mapMutations: Mapper<MutationMethod>
+  //   & MapperWithNamespace<MutationMethod>
+  //   & FunctionMapper<Commit, MutationMethod>
+  //   & FunctionMapperWithNamespace<Commit, MutationMethod>;
   
-  export  const mapGetters: Mapper<Computed>
-    & MapperWithNamespace<Computed>;
+  // export  const mapGetters: Mapper<Computed>
+  //   & MapperWithNamespace<Computed>;
   
-  export  const mapActions: Mapper<ActionMethod>
-    & MapperWithNamespace<ActionMethod>
-    & FunctionMapper<Dispatch, ActionMethod>
-    & FunctionMapperWithNamespace<Dispatch, ActionMethod>;
+  // export  const mapActions: Mapper<ActionMethod>
+  //   & MapperWithNamespace<ActionMethod>
+  //   & FunctionMapper<Dispatch, ActionMethod>
+  //   & FunctionMapperWithNamespace<Dispatch, ActionMethod>;
   
   interface HelperOptions{
     getterType: string;

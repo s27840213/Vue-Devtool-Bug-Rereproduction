@@ -32,18 +32,20 @@
             svg-icon(iconName="pro" iconWidth="24px")
             span {{can}}
         template(v-if="view === 'cancel2'")
-          div(v-for="can in cancel2" class="payment-left-content-cancel")
-            radio-btn(:isSelected="cancelReason === can"
-                      :formatKey="can" circleColor="gray-4"
-                      @select="selectCancelReason(can)")
+          div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
+            //- todo: for label prop
+            radio-btn(:isSelected="reasonIndex === idx"
+                      :formatKey="String(idx)" circleColor="gray-4"
+                      @select="selectCancelReason(idx)")
             span {{can}}
           input(class="payment-left-content-cancel__other"
                 v-model="otherReason" :placeholder="$t('TMP0069')")
       p(v-if="view === 'step1'"
         class="payment-left-button-description") {{$t('TMP0042')}}
       div(class="payment-left-button")
-        btn(v-for="button in buttons" type="primary-lg"
-            @click.native="button.func()")
+        btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
+            @click.native="button.func()"
+            :disabled="button.disabled ? button.disabled() : false")
           span {{button.text}}
     //- move to jpg folder, compress?
     img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
@@ -54,8 +56,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import i18n from '@/i18n'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import i18n from '@/i18n'
 import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
@@ -85,7 +87,7 @@ export default Vue.extend({
       totalStep: 0,
       title: '',
       description: '',
-      buttons: [{}] as {text: string, func: ()=>void}[],
+      buttons: [{}] as {type?: string, disabled?: ()=>boolean, text: string, func: ()=>void}[],
       img: 'remover.jpg',
       // View constant // split to other js?
       periodInput: [{
@@ -128,7 +130,7 @@ export default Vue.extend({
         i18n.t('TMP0067'),
         i18n.t('TMP0068')
       ],
-      cancelReason: '', // todo move to store
+      reasonIndex: '-1', // todo move to store
       otherReason: ''
     }
   },
@@ -151,6 +153,11 @@ export default Vue.extend({
     },
     invoice():Record<string, string> {
       return this.$store.state.payment.invoice
+    },
+    cancelReason(): string {
+      return Number(this.reasonIndex) < this.cancel2.length - 1
+        ? this.cancel2[Number(this.reasonIndex)] as string
+        : this.otherReason
     }
   },
   mounted() {
@@ -160,7 +167,7 @@ export default Vue.extend({
     ...mapActions({
       tappayAdd: 'payment/tappayAdd',
       switchToBundle: 'payment/switchToBundle',
-      cancleSubscription: 'payment/cancleSubscription'
+      cancelApi: 'payment/cancel'
     }),
     ...mapMutations({
       setIsBundle: 'payment/SET_isBundle'
@@ -216,6 +223,7 @@ export default Vue.extend({
             text: i18n.t('TMP0061') as string,
             func: () => this.closePopup()
           }, {
+            type: 'light-lg',
             text: i18n.t('TMP0060') as string,
             func: () => this.changeView('cancel2')
           }]
@@ -223,10 +231,8 @@ export default Vue.extend({
           break
         case 'cancel2':
           this.title = i18n.t('TMP0062') as string
-          this.buttons[1].func = () => {
-            this.cancleSubscription()
-            this.closePopup() // refresh or double check?
-          }
+          this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
+          this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
           break
       }
@@ -247,7 +253,15 @@ export default Vue.extend({
       if (this.view === 'step1') { this.setIsBundle(isBundle) }
     },
     selectCancelReason(can: string) {
-      this.cancelReason = can
+      this.reasonIndex = can
+    },
+    cancel() {
+      // todo test no reason
+      this.cancelApi(this.cancelReason).then(
+        this.closePopup
+      ).catch((msg) => {
+        Vue.notify({ group: 'error', text: msg })
+      })
     },
     closePopup() { this.$emit('close') }
   }
@@ -283,6 +297,7 @@ export default Vue.extend({
   &-top {
     @include body-MD;
     position: relative;
+    margin-bottom: 16px;
     color: setColor(gray-1);
     &__step {
       display: flex;
@@ -291,12 +306,10 @@ export default Vue.extend({
       top: -40px;
       >svg { margin-right: 15px; }
     }
-    &__title {
-      @include text-H4;
-      margin-bottom: 16px;
-    }
+    &__title { @include text-H4; }
+    &__description { margin-top: 16px; }
   }
-  &-content[view='step2'] { height: 100%; }
+  &-content { height: 100%; }
   &-button-description {
     position: absolute;
     bottom: 9%
@@ -311,8 +324,8 @@ export default Vue.extend({
       border-radius: 4px;
     }
     >button:nth-child(2) {
-      background-color: transparent;
-      color: setColor(blue-1);
+      margin-top: 20px;
+      border: none;
     }
   }
 }

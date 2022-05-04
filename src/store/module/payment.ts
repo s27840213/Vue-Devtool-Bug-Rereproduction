@@ -1,9 +1,12 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
 import i18n from '@/i18n'
-import payment from '@/apis/payment'
+import paymentApi from '@/apis/payment'
 
 interface IPaymentState {
+  // Constant
+  plans: Array<Record<string, string>>
+  // User data
   userCountry: string
   isBundle: number
   prime: string
@@ -13,15 +16,19 @@ interface IPaymentState {
     phone: string
     GUI: string
   }
-  isPro: boolean,
-  nextPrice: string
+  isPro: boolean
+  isCancelingPro: boolean
   nextPaidDate: string
+  nextPrice: string
   bgrmCredit: number
   lastFour: string
   expireDate: string
 }
 
 const getDefaultState = (): IPaymentState => ({
+  // Constant
+  plans: [{}, {}],
+  // User data
   userCountry: '',
   isBundle: 0,
   prime: '',
@@ -32,8 +39,9 @@ const getDefaultState = (): IPaymentState => ({
     GUI: ''
   },
   isPro: false,
-  nextPrice: '$8.99',
+  isCancelingPro: false,
   nextPaidDate: 'May 14, 2022',
+  nextPrice: '$8.99',
   bgrmCredit: 88,
   lastFour: '4242',
   expireDate: '06/2028'
@@ -73,8 +81,20 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
+  getPrice({ commit }) {
+    paymentApi.planList().then((response) => {
+      const res = response.data.data
+      commit('SET_plans', [{
+        original: res[0].price_month_original,
+        now: res[0].price_month_discount
+      }, {
+        original: res[0].price_month_bundle_original,
+        now: res[0].price_month_bundle_discount
+      }])
+    })
+  },
   tappayAdd() {
-    // payment.tappayAdd({
+    // paymentApi.tappayAdd({
     //   country: state.userCountry.value,
     //   plan_id: '',
     //   is_bundle: state.isBundle,
@@ -82,12 +102,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
     // })
   },
   stripeInit() {
-    payment.stripeInit({ country: state.userCountry })
+    return paymentApi.stripeInit().then((response) => {
+      return response.data.client_secret
+    })
   },
   stripeAdd() {
-    payment.stripeAdd({
+    return paymentApi.stripeAdd({
       country: state.userCountry,
-      plan_id: '',
+      plan_id: 'sample_us',
       is_bundle: state.isBundle
     })
   },
@@ -95,8 +117,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
     console.log('switchToBundle')
     commit('SET_isBundle', 1 - state.isBundle)
   },
-  cancleSubscription() {
-    console.log('cancel')
+  cancel(context, reason: string) {
+    // if (!reason) throw Error('No canceling reason')
+    return paymentApi.cancel(reason).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    })
   },
   togglePro({ commit }) { // todelete
     commit('SET_isPro', !state.isPro)
@@ -105,6 +130,13 @@ const actions: ActionTree<IPaymentState, unknown> = {
 
 const mutations: MutationTree<IPaymentState> = {
   updateField,
+  SET_plans(state: IPaymentState, plans) {
+    state.plans = plans
+  },
+  INIT(state: IPaymentState, data) {
+    state = Object.assign(state, data)
+  },
+  // old
   SET_userCountry(state: IPaymentState, userCountry) {
     state.userCountry = userCountry
   },

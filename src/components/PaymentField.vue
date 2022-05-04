@@ -12,7 +12,7 @@
         svg-icon(iconName="loading" iconColor="gray-1")
       div(v-if="!isChange" class="field-content__info")
         span {{$t('TMP0044', {date: nextPaidDate})}}
-        span {{'USD 12.89'}}
+        span {{plans[isBundle].now}}
       div(v-if="!isChange" class="field-content__info-today")
         span {{$t('TMP0045')}}
         span {{'USD 0.00'}}
@@ -23,7 +23,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
@@ -76,6 +76,10 @@ export default Vue.extend({
       userCountry: 'userCountry',
       nextPaidDate: 'nextPaidDate'
     }),
+    ...mapState('payment', {
+      plans: 'plans',
+      isBundle: 'isBundle'
+    }),
     submitText(): string {
       return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0051')) as string
     }
@@ -85,6 +89,10 @@ export default Vue.extend({
     this.tappayInit()
   },
   methods: {
+    ...mapActions({
+      stripeInitApi: 'payment/stripeInit',
+      stripeAddApi: 'payment/stripeAdd'
+    }),
     ...mapMutations({
       // setUserCountry: 'payment/SET_userCountry',
       setPrime: 'payment/SET_prime'
@@ -93,14 +101,14 @@ export default Vue.extend({
     //   this.setUserCountry(option)
     // },
     async stripeInit() {
-      console.log('stripe', this.stripe)
-      if (this.stripe) return
+      if (this.stripe) return // Prevent load stripe twice
 
       this.payReady = false
+      const clientSecret = await this.stripeInitApi()
       this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
-      // payment api init client sectet
+
       this.stripeElement = this.stripe.elements({
-        clientSecret: 'seti_1KppzxJuHmbesNZItzzNJy9G_secret_LWtnjxN1FqK7D0Yh5n8zIWDXbPcJuxf',
+        clientSecret: clientSecret,
         appearance: { labels: 'floating' }
       })
       const stripePaymentElement = this.stripeElement.create('payment', {
@@ -113,21 +121,21 @@ export default Vue.extend({
       this.submit = this.stripeSubmit
     },
     stripeSubmit() {
-      console.log('stripe submit')
-      // this.stripe.confirmSetup({
-      //   elements: this.stripeElement,
-      //   confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountry.value } } } },
-      //   redirect: 'if_required'
-      // }).then((result) => {
-      //   console.log('stripe res', result)
-      //   if (result.error) {
-      //     Vue.notify({ group: 'error', text: result.error.code })
-      //   } else {
-      //     this.$emit('paid')
-      //     Vue.notify({ group: 'copy', text: result.setupIntent.status })
-      //   }
-      // })
-      this.$emit('paid')
+      this.stripe.confirmSetup({
+        elements: this.stripeElement,
+        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountry } } } },
+        redirect: 'if_required'
+      }).then((response) => {
+        if (response.error) throw Error(response.error.message)
+      }).then(() => {
+        return this.stripeAddApi()
+      }).then(({ data }) => {
+        if (data.flag) throw Error(data.msg)
+        this.$emit('paid')
+        Vue.notify({ group: 'copy', text: 'Success' })
+      }).catch((msg) => {
+        Vue.notify({ group: 'error', text: msg })
+      })
     },
     tappayInit() {
       this.payReady = false

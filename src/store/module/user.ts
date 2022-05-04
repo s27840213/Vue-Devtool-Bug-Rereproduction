@@ -304,6 +304,11 @@ const actions: ActionTree<IUserModule, unknown> = {
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
+      commit('payment/INIT', {
+        isPro: data.data.plan_subscribe === 1,
+        isCancelingPro: data.data.plan_stop_subscribe === 1,
+        nextPaidDate: data.data.plan_due_time
+      }, { root: true })
 
       // locale settings
       process.env.NODE_ENV === 'development' && console.log(data.data)
