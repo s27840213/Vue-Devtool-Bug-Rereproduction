@@ -15,6 +15,30 @@ class Payment {
     })
   }
 
+  billingInfo (): AxiosPromise {
+    return axios.request<any>({
+      url: '/billing-info',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        type: 'status'
+      }
+    })
+  }
+
+  billingHistory (): AxiosPromise {
+    return axios.request<any>({
+      url: '/billing-info',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        type: 'history'
+      }
+    })
+  }
+
   tappayAdd (params: any): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',
@@ -65,6 +89,18 @@ class Payment {
         locale: i18n.locale,
         action: 'cancel',
         reason: reason
+      }
+    })
+  }
+
+  resume (): AxiosPromise {
+    return axios.request<any>({
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        action: 'resume'
       }
     })
   }

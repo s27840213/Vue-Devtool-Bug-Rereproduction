@@ -304,7 +304,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
-      commit('payment/INIT', {
+      commit('payment/SET_state', {
         isPro: data.data.plan_subscribe === 1,
         isCancelingPro: data.data.plan_stop_subscribe === 1,
         nextPaidDate: data.data.plan_due_time

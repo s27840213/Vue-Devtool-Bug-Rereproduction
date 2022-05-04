@@ -10,69 +10,74 @@
       //- todelete @click
       svg-icon(iconName="pro"
               @click.native="togglePro()")
-      span(class="body-SM")             {{$t('TMP0073', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
-      span(class="body-SM"        v-html="$t('TMP0074', { price: nextPrice, date: nextPaidDate  })")
-      span(class="text-blue-1 body-SM pointer"
-          @click="switchPeriod()")      {{$t('TMP0075', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
-      span(class="text-gray-3 body-SM pointer"
-          @click="cancelSub()")         {{$t('TMP0076')}}
-      p(class="text-blue-1")            {{$t('TMP0077')}}
-      span(                       v-html="$t('TMP0078', { amount: bgrmCredit, date: nextPaidDate })")
-      span(class="body-XS")             {{$t('TMP0079')}}
-      p(class="text-blue-1")            {{$t('TMP0080')}}
+      template(v-if="isCancelingPro")
+        span(class="body-SM")           {{$t('TMP0078', {date: nextPaidDate})}}
+        btn(class="rounded" type="primary-mid" @click.native="resume()")
+          span                          {{$t('TMP0073')}}
+      template(v-else)
+        span(class="body-SM")             {{$t('TMP0074', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
+        span(class="body-SM"        v-html="$t('TMP0075', { price: nextPrice, date: nextPaidDate  })")
+        span(class="text-blue-1 body-SM pointer"
+            @click="switchPeriod()")      {{$t('TMP0076', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
+        span(class="text-gray-3 body-SM pointer"
+            @click="cancelSub()")         {{$t('TMP0077')}}
+      p(class="text-blue-1")            {{$t('TMP0079')}}
+      span(                       v-html="$t('TMP0080', { amount: bgrmCredit, date: nextPaidDate })")
       span(class="body-XS")             {{$t('TMP0081')}}
+      p(class="text-blue-1")            {{$t('TMP0082')}}
+      span(class="body-XS")             {{$t('TMP0083')}}
     hr
     div(v-if="isPro" class="sp-detail")
-      p(class="text-blue-1")            {{$t('TMP0082')}}
-      span(class="body-SM")             {{`···· ···· ···· ${lastFour}  ${$t('TMP0083')} ${expireDate}`}}
+      p(class="text-blue-1")            {{$t('TMP0084')}}
+      span(class="body-SM")             {{`···· ···· ···· ${lastFour}  ${$t('TMP0085')} ${expireDate}`}}
       p(class="text-blue-1 body-SM"
-        @click="openCardPopup()")       {{$t('TMP0084')}}
+        @click="openCardPopup()")       {{$t('TMP0086')}}
     hr(v-if="isPro")
     div(v-if="isPro && isTW" class="sp-info")
       //- todo reuse
-      p(class="text-blue-1")            {{$t('TMP0085')}}
+      p(class="text-blue-1")            {{$t('TMP0087')}}
       span                              {{$tc('NN0173', 1)}}
-      input(                :placeholder="$t('TMP0086')")
+      input(                :placeholder="$t('TMP0088')")
       span                              {{$t('NN0172')}}
-      input(                :placeholder="$t('TMP0087')")
+      input(                :placeholder="$t('TMP0089')")
       span                              {{$t('TMP0047')}}
       input(                :placeholder="$t('TMP0048')")
       span                              {{$t('TMP0049')}}
       input(                :placeholder="$t('TMP0050')")
       btn(type="primary-sm")            {{$t('NN0176')}}
     div(v-if="isPro && isUS" class="sp-info")
-      p(class="text-blue-1")            {{$t('TMP0085')}}
+      p(class="text-blue-1")            {{$t('TMP0087')}}
       options(class="mb-10" :options="countryData" v-model="userCountry")
       span                              {{$tc('NN0173', 1)}}
-      input(                :placeholder="$t('TMP0086')")
+      input(                :placeholder="$t('TMP0088')")
       span                              {{$t('NN0172')}}
-      input(                :placeholder="$t('TMP0087')")
-      span                              {{$t('TMP0088')}}
-      input(                :placeholder="$t('TMP0089')")
-      span                              {{$t('TMP0092', { number: 1 })}}
-      input(                :placeholder="$t('TMP0093')")
-      span                              {{$t('TMP0092', { number: 2 })}}
-      input(                :placeholder="$t('TMP0094')")
-      span                              {{$t('TMP0095')}}
-      input(                :placeholder="$t('TMP0095')")
-      div(class="sp-info__half")
-        span
-        span                            {{$t('TMP0097')}}
-        options(class="mb-10" :options="stateData"
-                v-model="testState"  :ph="$t('TMP0096')")
-        input(              :placeholder="$t('TMP0097')")
-      btn(type="primary-sm")            {{$t('NN0176')}}
-    div(v-if="isPro && !isTW && !isUS" class="sp-info")
-      p(class="text-blue-1")            {{$t('TMP0085')}}
-      options(class="mb-10" :options="countryData" v-model="userCountry")
-      span                              {{$tc('NN0173', 1)}}
-      input(                :placeholder="$t('TMP0086')")
-      span                              {{$t('NN0172')}}
-      input(                :placeholder="$t('TMP0087')")
-      span                              {{$t('TMP0088')}}
       input(                :placeholder="$t('TMP0089')")
       span                              {{$t('TMP0090')}}
       input(                :placeholder="$t('TMP0091')")
+      span                              {{$t('TMP0094', { number: 1 })}}
+      input(                :placeholder="$t('TMP0095')")
+      span                              {{$t('TMP0094', { number: 2 })}}
+      input(                :placeholder="$t('TMP0096')")
+      span                              {{$t('TMP0097')}}
+      input(                :placeholder="$t('TMP0097')")
+      div(class="sp-info__half")
+        span
+        span                            {{$t('TMP0099')}}
+        options(class="mb-10" :options="stateData"
+                v-model="testState"  :ph="$t('TMP0098')")
+        input(              :placeholder="$t('TMP0099')")
+      btn(type="primary-sm")            {{$t('NN0176')}}
+    div(v-if="isPro && !isTW && !isUS" class="sp-info")
+      p(class="text-blue-1")            {{$t('TMP0087')}}
+      options(class="mb-10" :options="countryData" v-model="userCountry")
+      span                              {{$tc('NN0173', 1)}}
+      input(                :placeholder="$t('TMP0088')")
+      span                              {{$t('NN0172')}}
+      input(                :placeholder="$t('TMP0089')")
+      span                              {{$t('TMP0090')}}
+      input(                :placeholder="$t('TMP0091')")
+      span                              {{$t('TMP0092')}}
+      input(                :placeholder="$t('TMP0093')")
       btn(type="primary-sm")            {{$t('NN0176')}}
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
@@ -123,12 +128,15 @@ export default Vue.extend({
       isBundle: 'payment/getIsBundle',
       isTW: 'payment/isTW',
       isUS: 'payment/isUS'
+      // userType: 'payment/getUserType'
     }),
     ...mapFields({
       userCountry: 'userCountry'
     }),
     ...mapState('payment', [
       'isPro',
+      'isCancelingPro',
+      'nextPaidDate',
       'nextPrice',
       'nextPaidDate',
       'bgrmCredit',
@@ -136,9 +144,14 @@ export default Vue.extend({
       'expireDate'
     ])
   },
+  mounted() {
+    this.getBillingInfo()
+  },
   methods: {
     ...mapActions({
-      togglePro: 'payment/togglePro' // todelete
+      togglePro: 'payment/togglePro', // todelete
+      getBillingInfo: 'payment/getBillingInfo',
+      resume: 'payment/resume'
     }),
     openCardPopup() { this.showCardPopup = true },
     closeCardPopup() { this.showCardPopup = false },

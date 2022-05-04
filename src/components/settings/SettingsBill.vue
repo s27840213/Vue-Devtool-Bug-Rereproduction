@@ -1,12 +1,12 @@
 <template lang="pug">
   div(class="bill")
     div(class="bill__title")
-      p {{$t('TMP0098')}}
+      p {{$t('TMP0100')}}
     div(class="bill-table")
-      span {{$t('TMP0099')}}
-      span {{$t('TMP0100')}}
       span {{$t('TMP0101')}}
       span {{$t('TMP0102')}}
+      span {{$t('TMP0103')}}
+      span {{$t('TMP0104')}}
       template(v-for="his in testData")
         span {{his.date}}
         span {{his.description}}
@@ -51,6 +51,7 @@ import Vue from 'vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
+import { mapActions } from 'vuex'
 
 export default Vue.extend({
   name: 'SettingsBill',
@@ -94,9 +95,13 @@ export default Vue.extend({
   },
   computed: {
   },
-  // mounted() {
-  // },
+  mounted() {
+    this.getBillingHistroy()
+  },
   methods: {
+    ...mapActions({
+      getBillingHistroy: 'payment/getBillingHistroy'
+    }),
     pdf() {
       const invoice = document.getElementById('bill-invoice')
       const opt = {

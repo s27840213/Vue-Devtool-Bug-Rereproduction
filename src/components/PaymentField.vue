@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="field")
-    span(class="field__title") {{isChange ? $t('TMP0084') : ''}}
+    span(class="field__title") {{isChange ? $t('TMP0086') : ''}}
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountry")
@@ -133,9 +133,7 @@ export default Vue.extend({
         if (data.flag) throw Error(data.msg)
         this.$emit('paid')
         Vue.notify({ group: 'copy', text: 'Success' })
-      }).catch((msg) => {
-        Vue.notify({ group: 'error', text: msg })
-      })
+      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     tappayInit() {
       this.payReady = false

@@ -99,7 +99,7 @@ export default Vue.extend({
         type: 'yearly',
         isBundle: 1
       }],
-      invoiceInput: [{
+      invoiceInput: [{ // todo rebind data
         label: 'email',
         type: 'email',
         ph: i18n.tc('NN0173', 1)
@@ -151,9 +151,9 @@ export default Vue.extend({
     showPreStep(): boolean {
       return ['step2', 'step3'].includes(this.view)
     },
-    invoice():Record<string, string> {
-      return this.$store.state.payment.invoice
-    },
+    // invoice():Record<string, string> {
+    //   return this.$store.state.payment.billinfInfo
+    // },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
         ? this.cancel2[Number(this.reasonIndex)] as string
@@ -241,11 +241,11 @@ export default Vue.extend({
       if (this.view === 'step2') this.changeView('step1')
       else if (this.view === 'step3') this.changeView('step2')
     },
-    setInvoice(key: string, event: InputEvent) {
-      this.$store.commit('payment/SET_invoice',
-        Object.assign(this.invoice, { [key]: (event.target as HTMLInputElement).value })
-      )
-    },
+    // setInvoice(key: string, event: InputEvent) {
+    //   this.$store.commit('payment/SET_invoice',
+    //     Object.assign(this.invoice, { [key]: (event.target as HTMLInputElement).value })
+    //   )
+    // },
     paid() { // rename?
       this.isTW ? this.changeView('step3') : this.changeView('finish')
     },
@@ -259,9 +259,7 @@ export default Vue.extend({
       // todo test no reason
       this.cancelApi(this.cancelReason).then(
         this.closePopup
-      ).catch((msg) => {
-        Vue.notify({ group: 'error', text: msg })
-      })
+      ).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     closePopup() { this.$emit('close') }
   }
