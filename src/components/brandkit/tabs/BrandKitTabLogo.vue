@@ -22,7 +22,7 @@
         :class="{hovered: checkMenuOpen(logo)}"
         :key="logo.id.replace('new_', '')")
         svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
-        img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img" crossOrigin="Anonymous")
+        img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
         div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
           @click="handleOpenMenu(logo)")
           div(class="brand-kit-tab-logo__item__more-container relative")
@@ -116,7 +116,6 @@ export default Vue.extend({
       const url = brandkitUtils.getLogoUrl(logo, brand.id, 'original')
       if (logo.signed_url) {
         const image = new Image()
-        image.setAttribute('crossOrigin', 'Anonymous')
         image.onload = () => { this.startDownloading(url, logoName) }
         image.onerror = () => {
           this.refreshLogoAsset({
