@@ -39,6 +39,19 @@ class Payment {
     })
   }
 
+  updateBillingInfo (params: any): AxiosPromise { // todo retype
+    return axios.request<any>({ // todo retype
+      url: '/billing-info',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        type: 'update',
+        ...params // meta (billing info)
+      }
+    })
+  }
+
   tappayAdd (params: any): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',

@@ -41,7 +41,13 @@ interface IPaymentState {
     // TW only
     phone: string
     GUI: string
-  }
+  },
+  billingInfoInvalid: {
+    email: boolean
+    zip: boolean
+    phone: boolean
+    GUI: boolean
+  },
   billingHistory: Array<Record<string, string>>
 }
 
@@ -79,6 +85,12 @@ const getDefaultState = (): IPaymentState => ({
     phone: '',
     GUI: ''
   },
+  billingInfoInvalid: {
+    email: false,
+    zip: false,
+    phone: false,
+    GUI: false
+  },
   billingHistory: []
 })
 
@@ -115,23 +127,6 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
     : GUIsum % 5 === 0
 }
 
-// function keyTranslate(obj: Record<string, string>):Record<string, string> {
-//   const newKeys = {
-//     valid_thru: 'date',
-//     address_line1: 'address1',
-//     address_line2: 'address2',
-//     address_city: 'ciry',
-//     address_state: 'state',
-//     postal_code: 'zip',
-//     tax_id: 'GUI'
-//   } as Record<string, string>
-//   const keyValues = Object.keys(obj).map(key => {
-//     const newKey = newKeys[key] || key
-//     return { [newKey]: obj[key] }
-//   })
-//   return Object.assign({}, ...keyValues)
-// }
-
 const actions: ActionTree<IPaymentState, unknown> = {
   getPrice({ commit }) {
     paymentApi.planList().then((response) => {
@@ -148,7 +143,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
   getBillingInfo({ commit }) {
     paymentApi.billingInfo().then((response) => {
       const data = response.data.data
-      console.log('aa', data)
+      console.log('bill info', data) // todelete
       commit('SET_state', {
         isPro: data.plan_subscribe === 1,
         isCancelingPro: data.plan_stop_subscribe === 1,
@@ -182,11 +177,54 @@ const actions: ActionTree<IPaymentState, unknown> = {
   },
   getBillingHistroy({ commit }) {
     paymentApi.billingHistory().then((response) => {
-      console.log('his', response)
+      console.log('his', response) // todelete
       commit('SET_state', {
         billingHistory: response.data.data
       })
     })
+  },
+  checkBillingInfo({ commit }, key: keyof IPaymentState['billingInfoInvalid']):boolean {
+    let value
+    switch (key) {
+      case 'email':
+        value = !state.billingInfo.email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
+        break
+      case 'zip':
+        value = !state.billingInfo.zip.match(/^[0-9]{5}$/)
+        break
+      case 'phone':
+        value = !state.billingInfo.phone.match(/^[-0-9]{9,12}$/)
+        break
+      case 'GUI':
+        value = !isLegalGUI(state.billingInfo.GUI)
+        break
+    }
+    commit('SET_state', {
+      billingInfoInvalid: {
+        [key]: value
+      }
+    })
+    return state.billingInfoInvalid[key]
+  },
+  updateBillingInfo() {
+    paymentApi.updateBillingInfo({
+      meta: JSON.stringify({
+        country: state.userCountry,
+        email: state.billingInfo.email,
+        name: state.billingInfo.name,
+        company: state.billingInfo.company,
+        address_line1: state.billingInfo.address1,
+        address_line2: state.billingInfo.address2,
+        address_city: state.billingInfo.city,
+        address_state: state.billingInfo.state,
+        postal_code: state.billingInfo.zip,
+        phone: state.billingInfo.phone,
+        tax_id: state.billingInfo.GUI
+      })
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    }).then(() => Vue.notify({ group: 'copy', text: 'Success' }))
+      .catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   tappayAdd() {
     // paymentApi.tappayAdd({

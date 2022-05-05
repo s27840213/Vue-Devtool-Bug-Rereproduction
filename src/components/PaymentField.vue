@@ -69,7 +69,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      // userCountry: 'payment/getUserCountry',
       isTW: 'payment/isTW'
     }),
     ...mapFields({

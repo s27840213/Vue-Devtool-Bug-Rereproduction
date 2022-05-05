@@ -307,7 +307,13 @@ export default Vue.extend({
     &__title { @include text-H4; }
     &__description { margin-top: 16px; }
   }
-  &-content { height: 100%; }
+  &-content {
+    height: 100%;
+    input {
+      &:focus { border-color: setColor(blue-1); }
+      &:invalid { border-color: red; }
+    }
+  }
   &-button-description {
     position: absolute;
     bottom: 9%
