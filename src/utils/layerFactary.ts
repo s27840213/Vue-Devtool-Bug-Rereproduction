@@ -120,7 +120,7 @@ class LayerFactary {
       img.styles.rotate = 0
     }
 
-    return {
+    const frame = {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -167,6 +167,8 @@ class LayerFactary {
         return decorationTop
       })()) : undefined
     }
+    frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
+    return frame
   }
 
   newText(config: Partial<IText>): IText {
@@ -301,7 +303,7 @@ class LayerFactary {
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
-    return {
+    const group = {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -341,10 +343,12 @@ class LayerFactary {
           return [this.newByLayerType(l) as IShape | IText | IImage]
         })
     }
+    group.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = group.styles))
+    return group
   }
 
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
-    return {
+    const tmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
       active: true,
@@ -369,8 +373,10 @@ class LayerFactary {
         horizontalFlip: false,
         verticalFlip: false
       },
-      layers: layers
-    }
+      layers
+    } as unknown as ITmp
+    tmp.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = tmp.styles))
+    return tmp
   }
 
   newShape(config: any): IShape {
