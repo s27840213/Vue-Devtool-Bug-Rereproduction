@@ -1412,6 +1412,8 @@ export default Vue.extend({
       if (e.dataTransfer?.getData('data')) {
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
+        } else if (this.getLayerType === 'image') {
+          StepsUtils.record()
         }
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files

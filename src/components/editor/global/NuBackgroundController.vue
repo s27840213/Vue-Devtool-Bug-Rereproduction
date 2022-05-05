@@ -180,7 +180,9 @@ export default Vue.extend({
       }
     },
     moveEnd() {
+      PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
+      PageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
       window.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
@@ -284,7 +286,9 @@ export default Vue.extend({
     },
     scaleEnd() {
       this.isControlling = false
+      PageUtils.setBackgroundImageControlDefault()
       stepsUtils.record()
+      PageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.scaling, false)
       window.removeEventListener('mouseup', this.scaleEnd, false)

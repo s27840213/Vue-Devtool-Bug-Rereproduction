@@ -261,6 +261,7 @@ class ImageShadowUtils {
 
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
+        console.log(img)
         ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
         const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString()
         if (!(this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
@@ -492,19 +493,22 @@ class ImageShadowUtils {
     if (layer.type === LayerType.image) {
       const { shadow, width, height } = layer.styles
       const { effects } = shadow
+      const layerInfo = { pageIndex, layerIndex, subLayerIdx }
+
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         initWidth: width,
         initHeight: height,
         scale: 1,
-        adjust: {},
-        shadow: {
-          currentEffect: effect,
-          effects: {
-            ...effects,
-            ...attrs
-          }
-        }
+        adjust: {}
       }, subLayerIdx)
+
+      if (layer.styles.shadow.currentEffect !== effect) {
+        this.updateEffectState(layerInfo, effect)
+      }
+      this.updateEffect(layerInfo, {
+        ...effects,
+        ...attrs
+      })
     }
   }
 
@@ -729,10 +733,10 @@ class ImageShadowUtils {
     })
   }
 
-  updateEffectState(layerInfo: ILayerInfo, currEffect: string) {
+  updateEffectState(layerInfo: ILayerInfo, currentEffect: string) {
     store.commit('UPDATE_shadowEffectState', {
       layerInfo,
-      payload: { currEffect }
+      payload: { currentEffect }
     })
   }
 }

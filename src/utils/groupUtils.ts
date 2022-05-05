@@ -90,7 +90,6 @@ class GroupUtils {
 
     if (this.currSelectedInfo.types.has('group')) {
       this.ungroupInnerGroup()
-      stepsUtils.record()
     }
 
     const tmpPageIndex = currSelectedInfo.pageIndex
@@ -143,6 +142,7 @@ class GroupUtils {
       const tmpIndex = this.currSelectedInfo.index
       this.reset()
       this.set(tmpPageIndex, tmpIndex, targetLayer.layers)
+      stepsUtils.record()
     }
   }
 

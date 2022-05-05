@@ -20,7 +20,6 @@
           :style="flipStyles"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
           draggable="false"
-          crossOrigin="Anonymous"
           :src="finalSrc"
           @error="onError()"
           @load="onLoad()")
@@ -70,7 +69,11 @@ export default Vue.extend({
       isOnError: false,
       src: '',
       canvasScale: CANVAS_SCALE,
-      canvasShadowImg: undefined as undefined | HTMLImageElement,
+      canvasShadowImg: {
+        shadow: undefined as undefined | HTMLImageElement,
+        imageMatched: undefined as undefined | HTMLImageElement,
+        floating: undefined as undefined | HTMLImageElement
+      },
       canvasSize: { width: 0, height: 0 }
     }
   },
@@ -93,10 +96,14 @@ export default Vue.extend({
       },
       deep: true
     },
-    shadowEffects(val) {
-      if (this.$refs.canvas) {
-        !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
-      }
+    shadowEffects: {
+      handler(val) {
+        console.log('update shadow effect')
+        if (this.$refs.canvas) {
+          !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
+        }
+      },
+      deep: true
     },
     currentShadowEffect() {
       if (this.$refs.canvas && !this.forRender) {
@@ -302,7 +309,6 @@ export default Vue.extend({
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
           if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
@@ -337,8 +343,6 @@ export default Vue.extend({
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
       return new Promise<void>((resolve, reject) => {
         const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
-
         img.onload = () => resolve()
         img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
@@ -349,7 +353,6 @@ export default Vue.extend({
       if (this.userId !== 'backendRendering') {
         await this.perviewAsLoading()
         const preImg = new Image()
-        preImg.setAttribute('crossOrigin', 'Anonymous')
         preImg.onerror = () => {
           if (type === 'pexels') {
             const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
@@ -367,7 +370,6 @@ export default Vue.extend({
         }
         preImg.onload = () => {
           const nextImg = new Image()
-          nextImg.setAttribute('crossOrigin', 'Anonymous')
           nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
         }
         preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
@@ -410,52 +412,78 @@ export default Vue.extend({
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
-          if (this.canvasShadowImg) {
-            imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
+          if (this.canvasShadowImg.shadow) {
+            imgShadowUtils.draw(canvas, this.canvasShadowImg.shadow as HTMLImageElement, this.config, {
               drawCanvasW,
               drawCanvasH,
               layerInfo
             })
           } else {
-            const previewImg = new Image()
-            previewImg.crossOrigin = 'Anonymous'
-            previewImg.onload = () => {
-              imgShadowUtils.draw(canvas, previewImg, this.config, {
+            const img = new Image()
+            img.crossOrigin = 'anonymous'
+            imgShadowUtils.setIsProcess(layerInfo, true)
+            img.onload = () => {
+              imgShadowUtils.draw(canvas, img, this.config, {
                 drawCanvasW,
                 drawCanvasH,
                 layerInfo
               })
-              this.canvasShadowImg = previewImg
+              this.canvasShadowImg.shadow = img
             }
-            previewImg.src = ImageUtils.getSrc(this.config,
+            img.src = ImageUtils.getSrc(this.config,
               ['private', 'public'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE)
           }
           break
         }
         case ShadowEffectType.imageMatched: {
-          const img = this.$refs.img as HTMLImageElement
-          imgShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
-            drawCanvasW,
-            drawCanvasH,
-            layerInfo
-          })
+          console.log('change ')
+          if (this.canvasShadowImg.imageMatched) {
+            imgShadowUtils.drawImageMatchedShadow(canvas, this.canvasShadowImg.imageMatched, this.config, {
+              drawCanvasW,
+              drawCanvasH,
+              layerInfo
+            })
+          } else {
+            const img = new Image()
+            img.crossOrigin = 'anonymous'
+            img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            imgShadowUtils.setIsProcess(layerInfo, true)
+            img.onload = () => {
+              imgShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
+                drawCanvasW,
+                drawCanvasH,
+                layerInfo
+              })
+              this.canvasShadowImg.imageMatched = img
+            }
+          }
           break
         }
         case ShadowEffectType.floating: {
-          const img = this.$refs.img as HTMLImageElement
-          // const height = this.config.styles.height / this.config.styles.width < 1
-          //   ? img.naturalHeight * CANVAS_FLOATING_SCALE : img.naturalHeight * CANVAS_SCALE
-          // canvas.setAttribute('width', `${img.naturalWidth * CANVAS_SCALE}`)
-          // canvas.setAttribute('height', `${height}`)
-          imgShadowUtils.drawFloatingShadow(canvas, img, this.config, {
-            layerInfo,
-            drawCanvasW,
-            drawCanvasH
-          })
+          if (this.canvasShadowImg.floating) {
+            imgShadowUtils.drawFloatingShadow(canvas, this.canvasShadowImg.floating, this.config, {
+              layerInfo,
+              drawCanvasW,
+              drawCanvasH
+            })
+          } else {
+            const img = new Image()
+            img.crossOrigin = 'anonymous'
+            img.onload = () => {
+              imgShadowUtils.drawFloatingShadow(canvas, img, this.config, {
+                layerInfo,
+                drawCanvasW,
+                drawCanvasH
+              })
+              this.canvasShadowImg.floating = img
+            }
+            img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+          }
           break
         }
         case ShadowEffectType.none:
-          this.canvasShadowImg = undefined
+          this.canvasShadowImg.imageMatched = undefined
+          this.canvasShadowImg.shadow = undefined
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
@@ -475,21 +503,19 @@ export default Vue.extend({
           case ShadowEffectType.shadow:
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
-            if (this.canvasShadowImg) {
-              imgShadowUtils.draw(canvas, this.canvasShadowImg as HTMLImageElement, this.config, {
-                layerInfo
-              })
+            if (this.canvasShadowImg.shadow as HTMLImageElement) {
+              imgShadowUtils.draw(canvas, this.canvasShadowImg.shadow as HTMLImageElement, this.config, { layerInfo })
             }
             break
           case ShadowEffectType.imageMatched:
-            imgShadowUtils.drawImageMatchedShadow(canvas, this.$refs.img as HTMLImageElement, this.config, {
-              layerInfo
-            })
+            if (this.canvasShadowImg.imageMatched as HTMLImageElement) {
+              imgShadowUtils.drawImageMatchedShadow(canvas, this.canvasShadowImg.imageMatched as HTMLImageElement, this.config, { layerInfo })
+            }
             break
           case ShadowEffectType.floating:
-            imgShadowUtils.drawFloatingShadow(canvas, this.$refs.img as HTMLImageElement, this.config, {
-              layerInfo
-            })
+            if (this.$refs.floating as HTMLImageElement) {
+              imgShadowUtils.drawFloatingShadow(canvas, this.$refs.floating as HTMLImageElement, this.config, { layerInfo })
+            }
             break
           case ShadowEffectType.none:
             break

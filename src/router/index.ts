@@ -256,8 +256,6 @@ router.beforeEach(async (to, from, next) => {
       } else {
         await store.dispatch('user/login', { token: token })
       }
-    } else if (to.name === 'BrandKit' && !store.getters['user/isAdmin']) {
-      next({ name: 'Home' })
     }
   } else {
     if (!store.getters['user/isLogin']) {

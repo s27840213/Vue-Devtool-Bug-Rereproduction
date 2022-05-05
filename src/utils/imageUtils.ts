@@ -368,7 +368,6 @@ class ImageUtils {
   async getImageSize(url: string, defaultWidth: number, defaultHeight: number, setAnonymous = true): Promise<{ width: number; height: number, exists: boolean }> {
     const loadImage = new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image()
-      setAnonymous && image.setAttribute('crossOrigin', 'Anonymous')
       image.onload = () => resolve(image)
       image.onerror = () => reject(new Error('Could not load image'))
       image.src = url

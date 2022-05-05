@@ -47,6 +47,7 @@ import { IPopupOptions } from '@/interfaces/popup'
 import pageUtils from '@/utils/pageUtils'
 import assetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
+import layerFactary from '@/utils/layerFactary'
 
 export default Vue.extend({
   props: {
@@ -54,36 +55,19 @@ export default Vue.extend({
   },
   data() {
     return {
-      baseBgImgConfig: {
-        type: 'image',
+      baseBgImgConfig: layerFactary.newImage({
         srcObj: {
           type: '',
           userId: '',
           assetId: ''
         },
-        clipPath: '',
-        active: false,
-        shown: false,
-        imgControl: false,
         styles: {
-          x: 0,
-          y: 0,
-          scale: 1,
-          scaleX: 0,
-          scaleY: 0,
-          rotate: 0,
           width: 0,
           height: 0,
-          initWidth: 0,
-          initHeight: 0,
-          imgX: 0,
-          imgY: 0,
-          imgWidth: 0,
-          imgHeight: 0,
           zindex: -1,
           opacity: 100
         }
-      }
+      })
     }
   },
   computed: {
@@ -173,7 +157,6 @@ export default Vue.extend({
         /** get a tiny photo in order to get the aspectRatio of the image */
         const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj.type, 50))
         const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
         img.onload = () => {
           const ratio = img.naturalWidth / img.naturalHeight
           assetUtils.addImage(src, ratio, {

@@ -10,6 +10,8 @@ import localeUtils from './localeUtils'
 import textPropUtils from './textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
+import imageShadowUtils from './imageShadowUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -53,7 +55,18 @@ class LayerFactary {
         horizontalFlip: false,
         verticalFlip: false,
         adjust: {},
-        shadow: { currentEffect: 'none', effects: {} }
+        shadow: {
+          currentEffect: 'none',
+          effects: {
+            ...Object.keys(ShadowEffectType)
+              .reduce((obj, effect) => {
+                return {
+                  ...obj,
+                  [effect]: {}
+                }
+              }, {})
+          }
+        }
       }
     }
     Object.assign(basicConfig.styles, config.styles)

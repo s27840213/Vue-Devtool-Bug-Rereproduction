@@ -188,20 +188,18 @@ export default Vue.extend({
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
 
-      updateCanvas.style.width = (updateCanvas.width / 4).toString() + 'px'
-      updateCanvas.style.height = (updateCanvas.height / 4).toString() + 'px'
-      updateCanvas.style.position = 'absolute'
-      updateCanvas.style.zIndex = '1000'
-      updateCanvas.style.top = '0'
+      // updateCanvas.style.width = (updateCanvas.width / 4).toString() + 'px'
+      // updateCanvas.style.height = (updateCanvas.height / 4).toString() + 'px'
+      // updateCanvas.style.position = 'absolute'
+      // updateCanvas.style.zIndex = '1000'
+      // updateCanvas.style.top = '0'
 
-      document.body.append(updateCanvas)
-      setTimeout(() => document.body.removeChild(updateCanvas), 15000)
+      // document.body.append(updateCanvas)
+      // setTimeout(() => document.body.removeChild(updateCanvas), 15000)
 
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
-      // const leftShadowThickness = ((updateCanvas.width - img.naturalWidth) * 0.5 - left) / img.naturalWidth
-      // const topShadowThickness = ((updateCanvas.height - img.naturalHeight) * 0.5 - top) / img.naturalHeight
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -338,7 +336,8 @@ export default Vue.extend({
       colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     },
     onEffectClick(effectName: ShadowEffectType): void {
-      const alreadySetEffect = effectName in this.currentStyle.shadow.effects
+      const alreadySetEffect = effectName === ShadowEffectType.none
+        ? true : Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
