@@ -394,13 +394,6 @@ export default Vue.extend({
       const drawCanvasW = width * canvasW / _canvasW
       const drawCanvasH = height * canvasH / _canvasH
 
-      // const drawCanvasW = width >= height ? CANVAS_SIZE : CANVAS_SIZE * width / height
-      // const drawCanvasH = height > width ? CANVAS_SIZE : CANVAS_SIZE * height / width
-      // const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
-      // const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
-      // const _canvasW = canvasW * CANVAS_SIZE / Math.max(width, height)
-      // const _canvasH = canvasH * CANVAS_SIZE / Math.max(width, height)
-
       this.canvasSize.width = _canvasW
       this.canvasSize.height = _canvasH
 
@@ -513,8 +506,8 @@ export default Vue.extend({
             }
             break
           case ShadowEffectType.floating:
-            if (this.$refs.floating as HTMLImageElement) {
-              imgShadowUtils.drawFloatingShadow(canvas, this.$refs.floating as HTMLImageElement, this.config, { layerInfo })
+            if (this.canvasShadowImg.floating as HTMLImageElement) {
+              imgShadowUtils.drawFloatingShadow(canvas, this.canvasShadowImg.floating as HTMLImageElement, this.config, { layerInfo })
             }
             break
           case ShadowEffectType.none:

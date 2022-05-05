@@ -47,6 +47,8 @@ class ImageUtils {
         config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
       )
     }
+
+    const ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}?origin=true` + FORCE_UPDATE_VER
@@ -61,9 +63,9 @@ class ImageUtils {
         return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
       }
       case 'unsplash':
-        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size || 766}&origin=true`
+        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size || 766}&origin=true`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
       case 'frame':

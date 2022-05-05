@@ -142,8 +142,6 @@ export default Vue.extend({
       const updateCanvas = document.createElement('canvas')
 
       const { width, height, imgWidth, imgHeight } = config.styles
-      // const drawCanvasW = width / imgWidth * img.naturalWidth
-      // const drawCanvasH = height / imgHeight * img.naturalHeight
       const drawCanvasW = width / imgWidth * img.naturalWidth
       const drawCanvasH = height / imgHeight * img.naturalHeight
       let spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
@@ -156,8 +154,7 @@ export default Vue.extend({
       const drawCanvasHOri = height * canvasHOri / _canvasH
 
       spaceScale *= width > height ? CANVAS_SIZE / _canvasW : CANVAS_SIZE / _canvasH
-      // spaceScale *= 1600 / CANVAS_SIZE
-      spaceScale *= width > height
+      spaceScale *= imgWidth > imgHeight
         ? (width / imgWidth) * 1600 / drawCanvasWOri
         : (height / imgHeight) * 1600 / drawCanvasHOri
 

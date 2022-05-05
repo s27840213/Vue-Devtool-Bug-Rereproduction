@@ -136,22 +136,13 @@ class ImageShadowUtils {
       canvasT.setAttribute('height', `${canvas.height}`)
     }
 
-    // const mappingScale = 1600 / Math.max(drawCanvasW, drawCanvasH)
-    const mappingScale = layerWidth > layerHeight
+    const mappingScale = _imgWidth > _imgHeight
       ? (layerWidth / _imgWidth) * 1600 / drawCanvasW
       : (layerHeight / _imgHeight) * 1600 / drawCanvasH
 
-    console.warn('mapping scale', mappingScale)
     const canvasMaxW = canvas.width * mappingScale
-    const canvasMaxH = canvas.height * mappingScale
     const ellipseX = canvasMaxW * 0.5
-    console.log(canvasMaxH)
-    console.log(drawCanvasH * mappingScale)
-    /** const ellipseY = (canvasMaxH - canvasMaxH / CANVAS_FLOATING_SCALE) * 0.5 + canvasMaxH / CANVAS_FLOATING_SCALE + FLOATING_Y_OFFSET * mappingScale  */
-    // let ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
-    // const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
     const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
-    console.log(ellipseY)
     const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
@@ -265,7 +256,11 @@ class ImageShadowUtils {
         ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
         const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString()
         if (!(this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
-          const mappingScale = 1600 / Math.max(drawCanvasW as number, drawCanvasH as number)
+          // const mappingScale = 1600 / Math.max(drawCanvasW as number, drawCanvasH as number)
+          const mappingScale = _imgWidth > _imgHeight
+            ? (layerWidth / _imgWidth) * 1600 / (drawCanvasW as number)
+            : (layerHeight / _imgHeight) * 1600 / (drawCanvasH as number)
+
           canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
           canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
 
@@ -384,7 +379,10 @@ class ImageShadowUtils {
 
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
-          const mappingScale = 1600 / Math.max(drawCanvasW as number, drawCanvasH as number)
+          // const mappingScale = 1600 / Math.max(drawCanvasW as number, drawCanvasH as number)
+          const mappingScale = _imgWidth > _imgHeight
+            ? (layerWidth / _imgWidth) * 1600 / (drawCanvasW as number)
+            : (layerHeight / _imgHeight) * 1600 / (drawCanvasH as number)
           canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
           canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
 
