@@ -21,10 +21,11 @@
             @click="switchPeriod()")    {{$t('TMP0076', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
         span(class="text-gray-3 body-SM pointer"
             @click="cancelSub()")       {{$t('TMP0077')}}
-      p(class="text-blue-1")            {{$t('TMP0079')}}
-      span(                       v-html="$t('TMP0080', { amount: usage.bgrmUsed, date: nextPaidDate })")
+      span(class="text-blue-1")         {{$t('TMP0079')}}
+      span(                       v-html="$t('TMP0080', { amount: usage.bgrmRemain, date: nextPaidDate })")
       span(class="body-XS")             {{$t('TMP0081')}}
-      p(class="text-blue-1")            {{$t('TMP0082')}}
+      span(class="text-blue-1")         {{$t('TMP0082')}}
+      span                              {{`${usage.diskUsed}/${usage.diskTotal}`}}
       span(class="body-XS")             {{$t('TMP0083')}}
     hr
     div(v-if="isPro" class="sp-detail")

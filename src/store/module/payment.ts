@@ -16,7 +16,7 @@ interface IPaymentState {
   nextPaidDate: string
   nextPrice: string
   usage: {
-    bgrmUsed: number
+    bgrmRemain: number
     bgrmTotal: number
     diskUsed: number
     diskTotal: number
@@ -48,7 +48,9 @@ interface IPaymentState {
     phone: boolean
     GUI: boolean
   },
-  billingHistory: Array<Record<string, string>>
+  billingHistory: {
+    a: string
+  }[]
 }
 
 const getDefaultState = (): IPaymentState => ({
@@ -63,7 +65,7 @@ const getDefaultState = (): IPaymentState => ({
   nextPaidDate: '',
   nextPrice: '',
   usage: {
-    bgrmUsed: 0,
+    bgrmRemain: 0,
     bgrmTotal: 100,
     diskUsed: 0,
     diskTotal: 100
@@ -147,13 +149,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
       commit('SET_state', {
         isPro: data.plan_subscribe === 1,
         isCancelingPro: data.plan_stop_subscribe === 1,
+        nextPrice: '$' + data.price,
         nextPaidDate: data.plan_due_time,
         country: data.country.toUpperCase(),
         usage: {
-          bgrmUsed: data.bg_credit_current,
+          bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
-          diskUsed: data.capacity,
-          diskTotal: data.capacity_current
+          diskUsed: data.capacity_current.toFixed(2),
+          diskTotal: data.capacity
         },
         cardInfo: {
           brand: data.brand,
@@ -179,7 +182,27 @@ const actions: ActionTree<IPaymentState, unknown> = {
     paymentApi.billingHistory().then((response) => {
       console.log('his', response) // todelete
       commit('SET_state', {
-        billingHistory: response.data.data
+        billingHistory: response.data.data.map((item:Record<string, string>) => {
+          const date = new Date(item.create_time).toLocaleDateString('en', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+          return {
+            date: date,
+            description: item.title,
+            price: item.price,
+            id: item.order_id,
+            name: item.name,
+            address: '?',
+            email: item.email,
+            items: [{
+              description: item.title,
+              date: date,
+              price: item.price
+            }]
+          }
+        })
       })
     })
   },
@@ -190,7 +213,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         value = !state.billingInfo.email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
         break
       case 'zip':
-        value = !state.billingInfo.zip.match(/^[0-9]{5}$/)
+        value = !state.billingInfo.zip.match(/^([0-9]{5}|[0-9]{9})$/)
         break
       case 'phone':
         value = !state.billingInfo.phone.match(/^[-0-9]{9,12}$/)
@@ -279,7 +302,14 @@ const mutations: MutationTree<IPaymentState> = {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
-      if (key in state) {
+      if (key === 'nextPaidDate') {
+        (state[key] as any) = new Date(newState[key] as string)
+          .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+      } else if (key in state) {
         (state[key] as any) = newState[key]
       }
     })

@@ -2,24 +2,27 @@
   div(class="bill")
     div(class="bill__title")
       p {{$t('TMP0100')}}
-    div(class="bill-table")
+    template(v-if="!historys.length")
+      img(:src="require('@/assets/img/svg/E-payment.svg')")
+      p(class="text-H6") {{$t('TMP0106')}}
+    div(v-else class="bill-table")
       span {{$t('TMP0101')}}
       span {{$t('TMP0102')}}
       span {{$t('TMP0103')}}
       span {{$t('TMP0104')}}
-      template(v-for="his in testData")
+      template(v-for="his, idx in historys")
         span {{his.date}}
         span {{his.description}}
-        span {{his.amount}}
-        span(@click="pdf()") {{his.details}}
-    div(class="bill-invoice-wrapper")
+        span {{his.price}}
+        span(class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0105')}}
+    div(v-if="historys.length" class="bill-invoice-wrapper")
       div(class="bill-invoice" id="bill-invoice")
         div(class="bill-invoice__title")
           //- svg-icon(iconName="logo" iconWidth="143px" style="height: 50px;")
           img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
           span {{'INVOICE'}}
-        div(class="bill-invoice__invoice-number") {{'Invoice number:'}}
-        div(class="bill-invoice__invoice-date") {{'Invoice date'}}
+        div(class="bill-invoice__invoice-number") {{`Invoice number: ${historys[hisIndex].id}`}}
+        div(class="bill-invoice__invoice-date") {{`Invoice date: ${historys[hisIndex].date}`}}
         div(class="bill-invoice-fromto")
           //- todo reuse
           span {{'From:'}}
@@ -28,17 +31,17 @@
           span {{'vivipic zipcode city?'}}
           span {{'vivipic mail'}}
           span {{'To:'}}
-          span {{'Customer name'}}
-          span {{'Customer addr'}}
-          span {{'Customer mail'}}
+          span {{historys[hisIndex].name}}
+          span {{historys[hisIndex].address}}
+          span {{historys[hisIndex].email}}
         div(class="bill-invoice-detail")
           span {{'Descriptions'}}
           span {{'Date'}}
           span {{'Price'}}
-          template(v-for="detail in testData2")
-            span {{detail.description}}
-            span {{detail.date}}
-            span {{detail.price}}
+          template(v-for="item in historys[hisIndex].items")
+            span {{item.description}}
+            span {{item.date}}
+            span {{item.price}}
           span
           span {{'Total price'}}
           span {{'$13.09 USD'}}
@@ -48,10 +51,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapActions, mapState } from 'vuex'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
-import { mapActions } from 'vuex'
 
 export default Vue.extend({
   name: 'SettingsBill',
@@ -61,39 +64,13 @@ export default Vue.extend({
   },
   data() {
     return {
-      testData: [{
-        date: '14-04-2022',
-        description: 'PRO Plan',
-        amount: '$12.89',
-        details: '?'
-      }, {
-        date: '14-04-2022',
-        description: 'PRO Plan',
-        amount: '$12.89',
-        details: '?'
-      }, {
-        date: '14-04-2022',
-        description: 'PRO Plan',
-        amount: '$12.89',
-        details: '?'
-      }, {
-        date: '14-04-2022',
-        description: 'PRO Plan',
-        amount: '$12.89',
-        details: '?'
-      }],
-      testData2: [{
-        description: 'Vivipic PRO monthly',
-        date: '14-04-2022',
-        price: '$12.89 USD'
-      }, {
-        description: 'Background remover 100 credits',
-        date: '$0.2 USD',
-        price: '$12.89 USD'
-      }]
+      hisIndex: 0
     }
   },
   computed: {
+    ...mapState('payment', {
+      historys: 'billingHistory'
+    })
   },
   mounted() {
     this.getBillingHistroy()
@@ -102,7 +79,8 @@ export default Vue.extend({
     ...mapActions({
       getBillingHistroy: 'payment/getBillingHistroy'
     }),
-    pdf() {
+    pdf(index: number) {
+      this.hisIndex = index
       const invoice = document.getElementById('bill-invoice')
       const opt = {
         html2canvas: { scale: 5 },

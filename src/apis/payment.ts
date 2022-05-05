@@ -1,7 +1,7 @@
+import i18n from '@/i18n'
 import axios from '@/apis'
 import authToken from './auth-token'
 import { AxiosPromise } from 'axios'
-import i18n from '@/i18n'
 
 class Payment {
   planList (): AxiosPromise {
