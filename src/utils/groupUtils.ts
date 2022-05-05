@@ -90,7 +90,6 @@ class GroupUtils {
 
     if (this.currSelectedInfo.types.has('group')) {
       this.ungroupInnerGroup()
-      stepsUtils.record()
     }
 
     const tmpPageIndex = currSelectedInfo.pageIndex

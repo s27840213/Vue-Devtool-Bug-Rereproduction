@@ -196,7 +196,6 @@ class UploadUtils {
        */
       const img = new Image()
       img.src = evt.target?.result as string
-      img.setAttribute('crossOrigin', 'Anonymous')
       img.onload = (evt) => {
         store.commit('file/ADD_PREVIEW', {
           imageFile: img,
