@@ -28,7 +28,7 @@ import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
-import countryData from '@/assets/json/countries.json'
+import paymentData from '@/utils/paymentData'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -48,7 +48,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      countryData,
+      countryData: paymentData.countryList(),
       payReady: false,
       submit: null as unknown as () => void,
       // Stripe

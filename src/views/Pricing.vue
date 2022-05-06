@@ -8,7 +8,7 @@
       div(class="pricing-plan")
         div(class="pricing-plan-left")
           //- todelete
-          slide-toggle(:options="[{label: '',value: '0'}, {label: '', value: '1'}]" v-model="period" optionWidth="32px")
+          //- slide-toggle(:options="[{label: '',value: '0'}, {label: '', value: '1'}]" v-model="period" optionWidth="32px")
           div(class="pricing-plan-left__top")
             span(class="pricing-plan-left__top__title") {{$t('TMP0003')}}
             span(class="pricing-plan-left__top__description") {{$t('TMP0004')}}

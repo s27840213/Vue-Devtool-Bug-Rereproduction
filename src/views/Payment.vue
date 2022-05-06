@@ -56,7 +56,6 @@ import i18n from '@/i18n'
 import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js'
 import payment from '@/apis/payment'
 import NuHeader from '@/components/NuHeader.vue'
-import countryData from '@/assets/json/countries.json'
 
 export default Vue.extend({
   name: 'Payment',
@@ -81,7 +80,6 @@ export default Vue.extend({
         // invoice: ''
       },
       userCountryName: '',
-      country: countryData,
       TPDirect: (window as any).TPDirect
     }
   },

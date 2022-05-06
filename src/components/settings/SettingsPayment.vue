@@ -74,8 +74,6 @@ import vClickOutside from 'v-click-outside'
 import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
-import countryData from '@/assets/json/countries.json'
-import stateData from '@/assets/json/us_state.json'
 import paymentData from '@/utils/paymentData'
 
 const { mapFields } = createHelpers({
@@ -95,8 +93,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      countryData,
-      stateData,
+      countryData: paymentData.countryList(),
+      stateData: paymentData.usState(),
       showCardPopup: false,
       showPaymentPopup: false,
       paymentView: ''

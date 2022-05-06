@@ -62,6 +62,7 @@ import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
+import paymentData from '@/utils/paymentData'
 
 export default Vue.extend({
   name: 'PopupPayment',
@@ -89,47 +90,12 @@ export default Vue.extend({
       description: '',
       buttons: [{}] as {type?: string, disabled?: ()=>boolean, text: string, func: ()=>void}[],
       img: 'remover.jpg',
-      // View constant // split to other js?
-      periodInput: [{
-        label: i18n.t('TMP0010'),
-        type: 'monthly',
-        isBundle: 0
-      }, {
-        label: i18n.t('TMP0011'),
-        type: 'yearly',
-        isBundle: 1
-      }],
-      invoiceInput: [{ // todo rebind data
-        label: 'email',
-        type: 'email',
-        ph: i18n.tc('NN0173', 1)
-      }, {
-        name: 'name',
-        type: 'text',
-        ph: i18n.t('NN0172')
-      }, {
-        name: 'phone',
-        type: 'tel',
-        ph: i18n.t('TMP0047')
-      }, {
-        name: 'GUI',
-        type: 'text',
-        ph: i18n.t('TMP0049')
-      }],
-      cancel1: [
-        i18n.t('TMP0056'),
-        i18n.t('TMP0057'),
-        i18n.t('TMP0058'),
-        i18n.t('TMP0059')
-      ],
-      cancel2: [
-        i18n.t('TMP0063'),
-        i18n.t('TMP0064'),
-        i18n.t('TMP0065'),
-        i18n.t('TMP0066'),
-        i18n.t('TMP0067'),
-        i18n.t('TMP0068')
-      ],
+      // View constant
+      periodInput: paymentData.periodInput(),
+      invoiceInput: paymentData.invoiceInput(),
+      cancel1: paymentData.cancel1(),
+      cancel2: paymentData.cancel2(),
+      // User input
       reasonIndex: '-1', // todo move to store
       otherReason: ''
     }
