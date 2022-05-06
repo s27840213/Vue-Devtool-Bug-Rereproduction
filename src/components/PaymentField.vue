@@ -12,7 +12,7 @@
         svg-icon(iconName="loading" iconColor="gray-1")
       div(v-if="!isChange" class="field-content__info")
         span {{$t('TMP0044', {date: nextPaidDate})}}
-        span {{plans[isBundle].now}}
+        span {{plans[0][period].now}}
       div(v-if="!isChange" class="field-content__info-today")
         span {{$t('TMP0045')}}
         span {{'USD 0.00'}}
@@ -77,7 +77,7 @@ export default Vue.extend({
     }),
     ...mapState('payment', {
       plans: 'plans',
-      isBundle: 'isBundle'
+      period: 'period'
     }),
     submitText(): string {
       return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0051')) as string

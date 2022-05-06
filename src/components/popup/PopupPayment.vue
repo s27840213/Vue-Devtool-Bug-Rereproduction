@@ -11,26 +11,32 @@
           span {{$t('TMP0038')}} {{currentStep}} of {{totalStep}}
         div(class="payment-left-top__title") {{title}}
         div(v-if="description" class="payment-left-top__description") {{description}}
+      //- switch(view)
       div(class="payment-left-content" :view="view")
-        //- switch(view)
+        //- case step1 or switch
         template(v-if="['step1', 'switch'].includes(view)")
-          div(v-for="p in periodInput" :isSelected="p.type === userPeriod"
+          div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
               class="payment-left-content-period pointer"
-              @click="setPeriod(p.isBundle)")
+              @click="setPeriod(p.value)")
             svg-icon(iconWidth="20px"
-                    :iconName="p.type === userPeriod ? 'radio-checked' : 'radio'"
-                    :iconColor="p.type === userPeriod ? 'white' : 'gray-4'")
-            span {{p.label}}
+                    :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
+                    :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
+            span(class="payment-left-content-period__label") {{p.label}}
+            span {{`$${plans[0][p.label].now}${$t('TMP0012')}`}}
+        //- case step2
         template(v-if="view === 'step2'")
           PaymentField(@paid="paid")
+        //- case step3
         template(v-if="view === 'step3'")
           input(v-for="inv in invoiceInput" :type="inv.type"
                 :value="invoice[inv.name]" @input="setInvoice(inv.name, $event)"
                 class="payment-left-content-invoice" :placeholder="inv.ph")
+        //- case cancel1
         template(v-if="view === 'cancel1'")
           div(v-for="can in cancel1" class="payment-left-content-cancel")
             svg-icon(iconName="pro" iconWidth="24px")
             span {{can}}
+        //- case cancel2
         template(v-if="view === 'cancel2'")
           div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
             //- todo: for label prop
@@ -40,13 +46,13 @@
             span {{can}}
           input(class="payment-left-content-cancel__other"
                 v-model="otherReason" :placeholder="$t('TMP0069')")
-      p(v-if="view === 'step1'"
-        class="payment-left-button-description") {{$t('TMP0042')}}
       div(class="payment-left-button")
         btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
             @click.native="button.func()"
             :disabled="button.disabled ? button.disabled() : false")
           span {{button.text}}
+        span(v-if="view === 'step1'"
+            class="payment-left-button-description") {{$t('TMP0042')}}
     //- move to jpg folder, compress?
     img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
     div(v-if="view === 'finish'" class="payment-finish")
@@ -56,13 +62,19 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 import i18n from '@/i18n'
 import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
 import paymentData from '@/utils/paymentData'
+
+const { mapFields } = createHelpers({
+  getterType: 'payment/getField',
+  mutationType: 'payment/updateField'
+})
 
 export default Vue.extend({
   name: 'PopupPayment',
@@ -91,7 +103,7 @@ export default Vue.extend({
       buttons: [{}] as {type?: string, disabled?: ()=>boolean, text: string, func: ()=>void}[],
       img: 'remover.jpg',
       // View constant
-      periodInput: paymentData.periodInput(),
+      periodInput: paymentData.periodOptions(),
       invoiceInput: paymentData.invoiceInput(),
       cancel1: paymentData.cancel1(),
       cancel2: paymentData.cancel2(),
@@ -107,12 +119,17 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
+      plans: 'payment/getPlans',
       userCountry: 'payment/getUserCountry',
-      isBundle: 'payment/getIsBundle',
       isTW: 'payment/isTW'
     }),
+    ...mapFields({
+      period: 'period'
+    }),
     userPeriod():string {
-      return (this.view === 'switch' ? 1 - this.isBundle : this.isBundle) ? 'yearly' : 'monthly'
+      return this.view === 'switch'
+        ? (this.period === 'monthly' ? 'yearly' : 'monthly')
+        : this.period
     },
     showPreStep(): boolean {
       return ['step2', 'step3'].includes(this.view)
@@ -134,9 +151,6 @@ export default Vue.extend({
       tappayAdd: 'payment/tappayAdd',
       switchToBundle: 'payment/switchToBundle',
       cancelApi: 'payment/cancel'
-    }),
-    ...mapMutations({
-      setIsBundle: 'payment/SET_isBundle'
     }),
     changeView(name: string) {
       this.view = name
@@ -215,8 +229,8 @@ export default Vue.extend({
     paid() { // rename?
       this.isTW ? this.changeView('step3') : this.changeView('finish')
     },
-    setPeriod(isBundle: boolean) {
-      if (this.view === 'step1') { this.setIsBundle(isBundle) }
+    setPeriod(value: string) {
+      if (this.view === 'step1') { this.period = value }
     },
     selectCancelReason(can: string) {
       this.reasonIndex = can
@@ -254,7 +268,7 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  position: relative;
+
   width: calc(50% - 40px);
   padding: 12% 20px 15% 20px;
   &-top, &-content, &-button { width: 100%; }
@@ -280,14 +294,11 @@ export default Vue.extend({
       &:invalid { border-color: red; }
     }
   }
-  &-button-description {
-    position: absolute;
-    bottom: 9%
-  }
   &-button {
-    // margin-top: auto;
-    // display: flex;
-    // flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
     >button {
       @include btn-LG;
       width: 100%;
@@ -296,6 +307,10 @@ export default Vue.extend({
     >button:nth-child(2) {
       margin-top: 20px;
       border: none;
+    }
+    &-description {
+      position: absolute;
+      bottom: -60%;
     }
   }
 }
@@ -309,6 +324,7 @@ export default Vue.extend({
   padding: 10px;
   border: 1px solid setColor(gray-3);
   border-radius: 4px;
+  &__label { text-transform: capitalize; }
   &[isSelected] {
     background-color: setColor(blue-1);
     color: white;

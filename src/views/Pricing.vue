@@ -22,7 +22,11 @@
         div(class="pricing-plan-right")
           slide-toggle(:options="periods" v-model="period" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
-            span {{plans[isBundle].now}}{{$t('TMP0012')}}
+            span(class="pricing-plan-right-price__del") {{`$${plans[0][period].original}${$t('TMP0012')}`}}
+            br
+            span(class="pricing-plan-right-price__dollar") {{'$ '}}
+            span(class="text-H1") {{plans[0][period].now}}
+            span {{' ' + $t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
             span {{$t('TMP0013')}}
       div(class="pricing-compare")
@@ -35,7 +39,6 @@
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
           p(v-html="item.A")
-      //- popup-payment(initView="step1" @close="closePopup()")
       nu-footer
       div(v-if="showPopup" class="popup-window")
         popup-payment(initView="step1" @close="closePopup()" class="pricing-payment")
@@ -44,11 +47,17 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
 import paymentData from '@/utils/paymentData'
+
+const { mapFields } = createHelpers({
+  getterType: 'payment/getField',
+  mutationType: 'payment/updateField'
+})
 
 export default Vue.extend({
   name: 'Pricing',
@@ -63,14 +72,15 @@ export default Vue.extend({
       periods: paymentData.periodOptions(),
       compareTable: paymentData.compareTable(),
       faqs: paymentData.faqs(),
-      period: '',
       showPopup: false
     }
   },
   computed: {
     ...mapState('payment', {
-      plans: 'plans',
-      isBundle: 'isBundle'
+      plans: 'plans'
+    }),
+    ...mapFields({
+      period: 'period'
     })
   },
   async mounted() {
@@ -167,10 +177,9 @@ export default Vue.extend({
   &-right {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     width: 32%;
-    padding: 75px 0;
     background-color: setColor(blue-1);
     border-radius: 0 16px 16px 0;
     &-period {
@@ -178,8 +187,22 @@ export default Vue.extend({
       background-color: setColor(gray-5);
       border-radius: 16px;
     }
-    // &-price {
-    // }
+    &-price {
+      @include body-MD;
+      position: relative;
+      margin: 30px 0;
+      color: white;
+      &__del {
+        position: absolute;
+        left: 0;
+        text-decoration-line: line-through;
+      }
+      &__dollar {
+        position: relative;
+        bottom: 20px;
+        margin-bottom: 20px;
+      }
+    }
     &-buy {
       width: 80%;
       border-radius: 8px;

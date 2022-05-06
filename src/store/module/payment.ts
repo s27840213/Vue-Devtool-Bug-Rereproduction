@@ -6,10 +6,7 @@ import paymentApi from '@/apis/payment'
 
 interface IPaymentState {
   // Constant
-  plans: Array<Record<string, string>>
-  // User data
-  userCountry: string
-  isBundle: number
+  plans: Array<Record<string, Record<string, string>>>
   prime: string
   isPro: boolean
   isCancelingPro: boolean
@@ -26,6 +23,24 @@ interface IPaymentState {
     last4: string
     date: string
   }
+  billingHistory: {
+    date: string
+    description: string
+    price: number
+    id: string
+    name: string
+    address: string
+    email: string
+    success: boolean
+    items: [{
+      description: string
+      date: string
+      price: string
+    }]
+  }[]
+  // User input
+  period: string,
+  userCountry: string
   billingInfo: {
     // general
     email: string
@@ -41,24 +56,27 @@ interface IPaymentState {
     // TW only
     phone: string
     GUI: string
-  },
+  }
   billingInfoInvalid: {
     email: boolean
     zip: boolean
     phone: boolean
     GUI: boolean
-  },
-  billingHistory: {
-    a: string
-  }[]
+  }
 }
 
 const getDefaultState = (): IPaymentState => ({
   // Constant
-  plans: [{}, {}],
-  // User data
-  userCountry: '',
-  isBundle: 0,
+  plans: [{
+    monthly: {
+      original: '',
+      now: ''
+    },
+    yearly: {
+      original: '',
+      now: ''
+    }
+  }],
   prime: '',
   isPro: false,
   isCancelingPro: false,
@@ -75,6 +93,24 @@ const getDefaultState = (): IPaymentState => ({
     last4: '',
     date: ''
   },
+  billingHistory: [{
+    date: '',
+    description: '',
+    price: 0,
+    id: '',
+    name: '',
+    address: '',
+    email: '',
+    success: true,
+    items: [{
+      description: '',
+      date: '',
+      price: ''
+    }]
+  }],
+  // User input
+  period: 'monthly',
+  userCountry: '',
   billingInfo: {
     email: '',
     name: '',
@@ -92,8 +128,7 @@ const getDefaultState = (): IPaymentState => ({
     zip: false,
     phone: false,
     GUI: false
-  },
-  billingHistory: []
+  }
 })
 
 const state = getDefaultState()
@@ -134,11 +169,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
     paymentApi.planList().then((response) => {
       const res = response.data.data
       commit('SET_plans', [{
-        original: res[0].price_month_original,
-        now: res[0].price_month_discount
-      }, {
-        original: res[0].price_month_bundle_original,
-        now: res[0].price_month_bundle_discount
+        monthly: {
+          original: res[0].price_month_original,
+          now: res[0].price_month_discount
+        },
+        yearly: {
+          original: res[0].price_month_bundle_original,
+          now: res[0].price_month_bundle_discount
+        }
       }])
     })
   },
@@ -182,7 +220,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     paymentApi.billingHistory().then((response) => {
       console.log('his', response) // todelete
       commit('SET_state', {
-        billingHistory: response.data.data.map((item:Record<string, string>) => {
+        billingHistory: response.data.data.map((item:Record<string, string|number>) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
             month: 'long',
@@ -196,6 +234,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
             name: item.name,
             address: '?',
             email: item.email,
+            success: item.success === 1,
             items: [{
               description: item.title,
               date: date,
@@ -266,11 +305,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.stripeAdd({
       country: state.userCountry,
       plan_id: 'sample_us',
-      is_bundle: state.isBundle
+      is_bundle: state.period === 'yearly'
     })
-  },
-  switchToBundle({ commit }) {
-    commit('SET_isBundle', 1 - state.isBundle)
   },
   cancel({ commit }, reason: string) {
     // if (!reason) throw Error('No canceling reason')
@@ -321,9 +357,9 @@ const mutations: MutationTree<IPaymentState> = {
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime
   },
-  SET_isBundle(state: IPaymentState, isBundle: number) {
-    state.isBundle = isBundle
-  },
+  // SET_isBundle(state: IPaymentState, isBundle: number) {
+  //   state.isBundle = isBundle
+  // },
   // SET_invoice(state: IPaymentState, invoice) {
   //   state.invoice = invoice
   // },
@@ -339,6 +375,9 @@ const getters: GetterTree<IPaymentState, any> = {
   //   else if (state.isPro) return 'subscribing'
   //   else return 'free'
   // },
+  getPlans(state) {
+    return state.plans
+  },
   // old
   getUserCountry(state) {
     return state.userCountry
@@ -346,9 +385,9 @@ const getters: GetterTree<IPaymentState, any> = {
   getPrime(state) {
     return state.prime
   },
-  getIsBundle(state) {
-    return state.isBundle
-  },
+  // getIsBundle(state) {
+  //   return state.isBundle
+  // },
   // getPeriod(state) {
   //   return state.isBundle ? 'yearly' : 'monthly'
   // },

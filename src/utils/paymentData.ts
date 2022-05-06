@@ -47,18 +47,6 @@ class PaymentData {
   }
 
   // For PopupPayment.vue
-  periodInput() {
-    return [{
-      label: i18n.t('TMP0010'),
-      type: 'monthly',
-      isBundle: 0
-    }, {
-      label: i18n.t('TMP0011'),
-      type: 'yearly',
-      isBundle: 1
-    }]
-  }
-
   invoiceInput() {
     return [{ // todo rebind data
       label: 'email',
