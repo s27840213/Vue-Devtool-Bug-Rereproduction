@@ -9,7 +9,44 @@ interface BillingInfoInput {
 }
 
 class PaymentData {
-  // for SettingsPayment billing info
+  // For Pricing.vue
+  periodOptions() {
+    return [{
+      label: i18n.t('TMP0010'),
+      value: 'monthly'
+    }, {
+      label: i18n.t('TMP0011'),
+      value: 'yearly'
+    }]
+  }
+
+  compareTable() {
+    return [
+      i18n.t('TMP0014'), i18n.t('TMP0015'), i18n.t('TMP0016'),
+      i18n.t('TMP0017'), '-', true,
+      i18n.t('TMP0018'), true, true,
+      i18n.t('TMP0019'), true, true,
+      i18n.t('TMP0020'), '1GB', '100GB',
+      i18n.t('TMP0021'), true, true,
+      i18n.t('TMP0022'), '-', true,
+      i18n.t('TMP0023'), '-', true,
+      i18n.t('TMP0024'), true, true,
+      i18n.t('TMP0025'), true, true,
+      i18n.t('TMP0026'), true, true
+    ]
+  }
+
+  faqs() {
+    return [
+      { Q: i18n.t('TMP0028'), A: i18n.t('TMP0029') },
+      { Q: i18n.t('TMP0030'), A: i18n.t('TMP0031') },
+      { Q: i18n.t('TMP0032'), A: i18n.t('TMP0033') },
+      { Q: i18n.t('TMP0034'), A: i18n.t('TMP0035') },
+      { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') }
+    ]
+  }
+
+  // For SettingsPayment billing info
   country():BillingInfoInput[] {
     return [{ label: 'country' }]
   }

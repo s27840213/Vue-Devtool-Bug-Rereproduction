@@ -15,7 +15,7 @@ export default Vue.extend({
       type: Array,
       required: true
     },
-    // Use v-model to two way bindings this props.
+    // Use v-model to two way bindings this props, don't use :value.
     value: {
       default: ''
     },

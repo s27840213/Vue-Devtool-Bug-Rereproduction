@@ -7,6 +7,8 @@
         span(class="pricing-top__description") {{$t('TMP0002')}}
       div(class="pricing-plan")
         div(class="pricing-plan-left")
+          //- todelete
+          slide-toggle(:options="[{label: '',value: '0'}, {label: '', value: '1'}]" v-model="period" optionWidth="32px")
           div(class="pricing-plan-left__top")
             span(class="pricing-plan-left__top__title") {{$t('TMP0003')}}
             span(class="pricing-plan-left__top__description") {{$t('TMP0004')}}
@@ -18,9 +20,7 @@
               svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
-          div(class="pricing-plan-right-period")
-            span {{$t('TMP0010')}}
-            span {{$t('TMP0011')}}
+          slide-toggle(:options="periods" v-model="period" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
             span {{plans[isBundle].now}}{{$t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
@@ -44,41 +44,27 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapState } from 'vuex'
-import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
+import SlideToggle from '@/components/global/SlideToggle.vue'
+import paymentData from '@/utils/paymentData'
 
 export default Vue.extend({
   name: 'Pricing',
   components: {
     NuHeader,
     NuFooter,
-    PopupPayment
+    PopupPayment,
+    SlideToggle
   },
   data() {
     return {
-      showPopup: false,
-      compareTable: [
-        i18n.t('TMP0014'), i18n.t('TMP0015'), i18n.t('TMP0016'),
-        i18n.t('TMP0017'), '-', true,
-        i18n.t('TMP0018'), true, true,
-        i18n.t('TMP0019'), true, true,
-        i18n.t('TMP0020'), '1GB', '100GB',
-        i18n.t('TMP0021'), true, true,
-        i18n.t('TMP0022'), '-', true,
-        i18n.t('TMP0023'), '-', true,
-        i18n.t('TMP0024'), true, true,
-        i18n.t('TMP0025'), true, true,
-        i18n.t('TMP0026'), true, true
-      ],
-      faqs: [
-        { Q: i18n.t('TMP0028'), A: i18n.t('TMP0029') },
-        { Q: i18n.t('TMP0030'), A: i18n.t('TMP0031') },
-        { Q: i18n.t('TMP0032'), A: i18n.t('TMP0033') },
-        { Q: i18n.t('TMP0034'), A: i18n.t('TMP0035') },
-        { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') }
-      ]
+      periods: paymentData.periodOptions(),
+      compareTable: paymentData.compareTable(),
+      faqs: paymentData.faqs(),
+      period: '',
+      showPopup: false
     }
   },
   computed: {
