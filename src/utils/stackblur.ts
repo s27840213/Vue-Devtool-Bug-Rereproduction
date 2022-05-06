@@ -38,6 +38,9 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+import imageShadowUtils from './imageShadowUtils'
+import layerUtils from './layerUtils'
+
 const mulTable = [
   512, 512, 456, 512, 328, 456, 335, 512, 405, 328, 271, 456, 388, 335, 292,
   512, 454, 405, 364, 328, 298, 271, 496, 456, 420, 388, 360, 335, 312, 292,
@@ -203,9 +206,10 @@ function getImageDataFromCanvas (canvas: HTMLCanvasElement, topX: number, topY: 
  * @param {Float} radius
  * @returns {ImageData}
  */
-export function imageDataRGBA (imageData: ImageData, topX: number, topY: number, width: number, height: number, radius: number) {
+export async function imageDataRGBA (imageData: ImageData, topX: number, topY: number, width: number, height: number, radius: number, handlerId?: string) {
   const pixels = imageData.data
-
+  const { getHandlerId } = imageShadowUtils
+  const currHandlerId = getHandlerId.bind(imageShadowUtils)
   const div = 2 * radius + 1
   // const w4 = width << 2
   const widthMinus1 = width - 1
@@ -215,7 +219,7 @@ export function imageDataRGBA (imageData: ImageData, topX: number, topY: number,
 
   const stackStart = new BlurStack()
   let stack = stackStart
-  let stackEnd
+  let stackEnd = undefined as unknown as BlurStack
   for (let i = 1; i < div; i++) {
     stack = stack.next = new BlurStack()
     if (i === radiusPlus1) {
@@ -231,223 +235,255 @@ export function imageDataRGBA (imageData: ImageData, topX: number, topY: number,
 
   const mulSum = mulTable[radius]
   const shgSum = shgTable[radius]
+  // for (let i = 0; i < width * height * 4; i += 4) {
+  //   pixels[i] = pixels[i] * pixels[i + 3] / 255
+  //   pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
+  //   pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
+  // }
 
-  for (let i = 0; i < width * height * 4; i += 4) {
-    pixels[i] = pixels[i] * pixels[i + 3] / 255
-    pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
-    pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
+  const DIVIDE_SIZE = 16
+  const pexelsNum = width * height
+  const _pexelsNum = Math.ceil(pexelsNum / DIVIDE_SIZE)
+  for (let j = 0; j < DIVIDE_SIZE; j++) {
+    await imageShadowUtils.asyncProcessing(() => {
+      for (let i = _pexelsNum * j; i < _pexelsNum * (j + 1) && i < pexelsNum; i += 4) {
+        pixels[i] = pixels[i] * pixels[i + 3] / 255
+        pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
+        pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
+      }
+    })
+    if (handlerId !== currHandlerId()) {
+      return imageData
+    }
   }
 
-  for (let y = 0; y < height; y++) {
-    stack = stackStart
+  // for (let y = 0; y < height; y++) {
+  const _height = Math.ceil(height / DIVIDE_SIZE)
+  for (let i = 0; i < DIVIDE_SIZE; i++) {
+    await imageShadowUtils.asyncProcessing(() => {
+      for (let y = _height * i; y < _height * (i + 1) && y < height; y++) {
+        stack = stackStart
 
-    const pr = pixels[yi]
-    const pg = pixels[yi + 1]
-    const pb = pixels[yi + 2]
-    const pa = pixels[yi + 3]
+        const pr = pixels[yi]
+        const pg = pixels[yi + 1]
+        const pb = pixels[yi + 2]
+        const pa = pixels[yi + 3]
 
-    for (let i = 0; i < radiusPlus1; i++) {
-      stack.r = pr
-      stack.g = pg
-      stack.b = pb
-      stack.a = pa
-      stack = stack.next as BlurStack
-    }
+        for (let i = 0; i < radiusPlus1; i++) {
+          stack.r = pr
+          stack.g = pg
+          stack.b = pb
+          stack.a = pa
+          stack = stack.next as BlurStack
+        }
 
-    let rInSum = 0
-    let gInSum = 0
-    let bInSum = 0
-    let aInSum = 0
-    let rOutSum = radiusPlus1 * pr
-    let gOutSum = radiusPlus1 * pg
-    let bOutSum = radiusPlus1 * pb
-    let aOutSum = radiusPlus1 * pa
-    let rSum = sumFactor * pr
-    let gSum = sumFactor * pg
-    let bSum = sumFactor * pb
-    let aSum = sumFactor * pa
+        let rInSum = 0
+        let gInSum = 0
+        let bInSum = 0
+        let aInSum = 0
+        let rOutSum = radiusPlus1 * pr
+        let gOutSum = radiusPlus1 * pg
+        let bOutSum = radiusPlus1 * pb
+        let aOutSum = radiusPlus1 * pa
+        let rSum = sumFactor * pr
+        let gSum = sumFactor * pg
+        let bSum = sumFactor * pb
+        let aSum = sumFactor * pa
 
-    for (let i = 1; i < radiusPlus1; i++) {
-      const p = yi + ((widthMinus1 < i ? widthMinus1 : i) << 2)
+        for (let i = 1; i < radiusPlus1; i++) {
+          const p = yi + ((widthMinus1 < i ? widthMinus1 : i) << 2)
 
-      const r = pixels[p]
-      const g = pixels[p + 1]
-      const b = pixels[p + 2]
-      const a = pixels[p + 3]
+          const r = pixels[p]
+          const g = pixels[p + 1]
+          const b = pixels[p + 2]
+          const a = pixels[p + 3]
 
-      const rbs = radiusPlus1 - i
-      rSum += (stack.r = r) * rbs
-      gSum += (stack.g = g) * rbs
-      bSum += (stack.b = b) * rbs
-      aSum += (stack.a = a) * rbs
+          const rbs = radiusPlus1 - i
+          rSum += (stack.r = r) * rbs
+          gSum += (stack.g = g) * rbs
+          bSum += (stack.b = b) * rbs
+          aSum += (stack.a = a) * rbs
 
-      rInSum += r
-      gInSum += g
-      bInSum += b
-      aInSum += a
+          rInSum += r
+          gInSum += g
+          bInSum += b
+          aInSum += a
 
-      stack = stack.next as BlurStack
-    }
+          stack = stack.next as BlurStack
+        }
 
-    stackIn = stackStart
-    stackOut = stackEnd
-    for (let x = 0; x < width && stackIn && stackOut; x++) {
-      const paInitial = (aSum * mulSum) >> shgSum
-      pixels[yi + 3] = paInitial
-      if (paInitial !== 0) {
-        const a = 255 / paInitial
-        pixels[yi] = ((rSum * mulSum) >> shgSum)
-        pixels[yi + 1] = ((gSum * mulSum) >> shgSum)
-        pixels[yi + 2] = ((bSum * mulSum) >> shgSum)
-      } else {
-        pixels[yi] = pixels[yi + 1] = pixels[yi + 2] = 0
+        stackIn = stackStart
+        stackOut = stackEnd
+        for (let x = 0; x < width && stackIn && stackOut; x++) {
+          const paInitial = (aSum * mulSum) >> shgSum
+          pixels[yi + 3] = paInitial
+          if (paInitial !== 0) {
+            const a = 255 / paInitial
+            pixels[yi] = ((rSum * mulSum) >> shgSum)
+            pixels[yi + 1] = ((gSum * mulSum) >> shgSum)
+            pixels[yi + 2] = ((bSum * mulSum) >> shgSum)
+          } else {
+            pixels[yi] = pixels[yi + 1] = pixels[yi + 2] = 0
+          }
+
+          rSum -= rOutSum
+          gSum -= gOutSum
+          bSum -= bOutSum
+          aSum -= aOutSum
+
+          rOutSum -= stackIn.r
+          gOutSum -= stackIn.g
+          bOutSum -= stackIn.b
+          aOutSum -= stackIn.a
+
+          let p = x + radius + 1
+          p = (yw + (p < widthMinus1
+            ? p
+            : widthMinus1)) << 2
+
+          rInSum += (stackIn.r = pixels[p])
+          gInSum += (stackIn.g = pixels[p + 1])
+          bInSum += (stackIn.b = pixels[p + 2])
+          aInSum += (stackIn.a = pixels[p + 3])
+
+          rSum += rInSum
+          gSum += gInSum
+          bSum += bInSum
+          aSum += aInSum
+
+          stackIn = stackIn.next
+
+          const { r, g, b, a } = stackOut
+
+          rOutSum += r
+          gOutSum += g
+          bOutSum += b
+          aOutSum += a
+
+          rInSum -= r
+          gInSum -= g
+          bInSum -= b
+          aInSum -= a
+
+          stackOut = stackOut.next
+
+          yi += 4
+        }
+        yw += width
       }
-
-      rSum -= rOutSum
-      gSum -= gOutSum
-      bSum -= bOutSum
-      aSum -= aOutSum
-
-      rOutSum -= stackIn.r
-      gOutSum -= stackIn.g
-      bOutSum -= stackIn.b
-      aOutSum -= stackIn.a
-
-      let p = x + radius + 1
-      p = (yw + (p < widthMinus1
-        ? p
-        : widthMinus1)) << 2
-
-      rInSum += (stackIn.r = pixels[p])
-      gInSum += (stackIn.g = pixels[p + 1])
-      bInSum += (stackIn.b = pixels[p + 2])
-      aInSum += (stackIn.a = pixels[p + 3])
-
-      rSum += rInSum
-      gSum += gInSum
-      bSum += bInSum
-      aSum += aInSum
-
-      stackIn = stackIn.next
-
-      const { r, g, b, a } = stackOut
-
-      rOutSum += r
-      gOutSum += g
-      bOutSum += b
-      aOutSum += a
-
-      rInSum -= r
-      gInSum -= g
-      bInSum -= b
-      aInSum -= a
-
-      stackOut = stackOut.next
-
-      yi += 4
+    })
+    if (handlerId !== currHandlerId()) {
+      return imageData
     }
-    yw += width
   }
+  // for (let x = 0; x < width; x++) {
+  const _width = Math.ceil(width / DIVIDE_SIZE)
+  for (let i = 0; i < DIVIDE_SIZE; i++) {
+    await imageShadowUtils.asyncProcessing(() => {
+      for (let x = _width * i; x < _width * (i + 1) && x < width; x++) {
+        yi = x << 2
 
-  for (let x = 0; x < width; x++) {
-    yi = x << 2
+        let pr = pixels[yi]
+        let pg = pixels[yi + 1]
+        let pb = pixels[yi + 2]
+        let pa = pixels[yi + 3]
+        let rOutSum = radiusPlus1 * pr
+        let gOutSum = radiusPlus1 * pg
+        let bOutSum = radiusPlus1 * pb
+        let aOutSum = radiusPlus1 * pa
+        let rSum = sumFactor * pr
+        let gSum = sumFactor * pg
+        let bSum = sumFactor * pb
+        let aSum = sumFactor * pa
 
-    let pr = pixels[yi]
-    let pg = pixels[yi + 1]
-    let pb = pixels[yi + 2]
-    let pa = pixels[yi + 3]
-    let rOutSum = radiusPlus1 * pr
-    let gOutSum = radiusPlus1 * pg
-    let bOutSum = radiusPlus1 * pb
-    let aOutSum = radiusPlus1 * pa
-    let rSum = sumFactor * pr
-    let gSum = sumFactor * pg
-    let bSum = sumFactor * pb
-    let aSum = sumFactor * pa
+        stack = stackStart
+        for (let i = 0; i < radiusPlus1; i++) {
+          stack.r = pr
+          stack.g = pg
+          stack.b = pb
+          stack.a = pa
+          stack = stack.next as BlurStack
+        }
 
-    stack = stackStart
-    for (let i = 0; i < radiusPlus1; i++) {
-      stack.r = pr
-      stack.g = pg
-      stack.b = pb
-      stack.a = pa
-      stack = stack.next as BlurStack
-    }
+        let yp = width
 
-    let yp = width
+        let gInSum = 0
+        let bInSum = 0
+        let aInSum = 0
+        let rInSum = 0
+        for (let i = 1; i <= radius; i++) {
+          yi = (yp + x) << 2
 
-    let gInSum = 0
-    let bInSum = 0
-    let aInSum = 0
-    let rInSum = 0
-    for (let i = 1; i <= radius; i++) {
-      yi = (yp + x) << 2
+          const rbs = radiusPlus1 - i
+          rSum += (stack.r = (pr = pixels[yi])) * rbs
+          gSum += (stack.g = (pg = pixels[yi + 1])) * rbs
+          bSum += (stack.b = (pb = pixels[yi + 2])) * rbs
+          aSum += (stack.a = (pa = pixels[yi + 3])) * rbs
 
-      const rbs = radiusPlus1 - i
-      rSum += (stack.r = (pr = pixels[yi])) * rbs
-      gSum += (stack.g = (pg = pixels[yi + 1])) * rbs
-      bSum += (stack.b = (pb = pixels[yi + 2])) * rbs
-      aSum += (stack.a = (pa = pixels[yi + 3])) * rbs
+          rInSum += pr
+          gInSum += pg
+          bInSum += pb
+          aInSum += pa
 
-      rInSum += pr
-      gInSum += pg
-      bInSum += pb
-      aInSum += pa
+          stack = stack.next as BlurStack
 
-      stack = stack.next as BlurStack
+          if (i < heightMinus1) {
+            yp += width
+          }
+        }
 
-      if (i < heightMinus1) {
-        yp += width
+        yi = x
+        stackIn = stackStart
+        stackOut = stackEnd
+        for (let y = 0; y < height && stackIn && stackOut; y++) {
+          let p = yi << 2
+          pixels[p + 3] = pa = (aSum * mulSum) >> shgSum
+          if (pa > 0) {
+            pa = 255 / pa
+            pixels[p] = ((rSum * mulSum) >> shgSum)
+            pixels[p + 1] = ((gSum * mulSum) >> shgSum)
+            pixels[p + 2] = ((bSum * mulSum) >> shgSum)
+          } else {
+            pixels[p] = pixels[p + 1] = pixels[p + 2] = 0
+          }
+
+          rSum -= rOutSum
+          gSum -= gOutSum
+          bSum -= bOutSum
+          aSum -= aOutSum
+
+          rOutSum -= stackIn.r
+          gOutSum -= stackIn.g
+          bOutSum -= stackIn.b
+          aOutSum -= stackIn.a
+
+          p = (x + (((p = y + radiusPlus1) < heightMinus1 ? p : heightMinus1) * width)) << 2
+
+          rSum += (rInSum += (stackIn.r = pixels[p]))
+          gSum += (gInSum += (stackIn.g = pixels[p + 1]))
+          bSum += (bInSum += (stackIn.b = pixels[p + 2]))
+          aSum += (aInSum += (stackIn.a = pixels[p + 3]))
+
+          stackIn = stackIn.next
+
+          rOutSum += (pr = stackOut.r)
+          gOutSum += (pg = stackOut.g)
+          bOutSum += (pb = stackOut.b)
+          aOutSum += (pa = stackOut.a)
+
+          rInSum -= pr
+          gInSum -= pg
+          bInSum -= pb
+          aInSum -= pa
+
+          stackOut = stackOut.next
+
+          yi += width
+        }
       }
-    }
-
-    yi = x
-    stackIn = stackStart
-    stackOut = stackEnd
-    for (let y = 0; y < height && stackIn && stackOut; y++) {
-      let p = yi << 2
-      pixels[p + 3] = pa = (aSum * mulSum) >> shgSum
-      if (pa > 0) {
-        pa = 255 / pa
-        pixels[p] = ((rSum * mulSum) >> shgSum)
-        pixels[p + 1] = ((gSum * mulSum) >> shgSum)
-        pixels[p + 2] = ((bSum * mulSum) >> shgSum)
-      } else {
-        pixels[p] = pixels[p + 1] = pixels[p + 2] = 0
-      }
-
-      rSum -= rOutSum
-      gSum -= gOutSum
-      bSum -= bOutSum
-      aSum -= aOutSum
-
-      rOutSum -= stackIn.r
-      gOutSum -= stackIn.g
-      bOutSum -= stackIn.b
-      aOutSum -= stackIn.a
-
-      p = (x + (((p = y + radiusPlus1) < heightMinus1 ? p : heightMinus1) * width)) << 2
-
-      rSum += (rInSum += (stackIn.r = pixels[p]))
-      gSum += (gInSum += (stackIn.g = pixels[p + 1]))
-      bSum += (bInSum += (stackIn.b = pixels[p + 2]))
-      aSum += (aInSum += (stackIn.a = pixels[p + 3]))
-
-      stackIn = stackIn.next
-
-      rOutSum += (pr = stackOut.r)
-      gOutSum += (pg = stackOut.g)
-      bOutSum += (pb = stackOut.b)
-      aOutSum += (pa = stackOut.a)
-
-      rInSum -= pr
-      gInSum -= pg
-      bInSum -= pb
-      aInSum -= pa
-
-      stackOut = stackOut.next
-
-      yi += width
+    })
+    if (handlerId !== currHandlerId()) {
+      return imageData
     }
   }
 

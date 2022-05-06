@@ -98,7 +98,6 @@ export default Vue.extend({
     },
     shadowEffects: {
       handler(val) {
-        console.log('update shadow effect')
         if (this.$refs.canvas) {
           !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
         }
@@ -406,7 +405,7 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (this.canvasShadowImg.shadow) {
-            imgShadowUtils.draw(canvas, this.canvasShadowImg.shadow as HTMLImageElement, this.config, {
+            imgShadowUtils.drawShadow(canvas, this.canvasShadowImg.shadow as HTMLImageElement, this.config, {
               drawCanvasW,
               drawCanvasH,
               layerInfo
@@ -416,7 +415,7 @@ export default Vue.extend({
             img.crossOrigin = 'anonymous'
             imgShadowUtils.setIsProcess(layerInfo, true)
             img.onload = () => {
-              imgShadowUtils.draw(canvas, img, this.config, {
+              imgShadowUtils.drawShadow(canvas, img, this.config, {
                 drawCanvasW,
                 drawCanvasH,
                 layerInfo
@@ -497,7 +496,7 @@ export default Vue.extend({
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
             if (this.canvasShadowImg.shadow as HTMLImageElement) {
-              imgShadowUtils.draw(canvas, this.canvasShadowImg.shadow as HTMLImageElement, this.config, { layerInfo })
+              imgShadowUtils.drawShadow(canvas, this.canvasShadowImg.shadow as HTMLImageElement, this.config, { layerInfo })
             }
             break
           case ShadowEffectType.imageMatched:
