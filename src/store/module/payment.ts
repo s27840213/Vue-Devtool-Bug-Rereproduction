@@ -39,7 +39,8 @@ interface IPaymentState {
     }]
   }[]
   // User input
-  period: string,
+  period: string
+  userPlan: string
   userCountry: string
   billingInfo: {
     // general
@@ -110,6 +111,7 @@ const getDefaultState = (): IPaymentState => ({
   }],
   // User input
   period: 'monthly',
+  userPlan: '',
   userCountry: '',
   billingInfo: {
     email: '',
@@ -193,7 +195,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         usage: {
           bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
-          diskUsed: data.capacity_current.toFixed(2),
+          diskUsed: Number(data.capacity_current.toFixed(2)),
           diskTotal: data.capacity
         },
         cardInfo: {
@@ -220,6 +222,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     paymentApi.billingHistory().then((response) => {
       console.log('his', response) // todelete
       commit('SET_state', {
+        // todo filter unsuccessful history
         billingHistory: response.data.data.map((item:Record<string, string|number>) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
@@ -232,7 +235,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
             price: item.price,
             id: item.order_id,
             name: item.name,
-            address: '?',
+            address: item.country !== 'us' ? item.address_line1 : `${item.address_line1}${item.address_line2}${item.address_city}${item.address_state}${item.postal_code}`,
             email: item.email,
             success: item.success === 1,
             items: [{
@@ -305,7 +308,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.stripeAdd({
       country: state.userCountry,
       plan_id: 'sample_us',
-      is_bundle: state.period === 'yearly'
+      is_bundle: Number(getters.getIsBundle)
     })
   },
   cancel({ commit }, reason: string) {
@@ -378,6 +381,9 @@ const getters: GetterTree<IPaymentState, any> = {
   getPlans(state) {
     return state.plans
   },
+  getIsBundle(state) {
+    return state.period === 'yearly'
+  },
   // old
   getUserCountry(state) {
     return state.userCountry
@@ -385,9 +391,6 @@ const getters: GetterTree<IPaymentState, any> = {
   getPrime(state) {
     return state.prime
   },
-  // getIsBundle(state) {
-  //   return state.isBundle
-  // },
   // getPeriod(state) {
   //   return state.isBundle ? 'yearly' : 'monthly'
   // },

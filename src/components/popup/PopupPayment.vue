@@ -26,7 +26,7 @@
               span(class="payment-left-content-period-price__amount") {{`$${plans[0][p.label].now}`}}
                 span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0013') : ''}`}}
             span(v-if="p.value==='yearly'"
-                class="payment-left-content-period-price__off") {{$t('TMP0014')}}
+                class="payment-left-content-period__off") {{$t('TMP0014')}}
         //- case step2
         template(v-if="view === 'step2'")
           PaymentField(@paid="paid")
@@ -125,14 +125,15 @@ export default Vue.extend({
     ...mapGetters({
       plans: 'payment/getPlans',
       userCountry: 'payment/getUserCountry',
-      isTW: 'payment/isTW'
+      isTW: 'payment/isTW',
+      isBundle: 'payment/getIsBundle'
     }),
     ...mapFields({
       period: 'period'
     }),
     userPeriod():string {
       return this.view === 'switch'
-        ? (this.period === 'monthly' ? 'yearly' : 'monthly')
+        ? (this.isBundle ? 'monthly' : 'yearly')
         : this.period
     },
     showPreStep(): boolean {
@@ -337,11 +338,11 @@ export default Vue.extend({
     }
     &__amount { @include text-H6; }
     &__end { @include body-XS; }
-    &__off {
-      @include overline-SM;
-      color: setColor(red-1);
-      white-space: nowrap;
-    }
+  }
+  &__off {
+    @include overline-SM;
+    color: setColor(red-1);
+    white-space: nowrap;
   }
   &[isSelected] {
     background-color: setColor(blue-1);

@@ -87,9 +87,9 @@ export default Vue.extend({
     this.getPrice()
   },
   methods: {
-    ...mapActions('payment', [
-      'getPrice'
-    ]),
+    ...mapActions({
+      getPrice: 'payment/getPrice'
+    }),
     openPopup() { this.showPopup = true },
     closePopup() { this.showPopup = false }
   }

@@ -16,16 +16,19 @@
           span                          {{$t('TMP0075')}}
       template(v-else)
         span(class="body-SM")           {{$t('TMP0076', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
-        span(class="body-SM"        v-html="$t('TMP0077', { price: nextPrice, date: nextPaidDate  })")
+        span(class="body-SM"      v-html="$t('TMP0077', { price: nextPrice, date: nextPaidDate  })")
         span(class="text-blue-1 body-SM pointer"
             @click="switchPeriod()")    {{$t('TMP0078', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
         span(class="text-gray-3 body-SM pointer"
             @click="cancelSub()")       {{$t('TMP0079')}}
-      span(class="text-blue-1")         {{$t('TMP0081')}}
+      span(class="text-blue-1 mt-30")   {{$t('TMP0081')}}
       span(                       v-html="$t('TMP0082', { amount: usage.bgrmRemain, date: nextPaidDate })")
       span(class="body-XS")             {{$t('TMP0083')}}
       span(class="text-blue-1")         {{$t('TMP0084')}}
-      span                              {{`${usage.diskUsed}/${usage.diskTotal}`}}
+      div(class="sp-pro-disk")
+        div(class="sp-pro-disk-total")
+          div(class="sp-pro-disk-used" :style="diskPercent")
+        span                            {{`${usage.diskUsed}/${usage.diskTotal}`}}
       span(class="body-XS")             {{$t('TMP0085')}}
     hr
     div(v-if="isPro" class="sp-detail")
@@ -119,6 +122,9 @@ export default Vue.extend({
       'nextPaidDate',
       'nextPrice'
     ]),
+    diskPercent():Record<string, string> {
+      return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
+    },
     billingInfoInput():ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountry) {
         case 'TW':
@@ -148,11 +154,13 @@ export default Vue.extend({
   },
   mounted() {
     this.getBillingInfo()
+    this.getPrice()
   },
   methods: {
     ...mapActions({
       togglePro: 'payment/togglePro', // todelete
       getBillingInfo: 'payment/getBillingInfo',
+      getPrice: 'payment/getPrice',
       updateBillingInfoApi: 'payment/updateBillingInfo',
       checkBillingInfo: 'payment/checkBillingInfo',
       resume: 'payment/resume'
@@ -197,6 +205,21 @@ export default Vue.extend({
 
 .sp-free {
   >button { @include btn-LG; }
+}
+
+.sp-pro-disk {
+  display: flex;
+  align-items: center;
+  &-total{
+    margin-right: 5px;
+    width: 200px;
+    height: 10px;
+    border: 1px solid setColor(blue-1);
+  }
+  &-used {
+    height: 10px;
+    background-color: setColor(blue-1);
+  }
 }
 
 .sp-info {
