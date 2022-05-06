@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="field")
-    span(class="field__title") {{isChange ? $t('TMP0086') : ''}}
+    span(class="field__title") {{isChange ? $t('TMP0088') : ''}}
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountry")
@@ -11,10 +11,10 @@
       div(:class="{hidden: isTW}" id="stripe" class="stripe")
         svg-icon(iconName="loading" iconColor="gray-1")
       div(v-if="!isChange" class="field-content__info")
-        span {{$t('TMP0044', {date: nextPaidDate})}}
+        span {{$t('TMP0046', {date: nextPaidDate})}}
         span {{plans[0][period].now}}
       div(v-if="!isChange" class="field-content__info-today")
-        span {{$t('TMP0045')}}
+        span {{$t('TMP0047')}}
         span {{'USD 0.00'}}
     btn(class="rounded" type="primary-lg"
         :disabled="!payReady" @click.native="submit()") {{submitText}}
@@ -80,7 +80,7 @@ export default Vue.extend({
       period: 'period'
     }),
     submitText(): string {
-      return (this.isTW ? i18n.t('TMP0041') : i18n.t('TMP0051')) as string
+      return (this.isTW ? i18n.t('TMP0043') : i18n.t('TMP0053')) as string
     }
   },
   mounted() {

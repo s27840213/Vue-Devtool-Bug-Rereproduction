@@ -22,27 +22,27 @@ class PaymentData {
 
   compareTable() {
     return [
-      i18n.t('TMP0014'), i18n.t('TMP0015'), i18n.t('TMP0016'),
-      i18n.t('TMP0017'), '-', true,
-      i18n.t('TMP0018'), true, true,
-      i18n.t('TMP0019'), true, true,
-      i18n.t('TMP0020'), '1GB', '100GB',
+      i18n.t('TMP0016'), i18n.t('TMP0017'), i18n.t('TMP0018'),
+      i18n.t('TMP0019'), '-', true,
+      i18n.t('TMP0020'), true, true,
       i18n.t('TMP0021'), true, true,
-      i18n.t('TMP0022'), '-', true,
-      i18n.t('TMP0023'), '-', true,
-      i18n.t('TMP0024'), true, true,
-      i18n.t('TMP0025'), true, true,
-      i18n.t('TMP0026'), true, true
+      i18n.t('TMP0022'), '1GB', '100GB',
+      i18n.t('TMP0023'), true, true,
+      i18n.t('TMP0024'), '-', true,
+      i18n.t('TMP0025'), '-', true,
+      i18n.t('TMP0026'), true, true,
+      i18n.t('TMP0027'), true, true,
+      i18n.t('TMP0028'), true, true
     ]
   }
 
   faqs() {
     return [
-      { Q: i18n.t('TMP0028'), A: i18n.t('TMP0029') },
       { Q: i18n.t('TMP0030'), A: i18n.t('TMP0031') },
       { Q: i18n.t('TMP0032'), A: i18n.t('TMP0033') },
       { Q: i18n.t('TMP0034'), A: i18n.t('TMP0035') },
-      { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') }
+      { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') },
+      { Q: i18n.t('TMP0038'), A: i18n.t('TMP0039') }
     ]
   }
 
@@ -59,31 +59,31 @@ class PaymentData {
     }, {
       name: 'phone',
       type: 'tel',
-      ph: i18n.t('TMP0047')
+      ph: i18n.t('TMP0049')
     }, {
       name: 'GUI',
       type: 'text',
-      ph: i18n.t('TMP0049')
+      ph: i18n.t('TMP0051')
     }]
   }
 
   cancel1() {
     return [
-      i18n.t('TMP0056'),
-      i18n.t('TMP0057'),
       i18n.t('TMP0058'),
-      i18n.t('TMP0059')
+      i18n.t('TMP0059'),
+      i18n.t('TMP0060'),
+      i18n.t('TMP0061')
     ]
   }
 
   cancel2() {
     return [
-      i18n.t('TMP0063'),
-      i18n.t('TMP0064'),
       i18n.t('TMP0065'),
       i18n.t('TMP0066'),
       i18n.t('TMP0067'),
-      i18n.t('TMP0068')
+      i18n.t('TMP0068'),
+      i18n.t('TMP0069'),
+      i18n.t('TMP0070')
     ]
   }
 
@@ -95,25 +95,25 @@ class PaymentData {
   gerneral():BillingInfoInput[] {
     return [{
       label: i18n.tc('NN0173', 1) as string,
-      ph: i18n.t('TMP0088') as string,
+      ph: i18n.t('TMP0090') as string,
       key: 'email',
       error: 'Invalid email format.'
     }, {
       label: i18n.t('NN0172') as string,
-      ph: i18n.t('TMP0089') as string,
+      ph: i18n.t('TMP0091') as string,
       key: 'name'
     }]
   }
 
   TWonly():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0047') as string,
-      ph: i18n.t('TMP0048') as string,
+      label: i18n.t('TMP0049') as string,
+      ph: i18n.t('TMP0050') as string,
       key: 'phone',
       error: 'Invalid phone format.'
     }, {
-      label: i18n.t('TMP0049') as string,
-      ph: i18n.t('TMP0050') as string,
+      label: i18n.t('TMP0051') as string,
+      ph: i18n.t('TMP0052') as string,
       key: 'GUI',
       error: 'Invalid GUI format.'
     }]
@@ -121,20 +121,20 @@ class PaymentData {
 
   USonly():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0090') as string,
-      ph: i18n.t('TMP0091') as string,
+      label: i18n.t('TMP0092') as string,
+      ph: i18n.t('TMP0093') as string,
       key: 'company'
     }, {
-      label: i18n.t('TMP0094', { number: 1 }) as string,
-      ph: i18n.t('TMP0095') as string,
+      label: i18n.t('TMP0096', { number: 1 }) as string,
+      ph: i18n.t('TMP0097') as string,
       key: 'address1'
     }, {
-      label: i18n.t('TMP0094', { number: 2 }) as string,
-      ph: i18n.t('TMP0096') as string,
+      label: i18n.t('TMP0096', { number: 2 }) as string,
+      ph: i18n.t('TMP0098') as string,
       key: 'address2'
     }, {
-      label: i18n.t('TMP0097') as string,
-      ph: i18n.t('TMP0097') as string,
+      label: i18n.t('TMP0099') as string,
+      ph: i18n.t('TMP0099') as string,
       key: 'city'
     }, {
       label: 'state & zip',
@@ -145,12 +145,12 @@ class PaymentData {
 
   others():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0090') as string,
-      ph: i18n.t('TMP0091') as string,
-      key: 'company'
-    }, {
       label: i18n.t('TMP0092') as string,
       ph: i18n.t('TMP0093') as string,
+      key: 'company'
+    }, {
+      label: i18n.t('TMP0094') as string,
+      ph: i18n.t('TMP0095') as string,
       key: 'address1'
     }]
   }

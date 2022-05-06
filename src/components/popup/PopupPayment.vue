@@ -8,7 +8,7 @@
         div(v-if="totalStep" class="payment-left-top__step")
           svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
                   iconColor="gray1" @click.native="preStep()")
-          span {{$t('TMP0038')}} {{currentStep}} of {{totalStep}}
+          span {{$t('TMP0040')}} {{currentStep}} of {{totalStep}}
         div(class="payment-left-top__title") {{title}}
         div(v-if="description" class="payment-left-top__description") {{description}}
       //- switch(view)
@@ -21,8 +21,12 @@
             svg-icon(iconWidth="20px"
                     :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
                     :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
-            span(class="payment-left-content-period__label") {{p.label}}
-            span {{`$${plans[0][p.label].now}${$t('TMP0012')}`}}
+            div(class="payment-left-content-period-price")
+              span(class="payment-left-content-period-price__label") {{p.label}}
+              span(class="payment-left-content-period-price__amount") {{`$${plans[0][p.label].now}`}}
+                span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0013') : ''}`}}
+            span(v-if="p.value==='yearly'"
+                class="payment-left-content-period-price__off") {{$t('TMP0014')}}
         //- case step2
         template(v-if="view === 'step2'")
           PaymentField(@paid="paid")
@@ -45,14 +49,14 @@
                       @select="selectCancelReason(idx)")
             span {{can}}
           input(class="payment-left-content-cancel__other"
-                v-model="otherReason" :placeholder="$t('TMP0069')")
+                v-model="otherReason" :placeholder="$t('TMP0071')")
       div(class="payment-left-button")
         btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
             @click.native="button.func()"
             :disabled="button.disabled ? button.disabled() : false")
           span {{button.text}}
         span(v-if="view === 'step1'"
-            class="payment-left-button-description") {{$t('TMP0042')}}
+            class="payment-left-button-description") {{$t('TMP0044')}}
     //- move to jpg folder, compress?
     img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
     div(v-if="view === 'finish'" class="payment-finish")
@@ -158,26 +162,26 @@ export default Vue.extend({
         case 'step1':
           this.currentStep = 1
           this.totalStep = i18n.locale === 'tw' ? 3 : 2
-          this.title = i18n.t('TMP0039') as string
-          this.description = i18n.t('TMP0040') as string
+          this.title = i18n.t('TMP0041') as string
+          this.description = i18n.t('TMP0042') as string
           this.buttons = [{
-            text: i18n.t('TMP0041') as string,
+            text: i18n.t('TMP0043') as string,
             func: () => this.changeView('step2')
           }]
           this.img = 'remover.jpg'
           break
         case 'step2':
           this.currentStep = 2
-          this.title = i18n.t('TMP0043') as string
+          this.title = i18n.t('TMP0045') as string
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template.jpg'
           break
         case 'step3':
           this.currentStep = 3
-          this.title = i18n.t('TMP0046') as string
+          this.title = i18n.t('TMP0048') as string
           this.buttons = [{
-            text: i18n.t('TMP0051') as string,
+            text: i18n.t('TMP0053') as string,
             func: () => {
               this.tappayAdd()
               this.changeView('finish')
@@ -187,10 +191,10 @@ export default Vue.extend({
         case 'finish':
           break
         case 'switch':
-          this.title = i18n.t('TMP0052') as string
-          this.description = i18n.t('TMP0053') as string
+          this.title = i18n.t('TMP0054') as string
+          this.description = i18n.t('TMP0055') as string
           this.buttons = [{
-            text: i18n.t('TMP0054') as string,
+            text: i18n.t('TMP0056') as string,
             func: () => {
               this.switchToBundle()
               this.closePopup() // refresh or double check?
@@ -198,19 +202,19 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0055') as string
+          this.title = i18n.t('TMP0057') as string
           this.buttons = [{
-            text: i18n.t('TMP0061') as string,
+            text: i18n.t('TMP0063') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            text: i18n.t('TMP0060') as string,
+            text: i18n.t('TMP0062') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0062') as string
+          this.title = i18n.t('TMP0064') as string
           this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
@@ -268,7 +272,6 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-
   width: calc(50% - 40px);
   padding: 12% 20px 15% 20px;
   &-top, &-content, &-button { width: 100%; }
@@ -316,15 +319,30 @@ export default Vue.extend({
 }
 
 .payment-left-content-period {
-  display: grid;
-  grid-template-columns: 40px 1fr;
+  display: flex;
   align-items: center;
   height: 52px; // ?
   margin: 16px 0;
   padding: 10px;
   border: 1px solid setColor(gray-3);
   border-radius: 4px;
-  &__label { text-transform: capitalize; }
+  &-price {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 10px;
+    &__label {
+      @include btn-LG;
+      text-transform: capitalize;
+    }
+    &__amount { @include text-H6; }
+    &__end { @include body-XS; }
+    &__off {
+      @include overline-SM;
+      color: setColor(red-1);
+      white-space: nowrap;
+    }
+  }
   &[isSelected] {
     background-color: setColor(blue-1);
     color: white;
