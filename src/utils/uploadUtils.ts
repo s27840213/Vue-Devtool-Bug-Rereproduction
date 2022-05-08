@@ -529,7 +529,8 @@ class UploadUtils {
     logUtils.setLog(`Query Info:
       type: ${type},
       designId: ${designId}
-      teamId: ${teamId}`)
+      teamId: ${teamId},
+      needAppendQuery: ${!type || !designId || !teamId}`)
 
     if (!type || !designId || !teamId) {
       logUtils.setLog(`Append Query & Upload BOTH:
@@ -538,6 +539,7 @@ class UploadUtils {
       putAssetDesignType = PutAssetDesignType.UPDATE_BOTH
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
     }
+
     store.commit('SET_assetId', assetId)
     const pages = generalUtils.deepCopy(pageUtils.getPages) as Array<IPage>
 
