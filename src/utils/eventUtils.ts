@@ -21,6 +21,7 @@ const mobileHash = {
 class EventUtils {
   static readonly EventType = EventType
   readonly EventType = EventUtils.EventType
+
   addPointerEvent(type: EventType, callback: any) {
     if (window.PointerEvent) {
       window.addEventListener(type, callback)
@@ -31,13 +32,13 @@ class EventUtils {
     }
   }
 
-  removeointerEvent(type: EventType, callback: any) {
+  removePointerEvent(type: EventType, callback: any) {
     if (window.PointerEvent) {
       window.removeEventListener(type, callback)
     } else {
       const targetEvent = generalUtils.isMobile() ? mobileHash[type] : computerHash[type]
 
-      window.addEventListener(targetEvent, callback)
+      window.removeEventListener(targetEvent, callback)
     }
   }
 }
