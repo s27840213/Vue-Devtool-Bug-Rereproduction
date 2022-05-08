@@ -1,6 +1,13 @@
 <template lang="pug">
-  div(class="brand-selector relative")
-    div(class="brand-selector__brand-name")
+  div(class="brand-selector relative"
+    :class="`${theme}-theme`")
+    div(v-if="defaultOption && isDefaultSelected"
+      class="brand-selector__brand-name"
+      :class="`${theme}-theme`")
+      span {{ $t('NN0089') }}
+    div(v-else
+      class="brand-selector__brand-name hover"
+      :class="`${theme}-theme`")
       input(v-if="isNameEditing"
         ref="brandName"
         v-model="editableName"
@@ -10,10 +17,12 @@
       span(v-else
         @click="handleNameClick") {{ brandName }}
     div(class="brand-selector__dropdown pointer"
+      :class="`${theme}-theme`"
       @click="isBrandListOpen = true")
-      svg-icon(iconName="chevron-down"
+      svg-icon(:class="`${theme}-theme`"
         :style="dropdownStyles()"
-        iconWidth="24px" iconColor="bu")
+        iconName="chevron-down"
+        iconWidth="24px")
     transition(name="fade-slide")
       div(v-if="isBrandListOpen"
         v-click-outside="() => { isBrandListOpen = false }"
@@ -25,18 +34,25 @@
           @mouseleave="handleMouseLeave()"
           @click="handleSetCurrentBrand(brand)")
           span {{ getDisplayedBrandName(brand) }}
-          div(class="brand-selector__brand-list__item-menu-icon pointer" @click.stop="handleBrandMenu(brand)")
-            svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
-          div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
-          div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
-            div(class="brand-selector__brand-list__item-menu-row pointer"
-              @click="handleCopyBrand(brand)")
-              svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
-              span {{ $t('NN0251') }}
-            div(class="brand-selector__brand-list__item-menu-row pointer"
-              @click="handleDeleteBrand(brand)")
-              svg-icon(iconName="trash" iconWidth="24px" iconColor="gray-2")
-              span {{ $t('NN0034') }}
+          template(v-if="theme === 'brandkit'")
+            div(class="brand-selector__brand-list__item-menu-icon pointer" @click.stop="handleBrandMenu(brand)")
+              svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
+            div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu-bridge")
+            div(v-if="checkBrandMenuShowing(brand)" class="brand-selector__brand-list__item-menu")
+              div(class="brand-selector__brand-list__item-menu-row pointer"
+                @click="handleCopyBrand(brand)")
+                svg-icon(iconName="copy" iconWidth="24px" iconColor="gray-2")
+                span {{ $t('NN0251') }}
+              div(class="brand-selector__brand-list__item-menu-row pointer"
+                @click="handleDeleteBrand(brand)")
+                svg-icon(iconName="trash" iconWidth="24px" iconColor="gray-2")
+                span {{ $t('NN0034') }}
+        template(v-if="defaultOption")
+          div(class="horizontal-rule")
+          div(class="feature-button brand-selector__brand-list__item pointer"
+            :class="{'active': isDefaultSelected}"
+            @click="handleSelectDefault")
+            span {{ $t('NN0089') }}
 </template>
 
 <script lang="ts">
@@ -47,6 +63,16 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand } from '@/interfaces/brandkit'
 
 export default Vue.extend({
+  props: {
+    theme: {
+      type: String,
+      default: 'brandkit'
+    },
+    defaultOption: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       isNameEditing: false,
@@ -62,7 +88,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('brandkit', {
       brands: 'getBrands',
-      currentBrand: 'getCurrentBrand'
+      currentBrand: 'getCurrentBrand',
+      isDefaultSelected: 'getIsDefaultSelected'
     }),
     brandName(): string {
       return brandkitUtils.getDisplayedBrandName(this.currentBrand)
@@ -83,7 +110,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations('brandkit', {
-      setCurrentBrand: 'SET_currentBrand'
+      setCurrentBrand: 'SET_currentBrand',
+      setIsDefaultSelected: 'SET_isDefaultSelected'
     }),
     dropdownStyles() {
       return this.isBrandListOpen ? {
@@ -107,6 +135,13 @@ export default Vue.extend({
     handleSetCurrentBrand(brand: IBrand) {
       this.isBrandListOpen = false
       this.setCurrentBrand(brand)
+      if (this.defaultOption) {
+        this.setIsDefaultSelected(false)
+      }
+    },
+    handleSelectDefault() {
+      this.isBrandListOpen = false
+      this.setIsDefaultSelected(true)
     },
     handleBrandMenu(brand: IBrand) {
       this.currentBrandMenuId = brand.id
@@ -133,7 +168,7 @@ export default Vue.extend({
       // this.checkNameLength()
     },
     checkSelected(brand: IBrand): boolean {
-      return this.currentBrand.id === brand.id
+      return this.currentBrand.id === brand.id && (!this.defaultOption || !this.isDefaultSelected)
     },
     checkTemp(brand: IBrand): boolean {
       return brand.id.startsWith('new_')
@@ -150,16 +185,58 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .brand-selector {
-  margin-left: 12px;
   display: flex;
   gap: 12px;
   align-items: center;
+  &.brandkit-theme {
+    margin-left: 12px;
+  }
+  &.editor-theme {
+    margin-left: 2px;
+  }
+  &.panel-theme {
+    margin-left: 1px;
+  }
   &__brand-name {
     @include text-H4;
     line-height: unset;
-    color: setColor(bu);
     height: 39px;
-    max-width: 260px;
+    &.hover > span:hover {
+      background: setColor(blue-4);
+    }
+    &.brandkit-theme {
+      max-width: 260px;
+      color: setColor(bu);
+    }
+    &.editor-theme {
+      max-width: calc(100% - 80px);
+      color: white;
+      & > input {
+        background-color: transparent;
+      }
+      &.hover > span:hover {
+        color: setColor(gray-3);
+      }
+    }
+    &.panel-theme {
+      @include text-H6;
+      max-width: calc(100% - 110px);
+      color: white;
+      height: 24px;
+      & > input {
+        padding: 0px;
+        background-color: transparent;
+      }
+      & > span {
+        padding: 0px;
+        cursor: initial;
+      }
+      &.hover > span {
+        &:hover {
+          color: setColor(gray-3);
+        }
+      }
+    }
     & > span {
       display: block;
       padding: 2px;
@@ -168,9 +245,6 @@ export default Vue.extend({
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      &:hover {
-        background: setColor(blue-4);
-      }
     }
     & > input {
       padding: 2px;
@@ -192,8 +266,17 @@ export default Vue.extend({
     &:hover {
       background: setColor(blue-4);
     }
+    &.editor-theme > svg, &.panel-theme > svg {
+      color: white;
+    }
+    &.brandkit-theme > svg {
+      color: setColor(bu);
+    }
+    &.editor-theme:hover > svg, &.panel-theme:hover > svg {
+      color: setColor(gray-3);
+    }
     & > svg {
-      transition: 0.2s ease;
+      transition: transform 0.2s ease;
     }
   }
   &__brand-list {
@@ -219,6 +302,9 @@ export default Vue.extend({
       border-radius: 0px; // to override .feature-button
       & > span {
         @include body-SM;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       &:not(.disabled):hover {
         & > .brand-selector__brand-list__item-menu-icon {
@@ -276,6 +362,14 @@ export default Vue.extend({
       }
     }
   }
+}
+
+.horizontal-rule {
+  height: 1px;
+  background-color: setColor(gray-4);
+  width: calc(100% - 20px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .fade-slide-enter-active,

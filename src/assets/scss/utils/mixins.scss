@@ -61,6 +61,13 @@
   }
 }
 
+@mixin hide-scrollbar-white {
+  @include hide-scrollbar;
+  &::-webkit-scrollbar-thumb {
+    border: 3px solid white;
+  }
+}
+
 @import "@/assets/scss/utils/variables.scss";
 
 @mixin popup-window {

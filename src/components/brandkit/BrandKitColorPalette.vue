@@ -14,26 +14,31 @@
         div(class="brand-kit-color-palette__trash pointer"
             @click="handleDeletePalette(colorPalette)")
           svg-icon(iconName="trash" iconWidth="16px" iconColor="gray-2")
-    div(class="brand-kit-color-palette__colors")
-      div(v-for="(color, index) in colorPalette.colors"
-        class="brand-kit-color-palette__colors__color-wrapper relative"
-        :class="{ selected: checkSelected(colorPalette.id, color) }")
-        div(class="brand-kit-color-palette__colors__color pointer"
-          :style="backgroundColorStyles(color.color)"
-          @click="handleSelectColor(colorPalette.id, color)")
-        div(class="brand-kit-color-palette__colors__color-close pointer"
+    transition-group(class="brand-kit-color-palette__colors" name="color-list" tag="div")
+      template(v-for="(color, index) in colors")
+        div(v-if="color === 'add'"
+          class="brand-kit-color-palette__colors__color-wrapper pointer"
+          key="default"
+          @click="handleAddColor(colorPalette.id)")
+          div(class="brand-kit-color-palette__colors__color-add")
+            svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
+        div(v-else
+          class="brand-kit-color-palette__colors__color-wrapper"
           :class="{ selected: checkSelected(colorPalette.id, color) }"
-          @click.stop="handleDeleteColor(colorPalette.id, color)")
-          svg-icon(iconName="close" iconWidth="16px" iconColor="gray-2")
-        color-picker(v-if="checkSelected(colorPalette.id, color)"
-                    class="color-picker"
-                    v-click-outside="handleDeSelectColor"
-                    :currentColor="color.color"
-                    @update="handleDragUpdate"
-                    @final="handleColorChangeEnd")
-      div(class="brand-kit-color-palette__colors__color-add pointer"
-        @click="handleAddColor(colorPalette.id)")
-        svg-icon(iconName="plus-origin" iconWidth="16px" iconColor="gray-3")
+          :key="color.id")
+          div(class="brand-kit-color-palette__colors__color pointer"
+            :style="backgroundColorStyles(color.color)"
+            @click="handleSelectColor(colorPalette.id, color)")
+          div(class="brand-kit-color-palette__colors__color-close pointer"
+            :class="{ selected: checkSelected(colorPalette.id, color) }"
+            @click.stop="handleDeleteColor(colorPalette.id, color)")
+            svg-icon(iconName="close" iconWidth="16px" iconColor="gray-2")
+          color-picker(v-if="checkSelected(colorPalette.id, color)"
+                      class="color-picker"
+                      v-click-outside="handleDeSelectColor"
+                      :currentColor="color.color"
+                      @update="handleDragUpdate"
+                      @final="handleColorChangeEnd")
 </template>
 
 <script lang="ts">
@@ -65,6 +70,9 @@ export default Vue.extend({
   computed: {
     paletteName(): string {
       return this.getDisplayedPaletteName(this.colorPalette)
+    },
+    colors(): (IBrandColor | string)[] {
+      return [...this.colorPalette.colors, 'add']
     }
   },
   methods: {
@@ -206,8 +214,9 @@ export default Vue.extend({
     grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
     gap: 20px 10px;
     &__color-wrapper {
+      position: relative;
       width: 100%;
-      aspect-ratio: 1;
+      padding-top: 100%;
       box-sizing: border-box;
       border-radius: 10%;
       &:hover {
@@ -217,12 +226,16 @@ export default Vue.extend({
         }
       }
       &.selected {
+        padding-top: calc(100% - 2px);
         border: 1px solid setColor(blue-1);
       }
     }
     &__color-add {
+      position: absolute;
       width: 100%;
-      aspect-ratio: 1;
+      height: 100%;
+      left: 0;
+      top: 0;
       box-sizing: border-box;
       border-radius: 10%;
       border: 1px solid setColor(gray-3);
@@ -234,6 +247,9 @@ export default Vue.extend({
       }
     }
     &__color {
+      position: absolute;
+      left: 0;
+      top: 0;
       width: 100%;
       height: 100%;
       border: 2px solid setColor(gray-7);
@@ -267,5 +283,20 @@ export default Vue.extend({
   left: 0;
   top: calc(100% + 5px);
   z-index: 10;
+}
+
+.color-list {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+    z-index: 10;
+    padding-top: calc(100% - 2px);
+  }
+
+  &-enter,
+  &-leave-to {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
 }
 </style>

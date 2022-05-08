@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { captureException } from '@sentry/browser'
 import store from '@/store'
-import { IListServiceContentDataItem, IListServiceContentData, IAssetPhoto } from '@/interfaces/api'
+import { IListServiceContentDataItem, IListServiceContentData } from '@/interfaces/api'
 import { IAsset, IAssetProps } from '@/interfaces/module'
 import TemplateUtils from './templateUtils'
 import pageUtils from './pageUtils'
@@ -10,7 +10,7 @@ import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import GeneralUtils from './generalUtils'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage, IShape, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
@@ -19,7 +19,6 @@ import ZindexUtils from './zindexUtils'
 import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
-import { ITextState } from '@/store/text'
 import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
 
@@ -396,7 +395,7 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}) {
+  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     return import(`@/assets/json/${type}.json`)
       .then(jsonData => {
@@ -415,6 +414,10 @@ class AssetUtils {
 
         if (attrs.styles) {
           Object.assign(textLayer.styles, attrs.styles)
+        }
+
+        if (spanStyles) {
+          Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
         }
 
         TextUtils.resetTextField(textLayer, targePageIndex, field)
@@ -456,7 +459,8 @@ class AssetUtils {
       srcObj: {
         type,
         userId: ImageUtils.getUserId(url, type),
-        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type))
+        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type)),
+        brandId: ImageUtils.getBrandId(url, type)
       },
       styles: {
         x,
@@ -604,7 +608,8 @@ class AssetUtils {
     const {
       id, type, width, height,
       content_ids: contentIds, match_cover: matchCover,
-      src, userId, assetId, fontUrl, ver
+      user_id: userId, asset_id: assetId, asset_index: assetIndex_,
+      src, ver, signed_url: signedUrl
     } = asset
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
@@ -625,9 +630,10 @@ class AssetUtils {
           content_ids: contentIds,
           match_cover: matchCover,
           src,
-          userId,
-          assetId,
-          fontUrl,
+          user_id: userId,
+          asset_id: assetId,
+          asset_index: assetIndex_,
+          signed_url: signedUrl,
           ver
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })

@@ -128,7 +128,8 @@ export interface IImage extends ILayer<IImageStyle> {
   isFrame?: boolean,
   imgControl: boolean,
   inProcess: boolean,
-  trace?: number
+  trace?: number,
+  parentLayerStyles?: IStyle
 }
 export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

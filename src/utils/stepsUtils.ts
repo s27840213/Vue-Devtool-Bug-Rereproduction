@@ -42,7 +42,7 @@ class StepsUtils {
     this.steps = []
     // this.pageSteps = []
     this.currStep = -1
-    this.MAX_STORAGE_COUNT = 20
+    this.MAX_STORAGE_COUNT = 30
     this.timers = {}
   }
 

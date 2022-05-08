@@ -155,6 +155,8 @@ import DownloadTypeOption from '@/components/download/DownloadTypeOption.vue'
 import DownloadPageSelection from '@/components/download/DownloadPageSelection.vue'
 import GeneralUtils from '@/utils/generalUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import pageUtils from '@/utils/pageUtils'
+import gtmUtils from '@/utils/gtmUtils'
 
 const submission = `${process.env.VUE_APP_VERSION}::download_submission`
 
@@ -424,6 +426,32 @@ export default Vue.extend({
           this.progress = 100
           setTimeout(() => {
             DownloadUtil.downloadByUrl(url)
+            const { rangeType } = this
+
+            switch (rangeType) {
+              case 'all': {
+                pageUtils.getPages.map((page, index) => {
+                  if (pageUtils.hasDesignId(index)) {
+                    gtmUtils.trackPageDownload(page.designId)
+                  }
+                })
+                break
+              }
+              case 'spec': {
+                this.pageRange.map((index: number) => {
+                  if (pageUtils.hasDesignId(index)) {
+                    gtmUtils.trackPageDownload(pageUtils.getPage(index).designId)
+                  }
+                })
+                break
+              }
+              case 'current': {
+                if (pageUtils.hasDesignId(this.currentPageIndex)) {
+                  gtmUtils.trackPageDownload(pageUtils.getPage(this.currentPageIndex).designId)
+                }
+                break
+              }
+            }
             this.$emit('close')
           }, 1000)
           break

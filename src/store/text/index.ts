@@ -1,5 +1,7 @@
+import { IBrandFont } from '@/interfaces/brandkit'
 import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
+import brandkitUtils from '@/utils/brandkitUtils'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -188,15 +190,29 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'public':
       return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
     case 'admin':
-      return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}}/subset/font.css?ver=${ver}`
-    case 'private':
-      // not implemented yet (may need fetching new presigned url (async))
-      // params: assetId (index)
-      return ''
+      return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}`
+    case 'private': {
+      let urlMap = brandkitUtils.getFontUrlMap(assetId)
+      if (urlMap) { // if font is in font-list or has been seen before
+        const finalUrl = getCssUrl(urlMap, ver)
+        const response = await fetch(finalUrl) // check if the url is still valid
+        if (response.ok) return finalUrl
+        urlMap = await brandkitUtils.refreshFontAsset(assetId)
+        return getCssUrl(urlMap, ver)
+      } else { // font is not seen before, fetch it
+        urlMap = await brandkitUtils.refreshFontAsset(assetId)
+        return getCssUrl(urlMap, ver)
+      }
+    }
     case 'URL':
       return url
   }
   return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+}
+
+const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
+  const cssUrl = urlMap.css
+  return cssUrl ? `${cssUrl}&ver=${ver}` : ''
 }
 
 export default {

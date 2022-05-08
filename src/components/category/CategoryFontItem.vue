@@ -5,11 +5,11 @@
     @click="setFont()")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${host}/${item.id}/${preview}?ver=${item.ver}`"
+        :src="fallbackSrc || `${getPreview}`"
         @error="handleNotFound")
     div(class="category-fonts__item-wrapper")
       img(class="category-fonts__item"
-        :src="fallbackSrc || `${host}/${item.id}/${preview2}`"
+        :src="fallbackSrc || `${getPreview2}`"
         @error="handleNotFound")
     div(class="category-fonts__icon")
       svg-icon(v-if="props.font === item.id"
@@ -24,24 +24,24 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFont, ISelection } from '@/interfaces/text'
+import { ISelection } from '@/interfaces/text'
 import AssetUtils from '@/utils/assetUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
-import text from '@/store/text'
 import tiptapUtils from '@/utils/tiptapUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   props: {
     host: String,
     preview: String,
     preview2: String,
-    item: Object
+    item: Object,
+    textStyleType: String
   },
   data() {
     return {
@@ -50,6 +50,15 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'fontStore', 'pending']),
+    ...mapGetters('brandkit', {
+      isSettingsOpen: 'getIsSettingsOpen'
+    }),
+    getPreview(): string {
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-name')
+    },
+    getPreview2(): string {
+      return brandkitUtils.getFontPrevUrlByFontFamily(this.item.id, this.itemFontType, this.item.userId, this.item.assetId, 'prev-sample')
+    },
     getCurrLayerInfo(): {
       layer: IText,
       layerIndex: number,
@@ -81,17 +90,71 @@ export default Vue.extend({
         default:
           throw new Error('Wrong layer type as Font Item applied')
       }
+    },
+    itemFontType(): string {
+      return this.item.src || this.item.fontType
     }
   },
   methods: {
+    ...mapActions('brandkit', {
+      refreshFontAsset: 'refreshFontAsset'
+    }),
     ...mapMutations('text', {
       updateTextState: 'UPDATE_STATE'
     }),
-    handleNotFound(event: Event) {
+    handleNotFound() {
+      if (this.itemFontType === 'private') {
+        this.refreshFontAsset({
+          id: this.item.assetId,
+          asset_index: this.item.asset_index
+        })
+        return
+      }
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
       console.warn(this.item)
     },
-    async setFont() {
+    setFont() {
+      if (this.$route.name === 'BrandKit' || (this.$route.name === 'Editor' && this.isSettingsOpen)) {
+        this.setBrandkitFont()
+      } else {
+        this.setEditorFont()
+      }
+    },
+    async setBrandkitFont() {
+      await this.$store.dispatch('text/addFont', {
+        type: this.itemFontType, // public fonts in list-design don't have src
+        url: this.item.fontUrl,
+        userId: this.item.userId,
+        assetId: this.item.assetId,
+        face: this.item.id,
+        ver: this.item.ver
+      })
+      brandkitUtils.updateTextStyle(this.textStyleType, {
+        fontId: this.item.id,
+        fontUserId: this.item.userId,
+        fontAssetId: this.item.assetId,
+        fontType: this.itemFontType,
+        fontName: this.item.name
+      })
+      AssetUtils.addAssetToRecentlyUsed({
+        id: this.item.id,
+        type: 0,
+        user_id: this.item.userId,
+        asset_id: this.item.assetId,
+        asset_index: this.item.asset_index,
+        src: this.itemFontType,
+        ver: this.item.ver,
+        signed_url: this.item.signed_url,
+        urls: {
+          prev: '',
+          full: '',
+          larg: '',
+          original: '',
+          json: ''
+        }
+      })
+    },
+    async setEditorFont() {
       if (this.pending) return
       tiptapUtils.agent(editor => editor.setEditable(false))
       const isRanged = this.isRanged()
@@ -112,7 +175,7 @@ export default Vue.extend({
         this.updateLayerProps(preLayerIndex, subLayerIdx, { loadFontEdited: false })
 
         const updateItem = {
-          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          type: this.itemFontType, // public fonts in list-design don't have src
           fontUrl: this.item.fontUrl ?? '',
           userId: this.item.userId ?? '',
           assetId: this.item.assetId ?? '',
@@ -120,7 +183,7 @@ export default Vue.extend({
         }
 
         await this.$store.dispatch('text/addFont', {
-          type: this.item.src || this.item.fontType, // public fonts in list-design don't have src
+          type: this.itemFontType, // public fonts in list-design don't have src
           url: this.item.fontUrl,
           userId: this.item.userId,
           assetId: this.item.assetId,
@@ -154,9 +217,30 @@ export default Vue.extend({
             }
           })
 
-          AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
+          AssetUtils.addAssetToRecentlyUsed({
+            id: this.item.id,
+            type: 0,
+            user_id: this.item.userId,
+            asset_id: this.item.assetId,
+            asset_index: this.item.asset_index,
+            src: this.itemFontType,
+            ver: this.item.ver,
+            signed_url: this.item.signed_url,
+            urls: {
+              prev: '',
+              full: '',
+              larg: '',
+              original: '',
+              json: ''
+            }
+          })
           StepsUtils.record()
-          TextPropUtils.updateTextPropsState({ font: this.item.id })
+          TextPropUtils.updateTextPropsState({
+            font: this.item.id,
+            type: this.itemFontType,
+            assetId: this.item.assetId,
+            userId: this.item.userId
+          })
           return
         }
 
@@ -188,9 +272,30 @@ export default Vue.extend({
           tiptapUtils.focus()
         }
 
-        AssetUtils.addAssetToRecentlyUsed({ ...this.item, type: 0 })
+        AssetUtils.addAssetToRecentlyUsed({
+          id: this.item.id,
+          type: 0,
+          user_id: this.item.userId,
+          asset_id: this.item.assetId,
+          asset_index: this.item.asset_index,
+          src: this.itemFontType,
+          ver: this.item.ver,
+          signed_url: this.item.signed_url,
+          urls: {
+            prev: '',
+            full: '',
+            larg: '',
+            original: '',
+            json: ''
+          }
+        })
         StepsUtils.record()
-        TextPropUtils.updateTextPropsState({ font: this.item.id })
+        TextPropUtils.updateTextPropsState({
+          font: this.item.id,
+          type: this.itemFontType,
+          assetId: this.item.assetId,
+          userId: this.item.userId
+        })
       } catch (error: any) {
         const code = error.message === 'timeout' ? 'timeout' : error.code
         console.error(error)

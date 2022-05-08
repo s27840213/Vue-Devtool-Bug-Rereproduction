@@ -39,6 +39,7 @@
     "fontfaceobserver": "^2.1.0",
     "konva": "^7.2.5",
     "lottie-vuejs": "^0.4.0",
+    "open": "^8.4.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "tinycolor": "^0.0.1",

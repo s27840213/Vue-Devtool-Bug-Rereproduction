@@ -21,6 +21,7 @@ import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -39,7 +40,7 @@ const MOBILE_ROUTES = [
 
 // Ingore some normal router console error
 const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location: RawLocation):Promise<Route> {
+VueRouter.prototype.push = function push(location: RawLocation): Promise<Route> {
   return (originalPush.call(this, location) as unknown as Promise<Route>)
     .catch(err => {
       switch (err.name) {
@@ -53,7 +54,7 @@ VueRouter.prototype.push = function push(location: RawLocation):Promise<Route> {
 }
 
 const originalReplace = VueRouter.prototype.replace
-VueRouter.prototype.replace = function repalce(location: RawLocation):Promise<Route> {
+VueRouter.prototype.replace = function repalce(location: RawLocation): Promise<Route> {
   return (originalReplace.call(this, location) as unknown as Promise<Route>)
     .catch(err => {
       switch (err.name) {
@@ -192,7 +193,18 @@ const routes: Array<RouteConfig> = [
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: BrandKit
+    component: BrandKit,
+    beforeEnter: async (to, from, next) => {
+      try {
+        if (!brandkitUtils.isBrandkitAvailable) {
+          next({ path: '/' })
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
   },
   {
     path: 'mobile-text',
@@ -274,8 +286,6 @@ router.beforeEach(async (to, from, next) => {
       } else {
         await store.dispatch('user/login', { token: token })
       }
-    } else if (to.name === 'BrandKit' && !store.getters['user/isAdmin']) {
-      next({ name: 'Home' })
     }
   } else {
     if (!store.getters['user/isLogin']) {

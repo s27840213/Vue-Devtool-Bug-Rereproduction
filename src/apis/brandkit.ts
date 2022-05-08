@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from '@/apis'
 import apiUtils from '@/utils/apiUtils'
 import store from '@/store'
@@ -18,36 +19,70 @@ export default {
   getTeamId(): string {
     return store.getters['user/getTeamId']
   },
-  async getBrands(token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-brand', {
+  async sendApi(url: string, data: {[key: string]: any}): Promise<any> {
+    return await apiUtils.requestWithRetry(() => axios(url, {
       method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId()
-      }
+      data
     }))
+  },
+  async getBrands(token?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/list-brand', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId()
+    })
+  },
+  async getLogos(brandId: string, token?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/list-logo', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      brand_id: brandId
+    })
+  },
+  async getPalettes(brandId: string, token?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/list-palette', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      brand_id: brandId
+    })
   },
   async getFonts(token?: string, teamId?: string, params = {}): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        type: 'font',
-        ...params
-      }
-    }))
+    return await this.sendApi('/list-asset', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      type: 'font',
+      ...params
+    })
   },
-  async getFont(assetIndex: number, token?: string, teamId?: string): Promise<any> {
-    return await apiUtils.requestWithRetry(() => axios('/list-asset', {
-      method: 'POST',
-      data: {
-        token: token ?? this.getToken(),
-        team_id: teamId ?? this.getTeamId(),
-        type: 'font',
-        asset_list: assetIndex.toString()
-      }
-    }))
+  async getAsset(type: string, assetIndex: string, token?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/list-asset', {
+      token: token ?? this.getToken(),
+      team_id: teamId ?? this.getTeamId(),
+      type,
+      asset_list: assetIndex
+    })
+  },
+  async getFont(assetIndex: string, token?: string, teamId?: string): Promise<any> {
+    return await this.getAsset('font', assetIndex, token, teamId)
+  },
+  async getLogo(assetIndex: string, token?: string, teamId?: string): Promise<any> {
+    return await this.getAsset('logo', assetIndex, token, teamId)
+  },
+  async deleteAsset(type: string, assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
+    return await this.sendApi('/update-asset', {
+      type,
+      token: token ?? this.getToken(),
+      locale: locale ?? this.getLocale(),
+      team_id: teamId ?? this.getTeamId(),
+      update_type: 'delete',
+      target: 1,
+      src_asset: assetIndex
+    })
+  },
+  async deleteFont(assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
+    return await this.deleteAsset('font', assetIndex, token, locale, teamId)
+  },
+  async deleteLogo(assetIndex: string, token?: string, locale?: string, teamId?: string): Promise<any> {
+    return await this.deleteAsset('logo', assetIndex, token, locale, teamId)
   },
   async getTestingBrands(token: string): Promise<IBrand[]> {
     return new Promise<IBrand[]>(resolve => {
@@ -78,10 +113,10 @@ export default {
       // })
     }
   },
-  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+  async updateApiWrapper(apiSender: () => Promise<any>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
     updater()
     try {
-      const response = await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
+      const response = await apiSender()
       if (response.data.flag !== 0) {
         fallbacker()
         errorShower()
@@ -97,5 +132,10 @@ export default {
       return false
     }
     return true
+  },
+  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+    return await this.updateApiWrapper(async () => {
+      return await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
+    }, updater, fallbacker, errorShower, responseHandler)
   }
 }

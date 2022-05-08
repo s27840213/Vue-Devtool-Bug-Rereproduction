@@ -60,41 +60,19 @@ class PageUtils {
       height: 1080,
       backgroundColor: '#ffffff',
       backgroundImage: {
-        config: {
-          type: 'image',
+        config: layerFactary.newImage({
           srcObj: {
             type: '',
             userId: '',
             assetId: ''
           },
-          clipPath: '',
-          active: false,
-          shown: false,
-          locked: false,
-          moved: false,
-          imgControl: false,
-          isClipper: false,
-          dragging: false,
-          designId: '',
           styles: {
-            x: 0,
-            y: 0,
-            scale: 1,
-            scaleX: 0,
-            scaleY: 0,
-            rotate: 0,
             width: 0,
             height: 0,
-            initWidth: 0,
-            initHeight: 0,
-            imgX: 0,
-            imgY: 0,
-            imgWidth: 0,
-            imgHeight: 0,
             zindex: -1,
             opacity: 100
           }
-        },
+        }),
         posX: -1,
         posY: -1
       },
@@ -405,6 +383,10 @@ class PageUtils {
       }
     }
     return {}
+  }
+
+  hasDesignId(pageIndex: number) {
+    return this.getPage(pageIndex).designId !== ''
   }
 }
 

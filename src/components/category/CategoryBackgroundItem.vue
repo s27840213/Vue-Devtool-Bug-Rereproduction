@@ -1,7 +1,6 @@
 <template lang="pug">
   img(class="pointer"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
-    crossOrigin="Anonymous"
     draggable="false"
     @click="addBackground"
     @error="handleNotFound")

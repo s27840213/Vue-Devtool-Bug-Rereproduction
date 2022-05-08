@@ -233,7 +233,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      colorPresets: [],
       fieldRange: {
         lineWidth: { min: 1, max: 100 }
       },
@@ -242,7 +241,6 @@ export default Vue.extend({
       openSliderBar: '',
       openValueSelector: '',
       openColorPicker: false,
-      paletteRecord: [{ key: 0, value: -1 }],
       markerIds: ['none'],
       dashAndEdge: [1, 3],
       markerContentMap: ({
@@ -280,7 +278,6 @@ export default Vue.extend({
     })
     colorUtils.setCurrEvent(ColorEventType.shape)
     colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
-    this.initilizeRecord()
     this.fetchMarkers().then(async () => {
       const markerList = (this.categories[0] as IListServiceContentData).list
       this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
@@ -478,28 +475,6 @@ export default Vue.extend({
         }
       }
     },
-    paletteColorStyle(color: string, index: number) {
-      const currSelectedInPalette = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)?.value
-      if (currSelectedInPalette === index) {
-        return {
-          backgroundColor: color,
-          boxShadow: '0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff'
-        }
-      } else {
-        return {
-          backgroundColor: color
-        }
-      }
-    },
-    colorPickerStyles() {
-      const isSelected = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)?.value === -1
-      return {
-        background: `url(${require('@/assets/img/png/picker.png')})`,
-        backgroundPosition: 'center center',
-        backgroundSize: 'cover',
-        boxShadow: isSelected ? '0 0 0 2px #7d2ae8, inset 0 0 0 1.5px #fff' : ''
-      }
-    },
     handleColorModalOn(e: MouseEvent) {
       this.openColorPicker = true
     },
@@ -507,11 +482,7 @@ export default Vue.extend({
       this.openColorPicker = false
     },
     handleColorUpdate(color: string) {
-      this.setColor(color, this.currSelectedColorIndex)
-      const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
-      if (record) {
-        record.value = -1
-      }
+      this.setColor(color)
     },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
@@ -535,16 +506,12 @@ export default Vue.extend({
     handleValueModal(modalName = '') {
       this.openValueSelector = modalName
     },
-    setColor(newColor: string, index: number) {
+    setColor(newColor: string) {
       const currLayer = LayerUtils.getCurrLayer
       switch (currLayer.type) {
         case 'shape': {
           const color = [...this.getColors]
           color[this.currSelectedColorIndex] = newColor
-          const record = this.paletteRecord.find(record => record.key === this.currSelectedColorIndex)
-          if (record) {
-            record.value = index
-          }
           LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
           break
         }
@@ -621,12 +588,12 @@ export default Vue.extend({
       }
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
-      stepsUtils.record()
       if (index === 0) {
         this.handleLineDash(value)
       } else {
         this.handleLineEdge(value)
       }
+      stepsUtils.record()
       this.$set(this.dashAndEdge, index, value)
     },
     handleLineDash(dash: number) {
@@ -644,12 +611,12 @@ export default Vue.extend({
       )
     },
     handleBasicShapeFilledUpdate(index: number, filled: number) {
-      stepsUtils.record()
       LayerUtils.updateLayerProps(
         pageUtils.currFocusPageIndex,
         this.currSelectedIndex,
         { filled: filled === 1 }
       )
+      stepsUtils.record()
     },
     handleBasicShapeCorRadPercentUpdate(value: number) {
       const corRadPercentage = value
@@ -665,7 +632,6 @@ export default Vue.extend({
       )
     },
     handleStartMarkerUpdate(index: number, value: string) {
-      stepsUtils.record()
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
@@ -686,9 +652,9 @@ export default Vue.extend({
           markerId: [value, currLayer.markerId?.[1] ?? 'none']
         }
       )
+      stepsUtils.record()
     },
     handleEndMarkerUpdate(index: number, value: string) {
-      stepsUtils.record()
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       LayerUtils.updateLayerProps(
@@ -709,6 +675,7 @@ export default Vue.extend({
           markerId: [currLayer.markerId?.[0] ?? 'none', value]
         }
       )
+      stepsUtils.record()
     },
     makeSlots(markerIds: string[]): { marker: string, name: string }[] {
       return this.markerIds.map((id, index) => ({ marker: id, name: `g0i${index}` }))
@@ -717,18 +684,8 @@ export default Vue.extend({
       return this.markerContentMap[markerId] ?? this.markerContentMap.none
     },
     initilizeRecord() {
-      if (this.getColors.length) {
-        this.paletteRecord = []
-        for (let i = 0; i < this.getColors.length; i++) {
-          const record = { key: i, value: this.colorPresets.findIndex(color => this.getColors[i] === color) }
-          this.paletteRecord.push(record)
-        }
-        if (this.currSelectedColorIndex < 0) {
-          this.currSelectedColorIndex = 0
-        }
-        while (this.currSelectedColorIndex > this.paletteRecord.length - 1) {
-          this.currSelectedColorIndex--
-        }
+      if (this.currSelectedColorIndex < 0) {
+        this.currSelectedColorIndex = 0
       }
     },
     copyText(text: string) {

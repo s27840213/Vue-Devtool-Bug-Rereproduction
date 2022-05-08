@@ -19,9 +19,7 @@ class LayerFactary {
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
       previewSrc: config.previewSrc,
       srcObj: {
-        tpye: config.srcObj.type,
-        userId: config.srcObj.userId,
-        assetId: config.srcObj.assetId
+        ...config.srcObj
       },
       id: config.id || GeneralUtils.generateRandomString(8),
       clipPath: config.clipPath ?? `M0,0h${width}v${height}h${-width}z`,
@@ -122,7 +120,7 @@ class LayerFactary {
       img.styles.rotate = 0
     }
 
-    return {
+    const frame = {
       type: 'frame',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -169,6 +167,8 @@ class LayerFactary {
         return decorationTop
       })()) : undefined
     }
+    frame.clips.forEach(i => (i.parentLayerStyles = frame.styles))
+    return frame
   }
 
   newText(config: Partial<IText>): IText {
@@ -268,13 +268,16 @@ class LayerFactary {
             const firstSpanStyles = paragraph.spans[0].styles
             if (firstSpanStyles.font) {
               paragraph.styles.font = firstSpanStyles.font
-              paragraph.styles.type = firstSpanStyles.type
-              paragraph.styles.userId = firstSpanStyles.userId
-              paragraph.styles.assetId = firstSpanStyles.assetId
-              paragraph.styles.fontUrl = firstSpanStyles.fontUrl
+              paragraph.styles.type = firstSpanStyles.type ?? 'public'
+              paragraph.styles.userId = firstSpanStyles.userId ?? ''
+              paragraph.styles.assetId = firstSpanStyles.assetId ?? ''
+              paragraph.styles.fontUrl = firstSpanStyles.fontUrl ?? ''
             } else {
               paragraph.styles.font = defaultFont
               paragraph.styles.type = 'public'
+              paragraph.styles.userId = ''
+              paragraph.styles.assetId = ''
+              paragraph.styles.fontUrl = ''
             }
             if (paragraph.styles.spanStyle) {
               delete paragraph.styles.spanStyle
@@ -282,21 +285,16 @@ class LayerFactary {
           } else if (paragraph.styles.spanStyle) {
             const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
             paragraph.styles.font = spanStyles.font
-            paragraph.styles.type = spanStyles.type
-            paragraph.styles.userId = spanStyles.userId
-            paragraph.styles.assetId = spanStyles.assetId
-            paragraph.styles.fontUrl = spanStyles.fontUrl
+            paragraph.styles.type = spanStyles.type ?? 'public'
+            paragraph.styles.userId = spanStyles.userId ?? ''
+            paragraph.styles.assetId = spanStyles.assetId ?? ''
+            paragraph.styles.fontUrl = spanStyles.fontUrl ?? ''
           } else {
             paragraph.styles.font = defaultFont
             paragraph.styles.type = 'public'
-          }
-        },
-        (span) => {
-          if (!span.styles.font) {
-            span.styles.font = defaultFont
-            span.styles.type = 'public'
-          } else if (!span.styles.type) {
-            span.styles.type = 'public'
+            paragraph.styles.userId = ''
+            paragraph.styles.assetId = ''
+            paragraph.styles.fontUrl = ''
           }
         }
       )
@@ -305,7 +303,7 @@ class LayerFactary {
   }
 
   newGroup(config: IGroup, layers: Array<IShape | IText | IImage | IGroup>): IGroup {
-    return {
+    const group = {
       type: 'group',
       id: config.id || GeneralUtils.generateRandomString(8),
       active: false,
@@ -345,10 +343,12 @@ class LayerFactary {
           return [this.newByLayerType(l) as IShape | IText | IImage]
         })
     }
+    group.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = group.styles))
+    return group
   }
 
   newTmp(styles: ICalculatedGroupStyle, layers: Array<IShape | IText | IImage | IGroup>) {
-    return {
+    const tmp = {
       type: 'tmp',
       id: GeneralUtils.generateRandomString(8),
       active: true,
@@ -373,8 +373,10 @@ class LayerFactary {
         horizontalFlip: false,
         verticalFlip: false
       },
-      layers: layers
-    }
+      layers
+    } as unknown as ITmp
+    tmp.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = tmp.styles))
+    return tmp
   }
 
   newShape(config: any): IShape {

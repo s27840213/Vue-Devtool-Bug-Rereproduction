@@ -1,12 +1,13 @@
 <template lang="pug">
   div(class="label-with-range")
-    div(class="label-with-range__label flex-between")
+    div(class="label-with-range__label flex-between"
+        :class="{ pointer: !disabled }"
+        @click="openCorRadSliderPopup")
       div(class="label-with-range__label__description")
         slot
           div placeholder
       div(class="label-with-range__label__value"
-          :class="{ disabled: disabled }"
-          @click="openCorRadSliderPopup")
+          :class="{ disabled: disabled }")
         input(:value="Math.round(value)"
               @input="setValue"
               :disabled="disabled"

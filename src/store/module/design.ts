@@ -122,7 +122,6 @@ const actions: ActionTree<IDesignState, unknown> = {
     const { getSortByField, getSortByDescending } = getters
     try {
       const { data } = await designApis.getDesigns(designApis.getToken(), path, 0, getSortByField, getSortByDescending)
-      console.log(data)
       commit('SET_designsPageIndex', data.next_page)
       const designs = data.data.design.content.map((design: IUserDesignContentData) => {
         return designUtils.apiDesign2IDesign(design)

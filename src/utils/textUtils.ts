@@ -926,9 +926,12 @@ class TextUtils {
     }
   }
 
-  loadDefaultFonts() {
+  loadDefaultFonts(extraFonts: { type: string, face: string, url: string, userId: string, assetId: string, ver: number }[] = []) {
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
       store.dispatch('text/addFont', defaultFont).catch(e => console.error(e))
+    }
+    for (const extraFont of extraFonts) {
+      store.dispatch('text/addFont', extraFont).catch(e => console.error(e))
     }
   }
 
