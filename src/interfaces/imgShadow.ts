@@ -1,3 +1,5 @@
+import { SrcObj } from './gallery'
+
 export enum ShadowEffectType {
   none = 'none',
   shadow = 'shadow',
@@ -54,6 +56,7 @@ export interface IShadowEffects {
 }
 export interface IShadowProps {
   currentEffect: ShadowEffectType,
-  filterId?: string,
-  effects: IShadowEffects
+  effects: IShadowEffects,
+  srcObj: SrcObj
+  isTransparent?: boolean,
 }

@@ -415,7 +415,8 @@ export default Vue.extend({
       const tooNarrow = this.getLayerWidth * this.scaleRatio < RESIZER_SHOWN_MIN
       switch (this.getLayerType) {
         case 'image':
-          return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
+          // return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
+          return resizers
         case 'text':
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
@@ -1520,10 +1521,7 @@ export default Vue.extend({
       }
       switch (this.getLayerType) {
         case LayerType.image:
-          if (![ShadowEffectType.frame, ShadowEffectType.imageMatched, ShadowEffectType.shadow]
-            .includes(this.config.styles.shadow.currentEffect)) {
-            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-          }
+          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
       }
     },
     onRightClick(event: MouseEvent) {

@@ -7,8 +7,11 @@
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
-        component(:is="`nu-${config.type}`" :config="config" class="transition-none"
-        :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+        component(:is="`nu-${config.type}`"
+          class="transition-none"
+          :config="config"
+          :imgControl="imgControl"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     div(v-if="config.inProcess" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"

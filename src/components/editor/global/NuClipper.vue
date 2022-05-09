@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-clipper layer-flip" :style="styles()" ref="body"
-  :id="config.type === 'frame' ? `nu-clipper-${layerIndex}` : ''")
+    :id="config.type === 'frame' ? `nu-clipper-${layerIndex}` : ''")
     slot
 </template>
 

@@ -152,7 +152,7 @@ export default Vue.extend({
     },
     imgWrapperstyle(): any {
       let clipPath = ''
-      if (this.currentShadowEffect !== ShadowEffectType.none) {
+      if (this.currentShadowEffect !== ShadowEffectType.none && !this.imgControl) {
         const { height, width } = this.config.styles
         clipPath = `path('M0,0h${width}v${height}h${-width}z`
       }
@@ -266,6 +266,9 @@ export default Vue.extend({
     parentLayerDimension(): number {
       const { width, height } = this.config.parentLayerStyles || {}
       return ImageUtils.getSrcSize(this.config.srcObj.type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
+    },
+    shadowSrc(): string {
+      return ImageUtils.getSrc(this.shadow.srcObj, ImageUtils.getSrcSize(this.shadow.srcObj.type, this.getImgDimension))
     }
   },
   methods: {

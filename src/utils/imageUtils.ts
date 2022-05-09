@@ -32,23 +32,31 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: Partial<IImage>, size?: string | number, ver?: number): string {
-    if (!config.srcObj && !config.src_obj) return ''
-    if (config.previewSrc) {
-      return config.previewSrc + FORCE_UPDATE_VER
+  isSrcObj(srcObj: Partial<IImage> | SrcObj): srcObj is SrcObj {
+    return typeof srcObj.assetId !== 'undefined' && typeof srcObj.userId !== 'undefined' && typeof srcObj.type !== 'undefined'
+  }
+
+  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number): string {
+    let { type, userId, assetId, brandId } = {} as SrcObj
+    let ratio = 1
+    if (this.isSrcObj(config)) {
+      ({ type, userId, assetId, brandId } = config)
+    } else {
+      if (config.previewSrc) {
+        return config.previewSrc + FORCE_UPDATE_VER
+      }
+      ({ type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj)
+      if (typeof size === 'undefined' && config.styles) {
+        const { imgWidth, imgHeight } = config.styles
+        const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
+        size = this.getSrcSize(
+          type,
+          config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
+        )
+      }
+      ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     }
 
-    const { type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj
-    if (typeof size === 'undefined' && config.styles) {
-      const { imgWidth, imgHeight } = config.styles
-      const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
-      size = this.getSrcSize(
-        type,
-        config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
-      )
-    }
-
-    const ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     switch (type) {
       case 'public':
         return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}?origin=true` + FORCE_UPDATE_VER

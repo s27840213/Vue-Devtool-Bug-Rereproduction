@@ -1,4 +1,4 @@
-import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage } from '@/interfaces/layer'
 import store from '@/store'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -47,7 +47,7 @@ class ImageShadowUtils {
     config: IImage,
     /** This identifier is used to indexing the sub-layer */
     primarylayerId?: string,
-    isTransparentBg: boolean,
+    // isTransparentBg: boolean,
     options?: DrawOptions
   } | null
 
@@ -75,14 +75,16 @@ class ImageShadowUtils {
       }
       if (ctxT) {
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
-        const isTransparentBg = [ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)
-          ? this.isTransparentBg(canvasT) : false
-        this._layerData = { img, config, isTransparentBg }
+        this._layerData = { img, config }
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
 
         const { layerInfo } = options || {}
         if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
           this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+          this.updateEffectProps(layerInfo, {
+            isTransparent: [ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)
+              ? this.isTransparentBg(canvasT) : false
+          })
         }
         if (options) {
           this._layerData.options = {
@@ -277,35 +279,6 @@ class ImageShadowUtils {
         return
       }
     }
-    // await this.asyncProcessing( () => {
-    //   if (this.handlerId === handlerId) {
-    //     console.log('123')
-    //     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
-    //     const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString()
-    //     if (!(this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
-    //       // const mappingScale = 1600 / Math.max(drawCanvasW as number, drawCanvasH as number)
-    //       const mappingScale = _imgWidth > _imgHeight
-    //         ? (layerWidth / _imgWidth) * 1600 / (drawCanvasW as number)
-    //         : (layerHeight / _imgHeight) * 1600 / (drawCanvasH as number)
-
-    //       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
-    //       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-
-    //       ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
-    //       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-    //       const data = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1, handlerId)
-    //       console.log('1')
-    //       if (handlerId === this.handlerId) {
-    //         console.log('2')
-    //         this.dataBuff.effect = ShadowEffectType.imageMatched
-    //         this.dataBuff.radius = radius
-    //         this.dataBuff.size = size
-    //         this.dataBuff.data = data
-    //         this.dataBuff.layerIdentifier = layerIdentifier
-    //       }
-    //     }
-    //   }
-    // })
 
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
@@ -384,9 +357,9 @@ class ImageShadowUtils {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
               const r = Math.sqrt(i * i + j * j)
-              if (r >= unifiedSpread + unifiedSpreadRadius && (currentEffect !== ShadowEffectType.frame || this.layerData?.isTransparentBg)) {
+              if (r >= unifiedSpread + unifiedSpreadRadius && (currentEffect !== ShadowEffectType.frame || shadow?.isTransparent)) {
                 alphaVal = 0
-              } else if (r >= unifiedSpread && (currentEffect !== ShadowEffectType.frame || this.layerData?.isTransparentBg)) {
+              } else if (r >= unifiedSpread && (currentEffect !== ShadowEffectType.frame || shadow?.isTransparent)) {
                 alphaVal = (1 - (r - unifiedSpread) * _spread)
               } else {
                 alphaVal = 1
@@ -762,6 +735,13 @@ class ImageShadowUtils {
     store.commit('UPDATE_shadowEffectState', {
       layerInfo,
       payload: { currentEffect }
+    })
+  }
+
+  updateEffectProps(layerInfo: ILayerInfo, payload: Partial<IShadowProps>) {
+    store.commit('UPDATE_shadowProps', {
+      layerInfo,
+      payload
     })
   }
 }
