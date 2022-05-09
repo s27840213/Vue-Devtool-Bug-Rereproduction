@@ -13,7 +13,6 @@
       :style="flipStyles()"
       :class="{ 'nu-image__picture' : true, 'layer-flip': flippedAnimation }"
       draggable="false"
-      crossOrigin="Anonymous"
       :src="finalSrc"
       @error="onError()"
       @load="onLoad()")
@@ -228,7 +227,6 @@ export default Vue.extend({
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
         img.onload = () => {
           // If after onload the img, the config.srcObj is the same, set the src.
           if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
@@ -263,8 +261,6 @@ export default Vue.extend({
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
       return new Promise<void>((resolve, reject) => {
         const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
-
         img.onload = () => resolve()
         img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
@@ -275,7 +271,6 @@ export default Vue.extend({
       if (this.userId !== 'backendRendering') {
         await this.perviewAsLoading()
         const preImg = new Image()
-        preImg.setAttribute('crossOrigin', 'Anonymous')
         preImg.onerror = () => {
           if (type === 'pexels') {
             const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
@@ -293,7 +288,6 @@ export default Vue.extend({
         }
         preImg.onload = () => {
           const nextImg = new Image()
-          nextImg.setAttribute('crossOrigin', 'Anonymous')
           nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
         }
         preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
