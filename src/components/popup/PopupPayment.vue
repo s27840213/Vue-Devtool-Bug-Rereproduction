@@ -145,9 +145,6 @@ export default Vue.extend({
     showPreStep(): boolean {
       return ['step2', 'step3'].includes(this.view)
     },
-    // invoice():Record<string, string> {
-    //   return this.$store.state.payment.billinfInfo
-    // },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
         ? this.cancel2[Number(this.reasonIndex)] as string
@@ -160,8 +157,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      getBillingInfo: 'payment/getBillingInfo',
+      // getBillingInfo: 'payment/getBillingInfo',
       tappayAdd: 'payment/tappayAdd',
+      getSwitchPrice: 'payment/getSwitchPrice',
       switch: 'payment/switch',
       checkBillingInfo: 'payment/checkBillingInfo',
       cancelApi: 'payment/cancel'
@@ -198,6 +196,7 @@ export default Vue.extend({
         case 'finish':
           break
         case 'switch':
+          this.getSwitchPrice()
           this.title = i18n.t('TMP0054') as string
           this.description = i18n.t('TMP0055') as string
           this.buttons = [{
@@ -232,12 +231,7 @@ export default Vue.extend({
       if (this.view === 'step2') this.changeView('step1')
       else if (this.view === 'step3') this.changeView('step2')
     },
-    // setInvoice(key: string, event: InputEvent) {
-    //   this.$store.commit('payment/SET_invoice',
-    //     Object.assign(this.invoice, { [key]: (event.target as HTMLInputElement).value })
-    //   )
-    // },
-    step2Finish() { // rename?
+    step2Finish() {
       this.isUiTW ? this.changeView('step3') : this.changeView('finish')
     },
     async step3Finish() {
@@ -253,8 +247,8 @@ export default Vue.extend({
     setPeriod(value: string) {
       if (this.view === 'step1') { this.periodUi = value }
     },
-    selectCancelReason(can: string) {
-      this.reasonIndex = can
+    selectCancelReason(index: string) {
+      this.reasonIndex = index
     },
     cancel() {
       // todo test no reason

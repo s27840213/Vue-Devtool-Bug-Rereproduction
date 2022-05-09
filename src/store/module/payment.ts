@@ -178,8 +178,8 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
-  async getPrice({ commit }) {
-    return paymentApi.planList(state.userCountryUi).then((response) => {
+  async getPrice({ commit }, country: string) {
+    return paymentApi.planList(country).then((response) => {
       const res = response.data.data
       commit('SET_state', {
         planSelected: res[0].plan_id,
@@ -343,6 +343,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
   },
   async stripeUpdate() {
     return paymentApi.stripeUpdate()
+  },
+  async getSwitchPrice({ getters }) {
+    return paymentApi.getSwitchPrice({
+      plan_id: state.planSelected,
+      is_bundle: 1 - Number(getters.getIsBundle)
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async switch({ getters }) {
     return paymentApi.switch({

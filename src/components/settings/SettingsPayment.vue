@@ -164,7 +164,7 @@ export default Vue.extend({
   },
   async mounted() {
     await this.getBillingInfo()
-    this.getPrice()
+    this.getPrice(this.userCountryInfo)
   },
   methods: {
     ...mapActions({

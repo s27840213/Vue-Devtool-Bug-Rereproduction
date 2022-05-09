@@ -66,7 +66,7 @@ export default Vue.extend({
         this.stripeInit()
         this.submit = this.stripeSubmit
       }
-      this.getPrice()
+      this.getPrice(this.userCountryUi)
     }
   },
   computed: {

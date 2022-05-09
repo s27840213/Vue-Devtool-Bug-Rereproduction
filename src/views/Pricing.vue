@@ -27,6 +27,7 @@
             span {{' ' + $t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
             span {{$t('TMP0015')}}
+        span(class="pricing-plan-currency") {{'*prices based on USD'}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
           svg-icon(v-if="item === true" iconName="feature-true")
@@ -76,14 +77,15 @@ export default Vue.extend({
   computed: {
     ...mapState('payment', {
       plans: 'plans',
-      planSelected: 'planSelected'
+      planSelected: 'planSelected',
+      userCountryUi: 'userCountryUi'
     }),
     ...mapFields({
       periodUi: 'periodUi'
     })
   },
   async mounted() {
-    this.getPrice()
+    this.getPrice(this.userCountryUi)
   },
   methods: {
     ...mapActions({
@@ -126,90 +128,101 @@ export default Vue.extend({
 
 .pricing-plan {
   display: flex;
+  position: relative;
   width: 1128px;
   height: 367px;
   flex-shrink: 0;
   border: 1px solid setColor(gray-4);
   border-radius: 16px;
-  &-left {
-    display: grid;
-    grid-template-rows: 1fr 24px 1fr;
-    width: calc(68% - 96px);
-    padding: 64px 24px 64px 72px;
-    text-align: left;
-    &__top {
-      display: flex;
-      flex-direction: column;
-      &__title {
-        @include text-H4;
-        color: #121127;
-        margin-bottom: 16px;
-      }
-      &__description {
-        @include body-LG;
-        color: rgba(18, 17, 39, 0.56);
-      }
-    }
-    &__divider {
-      @include overline-LG;
-      display: flex;
-      color: setColor(blue-1);
-      >hr {
-        width: 521px;
-        border: 0.5px solid rgba(18, 17, 39, 0.12);
-        margin: auto
-      }
-    }
-    &__bottom {
-      @include body-MD;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      margin-top: 20px;
-      color: setColor(gray-2);
-      >div {
-        display: flex;
-        align-items: center;
-      }
-      span { margin-left: 12px; }
-    }
-  }
-  &-right {
+}
+
+.pricing-plan-left {
+  display: grid;
+  grid-template-rows: 1fr 24px 1fr;
+  width: calc(68% - 96px);
+  padding: 64px 24px 64px 72px;
+  text-align: left;
+  &__top {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 32%;
-    background-color: setColor(blue-1);
-    border-radius: 0 16px 16px 0;
-    &-period {
-      @include body-XS;
-      background-color: setColor(gray-5);
-      border-radius: 16px;
+    &__title {
+      @include text-H4;
+      color: #121127;
+      margin-bottom: 16px;
     }
-    &-price {
-      @include body-MD;
-      position: relative;
-      margin: 30px 0;
-      color: white;
-      &__del {
-        position: absolute;
-        left: 0;
-        text-decoration-line: line-through;
-      }
-      &__dollar {
-        position: relative;
-        bottom: 20px;
-        margin-bottom: 20px;
-      }
-    }
-    &-buy {
-      width: 80%;
-      border-radius: 8px;
-      span {
-        @include btn-LG;
-      }
+    &__description {
+      @include body-LG;
+      color: rgba(18, 17, 39, 0.56);
     }
   }
+  &__divider {
+    @include overline-LG;
+    display: flex;
+    color: setColor(blue-1);
+    >hr {
+      width: 521px;
+      border: 0.5px solid rgba(18, 17, 39, 0.12);
+      margin: auto
+    }
+  }
+  &__bottom {
+    @include body-MD;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 20px;
+    color: setColor(gray-2);
+    >div {
+      display: flex;
+      align-items: center;
+    }
+    span { margin-left: 12px; }
+  }
+}
+
+.pricing-plan-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 32%;
+  background-color: setColor(blue-1);
+  border-radius: 0 16px 16px 0;
+  &-period {
+    @include body-XS;
+    background-color: setColor(gray-5);
+    border-radius: 16px;
+  }
+  &-price {
+    @include body-MD;
+    position: relative;
+    margin: 30px 0;
+    color: white;
+    &__del {
+      position: absolute;
+      left: 0;
+      text-decoration-line: line-through;
+    }
+    &__dollar {
+      position: relative;
+      bottom: 20px;
+      margin-bottom: 20px;
+    }
+  }
+  &-buy {
+    width: 80%;
+    border-radius: 8px;
+    span {
+      @include btn-LG;
+    }
+  }
+}
+
+.pricing-plan-currency {
+  @include body-XS;
+  color: setColor(gray-3);
+  position: absolute;
+  right: 20px;
+  bottom: -21.6px
 }
 
 .pricing-compare {
