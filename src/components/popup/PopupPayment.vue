@@ -23,18 +23,19 @@
                     :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
             div(class="payment-left-content-period-price")
               span(class="payment-left-content-period-price__label") {{p.label}}
-              span(class="payment-left-content-period-price__amount") {{`$${plans[0][p.label].now}`}}
+              span(class="payment-left-content-period-price__amount") {{`$${plans[planSelected][p.value].now}`}}
                 span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0013') : ''}`}}
             span(v-if="p.value==='yearly'"
                 class="payment-left-content-period__off") {{$t('TMP0014')}}
         //- case step2
         template(v-if="view === 'step2'")
-          PaymentField(@paid="paid")
+          PaymentField(@next="step2Finish")
         //- case step3
         template(v-if="view === 'step3'")
-          input(v-for="inv in invoiceInput" :type="inv.type"
-                :value="invoice[inv.name]" @input="setInvoice(inv.name, $event)"
-                class="payment-left-content-invoice" :placeholder="inv.ph")
+          template(v-for="inv in invoiceInput")
+            input(:placeholder="inv.ph" :invalid="biv[inv.key]"
+                  class="payment-left-content-invoice" v-model="bi[inv.key]")
+            span(v-if="biv[inv.key]" class="sp-info__invalid") {{inv.error}}
         //- case cancel1
         template(v-if="view === 'cancel1'")
           div(v-for="can in cancel1" class="payment-left-content-cancel")
@@ -108,7 +109,7 @@ export default Vue.extend({
       img: 'remover.jpg',
       // View constant
       periodInput: paymentData.periodOptions(),
-      invoiceInput: paymentData.invoiceInput(),
+      invoiceInput: [...paymentData.gerneral(), ...paymentData.TWonly()],
       cancel1: paymentData.cancel1(),
       cancel2: paymentData.cancel2(),
       // User input
@@ -123,13 +124,18 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      plans: 'payment/getPlans',
       userCountry: 'payment/getUserCountry',
       isTW: 'payment/isTW',
       isBundle: 'payment/getIsBundle'
     }),
     ...mapFields({
-      period: 'period'
+      period: 'period',
+      bi: 'billingInfo',
+      biv: 'billingInfoInvalid'
+    }),
+    ...mapState('payment', {
+      plans: 'plans',
+      planSelected: 'planSelected'
     }),
     userPeriod():string {
       return this.view === 'switch'
@@ -149,12 +155,15 @@ export default Vue.extend({
     }
   },
   mounted() {
+    this.getBillingInfo()
     this.changeView(this.initView)
   },
   methods: {
     ...mapActions({
+      getBillingInfo: 'payment/getBillingInfo',
       tappayAdd: 'payment/tappayAdd',
       switchToBundle: 'payment/switchToBundle',
+      checkBillingInfo: 'payment/checkBillingInfo',
       cancelApi: 'payment/cancel'
     }),
     changeView(name: string) {
@@ -183,10 +192,7 @@ export default Vue.extend({
           this.title = i18n.t('TMP0048') as string
           this.buttons = [{
             text: i18n.t('TMP0053') as string,
-            func: () => {
-              this.tappayAdd()
-              this.changeView('finish')
-            }
+            func: this.step3Finish
           }]
           break
         case 'finish':
@@ -231,8 +237,18 @@ export default Vue.extend({
     //     Object.assign(this.invoice, { [key]: (event.target as HTMLInputElement).value })
     //   )
     // },
-    paid() { // rename?
+    step2Finish() { // rename?
       this.isTW ? this.changeView('step3') : this.changeView('finish')
+    },
+    async step3Finish() {
+      for (const item of this.invoiceInput) {
+        if (item.error && await this.checkBillingInfo(item.key)) return
+      }
+      this.tappayAdd().then(({ data }) => {
+        if (data.flag) throw Error(data.msg)
+        Vue.notify({ group: 'copy', text: 'Success' })
+        this.changeView('finish')
+      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     setPeriod(value: string) {
       if (this.view === 'step1') { this.period = value }

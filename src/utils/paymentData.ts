@@ -47,26 +47,6 @@ class PaymentData {
   }
 
   // For PopupPayment.vue
-  invoiceInput() {
-    return [{ // todo rebind data
-      label: 'email',
-      type: 'email',
-      ph: i18n.tc('NN0173', 1)
-    }, {
-      name: 'name',
-      type: 'text',
-      ph: i18n.t('NN0172')
-    }, {
-      name: 'phone',
-      type: 'tel',
-      ph: i18n.t('TMP0049')
-    }, {
-      name: 'GUI',
-      type: 'text',
-      ph: i18n.t('TMP0051')
-    }]
-  }
-
   cancel1() {
     return [
       i18n.t('TMP0058'),

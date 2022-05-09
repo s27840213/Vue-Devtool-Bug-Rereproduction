@@ -33,9 +33,11 @@
     hr
     div(v-if="isPro" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0086')}}
-      span(class="body-SM")             {{`···· ···· ···· ${card.lastFour}  ${$t('TMP0087')} ${card.date}`}}
+      span(class="body-SM")             {{`···· ···· ···· ${card.last4}  ${$t('TMP0087')} ${card.date}`}}
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0088')}}
+      p(class="text-gray-3"
+        @click="deleteCard()")          {{'刪除卡片'}}
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0089')}}
@@ -163,7 +165,8 @@ export default Vue.extend({
       getPrice: 'payment/getPrice',
       updateBillingInfoApi: 'payment/updateBillingInfo',
       checkBillingInfo: 'payment/checkBillingInfo',
-      resume: 'payment/resume'
+      resume: 'payment/resume',
+      deleteCard: 'payment/deleteCard'
     }),
     async updateBillingInfo() {
       for (const item of this.billingInfoInput) {

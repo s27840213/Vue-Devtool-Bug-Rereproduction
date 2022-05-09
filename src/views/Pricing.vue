@@ -7,8 +7,6 @@
         span(class="pricing-top__description") {{$t('TMP0002')}}
       div(class="pricing-plan")
         div(class="pricing-plan-left")
-          //- todelete
-          //- slide-toggle(:options="[{label: '',value: '0'}, {label: '', value: '1'}]" v-model="period" optionWidth="32px")
           div(class="pricing-plan-left__top")
             span(class="pricing-plan-left__top__title") {{$t('TMP0003')}}
             span(class="pricing-plan-left__top__description") {{$t('TMP0004')}}
@@ -22,10 +20,10 @@
         div(class="pricing-plan-right")
           slide-toggle(:options="periods" v-model="period" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
-            span(class="pricing-plan-right-price__del") {{`$${plans[0][period].original}${$t('TMP0012')}`}}
+            span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][period].original}${$t('TMP0012')}`}}
             br
             span(class="pricing-plan-right-price__dollar") {{'$ '}}
-            span(class="text-H1") {{plans[0][period].now}}
+            span(class="text-H1") {{plans[planSelected][period].now}}
             span {{' ' + $t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
             span {{$t('TMP0015')}}
@@ -77,7 +75,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('payment', {
-      plans: 'plans'
+      plans: 'plans',
+      planSelected: 'planSelected'
     }),
     ...mapFields({
       period: 'period'

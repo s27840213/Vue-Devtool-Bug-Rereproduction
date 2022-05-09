@@ -12,7 +12,7 @@
         svg-icon(iconName="loading" iconColor="gray-1")
       div(v-if="!isChange" class="field-content__info")
         span {{$t('TMP0046', {date: nextPaidDate})}}
-        span {{plans[0][period].now}}
+        span {{plans[planSelected][period].now}}
       div(v-if="!isChange" class="field-content__info-today")
         span {{$t('TMP0047')}}
         span {{'USD 0.00'}}
@@ -65,6 +65,7 @@ export default Vue.extend({
       } else {
         this.submit = this.tappaySubmit
       }
+      this.getPrice()
     }
   },
   computed: {
@@ -77,6 +78,7 @@ export default Vue.extend({
     }),
     ...mapState('payment', {
       plans: 'plans',
+      planSelected: 'planSelected',
       period: 'period'
     }),
     submitText(): string {
@@ -90,7 +92,8 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       stripeInitApi: 'payment/stripeInit',
-      stripeAddApi: 'payment/stripeAdd'
+      stripeAddApi: 'payment/stripeAdd',
+      getPrice: 'payment/getPrice'
     }),
     ...mapMutations({
       // setUserCountry: 'payment/SET_userCountry',
@@ -103,6 +106,7 @@ export default Vue.extend({
       if (this.stripe) return // Prevent load stripe twice
 
       this.payReady = false
+      this.submit = this.stripeSubmit
       const clientSecret = await this.stripeInitApi()
       this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
 
@@ -117,7 +121,6 @@ export default Vue.extend({
       stripePaymentElement.on('change', (event) => {
         this.payReady = event.complete
       })
-      this.submit = this.stripeSubmit
     },
     stripeSubmit() {
       this.stripe.confirmSetup({
@@ -130,12 +133,13 @@ export default Vue.extend({
         return this.stripeAddApi()
       }).then(({ data }) => {
         if (data.flag) throw Error(data.msg)
-        this.$emit('paid')
         Vue.notify({ group: 'copy', text: 'Success' })
+        this.$emit('next')
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     tappayInit() {
       this.payReady = false
+      this.submit = this.tappaySubmit
       this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
 
       this.TPDirect.card.setup({
@@ -173,17 +177,15 @@ export default Vue.extend({
       this.TPDirect.card.onUpdate((update: any) => {
         this.payReady = update.canGetPrime
       })
-      this.submit = this.tappaySubmit
     },
     tappaySubmit() {
       this.TPDirect.card.getPrime((result: any) => {
         if (result.status !== 0) {
-          Vue.notify({ group: 'error', text: result.msg }) // todo throw exception
+          Vue.notify({ group: 'error', text: result.msg })
           return
         }
-
         this.setPrime(result.card.prime)
-        this.$emit('paid')
+        this.$emit('next')
       })
     }
   }
