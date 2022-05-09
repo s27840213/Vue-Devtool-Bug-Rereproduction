@@ -36,7 +36,7 @@
       span(class="body-SM")             {{`···· ···· ···· ${card.last4}  ${$t('TMP0087')} ${card.date}`}}
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0088')}}
-      p(class="text-gray-3"
+      p(class="text-gray-3 pointer"
         @click="deleteCard()")          {{'刪除卡片'}}
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
@@ -45,7 +45,7 @@
       template(v-for="input in billingInfoInput")
         //- case country
         options(v-if="input.label === 'country'" class="mb-10"
-                :options="countryData" v-model="userCountry")
+                :options="countryData" v-model="userCountryInfo")
         //- case state & zip
         div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
           span
@@ -112,7 +112,7 @@ export default Vue.extend({
       isUS: 'payment/isUS'
     }),
     ...mapFields({
-      userCountry: 'userCountry',
+      userCountryInfo: 'userCountryInfo',
       usage: 'usage',
       card: 'cardInfo',
       bi: 'billingInfo',
@@ -128,7 +128,7 @@ export default Vue.extend({
       return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
     },
     billingInfoInput():ReturnType<typeof paymentData.gerneral> {
-      switch (this.userCountry) {
+      switch (this.userCountryInfo) {
         case 'TW':
           return [...paymentData.gerneral(), ...paymentData.TWonly()]
         case 'US':
@@ -141,7 +141,7 @@ export default Vue.extend({
       for (const item of this.billingInfoInput) {
         switch (item.label) {
           case 'country':
-            if (!this.userCountry) return false
+            if (!this.userCountryInfo) return false
             break
           case 'state & zip':
             if (!this.bi.zip || !this.bi.state) return false
@@ -154,8 +154,8 @@ export default Vue.extend({
       return true
     }
   },
-  mounted() {
-    this.getBillingInfo()
+  async mounted() {
+    await this.getBillingInfo()
     this.getPrice()
   },
   methods: {

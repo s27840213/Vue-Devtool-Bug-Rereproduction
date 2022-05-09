@@ -3,16 +3,16 @@
     span(class="field__title") {{isChange ? $t('TMP0088') : ''}}
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
-              :options="countryData" v-model="userCountry")
-      div(:class="{hidden: !isTW}" class="field__tappay")
+              :options="countryData" v-model="userCountryUi")
+      div(:class="{hidden: !isUiTW}" class="field__tappay")
         div(class="field__tappay-card" id="card-number")
         div(class="field__tappay-date" id="card-date")
         div(class="field__tappay-ccv" id="card-ccv")
-      div(:class="{hidden: isTW}" id="stripe" class="stripe")
+      div(:class="{hidden: isUiTW}" id="stripe" class="stripe")
         svg-icon(iconName="loading" iconColor="gray-1")
       div(v-if="!isChange" class="field-content__info")
         span {{$t('TMP0046', {date: nextPaidDate})}}
-        span {{plans[planSelected][period].now}}
+        span {{plans[planSelected][periodUi].nextPaid}}
       div(v-if="!isChange" class="field-content__info-today")
         span {{$t('TMP0047')}}
         span {{'USD 0.00'}}
@@ -59,9 +59,10 @@ export default Vue.extend({
     }
   },
   watch: {
-    userCountry() {
-      if (!this.isTW) {
+    userCountryUi(newVal) {
+      if (!this.isUiTW) {
         this.stripeInit()
+        this.submit = this.stripeSubmit
       } else {
         this.submit = this.tappaySubmit
       }
@@ -70,23 +71,23 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isTW: 'payment/isTW'
+      isUiTW: 'payment/isUiTW'
     }),
     ...mapFields({
-      userCountry: 'userCountry',
+      userCountryUi: 'userCountryUi',
       nextPaidDate: 'nextPaidDate'
     }),
     ...mapState('payment', {
       plans: 'plans',
       planSelected: 'planSelected',
-      period: 'period'
+      periodUi: 'periodUi'
     }),
     submitText(): string {
-      return (this.isTW ? i18n.t('TMP0043') : i18n.t('TMP0053')) as string
+      return (this.isUiTW ? i18n.t('TMP0043') : i18n.t('TMP0053')) as string
     }
   },
   mounted() {
-    !this.isTW && this.stripeInit()
+    !this.isUiTW && this.stripeInit()
     this.tappayInit()
   },
   methods: {
@@ -96,12 +97,8 @@ export default Vue.extend({
       getPrice: 'payment/getPrice'
     }),
     ...mapMutations({
-      // setUserCountry: 'payment/SET_userCountry',
       setPrime: 'payment/SET_prime'
     }),
-    // setCountry(option: Record<string, string>) {
-    //   this.setUserCountry(option)
-    // },
     async stripeInit() {
       if (this.stripe) return // Prevent load stripe twice
 
@@ -125,7 +122,7 @@ export default Vue.extend({
     stripeSubmit() {
       this.stripe.confirmSetup({
         elements: this.stripeElement,
-        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountry } } } },
+        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountryUi } } } },
         redirect: 'if_required'
       }).then((response) => {
         if (response.error) throw Error(response.error.message)

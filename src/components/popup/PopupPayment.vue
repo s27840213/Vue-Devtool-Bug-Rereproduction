@@ -118,29 +118,29 @@ export default Vue.extend({
     }
   },
   watch: {
-    userCountry() {
-      this.totalStep = this.isTW ? 3 : 2
+    userCountryUI() {
+      this.totalStep = this.isUiTW ? 3 : 2
     }
   },
   computed: {
     ...mapGetters({
-      userCountry: 'payment/getUserCountry',
-      isTW: 'payment/isTW',
+      isUiTW: 'payment/isUiTW',
       isBundle: 'payment/getIsBundle'
     }),
     ...mapFields({
-      period: 'period',
+      periodUi: 'periodUi',
       bi: 'billingInfo',
       biv: 'billingInfoInvalid'
     }),
     ...mapState('payment', {
+      userCountryUI: 'userCountryUI',
       plans: 'plans',
       planSelected: 'planSelected'
     }),
     userPeriod():string {
       return this.view === 'switch'
         ? (this.isBundle ? 'monthly' : 'yearly')
-        : this.period
+        : this.periodUi
     },
     showPreStep(): boolean {
       return ['step2', 'step3'].includes(this.view)
@@ -162,7 +162,7 @@ export default Vue.extend({
     ...mapActions({
       getBillingInfo: 'payment/getBillingInfo',
       tappayAdd: 'payment/tappayAdd',
-      switchToBundle: 'payment/switchToBundle',
+      switch: 'payment/switch',
       checkBillingInfo: 'payment/checkBillingInfo',
       cancelApi: 'payment/cancel'
     }),
@@ -201,9 +201,9 @@ export default Vue.extend({
           this.title = i18n.t('TMP0054') as string
           this.description = i18n.t('TMP0055') as string
           this.buttons = [{
-            text: i18n.t('TMP0056') as string,
+            text: i18n.t('TMP0056', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => {
-              this.switchToBundle()
+              this.switch()
               this.closePopup() // refresh or double check?
             }
           }]
@@ -238,7 +238,7 @@ export default Vue.extend({
     //   )
     // },
     step2Finish() { // rename?
-      this.isTW ? this.changeView('step3') : this.changeView('finish')
+      this.isUiTW ? this.changeView('step3') : this.changeView('finish')
     },
     async step3Finish() {
       for (const item of this.invoiceInput) {
@@ -251,7 +251,7 @@ export default Vue.extend({
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     setPeriod(value: string) {
-      if (this.view === 'step1') { this.period = value }
+      if (this.view === 'step1') { this.periodUi = value }
     },
     selectCancelReason(can: string) {
       this.reasonIndex = can

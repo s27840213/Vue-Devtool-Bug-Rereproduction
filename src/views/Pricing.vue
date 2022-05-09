@@ -18,12 +18,12 @@
               svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
-          slide-toggle(:options="periods" v-model="period" bgColor="#F4F5F7")
+          slide-toggle(:options="periods" v-model="periodUi" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
-            span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][period].original}${$t('TMP0012')}`}}
+            span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('TMP0012')}`}}
             br
             span(class="pricing-plan-right-price__dollar") {{'$ '}}
-            span(class="text-H1") {{plans[planSelected][period].now}}
+            span(class="text-H1") {{plans[planSelected][periodUi].now}}
             span {{' ' + $t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
             span {{$t('TMP0015')}}
@@ -79,7 +79,7 @@ export default Vue.extend({
       planSelected: 'planSelected'
     }),
     ...mapFields({
-      period: 'period'
+      periodUi: 'periodUi'
     })
   },
   async mounted() {

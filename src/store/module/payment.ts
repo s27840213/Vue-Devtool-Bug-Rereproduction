@@ -40,9 +40,11 @@ interface IPaymentState {
   }[]
   // User input
   planSelected: string
-  period: string
   userPlan: string
-  userCountry: string
+  periodUi: string
+  periodInfo: string
+  userCountryUi: string
+  userCountryInfo: string
   billingInfo: {
     // general
     email: string
@@ -74,11 +76,13 @@ const getDefaultState = (): IPaymentState => ({
       name: '',
       monthly: {
         original: '',
-        now: ''
+        now: '',
+        nextPaid: ''
       },
       yearly: {
         original: '',
-        now: ''
+        now: '',
+        nextPaid: ''
       }
     }
   },
@@ -115,9 +119,11 @@ const getDefaultState = (): IPaymentState => ({
   }],
   // User input
   planSelected: '',
-  period: 'monthly',
   userPlan: '',
-  userCountry: '',
+  periodUi: 'monthly',
+  periodInfo: 'monthly',
+  userCountryUi: '',
+  userCountryInfo: '',
   billingInfo: {
     email: '',
     name: '',
@@ -142,13 +148,13 @@ const state = getDefaultState()
 
 switch (i18n.locale) {
   case 'tw':
-    state.userCountry = 'TW'
+    state.userCountryUi = 'TW'
     break
   case 'jp':
-    state.userCountry = 'JP'
+    state.userCountryUi = 'JP'
     break
   case 'us':
-    state.userCountry = 'US'
+    state.userCountryUi = 'US'
     break
 }
 
@@ -172,8 +178,8 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
-  getPrice({ commit }) {
-    paymentApi.planList(state.userCountry).then((response) => {
+  async getPrice({ commit }) {
+    return paymentApi.planList(state.userCountryUi).then((response) => {
       const res = response.data.data
       commit('SET_state', {
         planSelected: res[0].plan_id,
@@ -183,27 +189,30 @@ const actions: ActionTree<IPaymentState, unknown> = {
             name: item.plan_id,
             monthly: {
               original: item.price_month_original,
-              now: item.price_month_discount
+              now: item.price_month_discount,
+              nextPaid: item.price_month_discount
             },
             yearly: {
               original: item.price_month_bundle_original,
-              now: item.price_month_bundle_discount
+              now: item.price_month_bundle_discount,
+              nextPaid: item.price_bundle_discount
             }
           }
         }), {})
       })
     })
   },
-  getBillingInfo({ commit }) {
-    paymentApi.billingInfo().then((response) => {
+  async getBillingInfo({ commit }) {
+    return paymentApi.billingInfo().then((response) => {
       const data = response.data.data
       console.log('bill info', data) // todelete
       commit('SET_state', {
         isPro: data.plan_subscribe === 1,
+        periodInfo: data.plan_next_bundle ? 'yearly' : 'monthly',
         isCancelingPro: data.plan_stop_subscribe === 1,
         nextPrice: '$' + data.price,
         nextPaidDate: data.plan_due_time,
-        country: data.country.toUpperCase(),
+        userCountryInfo: data.country.toUpperCase(),
         usage: {
           bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
@@ -230,8 +239,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       })
     })
   },
-  getBillingHistroy({ commit }) {
-    paymentApi.billingHistory().then((response) => {
+  async getBillingHistroy({ commit }) {
+    return paymentApi.billingHistory().then((response) => {
       console.log('his', response) // todelete
       commit('SET_state', {
         // todo filter unsuccessful history
@@ -283,10 +292,10 @@ const actions: ActionTree<IPaymentState, unknown> = {
     })
     return state.billingInfoInvalid[key]
   },
-  updateBillingInfo() {
-    paymentApi.updateBillingInfo({
+  async updateBillingInfo() {
+    return paymentApi.updateBillingInfo({
       meta: JSON.stringify({
-        country: state.userCountry,
+        country: state.userCountryInfo,
         email: state.billingInfo.email,
         name: state.billingInfo.name,
         company: state.billingInfo.company,
@@ -303,49 +312,56 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).then(() => Vue.notify({ group: 'copy', text: 'Success' }))
       .catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  tappayAdd({ getters }) {
+  async tappayAdd() {
     return paymentApi.tappayAdd({
-      country: state.userCountry,
+      country: state.userCountryUi,
       plan_id: state.planSelected,
-      is_bundle: Number(getters.getIsBundle),
+      is_bundle: Number(state.periodUi === 'yearly'),
       prime: state.prime
     })
   },
-  stripeInit() {
+  async stripeInit() {
     return paymentApi.stripeInit().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       return data.client_secret
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  stripeAdd({ getters }) {
+  async stripeAdd() {
     return paymentApi.stripeAdd({
-      country: state.userCountry,
+      country: state.userCountryUi,
       plan_id: state.planSelected,
-      is_bundle: Number(getters.getIsBundle)
+      is_bundle: Number(state.periodUi === 'yearly')
     })
   },
-  cancel({ commit }, reason: string) {
+  async switch({ getters }) {
+    return paymentApi.switch({
+      plan_id: state.planSelected,
+      is_bundle: 1 - Number(getters.getIsBundle)
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      Vue.notify({ group: 'copy', text: '切換成功' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async cancel({ commit }, reason: string) {
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       commit('SET_state', { isCancelingPro: true })
-    })
+      Vue.notify({ group: 'copy', text: '取消成功' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  resume({ commit }) {
-    paymentApi.resume().then(({ data }) => {
+  async resume({ commit }) {
+    return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       commit('SET_state', { isCancelingPro: false })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  deleteCard() {
-    paymentApi.deleteCard().then(({ data }) => {
+  async deleteCard() {
+    return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       // commit('SET_state', { isCancelingPro: false })
       Vue.notify({ group: 'copy', text: '刪除成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
-  // togglePro({ commit }) { // todelete
-  //   commit('SET_isPro', !state.isPro)
-  // }
 }
 
 const mutations: MutationTree<IPaymentState> = {
@@ -373,9 +389,6 @@ const mutations: MutationTree<IPaymentState> = {
     })
   },
   // old
-  SET_userCountry(state: IPaymentState, userCountry) {
-    state.userCountry = userCountry
-  },
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime
   },
@@ -401,12 +414,9 @@ const getters: GetterTree<IPaymentState, any> = {
   //   return state.plans
   // },
   getIsBundle(state) {
-    return state.period === 'yearly'
+    return state.periodInfo === 'yearly'
   },
   // old
-  getUserCountry(state) {
-    return state.userCountry
-  },
   getPrime(state) {
     return state.prime
   },
@@ -419,11 +429,11 @@ const getters: GetterTree<IPaymentState, any> = {
   getGUIvalid(state) {
     return isLegalGUI(state.billingInfo.GUI)
   },
-  isTW(state) {
-    return state.userCountry === 'TW'
+  isUiTW(state) {
+    return state.userCountryUi === 'TW'
   },
-  isUS(state) {
-    return state.userCountry === 'US'
+  isUiUS(state) {
+    return state.userCountryUi === 'US'
   }
 }
 
