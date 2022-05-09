@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import i18n from '@/i18n'
 import vClickOutside from 'v-click-outside'
@@ -113,7 +113,7 @@ export default Vue.extend({
       cancel1: paymentData.cancel1(),
       cancel2: paymentData.cancel2(),
       // User input
-      reasonIndex: '-1', // todo move to store
+      reasonIndex: '-1',
       otherReason: ''
     }
   },
@@ -155,7 +155,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getBillingInfo()
+    // this.getBillingInfo()
     this.changeView(this.initView)
   },
   methods: {

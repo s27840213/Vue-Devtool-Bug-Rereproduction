@@ -67,6 +67,20 @@ class Payment {
     })
   }
 
+  tappayUpdate (params: any): AxiosPromise { // todo retype
+    return axios.request<any>({ // todo retype
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        action: 'update_card',
+        type: 'tappay',
+        ...params // prime
+      }
+    })
+  }
+
   stripeInit (): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',
@@ -90,6 +104,19 @@ class Payment {
         action: 'add_card',
         type: 'stripe',
         ...params // country, plan_id, is_bundle,
+      }
+    })
+  }
+
+  stripeUpdate (): AxiosPromise { // todo retype
+    return axios.request<any>({ // todo retype
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        action: 'update_card',
+        type: 'stripe'
       }
     })
   }

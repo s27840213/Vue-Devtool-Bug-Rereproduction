@@ -4,11 +4,11 @@
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountryUi")
-      div(:class="{hidden: !isUiTW}" class="field__tappay")
+      div(:class="{hidden: !useTappay}" class="field__tappay")
         div(class="field__tappay-card" id="card-number")
         div(class="field__tappay-date" id="card-date")
         div(class="field__tappay-ccv" id="card-ccv")
-      div(:class="{hidden: isUiTW}" id="stripe" class="stripe")
+      div(:class="{hidden: useTappay}" id="stripe" class="stripe")
         svg-icon(iconName="loading" iconColor="gray-1")
       div(v-if="!isChange" class="field-content__info")
         span {{$t('TMP0046', {date: nextPaidDate})}}
@@ -23,7 +23,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
@@ -38,7 +38,7 @@ const { mapFields } = createHelpers({
 export default Vue.extend({
   name: 'PaymentField',
   props: {
-    isChange: {
+    isChange: { // Is change credit card
       type: Boolean,
       default: false
     }
@@ -59,20 +59,17 @@ export default Vue.extend({
     }
   },
   watch: {
-    userCountryUi(newVal) {
-      if (!this.isUiTW) {
+    userCountryUi() {
+      if (this.useTappay) {
+        this.tappayInit()
+      } else {
         this.stripeInit()
         this.submit = this.stripeSubmit
-      } else {
-        this.submit = this.tappaySubmit
       }
       this.getPrice()
     }
   },
   computed: {
-    ...mapGetters({
-      isUiTW: 'payment/isUiTW'
-    }),
     ...mapFields({
       userCountryUi: 'userCountryUi',
       nextPaidDate: 'nextPaidDate'
@@ -80,20 +77,34 @@ export default Vue.extend({
     ...mapState('payment', {
       plans: 'plans',
       planSelected: 'planSelected',
-      periodUi: 'periodUi'
+      periodUi: 'periodUi',
+      userCountryInfo: 'userCountryInfo'
     }),
+    useTappay():boolean {
+      return this.isChange ? this.userCountryInfo === 'TW'
+        : this.userCountryUi === 'TW'
+    },
     submitText(): string {
-      return (this.isUiTW ? i18n.t('TMP0043') : i18n.t('TMP0053')) as string
+      return (this.isChange
+        ? i18n.t('NN0133')
+        : this.useTappay
+          ? i18n.t('TMP0043')
+          : i18n.t('TMP0053')) as string
     }
   },
   mounted() {
-    !this.isUiTW && this.stripeInit()
-    this.tappayInit()
+    if (this.useTappay) {
+      this.tappayInit()
+    } else {
+      this.stripeInit()
+    }
   },
   methods: {
     ...mapActions({
       stripeInitApi: 'payment/stripeInit',
       stripeAddApi: 'payment/stripeAdd',
+      tappayUpdate: 'payment/tappayUpdate',
+      stripeUpdate: 'payment/stripeUpdate',
       getPrice: 'payment/getPrice'
     }),
     ...mapMutations({
@@ -127,7 +138,7 @@ export default Vue.extend({
       }).then((response) => {
         if (response.error) throw Error(response.error.message)
       }).then(() => {
-        return this.stripeAddApi()
+        return this.isChange ? this.stripeUpdate() : this.stripeAddApi()
       }).then(({ data }) => {
         if (data.flag) throw Error(data.msg)
         Vue.notify({ group: 'copy', text: 'Success' })
@@ -182,6 +193,7 @@ export default Vue.extend({
           return
         }
         this.setPrime(result.card.prime)
+        if (this.isChange) this.tappayUpdate()
         this.$emit('next')
       })
     }

@@ -66,7 +66,7 @@
           :disabled="!billingInfoCheck") {{$t('NN0176')}}
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
-        payment-field(isChange)
+        payment-field(isChange @next="closeCardPopup")
     div(v-if="showPaymentPopup" class="popup-window")
       popup-payment(:initView="paymentView" @close="closePaymentPopup()")
 </template>
@@ -105,11 +105,19 @@ export default Vue.extend({
       paymentView: ''
     }
   },
+  watch: {
+    userCountryInfo(newVal, oldVal) {
+      if (newVal === 'TW' && oldVal !== 'TW' && oldVal !== '') {
+        this.$nextTick(() => {
+          this.userCountryInfo = oldVal
+          Vue.notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
+        })
+      }
+    }
+  },
   computed: {
     ...mapGetters({
-      isBundle: 'payment/getIsBundle',
-      isTW: 'payment/isTW',
-      isUS: 'payment/isUS'
+      isBundle: 'payment/getIsBundle'
     }),
     ...mapFields({
       userCountryInfo: 'userCountryInfo',

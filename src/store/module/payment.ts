@@ -320,6 +320,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
       prime: state.prime
     })
   },
+  async tappayUpdate() {
+    return paymentApi.tappayUpdate({
+      prime: state.prime
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    }).then(() => Vue.notify({ group: 'copy', text: 'tappay update success' }))
+      .catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
   async stripeInit() {
     return paymentApi.stripeInit().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
@@ -332,6 +340,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly')
     })
+  },
+  async stripeUpdate() {
+    return paymentApi.stripeUpdate()
   },
   async switch({ getters }) {
     return paymentApi.switch({
@@ -431,10 +442,10 @@ const getters: GetterTree<IPaymentState, any> = {
   },
   isUiTW(state) {
     return state.userCountryUi === 'TW'
-  },
-  isUiUS(state) {
-    return state.userCountryUi === 'US'
   }
+  // isUiUS(state) {
+  //   return state.userCountryUi === 'US'
+  // }
 }
 
 export default {
