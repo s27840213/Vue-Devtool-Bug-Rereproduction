@@ -1,68 +1,68 @@
 <template lang="pug">
-  div(class="payment" v-click-outside="closePopup")
-    div(class="payment__close")
-      svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
-              class="pointer" @click.native="closePopup()")
-    div(class="payment-left")
-      div(class="payment-left-top")
-        div(v-if="totalStep" class="payment-left-top__step")
-          svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
-                  iconColor="gray1" @click.native="preStep()")
-          span {{$t('TMP0039')}} {{currentStep}} of {{totalStep}}
-        div(class="payment-left-top__title") {{title}}
-        div(v-if="description" class="payment-left-top__description") {{description}}
-      //- switch(view)
-      div(class="payment-left-content" :view="view")
-        //- case step1 or switch
-        template(v-if="['step1', 'switch'].includes(view)")
-          div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
-              class="payment-left-content-period pointer"
-              @click="setPeriod(p.value)")
-            svg-icon(iconWidth="20px"
-                    :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
-                    :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
-            div(class="payment-left-content-period-price")
-              span(class="payment-left-content-period-price__label") {{p.label}}
-              span(class="payment-left-content-period-price__amount") {{`$${plans[planSelected][p.value].now}`}}
-                span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0042') : ''}`}}
-            span(v-if="p.value==='yearly'"
-                class="payment-left-content-period__off") {{$t('TMP0043')}}
-        //- case step2
-        template(v-if="view === 'step2'")
-          PaymentField(@next="step2Finish")
-        //- case step3
-        template(v-if="view === 'step3'")
-          div(v-for="inv in invoiceInput"
-              class="payment-left-content-invoice")
-            input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
-            span(v-if="biv[inv.key]") {{inv.error}}
-        //- case cancel1
-        template(v-if="view === 'cancel1'")
-          div(v-for="can in cancel1" class="payment-left-content-cancel")
-            svg-icon(iconName="pro" iconWidth="24px")
-            span {{can}}
-        //- case cancel2
-        template(v-if="view === 'cancel2'")
-          div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
-            //- todo: for label prop
-            radio-btn(:isSelected="reasonIndex === idx"
-                      :formatKey="String(idx)" circleColor="gray-4"
-                      @select="selectCancelReason(idx)")
-            span {{can}}
-          input(class="payment-left-content-cancel__other"
-                v-model="otherReason" :placeholder="$t('TMP0072')")
-      div(class="payment-left-button")
-        btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
-            @click.native="button.func()"
-            :disabled="button.disabled ? button.disabled() : false")
-          span {{button.text}}
-        span(v-if="view === 'step1'"
-            class="payment-left-button-description") {{$t('TMP0045')}}
-    //- move to jpg folder, compress?
-    img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
-    div(v-if="view === 'finish'" class="payment-finish")
-      animation(path="/lottie/us/pro.json")
-
+  div(class="wrapper")
+    div(class="payment" v-click-outside="closePopup")
+      div(class="payment__close")
+        svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
+                class="pointer" @click.native="closePopup()")
+      div(class="payment-left")
+        div(class="payment-left-top")
+          div(v-if="totalStep" class="payment-left-top__step")
+            svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
+                    iconColor="gray1" @click.native="preStep()")
+            span {{$t('TMP0039')}} {{currentStep}} of {{totalStep}}
+          div(class="payment-left-top__title") {{title}}
+          div(v-if="description" class="payment-left-top__description") {{description}}
+        //- switch(view)
+        div(class="payment-left-content" :view="view")
+          //- case step1 or switch
+          template(v-if="['step1', 'switch'].includes(view)")
+            div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
+                class="payment-left-content-period pointer"
+                @click="setPeriod(p.value)")
+              svg-icon(iconWidth="20px"
+                      :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
+                      :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
+              div(class="payment-left-content-period-price")
+                span(class="payment-left-content-period-price__label") {{p.label}}
+                span(class="payment-left-content-period-price__amount") {{`$${plans[planSelected][p.value].now}`}}
+                  span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0042') : ''}`}}
+              span(v-if="p.value==='yearly'"
+                  class="payment-left-content-period__off") {{$t('TMP0043')}}
+          //- case step2
+          template(v-if="view === 'step2'")
+            PaymentField(@next="step2Finish")
+          //- case step3
+          template(v-if="view === 'step3'")
+            div(v-for="inv in invoiceInput"
+                class="payment-left-content-invoice")
+              input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
+              span(v-if="biv[inv.key]") {{inv.error}}
+          //- case cancel1
+          template(v-if="view === 'cancel1'")
+            div(v-for="can in cancel1" class="payment-left-content-cancel")
+              svg-icon(iconName="pro" iconWidth="24px")
+              span {{can}}
+          //- case cancel2
+          template(v-if="view === 'cancel2'")
+            div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
+              //- todo: for label prop
+              radio-btn(:isSelected="reasonIndex === idx"
+                        :formatKey="String(idx)" circleColor="gray-4"
+                        @select="selectCancelReason(idx)")
+              span {{can}}
+            input(class="payment-left-content-cancel__other"
+                  v-model="otherReason" :placeholder="$t('TMP0072')")
+        div(class="payment-left-button")
+          btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
+              @click.native="button.func()"
+              :disabled="button.disabled ? button.disabled() : false")
+            span {{button.text}}
+          span(v-if="view === 'step1'"
+              class="payment-left-button-description") {{$t('TMP0045')}}
+      //- move to jpg folder, compress?
+      img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
+      div(v-if="view === 'finish'" class="payment-finish")
+        animation(path="/lottie/us/pro.json")
 </template>
 
 <script lang="ts">
@@ -262,11 +262,17 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  @include hide-scrollbar;
+  width: min(792px, min(90vw));
+  height: min(704px, min(80vw, 90vh));
+}
+
 .payment {
   display: flex;
   position: relative;
-  width: min(792px, min(90vw, 101.25vh));
-  height: min(704px, min(80vw, 90vh));
+  width: min(792px, 90vw);
+  height: min(704px, 80vw);
   flex-shrink: 0;
   background-color: white; // ?
   overflow: auto; // ?
