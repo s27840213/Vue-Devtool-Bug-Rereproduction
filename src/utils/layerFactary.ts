@@ -58,6 +58,7 @@ class LayerFactary {
         shadow: {
           currentEffect: 'none',
           effects: {
+            color: '#000000',
             ...Object.keys(ShadowEffectType)
               .reduce((obj, effect) => {
                 return {
@@ -65,7 +66,9 @@ class LayerFactary {
                   [effect]: {}
                 }
               }, {})
-          }
+          },
+          srcObj: { type: '', assetId: '', userId: '' },
+          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 }
         }
       }
     }

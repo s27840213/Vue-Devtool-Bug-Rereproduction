@@ -36,6 +36,8 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import { LayerType } from '@/store/types'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   data() {
@@ -151,16 +153,14 @@ export default Vue.extend({
         case this.btns.find(b => b.name === 'shadow')?.show || '': {
           const { pageIndex, layerIndex, subLayerIdx, getLayer } = layerUtils
           const currLayer = getLayer(pageIndex, layerIndex)
-          if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
-            const isUploading = (currLayer as IGroup).layers[subLayerIdx].isUploading
-            if (isUploading) {
-              return
-            }
-          } else {
-            if (currLayer.isUploading) {
-              console.log('is uploading')
-              return
-            }
+          const target = (currLayer.type === LayerType.group && subLayerIdx !== -1
+            ? (currLayer as IGroup).layers[subLayerIdx] : currLayer) as IImage
+          if (target.isUploading) {
+            return
+          }
+          const currentEffect = target.styles.shadow.currentEffect
+          if (currentEffect !== ShadowEffectType.none) {
+            imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', userId: '', assetId: '' })
           }
           break
         }

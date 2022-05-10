@@ -1,4 +1,5 @@
-import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { SrcObj } from '@/interfaces/gallery'
+import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage } from '@/interfaces/layer'
 import store from '@/store'
 import { ILayerInfo, LayerType } from '@/store/types'
@@ -183,17 +184,17 @@ class ImageShadowUtils {
         ctxT.globalAlpha = 1
         ctxT.globalCompositeOperation = 'source-over'
 
-        if (!timeout) {
-          const imgX = _imgX * img.naturalWidth / _imgWidth
-          const imgY = _imgY * img.naturalWidth / _imgWidth
-          const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-          const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-          const drawCanvasHeight = drawCanvasH as number
-          const drawCanvasWidth = drawCanvasW as number
-          const x = (canvasT.width - drawCanvasWidth) * 0.5
-          const y = (canvasT.height - drawCanvasHeight) * 0.5
-          ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
-        }
+        // if (!timeout) {
+        //   const imgX = _imgX * img.naturalWidth / _imgWidth
+        //   const imgY = _imgY * img.naturalWidth / _imgWidth
+        //   const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+        //   const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+        //   const drawCanvasHeight = drawCanvasH as number
+        //   const drawCanvasWidth = drawCanvasW as number
+        //   const x = (canvasT.width - drawCanvasWidth) * 0.5
+        //   const y = (canvasT.height - drawCanvasHeight) * 0.5
+        //   ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
+        // }
 
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -291,12 +292,12 @@ class ImageShadowUtils {
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalAlpha = 1
 
-        if (!timeout) {
-          const { drawCanvasW, drawCanvasH } = options
-          const x = (canvas.width - (drawCanvasW as number)) * 0.5
-          const y = (canvas.height - (drawCanvasH as number)) * 0.5
-          ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
-        }
+        // if (!timeout) {
+        //   const { drawCanvasW, drawCanvasH } = options
+        //   const x = (canvas.width - (drawCanvasW as number)) * 0.5
+        //   const y = (canvas.height - (drawCanvasH as number)) * 0.5
+        //   ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
+        // }
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
@@ -389,6 +390,7 @@ class ImageShadowUtils {
       ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+      // const bluredData = imageData
       const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
       if (this.handlerId === handlerId) {
@@ -413,11 +415,11 @@ class ImageShadowUtils {
 
           ctxT.globalCompositeOperation = 'source-over'
           /** only draw the origin image over the canvas as uploading */
-          if (!timeout) {
-            ctxT.save()
-            ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
-            ctxT.restore()
-          }
+          // if (!timeout) {
+          //   ctxT.save()
+          //   ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
+          //   ctxT.restore()
+          // }
 
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
@@ -732,7 +734,7 @@ class ImageShadowUtils {
   }
 
   updateEffectState(layerInfo: ILayerInfo, currentEffect: string) {
-    store.commit('UPDATE_shadowEffectState', {
+    store.commit('SET_shadowEffectState', {
       layerInfo,
       payload: { currentEffect }
     })
@@ -742,6 +744,20 @@ class ImageShadowUtils {
     store.commit('UPDATE_shadowProps', {
       layerInfo,
       payload
+    })
+  }
+
+  updateShadowStyles(layerInfo: ILayerInfo, payload: Partial<IShadowStyles>) {
+    store.commit('UPDATE_shadowStyles', {
+      layerInfo,
+      payload
+    })
+  }
+
+  updateShadowSrc(layerInfo: ILayerInfo, srcObj: SrcObj) {
+    store.commit('SET_srcObj', {
+      layerInfo,
+      srcObj
     })
   }
 }

@@ -1,4 +1,5 @@
 import { SrcObj } from './gallery'
+import { IImageStyle } from './layer'
 
 export enum ShadowEffectType {
   none = 'none',
@@ -54,9 +55,17 @@ export interface IShadowEffects {
   imageMatched?: IImageMatchedEffect,
   floating?: IFloatingEffect
 }
+
+export interface IShadowStyles {
+  imgWidth: number,
+  imgHeight: number,
+  imgX: number,
+  imgY: number
+}
 export interface IShadowProps {
   currentEffect: ShadowEffectType,
   effects: IShadowEffects,
-  srcObj: SrcObj
+  srcObj: SrcObj,
+  styles: IShadowStyles,
   isTransparent?: boolean,
 }

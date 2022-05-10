@@ -38,19 +38,12 @@ export default Vue.extend({
       const layerPath = `path('M0,0h${width}v${height}h${-width}z`
       let clipPath = ''
 
-      if (type === 'image') {
-        if (this.config.isFrame) {
-          clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
-        } else {
-          clipPath = layerPath
-        }
-      }
       switch (type) {
         case 'image':
           if (this.config.isFrame) {
             clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
           } else {
-            clipPath = layerPath
+            // clipPath = layerPath
           }
           width = `${width}px`
           height = `${height}px`

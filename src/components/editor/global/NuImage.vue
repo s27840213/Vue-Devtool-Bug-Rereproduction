@@ -7,10 +7,23 @@
         :src="finalSrc"
         :styles="adjustImgStyles"
         :style="imgStyles")
-    div(v-if="showCanvas && !isAdjustImage"
-      class="canvas__wrapper"
+    div(v-if="showCanvas && !shadowSrc"
+      class="shadow__canvas-wrapper"
       :style="canvasWrapperStyle")
       canvas(ref="canvas")
+    //- div(v-else-if="shadowSrc"
+    //-     class="img-wrapper"
+    //-     :style="imgWrapperstyle")
+    div(v-else-if="shadowSrc"
+      class="shadow__picture"
+      :style="imgShadowStyles")
+      img(ref="img"
+        :style="flipStyles"
+        :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+        draggable="false"
+        :src="shadowSrc"
+        @error="onError()"
+        @load="onLoad()")
     div(v-show="!isAdjustImage"
       class="img-wrapper"
       :style="imgWrapperstyle")
@@ -54,7 +67,7 @@ export default Vue.extend({
   mounted() {
     const isPrimaryLayerFrame = layerUtils.getLayer(this.pageIndex, this.layerIndex).type === LayerType.frame &&
       (this.subLayerIndex !== -1 || typeof this.subLayerIndex !== 'undefined')
-    if (!this.config.forRender && !isPrimaryLayerFrame) {
+    if (!this.config.forRender && !isPrimaryLayerFrame && this.shadow.currentEffect !== ShadowEffectType.none) {
       this.handleNewShadowEffect()
     }
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
@@ -75,6 +88,11 @@ export default Vue.extend({
         floating: undefined as undefined | HTMLImageElement
       },
       canvasSize: { width: 0, height: 0 }
+    }
+  },
+  updated() {
+    if (!this.shadowSrc && this.currentShadowEffect !== ShadowEffectType.none && this.canvas) {
+      this.handleNewShadowEffect()
     }
   },
   watch: {
@@ -98,6 +116,7 @@ export default Vue.extend({
     },
     shadowEffects: {
       handler(val) {
+        console.log('update')
         if (this.$refs.canvas) {
           !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
         }
@@ -152,7 +171,7 @@ export default Vue.extend({
     },
     imgWrapperstyle(): any {
       let clipPath = ''
-      if (this.currentShadowEffect !== ShadowEffectType.none && !this.imgControl) {
+      if (!this.imgControl) {
         const { height, width } = this.config.styles
         clipPath = `path('M0,0h${width}v${height}h${-width}z`
       }
@@ -166,6 +185,14 @@ export default Vue.extend({
         transform: `translate(${imgX}px, ${imgY}px)`,
         width: `${imgWidth}px`,
         height: `${imgHeight}px`
+      }
+    },
+    imgShadowStyles(): any {
+      const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
+      return {
+        width: imgWidth.toString() + 'px',
+        height: imgHeight.toString() + 'px',
+        transform: `translate(${imgX}px, ${imgY}px)`
       }
     },
     flipStyles(): any {
@@ -228,7 +255,7 @@ export default Vue.extend({
       return (this.config as IImage).styles.shadow
     },
     shadowEffects(): IShadowEffects {
-      return this.shadow ? this.shadow.effects : { color: '#FFFFFF' }
+      return this.shadow.effects
     },
     currentShadowEffect(): ShadowEffectType {
       return this.shadow.currentEffect
@@ -382,7 +409,7 @@ export default Vue.extend({
     handleNewShadowEffect() {
       const { canvas, layerInfo } = this
       if (!canvas) {
-        console.warn('there is no cnavas!')
+        console.warn('there is no canvas!')
         return
       }
       imgShadowUtils.clearLayerData()
@@ -542,27 +569,24 @@ export default Vue.extend({
     width: 100%;
     height:100%;
   }
-  .canvas {
-    &__wrapper {
-      pointer-events: none;
-      flex-shrink: 0;
-    }
-    &__process {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: setColor(gray-1, 0.3);
-    }
-  }
-  canvas {
-    width: 100%;
-    height: 100%;
-  }
+  // .canvas {
+  //   &__wrapper {
+  //     pointer-events: none;
+  //     flex-shrink: 0;
+  //   }
+  //   &__process {
+  //     width: 100%;
+  //     height: 100%;
+  //     position: absolute;
+  //     top: 0;
+  //     left: 0;
+  //     display: flex;
+  //     align-items: center;
+  //     justify-content: center;
+  //     background-color: setColor(gray-1, 0.3);
+  //   }
+  // }
+
   .img-wrapper {
     position: absolute;
     justify-content: center;
@@ -571,6 +595,21 @@ export default Vue.extend({
     height: 100%;
     // display: none;
   }
+}
+
+.shadow {
+  &__canvas-wrapper {
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+  &__picture {
+    position: absolute;
+  }
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
 }
 
 .layer-flip {

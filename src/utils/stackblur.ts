@@ -80,56 +80,6 @@ const shgTable = [
   24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24
 ]
 
-// /**
-//  * @param {string|HTMLImageElement} img
-//  * @param {string|HTMLCanvasElement} canvas
-//  * @param {Float} radius
-//  * @param {boolean} blurAlphaChannel
-//  * @param {boolean} useOffset
-//  * @param {boolean} skipStyles
-//  * @returns {undefined}
-//  */
-// function processImage (
-//   img, canvas, radius, blurAlphaChannel, useOffset, skipStyles
-// ) {
-//   if (typeof img === 'string') {
-//     img = document.getElementById(img);
-//   }
-//   if (!img || !('naturalWidth' in img)) {
-//     return;
-//   }
-
-//   const dimensionType = useOffset ? 'offset' : 'natural';
-//   const w = img[dimensionType + 'Width'];
-//   const h = img[dimensionType + 'Height'];
-
-//   if (typeof canvas === 'string') {
-//     canvas = document.getElementById(canvas);
-//   }
-//   if (!canvas || !('getContext' in canvas)) {
-//     return;
-//   }
-
-//   if (!skipStyles) {
-//     canvas.style.width = w + 'px';
-//     canvas.style.height = h + 'px';
-//   }
-//   canvas.width = w;
-//   canvas.height = h;
-
-//   const context = canvas.getContext('2d');
-//   context.clearRect(0, 0, w, h);
-//   context.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, w, h);
-
-//   if (isNaN(radius) || radius < 1) { return; }
-
-//   if (blurAlphaChannel) {
-//     processCanvasRGBA(canvas, 0, 0, w, h, radius);
-//   } else {
-//     processCanvasRGB(canvas, 0, 0, w, h, radius);
-//   }
-// }
-
 export class BlurStack {
   /**
    * Set properties.
@@ -177,26 +127,6 @@ function getImageDataFromCanvas (canvas: HTMLCanvasElement, topX: number, topY: 
   }
 }
 
-// /**
-//  * @param {HTMLCanvasElement} canvas
-//  * @param {Integer} topX
-//  * @param {Integer} topY
-//  * @param {Integer} width
-//  * @param {Integer} height
-//  * @param {Float} radius
-//  * @returns {undefined}
-//  */
-//  function processCanvasRGBA (canvas: HTMLCanvasElement, topX: number, topY: number, width: number, height: number, radius: number) {
-//   if (isNaN(radius) || radius < 1) { return; }
-//   radius |= 0;
-
-//   let imageData = getImageDataFromCanvas(canvas, topX, topY, width, height)
-
-//   imageData = processImageDataRGBA(imageData, topX, topY, width, height, radius)
-
-//   (canvas.getContext('2d') as CanvasRenderingContext2D).putImageData(imageData, topX, topY)
-// }
-
 /**
  * @param {ImageData} imageData
  * @param {Integer} topX
@@ -235,27 +165,30 @@ export async function imageDataRGBA (imageData: ImageData, topX: number, topY: n
 
   const mulSum = mulTable[radius]
   const shgSum = shgTable[radius]
-  // for (let i = 0; i < width * height * 4; i += 4) {
-  //   pixels[i] = pixels[i] * pixels[i + 3] / 255
-  //   pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
-  //   pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
-  // }
+  for (let i = 0; i < width * height * 4; i += 4) {
+    pixels[i] = pixels[i] * pixels[i + 3] / 255
+    pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
+    pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
+  }
 
   const DIVIDE_SIZE = 16
-  const pexelsNum = width * height
-  const _pexelsNum = Math.ceil(pexelsNum / DIVIDE_SIZE)
-  for (let j = 0; j < DIVIDE_SIZE; j++) {
-    await imageShadowUtils.asyncProcessing(() => {
-      for (let i = _pexelsNum * j; i < _pexelsNum * (j + 1) && i < pexelsNum; i += 4) {
-        pixels[i] = pixels[i] * pixels[i + 3] / 255
-        pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
-        pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
-      }
-    })
-    if (handlerId !== currHandlerId()) {
-      return imageData
-    }
-  }
+  // const pexelsNum = width * height
+  // const _pexelsNum = Math.ceil(pexelsNum / DIVIDE_SIZE)
+  // let k = 0
+  // for (let j = 0; j < DIVIDE_SIZE; j++) {
+  //   await imageShadowUtils.asyncProcessing(() => {
+  //     for (let i = _pexelsNum * j; i < _pexelsNum * (j + 1) && i < pexelsNum; i += 4) {
+  //       pixels[i] = pixels[i] * pixels[i + 3] / 255
+  //       pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
+  //       pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
+  //       k = i
+  //     }
+  //   })
+  //   if (handlerId !== currHandlerId()) {
+  //     return imageData
+  //   }
+  // }
+  // console.log(k)
 
   // for (let y = 0; y < height; y++) {
   const _height = Math.ceil(height / DIVIDE_SIZE)

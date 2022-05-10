@@ -84,6 +84,9 @@ class ImageUtils {
   }
 
   getSrcSize(type: string, dimension: number, preload = '') {
+    if (!type) {
+      return 0
+    }
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
     const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
