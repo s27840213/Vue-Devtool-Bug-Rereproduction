@@ -38,6 +38,8 @@
         @click="openCardPopup()")       {{$t('TMP0089')}}
       p(class="text-gray-3 pointer"
         @click="deleteCard()")          {{'刪除卡片'}}
+      p(class="text-gray-3 pointer"
+        @click="deletePlanCompletely()") {{'完全刪除plan（僅供測試）'}}
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0090')}}
@@ -174,7 +176,8 @@ export default Vue.extend({
       updateBillingInfoApi: 'payment/updateBillingInfo',
       checkBillingInfo: 'payment/checkBillingInfo',
       resume: 'payment/resume',
-      deleteCard: 'payment/deleteCard'
+      deleteCard: 'payment/deleteCard',
+      deletePlanCompletely: 'payment/deletePlanCompletely'
     }),
     async updateBillingInfo() {
       for (const item of this.billingInfoInput) {

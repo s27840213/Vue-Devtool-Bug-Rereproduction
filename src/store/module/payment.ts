@@ -380,6 +380,12 @@ const actions: ActionTree<IPaymentState, unknown> = {
       // commit('SET_state', { isCancelingPro: false })
       Vue.notify({ group: 'copy', text: '刪除成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async deletePlanCompletely() {
+    return paymentApi.deletePlanCompletely().then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      Vue.notify({ group: 'copy', text: '完全刪除成功' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
 }
 

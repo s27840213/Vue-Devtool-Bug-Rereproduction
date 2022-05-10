@@ -185,6 +185,18 @@ class Payment {
       }
     })
   }
+
+  // Only for testing
+  deletePlanCompletely(): AxiosPromise {
+    return axios.request<any>({
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        admin_token: 'vKLyK56ICyAn1dLQ'
+      }
+    })
+  }
 }
 
 export default new Payment()
