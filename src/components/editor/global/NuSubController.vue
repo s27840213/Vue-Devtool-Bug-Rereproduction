@@ -471,7 +471,10 @@ export default Vue.extend({
             this.getLayerType === 'image' && this.onFrameDrop(e)
             return
           case 'group':
-            this.getLayerType === 'image' && this.dragUtils.onImgDrop(e)
+            if (this.getLayerType === 'image') {
+              this.dragUtils.onImgDrop(e)
+              LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+            }
         }
       }
     },

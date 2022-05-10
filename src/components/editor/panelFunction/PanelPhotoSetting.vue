@@ -38,6 +38,7 @@ import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow
 import { LayerType } from '@/store/types'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   data() {
@@ -65,6 +66,9 @@ export default Vue.extend({
   },
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
+    eventUtils.on(PanelEvent.showPhotoShadow, () => {
+      this.show = this.btns.find(b => b.name === 'shadow')?.show || ''
+    })
   },
   destroyed() {
     document.removeEventListener('mouseup', this.handleClick)
