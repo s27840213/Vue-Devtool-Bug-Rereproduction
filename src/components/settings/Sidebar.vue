@@ -48,11 +48,11 @@ export default Vue.extend({
         name: 'hr'
       }, {
         name: 'payment',
-        label: i18n.t('TMP0073'),
+        label: i18n.t('TMP0075'),
         icon: 'pro'
       }, {
         name: 'billing',
-        label: i18n.t('TMP0103'),
+        label: i18n.t('TMP0105'),
         icon: 'invoice'
       }]
     }

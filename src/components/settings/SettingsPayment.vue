@@ -1,48 +1,48 @@
 <template lang="pug">
   div(class="sp")
     div(v-if="!isPro" class="sp-free")
-      p(class="text-blue-1")            {{$t('TMP0074')}}
+      p(class="text-blue-1")            {{$t('TMP0076')}}
       svg-icon(iconName="free")
       btn(class="rounded" type="primary-lg" @click.native="togglePro()")
-        span                            {{$t('TMP0075')}}
+        span                            {{$t('TMP0077')}}
     div(v-if="isPro" class="sp-pro")
-      p(class="text-blue-1")            {{$t('TMP0074')}}
+      p(class="text-blue-1")            {{$t('TMP0076')}}
       //- todelete @click
       svg-icon(iconName="pro"
               @click.native="togglePro()")
       template(v-if="isCancelingPro")
-        span(class="body-SM")           {{$t('TMP0081', {date: nextPaidDate})}}
+        span(class="body-SM")           {{$t('TMP0083', {date: nextPaidDate})}}
         btn(class="rounded" type="primary-mid" @click.native="resume()")
-          span                          {{$t('TMP0076')}}
+          span                          {{$t('TMP0078')}}
       template(v-else)
-        span(class="body-SM")           {{$t('TMP0077', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
-        span(class="body-SM"      v-html="$t('TMP0078', { price: nextPrice, date: nextPaidDate  })")
+        span(class="body-SM")           {{$t('TMP0079', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
+        span(class="body-SM"      v-html="$t('TMP0080', { price: nextPrice, date: nextPaidDate  })")
         span(class="text-blue-1 body-SM pointer"
-            @click="switchPeriod()")    {{$t('TMP0079', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
+            @click="switchPeriod()")    {{$t('TMP0081', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
         span(class="text-gray-3 body-SM pointer"
-            @click="cancelSub()")       {{$t('TMP0080')}}
-      span(class="text-blue-1 mt-30")   {{$t('TMP0082')}}
-      span(                       v-html="$t('TMP0083', { amount: usage.bgrmRemain, date: nextPaidDate })")
-      span(class="body-XS")             {{$t('TMP0084')}}
-      span(class="text-blue-1")         {{$t('TMP0085')}}
+            @click="cancelSub()")       {{$t('TMP0082')}}
+      span(class="text-blue-1 mt-30")   {{$t('TMP0084')}}
+      span(                       v-html="$t('TMP0085', { amount: usage.bgrmRemain, date: nextPaidDate })")
+      span(class="body-XS")             {{$t('TMP0086')}}
+      span(class="text-blue-1")         {{$t('TMP0087')}}
       div(class="sp-pro-disk")
         div(class="sp-pro-disk-total")
           div(class="sp-pro-disk-used" :style="diskPercent")
         span                            {{`${usage.diskUsed}/${usage.diskTotal}`}}
-      span(class="body-XS")             {{$t('TMP0086')}}
+      span(class="body-XS")             {{$t('TMP0088')}}
     hr
     div(v-if="isPro" class="sp-detail")
-      p(class="text-blue-1")            {{$t('TMP0087')}}
-      span(class="body-SM")             {{`···· ···· ···· ${card.last4}  ${$t('TMP0088')} ${card.date}`}}
+      p(class="text-blue-1")            {{$t('TMP0089')}}
+      span(class="body-SM")             {{`···· ···· ···· ${card.last4}  ${$t('TMP0090')} ${card.date}`}}
       p(class="text-blue-1 body-SM"
-        @click="openCardPopup()")       {{$t('TMP0089')}}
+        @click="openCardPopup()")       {{$t('TMP0091')}}
       p(class="text-gray-3 pointer"
         @click="deleteCard()")          {{'刪除卡片'}}
       p(class="text-gray-3 pointer"
         @click="deletePlanCompletely()") {{'完全刪除plan（僅供測試）'}}
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
-      p(class="text-blue-1")            {{$t('TMP0090')}}
+      p(class="text-blue-1")            {{$t('TMP0092')}}
       //- switch(input.label)
       template(v-for="input in billingInfoInput")
         //- case country
@@ -51,11 +51,11 @@
         //- case state & zip
         div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
           span
-          label(for="zip") {{$t('TMP0102')}}
+          label(for="zip") {{$t('TMP0104')}}
           options(class="mb-10" :options="stateData"
-                  v-model="bi.state" :ph="$t('TMP0101')")
+                  v-model="bi.state" :ph="$t('TMP0103')")
           input(id="zip" v-model="bi.zip" :invalid="biv.zip"
-                :placeholder="$t('TMP0102')")
+                :placeholder="$t('TMP0104')")
           span
           span(v-if="biv.zip" class="sp-info__invalid") {{'zip error'}}
         //- defualt

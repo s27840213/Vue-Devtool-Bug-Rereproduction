@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="field")
-    span(class="field__title") {{isChange ? $t('TMP0089') : ''}}
+    span(class="field__title") {{isChange ? $t('TMP0091') : ''}}
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountryUi")

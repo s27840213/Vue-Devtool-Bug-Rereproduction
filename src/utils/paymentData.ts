@@ -54,21 +54,21 @@ class PaymentData {
   // For PopupPayment.vue
   cancel1() {
     return [
-      i18n.t('TMP0059'),
-      i18n.t('TMP0060'),
       i18n.t('TMP0061'),
-      i18n.t('TMP0062')
+      i18n.t('TMP0062'),
+      i18n.t('TMP0063'),
+      i18n.t('TMP0064')
     ]
   }
 
   cancel2() {
     return [
-      i18n.t('TMP0066'),
-      i18n.t('TMP0067'),
       i18n.t('TMP0068'),
       i18n.t('TMP0069'),
       i18n.t('TMP0070'),
-      i18n.t('TMP0071')
+      i18n.t('TMP0071'),
+      i18n.t('TMP0072'),
+      i18n.t('TMP0073')
     ]
   }
 
@@ -80,12 +80,12 @@ class PaymentData {
   gerneral():BillingInfoInput[] {
     return [{
       label: i18n.tc('NN0173', 1) as string,
-      ph: i18n.t('TMP0091') as string,
+      ph: i18n.t('TMP0093') as string,
       key: 'email',
       error: 'Invalid email format.'
     }, {
       label: i18n.t('NN0172') as string,
-      ph: i18n.t('TMP0092') as string,
+      ph: i18n.t('TMP0094') as string,
       key: 'name'
     }]
   }
@@ -106,20 +106,20 @@ class PaymentData {
 
   USonly():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0093') as string,
-      ph: i18n.t('TMP0094') as string,
+      label: i18n.t('TMP0095') as string,
+      ph: i18n.t('TMP0096') as string,
       key: 'company'
     }, {
-      label: i18n.t('TMP0097', { number: 1 }) as string,
-      ph: i18n.t('TMP0098') as string,
+      label: i18n.t('TMP0099', { number: 1 }) as string,
+      ph: i18n.t('TMP0100') as string,
       key: 'address1'
     }, {
-      label: i18n.t('TMP0097', { number: 2 }) as string,
-      ph: i18n.t('TMP0099') as string,
+      label: i18n.t('TMP0099', { number: 2 }) as string,
+      ph: i18n.t('TMP0101') as string,
       key: 'address2'
     }, {
-      label: i18n.t('TMP0100') as string,
-      ph: i18n.t('TMP0100') as string,
+      label: i18n.t('TMP0102') as string,
+      ph: i18n.t('TMP0102') as string,
       key: 'city'
     }, {
       label: 'state & zip',
@@ -130,12 +130,12 @@ class PaymentData {
 
   others():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0093') as string,
-      ph: i18n.t('TMP0094') as string,
-      key: 'company'
-    }, {
       label: i18n.t('TMP0095') as string,
       ph: i18n.t('TMP0096') as string,
+      key: 'company'
+    }, {
+      label: i18n.t('TMP0097') as string,
+      ph: i18n.t('TMP0098') as string,
       key: 'address1'
     }]
   }

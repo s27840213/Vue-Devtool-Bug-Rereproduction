@@ -51,7 +51,7 @@
                         @select="selectCancelReason(idx)")
               span {{can}}
             input(class="payment-left-content-cancel__other"
-                  v-model="otherReason" :placeholder="$t('TMP0072')")
+                  v-model="otherReason" :placeholder="$t('TMP0074')")
         div(class="payment-left-button")
           btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
               @click.native="button.func()"
@@ -61,8 +61,9 @@
               class="payment-left-button-description") {{$t('TMP0045')}}
       //- move to jpg folder, compress?
       img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
-      div(v-if="view === 'finish'" class="payment-finish")
+      div(v-if="['finish', 'already pro'].includes(view)" class="payment-finish")
         animation(path="/lottie/us/pro.json")
+        div {{finishText}}
 </template>
 
 <script lang="ts">
@@ -107,6 +108,7 @@ export default Vue.extend({
       description: '',
       buttons: [{}] as {type?: string, disabled?: ()=>boolean, text: string, func: ()=>void}[],
       img: 'remover.jpg',
+      finishText: '',
       // View constant
       periodInput: paymentData.periodOptions(),
       invoiceInput: [...paymentData.gerneral(), ...paymentData.TWonly()],
@@ -194,13 +196,17 @@ export default Vue.extend({
           }]
           break
         case 'finish':
+          this.finishText = i18n.t('TMP0055') as string
+          break
+        case 'already pro':
+          this.finishText = i18n.t('TMP0056') as string
           break
         case 'switch':
           this.getSwitchPrice()
-          this.title = i18n.t('TMP0055') as string
-          this.description = i18n.t('TMP0056') as string
+          this.title = i18n.t('TMP0057') as string
+          this.description = i18n.t('TMP0058') as string
           this.buttons = [{
-            text: i18n.t('TMP0057', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
+            text: i18n.t('TMP0059', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => {
               this.switch()
               this.closePopup() // refresh or double check?
@@ -208,19 +214,19 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0058') as string
+          this.title = i18n.t('TMP0060') as string
           this.buttons = [{
-            text: i18n.t('TMP0064') as string,
+            text: i18n.t('TMP0066') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            text: i18n.t('TMP0063') as string,
+            text: i18n.t('TMP0065') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0065') as string
+          this.title = i18n.t('TMP0067') as string
           this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
@@ -408,9 +414,13 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   background-color: white;
-  .animation {
-    width: min(80vh, 80vw);
-    height: min(80vh, 80vw);
+  .animation { height: 100%; }
+  >div {
+    @include body-SM;
+    position: absolute;
+    top: 57%;
+    width: 70%;
+    text-align: center;
   }
 }
 </style>
