@@ -1,9 +1,9 @@
 import i18n from '@/i18n'
-import VueI18n from 'vue-i18n'
+import { TranslateResult } from 'vue-i18n'
 
 interface BillingInfoInput {
-  label: VueI18n.TranslateResult
-  ph?: VueI18n.TranslateResult
+  label: TranslateResult
+  ph?: TranslateResult
   key?: string
   error?: string
 }
@@ -36,11 +36,16 @@ class PaymentData {
     ]
   }
 
+  addLink(text: string):string {
+    const link = text.match(/(https:\/\/[\w./]+)/)?.[0] as string
+    return text.replace(link, `<a href=${link}>${link}</a>`)
+  }
+
   faqs() {
     return [
       { Q: i18n.t('TMP0029'), A: i18n.t('TMP0030') },
       { Q: i18n.t('TMP0031'), A: i18n.t('TMP0032') },
-      { Q: i18n.t('TMP0033'), A: i18n.t('TMP0034') },
+      { Q: i18n.t('TMP0033'), A: this.addLink(i18n.t('TMP0034') as string) },
       { Q: i18n.t('TMP0035'), A: i18n.t('TMP0036') },
       { Q: i18n.t('TMP0037'), A: i18n.t('TMP0038') }
     ]

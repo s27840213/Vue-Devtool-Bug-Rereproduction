@@ -32,10 +32,10 @@
           PaymentField(@next="step2Finish")
         //- case step3
         template(v-if="view === 'step3'")
-          template(v-for="inv in invoiceInput")
-            input(:placeholder="inv.ph" :invalid="biv[inv.key]"
-                  class="payment-left-content-invoice" v-model="bi[inv.key]")
-            span(v-if="biv[inv.key]" class="sp-info__invalid") {{inv.error}}
+          div(v-for="inv in invoiceInput"
+              class="payment-left-content-invoice")
+            input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
+            span(v-if="biv[inv.key]") {{inv.error}}
         //- case cancel1
         template(v-if="view === 'cancel1'")
           div(v-for="can in cancel1" class="payment-left-content-cancel")
@@ -325,6 +325,7 @@ export default Vue.extend({
     &-description {
       position: absolute;
       bottom: -60%;
+      white-space: nowrap;
     }
   }
 }
@@ -351,9 +352,9 @@ export default Vue.extend({
   }
   &__off {
     @include overline-SM;
-    color: setColor(red-1);
     white-space: nowrap;
   }
+  &:not([isSelected]) &__off { color: setColor(red-1); }
   &[isSelected] {
     background-color: setColor(blue-1);
     color: white;
@@ -361,13 +362,18 @@ export default Vue.extend({
 }
 
 .payment-left-content-invoice {
-  @include body-SM;
-  width: calc(100% - 22px);
-  // height: 20px; // ask kitty
-  margin: 5px 0;
-  padding: 10px;
-  border: 1px solid setColor(gray-3);
-  border-radius: 4px;
+  >input {
+    @include body-SM;
+    width: calc(100% - 22px);
+    // height: 20px; // ask kitty
+    margin: 5px 0;
+    padding: 10px;
+    border: 1px solid setColor(gray-3);
+    border-radius: 4px;
+  }
+  >span {
+    color: setColor(red);
+  }
 }
 
 .payment-left-content-cancel {
