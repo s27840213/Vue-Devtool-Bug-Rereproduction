@@ -81,8 +81,8 @@ export default Vue.extend({
       userCountryInfo: 'userCountryInfo'
     }),
     useTappay():boolean {
-      return this.isChange ? this.userCountryInfo === 'TW'
-        : this.userCountryUi === 'TW'
+      return this.isChange ? this.userCountryInfo === 'tw'
+        : this.userCountryUi === 'tw'
     },
     submitText(): string {
       return (this.isChange

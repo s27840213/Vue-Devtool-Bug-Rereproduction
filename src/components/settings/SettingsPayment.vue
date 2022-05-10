@@ -109,7 +109,7 @@ export default Vue.extend({
   },
   watch: {
     userCountryInfo(newVal, oldVal) {
-      if (newVal === 'TW' && oldVal !== 'TW' && oldVal !== '') {
+      if (newVal === 'tw' && oldVal !== 'tw' && oldVal !== '') {
         this.$nextTick(() => {
           this.userCountryInfo = oldVal
           Vue.notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
@@ -139,9 +139,9 @@ export default Vue.extend({
     },
     billingInfoInput():ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountryInfo) {
-        case 'TW':
+        case 'tw':
           return [...paymentData.gerneral(), ...paymentData.TWonly()]
-        case 'US':
+        case 'us':
           return [...paymentData.country(), ...paymentData.gerneral(), ...paymentData.USonly()]
         default:
           return [...paymentData.country(), ...paymentData.gerneral(), ...paymentData.others()]

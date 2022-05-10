@@ -146,18 +146,6 @@ const getDefaultState = (): IPaymentState => ({
 
 const state = getDefaultState()
 
-switch (i18n.locale) {
-  case 'tw':
-    state.userCountryUi = 'TW'
-    break
-  case 'jp':
-    state.userCountryUi = 'JP'
-    break
-  case 'us':
-    state.userCountryUi = 'US'
-    break
-}
-
 function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
   const weight = [1, 2, 1, 2, 1, 2, 4, 1]
   if (GUI.length !== 8) {
@@ -179,6 +167,11 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 
 const actions: ActionTree<IPaymentState, unknown> = {
   async getPrice({ commit }, country: string) {
+    if (state.userCountryUi === '') {
+      commit('SET_state', { userCountryUi: i18n.locale })
+      country = i18n.locale
+    }
+
     return paymentApi.planList(country).then((response) => {
       const res = response.data.data
       commit('SET_state', {
@@ -212,7 +205,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         isCancelingPro: data.plan_stop_subscribe === 1,
         nextPrice: '$' + data.price,
         nextPaidDate: data.plan_due_time,
-        userCountryInfo: data.country.toUpperCase(),
+        userCountryInfo: data.country,
         usage: {
           bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
@@ -455,7 +448,7 @@ const getters: GetterTree<IPaymentState, any> = {
     return isLegalGUI(state.billingInfo.GUI)
   },
   isUiTW(state) {
-    return state.userCountryUi === 'TW'
+    return state.userCountryUi === 'tw'
   }
   // isUiUS(state) {
   //   return state.userCountryUi === 'US'
