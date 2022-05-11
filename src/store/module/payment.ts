@@ -19,7 +19,7 @@ interface IPaymentState {
     diskTotal: number
   }
   cardInfo: {
-    brand: string
+    issuer: string
     last4: string
     date: string
   }
@@ -98,7 +98,7 @@ const getDefaultState = (): IPaymentState => ({
     diskTotal: 100
   },
   cardInfo: {
-    brand: '',
+    issuer: '',
     last4: '',
     date: ''
   },
@@ -213,7 +213,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           diskTotal: data.capacity
         },
         cardInfo: {
-          brand: data.brand,
+          issuer: data.brand,
           last4: data.last4,
           date: data.valid_thru
         },
@@ -334,8 +334,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: Number(state.periodUi === 'yearly')
     })
   },
-  async stripeUpdate() {
-    return paymentApi.stripeUpdate()
+  async stripeUpdate({ dispatch }) {
+    return paymentApi.stripeUpdate().then((response) => {
+      dispatch('getBillingInfo')
+      return response
+    })
   },
   async getSwitchPrice({ getters }) {
     return paymentApi.getSwitchPrice({

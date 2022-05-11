@@ -33,7 +33,7 @@
     hr
     div(v-if="isPro" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0090')}}
-      span(class="body-SM")             {{`···· ···· ···· ${card.last4}  ${$t('TMP0091')} ${card.date}`}}
+      card-info(:issuer="card.issuer" :last4="card.last4" :expire="card.date")
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0092')}}
       p(class="text-gray-3 pointer"
@@ -79,8 +79,9 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import Options from '@/components/global/Options.vue'
-import PaymentField from '@/components/PaymentField.vue'
+import PaymentField from '@/components/payment/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
+import CardInfo from '@/components/payment/CardInfo.vue'
 import paymentData from '@/utils/paymentData'
 
 const { mapFields } = createHelpers({
@@ -93,7 +94,8 @@ export default Vue.extend({
   components: {
     Options,
     PaymentField,
-    PopupPayment
+    PopupPayment,
+    CardInfo
   },
   directives: {
     clickOutside: vClickOutside.directive
