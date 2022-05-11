@@ -7,9 +7,7 @@
         span                            {{$t('TMP0078')}}
     div(v-if="isPro" class="sp-pro")
       p(class="text-blue-1")            {{$t('TMP0077')}}
-      //- todelete @click
-      svg-icon(iconName="pro"
-              @click.native="togglePro()")
+      svg-icon(iconName="pro")
       template(v-if="isCancelingPro")
         span(class="body-SM")           {{$t('TMP0084', {date: nextPaidDate})}}
         btn(class="rounded" type="primary-mid" @click.native="resume()")
@@ -28,18 +26,17 @@
       div(class="sp-pro-disk")
         div(class="sp-pro-disk-total")
           div(class="sp-pro-disk-used" :style="diskPercent")
-        span                            {{`${usage.diskUsed}/${usage.diskTotal}`}}
+        span {{`${usage.diskUsed}/${usage.diskTotal}`}}
       span(class="body-XS")             {{$t('TMP0089')}}
     hr
-    div(v-if="isPro" class="sp-detail")
+    div(v-if="isPro && card.issuer" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0090')}}
-      card-info(:issuer="card.issuer" :last4="card.last4" :expire="card.date")
+      card-info(:issuer="card.issuer" :last4="card.last4"
+                :expire="card.date" :trash="isCancelingPro")
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0092')}}
-      p(class="text-gray-3 pointer"
-        @click="deleteCard()")          {{'刪除卡片'}}
-      p(class="text-gray-3 pointer"
-        @click="deletePlanCompletely()") {{'完全刪除plan（僅供測試）'}}
+    p(class="text-gray-3 pointer"
+      @click="deletePlanCompletely()") {{'完全刪除plan（僅供測試）'}}
     hr(v-if="isPro")
     div(v-if="isPro" class="sp-info")
       p(class="text-blue-1")            {{$t('TMP0093')}}
@@ -177,8 +174,7 @@ export default Vue.extend({
       getPrice: 'payment/getPrice',
       updateBillingInfoApi: 'payment/updateBillingInfo',
       checkBillingInfo: 'payment/checkBillingInfo',
-      resume: 'payment/resume',
-      deleteCard: 'payment/deleteCard',
+      resumeApi: 'payment/resume',
       deletePlanCompletely: 'payment/deletePlanCompletely'
     }),
     async updateBillingInfo() {
@@ -186,6 +182,13 @@ export default Vue.extend({
         if (item.error && await this.checkBillingInfo(item.key)) return
       }
       this.updateBillingInfoApi()
+    },
+    resume() {
+      if (this.card.issuer) this.resumeApi()
+      else {
+        this.paymentView = 'step1'
+        this.showPaymentPopup = true
+      }
     },
     openCardPopup() { this.showCardPopup = true },
     closeCardPopup() { this.showCardPopup = false },

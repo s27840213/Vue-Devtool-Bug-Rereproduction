@@ -141,7 +141,7 @@ export default Vue.extend({
         return this.isChange ? this.stripeUpdate() : this.stripeAddApi()
       }).then(({ data }) => {
         if (data.flag) throw Error(data.msg)
-        Vue.notify({ group: 'copy', text: 'Success' })
+        // Vue.notify({ group: 'copy', text: 'Success' })
         this.$emit('next')
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },

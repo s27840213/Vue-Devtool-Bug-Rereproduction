@@ -161,7 +161,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      // getBillingInfo: 'payment/getBillingInfo',
+      getBillingInfo: 'payment/getBillingInfo',
       tappayAdd: 'payment/tappayAdd',
       getSwitchPrice: 'payment/getSwitchPrice',
       switch: 'payment/switch',
@@ -198,6 +198,7 @@ export default Vue.extend({
           }]
           break
         case 'finish':
+          this.getBillingInfo()
           this.finishText = i18n.t('TMP0055') as string
           break
         case 'already pro':

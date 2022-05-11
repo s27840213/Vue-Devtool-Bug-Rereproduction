@@ -313,12 +313,13 @@ const actions: ActionTree<IPaymentState, unknown> = {
       prime: state.prime
     })
   },
-  async tappayUpdate() {
+  async tappayUpdate({ dispatch }) {
     return paymentApi.tappayUpdate({
       prime: state.prime
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-    }).then(() => Vue.notify({ group: 'copy', text: 'tappay update success' }))
+      dispatch('getBillingInfo')
+    }).then(() => Vue.notify({ group: 'copy', text: '更新卡片成功' }))
       .catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async stripeInit() {
@@ -336,9 +337,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
   },
   async stripeUpdate({ dispatch }) {
     return paymentApi.stripeUpdate().then((response) => {
+      if (response.data.flag) throw Error(response.data.msg)
       dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: '更新卡片成功' })
       return response
-    })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async getSwitchPrice({ getters }) {
     return paymentApi.getSwitchPrice({
@@ -348,38 +351,41 @@ const actions: ActionTree<IPaymentState, unknown> = {
       if (data.flag) throw Error(data.msg)
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async switch({ getters }) {
+  async switch({ getters, dispatch }) {
     return paymentApi.switch({
       plan_id: state.planSelected,
       is_bundle: 1 - Number(getters.getIsBundle)
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '切換成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async cancel({ commit }, reason: string) {
+  async cancel({ dispatch }, reason: string) {
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      commit('SET_state', { isCancelingPro: true })
+      dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '取消成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async resume({ commit }) {
+  async resume({ dispatch }) {
     return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      commit('SET_state', { isCancelingPro: false })
+      dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: '恢復成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async deleteCard() {
+  async deleteCard({ dispatch }) {
     return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      // commit('SET_state', { isCancelingPro: false })
+      dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '刪除成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async deletePlanCompletely() {
+  async deletePlanCompletely({ dispatch }) {
     return paymentApi.deletePlanCompletely().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '完全刪除成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
