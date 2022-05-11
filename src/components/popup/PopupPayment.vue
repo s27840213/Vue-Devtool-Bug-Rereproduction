@@ -162,6 +162,7 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       getBillingInfo: 'payment/getBillingInfo',
+      stripeInit: 'payment/stripeInit',
       tappayAdd: 'payment/tappayAdd',
       getSwitchPrice: 'payment/getSwitchPrice',
       switch: 'payment/switch',
@@ -172,6 +173,7 @@ export default Vue.extend({
       this.view = name
       switch (name) {
         case 'step1':
+          this.stripeInit()
           this.currentStep = 1
           this.totalStep = i18n.locale === 'tw' ? 3 : 2
           this.title = i18n.t('TMP0040') as string

@@ -7,6 +7,7 @@ import paymentApi from '@/apis/payment'
 interface IPaymentState {
   // Constant
   plans: Record<string, Record<string, Record<string, string>|string>>
+  stripeClientSecret: string
   prime: string
   isPro: boolean
   isCancelingPro: boolean
@@ -86,6 +87,7 @@ const getDefaultState = (): IPaymentState => ({
       }
     }
   },
+  stripeClientSecret: '',
   prime: '',
   isPro: false,
   isCancelingPro: false,
@@ -322,10 +324,12 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).then(() => Vue.notify({ group: 'copy', text: '更新卡片成功' }))
       .catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async stripeInit() {
+  async stripeInit({ commit }) {
     return paymentApi.stripeInit().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      return data.client_secret
+      commit('SET_state', {
+        stripeClientSecret: data.client_secret
+      })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async stripeAdd() {

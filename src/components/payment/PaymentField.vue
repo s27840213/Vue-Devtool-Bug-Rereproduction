@@ -78,7 +78,8 @@ export default Vue.extend({
       plans: 'plans',
       planSelected: 'planSelected',
       periodUi: 'periodUi',
-      userCountryInfo: 'userCountryInfo'
+      userCountryInfo: 'userCountryInfo',
+      clientSecret: 'stripeClientSecret'
     }),
     useTappay():boolean {
       return this.isChange ? this.userCountryInfo === 'tw'
@@ -112,14 +113,12 @@ export default Vue.extend({
     }),
     async stripeInit() {
       if (this.stripe) return // Prevent load stripe twice
-
       this.payReady = false
       this.submit = this.stripeSubmit
-      const clientSecret = await this.stripeInitApi()
-      this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
 
+      this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
       this.stripeElement = this.stripe.elements({
-        clientSecret: clientSecret,
+        clientSecret: this.clientSecret,
         appearance: { labels: 'floating' }
       })
       const stripePaymentElement = this.stripeElement.create('payment', {
