@@ -31,8 +31,7 @@
     hr
     div(v-if="isPro && card.issuer" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0090')}}
-      card-info(:issuer="card.issuer" :last4="card.last4"
-                :expire="card.date" :trash="isCancelingPro")
+      card-info(:card="card" :trash="isCancelingPro")
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0092')}}
     p(class="text-gray-3 pointer"
@@ -123,16 +122,16 @@ export default Vue.extend({
     ...mapFields({
       userCountryInfo: 'userCountryInfo',
       usage: 'usage',
-      card: 'cardInfo',
       bi: 'billingInfo',
       biv: 'billingInfoInvalid'
     }),
-    ...mapState('payment', [
-      'isPro',
-      'isCancelingPro',
-      'nextPaidDate',
-      'nextPrice'
-    ]),
+    ...mapState('payment', {
+      isPro: 'isPro',
+      card: 'cardInfo',
+      isCancelingPro: 'isCancelingPro',
+      nextPaidDate: 'nextPaidDate',
+      nextPrice: 'nextPrice'
+    }),
     diskPercent():Record<string, string> {
       return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
     },
@@ -195,7 +194,7 @@ export default Vue.extend({
     openPaymentPopup() { this.showPaymentPopup = true },
     closePaymentPopup() { this.showPaymentPopup = false },
     switchPeriod() {
-      this.paymentView = 'switch'
+      this.paymentView = 'switch1'
       this.showPaymentPopup = true
     },
     cancelSub() {

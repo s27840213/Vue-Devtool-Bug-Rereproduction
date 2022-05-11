@@ -6,16 +6,16 @@
                 class="pointer" @click.native="closePopup()")
       div(class="payment-left")
         div(class="payment-left-top")
-          div(v-if="totalStep" class="payment-left-top__step")
-            svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
+          div(v-if="showPreStep" class="payment-left-top__step")
+            svg-icon(iconName="left-arrow" iconWidth="24px"
                     iconColor="gray1" @click.native="preStep()")
-            span {{$t('TMP0039')}} {{currentStep}} of {{totalStep}}
+            span(v-if="totalStep") {{$t('TMP0039')}} {{currentStep}} of {{totalStep}}
           div(class="payment-left-top__title") {{title}}
           div(v-if="description" class="payment-left-top__description") {{description}}
         //- switch(view)
         div(class="payment-left-content" :view="view")
-          //- case step1 or switch
-          template(v-if="['step1', 'switch'].includes(view)")
+          //- case step1 or switch1
+          template(v-if="['step1', 'switch1'].includes(view)")
             div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
                 class="payment-left-content-period pointer"
                 @click="setPeriod(p.value)")
@@ -23,7 +23,7 @@
                       :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
                       :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
               div(class="payment-left-content-period-price")
-                span(class="payment-left-content-period-price__label") {{p.label}}
+                span(class="payment-left-content-period-price__label") {{p.label}} {{currentPlan(p.value)}}
                 span(class="payment-left-content-period-price__amount") {{`$${plans[planSelected][p.value].now}`}}
                   span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0042') : ''}`}}
               span(v-if="p.value==='yearly'"
@@ -37,6 +37,12 @@
                 class="payment-left-content-invoice")
               input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
               span(v-if="biv[inv.key]") {{inv.error}}
+          //- case switch2
+          template(v-if="view === 'switch2'")
+            card-info(:card="card")
+            div(class="payment-left-content-switch2")
+              span {{$t('TMP0047', {date: switchPaidDate})}}
+              span {{switchPrice}}
           //- case cancel1
           template(v-if="view === 'cancel1'")
             div(v-for="can in cancel1" class="payment-left-content-cancel")
@@ -77,6 +83,7 @@ import vClickOutside from 'v-click-outside'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
+import CardInfo from '@/components/payment/CardInfo.vue'
 import paymentData from '@/utils/paymentData'
 
 const { mapFields } = createHelpers({
@@ -89,7 +96,8 @@ export default Vue.extend({
   components: {
     PaymentField,
     RadioBtn,
-    Animation
+    Animation,
+    CardInfo
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -138,16 +146,19 @@ export default Vue.extend({
     }),
     ...mapState('payment', {
       userCountryUI: 'userCountryUI',
+      switchPaidDate: 'switchPaidDate',
+      switchPrice: 'switchPrice',
+      card: 'cardInfo',
       plans: 'plans',
       planSelected: 'planSelected'
     }),
     userPeriod():string {
-      return this.view === 'switch'
+      return ['switch1', 'switch2'].includes(this.view)
         ? (this.isBundle ? 'monthly' : 'yearly')
         : this.periodUi
     },
     showPreStep(): boolean {
-      return ['step2', 'step3'].includes(this.view)
+      return ['step2', 'switch2'].includes(this.view)
     },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
@@ -206,12 +217,20 @@ export default Vue.extend({
         case 'already pro':
           this.finishText = i18n.t('TMP0056') as string
           break
-        case 'switch':
+        case 'switch1':
           this.getSwitchPrice()
           this.title = i18n.t('TMP0058') as string
           this.description = i18n.t('TMP0059') as string
           this.buttons = [{
             text: i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
+            func: () => this.changeView('switch2')
+          }]
+          break
+        case 'switch2':
+          this.title = i18n.t('TMP0046') as string
+          this.description = 'test'
+          this.buttons = [{
+            text: i18n.t('') as string,
             func: () => {
               this.switch()
               this.closePopup() // refresh or double check?
@@ -243,7 +262,7 @@ export default Vue.extend({
     },
     preStep() {
       if (this.view === 'step2') this.changeView('step1')
-      else if (this.view === 'step3') this.changeView('step2')
+      else if (this.view === 'switch2') this.changeView('switch1')
     },
     step2Finish() {
       this.isUiTW ? this.changeView('step3') : this.changeView('finish')
@@ -261,6 +280,9 @@ export default Vue.extend({
     addLink(text:string):string {
       return text.replace(/<link>/g, '<a href="/settings/payment" style="text-decoration:none;">')
         .replace(/<\/link>/g, '</a>')
+    },
+    currentPlan(period: string):string {
+      return this.view === 'switch1' && period !== this.userPeriod ? '(current plan)' : ''
     },
     selectCancelReason(index: string) {
       this.reasonIndex = index
@@ -380,6 +402,14 @@ export default Vue.extend({
     background-color: setColor(blue-1);
     color: white;
   }
+}
+
+.payment-left-content-switch2 {
+  @include overline-LG;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 23px;
+  text-transform: uppercase;
 }
 
 .payment-left-content-invoice {

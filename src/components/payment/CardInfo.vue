@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="card")
-    img(:src="require(`@/assets/img/svg/card/${issuer}.svg`)")
-    span {{`···· ···· ···· ${last4}`}}
-    span {{`Expires ${expire}`}}
+    img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
+    span {{`···· ···· ···· ${card.last4}`}}
+    span {{`Expires ${card.date}`}}
     svg-icon(v-if="trash" class="pointer" iconName="trash"
             iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
     div(v-if="showPopup" class="popup-window")
@@ -28,16 +28,8 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   props: {
-    issuer: {
-      type: String,
-      required: true
-    },
-    last4: {
-      type: String,
-      required: true
-    },
-    expire: {
-      type: String,
+    card: {
+      type: Object,
       required: true
     },
     trash: {

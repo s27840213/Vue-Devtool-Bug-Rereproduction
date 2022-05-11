@@ -13,6 +13,8 @@ interface IPaymentState {
   isCancelingPro: boolean
   nextPaidDate: string
   nextPrice: string
+  switchPaidDate: string
+  switchPrice: string
   usage: {
     bgrmRemain: number
     bgrmTotal: number
@@ -93,6 +95,8 @@ const getDefaultState = (): IPaymentState => ({
   isCancelingPro: false,
   nextPaidDate: '',
   nextPrice: '',
+  switchPaidDate: '',
+  switchPrice: '',
   usage: {
     bgrmRemain: 0,
     bgrmTotal: 100,
@@ -349,12 +353,16 @@ const actions: ActionTree<IPaymentState, unknown> = {
       return response
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async getSwitchPrice({ getters }) {
+  async getSwitchPrice({ commit, getters }) {
     return paymentApi.getSwitchPrice({
       plan_id: state.planSelected,
       is_bundle: 1 - Number(getters.getIsBundle)
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
+      commit('SET_state', {
+        switchPaidDate: 'Due Mar 14th,2022t',
+        switchPrice: data.price
+      })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async switch({ getters, dispatch }) {
