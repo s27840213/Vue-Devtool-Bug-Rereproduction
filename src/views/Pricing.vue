@@ -18,6 +18,8 @@
               svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
+          img(class="pricing-plan-right-off"
+              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
           slide-toggle(:options="periods" v-model="periodUi" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
             span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('TMP0012')}`}}
@@ -45,7 +47,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
@@ -75,6 +77,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters({
+      isUiTW: 'payment/isUiTW'
+    }),
     ...mapState('payment', {
       plans: 'plans',
       planSelected: 'planSelected',
@@ -82,7 +87,8 @@ export default Vue.extend({
     }),
     ...mapFields({
       periodUi: 'periodUi'
-    })
+    }),
+    off():string { return this.isUiTW ? '26off' : '25off' }
   },
   async mounted() {
     this.getPrice(this.userCountryUi)
@@ -187,6 +193,11 @@ export default Vue.extend({
   width: 32%;
   background-color: setColor(blue-1);
   border-radius: 0 16px 16px 0;
+  &-off {
+    position: absolute;
+    top: 40px;
+    right: 25px;
+  }
   &-period {
     @include body-XS;
     background-color: setColor(gray-5);

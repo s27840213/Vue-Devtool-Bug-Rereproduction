@@ -3,7 +3,7 @@
     div(class="bill__title")
       p {{$t('TMP0106')}}
     template(v-if="!historys.length")
-      img(:src="require('@/assets/img/svg/E-payment.svg')")
+      img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
       p(class="text-H6") {{$t('TMP0112')}}
     div(v-else class="bill-table")
       span {{$t('TMP0107')}}
