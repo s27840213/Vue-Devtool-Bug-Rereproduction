@@ -52,8 +52,8 @@ export default Vue.extend({
   data() {
     return {
       countryData: paymentData.countryList(),
-      payReady: false,
-      submit: null as unknown as () => void,
+      stripePayReady: false,
+      tappayPayReady: false,
       // Stripe
       stripe: null as unknown as Stripe,
       stripeElement: null as unknown as StripeElements,
@@ -63,12 +63,6 @@ export default Vue.extend({
   },
   watch: {
     userCountryUi() {
-      if (this.useTappay) {
-        this.tappayInit()
-      } else {
-        this.stripeInit()
-        this.submit = this.stripeSubmit
-      }
       this.getPrice(this.userCountryUi)
     }
   },
@@ -94,14 +88,14 @@ export default Vue.extend({
         : this.useTappay
           ? i18n.t('TMP0044')
           : i18n.t('TMP0054')) as string
+    },
+    payReady():boolean {
+      return this.useTappay ? this.tappayPayReady : this.stripePayReady
     }
   },
   mounted() {
-    if (this.useTappay) {
-      this.tappayInit()
-    } else {
-      this.stripeInit()
-    }
+    this.tappayInit()
+    this.stripeInit()
   },
   methods: {
     ...mapActions({
@@ -115,10 +109,6 @@ export default Vue.extend({
       setPrime: 'payment/SET_prime'
     }),
     async stripeInit() {
-      if (this.stripe) return // Prevent load stripe twice
-      this.payReady = false
-      this.submit = this.stripeSubmit
-
       await this.clientSecret // Wait for api promise
       this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
       this.stripeElement = this.stripe.elements({
@@ -130,7 +120,7 @@ export default Vue.extend({
       })
       stripePaymentElement.mount('#stripe')
       stripePaymentElement.on('change', (event) => {
-        this.payReady = event.complete
+        this.stripePayReady = event.complete
       })
     },
     stripeSubmit() {
@@ -149,8 +139,6 @@ export default Vue.extend({
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     tappayInit() {
-      this.payReady = false
-      this.submit = this.tappaySubmit
       this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
 
       this.TPDirect.card.setup({
@@ -186,7 +174,7 @@ export default Vue.extend({
       })
 
       this.TPDirect.card.onUpdate((update: any) => {
-        this.payReady = update.canGetPrime
+        this.tappayPayReady = update.canGetPrime
       })
     },
     tappaySubmit() {
@@ -199,6 +187,9 @@ export default Vue.extend({
         if (this.isChange) this.tappayUpdate()
         this.$emit('next')
       })
+    },
+    submit() {
+      this.useTappay ? this.tappaySubmit() : this.stripeSubmit()
     },
     close() {
       this.$emit('next')
