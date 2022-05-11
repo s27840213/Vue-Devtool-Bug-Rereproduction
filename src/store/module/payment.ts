@@ -325,12 +325,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
       .catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async stripeInit({ commit }) {
-    return paymentApi.stripeInit().then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      commit('SET_state', {
-        stripeClientSecret: data.client_secret
-      })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+    commit('SET_state', {
+      stripeClientSecret: paymentApi.stripeInit().then(({ data }) => {
+        if (data.flag) throw Error(data.msg)
+        commit('SET_state', {
+          stripeClientSecret: data.client_secret
+        })
+      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+    })
   },
   async stripeAdd() {
     return paymentApi.stripeAdd({

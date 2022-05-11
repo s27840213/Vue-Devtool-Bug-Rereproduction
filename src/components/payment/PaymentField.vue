@@ -1,6 +1,9 @@
 <template lang="pug">
   div(class="field")
-    span(class="field__title") {{isChange ? $t('TMP0092') : ''}}
+    div(class="field__close")
+      svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
+              class="pointer" @click.native="close()")
+    span(v-if="isChange" class="field__title") {{$t('TMP0092')}}
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountryUi")
@@ -116,6 +119,7 @@ export default Vue.extend({
       this.payReady = false
       this.submit = this.stripeSubmit
 
+      await this.clientSecret // Wait for api promise
       this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
@@ -195,6 +199,9 @@ export default Vue.extend({
         if (this.isChange) this.tappayUpdate()
         this.$emit('next')
       })
+    },
+    close() {
+      this.$emit('next')
     }
   }
 })
@@ -204,12 +211,18 @@ export default Vue.extend({
 .field {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  // justify-content: space-between;
+  position: relative;
   height: 100%;
+  &__close {
+    position: absolute;
+    top: -7px;
+    right: -47px;
+  }
   &__title { // move to html?
     @include text-H6;
     color: setColor(gray-2);
-    // margin-bottom: 50px;
+    margin-bottom: 50px;
   }
   >button {
     @include btn-LG;
@@ -237,6 +250,7 @@ export default Vue.extend({
 }
 
 .field-content {
+  height: 100%;
   &__info, &__info-today {
     @include body-SM;
     color: setColor(gray-1);
