@@ -13,9 +13,12 @@
         btn(class="rounded" type="primary-mid" @click.native="resume()")
           span                          {{$t('TMP0079')}}
       template(v-else)
+        span(v-if="card.status === 'invalid'"
+          class="text-red overline-LG") {{$t('TMP0117')}}
         span(class="body-SM")           {{$t('TMP0080', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
         span(class="body-SM"      v-html="$t('TMP0081', { price: nextPrice, date: nextPaidDate  })")
-        span(class="text-blue-1 body-SM pointer"
+        span(v-if="card.status !== 'invalid'"
+            class="text-blue-1 body-SM pointer"
             @click="switchPeriod()")    {{$t('TMP0082', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
         span(class="text-gray-3 body-SM pointer"
             @click="cancelSub()")       {{$t('TMP0083')}}
@@ -29,11 +32,14 @@
         span {{`${usage.diskUsed}/${usage.diskTotal}`}}
       span(class="body-XS")             {{$t('TMP0089')}}
     hr
-    div(v-if="isPro && card.issuer" class="sp-detail")
+    div(v-if="isPro && card.status !== 'none'" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0090')}}
       card-info(:card="card" :trash="isCancelingPro")
+      p(v-if="card.status === 'invalid'"
+        class="text-red overline-LG")   {{$t('TMP0117')}}
       p(class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0092')}}
+    hr
     p(class="text-gray-3 pointer"
       @click="deletePlanCompletely()") {{'完全刪除plan（僅供測試）'}}
     hr(v-if="isPro")
@@ -183,7 +189,7 @@ export default Vue.extend({
       this.updateBillingInfoApi()
     },
     resume() {
-      if (this.card.issuer) this.resumeApi()
+      if (this.card.status !== 'none') this.resumeApi()
       else {
         this.paymentView = 'step1'
         this.showPaymentPopup = true

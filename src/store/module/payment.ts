@@ -22,6 +22,7 @@ interface IPaymentState {
     diskTotal: number
   }
   cardInfo: {
+    status: string
     issuer: string
     last4: string
     date: string
@@ -104,6 +105,7 @@ const getDefaultState = (): IPaymentState => ({
     diskTotal: 100
   },
   cardInfo: {
+    status: 'none',
     issuer: '',
     last4: '',
     date: ''
@@ -219,6 +221,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           diskTotal: data.capacity
         },
         cardInfo: {
+          status: { 0: 'invalid', 1: 'valid', 2: 'none' }[data.card_valid as number],
           issuer: data.brand,
           last4: data.last4,
           date: data.valid_thru
