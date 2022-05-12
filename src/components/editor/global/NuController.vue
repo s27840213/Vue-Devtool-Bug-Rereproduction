@@ -1525,7 +1525,7 @@ export default Vue.extend({
       }
       switch (this.getLayerType) {
         case LayerType.image:
-          ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+          !this.config.inProcess && ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
       }
     },
     onRightClick(event: MouseEvent) {
@@ -1577,28 +1577,29 @@ export default Vue.extend({
       updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
-    dblSubController(targetIndex: number, selectionMode: boolean) {
+    dblSubController(targetIndex: number) {
       let updateSubLayerProps = null as any
+      let target = undefined as ILayer | undefined
       switch (this.getLayerType) {
-        case 'group':
-          if (!(this.config as IGroup).layers[targetIndex].active) {
+        case LayerType.group:
+          target = (this.config as IGroup).layers[targetIndex]
+          if (!target.active) {
             return
           }
           updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
-        case 'frame':
-          if (
-            !(this.config as IFrame).clips[targetIndex].active ||
-            (this.config as IFrame).clips[targetIndex].srcObj.type === 'frame'
-          ) {
+        case LayerType.frame:
+          target = (this.config as IFrame).clips[targetIndex]
+          if (!target.active || (target as IImage).srcObj.type === 'frame') {
             return
           }
           updateSubLayerProps = FrameUtils.updateFrameLayerProps
           break
+        case LayerType.image:
         default:
           return
       }
-      updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      target.type === LayerType.image && !target.inProcess && updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)

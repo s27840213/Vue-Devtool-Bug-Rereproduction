@@ -77,14 +77,12 @@ class ImageShadowUtils {
       if (ctxT) {
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
         this._layerData = { img, config }
-        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
 
         const { layerInfo } = options || {}
-        if (layerInfo && layerInfo.subLayerIdx !== -1 && typeof layerInfo.subLayerIdx !== 'undefined') {
+        if (layerInfo) {
           this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
           this.updateEffectProps(layerInfo, {
-            isTransparent: [ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)
-              ? this.isTransparentBg(canvasT) : false
+            isTransparent: this.isTransparentBg(canvasT)
           })
         }
         if (options) {
@@ -93,6 +91,7 @@ class ImageShadowUtils {
             ...options
           }
         }
+        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       }
     }
     if (this._draw) {
@@ -125,17 +124,20 @@ class ImageShadowUtils {
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
     const { styles } = config
-    const { timeout = DRAWING_TIMEOUT, layerInfo, cb } = options
+    const { timeout = DRAWING_TIMEOUT, cb } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { x, y, radius, opacity, size, spread, thinkness } = (effects as any)[currentEffect] as IFloatingEffect
 
-    layerInfo && this.setIsProcess(layerInfo, true)
-    let { drawCanvasW, drawCanvasH } = options || {}
+    let { drawCanvasW, drawCanvasH, layerInfo } = options || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
       drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0 as number
     }
+    if (!layerInfo || !Object.keys(layerInfo)) {
+      layerInfo = this.layerData?.options?.layerInfo
+    }
+    layerInfo && this.setIsProcess(layerInfo, true)
 
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
@@ -199,7 +201,7 @@ class ImageShadowUtils {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
-        layerInfo && this.setIsProcess(layerInfo, false)
+        layerInfo && !config.isUploading && this.setIsProcess(layerInfo, false)
       }
     })
     cb && cb()
@@ -230,18 +232,17 @@ class ImageShadowUtils {
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
     const { styles } = config
-    const { timeout = DRAWING_TIMEOUT, layerInfo, cb } = options
+    const { timeout = DRAWING_TIMEOUT, cb } = options
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
 
-    layerInfo && this.setIsProcess(layerInfo, true)
     const scaleRatio = img.naturalWidth / _imgWidth
     const imgX = _imgX * scaleRatio
     const imgY = _imgY * scaleRatio
     const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
     const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-    let { drawCanvasW, drawCanvasH } = options || {}
+    let { drawCanvasW, drawCanvasH, layerInfo } = options || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
       drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0 as number
@@ -250,6 +251,12 @@ class ImageShadowUtils {
     drawCanvasH *= size * 0.01
     const blurImgX = (canvas.width - drawCanvasW) * 0.5
     const blurImgY = (canvas.height - drawCanvasH) * 0.5
+
+    if (!layerInfo || !Object.keys(layerInfo)) {
+      layerInfo = this.layerData?.options?.layerInfo
+    }
+    layerInfo && this.setIsProcess(layerInfo, true)
+    console.warn('drawing start', generalUtils.deepCopy(layerInfo))
 
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
@@ -301,7 +308,7 @@ class ImageShadowUtils {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
-        layerInfo && this.setIsProcess(layerInfo, false)
+        layerInfo && !config.isUploading && this.setIsProcess(layerInfo, false)
       }
     })
     cb && cb()
@@ -309,7 +316,7 @@ class ImageShadowUtils {
 
   async drawShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
     const { styles } = config
-    const { timeout = DRAWING_TIMEOUT, layerInfo, cb } = options || {}
+    const { timeout = DRAWING_TIMEOUT, cb } = options || {}
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
@@ -325,6 +332,10 @@ class ImageShadowUtils {
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
+      let { layerInfo } = options || {}
+      if (!layerInfo || !Object.keys(layerInfo)) {
+        layerInfo = this.layerData?.options?.layerInfo
+      }
       layerInfo && this.setIsProcess(layerInfo, true)
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
@@ -344,7 +355,7 @@ class ImageShadowUtils {
       const unifiedSpread = spread * unifiedScale
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
-      const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
+      const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + imgX.toString() + imgY.toString()
 
       if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
         canvasT.setAttribute('width', `${canvas.width}`)
@@ -423,7 +434,7 @@ class ImageShadowUtils {
 
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
-          layerInfo && this.setIsProcess(layerInfo, false)
+          layerInfo && !config.isUploading && this.setIsProcess(layerInfo, false)
           cb && cb()
         }
       })
@@ -450,7 +461,17 @@ class ImageShadowUtils {
     })
   }
 
-  isTransparentBg(canvas: HTMLCanvasElement): boolean {
+  isTransparentBg(target: HTMLCanvasElement | HTMLImageElement): boolean {
+    let canvas = this.canvasT
+    if (target instanceof HTMLCanvasElement) {
+      canvas = this.canvasT
+    } else {
+      const { naturalWidth, naturalHeight } = target as HTMLImageElement
+      canvas.setAttribute('width', naturalWidth.toString())
+      canvas.setAttribute('height', naturalHeight.toString())
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+      ctx.drawImage(target, 0, 0, naturalWidth, naturalHeight)
+    }
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const { width, height } = canvas
     const data = ctx.getImageData(0, 0, width, height).data

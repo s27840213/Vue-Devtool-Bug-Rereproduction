@@ -35,7 +35,7 @@ import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
-import { LayerType } from '@/store/types'
+import { FunctionPanelType, LayerType } from '@/store/types'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -67,11 +67,14 @@ export default Vue.extend({
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, () => {
-      this.show = this.btns.find(b => b.name === 'shadow')?.show || ''
+      // this.show = this.btns.find(b => b.name === 'shadow')?.show || ''
+      this.show = 'panel-photo-shadow'
     })
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
   destroyed() {
     document.removeEventListener('mouseup', this.handleClick)
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },
   components: {
     PopupAdjust,
@@ -153,10 +156,12 @@ export default Vue.extend({
       return false
     },
     handleShow(name: string) {
+      const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
+      if (currLayer.type === LayerType.image && currLayer.inProcess) {
+        return
+      }
       switch (name) {
         case this.btns.find(b => b.name === 'shadow')?.show || '': {
-          const { pageIndex, layerIndex, subLayerIdx, getLayer } = layerUtils
-          const currLayer = getLayer(pageIndex, layerIndex)
           const target = (currLayer.type === LayerType.group && subLayerIdx !== -1
             ? (currLayer as IGroup).layers[subLayerIdx] : currLayer) as IImage
           if (target.isUploading) {
@@ -260,9 +265,6 @@ export default Vue.extend({
     },
     handleOutside() {
       this.show = ''
-      // const target = event.target as HTMLButtonElement
-      // const btn = this.$refs.btn as HTMLDivElement
-      // if (!btns.contains(target)) {}
     },
     handleClick(e: MouseEvent) {
       if (this.show === '') return
@@ -272,6 +274,13 @@ export default Vue.extend({
         return
       }
       if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
+        const currLayer = layerUtils.getCurrLayer as IImage
+        if (currLayer.type === LayerType.image && currLayer.inProcess) {
+          return
+        }
+        // if (currLayer.styles.shadow.isTransparent || currLayer.styles.shadow.currentEffect === ShadowEffectType.imageMatched) {
+        //   return
+        // }
         this.handleOutside()
       }
     },

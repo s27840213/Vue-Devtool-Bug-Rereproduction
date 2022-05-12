@@ -129,6 +129,7 @@ export interface IImage extends ILayer<IImageStyle> {
   imgControl: boolean,
   inProcess: boolean,
   trace?: number,
+  isUploading?: boolean,
   parentLayerStyles?: IStyle
 }
 export interface IGroup extends ILayer<IStyle> {

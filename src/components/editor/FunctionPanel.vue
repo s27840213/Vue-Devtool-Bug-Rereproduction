@@ -56,7 +56,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-import { LayerType } from '@/store/types'
+import { FunctionPanelType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
@@ -87,7 +87,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     functionPanelStyles(): { [index: string]: string } {
       return this.isShowPagePreview ? {

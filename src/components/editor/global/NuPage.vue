@@ -214,7 +214,7 @@ import NuImage from '@/components/editor/global/NuImage.vue'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import rulerUtils from '@/utils/rulerUtils'
 import { IPage } from '@/interfaces/page'
-import { FunctionPanelType, SidebarPanelType } from '@/store/types'
+import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
@@ -439,18 +439,16 @@ export default Vue.extend({
       this.isShownResizerHint = isHover
     },
     pageClickHandler(): void {
-      GroupUtils.deselect()
-      this.setCurrActivePageIndex(this.pageIndex)
-      const sel = window.getSelection()
-      if (sel) {
-        sel.empty()
-        sel.removeAllRanges()
-      }
+      // const sel = window.getSelection()
+      // if (sel) {
+      //   sel.empty()
+      //   sel.removeAllRanges()
+      // }
     },
     pageDblClickHandler(): void {
-      if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
-        pageUtils.startBackgroundImageControl(this.pageIndex)
-      }
+      // if ((this.config.backgroundImage.config.srcObj?.assetId ?? '') !== '') {
+      //   pageUtils.startBackgroundImageControl(this.pageIndex)
+      // }
     },
     setFocus(): void {
       this.$nextTick(() => {

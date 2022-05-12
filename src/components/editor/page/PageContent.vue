@@ -40,12 +40,13 @@ import mouseUtils from '@/utils/mouseUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -142,7 +143,10 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
-      groupUtils.deselect()
+      const currLayer = layerUtils.getCurrLayer
+      if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+        groupUtils.deselect()
+      }
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
@@ -156,6 +160,10 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
+      const currLayer = layerUtils.getCurrLayer
+      if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+        return
+      }
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)

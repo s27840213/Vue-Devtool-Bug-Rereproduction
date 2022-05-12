@@ -94,7 +94,7 @@ import Vue from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType, LayerType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, LayerType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import imageShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -125,23 +125,40 @@ export default Vue.extend({
   },
   mounted() {
     colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoShadow)
   },
   async beforeDestroy() {
-    if (this.notUpload) return
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
+    if (this.notUpload) return
     const layerData = imageShadowUtils.layerData
     if (layerData) {
       const { config, primarylayerId } = layerData
+      if (config.styles.shadow.srcObj.type) {
+        return
+      }
+
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
+      if (primarylayerId) {
+        this.setIsUploading(pageId, primarylayerId, config.id as string, true)
+      } else {
+        this.setIsUploading(pageId, config.id as string, '', true)
+      }
+
+      const assetId = generalUtils.generateAssetId()
+      this.$store.commit('file/SET_UPLOADING_IMGS', {
+        id: assetId,
+        adding: true,
+        pageIndex: pageUtils.currFocusPageIndex
+      })
+
       const img = new Image()
       img.crossOrigin = 'anonynous'
       img.src = imageUtils.getSrc(config, ['public', 'private'].includes(config.srcObj.type) ? 'larg' : 1600)
+      img.src += `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve) => {
         img.onload = () => resolve()
       })
-
       const updateCanvas = document.createElement('canvas')
-
       const { width, height, imgWidth, imgHeight } = config.styles
       const drawCanvasW = width / imgWidth * img.naturalWidth
       const drawCanvasH = height / imgHeight * img.naturalHeight
@@ -175,8 +192,6 @@ export default Vue.extend({
           await imageShadowUtils.drawImageMatchedShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         case ShadowEffectType.floating: {
-          // const canvasH = drawCanvasH + 0.5 * CANVAS_SPACE * spaceScale
-          // updateCanvas.setAttribute('height', `${canvasH}`)
           await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         }
@@ -213,11 +228,7 @@ export default Vue.extend({
         }
       })
 
-      if (primarylayerId) {
-        this.setIsUploading(pageId, primarylayerId, config.id as string, true)
-      } else {
-        this.setIsUploading(pageId, config.id as string, '', true)
-      }
+      const srcObjIdentifier = config.srcObj.type + config.srcObj.userId + config.srcObj.assetId
       uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 0.5)], {
         addToPage: false,
         needCompressed: false,
@@ -233,40 +244,23 @@ export default Vue.extend({
 
           if (pageIndex !== -1 && layerIndex !== -1) {
             const layer = layerUtils.getLayer(pageIndex, layerIndex)
-            // const target = subLayerIdx === -1 ? layer : (layer as IGroup).layers[subLayerIdx] as IImage
             const newWidth = (updateCanvas.width - right - left) / drawCanvasW * config.styles.width
             const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * config.styles.height
-            const styles = {
-              // width: newWidth,
-              // height: newHeight,
-              // imgWidth: newWidth,
-              // imgHeight: newHeight,
-              // initWidth: newWidth,
-              // initHeight: newHeight,
-              initWidth: width,
-              initHeight: height,
-              scale: 1
-              // imgX: 0,
-              // imgY: 0,
-              // x: target.styles.x - target.styles.width * leftShadowThickness,
-              // y: target.styles.y - target.styles.height * (this.currentEffect === ShadowEffectType.floating ? 0 : topShadowThickness)
-            }
-            // target.srcObj = srcObj
-            // Object.assign(target.styles, styles)
 
             const newImg = new Image()
             newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
-              // this.resetAllShadowProps(pageIndex, layerIndex, subLayerIdx)
-              // layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+              if (srcObjIdentifier !== config.srcObj.type + config.srcObj.userId + config.srcObj.assetId) {
+                return
+              }
               imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, {
                 imgWidth: newWidth,
                 imgHeight: newHeight,
                 imgX: newWidth * 0.5 - (config.styles.width * leftShadowThickness + config.styles.width * 0.5),
                 imgY: newHeight * 0.5 - (config.styles.height * topShadowThickness + config.styles.height * 0.5)
               })
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false }, subLayerIdx)
-              // imageShadowUtils.updateEffectProps({ pageIndex, layerIndex, subLayerIdx }, { srcObj })
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: false }, subLayerIdx)
+              layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               if (subLayerIdx !== -1) {
                 /** Handle the primary layer size update */
@@ -274,7 +268,6 @@ export default Vue.extend({
                 const { width, height, initWidth, initHeight } = mathUtils
                   .multipy(primaryLayer.styles.scale, calcTmpProps(primaryLayer.layers) as { [key: string] : number }) as ICalculatedGroupStyle
                 layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height, initWidth, initHeight })
-                // imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx: subLayerIdx ?? -1 }, { imgWidth: width, imgHeight: height })
                 /** Handle the sub-layer styles update */
                 const leftMargin = primaryLayer.layers.find(l => l.styles.x < 0)?.styles.x ?? 0
                 const topMargin = primaryLayer.layers.find(l => l.styles.y < 0)?.styles.y ?? 0
@@ -299,6 +292,9 @@ export default Vue.extend({
         }
       })
     }
+  },
+  destroyed() {
+    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
   },
   computed: {
     ...mapGetters({

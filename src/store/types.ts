@@ -88,6 +88,7 @@ export enum FunctionPanelType {
   colorPicker,
   pageSetting,
   photoSetting,
+  photoShadow,
   fonts,
   backgroundSetting
 }
