@@ -42,7 +42,8 @@
           p(v-html="item.A")
       nu-footer
       div(v-if="showPopup" class="popup-window")
-        popup-payment(initView="step1" @close="closePopup()" class="pricing-payment")
+        popup-payment(class="pricing-payment" :initView="paymentView"
+                      @close="closePopup()")
 </template>
 
 <script lang="ts">
@@ -73,7 +74,8 @@ export default Vue.extend({
       periods: paymentData.periodOptions(),
       compareTable: paymentData.compareTable(),
       faqs: paymentData.faqs(),
-      showPopup: false
+      showPopup: false,
+      paymentView: ''
     }
   },
   computed: {
@@ -82,6 +84,7 @@ export default Vue.extend({
     }),
     ...mapState('payment', {
       plans: 'plans',
+      card: 'cardInfo',
       planSelected: 'planSelected',
       userCountryUi: 'userCountryUi'
     }),
@@ -91,13 +94,18 @@ export default Vue.extend({
     off():string { return this.isUiTW ? '26off' : '25off' }
   },
   async mounted() {
+    await this.getBillingInfo()
     this.getPrice(this.userCountryUi)
   },
   methods: {
     ...mapActions({
+      getBillingInfo: 'payment/getBillingInfo',
       getPrice: 'payment/getPrice'
     }),
-    openPopup() { this.showPopup = true },
+    openPopup() {
+      this.paymentView = (this.card.status === 'none' ? 'step1' : 'already pro')
+      this.showPopup = true
+    },
     closePopup() { this.showPopup = false }
   }
 })

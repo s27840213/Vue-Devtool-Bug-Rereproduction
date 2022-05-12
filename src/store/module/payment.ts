@@ -74,6 +74,12 @@ interface IPaymentState {
   }
 }
 
+interface ICardStatue {
+  0: 'invalid'
+  1: 'valid'
+  2: 'none'
+}
+
 const getDefaultState = (): IPaymentState => ({
   // Constant
   plans: {
@@ -224,7 +230,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           diskTotal: data.capacity
         },
         cardInfo: {
-          status: { 0: 'invalid', 1: 'valid', 2: 'none' }[data.card_valid as number],
+          status: { 0: 'invalid', 1: 'valid', 2: 'none' }[data.card_valid as keyof ICardStatue],
           issuer: data.brand,
           last4: data.last4,
           date: data.valid_thru
