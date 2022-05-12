@@ -4,6 +4,7 @@
       svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
               class="pointer" @click.native="close()")
     span(v-if="isChange" class="field__title") {{$t('TMP0092')}}
+    //- todo rearrange class name
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountryUi")
@@ -13,12 +14,18 @@
         div(class="field__tappay-ccv" id="card-ccv")
       div(:class="{hidden: useTappay}" id="stripe" class="stripe")
         svg-icon(iconName="loading" iconColor="gray-1")
-      div(v-if="!isChange" class="field-content__info")
-        span {{$t('TMP0047', {date: nextPaidDate})}}
-        span {{plans[planSelected][periodUi].nextPaid}}
-      div(v-if="!isChange" class="field-content__info-today")
-        span {{$t('TMP0048')}}
-        span {{'USD 0.00'}}
+      template(v-if="!isChange")
+        div(v-if="paymentPaidDate" class="field-content__info")
+          span {{$t('TMP0047', {date: paymentPaidDate})}}
+          span {{'$'+plans[planSelected][periodUi].nextPaid}}
+        div(class="field-content__info-today")
+          span {{$t('TMP0048')}}
+          span {{priceToday}}
+    div(v-if="!isChange && useTappay" class="field-invoice")
+      span(class="field-invoice__title") {{$t('TMP0049')}}
+      div(v-for="inv in invoiceInput" class="field-invoice__input")
+        input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
+        span(v-if="biv[inv.key]") {{inv.error}}
     btn(class="rounded" type="primary-lg"
         :disabled="!payReady" @click.native="submit()") {{submitText}}
 </template>
@@ -52,12 +59,13 @@ export default Vue.extend({
   data() {
     return {
       countryData: paymentData.countryList(),
-      stripePayReady: false,
-      tappayPayReady: false,
+      invoiceInput: [...paymentData.gerneral(), ...paymentData.TWonly()],
       // Stripe
+      stripePayReady: false,
       stripe: null as unknown as Stripe,
       stripeElement: null as unknown as StripeElements,
       // Tappay
+      tappayPayReady: false,
       TPDirect: (window as any).TPDirect
     }
   },
@@ -69,18 +77,25 @@ export default Vue.extend({
   computed: {
     ...mapFields({
       userCountryUi: 'userCountryUi',
-      nextPaidDate: 'nextPaidDate'
+      bi: 'billingInfo'
     }),
     ...mapState('payment', {
       plans: 'plans',
       planSelected: 'planSelected',
       periodUi: 'periodUi',
       userCountryInfo: 'userCountryInfo',
-      clientSecret: 'stripeClientSecret'
+      clientSecret: 'stripeClientSecret',
+      biv: 'billingInfoInvalid',
+      paymentPaidDate: 'paymentPaidDate'
     }),
     useTappay():boolean {
       return this.isChange ? this.userCountryInfo === 'tw'
         : this.userCountryUi === 'tw'
+    },
+    priceToday():string {
+      if (!this.paymentPaidDate) return '$' + this.plans[this.planSelected][this.periodUi].nextPaid
+      else if (this.userCountryUi === 'tw') return '$0'
+      else return '$0.00'
     },
     submitText(): string {
       return (this.isChange
@@ -89,8 +104,22 @@ export default Vue.extend({
           ? i18n.t('TMP0044')
           : i18n.t('TMP0054')) as string
     },
+    invoiceReady():boolean {
+      for (const item of this.invoiceInput) {
+        switch (item.key) {
+          case 'GUI':
+            break
+          default:
+            if (!this.bi[item.key as string]) return false
+            break
+        }
+      }
+      return true
+    },
     payReady():boolean {
-      return this.useTappay ? this.tappayPayReady : this.stripePayReady
+      return this.useTappay
+        ? this.tappayPayReady && this.invoiceReady
+        : this.stripePayReady
     }
   },
   mounted() {
@@ -99,45 +128,16 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      stripeInitApi: 'payment/stripeInit',
+      tappayAdd: 'payment/tappayAdd',
       stripeAddApi: 'payment/stripeAdd',
       tappayUpdate: 'payment/tappayUpdate',
       stripeUpdate: 'payment/stripeUpdate',
+      checkBillingInfo: 'payment/checkBillingInfo',
       getPrice: 'payment/getPrice'
     }),
     ...mapMutations({
       setPrime: 'payment/SET_prime'
     }),
-    async stripeInit() {
-      await this.clientSecret // Wait for api promise
-      this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
-      this.stripeElement = this.stripe.elements({
-        clientSecret: this.clientSecret,
-        appearance: { labels: 'floating' }
-      })
-      const stripePaymentElement = this.stripeElement.create('payment', {
-        fields: { billingDetails: { address: { country: 'never' } } }
-      })
-      stripePaymentElement.mount('#stripe')
-      stripePaymentElement.on('change', (event) => {
-        this.stripePayReady = event.complete
-      })
-    },
-    stripeSubmit() {
-      this.stripe.confirmSetup({
-        elements: this.stripeElement,
-        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountryUi } } } },
-        redirect: 'if_required'
-      }).then((response) => {
-        if (response.error) throw Error(response.error.message)
-      }).then(() => {
-        return this.isChange ? this.stripeUpdate() : this.stripeAddApi()
-      }).then(({ data }) => {
-        if (data.flag) throw Error(data.msg)
-        // Vue.notify({ group: 'copy', text: 'Success' })
-        this.$emit('next')
-      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-    },
     tappayInit() {
       this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
 
@@ -177,16 +177,52 @@ export default Vue.extend({
         this.tappayPayReady = update.canGetPrime
       })
     },
-    tappaySubmit() {
-      this.TPDirect.card.getPrime((result: any) => {
-        if (result.status !== 0) {
-          Vue.notify({ group: 'error', text: result.msg })
-          return
-        }
-        this.setPrime(result.card.prime)
-        if (this.isChange) this.tappayUpdate()
-        this.$emit('next')
+    async stripeInit() {
+      await this.clientSecret // Wait for api promise
+      this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
+      this.stripeElement = this.stripe.elements({
+        clientSecret: this.clientSecret,
+        appearance: { labels: 'floating' }
       })
+      const stripePaymentElement = this.stripeElement.create('payment', {
+        fields: { billingDetails: { address: { country: 'never' } } }
+      })
+      stripePaymentElement.mount('#stripe')
+      stripePaymentElement.on('change', (event) => {
+        this.stripePayReady = event.complete
+      })
+    },
+    async tappaySubmit() {
+      for (const item of this.invoiceInput) { // Check invoice input validity
+        if (item.error && await this.checkBillingInfo(item.key)) return
+      }
+      const callback = (result: any) => {
+        return new Promise<void>((resolve) => {
+          if (result.status !== 0) throw Error(result.msg)
+          this.setPrime(result.card.prime)
+          resolve()
+        }).then(() => {
+          return this.isChange ? this.tappayUpdate() : this.tappayAdd()
+        }).then(({ data }) => {
+          if (data.flag) throw Error(data.msg)
+          this.close()
+        }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      }
+      this.TPDirect.card.getPrime(callback)
+    },
+    stripeSubmit() {
+      this.stripe.confirmSetup({
+        elements: this.stripeElement,
+        confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountryUi } } } },
+        redirect: 'if_required'
+      }).then((response) => {
+        if (response.error) throw Error(response.error.message)
+      }).then(() => {
+        return this.isChange ? this.stripeUpdate() : this.stripeAddApi()
+      }).then(({ data }) => {
+        if (data.flag) throw Error(data.msg)
+        this.close()
+      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
     submit() {
       this.useTappay ? this.tappaySubmit() : this.stripeSubmit()
@@ -213,12 +249,11 @@ export default Vue.extend({
   &__title { // move to html?
     @include text-H6;
     color: setColor(gray-2);
-    margin-bottom: 50px;
+    margin-bottom: 40px;
   }
   >button {
     @include btn-LG;
-    // width: 100%;
-    // margin-top: auto;
+    margin-top: 42px;
   }
 }
 
@@ -227,7 +262,7 @@ export default Vue.extend({
   grid-template-columns: 1fr 1fr;
   grid-gap: 12px;
   >div {
-    height: 45px;
+    height: 18px;
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
     padding: 10px;
@@ -247,8 +282,30 @@ export default Vue.extend({
     color: setColor(gray-1);
     display: flex;
     justify-content: space-between;
+    margin: 5px 0;
   }
   &__info-today { @include overline-LG; }
+}
+
+.field-invoice {
+  margin-top: 20px;
+  &__title {
+    @include text-H4;
+    margin-bottom: 6px;
+  }
+  &__input {
+    >input {
+      @include body-SM;
+      width: calc(100% - 22px);
+      height: 18px;
+      margin: 4px 0;
+      padding: 10px;
+      border: 1px solid setColor(gray-3);
+      border-radius: 4px;
+    }
+    // move to html class?
+    >span { color: setColor(red); }
+  }
 }
 
 .hidden {

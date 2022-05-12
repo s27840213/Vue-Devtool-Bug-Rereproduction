@@ -23,20 +23,14 @@
                       :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
                       :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
               div(class="payment-left-content-period-price")
-                span(class="payment-left-content-period-price__label") {{p.label}} {{currentPlan(p.value)}}
+                span(class="payment-left-content-period-price__label") {{p.label}} {{curPlan(p.value)}}
                 span(class="payment-left-content-period-price__amount") {{`$${plans[planSelected][p.value].now}`}}
                   span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0042') : ''}`}}
               span(v-if="p.value==='yearly'"
                   class="payment-left-content-period__off") {{$t('TMP0043')}}
           //- case step2
           template(v-if="view === 'step2'")
-            PaymentField(@next="step2Finish")
-          //- case step3
-          template(v-if="view === 'step3'")
-            div(v-for="inv in invoiceInput"
-                class="payment-left-content-invoice")
-              input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
-              span(v-if="biv[inv.key]") {{inv.error}}
+            PaymentField(@next="changeView('finish')")
           //- case switch2
           template(v-if="view === 'switch2'")
             card-info(:card="card")
@@ -121,7 +115,6 @@ export default Vue.extend({
       finishText: '',
       // View constant
       periodInput: paymentData.periodOptions(),
-      invoiceInput: [...paymentData.gerneral(), ...paymentData.TWonly()],
       cancel1: paymentData.cancel1(),
       cancel2: paymentData.cancel2(),
       // User input
@@ -129,23 +122,14 @@ export default Vue.extend({
       otherReason: ''
     }
   },
-  watch: {
-    userCountryUI() {
-      this.totalStep = this.isUiTW ? 3 : 2
-    }
-  },
   computed: {
     ...mapGetters({
-      isUiTW: 'payment/isUiTW',
       isBundle: 'payment/getIsBundle'
     }),
     ...mapFields({
-      periodUi: 'periodUi',
-      bi: 'billingInfo',
-      biv: 'billingInfoInvalid'
+      periodUi: 'periodUi'
     }),
     ...mapState('payment', {
-      userCountryUI: 'userCountryUI',
       switchPaidDate: 'switchPaidDate',
       switchPrice: 'switchPrice',
       card: 'cardInfo',
@@ -173,20 +157,18 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       getBillingInfo: 'payment/getBillingInfo',
-      stripeInit: 'payment/stripeInit',
-      tappayAdd: 'payment/tappayAdd',
+      init: 'payment/init',
       getSwitchPrice: 'payment/getSwitchPrice',
       switch: 'payment/switch',
-      checkBillingInfo: 'payment/checkBillingInfo',
       cancelApi: 'payment/cancel'
     }),
     changeView(name: string) {
       this.view = name
       switch (name) {
         case 'step1':
-          this.stripeInit()
+          this.init()
           this.currentStep = 1
-          this.totalStep = i18n.locale === 'tw' ? 3 : 2
+          this.totalStep = 2
           this.title = i18n.t('TMP0040') as string
           this.description = i18n.t('TMP0041') as string
           this.buttons = [{
@@ -201,14 +183,6 @@ export default Vue.extend({
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template.jpg'
-          break
-        case 'step3':
-          this.currentStep = 3
-          this.title = i18n.t('TMP0049') as string
-          this.buttons = [{
-            text: i18n.t('TMP0054') as string,
-            func: this.step3Finish
-          }]
           break
         case 'finish':
           this.getBillingInfo()
@@ -264,24 +238,11 @@ export default Vue.extend({
       if (this.view === 'step2') this.changeView('step1')
       else if (this.view === 'switch2') this.changeView('switch1')
     },
-    step2Finish() {
-      this.isUiTW ? this.changeView('step3') : this.changeView('finish')
-    },
-    async step3Finish() {
-      for (const item of this.invoiceInput) {
-        if (item.error && await this.checkBillingInfo(item.key)) return
-      }
-      this.tappayAdd().then(({ data }) => {
-        if (data.flag) throw Error(data.msg)
-        Vue.notify({ group: 'copy', text: 'Success' })
-        this.changeView('finish')
-      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-    },
     addLink(text:string):string {
       return text.replace(/<link>/g, '<a href="/settings/payment" style="text-decoration:none;">')
         .replace(/<\/link>/g, '</a>')
     },
-    currentPlan(period: string):string {
+    curPlan(period: string):string {
       return this.view === 'switch1' && period !== this.userPeriod ? '(current plan)' : ''
     },
     selectCancelReason(index: string) {
@@ -409,22 +370,6 @@ export default Vue.extend({
   display: flex;
   justify-content: space-between;
   margin-top: 23px;
-  text-transform: uppercase;
-}
-
-.payment-left-content-invoice {
-  >input {
-    @include body-SM;
-    width: calc(100% - 22px);
-    // height: 20px; // ask kitty
-    margin: 5px 0;
-    padding: 10px;
-    border: 1px solid setColor(gray-3);
-    border-radius: 4px;
-  }
-  >span {
-    color: setColor(red);
-  }
 }
 
 .payment-left-content-cancel {

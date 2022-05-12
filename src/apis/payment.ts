@@ -53,6 +53,19 @@ class Payment {
     })
   }
 
+  // Both stripe & tappay
+  init (): AxiosPromise { // todo retype
+    return axios.request<any>({ // todo retype
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        action: 'init'
+      }
+    })
+  }
+
   tappayAdd (params: any): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',
@@ -67,33 +80,6 @@ class Payment {
     })
   }
 
-  tappayUpdate (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
-      url: '/payment',
-      method: 'POST',
-      data: {
-        token: authToken().token || '',
-        locale: i18n.locale,
-        action: 'update_card',
-        type: 'tappay',
-        ...params // prime
-      }
-    })
-  }
-
-  stripeInit (): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
-      url: '/payment',
-      method: 'POST',
-      data: {
-        token: authToken().token || '',
-        locale: i18n.locale,
-        action: 'init',
-        type: 'stripe'
-      }
-    })
-  }
-
   stripeAdd (params: any): AxiosPromise { // todo retype
     return axios.request<any>({ // todo retype
       url: '/payment',
@@ -104,6 +90,20 @@ class Payment {
         action: 'add_card',
         type: 'stripe',
         ...params // country, plan_id, is_bundle,
+      }
+    })
+  }
+
+  tappayUpdate (params: any): AxiosPromise { // todo retype
+    return axios.request<any>({ // todo retype
+      url: '/payment',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        action: 'update_card',
+        type: 'tappay',
+        ...params // prime
       }
     })
   }
@@ -189,11 +189,12 @@ class Payment {
   // Only for testing
   deletePlanCompletely(): AxiosPromise {
     return axios.request<any>({
-      url: '/payment',
+      url: '/disable-plan',
       method: 'POST',
       data: {
         token: authToken().token || '',
-        admin_token: 'vKLyK56ICyAn1dLQ'
+        admin_token: 'vKLyK56ICyAn1dLQ',
+        card_invalid: 0
       }
     })
   }

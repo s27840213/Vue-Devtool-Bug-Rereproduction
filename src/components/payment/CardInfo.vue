@@ -73,11 +73,7 @@ export default Vue.extend({
   &-description {
     @include body-XS;
     margin: 30px 0;
-    >span {
-      @include overline-LG;
-      text-transform: uppercase;
-      font-weight:bold;
-    }
+    >span { @include overline-LG; }
   }
   &-button {
     display: flex;

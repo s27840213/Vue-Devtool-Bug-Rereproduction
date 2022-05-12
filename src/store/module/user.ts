@@ -307,7 +307,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       commit('payment/SET_state', {
         isPro: data.data.plan_subscribe === 1,
         isCancelingPro: data.data.plan_stop_subscribe === 1,
-        nextPaidDate: data.data.plan_due_time
+        myPaidDate: data.data.plan_due_time
       }, { root: true })
 
       // locale settings

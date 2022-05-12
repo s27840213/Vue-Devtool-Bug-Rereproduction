@@ -3,27 +3,27 @@
     div(v-if="!isPro" class="sp-free")
       p(class="text-blue-1")            {{$t('TMP0077')}}
       svg-icon(iconName="free")
-      btn(class="rounded" type="primary-lg" @click.native="togglePro()")
+      btn(class="rounded" type="primary-lg" @click.native="buy()")
         span                            {{$t('TMP0078')}}
     div(v-if="isPro" class="sp-pro")
       p(class="text-blue-1")            {{$t('TMP0077')}}
       svg-icon(iconName="pro")
       template(v-if="isCancelingPro")
-        span(class="body-SM")           {{$t('TMP0084', {date: nextPaidDate})}}
+        span(class="body-SM")           {{$t('TMP0084', {date: myPaidDate})}}
         btn(class="rounded" type="primary-mid" @click.native="resume()")
           span                          {{$t('TMP0079')}}
       template(v-else)
         span(v-if="card.status === 'invalid'"
           class="text-red overline-LG") {{$t('TMP0117')}}
         span(class="body-SM")           {{$t('TMP0080', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
-        span(class="body-SM"      v-html="$t('TMP0081', { price: nextPrice, date: nextPaidDate  })")
+        span(class="body-SM"      v-html="$t('TMP0081', { price: myPrice, date: myPaidDate  })")
         span(v-if="card.status !== 'invalid'"
             class="text-blue-1 body-SM pointer"
             @click="switchPeriod()")    {{$t('TMP0082', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
         span(class="text-gray-3 body-SM pointer"
             @click="cancelSub()")       {{$t('TMP0083')}}
       span(class="text-blue-1 mt-30")   {{$t('TMP0085')}}
-      span(                       v-html="$t('TMP0086', { amount: usage.bgrmRemain, date: nextPaidDate })")
+      span(                       v-html="$t('TMP0086', { amount: usage.bgrmRemain, date: myPaidDate })")
       span(class="body-XS")             {{$t('TMP0087')}}
       span(class="text-blue-1")         {{$t('TMP0088')}}
       div(class="sp-pro-disk")
@@ -32,7 +32,7 @@
         span {{`${usage.diskUsed}/${usage.diskTotal}`}}
       span(class="body-XS")             {{$t('TMP0089')}}
     hr
-    div(v-if="isPro && card.status !== 'none'" class="sp-detail")
+    div(v-if="card.status !== 'none'" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0090')}}
       card-info(:card="card" :trash="isCancelingPro")
       p(v-if="card.status === 'invalid'"
@@ -135,8 +135,8 @@ export default Vue.extend({
       isPro: 'isPro',
       card: 'cardInfo',
       isCancelingPro: 'isCancelingPro',
-      nextPaidDate: 'nextPaidDate',
-      nextPrice: 'nextPrice'
+      myPaidDate: 'myPaidDate',
+      myPrice: 'myPrice'
     }),
     diskPercent():Record<string, string> {
       return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
@@ -153,7 +153,7 @@ export default Vue.extend({
     },
     billingInfoCheck():boolean {
       for (const item of this.billingInfoInput) {
-        switch (item.label) {
+        switch (item.key) {
           case 'country':
             if (!this.userCountryInfo) return false
             break
@@ -174,7 +174,7 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      togglePro: 'payment/togglePro', // todelete
+      init: 'payment/init',
       getBillingInfo: 'payment/getBillingInfo',
       getPrice: 'payment/getPrice',
       updateBillingInfoApi: 'payment/updateBillingInfo',
@@ -190,15 +190,19 @@ export default Vue.extend({
     },
     resume() {
       if (this.card.status !== 'none') this.resumeApi()
-      else {
-        this.paymentView = 'step1'
-        this.showPaymentPopup = true
-      }
+      else this.buy()
     },
-    openCardPopup() { this.showCardPopup = true },
+    openCardPopup() {
+      this.init()
+      this.showCardPopup = true
+    },
     closeCardPopup() { this.showCardPopup = false },
     openPaymentPopup() { this.showPaymentPopup = true },
     closePaymentPopup() { this.showPaymentPopup = false },
+    buy() {
+      this.paymentView = 'step1'
+      this.showPaymentPopup = true
+    },
     switchPeriod() {
       this.paymentView = 'switch1'
       this.showPaymentPopup = true
@@ -281,7 +285,7 @@ export default Vue.extend({
 
 .sp-field{
   width: 320px;
-  height: 300px;
+  height: 240px;
   padding: 20px 60px 40px 60px;
   background-color: white;
 }

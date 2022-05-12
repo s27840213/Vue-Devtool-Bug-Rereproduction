@@ -11,8 +11,9 @@ interface IPaymentState {
   prime: string
   isPro: boolean
   isCancelingPro: boolean
-  nextPaidDate: string
-  nextPrice: string
+  paymentPaidDate: string,
+  myPaidDate: string
+  myPrice: string
   switchPaidDate: string
   switchPrice: string
   usage: {
@@ -94,8 +95,11 @@ const getDefaultState = (): IPaymentState => ({
   prime: '',
   isPro: false,
   isCancelingPro: false,
-  nextPaidDate: '',
-  nextPrice: '',
+  // 'payment' means when user trying to scribe a plan,
+  // 'my' means /settings/payment plan info
+  paymentPaidDate: '',
+  myPaidDate: '',
+  myPrice: '',
   switchPaidDate: '',
   switchPrice: '',
   usage: {
@@ -156,9 +160,8 @@ const state = getDefaultState()
 
 function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
   const weight = [1, 2, 1, 2, 1, 2, 4, 1]
-  if (GUI.length !== 8) {
-    return false
-  }
+  if (GUI === '') return true // Special case, because GUI is option field.
+  else if (GUI.length !== 8) return false
 
   const GUIsum = GUI.split('').map((item, index) => {
     return parseInt(item) * weight[index] // Multipy by weight each
@@ -211,8 +214,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
         isPro: data.plan_subscribe === 1,
         periodInfo: data.plan_next_bundle ? 'yearly' : 'monthly',
         isCancelingPro: data.plan_stop_subscribe === 1,
-        nextPrice: '$' + data.price,
-        nextPaidDate: data.plan_due_time,
+        myPrice: '$' + data.price,
+        myPaidDate: data.plan_due_time,
         userCountryInfo: data.country,
         usage: {
           bgrmRemain: data.bg_credit_current,
@@ -314,31 +317,23 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).then(() => Vue.notify({ group: 'copy', text: 'Success' }))
       .catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
+  async init({ commit }) {
+    commit('SET_state', {
+      stripeClientSecret: paymentApi.init().then(({ data }) => {
+        if (data.flag) throw Error(data.msg)
+        commit('SET_state', {
+          stripeClientSecret: data.client_secret,
+          paymentPaidDate: data.charge_time
+        })
+      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+    })
+  },
   async tappayAdd() {
     return paymentApi.tappayAdd({
       country: state.userCountryUi,
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
       prime: state.prime
-    })
-  },
-  async tappayUpdate({ dispatch }) {
-    return paymentApi.tappayUpdate({
-      prime: state.prime
-    }).then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      dispatch('getBillingInfo')
-    }).then(() => Vue.notify({ group: 'copy', text: '更新卡片成功' }))
-      .catch(msg => Vue.notify({ group: 'error', text: msg }))
-  },
-  async stripeInit({ commit }) {
-    commit('SET_state', {
-      stripeClientSecret: paymentApi.stripeInit().then(({ data }) => {
-        if (data.flag) throw Error(data.msg)
-        commit('SET_state', {
-          stripeClientSecret: data.client_secret
-        })
-      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     })
   },
   async stripeAdd() {
@@ -348,12 +343,20 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: Number(state.periodUi === 'yearly')
     })
   },
-  async stripeUpdate({ dispatch }) {
-    return paymentApi.stripeUpdate().then((response) => {
-      if (response.data.flag) throw Error(response.data.msg)
+  async tappayUpdate({ dispatch }) {
+    return paymentApi.tappayUpdate({
+      prime: state.prime
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '更新卡片成功' })
-      return response
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async stripeUpdate({ dispatch }) {
+    return paymentApi.stripeUpdate().then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: '更新卡片成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async getSwitchPrice({ commit, getters }) {
@@ -363,7 +366,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       commit('SET_state', {
-        switchPaidDate: 'Due Mar 14th,2022t',
+        switchPaidDate: data.charge_time,
         switchPrice: data.price
       })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
@@ -420,7 +423,7 @@ const mutations: MutationTree<IPaymentState> = {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
-      if (key === 'nextPaidDate') {
+      if (['paymentPaidDate', 'myPaidDate', 'switchPaidDate'].includes(key) && newState[key]) {
         (state[key] as any) = new Date(newState[key] as string)
           .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
             year: 'numeric',
