@@ -10,8 +10,9 @@ interface IPaymentState {
   stripeClientSecret: string
   prime: string
   isPro: boolean
+  trialStatus: string
   isCancelingPro: boolean
-  paymentPaidDate: string,
+  paymentPaidDate: string
   myPaidDate: string
   myPrice: string
   switchPaidDate: string
@@ -74,10 +75,16 @@ interface IPaymentState {
   }
 }
 
-interface ICardStatue {
-  0: 'invalid'
-  1: 'valid'
+const ICardStatue = {
+  0: 'invalid',
+  1: 'valid',
   2: 'none'
+}
+
+const ITrialStatue = {
+  0: 'not used',
+  1: 'using',
+  2: 'ended'
 }
 
 const getDefaultState = (): IPaymentState => ({
@@ -101,6 +108,7 @@ const getDefaultState = (): IPaymentState => ({
   prime: '',
   isPro: false,
   isCancelingPro: false,
+  trialStatus: '',
   // 'payment' means when user trying to scribe a plan,
   // 'my' means /settings/payment plan info
   paymentPaidDate: '',
@@ -220,6 +228,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         isPro: data.plan_subscribe === 1,
         periodInfo: data.plan_next_bundle ? 'yearly' : 'monthly',
         isCancelingPro: data.plan_stop_subscribe === 1,
+        trialStatus: ITrialStatue[data.trial_status as keyof typeof ITrialStatue],
         myPrice: '$' + data.price,
         myPaidDate: data.plan_due_time,
         userCountryInfo: data.country,
@@ -230,7 +239,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           diskTotal: data.capacity
         },
         cardInfo: {
-          status: { 0: 'invalid', 1: 'valid', 2: 'none' }[data.card_valid as keyof ICardStatue],
+          status: ICardStatue[data.card_valid as keyof typeof ICardStatue],
           issuer: data.brand,
           last4: data.last4,
           date: data.valid_thru

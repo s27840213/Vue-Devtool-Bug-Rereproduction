@@ -6,8 +6,8 @@
                 class="pointer" @click.native="closePopup()")
       div(class="payment-left")
         div(class="payment-left-top")
-          div(v-if="showPreStep" class="payment-left-top__step")
-            svg-icon(iconName="left-arrow" iconWidth="24px"
+          div(class="payment-left-top__step")
+            svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
                     iconColor="gray1" @click.native="preStep()")
             span(v-if="totalStep") {{$t('TMP0039')}} {{currentStep}} of {{totalStep}}
           div(class="payment-left-top__title") {{title}}
@@ -25,9 +25,9 @@
               div(class="payment-left-content-period-price")
                 span(class="payment-left-content-period-price__label") {{p.label}} {{curPlan(p.value)}}
                 span(class="payment-left-content-period-price__amount") {{`$${plans[planSelected][p.value].now}`}}
-                  span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0042') : ''}`}}
+                  span(class="payment-left-content-period-price__end") {{`${$t('TMP0012')}${p.value==='yearly' ? $t('TMP0043') : ''}`}}
               span(v-if="p.value==='yearly'"
-                  class="payment-left-content-period__off") {{$t('TMP0043')}}
+                  class="payment-left-content-period__off") {{$t('TMP0044')}}
           //- case step2
           template(v-if="view === 'step2'")
             PaymentField(@next="changeView('finish')")
@@ -35,7 +35,7 @@
           template(v-if="view === 'switch2'")
             card-info(:card="card")
             div(class="payment-left-content-switch2")
-              span {{$t('TMP0047', {date: switchPaidDate})}}
+              span {{$t('TMP0048', {date: switchPaidDate})}}
               span {{switchPrice}}
           //- case cancel1
           template(v-if="view === 'cancel1'")
@@ -51,23 +51,23 @@
                         @select="selectCancelReason(idx)")
               span {{can}}
             input(class="payment-left-content-cancel__other"
-                  v-model="otherReason" :placeholder="$t('TMP0075')")
+                  v-model="otherReason" :placeholder="$t('TMP0077')")
         div(class="payment-left-button")
           btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
               @click.native="button.func()"
               :disabled="button.disabled ? button.disabled() : false")
             span {{button.text}}
-          span(v-if="view === 'step1'"
-              class="payment-left-button-description") {{$t('TMP0045')}}
+          span(v-if="view === 'step1' && trialStatus === 'not used'"
+              class="payment-left-button-description") {{$t('TMP0046')}}
       img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
       div(v-if="['finish', 'already pro'].includes(view)" class="payment-finish")
         animation(path="/lottie/us/pro.json")
         div(class="payment-finish-description")
-          i18n(path="TMP0056" tag="span")
+          i18n(path="TMP0058" tag="span")
             template(#link)
-              router-link(to="/settings/payment") {{$t('TMP0076')}}
+              router-link(to="/settings/payment") {{$t('TMP0078')}}
           btn(v-if="view === 'already pro'" type="primary-mid"
-              @click.native="closePopup()") {{$t('TMP0057')}}
+              @click.native="closePopup()") {{$t('TMP0059')}}
 </template>
 
 <script lang="ts">
@@ -136,7 +136,8 @@ export default Vue.extend({
       switchPrice: 'switchPrice',
       card: 'cardInfo',
       plans: 'plans',
-      planSelected: 'planSelected'
+      planSelected: 'planSelected',
+      trialStatus: 'trialStatus'
     }),
     userPeriod():string {
       return ['switch1', 'switch2'].includes(this.view)
@@ -172,38 +173,38 @@ export default Vue.extend({
           this.currentStep = 1
           this.totalStep = 2
           this.title = i18n.t('TMP0040') as string
-          this.description = i18n.t('TMP0041') as string
+          this.description = (this.trialStatus === 'not used' ? i18n.t('TMP0041') : i18n.t('TMP0042')) as string
           this.buttons = [{
-            text: i18n.t('TMP0044') as string,
+            text: i18n.t('TMP0045') as string,
             func: () => this.changeView('step2')
           }]
           this.img = 'remover.jpg'
           break
         case 'step2':
           this.currentStep = 2
-          this.title = i18n.t('TMP0046') as string
+          this.title = i18n.t('TMP0047') as string
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template.jpg'
           break
         case 'finish':
           this.getBillingInfo()
-          this.finishText = i18n.t('TMP0055') as string
+          this.finishText = i18n.t('TMP0057') as string
           break
         case 'already pro':
-          this.finishText = i18n.t('TMP0056') as string
+          this.finishText = i18n.t('TMP0058') as string
           break
         case 'switch1':
           this.getSwitchPrice()
-          this.title = i18n.t('TMP0058') as string
-          this.description = i18n.t('TMP0059') as string
+          this.title = i18n.t('TMP0060') as string
+          this.description = i18n.t('TMP0061') as string
           this.buttons = [{
-            text: i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
+            text: i18n.t('TMP0062', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => this.changeView('switch2')
           }]
           break
         case 'switch2':
-          this.title = i18n.t('TMP0046') as string
+          this.title = i18n.t('TMP0047') as string
           this.description = 'test'
           this.buttons = [{
             text: i18n.t('') as string,
@@ -214,19 +215,19 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0061') as string
+          this.title = i18n.t('TMP0063') as string
           this.buttons = [{
-            text: i18n.t('TMP0067') as string,
+            text: i18n.t('TMP0069') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            text: i18n.t('TMP0066') as string,
+            text: i18n.t('TMP0068') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0068') as string
+          this.title = i18n.t('TMP0070') as string
           this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'

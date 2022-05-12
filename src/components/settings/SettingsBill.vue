@@ -1,20 +1,20 @@
 <template lang="pug">
   div(class="bill")
     div(class="bill__title")
-      p {{$t('TMP0106')}}
+      p {{$t('TMP0108')}}
     template(v-if="!historys.length")
       img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
-      p(class="text-H6") {{$t('TMP0112')}}
+      p(class="text-H6") {{$t('TMP0114')}}
     div(v-else class="bill-table")
-      span {{$t('TMP0107')}}
-      span {{$t('TMP0108')}}
       span {{$t('TMP0109')}}
       span {{$t('TMP0110')}}
+      span {{$t('TMP0111')}}
+      span {{$t('TMP0112')}}
       template(v-for="his, idx in historys")
         span {{his.date}}
         span {{his.description}}
         span {{his.price}}
-        span(class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0111')}}
+        span(class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0113')}}
     div(v-if="historys.length" class="bill-invoice-wrapper")
       div(class="bill-invoice" id="bill-invoice")
         div(class="bill-invoice__title")
