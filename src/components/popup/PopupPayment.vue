@@ -63,7 +63,9 @@
       div(v-if="['finish', 'already pro'].includes(view)" class="payment-finish")
         animation(path="/lottie/us/pro.json")
         div(class="payment-finish-description")
-          span(v-html="addLink(finishText)")
+          i18n(path="TMP0056" tag="span")
+            template(#link)
+              router-link(to="/settings/payment") {{$t('TMP0076')}}
           btn(v-if="view === 'already pro'" type="primary-mid"
               @click.native="closePopup()") {{$t('TMP0057')}}
 </template>
@@ -237,10 +239,6 @@ export default Vue.extend({
     preStep() {
       if (this.view === 'step2') this.changeView('step1')
       else if (this.view === 'switch2') this.changeView('switch1')
-    },
-    addLink(text:string):string {
-      return text.replace(/<link>/g, '<a href="/settings/payment" style="text-decoration:none;">')
-        .replace(/<\/link>/g, '</a>')
     },
     curPlan(period: string):string {
       return this.view === 'switch1' && period !== this.userPeriod ? '(current plan)' : ''
