@@ -328,13 +328,26 @@ const actions: ActionTree<IPaymentState, unknown> = {
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     })
   },
-  async tappayAdd() {
+  async tappayAdd({ dispatch }) {
     return paymentApi.tappayAdd({
       country: state.userCountryUi,
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
       prime: state.prime
-    })
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    }).then(() => {
+      return paymentApi.updateBillingInfo({
+        meta: JSON.stringify({
+          email: state.billingInfo.email,
+          name: state.billingInfo.name,
+          phone: state.billingInfo.phone,
+          tax_id: state.billingInfo.GUI
+        })
+      })
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async stripeAdd() {
     return paymentApi.stripeAdd({

@@ -203,10 +203,9 @@ export default Vue.extend({
           resolve()
         }).then(() => {
           return this.isChange ? this.tappayUpdate() : this.tappayAdd()
-        }).then(({ data }) => {
-          if (data.flag) throw Error(data.msg)
+        }).then(() => {
           this.close()
-        }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+        })
       }
       this.TPDirect.card.getPrime(callback)
     },
