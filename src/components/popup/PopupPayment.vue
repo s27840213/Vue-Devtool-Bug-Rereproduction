@@ -63,7 +63,7 @@
       div(v-if="['finish', 'already pro'].includes(view)" class="payment-finish")
         animation(path="/lottie/us/pro.json")
         div(class="payment-finish-description")
-          i18n(path="TMP0058" tag="span")
+          i18n(:path="finishTextId" tag="span")
             template(#link)
               router-link(to="/settings/payment") {{$t('TMP0078')}}
           btn(v-if="view === 'already pro'" type="primary-mid"
@@ -114,7 +114,7 @@ export default Vue.extend({
       description: '',
       buttons: [{}] as {type?: string, disabled?: ()=>boolean, text: string, func: ()=>void}[],
       img: 'remover.jpg',
-      finishText: '',
+      finishTextId: '',
       // View constant
       periodInput: paymentData.periodOptions(),
       cancel1: paymentData.cancel1(),
@@ -189,10 +189,10 @@ export default Vue.extend({
           break
         case 'finish':
           this.getBillingInfo()
-          this.finishText = i18n.t('TMP0057') as string
+          this.finishTextId = 'TMP0057'
           break
         case 'already pro':
-          this.finishText = i18n.t('TMP0058') as string
+          this.finishTextId = 'TMP0058'
           break
         case 'switch1':
           this.getSwitchPrice()
