@@ -565,7 +565,6 @@ export default Vue.extend({
           } else {
             const img = new Image()
             img.crossOrigin = 'anonymous'
-            imageShadowUtils.setIsProcess(layerInfo, true)
             img.onload = () => {
               imageShadowUtils.drawShadow(canvas, img, this.config, {
                 drawCanvasW,
@@ -591,7 +590,6 @@ export default Vue.extend({
             const img = new Image()
             img.crossOrigin = 'anonymous'
             img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            imageShadowUtils.setIsProcess(layerInfo, true)
             img.onload = () => {
               imageShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
                 drawCanvasW,

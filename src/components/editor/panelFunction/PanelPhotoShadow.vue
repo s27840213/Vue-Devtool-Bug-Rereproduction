@@ -158,6 +158,13 @@ export default Vue.extend({
         pageIndex: _pageIndex
       })
 
+      imageShadowUtils.setUploadId({
+        pageId: pageId,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: primarylayerId ? config.id || '' : ''
+      })
+
+      // Handle the params for drawing
       const img = new Image()
       img.crossOrigin = 'anonynous'
       img.src = imageUtils.getSrc(config, ['public', 'private'].includes(config.srcObj.type) ? 'larg' : 1600)
@@ -207,12 +214,6 @@ export default Vue.extend({
         default:
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
-      imageShadowUtils.setUploadId({
-        pageId: pageId,
-        layerId: primarylayerId || config.id || '',
-        subLayerId: primarylayerId ? config.id || '' : ''
-      })
-
       // updateCanvas.style.width = (updateCanvas.width / 4).toString() + 'px'
       // updateCanvas.style.height = (updateCanvas.height / 4).toString() + 'px'
       // updateCanvas.style.position = 'absolute'

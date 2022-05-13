@@ -145,7 +145,7 @@ class ImageShadowUtils {
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    if (layerInfo && timeout && !config.styles.shadow.hasPaintOnCanvas) {
+    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
       this.setIsProcess(layerInfo, true)
     }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
@@ -211,7 +211,7 @@ class ImageShadowUtils {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
         if (layerInfo) {
-          !config.isUploading && this.setIsProcess(layerInfo, false)
+          this.setIsProcess(layerInfo, false)
           this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
@@ -268,7 +268,7 @@ class ImageShadowUtils {
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    if (layerInfo && timeout && !config.styles.shadow.hasPaintOnCanvas) {
+    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
       this.setIsProcess(layerInfo, true)
     }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
@@ -322,7 +322,7 @@ class ImageShadowUtils {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
         if (layerInfo) {
-          !config.isUploading && this.setIsProcess(layerInfo, false)
+          this.setIsProcess(layerInfo, false)
           this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
@@ -353,7 +353,12 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-      if (layerInfo && timeout && !config.styles.shadow.hasPaintOnCanvas) {
+      /**
+       * Show the process icon as:
+       * 1. this drawing is not an uploading draw -> timeout !== 0
+       * 2. or, this drawing is an uploading draw and the canvas is empty
+       */
+      if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
         this.setIsProcess(layerInfo, true)
       }
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D

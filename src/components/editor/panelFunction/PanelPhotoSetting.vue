@@ -90,7 +90,9 @@ export default Vue.extend({
       currSelectedLayers: 'getCurrSelectedLayers',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       isProcessing: 'bgRemove/getIsProcessing',
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
     }),
     ...mapState('user', {
       isSuperUser: 'role'
@@ -135,6 +137,9 @@ export default Vue.extend({
     },
     selectedLayersNum(): number {
       return this.currSelectedInfo.layers.length
+    },
+    isHandlShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
     }
   },
   methods: {
@@ -157,7 +162,7 @@ export default Vue.extend({
     },
     handleShow(name: string) {
       const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
-      if (currLayer.type === LayerType.image && currLayer.inProcess) {
+      if (this.isHandlShadow) {
         return
       }
       switch (name) {
