@@ -157,7 +157,6 @@ export default Vue.extend({
         /** get a tiny photo in order to get the aspectRatio of the image */
         const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj.type, 50))
         const img = new Image()
-        img.setAttribute('crossOrigin', 'Anonymous')
         img.onload = () => {
           const ratio = img.naturalWidth / img.naturalHeight
           assetUtils.addImage(src, ratio, {
