@@ -214,6 +214,7 @@ class ImageShadowUtils {
           !config.isUploading && this.setIsProcess(layerInfo, false)
           this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
         }
+        this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
       }
       cb && cb()
     })
@@ -324,6 +325,7 @@ class ImageShadowUtils {
           !config.isUploading && this.setIsProcess(layerInfo, false)
           this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
         }
+        this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         cb && cb()
       }
     })
@@ -536,8 +538,7 @@ class ImageShadowUtils {
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         initWidth: width,
         initHeight: height,
-        scale: 1,
-        adjust: {}
+        scale: 1
       }, subLayerIdx)
 
       if (layer.styles.shadow.currentEffect !== effect) {

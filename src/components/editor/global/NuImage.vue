@@ -87,7 +87,6 @@ export default Vue.extend({
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
     eventUtils.on(ImageEvent.redrawCanvasShadow, () => {
-      console.log(123456)
       if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
         this.redrawShadow(true)
       } else if (this.currentShadowEffect !== ShadowEffectType.none) {
@@ -672,7 +671,6 @@ export default Vue.extend({
       })
     },
     redrawShadow(openPanel = false) {
-      console.log(1234675)
       imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { scale: 1 }, this.subLayerIndex)
       this.$nextTick(() => {
