@@ -1,12 +1,15 @@
 <template lang="pug">
   div(class="sp")
     span {{`status: ${status}`}}
-    div(v-if="!isPro" class="sp-free")
+    div(v-if="!isPro && status !== 'Fail' " class="sp-free")
       p(class="text-blue-1")            {{$t('TMP0079')}}
       svg-icon(iconName="free")
-      btn(class="rounded" type="primary-lg" @click.native="buy()")
+      btn(v-if="status==='Abort'" class="rounded"
+          type="primary-mid" @click.native="resume()")
+          span                          {{$t('TMP0081')}}
+      btn(v-else-if="status!=='Leave'" class="rounded" type="primary-lg" @click.native="buy()")
         span                            {{$t('TMP0080')}}
-    div(v-if="isPro" class="sp-pro")
+    div(v-if="isPro || status === 'Fail'" class="sp-pro")
       p(class="text-blue-1")            {{$t('TMP0079')}}
       svg-icon(iconName="pro")
       template(v-if="isCancelingPro")
@@ -38,13 +41,13 @@
       card-info(:card="card" :trash="isCancelingPro")
       p(v-if="card.status === 'invalid'"
         class="text-red overline-LG")   {{$t('TMP0119')}}
-      p(class="text-blue-1 body-SM"
+      p(v-if="canChangeCard" class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0094')}}
     hr
     p(class="text-gray-3 pointer"
-      @click="toAbort()")  {{'goto Abort'}}
+      @click="toReset()")  {{'goto toReset'}}
     p(class="text-gray-3 pointer"
-      @click="toLeave()")  {{'goto toLeave'}}
+      @click="toAbort()")  {{'goto Abort'}}
     p(class="text-gray-3 pointer"
       @click="toFail()")  {{'goto toFail'}}
     hr(v-if="isPro")
@@ -144,6 +147,9 @@ export default Vue.extend({
       myPaidDate: 'myPaidDate',
       myPrice: 'myPrice'
     }),
+    canChangeCard():boolean {
+      return ['Fail', 'Subscribed', 'Canceled'].includes(this.status)
+    },
     diskPercent():Record<string, string> {
       return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
     },
@@ -188,7 +194,7 @@ export default Vue.extend({
       checkBillingInfo: 'payment/checkBillingInfo',
       resumeApi: 'payment/resume',
       toAbort: 'payment/toAbort',
-      toLeave: 'payment/toLeave',
+      toReset: 'payment/toReset',
       toFail: 'payment/toFail'
     }),
     async updateBillingInfo() {

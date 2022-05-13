@@ -456,11 +456,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
       Vue.notify({ group: 'copy', text: 'goto Abort' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async toLeave({ dispatch }) {
-    return paymentApi.toLeave().then(({ data }) => {
+  async toReset({ dispatch }) {
+    return paymentApi.toReset().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'goto Leave' })
+      Vue.notify({ group: 'copy', text: 'goto Reset' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async toFail({ dispatch }) {

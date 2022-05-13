@@ -194,19 +194,19 @@ class Payment {
       data: {
         token: authToken().token || '',
         admin_token: 'vKLyK56ICyAn1dLQ',
-        card_invalid: 0
+        status: 'abort'
       }
     })
   }
 
-  toLeave(): AxiosPromise {
+  toReset(): AxiosPromise {
     return axios.request<any>({
       url: '/disable-plan',
       method: 'POST',
       data: {
         token: authToken().token || '',
         admin_token: 'vKLyK56ICyAn1dLQ',
-        card_invalid: 1
+        status: 'reset'
       }
     })
   }
@@ -218,8 +218,7 @@ class Payment {
       data: {
         token: authToken().token || '',
         admin_token: 'vKLyK56ICyAn1dLQ',
-        card_invalid: 1,
-        stop_subscribe: 0
+        status: 'fail'
       }
     })
   }

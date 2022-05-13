@@ -61,14 +61,14 @@
           span(v-if="view === 'step1' && trialStatus === 'not used'"
               class="payment-left-button-description") {{$t('TMP0046')}}
       img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
-      div(v-if="['finish', 'already pro'].includes(view)" class="payment-finish")
+      div(v-if="view === 'finish'" class="payment-finish")
         animation(path="/lottie/us/pro.json")
         div(class="payment-finish-description")
           i18n(:path="finishTextId" tag="span")
-            template(#link)
-              router-link(to="/settings/payment") {{$t('TMP0078')}}
-          btn(v-if="view === 'already pro'" type="primary-mid"
-              @click.native="closePopup()") {{$t('TMP0059')}}
+            //- template(#link)
+            //-   router-link(to="/settings/payment") {{$t('TMP0078')}}
+          //- btn(v-if="view === 'already pro'" type="primary-mid"
+          //-     @click.native="closePopup()") {{$t('TMP0059')}}
 </template>
 
 <script lang="ts">
@@ -190,11 +190,11 @@ export default Vue.extend({
           break
         case 'finish':
           this.getBillingInfo()
-          this.finishTextId = 'TMP0057'
+          this.finishTextId = 'TMP0057' // todo fix it
           break
-        case 'already pro':
-          this.finishTextId = 'TMP0058'
-          break
+        // case 'already pro':
+        //   this.finishTextId = 'TMP0058'
+        //   break
         case 'switch1':
           this.getSwitchPrice()
           this.title = i18n.t('TMP0060') as string

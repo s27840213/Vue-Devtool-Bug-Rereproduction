@@ -27,8 +27,8 @@
             span(class="pricing-plan-right-price__dollar") {{'$ '}}
             span(class="text-H1") {{plans[planSelected][periodUi].now}}
             span {{' ' + $t('TMP0012')}}
-          btn(class="pricing-plan-right-buy" type="light-lg" @click.native="openPopup()")
-            span {{$t('TMP0013')}}
+          btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
+            span {{canAddCard ? $t('TMP0013') : 'Manage subscription'}}
         span(class="pricing-plan-currency") {{$t('TMP0014')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
@@ -83,6 +83,7 @@ export default Vue.extend({
       isUiTW: 'payment/isUiTW'
     }),
     ...mapState('payment', {
+      isCancelingPro: 'isCancelingPro',
       plans: 'plans',
       card: 'cardInfo',
       planSelected: 'planSelected'
@@ -90,7 +91,8 @@ export default Vue.extend({
     ...mapFields({
       periodUi: 'periodUi'
     }),
-    off():string { return this.isUiTW ? '26off' : '25off' }
+    off():string { return this.isUiTW ? '26off' : '25off' },
+    canAddCard():boolean { return this.isCancelingPro && this.card.status === 'none' }
   },
   async mounted() {
     await this.getBillingInfo()
@@ -101,6 +103,10 @@ export default Vue.extend({
       getBillingInfo: 'payment/getBillingInfo',
       getPrice: 'payment/getPrice'
     }),
+    tryAddCard() {
+      if (this.canAddCard) this.openPopup()
+      else this.$router.push('/settings/payment')
+    },
     openPopup() {
       this.paymentView = (this.card.status === 'none' ? 'step1' : 'already pro')
       this.showPopup = true
