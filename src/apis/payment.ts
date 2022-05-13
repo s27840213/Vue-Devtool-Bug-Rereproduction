@@ -187,7 +187,7 @@ class Payment {
   }
 
   // Only for testing
-  deletePlanCompletely(): AxiosPromise {
+  toAbort(): AxiosPromise {
     return axios.request<any>({
       url: '/disable-plan',
       method: 'POST',
@@ -195,6 +195,31 @@ class Payment {
         token: authToken().token || '',
         admin_token: 'vKLyK56ICyAn1dLQ',
         card_invalid: 0
+      }
+    })
+  }
+
+  toLeave(): AxiosPromise {
+    return axios.request<any>({
+      url: '/disable-plan',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        admin_token: 'vKLyK56ICyAn1dLQ',
+        card_invalid: 1
+      }
+    })
+  }
+
+  toFail(): AxiosPromise {
+    return axios.request<any>({
+      url: '/disable-plan',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        admin_token: 'vKLyK56ICyAn1dLQ',
+        card_invalid: 1,
+        stop_subscribe: 0
       }
     })
   }

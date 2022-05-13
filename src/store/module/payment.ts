@@ -449,11 +449,25 @@ const actions: ActionTree<IPaymentState, unknown> = {
       Vue.notify({ group: 'copy', text: '刪除成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async deletePlanCompletely({ dispatch }) {
-    return paymentApi.deletePlanCompletely().then(({ data }) => {
+  async toAbort({ dispatch }) {
+    return paymentApi.toAbort().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '完全刪除成功' })
+      Vue.notify({ group: 'copy', text: 'goto Abort' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async toLeave({ dispatch }) {
+    return paymentApi.toLeave().then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: 'goto Leave' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async toFail({ dispatch }) {
+    return paymentApi.toFail().then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: 'goto Fail' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
 }
