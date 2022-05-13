@@ -35,8 +35,9 @@
           template(v-if="view === 'switch2'")
             card-info(:card="card")
             div(class="payment-left-content-switch2")
-              span {{$t('TMP0048', {date: switchPaidDate})}}
-              span {{switchPrice}}
+              span(v-if="switchPaidDate") {{$t('TMP0048', {date: switchPaidDate})}}
+              span(v-else) {{$t('TMP0049')}}
+              span {{`$${switchPrice}`}}
           //- case cancel1
           template(v-if="view === 'cancel1'")
             div(v-for="can in cancel1" class="payment-left-content-cancel")
@@ -207,7 +208,7 @@ export default Vue.extend({
           this.title = i18n.t('TMP0047') as string
           this.description = 'test'
           this.buttons = [{
-            text: i18n.t('') as string,
+            text: 'wait for i18n', // i18n.t('') as string,
             func: () => {
               this.switch()
               this.closePopup() // refresh or double check?

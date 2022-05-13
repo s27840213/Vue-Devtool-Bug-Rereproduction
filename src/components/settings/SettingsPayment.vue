@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="sp")
+    span {{`status: ${myStatus}`}}
     div(v-if="!isPro" class="sp-free")
       p(class="text-blue-1")            {{$t('TMP0079')}}
       svg-icon(iconName="free")
@@ -167,6 +168,21 @@ export default Vue.extend({
         }
       }
       return true
+    },
+    myStatus(): string {
+      if (!this.isPro && !this.isCancelingPro && this.card.status === 'no') return 'Initial'
+      else if (!this.isPro && !this.isCancelingPro && this.card.status === 'Fail') return 'Fail'
+      else if (!this.isPro && !this.isCancelingPro && this.card.status === 'valid') return 'Transient'
+      else if (!this.isPro && this.isCancelingPro && this.card.status === 'no') return 'Reset'
+      else if (!this.isPro && this.isCancelingPro && this.card.status === 'Fail') return 'Leave'
+      else if (!this.isPro && this.isCancelingPro && this.card.status === 'valid') return 'Abort'
+      else if (this.isPro && !this.isCancelingPro && this.card.status === 'no') return '-1'
+      else if (this.isPro && !this.isCancelingPro && this.card.status === 'Fail') return '-2'
+      else if (this.isPro && !this.isCancelingPro && this.card.status === 'valid') return 'Subscribed'
+      else if (this.isPro && this.isCancelingPro && this.card.status === 'no') return 'Delete'
+      else if (this.isPro && this.isCancelingPro && this.card.status === 'Fail') return '-3'
+      else if (this.isPro && this.isCancelingPro && this.card.status === 'valid') return 'Canceled'
+      return '-?'
     }
   },
   async mounted() {
