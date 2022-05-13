@@ -6,6 +6,7 @@ import paymentApi from '@/apis/payment'
 
 interface IPaymentState {
   // Constant
+  status: string
   plans: Record<string, Record<string, Record<string, string>|string>>
   stripeClientSecret: string
   prime: string
@@ -87,8 +88,25 @@ const ITrialStatue = {
   2: 'ended'
 }
 
+function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
+  if (!isPro && !isCancelingPro && cardStatus === 2) return '-1'
+  else if (!isPro && !isCancelingPro && cardStatus === 0) return 'Fail'
+  else if (!isPro && !isCancelingPro && cardStatus === 1) return 'Transient'
+  else if (!isPro && isCancelingPro && cardStatus === 2) return 'Initial'
+  else if (!isPro && isCancelingPro && cardStatus === 0) return 'Leave'
+  else if (!isPro && isCancelingPro && cardStatus === 1) return 'Abort'
+  else if (isPro && !isCancelingPro && cardStatus === 2) return '-2'
+  else if (isPro && !isCancelingPro && cardStatus === 0) return '-3'
+  else if (isPro && !isCancelingPro && cardStatus === 1) return 'Subscribed'
+  else if (isPro && isCancelingPro && cardStatus === 2) return 'Delete'
+  else if (isPro && isCancelingPro && cardStatus === 0) return '-4'
+  else if (isPro && isCancelingPro && cardStatus === 1) return 'Canceled'
+  return '-?'
+}
+
 const getDefaultState = (): IPaymentState => ({
   // Constant
+  status: 'Loading',
   plans: {
     '': {
       name: '',
@@ -224,6 +242,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       const data = response.data.data
       console.log('bill info', data) // todelete
       commit('SET_state', {
+        status: getStatus(data.plan_subscribe, data.plan_stop_subscribe, data.card_valid),
         isPro: data.plan_subscribe === 1,
         periodInfo: data.plan_next_bundle ? 'yearly' : 'monthly',
         isCancelingPro: data.plan_stop_subscribe === 1,
@@ -374,18 +393,18 @@ const actions: ActionTree<IPaymentState, unknown> = {
   async tappayUpdate({ dispatch }) {
     return paymentApi.tappayUpdate({
       prime: state.prime
-    }).then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
+    }).then((response) => {
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '更新卡片成功' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      return response
+    })
   },
   async stripeUpdate({ dispatch }) {
-    return paymentApi.stripeUpdate().then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
+    return paymentApi.stripeUpdate().then((response) => {
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: '更新卡片成功' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      return response
+    })
   },
   async getSwitchPrice({ commit, getters }) {
     return paymentApi.getSwitchPrice({
