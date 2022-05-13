@@ -17,22 +17,43 @@
         @error="onError()"
         @load="onLoad()")
     //- template(v-if="isAdjustImage")
-    nu-adjust-image(v-if="isAdjustImage"
-      :src="finalSrc"
-      :styles="adjustImgStyles"
-      :style="imgStyles")
-    div(v-show="!isAdjustImage"
-      class="img-wrapper"
+    //- nu-adjust-image(v-if="isAdjustImage"
+    //-   :src="finalSrc"
+    //-   :styles="adjustImgStyles"
+    //-   :style="imgStyles")
+    template(v-if="isAdjustImage")
+      svg(:viewBox="svgViewBox"
+        :width="svgImageWidth"
+        :height="svgImageHeight"
+        preserveAspectRatio="none"
+        role="image")
+        defs
+          filter(:id="filterId"
+            color-interpolation-filters="sRGB")
+            component(v-for="(elm, idx) in svgFilterElms"
+              :key="`svgFilter${idx}`"
+              :is="elm.tag"
+              v-bind="elm.attrs")
+              component(v-for="child in elm.child"
+                :key="child.tag"
+                :is="child.tag"
+                v-bind="child.attrs")
+    div(class="img-wrapper"
       :style="imgWrapperstyle")
       div(class='nu-image__picture'
         :style="imgStyles")
         img(ref="img"
           :style="flipStyles"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
-          draggable="false"
           :src="finalSrc"
+          draggable="false"
           @error="onError()"
-          @load="onLoad()")
+          @load="onLoad ()")
+    template(v-if="isAdjustImage")
+      component(v-for="(elm, idx) in cssFilterElms"
+        :key="`cssFilter${idx}`"
+        :is="elm.tag"
+        v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -47,7 +68,8 @@ import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ILayerInfo, LayerType } from '@/store/types'
 import imageShadowUtils, { CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE } from '@/utils/imageShadowUtils'
-import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default Vue.extend({
   props: {
@@ -64,6 +86,30 @@ export default Vue.extend({
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
+    eventUtils.on(ImageEvent.redrawCanvasShadow, () => {
+      console.log(123456)
+      if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
+        this.redrawShadow(true)
+      } else if (this.currentShadowEffect !== ShadowEffectType.none) {
+        if (this.shadow.isTransparent) {
+          this.redrawShadow()
+        } else {
+          const img = new Image()
+          img.crossOrigin = 'anonymous'
+          img.onload = () => {
+            const isTransparent = imageShadowUtils.isTransparentBg(img)
+            imageShadowUtils.updateEffectProps({
+              pageIndex: this.pageIndex,
+              layerIndex: this.layerIndex,
+              subLayerIdx: this.subLayerIndex
+            }, { isTransparent })
+            isTransparent && this.redrawShadow()
+          }
+          const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
+          img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        }
+      }
+    })
   },
   beforeDestroy() {
     if (this.config.inProcess) {
@@ -95,27 +141,27 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
-        if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
-          this.redrawShadow(true)
-        } else if (this.currentShadowEffect !== ShadowEffectType.none) {
-          if (this.shadow.isTransparent) {
-            this.redrawShadow()
-          } else {
-            const img = new Image()
-            img.crossOrigin = 'anonymous'
-            img.onload = () => {
-              const isTransparent = imageShadowUtils.isTransparentBg(img)
-              imageShadowUtils.updateEffectProps({
-                pageIndex: this.pageIndex,
-                layerIndex: this.layerIndex,
-                subLayerIdx: this.subLayerIndex
-              }, { isTransparent })
-              isTransparent && this.redrawShadow()
-            }
-            const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
-            img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-          }
-        }
+        // if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
+        //   this.redrawShadow(true)
+        // } else if (this.currentShadowEffect !== ShadowEffectType.none) {
+        //   if (this.shadow.isTransparent) {
+        //     this.redrawShadow()
+        //   } else {
+        //     const img = new Image()
+        //     img.crossOrigin = 'anonymous'
+        //     img.onload = () => {
+        //       const isTransparent = imageShadowUtils.isTransparentBg(img)
+        //       imageShadowUtils.updateEffectProps({
+        //         pageIndex: this.pageIndex,
+        //         layerIndex: this.layerIndex,
+        //         subLayerIdx: this.subLayerIndex
+        //       }, { isTransparent })
+        //       isTransparent && this.redrawShadow()
+        //     }
+        //     const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
+        //     img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        //   }
+        // }
 
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
@@ -197,6 +243,38 @@ export default Vue.extend({
         ...inheritStyle
       }
     },
+    svgImageWidth(): number {
+      const { imgWidth } = this.adjustImgStyles
+      return imgWidth
+    },
+    svgImageHeight(): number {
+      const { imgHeight } = this.adjustImgStyles
+      return imgHeight
+    },
+    svgViewBox(): string {
+      return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
+    },
+    cssFilterElms(): any[] {
+      const { adjustImgStyles: { adjust, width, imgX, imgY, height } } = this
+      // @TODO: only for halation now
+      if (Number.isNaN(adjust.halation) || !adjust.halation) {
+        return []
+      }
+      const position = {
+        width: width / 2,
+        x: Math.abs(imgX) + width / 2,
+        y: Math.abs(imgY) + height / 2
+      }
+      return imageAdjustUtil.getHalation(adjust.halation, position)
+    },
+    filterId(): string {
+      const randomId = generalUtils.generateRandomString(5)
+      return `filter__${randomId}`
+    },
+    svgFilterElms(): any[] {
+      const { adjust } = this.adjustImgStyles
+      return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {})
+    },
     canvasWrapperStyle(): any {
       if (this.forRender) {
         return {}
@@ -251,7 +329,8 @@ export default Vue.extend({
         }
       }
       return {
-        transform: `scale(${scaleX}, ${scaleY})`
+        transform: `scale(${scaleX}, ${scaleY})`,
+        ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
       }
     },
     getImgDimension(): number {
@@ -456,6 +535,7 @@ export default Vue.extend({
         return
       }
       imageShadowUtils.clearLayerData()
+      imageShadowUtils.updateEffectProps(this.layerInfo, { hasPaintOnCanvas: false })
       const { width, height } = this.config.styles
       const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
       const _canvasW = (width + CANVAS_SPACE * spaceScale)
@@ -592,6 +672,7 @@ export default Vue.extend({
       })
     },
     redrawShadow(openPanel = false) {
+      console.log(1234675)
       imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { scale: 1 }, this.subLayerIndex)
       this.$nextTick(() => {
@@ -640,6 +721,7 @@ export default Vue.extend({
   }
   &__picture {
     position: absolute;
+    pointer-events: none;
   }
 }
 

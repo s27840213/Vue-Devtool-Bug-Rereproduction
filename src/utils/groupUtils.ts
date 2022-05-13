@@ -120,7 +120,6 @@ class GroupUtils {
         }
       })
     stepsUtils.record()
-    // console.log(GeneralUtils.deepCopy(store.state.currSelectedInfo.layers))
   }
 
   ungroup() {
@@ -243,6 +242,7 @@ class GroupUtils {
   }
 
   deselect() {
+    console.trace()
     const tmpPageIndex = this.currSelectedInfo.pageIndex
     if (this.currSelectedInfo.index !== -1) {
       const currSelectedLayers = store.getters.getCurrSelectedLayers

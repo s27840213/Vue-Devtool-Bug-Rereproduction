@@ -13,6 +13,7 @@ import text, { ITextState } from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import shadow from '@/store/module/shadow'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
@@ -811,6 +812,7 @@ export default new Vuex.Store({
     brandkit,
     unsplash,
     bgRemove,
-    file
+    file,
+    shadow
   }
 })

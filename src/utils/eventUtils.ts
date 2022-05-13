@@ -23,6 +23,9 @@ export enum PanelEvent {
   showPhotoShadow = 'showPhotoShadow'
 }
 
+export enum ImageEvent {
+  redrawCanvasShadow = 'redrawCanvasShadow'
+}
 class EventUtils {
   static readonly EventType = EventType
   readonly EventType = EventUtils.EventType

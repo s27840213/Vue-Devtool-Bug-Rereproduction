@@ -119,8 +119,7 @@ export default Vue.extend({
   data() {
     return {
       shadowPropI18nMap,
-      fieldRange,
-      notUpload: false
+      fieldRange
     }
   },
   mounted() {
@@ -129,26 +128,34 @@ export default Vue.extend({
   },
   async beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
-    if (this.notUpload) return
     const layerData = imageShadowUtils.layerData
     if (layerData) {
       const { config, primarylayerId } = layerData
+      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
+      const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = primarylayerId
+        ? layerUtils.getLayerInfoById(pageId, primarylayerId, config.id as string)
+        : layerUtils.getLayerInfoById(pageId, config.id as string, '')
+
+      // If the shadow effct has already got the img src, return
       if (config.styles.shadow.srcObj.type) {
         return
       }
-
-      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       if (primarylayerId) {
         this.setIsUploading(pageId, primarylayerId, config.id as string, true)
       } else {
         this.setIsUploading(pageId, config.id as string, '', true)
       }
 
+      // If the canvas has been painted, stop showing the inProcess icon
+      if (config.styles.shadow.hasPaintOnCanvas) {
+        layerUtils.updateLayerProps(_pageIndex, _layerIndex, { inProcess: false }, _subLayerIdx)
+      }
+
       const assetId = generalUtils.generateAssetId()
       this.$store.commit('file/SET_UPLOADING_IMGS', {
         id: assetId,
         adding: true,
-        pageIndex: pageUtils.currFocusPageIndex
+        pageIndex: _pageIndex
       })
 
       const img = new Image()
@@ -200,6 +207,11 @@ export default Vue.extend({
         default:
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
+      imageShadowUtils.setUploadId({
+        pageId: pageId,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: primarylayerId ? config.id || '' : ''
+      })
 
       // updateCanvas.style.width = (updateCanvas.width / 4).toString() + 'px'
       // updateCanvas.style.height = (updateCanvas.height / 4).toString() + 'px'
@@ -232,6 +244,7 @@ export default Vue.extend({
       uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 0.5)], {
         addToPage: false,
         needCompressed: false,
+        id: assetId,
         pollingCallback: (json: IUploadAssetResponse) => {
           const srcObj = {
             type: this.isAdmin ? 'public' : 'private',
@@ -250,6 +263,7 @@ export default Vue.extend({
             const newImg = new Image()
             newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: false }, subLayerIdx)
               if (srcObjIdentifier !== config.srcObj.type + config.srcObj.userId + config.srcObj.assetId) {
                 return
               }
@@ -259,7 +273,6 @@ export default Vue.extend({
                 imgX: newWidth * 0.5 - (config.styles.width * leftShadowThickness + config.styles.width * 0.5),
                 imgY: newHeight * 0.5 - (config.styles.height * topShadowThickness + config.styles.height * 0.5)
               })
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: false }, subLayerIdx)
               layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               if (subLayerIdx !== -1) {
@@ -288,7 +301,7 @@ export default Vue.extend({
             }
             newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
           }
-          imageShadowUtils.clearLayerData()
+          imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
         }
       })
     }

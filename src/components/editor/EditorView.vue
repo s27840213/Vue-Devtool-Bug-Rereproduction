@@ -70,6 +70,8 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import layerUtils from '@/utils/layerUtils'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -269,7 +271,10 @@ export default Vue.extend({
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
         if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
-          GroupUtils.deselect()
+          const currLayer = layerUtils.getCurrLayer
+          if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+            GroupUtils.deselect()
+          }
         }
         this.isSelecting = true
         this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
@@ -303,7 +308,10 @@ export default Vue.extend({
     },
     selectEnd() {
       if (this.isSelecting) {
-        GroupUtils.deselect()
+        const currLayer = layerUtils.getCurrLayer
+        if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+          GroupUtils.deselect()
+        }
       }
       /**
        * Use nextTick to trigger the following function after DOM updating

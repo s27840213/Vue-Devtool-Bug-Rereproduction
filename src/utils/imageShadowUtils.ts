@@ -1,12 +1,13 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
-import { IGroup, IImage } from '@/interfaces/layer'
+import { IGroup, IImage, LayerIdentifier } from '@/interfaces/layer'
 import store from '@/store'
 import { ILayerInfo, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import mathUtils from './mathUtils'
+import pageUtils from './pageUtils'
 import { imageDataRGBA } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
@@ -80,7 +81,14 @@ class ImageShadowUtils {
 
         const { layerInfo } = options || {}
         if (layerInfo) {
-          this._layerData.primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+          // TODO no need the below line
+          const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+          this._layerData.primarylayerId = primarylayerId
+          this.setProcessId({
+            pageId: pageUtils.currFocusPage.id,
+            layerId: primarylayerId || config.id || '',
+            subLayerId: primarylayerId ? config.id || '' : ''
+          })
           this.updateEffectProps(layerInfo, {
             isTransparent: this.isTransparentBg(canvasT)
           })
@@ -137,8 +145,9 @@ class ImageShadowUtils {
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    layerInfo && this.setIsProcess(layerInfo, true)
-
+    if (layerInfo && timeout && !config.styles.shadow.hasPaintOnCanvas) {
+      this.setIsProcess(layerInfo, true)
+    }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
@@ -201,10 +210,13 @@ class ImageShadowUtils {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
-        layerInfo && !config.isUploading && this.setIsProcess(layerInfo, false)
+        if (layerInfo) {
+          !config.isUploading && this.setIsProcess(layerInfo, false)
+          this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
+        }
       }
+      cb && cb()
     })
-    cb && cb()
   }
 
   async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
@@ -255,9 +267,9 @@ class ImageShadowUtils {
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    layerInfo && this.setIsProcess(layerInfo, true)
-    console.warn('drawing start', generalUtils.deepCopy(layerInfo))
-
+    if (layerInfo && timeout && !config.styles.shadow.hasPaintOnCanvas) {
+      this.setIsProcess(layerInfo, true)
+    }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
@@ -308,10 +320,13 @@ class ImageShadowUtils {
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
-        layerInfo && !config.isUploading && this.setIsProcess(layerInfo, false)
+        if (layerInfo) {
+          !config.isUploading && this.setIsProcess(layerInfo, false)
+          this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
+        }
+        cb && cb()
       }
     })
-    cb && cb()
   }
 
   async drawShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
@@ -336,7 +351,9 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-      layerInfo && this.setIsProcess(layerInfo, true)
+      if (layerInfo && timeout && !config.styles.shadow.hasPaintOnCanvas) {
+        this.setIsProcess(layerInfo, true)
+      }
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
       const imgX = _imgX * scaleRatio
@@ -434,7 +451,11 @@ class ImageShadowUtils {
 
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
-          layerInfo && !config.isUploading && this.setIsProcess(layerInfo, false)
+          if (layerInfo) {
+            this.setIsProcess(layerInfo, false)
+            this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
+          }
+          this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
           cb && cb()
         }
       })
@@ -454,10 +475,6 @@ class ImageShadowUtils {
         cb()
         resolve()
       }, 0)
-      // window.requestAnimationFrame(() => {
-      //   cb()
-      //   resolve()
-      // })
     })
   }
 
@@ -780,6 +797,14 @@ class ImageShadowUtils {
       layerInfo,
       srcObj
     })
+  }
+
+  setUploadId(id: LayerIdentifier) {
+    store.commit('shadow/SET_UPLOAD_ID', id)
+  }
+
+  setProcessId(id: LayerIdentifier) {
+    store.commit('shadow/SET_PROCESS_ID', id)
   }
 }
 

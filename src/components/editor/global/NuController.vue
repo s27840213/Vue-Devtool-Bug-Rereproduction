@@ -152,6 +152,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -1415,6 +1416,8 @@ export default Vue.extend({
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image') {
           StepsUtils.record()
+          console.log('123')
+          eventUtils.emit(ImageEvent.redrawCanvasShadow)
         }
         if (this.currSelectedInfo.index < 0) {
           this.setLastSelectedLayerIndex(this.layerIndex)

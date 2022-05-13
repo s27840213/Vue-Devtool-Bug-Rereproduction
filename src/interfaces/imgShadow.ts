@@ -68,4 +68,5 @@ export interface IShadowProps {
   srcObj: SrcObj,
   styles: IShadowStyles,
   isTransparent?: boolean,
+  hasPaintOnCanvas?: boolean
 }

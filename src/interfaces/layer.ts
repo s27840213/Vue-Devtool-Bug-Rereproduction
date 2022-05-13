@@ -4,6 +4,11 @@ import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { IShadowProps } from './imgShadow'
 
 export const jsonVer = '1.0.7'
+export interface LayerIdentifier {
+  pageId: string,
+  layerId: string,
+  subLayerId?: string
+}
 export interface IStyle {
   [key: string]: number | string | boolean | undefined | { [key: string]: number | string | boolean } | IShadowProps,
   x: number,
