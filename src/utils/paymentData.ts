@@ -5,6 +5,7 @@ interface BillingInfoInput {
   label: TranslateResult
   ph?: TranslateResult
   key?: string
+  optional?: boolean
   error?: string
 }
 
@@ -74,7 +75,10 @@ class PaymentData {
 
   // For SettingsPayment.vue billing info input
   country():BillingInfoInput[] {
-    return [{ label: 'country' }]
+    return [{
+      label: 'country',
+      key: 'country'
+    }]
   }
 
   gerneral():BillingInfoInput[] {
@@ -100,6 +104,7 @@ class PaymentData {
       label: i18n.t('TMP0053') as string,
       ph: i18n.t('TMP0054') as string,
       key: 'GUI',
+      optional: true,
       error: 'Invalid GUI format.'
     }]
   }
@@ -108,7 +113,8 @@ class PaymentData {
     return [{
       label: i18n.t('TMP0098') as string,
       ph: i18n.t('TMP0099') as string,
-      key: 'company'
+      key: 'company',
+      optional: true
     }, {
       label: i18n.t('TMP0102', { number: 1 }) as string,
       ph: i18n.t('TMP0103') as string,
@@ -116,7 +122,8 @@ class PaymentData {
     }, {
       label: i18n.t('TMP0102', { number: 2 }) as string,
       ph: i18n.t('TMP0104') as string,
-      key: 'address2'
+      key: 'address2',
+      optional: true
     }, {
       label: i18n.t('TMP0105') as string,
       ph: i18n.t('TMP0105') as string,
@@ -132,7 +139,8 @@ class PaymentData {
     return [{
       label: i18n.t('TMP0098') as string,
       ph: i18n.t('TMP0099') as string,
-      key: 'company'
+      key: 'company',
+      optional: true
     }, {
       label: i18n.t('TMP0100') as string,
       ph: i18n.t('TMP0101') as string,

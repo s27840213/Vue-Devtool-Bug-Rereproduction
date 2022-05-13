@@ -151,8 +151,9 @@ export default Vue.extend({
           return [...paymentData.country(), ...paymentData.gerneral(), ...paymentData.others()]
       }
     },
-    billingInfoCheck():boolean {
+    billingInfoCheck():boolean { // Check if input is empty
       for (const item of this.billingInfoInput) {
+        if (item.optional) continue
         switch (item.key) {
           case 'country':
             if (!this.userCountryInfo) return false
@@ -170,7 +171,7 @@ export default Vue.extend({
   },
   async mounted() {
     await this.getBillingInfo()
-    this.getPrice(this.userCountryInfo)
+    this.getPrice()
   },
   methods: {
     ...mapActions({

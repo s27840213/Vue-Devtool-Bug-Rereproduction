@@ -24,16 +24,10 @@
         div(class="bill-invoice__invoice-number") {{`Invoice number: ${historys[hisIndex].id}`}}
         div(class="bill-invoice__invoice-date") {{`Invoice date: ${historys[hisIndex].date}`}}
         div(class="bill-invoice-fromto")
-          //- todo reuse
           span {{'From:'}}
-          span {{'Vivipic Ltd'}}
-          span {{'vivipic addr'}}
-          span {{'vivipic zipcode city?'}}
-          span {{'vivipic mail'}}
           span {{'To:'}}
-          span {{historys[hisIndex].name}}
-          span {{historys[hisIndex].address}}
-          span {{historys[hisIndex].email}}
+          span {{'Artily, Inc.\n651 N Broad St, Ste 206\nMiddletown, Delaware 19709-6402 US\nservice@vivipic.com'}}
+          span {{customerAddr}}
         div(class="bill-invoice-detail")
           span {{'Descriptions'}}
           span {{'Date'}}
@@ -44,7 +38,7 @@
             span {{item.price}}
           span
           span {{'Total price'}}
-          span {{'$13.09 USD'}}
+          span {{`$${totalPrice} USD`}}
         div(class="bill-invoice-note")
           span {{'NOTE'}}
 </template>
@@ -70,7 +64,22 @@ export default Vue.extend({
   computed: {
     ...mapState('payment', {
       historys: 'billingHistory'
-    })
+    }),
+    customerAddr():string {
+      return [
+        this.historys[this.hisIndex].name,
+        this.historys[this.hisIndex].company,
+        this.historys[this.hisIndex].address,
+        this.historys[this.hisIndex].email
+      ].filter((item) => item !== '')
+        .join('\n')
+    },
+    totalPrice():number {
+      return this.historys[this.hisIndex].items
+        .reduce((acc: number, cur: Record<string, unknown>) => {
+          return acc + (cur.price as number)
+        }, 0)
+    }
   },
   mounted() {
     this.getBillingHistroy()
@@ -125,6 +134,7 @@ export default Vue.extend({
   margin: 35px 45px;
   text-align: left;
   color: setColor(gray-1);
+  white-space: pre;
   &__title {
     @include text-H4;
     display: flex;
@@ -134,8 +144,7 @@ export default Vue.extend({
   }
   &-fromto {
     display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-columns: 1fr 1fr;
     margin: 10px 0 30px 0;
   }
   &-detail {

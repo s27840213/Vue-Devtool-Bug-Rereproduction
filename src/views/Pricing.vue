@@ -85,8 +85,7 @@ export default Vue.extend({
     ...mapState('payment', {
       plans: 'plans',
       card: 'cardInfo',
-      planSelected: 'planSelected',
-      userCountryUi: 'userCountryUi'
+      planSelected: 'planSelected'
     }),
     ...mapFields({
       periodUi: 'periodUi'
@@ -95,7 +94,7 @@ export default Vue.extend({
   },
   async mounted() {
     await this.getBillingInfo()
-    this.getPrice(this.userCountryUi)
+    this.getPrice()
   },
   methods: {
     ...mapActions({

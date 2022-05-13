@@ -191,13 +191,12 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
-  async getPrice({ commit }, country: string) {
+  async getPrice({ commit }) {
     if (state.userCountryUi === '') {
       commit('SET_state', { userCountryUi: i18n.locale })
-      country = i18n.locale
     }
 
-    return paymentApi.planList(country).then((response) => {
+    return paymentApi.planList(state.userCountryUi).then((response) => {
       const res = response.data.data
       commit('SET_state', {
         planSelected: res[0].plan_id,
@@ -276,7 +275,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
             price: item.price,
             id: item.order_id,
             name: item.name,
-            address: item.country !== 'us' ? item.address_line1 : `${item.address_line1}${item.address_line2}${item.address_city}${item.address_state}${item.postal_code}`,
+            company: item.company,
+            address: item.country !== 'us' ? item.address_line1 : `${item.address_line1}${item.address_line2 ? `, ${item.address_line2}` : ''}\n${item.address_city}, ${item.address_state} ${item.postal_code} US`,
             email: item.email,
             success: item.success === 1,
             items: [{

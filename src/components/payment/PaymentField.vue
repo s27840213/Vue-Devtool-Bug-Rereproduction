@@ -71,7 +71,7 @@ export default Vue.extend({
   },
   watch: {
     userCountryUi() {
-      this.getPrice(this.userCountryUi)
+      this.getPrice()
     }
   },
   computed: {
@@ -105,15 +105,10 @@ export default Vue.extend({
           ? i18n.t('TMP0055')
           : i18n.t('TMP0056')) as string
     },
-    invoiceReady():boolean {
+    invoiceReady():boolean { // Check if input is empty
       for (const item of this.invoiceInput) {
-        switch (item.key) {
-          case 'GUI':
-            break
-          default:
-            if (!this.bi[item.key as string]) return false
-            break
-        }
+        if (item.optional) continue
+        if (!this.bi[item.key as string]) return false
       }
       return true
     },
