@@ -166,18 +166,8 @@ export default Vue.extend({
   &__designs {
     display: grid;
     grid-gap: 25px;
-    justify-items: stretch;
     margin-bottom: 20px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    @media(min-width: 976px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    @media(min-width: 1260px) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    @media(min-width: 1560px) {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
   }
   &__loading {
     display: flex;
