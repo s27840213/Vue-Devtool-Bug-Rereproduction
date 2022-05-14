@@ -81,7 +81,8 @@ export default Vue.extend({
     undroppable: Boolean,
     nameIneditable: Boolean,
     isAnySelected: Boolean,
-    isSelected: Boolean
+    isSelected: Boolean,
+    index: Number
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -131,7 +132,15 @@ export default Vue.extend({
       removeFolder: 'UPDATE_removeFolder',
       deleteFolder: 'UPDATE_deleteFolder'
     }),
-    emitGoto() {
+    emitGoto(e: MouseEvent) {
+      if (this.isAnySelected) {
+        if (e.shiftKey) {
+          this.$emit('metaSelectFolder')
+          return
+        }
+        this.$emit('select')
+        return
+      }
       if (this.isTempFolder) return
       this.$emit('goto')
     },
@@ -288,10 +297,18 @@ export default Vue.extend({
     closeMenu() {
       this.isMenuOpen = false
     },
-    emitSelect() {
+    emitSelect(e: MouseEvent) {
+      if (e.shiftKey) {
+        this.$emit('metaSelectFolder')
+        return
+      }
       this.$emit('select')
     },
-    emitDeselect() {
+    emitDeselect(e: MouseEvent) {
+      if (e.shiftKey) {
+        this.$emit('metaSelectFolder')
+        return
+      }
       this.$emit('deselect')
     },
     folderUndroppable(): boolean {

@@ -1097,6 +1097,74 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_removeFolderFromSelection(state: IDesignState, folder: IFolder) {
     Vue.delete(state.selectedFolders, folder.id)
   },
+  UPDATE_metaSelect(state: IDesignState, updateInfo: {designs: IDesign[], index: number}) {
+    const { designs, index } = updateInfo
+    if (Object.keys(state.selectedDesigns).length === 0) {
+      Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+    } else {
+      let nearestSelectedIndex = -1
+      const indexQueue = [[index, 0]]
+      while (indexQueue.length) {
+        const item = indexQueue.shift()
+        if (item === undefined) break
+        const [index, mode] = item
+        const design = designs[index]
+        if (state.selectedDesigns[design.asset_index.toString()]) {
+          nearestSelectedIndex = index
+          break
+        }
+        if (mode >= 0 && index + 1 < designs.length) {
+          indexQueue.push([index + 1, 1])
+        }
+        if (mode <= 0 && index - 1 >= 0) {
+          indexQueue.push([index - 1, -1])
+        }
+      }
+      state.selectedDesigns = {}
+      if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedDesigns contain only designs not in updateInfo.designs
+        Vue.set(state.selectedDesigns, designs[index].asset_index.toString(), designs[index])
+      } else {
+        const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
+        for (let i = indexFrom; i <= indexTo; i++) {
+          Vue.set(state.selectedDesigns, designs[i].asset_index.toString(), designs[i])
+        }
+      }
+    }
+  },
+  UPDATE_metaSelectFolder(state: IDesignState, updateInfo: {folders: IFolder[], index: number}) {
+    const { folders, index } = updateInfo
+    if (Object.keys(state.selectedFolders).length === 0) {
+      Vue.set(state.selectedFolders, folders[index].id, folders[index])
+    } else {
+      let nearestSelectedIndex = -1
+      const indexQueue = [[index, 0]]
+      while (indexQueue.length) {
+        const item = indexQueue.shift()
+        if (item === undefined) break
+        const [index, mode] = item
+        const folder = folders[index]
+        if (state.selectedFolders[folder.id]) {
+          nearestSelectedIndex = index
+          break
+        }
+        if (mode >= 0 && index + 1 < folders.length) {
+          indexQueue.push([index + 1, 1])
+        }
+        if (mode <= 0 && index - 1 >= 0) {
+          indexQueue.push([index - 1, -1])
+        }
+      }
+      state.selectedFolders = {}
+      if (nearestSelectedIndex === -1) { // should not happen, but in case that selectedFolders contain only folders not in updateInfo.folders
+        Vue.set(state.selectedFolders, folders[index].id, folders[index])
+      } else {
+        const [indexFrom, indexTo] = [nearestSelectedIndex, index].sort((a, b) => a - b)
+        for (let i = indexFrom; i <= indexTo; i++) {
+          Vue.set(state.selectedFolders, folders[i].id, folders[i])
+        }
+      }
+    }
+  },
   UPDATE_clearSelection(state: IDesignState) {
     state.selectedDesigns = {}
     state.selectedFolders = {}
