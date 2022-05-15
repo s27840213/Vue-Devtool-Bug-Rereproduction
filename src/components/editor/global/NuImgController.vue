@@ -5,12 +5,14 @@
     div(class="nu-controller__body"
         ref="body"
         :style="styles()"
-        @mousedown.left.stop="moveStart")
+        @pointerdown.prevent="moveStart"
+        @touchstart="disableTouchEvent")
       div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
           :key="index"
           :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate), { pointerEvents: forRender ? 'none' : 'initial' })"
-          @mousedown.stop="scaleStart")
+          @pointerdown.prevent.stop="scaleStart"
+          @touchstart="disableTouchEvent")
 </template>
 
 <script lang="ts">
@@ -23,6 +25,8 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import generalUtils from '@/utils/generalUtils'
+import eventUtils from '@/utils/eventUtils'
 
 export default Vue.extend({
   props: {
@@ -61,6 +65,9 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPage: 'getPage'
     }),
+    isMobile(): boolean {
+      return generalUtils.isMobile()
+    },
     pointerEvents(): string {
       return this.forRender ? 'none' : 'initial'
     },
@@ -226,18 +233,18 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, prop)
       }
     },
-    moveStart(event: MouseEvent) {
+    moveStart(event: MouseEvent | PointerEvent) {
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
-      window.addEventListener('mouseup', this.moveEnd)
-      window.addEventListener('mousemove', this.moving)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.moving)
 
       this.setCursorStyle('move')
       this.setLastSelectedLayerIndex(this.layerIndex)
     },
-    moving(event: MouseEvent) {
+    moving(event: MouseEvent | PointerEvent) {
       this.setCursorStyle('move')
       event.preventDefault()
       const reLayerScale = 1 / this.getLayerScale
@@ -290,8 +297,8 @@ export default Vue.extend({
         this.updateLayerProps({ imgControl: true })
       }
       this.setCursorStyle('default')
-      window.removeEventListener('mouseup', this.moveEnd)
-      window.removeEventListener('mousemove', this.moving)
+      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
+      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)
     },
     scaleStart(event: MouseEvent) {
       this.isControlling = true
@@ -312,8 +319,9 @@ export default Vue.extend({
       this.control.ySign = (clientP.y - this.center.y > 0) ? this.flipFactorY : -this.flipFactorY
 
       this.currCursorStyling(event)
-      window.addEventListener('mousemove', this.scaling, false)
-      window.addEventListener('mouseup', this.scaleEnd, false)
+
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.scaling)
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
@@ -428,8 +436,9 @@ export default Vue.extend({
       }
       this.isControlling = false
       this.setCursorStyle('default')
-      window.removeEventListener('mousemove', this.scaling, false)
-      window.removeEventListener('mouseup', this.scaleEnd, false)
+
+      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
+      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.scaling)
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
@@ -444,6 +453,12 @@ export default Vue.extend({
     currCursorStyling(e: MouseEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
+    },
+    disableTouchEvent(e: TouchEvent) {
+      if (this.isMobile) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
     }
   }
 })

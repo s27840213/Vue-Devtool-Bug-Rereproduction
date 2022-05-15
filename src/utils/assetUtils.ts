@@ -567,6 +567,7 @@ class AssetUtils {
         case 5:
         case 9:
           this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
