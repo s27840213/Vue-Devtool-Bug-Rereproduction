@@ -37,7 +37,7 @@
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
-    spinner(v-if="isLoading || isSaving" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
+    spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
     popup-brand-settings(v-if="isBrandSettingsOpen")
 </template>
 
@@ -125,7 +125,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      isGlobalLoading: 'getIsGlobalLoading'
     }),
     ...mapGetters('user', {
       token: 'getToken'

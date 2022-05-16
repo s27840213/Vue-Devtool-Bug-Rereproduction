@@ -113,7 +113,8 @@ export default Vue.extend({
     unenterable: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,
-    isMultiSelected: Boolean
+    isMultiSelected: Boolean,
+    index: Number
   },
   data() {
     return {
@@ -286,8 +287,12 @@ export default Vue.extend({
       if (this.editableName === '' || this.editableName === this.config.name) return
       designUtils.setDesignName(this.config, this.editableName)
     },
-    handleClick() {
+    handleClick(e: MouseEvent) {
       if (this.isAnySelected) {
+        if (e.shiftKey) {
+          this.$emit('metaSelect')
+          return
+        }
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
@@ -311,10 +316,18 @@ export default Vue.extend({
     emitLike() {
       this.$emit('like')
     },
-    emitSelect() {
+    emitSelect(e: MouseEvent) {
+      if (e.shiftKey) {
+        this.$emit('metaSelect')
+        return
+      }
       this.$emit('select')
     },
-    emitDeselect() {
+    emitDeselect(e: MouseEvent) {
+      if (e.shiftKey) {
+        this.$emit('metaSelect')
+        return
+      }
       this.$emit('deselect')
     },
     checkImageSize() {

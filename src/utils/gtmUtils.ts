@@ -24,7 +24,7 @@ class GtmUtils {
   }
 
   trackPageDownload(templateId: string) {
-    if (this.isLogin && !this.isAdmin && templateId) {
+    if (this.isLogin && !this.isAdmin && templateId !== '') {
       this.track('template-download-2', {
         templateId
       })
