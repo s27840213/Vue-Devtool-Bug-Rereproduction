@@ -92,7 +92,7 @@ const getters: GetterTree<IUserModule, any> = {
     return state.userId
   },
   getTeamId: state => {
-    return state.teamId || state.userId
+    return state.teamId ? state.teamId : state.userId
   },
   getToken(state) {
     return state.token

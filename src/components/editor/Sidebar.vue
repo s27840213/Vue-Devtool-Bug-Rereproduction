@@ -1,10 +1,12 @@
 <template lang="pug">
   div(class="sidebar")
     div(class="logo")
-      svg-icon(class="pointer"
-        :iconName="'logo-icon'"
-        :iconWidth="'30px'"
-        @click.native="goToPage('Home')")
+      router-link(to="/"
+        style="height: 30px;"
+        :style="inBgRemoveMode ? {pointerEvents: 'none'} : {}")
+        svg-icon(class="pointer"
+          :iconName="'logo-icon'"
+          :iconWidth="'30px'")
     div(class="nav")
       div(class="nav-container")
         div(class="nav-item pointer"
@@ -29,6 +31,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import { SidebarPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import Avatar from '@/components/Avatar.vue'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -50,16 +53,19 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     navItem(): Array<{ icon: string, text: string }> {
-      return [
+      const navItems = [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}` },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}` },
         { icon: 'shape', text: `${this.$tc('NN0003', 2)}` },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}` },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}` },
         { icon: 'upload', text: `${this.$tc('NN0006')}` }
-        // { icon: 'brand', text: `${this.$t('NN0007')}` },
         // { icon: 'photo', text: 'Pexels' }
       ]
+      if (brandkitUtils.isBrandkitAvailable) {
+        navItems.push({ icon: 'brand', text: `${this.$t('NN0497')}` })
+      }
+      return navItems
     }
   },
   methods: {

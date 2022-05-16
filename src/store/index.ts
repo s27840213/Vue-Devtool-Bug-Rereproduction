@@ -350,10 +350,12 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
+    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
     updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
+    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
@@ -452,6 +454,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph | SrcObj } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
+    if (!groupLayer.layers) return
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
@@ -641,6 +644,13 @@ const mutations: MutationTree<IEditorState> = {
       const clipsLayer = groupLayer.layers[subLayerIndex].clips as IImage[]
       Object.assign(clipsLayer[targetIndex].styles, styles)
     }
+  },
+  SET_frameDecorColors(state: IEditorState, data: { pageIndex: number, layerIndex: number, subLayerIdx: number, payload: any }) {
+    const { pageIndex, layerIndex, subLayerIdx, payload } = data
+    const { decorationColors, decorationTopColors } = payload
+    const targetLayer = subLayerIdx === -1 ? state.pages[pageIndex].layers[layerIndex] : (state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx]
+    decorationColors && ((targetLayer.decoration as IShape).color = decorationColors)
+    decorationTopColors && ((targetLayer.decorationTop as IShape).color = decorationTopColors)
   },
   SET_subFrameLayerAllClipsStyles(state: IEditorState, data: { pageIndex: number, primaryLayerIndex: number, subLayerIndex: number, styles: any }) {
     const { pageIndex, primaryLayerIndex, subLayerIndex, styles } = data

@@ -14,7 +14,10 @@
           div(v-for="item in navItems")
             div(v-if="item.condition" class="p-5 pointer"
                 :class="{'text-blue-1': currentPage === item.name}")
-              router-link(:to="item.url" class="nu-header__container__link") {{item.text}}
+              a(v-if="item.url.startsWith('http')" :href="item.url"
+                class="nu-header__container__link") {{item.text}}
+              router-link(v-else :to="item.url"
+                          class="nu-header__container__link") {{item.text}}
         div(v-else class="body-2" key="no-navigation")
       div(class="body-2")
         //- div(v-if="!isLogin")
@@ -95,6 +98,7 @@ import StepsUtils from '@/utils/stepsUtils'
 import localeUtils from '@/utils/localeUtils'
 import i18n from '@/i18n'
 import VueI18n from 'vue-i18n'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -183,29 +187,29 @@ export default Vue.extend({
         name: 'MyDesign',
         url: '/mydesign',
         text: i18n.t('NN0080')
-      // }, {
-      //   condition: this.isLogin && this.isAdmin,
-      //   name: 'BrandKit',
-      //   url: '/brandkit',
-      //   text: i18n.t('NN0007')
+      }, {
+        condition: this.isLogin && brandkitUtils.isBrandkitAvailable,
+        name: 'BrandKit',
+        url: '/brandkit',
+        text: i18n.t('NN0007')
       }]
     },
     tutorialPage(): string {
       if (this.currLocale === 'tw') {
-        return '//blog.vivipic.com/tw/tutorial/'
+        return 'https://blog.vivipic.com/tw/tutorial/'
       } else if (this.currLocale === 'us') {
-        return '//blog.vivipic.com/us-tutorial/'
+        return 'https://blog.vivipic.com/us-tutorial/'
       } else {
-        return '//www.facebook.com/vivipic' + this.currLocale
+        return 'https://www.facebook.com/vivipic' + this.currLocale
       }
     },
     faqPage(): string {
       if (this.currLocale === 'tw') {
-        return '//blog.vivipic.com/tw/faq/'
+        return 'https://blog.vivipic.com/tw/faq/'
       } else if (this.currLocale === 'us') {
-        return '//blog.vivipic.com/us-faq/'
+        return 'https://blog.vivipic.com/us-faq/'
       } else {
-        return '//www.facebook.com/vivipic' + this.currLocale
+        return 'https://www.facebook.com/vivipic' + this.currLocale
       }
     }
   },

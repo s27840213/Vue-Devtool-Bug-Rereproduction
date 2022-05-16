@@ -1,52 +1,55 @@
 <template lang="pug">
-  div(class="brand-kit relative"
-    @dragover.prevent.stop="handleDragEnter"
-    @dragenter.prevent.stop="handleDragEnter"
-    @dragleave.prevent.stop="handleDragLeave"
-    @drop.prevent.stop="handleDrop")
-    nu-header(v-header-border)
-    section(class="brand-kit__scroll")
-      div(v-if="isBrandsLoading" class="brand-kit__main")
-        svg-icon(iconName="loading"
-                iconWidth="50px"
-                iconColor="gray-3")
-      div(v-else class="brand-kit__main")
-        div(class="brand-kit__header")
-          div(class="brand-kit__selector")
-            brand-selector(@deleteItem="handleDeleteItem")
-          brand-kit-add-btn(:text="`${$t('NN0396')}`"
-                            @click.native="addNewBrand")
-        div(class="brand-kit__tab")
-          brand-kit-tab(@deleteItem="handleDeleteItem")
-      nu-footer
-    div(v-if="isOverlayed" class="dim-background"
-      :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
-      template(v-if="isDraggedOver")
-        div(class="upload-large")
-          svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
-          span {{ $t(hintText) }}
-        div(class="upload-small")
-            span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
-      div(v-if="isMessageShowing" class="delete-confirm")
-        div(class="delete-confirm__title")
-          span {{ $t('NN0433') }}
-        div(class="delete-confirm__description")
-          i18n(path="NN0434" tag="span")
-            template(#itemName)
-              span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
-        div(class="delete-confirm__description")
-          span {{ $t('NN0435') }}
-        div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
-          span {{ $t('NN0436') }}
-        div(v-else class="delete-confirm__description")
-          span {{ $t('NN0459') }}
-        div(class="delete-confirm__buttons")
-          div(class="delete-confirm__buttons__cancel pointer"
-            @click="handleClearDeletion")
-            span {{ $t('NN0203') }}
-          div(class="delete-confirm__buttons__confirm pointer"
-            @click="handleConfirmDeletion")
-            span {{ $t('NN0437') }}
+  div(class="popup-brand-settings")
+    div(class="dim-background under")
+    div(class="popup-brand-settings__window")
+      div(class="popup-brand-settings__wrapper relative")
+        div(class="brand-kit relative"
+          @dragover.prevent.stop="handleDragEnter"
+          @dragenter.prevent.stop="handleDragEnter"
+          @dragleave.prevent.stop="handleDragLeave"
+          @drop.prevent.stop="handleDrop")
+          div(v-if="isBrandsLoading" class="brand-kit__main")
+            svg-icon(iconName="loading"
+                    iconWidth="50px"
+                    iconColor="gray-3")
+          div(v-else class="brand-kit__main")
+            div(class="brand-kit__header")
+              div(class="brand-kit__selector")
+                brand-selector(@deleteItem="handleDeleteItem")
+            div(class="brand-kit__tab")
+              brand-kit-tab(@deleteItem="handleDeleteItem")
+          div(v-if="isOverlayed" class="dim-background"
+            :style="isDraggedOver ? { pointerEvents: 'none' } : {}")
+            template(v-if="isDraggedOver")
+              div(class="upload-large")
+                svg-icon(iconName="cloud-upload" iconWidth="78px" iconColor="white")
+                span {{ $t(hintText) }}
+              div(class="upload-small")
+                  span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
+            div(v-if="isMessageShowing" class="delete-confirm")
+              div(class="delete-confirm__title")
+                span {{ $t('NN0433') }}
+              div(class="delete-confirm__description")
+                i18n(path="NN0434" tag="span")
+                  template(#itemName)
+                    span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
+              div(class="delete-confirm__description")
+                span {{ $t('NN0435') }}
+              div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
+                span {{ $t('NN0436') }}
+              div(v-else class="delete-confirm__description")
+                span {{ $t('NN0459') }}
+              div(class="delete-confirm__buttons")
+                div(class="delete-confirm__buttons__cancel pointer"
+                  @click="handleClearDeletion")
+                  span {{ $t('NN0203') }}
+                div(class="delete-confirm__buttons__confirm pointer"
+                  @click="handleConfirmDeletion")
+                  span {{ $t('NN0437') }}
+        div(v-if="!isOverlayed"
+          class="popup-brand-settings__close pointer"
+          @click="handleCloseSettings")
+          svg-icon(iconName="close" iconColor="gray-1" iconWidth="36px")
 </template>
 
 <script lang="ts">
@@ -57,7 +60,7 @@ import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
 
@@ -71,13 +74,14 @@ export default Vue.extend({
     BrandKitAddBtn
   },
   mounted() {
-    brandkitUtils.fetchBrands(this.fetchBrands)
+    // brandkitUtils.fetchBrands(this.fetchBrands)
     brandkitUtils.fetchFonts(this.fetchFonts)
   },
   data() {
     return {
       isDraggedOver: false,
       isMessageShowing: false,
+      isTop: true,
       deleteBuffer: undefined as IDeletingItem | undefined,
       uploadHint: {
         logo: {
@@ -117,6 +121,9 @@ export default Vue.extend({
     ...mapActions('brandkit', {
       fetchBrands: 'fetchBrands',
       fetchFonts: 'fetchFonts'
+    }),
+    ...mapMutations('brandkit', {
+      setIsSettingsOpen: 'SET_isSettingsOpen'
     }),
     addNewBrand() {
       brandkitUtils.addNewBrand()
@@ -173,23 +180,50 @@ export default Vue.extend({
           break
       }
       this.handleClearDeletion()
+    },
+    handleCloseSettings() {
+      this.setIsSettingsOpen(false)
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.popup-brand-settings {
+  &__window {
+    @include size(900px, 800px);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    background-color: white;
+  }
+  &__wrapper {
+    @include size(100%, 100%);
+  }
+  &__close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
 .brand-kit {
   @include size(100%, 100%);
-  &__scroll {
-    height: calc(100vh - #{$header-height});
-    @include hide-scrollbar-white;
-  }
+  @include hide-scrollbar-white;
+  overflow-x: auto;
   &__main {
-    min-height: calc(100vh - #{$header-height});
-    padding-top: 100px;
-    padding-left: 148px;
-    padding-right: 148px;
+    padding-top: 30px;
+    padding-left: 24px;
+    padding-right: 24px;
   }
   &__header {
     width: 100%;
@@ -204,7 +238,7 @@ export default Vue.extend({
 
 .dim-background {
   @include size(100%, 100%);
-  position: absolute;
+  position: fixed;
   top: 0px;
   left: 0px;
   background: rgba(0, 0, 0, 0.3);
@@ -215,6 +249,9 @@ export default Vue.extend({
   align-items: center;
   justify-content: center;
   gap: 45px;
+  &.under {
+    z-index: 99;
+  }
 }
 
 .upload-large {

@@ -17,8 +17,15 @@ class GtmUtils {
 
   trackTemplateDownload(templateId: string) {
     if (this.isLogin && !this.isAdmin) {
-      console.log('track template download event')
       this.track('template-download', {
+        templateId
+      })
+    }
+  }
+
+  trackPageDownload(templateId: string) {
+    if (this.isLogin && !this.isAdmin && templateId !== '') {
+      this.track('template-download-2', {
         templateId
       })
     }

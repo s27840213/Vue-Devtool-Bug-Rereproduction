@@ -61,7 +61,6 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     store.commit('page/SET_showPagePanel', false)
 
     if (url) {
-      // e.g.: https://test.vivipic.com/editor?url=template.vivipic.com%2Fexport%2F9XBAb9yoKlJbzLiWNUVM%2F211123164456873giej3iKR%2Fpage_0.json%3Fver%3DJeQnhk9N%26token%3DVtOldDgVuwPIWP0Y%26team_id%3D9XBAb9yoKlJbzLiWNUVM
       const hasToken = url.indexOf('token=') !== -1
       let tokenKey = ''
       let src = url

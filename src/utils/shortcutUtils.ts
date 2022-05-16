@@ -227,8 +227,8 @@ class ShortcutUtils {
             assetId: '',
             userId: ''
           }
-          StepsUtils.record()
           LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { clips })
+          StepsUtils.record()
           return
         }
         break

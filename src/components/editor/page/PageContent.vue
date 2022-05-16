@@ -95,12 +95,18 @@ export default Vue.extend({
       _deletePage: 'DELETE_page'
     }),
     ...mapActions({
-      updatePageImages: 'file/updatePageImages'
+      updatePageImages: 'file/updatePageImages',
+      updatePageFonts: 'brandkit/updatePageFonts',
+      updatePageLogos: 'brandkit/updatePageLogos'
     }),
     async loadLayerImg() {
       if (this.setLayersDone && !this.imgLoaded && !this.imgLoading) {
         this.imgLoading = true
-        await this.updatePageImages({ pageIndex: this.pageIndex })
+        await Promise.all([
+          this.updatePageImages({ pageIndex: this.pageIndex }),
+          this.updatePageFonts({ pageIndex: this.pageIndex }),
+          this.updatePageLogos({ pageIndex: this.pageIndex })
+        ])
         this.imgLoaded = true
         this.imgLoading = false
       }
@@ -153,7 +159,6 @@ export default Vue.extend({
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)
-        stepsUtils.record()
       }
       if ((srcObj?.assetId ?? '') !== '' && locked) {
         this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })

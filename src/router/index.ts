@@ -18,6 +18,7 @@ import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -178,12 +179,24 @@ const routes: Array<RouteConfig> = [
   {
     path: 'brandkit',
     name: 'BrandKit',
-    component: BrandKit
+    component: BrandKit,
+    beforeEnter: async (to, from, next) => {
+      try {
+        if (!brandkitUtils.isBrandkitAvailable) {
+          next({ path: '/' })
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
   },
   {
     path: 'pricing',
     name: 'Pricing',
     component: Pricing
+
   }
 ]
 
@@ -250,8 +263,6 @@ router.beforeEach(async (to, from, next) => {
       } else {
         await store.dispatch('user/login', { token: token })
       }
-    } else if (to.name === 'BrandKit' && !store.getters['user/isAdmin']) {
-      next({ name: 'Home' })
     }
   } else {
     if (!store.getters['user/isLogin']) {

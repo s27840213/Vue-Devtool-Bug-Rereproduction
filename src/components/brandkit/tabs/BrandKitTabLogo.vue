@@ -1,48 +1,57 @@
 <template lang="pug">
-  div(class="brand-kit-tab-logo")
-    div(class="brand-kit-tab-logo__item add pointer relative"
-      @click="handleUploadLogo")
-      span(class="primary") {{ $t('NN0411') }}
-      i18n(class="secondary" path="NN0412" tag="span")
-        template(#newline)
-          br
-      svg-icon(class="hover"
-              iconName="plus-origin"
-              iconWidth="16px"
-              iconColor="gray-2")
-    div(v-for="logo in logos" class="brand-kit-tab-logo__item relative"
-      :key="logo.id"
-      :class="{hovered: checkMenuOpen(logo)}")
-      img(:src="logo.url" class="brand-kit-tab-logo__item__img")
-      div(class="brand-kit-tab-logo__item__more pointer"
-        @click="handleOpenMenu(logo)")
-        div(class="brand-kit-tab-logo__item__more-container relative")
-          svg-icon(iconName="more_vertical"
-                  iconWidth="24px"
-                  iconColor="gray-2")
-          div(v-if="checkMenuOpen(logo)"
-            class="brand-kit-tab-logo__item__menu"
-            v-click-outside="() => { menuOpenLogoId = '' }")
-            div(class="brand-kit-tab-logo__item__menu__name")
-              span {{ logo.name }}
-            div(class="brand-kit-tab-logo__item__menu__hr")
-            div(class="brand-kit-tab-logo__item__menu__row pointer"
-              @click="handleDownload(logo)")
-              svg-icon(iconName="download"
-                      iconWidth="24px"
-                      iconColor="gray-2")
-              span {{ $t('NN0010') }}
-            div(class="brand-kit-tab-logo__item__menu__row pointer"
-              @click="handleDeleteLogo(logo)")
-              svg-icon(iconName="trash"
-                      iconWidth="24px"
-                      iconColor="gray-2")
-              span {{ $t('NN0034') }}
+  div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
+    svg-icon(iconName="loading"
+            iconWidth="50px"
+            iconColor="gray-3")
+  transition-group(v-else class="brand-kit-tab-logo" name="logo-list" tag="div")
+    template(v-for="logo in logos")
+      div(v-if="logo === 'add'"
+        class="brand-kit-tab-logo__item add pointer relative"
+        key="add"
+        @click="handleUploadLogo")
+        span(class="primary") {{ $t('NN0411') }}
+        i18n(class="secondary" path="NN0412" tag="span")
+          template(#newline)
+            br
+        svg-icon(class="hover"
+                iconName="plus-origin"
+                iconWidth="16px"
+                iconColor="gray-2")
+      div(v-else
+        class="brand-kit-tab-logo__item relative"
+        :class="{hovered: checkMenuOpen(logo)}"
+        :key="logo.id.replace('new_', '')")
+        svg-icon(v-if="checkUploading(logo)" iconName="loading" iconWidth="24px" iconColor="gray-3")
+        img(v-else :src="getUrl(logo)" class="brand-kit-tab-logo__item__img")
+        div(v-if="!checkUploading(logo)" class="brand-kit-tab-logo__item__more pointer"
+          @click="handleOpenMenu(logo)")
+          div(class="brand-kit-tab-logo__item__more-container relative")
+            svg-icon(iconName="more_vertical"
+                    iconWidth="24px"
+                    iconColor="gray-2")
+            div(v-if="checkMenuOpen(logo)"
+              class="brand-kit-tab-logo__item__menu"
+              v-click-outside="() => { menuOpenLogoId = '' }")
+              div(class="brand-kit-tab-logo__item__menu__name")
+                span {{ logo.name }}
+              div(class="brand-kit-tab-logo__item__menu__hr")
+              div(class="brand-kit-tab-logo__item__menu__row pointer"
+                @click="handleDownload(logo)")
+                svg-icon(iconName="download"
+                        iconWidth="24px"
+                        iconColor="gray-2")
+                span {{ $t('NN0010') }}
+              div(class="brand-kit-tab-logo__item__menu__row pointer"
+                @click="handleDeleteLogo(logo)")
+                svg-icon(iconName="trash"
+                        iconWidth="24px"
+                        iconColor="gray-2")
+                span {{ $t('NN0034') }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
@@ -54,25 +63,42 @@ export default Vue.extend({
       menuOpenLogoId: ''
     }
   },
+  mounted() {
+    brandkitUtils.fetchLogos(this.fetchLogos)
+  },
   directives: {
     clickOutside: vClickOutside.directive
   },
   watch: {
     logos() {
       this.menuOpenLogoId = ''
+    },
+    currentBrand() {
+      brandkitUtils.fetchLogos(this.fetchLogos)
     }
   },
   computed: {
     ...mapGetters('brandkit', {
-      currentBrand: 'getCurrentBrand'
+      currentBrand: 'getCurrentBrand',
+      isLogosLoading: 'getIsLogosLoading'
     }),
-    logos(): IBrandLogo[] {
-      return (this.currentBrand as IBrand).logos
+    logos(): (IBrandLogo | string)[] {
+      return ['add', ...(this.currentBrand as IBrand).logos]
     }
   },
   methods: {
+    ...mapActions('brandkit', {
+      fetchLogos: 'fetchLogos',
+      refreshLogoAsset: 'refreshLogoAsset'
+    }),
+    getUrl(logo: IBrandLogo): string {
+      return brandkitUtils.getLogoUrl(logo, this.currentBrand.id, 'tiny')
+    },
     checkMenuOpen(logo: IBrandLogo): boolean {
       return this.menuOpenLogoId === logo.id
+    },
+    checkUploading(logo: IBrandLogo) {
+      return logo.id.startsWith('new_')
     },
     handleOpenMenu(logo: IBrandLogo) {
       if (this.checkMenuOpen(logo)) {
@@ -85,11 +111,24 @@ export default Vue.extend({
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {
-      const url = brandkitUtils.getDownloadUrl(logo)
-      const a = document.createElement('a')
-      a.setAttribute('href', url)
-      a.setAttribute('download', logo.name)
-      a.click()
+      const brand = this.currentBrand
+      const logoName = logo.name
+      const url = brandkitUtils.getLogoUrl(logo, brand.id, 'original')
+      if (logo.signed_url) {
+        const image = new Image()
+        image.onload = () => { this.startDownloading(url, logoName) }
+        image.onerror = () => {
+          this.refreshLogoAsset({
+            brand,
+            logoAssetIndex: logo.asset_index
+          }).then((urlMap) => {
+            this.startDownloading(urlMap.original, logoName)
+          })
+        }
+        image.src = url
+      } else {
+        this.startDownloading(url, logoName)
+      }
     },
     handleDeleteLogo(logo: IBrandLogo) {
       this.menuOpenLogoId = ''
@@ -97,12 +136,22 @@ export default Vue.extend({
         type: 'logo',
         content: logo
       })
+    },
+    startDownloading(url: string, name: string) {
+      const a = document.createElement('a')
+      a.setAttribute('href', url)
+      a.setAttribute('download', name)
+      a.click()
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.brand-kit-tab-logo-loading {
+  display: flex;
+  justify-content: center;
+}
 .brand-kit-tab-logo {
   display: flex;
   gap: 15px;
@@ -226,6 +275,19 @@ export default Vue.extend({
         }
       }
     }
+  }
+}
+
+.logo-list {
+  &-enter-active,
+  &-leave-active {
+    transition: 0.3s ease;
+  }
+
+  &-enter,
+  &-leave-to {
+    transform: translateY(-30%);
+    opacity: 0;
   }
 }
 </style>

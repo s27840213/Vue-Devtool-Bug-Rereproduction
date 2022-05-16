@@ -44,7 +44,7 @@
       )
     div(class="panel-group__adjust")
       btn(class="btn-align full-width" :type="'gray-mid'" :disabled="isLocked"
-        @click.native="openAlignPopup") {{$t('NN0044')}}
+        @click.native="openAlignPopup") {{$tc('NN0044',1)}}
       btn(class="btn-flip full-width" :type="'gray-mid'" :disabled="isLocked || isFlipDisabled"
         @click.native="openFlipPopup") {{$t('NN0038')}}
 </template>
@@ -54,12 +54,11 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
 import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
-import stepsUtils from '@/utils/stepsUtils'
 import formatUtils from '@/utils/formatUtils'
 import frameUtils from '@/utils/frameUtils'
 
@@ -174,6 +173,11 @@ export default Vue.extend({
     popupUtils.on(PopupSliderEventType.opacity, (value: number) => {
       this.setOpacity(value)
     })
+  },
+  watch: {
+    opacity(newVal) {
+      popupUtils.setSliderConfig(Object.assign({ value: newVal, noText: false }, MappingUtils.mappingMinMax('opacity')))
+    }
   },
   methods: {
     mappingIcons(type: string): string[] {

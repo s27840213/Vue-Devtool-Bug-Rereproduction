@@ -20,7 +20,10 @@ const fontPropsMap: {[key: string]: string} = {
   color: 'color',
   lineHeight: 'lineHeight',
   fontSpacing: 'fontSpacing',
-  textAlign: 'align'
+  textAlign: 'align',
+  type: 'type',
+  assetId: 'assetId',
+  userId: 'userId'
 }
 
 enum textPropType {
@@ -760,8 +763,8 @@ class TextPropUtils {
               continue
             }
             if (typeof propBuff === 'undefined') {
-              propBuff = this.propReadOfLayer(propName, tmpLayer)
-            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer)) {
+              propBuff = this.propReadOfLayer(propName, tmpLayer, true)
+            } else if (propBuff !== this.propReadOfLayer(propName, tmpLayer, true)) {
               return undefined
             }
           }
@@ -1174,8 +1177,10 @@ class TextPropUtils {
       'fontSpacing',
       'lineHeight',
       'font',
+      'type',
+      'assetId',
+      'userId',
       'color',
-      'opacity',
       'weight',
       'style',
       'decoration',
@@ -1211,12 +1216,23 @@ class TextPropUtils {
           value = typeof font === 'string' ? font : `_${i18n.t('NN0341')}`
           break
         }
-        case 'color': {
-          value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
+        case 'type': {
+          const type = this.propReader('type')
+          value = typeof type === 'string' ? type : '--'
           break
         }
-        case 'opacity': {
-          value = (currLayer as IText).styles.opacity
+        case 'assetId': {
+          const assetId = this.propReader('assetId')
+          value = assetId ?? ''
+          break
+        }
+        case 'userId': {
+          const userId = this.propReader('userId')
+          value = userId ?? ''
+          break
+        }
+        case 'color': {
+          value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
           break
         }
         case 'decoration': {

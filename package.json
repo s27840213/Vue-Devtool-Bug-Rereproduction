@@ -41,6 +41,7 @@
     "html2pdf.js": "^0.10.1",
     "konva": "^7.2.5",
     "lottie-web": "^5.1.9",
+    "open": "^8.4.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "tinycolor": "^0.0.1",

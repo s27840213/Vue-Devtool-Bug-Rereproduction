@@ -53,7 +53,7 @@ class ListService {
 
   getFont (params: IListServiceParams) {
     params.type = 'font'
-    params.fontList = 1
+    params.fontList = 2
     return this.getList(params)
   }
 
@@ -81,8 +81,9 @@ class ListService {
 
   getLayout (params: IListServiceParams) {
     params.type = 'layout'
-    params.token = '1'
-    params.cache = true
+    // layout has recently-used list, cannot be cached.
+    // params.token = '1'
+    // params.cache = true
     return this.getList(params)
   }
 

@@ -7,6 +7,8 @@ import layerFactary from './layerFactary'
 import generalUtils from './generalUtils'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import zindexUtils from './zindexUtils'
+import { ILayerInfo } from '@/store/types'
+import stepsUtils from './stepsUtils'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -128,6 +130,7 @@ class FrameUtils {
       LayerUtils.deleteLayer(layerIndex)
       LayerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
       zindexUtils.reassignZindex(pageIndex)
+      stepsUtils.record()
     }
   }
 
@@ -183,6 +186,16 @@ class FrameUtils {
       layerIndex: primaryLayerIndex,
       subLayerIndex: subLayerIndex,
       srcObj: { ...srcObj }
+    })
+  }
+
+  updateFrameDecorColor(layerInfo: ILayerInfo, payload: { decorationColors?: [], decorationTopColors?: [] }) {
+    const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    store.commit('SET_frameDecorColors', {
+      pageIndex,
+      layerIndex,
+      subLayerIdx,
+      payload
     })
   }
 }

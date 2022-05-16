@@ -109,7 +109,7 @@ export interface IListServiceParams {
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
-  fontList?: 0 | 1
+  fontList?: 0 | 1 | 2
   aspect?: string
   width?: number
   height?: number
@@ -139,7 +139,11 @@ export interface IListServiceContentDataItem {
   description?: string
   content_ids?: IListServiceContentDataItem[],
   group_id?: string,
-  group_type?: number | string
+  group_type?: number | string,
+  user_id?: string,
+  asset_index?: number,
+  asset_id?: string,
+  src?: string
 }
 
 export interface IListServiceContentData {
@@ -245,11 +249,32 @@ export interface IUserFontContentData {
   signed_url?: {
     original: string,
     font: string,
+    css: string,
     'prev-name': string,
     'prev_2x-name': string,
     'prev-sample': string,
     'prev-2x-sample': string
   }
+}
+
+export interface IUserLogoContentData {
+  team_id: string,
+  id?: string,
+  asset_index: number,
+  name: string,
+  create_time: string,
+  signed_url?: {
+    full: string,
+    larg: string,
+    midd: string,
+    original: string,
+    prev: string,
+    smal: string,
+    tiny: string
+  },
+  width?: number,
+  height?: number,
+  ver: number
 }
 
 export interface IUserAssetsData {
