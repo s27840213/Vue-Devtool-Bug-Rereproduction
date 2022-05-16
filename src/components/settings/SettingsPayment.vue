@@ -1,65 +1,65 @@
 <template lang="pug">
   div(class="sp")
     span {{`status: ${status}`}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="toInitial()")  {{'goto Initial'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="toAbort()")  {{'goto Abort'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="toFail()")  {{'goto Fail'}}
     div(class="sp-plan")
-      p(class="text-blue-1")            {{$t('TMP0081')}}
+      span(class="text-blue-1 body-MD") {{$t('TMP0081')}}
       svg-icon(v-if="isFreeIcon" iconName="free")
       svg-icon(v-else            iconName="pro" :iconColor="proIconColor")
-      template(v-if="canResume")
-        span(class="body-SM")           {{$t('TMP0088', {date: myPaidDate})}}
-        btn(class="rounded" type="primary-mid" @click.native="resume()")
-          span                          {{$t('TMP0083')}}
+      span(v-if="showDueDay")           {{$t('TMP0088', {date: myPaidDate})}}
+      btn(v-if="canResume" class="rounded"
+          type="primary-mid" @click.native="resume()")
+        span                            {{$t('TMP0083')}}
       btn(v-if="canAdd" class="rounded"
           type="primary-lg" @click.native="buy()")
         span                            {{$t('TMP0082')}}
       span(v-if="isFail"
           class="text-red overline-LG") {{$t('TMP0121')}}
       template(v-if="showPlan")
-        span(class="body-SM")           {{$t('TMP0084', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
-        span(class="body-SM"      v-html="$t('TMP0085', { price: myPrice, date: myPaidDate  })")
-      span(v-if="canSwitch"
-          class="text-blue-1 body-SM pointer"
+        span                            {{$t('TMP0084', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
+        span(                     v-html="$t('TMP0085', { price: myPrice, date: myPaidDate  })")
+      span(v-if="canSwitch" class="text-blue-1 pointer"
           @click="switchPeriod()")      {{$t('TMP0086', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
-      span(v-if="canCancel" class="text-gray-3 body-SM pointer"
+      span(v-if="canCancel" class="text-gray-3 pointer"
           @click="cancelSub()")         {{$t('TMP0087')}}
-      template(v-if="showUsage")
-        span(class="text-blue-1 mt-30") {{$t('TMP0089')}}
-        span(                     v-html="$t('TMP0090', { amount: usage.bgrmRemain, date: myPaidDate })")
-        span(class="body-XS")           {{$t('TMP0091')}}
-        span(class="text-blue-1")       {{$t('TMP0092')}}
-        div(class="sp-pro-disk")
-          div(class="sp-pro-disk-total")
-            div(class="sp-pro-disk-used" :style="diskPercent")
-          span {{`${usage.diskUsed}/${usage.diskTotal}`}}
-        span(class="body-XS")             {{$t('TMP0093')}}
-    hr
-    div(v-if="card.status !== 'none'" class="sp-detail")
-      p(class="text-blue-1")            {{$t('TMP0094')}}
+    div(v-if="showUsage" class="sp-usage")
+      span(class="text-blue-1 mt-30")   {{$t('TMP0089')}}
+      span(                       v-html="$t('TMP0090', { amount: usage.bgrmRemain, date: myPaidDate })")
+      span(class="text-blue-1")         {{$t('TMP0092')}}
+      div(class="sp-usage-disk")
+        div(class="sp-usage-disk-total")
+          div(class="sp-usage-disk-used" :style="diskPercent")
+        span {{`${usage.diskUsed}/${usage.diskTotal}`}}
+      span(class="body-XS")             {{$t('TMP0093')}}
+    hr(v-if="card.status !== 'none'")
+    div(v-if="card.status !== 'none'" class="sp-card")
+      span(class="text-blue-1")         {{$t('TMP0094')}}
       card-info(:card="card" :trash="isCancelingPro")
-      p(v-if="card.status === 'invalid'"
+      span(v-if="isFail"
         class="text-red overline-LG")   {{$t('TMP0121')}}
-      p(v-if="canUpdateCard" class="text-blue-1 body-SM"
+      span(v-if="canUpdateCard" class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0096')}}
     hr
-    p(class="text-gray-3 pointer"
-      @click="toInitial()")  {{'goto Initial'}}
-    p(class="text-gray-3 pointer"
-      @click="toAbort()")  {{'goto Abort'}}
-    p(class="text-gray-3 pointer"
-      @click="toFail()")  {{'goto toFail'}}
-    hr(v-if="isPro")
-    div(v-if="isPro" class="sp-info")
-      p(class="text-blue-1")            {{$t('TMP0097')}}
+    div(v-if="showBillingInfo" class="sp-info")
+      span(class="text-blue-1 body-MD") {{$t('TMP0097')}}
       //- switch(input.label)
       template(v-for="input in billingInfoInput")
         //- case country
-        options(v-if="input.label === 'country'" class="mb-10"
+        options(v-if="input.label === 'country'" class="my-10"
                 :options="countryData" v-model="userCountryInfo")
         //- case state & zip
         div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
           span
           label(for="zip") {{$t('TMP0109')}}
-          options(class="mb-10" :options="stateData"
+          options(:options="stateData"
                   v-model="bi.state" :ph="$t('TMP0108')")
           input(id="zip" v-model="bi.zip" :invalid="biv.zip"
                 :placeholder="$t('TMP0109')")
@@ -144,16 +144,18 @@ export default Vue.extend({
       myPaidDate: 'myPaidDate',
       myPrice: 'myPrice'
     }),
-    isFreeIcon(): boolean { return !this.isPro && this.isCancelingPro },
-    proIconColor(): string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
-    canResume(): boolean { return ['Abort', 'Deleted', 'Canceled'].includes(this.status) },
-    canAdd(): boolean { return this.status === 'Initial' },
-    canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
-    isFail(): boolean { return this.status === 'Fail' },
-    showPlan(): boolean { return ['Fail', 'Subscribed'].includes(this.status) },
-    canSwitch(): boolean { return this.status === 'Subscribed' },
-    canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
+    isFreeIcon():boolean { return !this.isPro && this.isCancelingPro },
+    proIconColor():string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
+    isFail():boolean { return this.status === 'Fail' },
+    showDueDay():boolean { return ['Deleted', 'Canceled'].includes(this.status) },
+    showPlan():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
     showUsage():boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
+    showBillingInfo():boolean { return ['Fail', 'Leave', 'Abort', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
+    canAdd():boolean { return this.status === 'Initial' },
+    canResume():boolean { return ['Abort', 'Deleted', 'Canceled'].includes(this.status) },
+    canSwitch():boolean { return this.status === 'Subscribed' },
+    canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
+    canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
     diskPercent():Record<string, string> {
       return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
     },
@@ -216,7 +218,6 @@ export default Vue.extend({
       this.showCardPopup = true
     },
     closeCardPopup() { this.showCardPopup = false },
-    openPaymentPopup() { this.showPaymentPopup = true },
     closePaymentPopup() { this.showPaymentPopup = false },
     buy() {
       this.paymentView = 'step1'
@@ -237,16 +238,20 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .sp {
   padding: 60px 13% 20px 13%;
-  &-plan, &-detail, &-info {
+  &-plan, &-usage, &-card, &-info, >hr { margin: 0 0 30px 0; }
+  &-plan, &-usage, &-card, &-info {
     @include body-MD;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
+  &-plan, &-info { @include body-SM; }
+  &-plan, &-usage {
+    >span, >button, >svg { margin: 1px 0; }
+  }
   >hr {
     width: 100%;
     border: 0.5px solid setColor(gray-4);
-    margin: 14px 0;
   }
 }
 
@@ -254,31 +259,33 @@ export default Vue.extend({
   >button { @include btn-LG; }
 }
 
-.sp-plan-disk {
+.sp-usage-disk {
   display: flex;
   align-items: center;
-  &-total{
+  &-total, &-used { height: 10px; }
+  &-total {
     margin-right: 5px;
     width: 200px;
-    height: 10px;
     border: 1px solid setColor(blue-1);
   }
   &-used {
-    height: 10px;
     background-color: setColor(blue-1);
   }
 }
 
+.sp-card {
+  display: grid;
+  grid-auto-flow: row;
+  text-align: left;
+  row-gap: 20px;
+}
+
 .sp-info {
   width: 350px;
-  label {
-    @include body-SM;
-    color: setColor(gray-3);
-  }
+  label { color: setColor(gray-3); }
   input {
-    @include body-SM;
     width: 330px;
-    height: 20px; // ask kitty
+    height: 18px;
     margin: 10px 0;
     padding: 10px;
     border: 1px solid setColor(gray-4);
@@ -288,7 +295,6 @@ export default Vue.extend({
     &[invalid="true"] { border-color: red; }
   }
   &__invalid {
-    @include body-SM;
     color: setColor(red);
   }
   &__half {
@@ -299,7 +305,7 @@ export default Vue.extend({
     >select, >input { margin: 10px 0; }
     >input { width: 150px; }
   }
-  >button { margin: 20px 0 0 auto; }
+  >button { margin: 10px 0 0 auto; }
 }
 
 .sp-field{

@@ -98,7 +98,7 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
   else if (isPro && !isCancelingPro && cardStatus === 2) return '-2'
   else if (isPro && !isCancelingPro && cardStatus === 0) return '-3'
   else if (isPro && !isCancelingPro && cardStatus === 1) return 'Subscribed'
-  else if (isPro && isCancelingPro && cardStatus === 2) return 'Delete'
+  else if (isPro && isCancelingPro && cardStatus === 2) return 'Deleted'
   else if (isPro && isCancelingPro && cardStatus === 0) return '-4'
   else if (isPro && isCancelingPro && cardStatus === 1) return 'Canceled'
   return '-?'
