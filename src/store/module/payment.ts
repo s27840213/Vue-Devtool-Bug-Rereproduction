@@ -395,14 +395,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
       prime: state.prime
     }).then((response) => {
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '更新卡片成功' })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0124') as string })
       return response
     })
   },
   async stripeUpdate({ dispatch }) {
     return paymentApi.stripeUpdate().then((response) => {
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '更新卡片成功' })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0124') as string })
       return response
     })
   },
@@ -424,29 +424,29 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: 1 - Number(getters.getIsBundle)
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0121', { period: getters.getIsBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string })
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '切換成功' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async cancel({ dispatch }, reason: string) {
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '取消成功' })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0122') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async resume({ dispatch }) {
     return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '恢復成功' })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0123') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async deleteCard({ dispatch }) {
     return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: '刪除成功' })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0125') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async toAbort({ dispatch }) {

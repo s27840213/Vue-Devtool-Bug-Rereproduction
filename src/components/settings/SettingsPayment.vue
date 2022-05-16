@@ -1,47 +1,44 @@
 <template lang="pug">
   div(class="sp")
     span {{`status: ${status}`}}
-    div(v-if="!isPro && status !== 'Fail' " class="sp-free")
+    div(class="sp-plan")
       p(class="text-blue-1")            {{$t('TMP0080')}}
-      svg-icon(iconName="free")
-      btn(v-if="status==='Abort'" class="rounded"
-          type="primary-mid" @click.native="resume()")
-          span                          {{$t('TMP0082')}}
-      btn(v-else-if="status!=='Leave'" class="rounded" type="primary-lg" @click.native="buy()")
-        span                            {{$t('TMP0081')}}
-    div(v-if="isPro || status === 'Fail'" class="sp-pro")
-      p(class="text-blue-1")            {{$t('TMP0080')}}
-      svg-icon(iconName="pro")
-      template(v-if="isCancelingPro")
+      svg-icon(v-if="isFreeIcon" iconName="free")
+      svg-icon(v-else            iconName="pro" :iconColor="proIconColor")
+      template(v-if="canResume")
         span(class="body-SM")           {{$t('TMP0087', {date: myPaidDate})}}
         btn(class="rounded" type="primary-mid" @click.native="resume()")
           span                          {{$t('TMP0082')}}
-      template(v-else)
-        span(v-if="card.status === 'invalid'"
+      btn(v-if="canAdd" class="rounded"
+          type="primary-lg" @click.native="buy()")
+        span                            {{$t('TMP0081')}}
+      span(v-if="isFail"
           class="text-red overline-LG") {{$t('TMP0120')}}
+      template(v-i="showPlan")
         span(class="body-SM")           {{$t('TMP0083', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
         span(class="body-SM"      v-html="$t('TMP0084', { price: myPrice, date: myPaidDate  })")
-        span(v-if="card.status !== 'invalid'"
-            class="text-blue-1 body-SM pointer"
-            @click="switchPeriod()")    {{$t('TMP0085', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
-        span(class="text-gray-3 body-SM pointer"
-            @click="cancelSub()")       {{$t('TMP0086')}}
-      span(class="text-blue-1 mt-30")   {{$t('TMP0088')}}
-      span(                       v-html="$t('TMP0089', { amount: usage.bgrmRemain, date: myPaidDate })")
-      span(class="body-XS")             {{$t('TMP0090')}}
-      span(class="text-blue-1")         {{$t('TMP0091')}}
-      div(class="sp-pro-disk")
-        div(class="sp-pro-disk-total")
-          div(class="sp-pro-disk-used" :style="diskPercent")
-        span {{`${usage.diskUsed}/${usage.diskTotal}`}}
-      span(class="body-XS")             {{$t('TMP0092')}}
+      span(v-if="canSwitch"
+          class="text-blue-1 body-SM pointer"
+          @click="switchPeriod()")      {{$t('TMP0085', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
+      span(v-if="canCancel" class="text-gray-3 body-SM pointer"
+          @click="cancelSub()")         {{$t('TMP0086')}}
+      template(v-if="showUsage")
+        span(class="text-blue-1 mt-30") {{$t('TMP0088')}}
+        span(                     v-html="$t('TMP0089', { amount: usage.bgrmRemain, date: myPaidDate })")
+        span(class="body-XS")           {{$t('TMP0090')}}
+        span(class="text-blue-1")       {{$t('TMP0091')}}
+        div(class="sp-pro-disk")
+          div(class="sp-pro-disk-total")
+            div(class="sp-pro-disk-used" :style="diskPercent")
+          span {{`${usage.diskUsed}/${usage.diskTotal}`}}
+        span(class="body-XS")             {{$t('TMP0092')}}
     hr
     div(v-if="card.status !== 'none'" class="sp-detail")
       p(class="text-blue-1")            {{$t('TMP0093')}}
       card-info(:card="card" :trash="isCancelingPro")
       p(v-if="card.status === 'invalid'"
         class="text-red overline-LG")   {{$t('TMP0120')}}
-      p(v-if="canChangeCard" class="text-blue-1 body-SM"
+      p(v-if="canUpdateCard" class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0095')}}
     hr
     p(class="text-gray-3 pointer"
@@ -147,9 +144,16 @@ export default Vue.extend({
       myPaidDate: 'myPaidDate',
       myPrice: 'myPrice'
     }),
-    canChangeCard():boolean {
-      return ['Fail', 'Subscribed', 'Canceled'].includes(this.status)
-    },
+    isFreeIcon(): boolean { return !this.isPro && this.isCancelingPro },
+    proIconColor(): string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
+    canResume(): boolean { return ['Abort', 'Deleted', 'Canceled'].includes(this.status) },
+    canAdd(): boolean { return this.status === 'Initial' },
+    canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
+    isFail(): boolean { return this.status === 'Fail' },
+    showPlan(): boolean { return ['Fail', 'Subscribed'].includes(this.status) },
+    canSwitch(): boolean { return this.status === 'Subscribed' },
+    canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
+    showUsage():boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
     diskPercent():Record<string, string> {
       return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
     },
@@ -233,7 +237,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .sp {
   padding: 60px 13% 20px 13%;
-  &-free, &-pro, &-detail, &-info {
+  &-plan, &-detail, &-info {
     @include body-MD;
     display: flex;
     flex-direction: column;
@@ -246,11 +250,11 @@ export default Vue.extend({
   }
 }
 
-.sp-free {
+.sp-plan {
   >button { @include btn-LG; }
 }
 
-.sp-pro-disk {
+.sp-plan-disk {
   display: flex;
   align-items: center;
   &-total{

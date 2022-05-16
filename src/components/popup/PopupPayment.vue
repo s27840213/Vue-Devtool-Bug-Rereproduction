@@ -197,8 +197,8 @@ export default Vue.extend({
         //   break
         case 'switch1':
           this.getSwitchPrice()
-          this.title = i18n.t('TMP0060') as string
-          this.description = i18n.t('TMP0061') as string
+          this.title = i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string
+          this.description = (this.isBundle ? i18n.t('TMP0062') : i18n.t('TMP0061')) as string
           this.buttons = [{
             text: i18n.t('TMP0063', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => this.changeView('switch2')
@@ -208,7 +208,7 @@ export default Vue.extend({
           this.title = i18n.t('TMP0047') as string
           this.description = 'test'
           this.buttons = [{
-            text: 'wait for i18n', // i18n.t('') as string,
+            text: i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => {
               this.switch()
               this.closePopup() // refresh or double check?

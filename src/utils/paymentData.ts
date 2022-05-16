@@ -86,7 +86,7 @@ class PaymentData {
       label: i18n.tc('NN0173', 1) as string,
       ph: i18n.t('TMP0097') as string,
       key: 'email',
-      error: 'Invalid email format.'
+      error: i18n.t('NN0297') as string
     }, {
       label: i18n.t('NN0172') as string,
       ph: i18n.t('TMP0098') as string,
@@ -99,13 +99,13 @@ class PaymentData {
       label: i18n.t('TMP0051') as string,
       ph: i18n.t('TMP0052') as string,
       key: 'phone',
-      error: 'Invalid phone format.'
+      error: i18n.t('TMP0126') as string
     }, {
       label: i18n.t('TMP0053') as string,
       ph: i18n.t('TMP0054') as string,
       key: 'GUI',
       optional: true,
-      error: 'Invalid GUI format.'
+      error: i18n.t('TMP0127') as string
     }]
   }
 
@@ -131,7 +131,7 @@ class PaymentData {
     }, {
       label: 'state & zip',
       key: 'zip',
-      error: 'Invalid zip format.'
+      error: i18n.t('TMP0128') as string
     }]
   }
 
