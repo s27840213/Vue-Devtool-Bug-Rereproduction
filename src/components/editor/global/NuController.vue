@@ -225,7 +225,9 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      currHoveredPageIndex: 'getCurrHoveredPageIndex'
+      currHoveredPageIndex: 'getCurrHoveredPageIndex',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -309,6 +311,9 @@ export default Vue.extend({
             })
       }
       return false
+    },
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
     },
     lockIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
@@ -1416,7 +1421,6 @@ export default Vue.extend({
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image') {
           StepsUtils.record()
-          console.log('123')
           eventUtils.emit(ImageEvent.redrawCanvasShadow)
         }
         if (this.currSelectedInfo.index < 0) {
@@ -1528,7 +1532,7 @@ export default Vue.extend({
       }
       switch (this.getLayerType) {
         case LayerType.image:
-          !this.config.inProcess && ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+          !this.isHandleShadow && ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
       }
     },
     onRightClick(event: MouseEvent) {

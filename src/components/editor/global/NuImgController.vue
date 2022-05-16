@@ -23,6 +23,10 @@ import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import pageUtils from '@/utils/pageUtils'
+import { IImage } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   props: {
@@ -47,6 +51,19 @@ export default Vue.extend({
       center: { x: 0, y: 0 },
       control: { xSign: 1, ySign: 1, isHorizon: false },
       isSnappedInVertical: false
+    }
+  },
+  mounted() {
+    if (this.forRender) {
+      return
+    }
+    const shadow = (this.config as IImage).styles.shadow
+    if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
+      imageShadowUtils.setProcessId({
+        pageId: pageUtils.currFocusPage.id,
+        layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
+        subLayerId: this.primaryLayer ? this.config.id : undefined
+      })
     }
   },
   destroyed() {

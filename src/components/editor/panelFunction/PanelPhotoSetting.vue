@@ -8,13 +8,14 @@
           :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
           type="gray-mid"
           ref="btn"
+          :disabled="isUploadImgShadow || (btn.name !== 'shadow' && (isHandleShadow || show === 'panel-photo-shadow'))"
           :key="btn.name"
           @click.native="handleShow(btn.show)") {{ btn.label }}
       btn(v-if="isImage && isAdmin && !isFrame"
         class="full-width"
         type="gray-mid"
         ref="btn"
-        :disabled="isProcessing"
+        :disabled="isProcessing || isHandleShadow || show === 'panel-photo-shadow'"
         @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
       ref="popup"
@@ -68,6 +69,7 @@ export default Vue.extend({
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, () => {
       // this.show = this.btns.find(b => b.name === 'shadow')?.show || ''
+      console.log('emit show panel')
       this.show = 'panel-photo-shadow'
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
@@ -79,6 +81,11 @@ export default Vue.extend({
   components: {
     PopupAdjust,
     PanelPhotoShadow
+  },
+  watch: {
+    show() {
+      console.log(this.show)
+    }
   },
   computed: {
     ...mapGetters({
@@ -97,6 +104,9 @@ export default Vue.extend({
     ...mapState('user', {
       isSuperUser: 'role'
     }),
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -137,9 +147,6 @@ export default Vue.extend({
     },
     selectedLayersNum(): number {
       return this.currSelectedInfo.layers.length
-    },
-    isHandlShadow(): boolean {
-      return this.isProcessImgShadow || this.isUploadImgShadow
     }
   },
   methods: {
@@ -162,7 +169,7 @@ export default Vue.extend({
     },
     handleShow(name: string) {
       const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
-      if (this.isHandlShadow) {
+      if (this.isHandleShadow) {
         return
       }
       switch (name) {
@@ -269,6 +276,7 @@ export default Vue.extend({
       this.show = this.show.includes(name) ? '' : name
     },
     handleOutside() {
+      console.log(123412)
       this.show = ''
     },
     handleClick(e: MouseEvent) {
@@ -279,14 +287,13 @@ export default Vue.extend({
         return
       }
       if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
-        const currLayer = layerUtils.getCurrLayer as IImage
-        if (currLayer.type === LayerType.image && currLayer.inProcess) {
-          return
-        }
         // if (currLayer.styles.shadow.isTransparent || currLayer.styles.shadow.currentEffect === ShadowEffectType.imageMatched) {
         //   return
         // }
-        this.handleOutside()
+        if (!this.isHandleShadow) {
+          console.log('123')
+          this.handleOutside()
+        }
       }
     },
     handleAdjust(adjust: any) {

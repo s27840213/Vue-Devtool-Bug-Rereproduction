@@ -197,7 +197,9 @@ export default Vue.extend({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       prevScrollPos: 'bgRemove/getPrevScrollPos',
-      getInInGestureMode: 'getInGestureToolMode'
+      getInInGestureMode: 'getInGestureToolMode',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -225,6 +227,9 @@ export default Vue.extend({
     },
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
+    },
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
     }
   },
   methods: {
@@ -245,7 +250,7 @@ export default Vue.extend({
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode) {
-        GroupUtils.deselect()
+        !this.isHandleShadow && GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
         pageUtils.findCentralPageIndexInfo()
@@ -271,8 +276,7 @@ export default Vue.extend({
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
         if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
-          const currLayer = layerUtils.getCurrLayer
-          if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+          if (!this.isHandleShadow) {
             GroupUtils.deselect()
           }
         }
@@ -308,8 +312,7 @@ export default Vue.extend({
     },
     selectEnd() {
       if (this.isSelecting) {
-        const currLayer = layerUtils.getCurrLayer
-        if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+        if (!this.isHandleShadow) {
           GroupUtils.deselect()
         }
       }

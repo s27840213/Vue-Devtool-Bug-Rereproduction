@@ -70,6 +70,7 @@ import { ILayerInfo, LayerType } from '@/store/types'
 import imageShadowUtils, { CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE } from '@/utils/imageShadowUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -140,28 +141,6 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
-        // if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
-        //   this.redrawShadow(true)
-        // } else if (this.currentShadowEffect !== ShadowEffectType.none) {
-        //   if (this.shadow.isTransparent) {
-        //     this.redrawShadow()
-        //   } else {
-        //     const img = new Image()
-        //     img.crossOrigin = 'anonymous'
-        //     img.onload = () => {
-        //       const isTransparent = imageShadowUtils.isTransparentBg(img)
-        //       imageShadowUtils.updateEffectProps({
-        //         pageIndex: this.pageIndex,
-        //         layerIndex: this.layerIndex,
-        //         subLayerIdx: this.subLayerIndex
-        //       }, { isTransparent })
-        //       isTransparent && this.redrawShadow()
-        //     }
-        //     const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
-        //     img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-        //   }
-        // }
-
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
         } else {
@@ -170,7 +149,6 @@ export default Vue.extend({
       },
       deep: true
     },
-
     shadowEffects: {
       handler(val) {
         if (this.$refs.canvas) {

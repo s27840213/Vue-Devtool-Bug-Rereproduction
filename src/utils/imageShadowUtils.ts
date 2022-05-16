@@ -169,7 +169,8 @@ class ImageShadowUtils {
       ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * shadowSize * (size * 0.01 + 2), shadowSize * (0.5 + thinkness * 0.005), 0, 0, Math.PI * 2)
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-      const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * 1.7) + 1, handlerId)
+      // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
+      const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5 + 50) * fieldRange.floating.radius.weighting), handlerId)
 
       if (this.handlerId === handlerId) {
         this.dataBuff.effect = ShadowEffectType.floating
@@ -194,18 +195,6 @@ class ImageShadowUtils {
         ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
         ctxT.globalAlpha = 1
         ctxT.globalCompositeOperation = 'source-over'
-
-        // if (!timeout) {
-        //   const imgX = _imgX * img.naturalWidth / _imgWidth
-        //   const imgY = _imgY * img.naturalWidth / _imgWidth
-        //   const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-        //   const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-        //   const drawCanvasHeight = drawCanvasH as number
-        //   const drawCanvasWidth = drawCanvasW as number
-        //   const x = (canvasT.width - drawCanvasWidth) * 0.5
-        //   const y = (canvasT.height - drawCanvasHeight) * 0.5
-        //   ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasWidth, drawCanvasHeight)
-        // }
 
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -873,8 +862,8 @@ export const fieldRange = {
   imageMatched: {
     distance: { max: 100, min: 0, weighting: 2 },
     angle: { max: 180, min: -180, weighting: 2 },
-    size: { max: 200, min: 50, weighting: 0.01 },
-    radius: { max: 100, min: 0, weighting: 1.7 },
+    size: { max: 120, min: 50, weighting: 0.01 },
+    radius: { max: 100, min: 0, weighting: 1 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
@@ -884,7 +873,7 @@ export const fieldRange = {
   },
   floating: {
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    radius: { max: 100, min: 0, weighting: 1.2 },
+    radius: { max: 100, min: 0, weighting: 1.7 },
     thinkness: { max: 100, min: 0 },
     size: { max: 200, min: 50 },
     x: { max: 100, min: -100, weighting: 0.5 },

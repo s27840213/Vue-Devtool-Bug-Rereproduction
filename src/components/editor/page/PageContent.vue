@@ -69,8 +69,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      setLayersDone: 'file/getSetLayersDone'
-    })
+      setLayersDone: 'file/getSetLayersDone',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
+    }),
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
+    }
   },
   mounted() {
     if (this.setLayersDone) {
@@ -143,8 +148,7 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
-      const currLayer = layerUtils.getCurrLayer
-      if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+      if (!this.isHandleShadow) {
         groupUtils.deselect()
       }
       this.setCurrActivePageIndex(this.pageIndex)
@@ -160,8 +164,7 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
-      const currLayer = layerUtils.getCurrLayer
-      if (!(currLayer.type === LayerType.image && currLayer.inProcess)) {
+      if (!this.isHandleShadow) {
         return
       }
       const { srcObj, locked } = this.config.backgroundImage.config
