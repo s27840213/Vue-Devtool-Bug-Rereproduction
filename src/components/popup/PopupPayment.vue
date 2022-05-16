@@ -62,7 +62,7 @@
               class="payment-left-button-description") {{$t('TMP0046')}}
       img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
       div(v-if="view === 'finish'" class="payment-finish")
-        animation(path="/lottie/us/pro.json")
+        animation(path="/lottie/pro.json")
         div(class="payment-finish-description")
           i18n(:path="finishTextId" tag="span")
             //- template(#link)
