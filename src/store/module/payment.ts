@@ -164,7 +164,7 @@ const getDefaultState = (): IPaymentState => ({
   // User input
   planSelected: '',
   userPlan: '',
-  periodUi: 'monthly',
+  periodUi: 'yearly',
   periodInfo: 'monthly',
   userCountryUi: '',
   userCountryInfo: '',
@@ -456,11 +456,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
       Vue.notify({ group: 'copy', text: 'goto Abort' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async toReset({ dispatch }) {
-    return paymentApi.toReset().then(({ data }) => {
+  async toInitial({ dispatch }) {
+    return paymentApi.toInitial().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'goto Reset' })
+      Vue.notify({ group: 'copy', text: 'goto Initial' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async toFail({ dispatch }) {

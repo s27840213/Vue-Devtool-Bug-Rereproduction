@@ -45,7 +45,7 @@
         @click="openCardPopup()")       {{$t('TMP0094')}}
     hr
     p(class="text-gray-3 pointer"
-      @click="toReset()")  {{'goto toReset'}}
+      @click="toInitial()")  {{'goto Initial'}}
     p(class="text-gray-3 pointer"
       @click="toAbort()")  {{'goto Abort'}}
     p(class="text-gray-3 pointer"
@@ -194,7 +194,7 @@ export default Vue.extend({
       checkBillingInfo: 'payment/checkBillingInfo',
       resumeApi: 'payment/resume',
       toAbort: 'payment/toAbort',
-      toReset: 'payment/toReset',
+      toInitial: 'payment/toInitial',
       toFail: 'payment/toFail'
     }),
     async updateBillingInfo() {

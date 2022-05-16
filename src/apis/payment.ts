@@ -199,7 +199,7 @@ class Payment {
     })
   }
 
-  toReset(): AxiosPromise {
+  toInitial(): AxiosPromise {
     return axios.request<any>({
       url: '/disable-plan',
       method: 'POST',
