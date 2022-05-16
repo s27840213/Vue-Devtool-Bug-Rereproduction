@@ -28,6 +28,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFooterTabProps } from '@/interfaces/editor'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -45,7 +46,8 @@ export default Vue.extend({
       isConfigPanelOpen: false,
       isLoading: false,
       isSaving: false,
-      currActivePanel: 'none'
+      currActivePanel: 'none',
+      currColorEvent: ''
     }
   },
   computed: {
@@ -139,11 +141,16 @@ export default Vue.extend({
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
     }),
-    switchTab(panelType: string) {
+    switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType) {
         this.currActivePanel = 'none'
       } else {
         this.currActivePanel = panelType
+        if (props) {
+          if (panelType === 'color' && props.currColorEvent) {
+            this.currColorEvent = props.currColorEvent
+          }
+        }
       }
     }
   }

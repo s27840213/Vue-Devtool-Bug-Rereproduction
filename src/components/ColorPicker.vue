@@ -7,7 +7,9 @@
       @paste="onPaste"
       @mouseup.native="onmouseup"
       :disableFields="true"
-      :disableAlpha="true")
+      :disableAlpha="true"
+      :isMobile="isMobile"
+      :aspectRatio="aspectRatio")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
         svg-icon(class="pointer"
@@ -70,6 +72,14 @@ export default Vue.extend({
     showColorSlip: {
       type: Boolean,
       default: false
+    },
+    isMobile: {
+      type: Boolean,
+      default: false
+    },
+    aspectRatio: {
+      type: Number,
+      default: 56.25
     }
   },
   components: {
@@ -175,7 +185,7 @@ export default Vue.extend({
 
       const eyeDropper = new (window as any).EyeDropper()
       if (eyeDropper !== undefined) {
-        eyeDropper.open().then((result: {sRGBHex: string}) => {
+        eyeDropper.open().then((result: { sRGBHex: string }) => {
           this.color = result.sRGBHex
         })
       }

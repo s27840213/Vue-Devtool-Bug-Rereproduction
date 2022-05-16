@@ -43,6 +43,7 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
@@ -78,7 +79,8 @@ export default Vue.extend({
     PanelFontFormat,
     PanelFontSpacing,
     PopupDownload,
-    PanelMore
+    PanelMore,
+    PanelColor
   },
   data() {
     return {
@@ -91,10 +93,10 @@ export default Vue.extend({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'font-format', 'font-spacing', 'download', 'more'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'font-spacing', 'download', 'more'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {

@@ -16,7 +16,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
-import { LayerType } from '@/store/types'
+import { ColorEventType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 import imageUtils from '@/utils/imageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -64,7 +64,14 @@ export default Vue.extend({
         mainMenu,
         { icon: 'font', text: `${this.$t('NN0353')}`, panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size', disabled: true },
-        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo', disabled: true },
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          props: {
+            currColorEvent: ColorEventType.text
+          }
+        },
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
@@ -221,7 +228,7 @@ export default Vue.extend({
       }
 
       if (tab.panelType !== undefined) {
-        this.$emit('switchTab', tab.panelType)
+        this.$emit('switchTab', tab.panelType, tab.props)
       }
     },
     targetIs(type: string): boolean {

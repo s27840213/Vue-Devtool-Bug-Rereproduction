@@ -11080,7 +11080,7 @@ vue-cli-plugin-i18n@~2.3.1:
 
 "vue-color@git+https://github.com/s27840213/CustomColorPicker.git":
   version "2.8.1"
-  resolved "git+https://github.com/s27840213/CustomColorPicker.git#c2d97f1adf2b9da6d63893ce67d1f7bd9dc81e8e"
+  resolved "git+https://github.com/s27840213/CustomColorPicker.git#f2f634de671782c43a39fc17d1ea6fd53108314e"
   dependencies:
     clamp "^1.0.1"
     lodash.throttle "^4.0.0"

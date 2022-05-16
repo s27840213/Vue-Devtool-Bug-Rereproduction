@@ -13,9 +13,14 @@ export interface ICurrSubSelectedInfo {
   type: string
 }
 
+export interface IFooterTabProps {
+  currColorEvent?: string
+}
+
 export interface IFooterTab {
   icon: string,
   text: string,
   panelType?: string,
-  disabled?: boolean
+  disabled?: boolean,
+  props: IFooterTabProps
 }
