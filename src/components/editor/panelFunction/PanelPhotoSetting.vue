@@ -36,7 +36,7 @@ import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
-import { FunctionPanelType, LayerType } from '@/store/types'
+import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
@@ -172,10 +172,10 @@ export default Vue.extend({
           if (target.isUploading) {
             return
           }
-          const currentEffect = target.styles.shadow.currentEffect
-          if (currentEffect !== ShadowEffectType.none) {
-            imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', userId: '', assetId: '' })
-          }
+          // const currentEffect = target.styles.shadow.currentEffect
+          // if (currentEffect !== ShadowEffectType.none) {
+          //   imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', userId: '', assetId: '' })
+          // }
           break
         }
         case 'crop':
@@ -202,7 +202,7 @@ export default Vue.extend({
 
           this.setIsProcessing(true)
           layerUtils.updateLayerProps(pageIndex, index, {
-            inProcess: true
+            inProcess: LayerProcessType.bgRemove
           })
 
           const targetLayer = layers[0] as IImage
@@ -229,7 +229,7 @@ export default Vue.extend({
 
                   if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
                     layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                      inProcess: false
+                      inProcess: LayerProcessType.none
                     })
                     const editorView = document.querySelector('.editor-view')
                     const { scrollTop, scrollLeft } = editorView as HTMLElement
@@ -250,7 +250,7 @@ export default Vue.extend({
 
                   if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
                     layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
-                      inProcess: false
+                      inProcess: LayerProcessType.none
                     })
 
                     this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })

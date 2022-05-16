@@ -2,7 +2,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, LayerIdentifier } from '@/interfaces/layer'
 import store from '@/store'
-import { ILayerInfo, LayerType } from '@/store/types'
+import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
@@ -414,7 +414,6 @@ class ImageShadowUtils {
       ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-      // const bluredData = imageData
       const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
       if (this.handlerId === handlerId) {
@@ -436,14 +435,7 @@ class ImageShadowUtils {
           ctxT.fillStyle = effects.color
           ctxT.fillRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
           ctxT.globalAlpha = 1
-
           ctxT.globalCompositeOperation = 'source-over'
-          /** only draw the origin image over the canvas as uploading */
-          // if (!timeout) {
-          //   ctxT.save()
-          //   ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
-          //   ctxT.restore()
-          // }
 
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
@@ -504,7 +496,7 @@ class ImageShadowUtils {
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     layerUtils.updateLayerProps(pageIndex, layerIndex, {
-      inProcess: drawing
+      inProcess: drawing ? LayerProcessType.imgShadow : LayerProcessType.none
     }, subLayerIdx)
   }
 

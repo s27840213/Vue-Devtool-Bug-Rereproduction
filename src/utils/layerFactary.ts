@@ -1,7 +1,7 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
 import store from '@/store'
-import { LayerType } from '@/store/types'
+import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
@@ -30,7 +30,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       imgControl: false,
-      inProcess: false,
+      inProcess: LayerProcessType.none,
       trace: config.trace ?? 0,
       isClipper: true,
       dragging: false,

@@ -1421,7 +1421,8 @@ export default Vue.extend({
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image') {
           StepsUtils.record()
-          eventUtils.emit(ImageEvent.redrawCanvasShadow)
+          const layerIdentifier = `${this.layerIndex}-_`
+          eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
         }
         if (this.currSelectedInfo.index < 0) {
           this.setLastSelectedLayerIndex(this.layerIndex)

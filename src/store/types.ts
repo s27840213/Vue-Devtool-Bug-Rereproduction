@@ -119,6 +119,11 @@ export enum LayerType {
   tmp = 'tmp'
 }
 
+export enum LayerProcessType {
+  imgShadow = 'imgShadow',
+  bgRemove = 'bgRemove',
+  none = ''
+}
 export interface ILayerInfo {
   pageIndex: number,
   layerIndex: number,

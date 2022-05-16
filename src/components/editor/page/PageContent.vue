@@ -160,7 +160,9 @@ export default Vue.extend({
     },
     onRightClick(event: MouseEvent) {
       this.setCurrActivePageIndex(this.pageIndex)
-      groupUtils.deselect()
+      if (!this.isHandleShadow) {
+        groupUtils.deselect()
+      }
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {

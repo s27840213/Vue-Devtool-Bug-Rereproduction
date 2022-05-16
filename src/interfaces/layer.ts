@@ -2,6 +2,7 @@ import { SrcObj } from './gallery'
 import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { IShadowProps } from './imgShadow'
+import { LayerProcessType } from '@/store/types'
 
 export const jsonVer = '1.0.7'
 export interface LayerIdentifier {
@@ -132,7 +133,7 @@ export interface IImage extends ILayer<IImageStyle> {
   isClipper: boolean,
   isFrame?: boolean,
   imgControl: boolean,
-  inProcess: boolean,
+  inProcess: LayerProcessType,
   trace?: number,
   isUploading?: boolean,
   parentLayerStyles?: IStyle

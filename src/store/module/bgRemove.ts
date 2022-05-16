@@ -189,8 +189,8 @@ const mutations: MutationTree<IBgRemoveState> = {
   SET_currStep(state: IBgRemoveState, step: number) {
     state.currStep = step
   },
-  SET_isProcessing(state: IBgRemoveState, bool) {
-    state.isProcessing = bool
+  SET_isProcessing(state: IBgRemoveState, type) {
+    state.isProcessing = type
   },
   SET_idInfo(state: IBgRemoveState, { pageId, layerId }) {
     Object.assign(state.idInfo, {

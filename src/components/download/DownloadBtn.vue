@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="download-btn")
+  div(class="download-btn"
+    v-hint="isHandlingShadow ? $t('NN0499') : ''")
     btn(:hasIcon="true"
       :iconName="'download'"
       :iconWidth="'18px'"

@@ -12,7 +12,7 @@
           :config="config"
           :imgControl="imgControl"
           :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
-    div(v-if="config.inProcess" class="nu-layer__inProcess")
+    div(v-if="config.inProcess === 'bgRemove' || (config.inProcess === 'imgShadow' && !hasShadowSrc)" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
       //-   :iconName="'spiner'"
@@ -74,6 +74,13 @@ export default Vue.extend({
     },
     getCos(): number {
       return MathUtils.cos(this.config.styles.rotate)
+    },
+    hasShadowSrc(): boolean {
+      if (this.config.type === LayerType.image) {
+        return this.config.styles.shadow.srcObj.type
+      } else {
+        return false
+      }
     }
   },
   methods: {

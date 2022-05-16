@@ -264,7 +264,7 @@ export default Vue.extend({
             const newImg = new Image()
             newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: false }, subLayerIdx)
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: '' }, subLayerIdx)
               if (srcObjIdentifier !== config.srcObj.type + config.srcObj.userId + config.srcObj.assetId) {
                 return
               }

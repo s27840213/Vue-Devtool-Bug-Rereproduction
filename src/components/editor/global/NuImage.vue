@@ -2,11 +2,12 @@
   div(class="nu-image"
     :style="styles"
     draggable="false")
-    div(v-if="showCanvas && !shadowSrc"
+    //- div(v-if="showCanvas && !shadowSrc"
+    div(v-if="showCanvas"
       class="shadow__canvas-wrapper"
       :style="canvasWrapperStyle")
       canvas(ref="canvas")
-    div(v-else-if="shadowSrc"
+    div(v-if="shadowSrc"
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="img"
@@ -62,11 +63,11 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IImage } from '@/interfaces/layer'
+import { IGroup, IImage } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import { ILayerInfo, LayerType } from '@/store/types'
+import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import imageShadowUtils, { CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE } from '@/utils/imageShadowUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
@@ -87,12 +88,14 @@ export default Vue.extend({
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
-    eventUtils.on(ImageEvent.redrawCanvasShadow, () => {
+    const { layerIndex, subLayerIndex } = this
+    const layerIdentifier = `${layerIndex}-${subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined' ? subLayerIndex : '_'}`
+    eventUtils.on(ImageEvent.redrawCanvasShadow + layerIdentifier, () => {
       if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
         this.redrawShadow(true)
       } else if (this.currentShadowEffect !== ShadowEffectType.none) {
         if (this.shadow.isTransparent) {
-          this.redrawShadow()
+          this.redrawShadow(true)
         } else {
           const img = new Image()
           img.crossOrigin = 'anonymous'
@@ -103,7 +106,7 @@ export default Vue.extend({
               layerIndex: this.layerIndex,
               subLayerIdx: this.subLayerIndex
             }, { isTransparent })
-            isTransparent && this.redrawShadow()
+            isTransparent && this.redrawShadow(true)
           }
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
           img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
@@ -113,7 +116,7 @@ export default Vue.extend({
   },
   beforeDestroy() {
     if (this.config.inProcess) {
-      this.setIsProcessing(false)
+      this.setIsProcessing(LayerProcessType.none)
     }
   },
   data() {
@@ -168,17 +171,22 @@ export default Vue.extend({
       }
     },
     shadowSrc() {
-      if (!this.shadowSrc && this.currentShadowEffect !== ShadowEffectType.none && !this.forRender) {
-        if (this.canvas) {
-          this.handleNewShadowEffect()
-        } else {
-          this.$nextTick(() => {
-            this.handleNewShadowEffect()
-          })
-        }
-      }
-      if (!this.shadowSrc) {
-        (this.canvasShadowImg as any)[this.currentShadowEffect] = undefined
+      // if (!this.shadowSrc && this.currentShadowEffect !== ShadowEffectType.none && !this.forRender) {
+      //   if (this.canvas) {
+      //     this.handleNewShadowEffect()
+      //   } else {
+      //     this.$nextTick(() => {
+      //       this.handleNewShadowEffect()
+      //     })
+      //   }
+      // }
+      // if (!this.shadowSrc) {
+      //   (this.canvasShadowImg as any)[this.currentShadowEffect] = undefined
+      // }
+    },
+    showCanvas(val) {
+      if (val) {
+        setTimeout(() => this.handleNewShadowEffect(false))
       }
     },
     'config.imgControl'() {
@@ -197,9 +205,11 @@ export default Vue.extend({
   components: { NuAdjustImage },
   computed: {
     ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('shadow', ['uploadId']),
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
@@ -327,8 +337,20 @@ export default Vue.extend({
         .some(val => typeof val === 'number' && val !== 0)
     },
     showCanvas(): boolean {
-      // return [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(this.currentShadowEffect)
-      return this.currentShadowEffect !== ShadowEffectType.none
+      // return this.currentShadowEffect !== ShadowEffectType.none
+      const { pageIndex, layerIndex, subLayerIndex, config, uploadId } = this
+      const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
+      const isCurrLayerActive = config.active
+      const isCurrShadowEffectApplied = this.currentShadowEffect !== ShadowEffectType.none
+      const isShadowUploading = uploadId.pageId === pageUtils.getPage(pageIndex).id && (() => {
+        if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
+          const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+          return primaryLayer.id === uploadId.layerId && primaryLayer.layers[subLayerIndex].id === uploadId.subLayerId
+        } else {
+          return layerUtils.getLayer(pageIndex, layerIndex).id === uploadId.layerId
+        }
+      })()
+      return (isPhotoShadowPanelOpen && isCurrLayerActive && isCurrShadowEffectApplied) || isShadowUploading
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -505,12 +527,13 @@ export default Vue.extend({
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
     },
-    handleNewShadowEffect() {
+    handleNewShadowEffect(clearShadowSrc = true) {
       const { canvas, layerInfo } = this
       if (!canvas) {
         console.warn('there is no canvas!')
         return
       }
+      clearShadowSrc && this.clearShadowSrc()
       imageShadowUtils.clearLayerData()
       imageShadowUtils.updateEffectProps(this.layerInfo, { hasPaintOnCanvas: false })
       const { width, height } = this.config.styles
@@ -547,7 +570,8 @@ export default Vue.extend({
               imageShadowUtils.drawShadow(canvas, img, this.config, {
                 drawCanvasW,
                 drawCanvasH,
-                layerInfo
+                layerInfo,
+                cb: this.clearShadowSrc
               })
               this.canvasShadowImg.shadow = img
             }
@@ -572,7 +596,8 @@ export default Vue.extend({
               imageShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
                 drawCanvasW,
                 drawCanvasH,
-                layerInfo
+                layerInfo,
+                cb: this.clearShadowSrc
               })
               this.canvasShadowImg.imageMatched = img
             }
@@ -593,7 +618,8 @@ export default Vue.extend({
               imageShadowUtils.drawFloatingShadow(canvas, img, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: this.clearShadowSrc
               })
               this.canvasShadowImg.floating = img
             }
@@ -621,6 +647,7 @@ export default Vue.extend({
             ...effects
           }
         })
+        this.clearShadowSrc()
         switch (this.currentShadowEffect) {
           case ShadowEffectType.shadow:
           case ShadowEffectType.blur:
@@ -646,7 +673,10 @@ export default Vue.extend({
         }
       })
     },
-    redrawShadow(openPanel = false) {
+    clearShadowSrc() {
+      imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
+    },
+    redrawShadow(openPanel: boolean) {
       imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { scale: 1 }, this.subLayerIndex)
       this.$nextTick(() => {
