@@ -3,7 +3,7 @@
     div(class="field__close")
       svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
               class="pointer" @click.native="close()")
-    span(v-if="isChange" class="field__title") {{$t('TMP0094')}}
+    span(v-if="isChange" class="field__title") {{$t('TMP0095')}}
     //- todo rearrange class name
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"

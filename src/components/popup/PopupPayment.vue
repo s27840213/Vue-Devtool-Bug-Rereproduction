@@ -52,7 +52,7 @@
                         @select="selectCancelReason(idx)")
               span {{can}}
             input(class="payment-left-content-cancel__other"
-                  v-model="otherReason" :placeholder="$t('TMP0077')")
+                  v-model="otherReason" :placeholder="$t('TMP0078')")
         div(class="payment-left-button")
           btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
               @click.native="button.func()"
@@ -66,7 +66,7 @@
         div(class="payment-finish-description")
           i18n(:path="finishTextId" tag="span")
             //- template(#link)
-            //-   router-link(to="/settings/payment") {{$t('TMP0078')}}
+            //-   router-link(to="/settings/payment") {{$t('TMP0079')}}
           //- btn(v-if="view === 'already pro'" type="primary-mid"
           //-     @click.native="closePopup()") {{$t('TMP0059')}}
 </template>
@@ -200,7 +200,7 @@ export default Vue.extend({
           this.title = i18n.t('TMP0060') as string
           this.description = i18n.t('TMP0061') as string
           this.buttons = [{
-            text: i18n.t('TMP0062', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
+            text: i18n.t('TMP0063', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => this.changeView('switch2')
           }]
           break
@@ -216,19 +216,19 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0063') as string
+          this.title = i18n.t('TMP0064') as string
           this.buttons = [{
-            text: i18n.t('TMP0069') as string,
+            text: i18n.t('TMP0070') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            text: i18n.t('TMP0068') as string,
+            text: i18n.t('TMP0069') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0070') as string
+          this.title = i18n.t('TMP0071') as string
           this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
