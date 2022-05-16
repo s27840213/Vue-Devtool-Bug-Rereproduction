@@ -28,14 +28,14 @@
             span(class="text-H1") {{plans[planSelected][periodUi].now}}
             span {{' ' + $t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
-            span {{canAddCard ? $t('TMP0013') : 'Manage subscription'}}
-        span(class="pricing-plan-currency") {{$t('TMP0014')}}
+            span {{canAddCard ? $t('TMP0013') : $t('TMP0014')}}
+        span(class="pricing-plan-currency") {{$t('TMP0015')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
           svg-icon(v-if="item === true" iconName="feature-true")
           span(v-else) {{item}}
       div(class="pricing-faq")
-        span(class="pricing-faq__title") {{$t('TMP0028')}}
+        span(class="pricing-faq__title") {{$t('TMP0029')}}
         details(v-for="item in faqs")
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")

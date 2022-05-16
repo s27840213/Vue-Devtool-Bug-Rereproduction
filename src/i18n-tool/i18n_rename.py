@@ -14,11 +14,11 @@ It will replace prefix and add/sub the number below.
 PREFIX_BEFORE = "TMP"
 PREFIX_AFTER = "TMP"
 # 2. Spicify serial range you want to replace.
-SERIAL_START = 62
+SERIAL_START = 1
 SERIAL_END = 9999
 # 3. Replace with the serial number difference between TMP and NN,
 #    can accept negative interger
-SERIAL_DIFFERENCE = 1
+SERIAL_DIFFERENCE = 5
 # 4. Choose which file extension you want to replace
 FILE_EXTENSION = [
   ".vue",
