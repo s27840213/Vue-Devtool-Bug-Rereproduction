@@ -256,7 +256,6 @@
             btn(:type="'primary-sm'" class="rounded my-5"
               style="padding: 5px 40px;"
               @click.native="updateParentIdClicked()") 修改
-    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -297,7 +296,6 @@ export default Vue.extend({
       isLayoutReady: false,
       isLocked: true,
       isPanelOpen: false,
-      isLoading: false,
       isGetGroup: false,
       isGetTemplate: false,
       updateParentIdChecked: false,
@@ -431,7 +429,8 @@ export default Vue.extend({
     ...mapMutations({
       updatePageProps: 'UPDATE_pageProps',
       addPageToPos: 'ADD_pageToPos',
-      setCurrActivePageIndex: 'SET_currActivePageIndex'
+      setCurrActivePageIndex: 'SET_currActivePageIndex',
+      setIsloading: 'SET_isGlobalLoading'
     }),
     ...mapActions('layouts',
       [
@@ -561,7 +560,7 @@ export default Vue.extend({
       this.selectedFormat = key
     },
     async getDataClicked() {
-      this.isLoading = true
+      this.setIsloading(true)
 
       this.resetStatus()
       const data = {}
@@ -592,13 +591,13 @@ export default Vue.extend({
         }
       }
 
-      this.isLoading = false
+      this.setIsloading(false)
     },
     async updateGroupClicked() {
       const coverId = this.groupInfo.groupThemes.map(theme => {
         return String(theme.id) + ':' + this.groupInfo.contents[theme.coverIndex].key_id
       })
-      this.isLoading = true
+      this.setIsloading(true)
       const data = {
         cover_ids: coverId.join()
       }
@@ -611,7 +610,7 @@ export default Vue.extend({
         this.$notify({ group: 'copy', text: '更新時發生錯誤' })
       }
       this.resetStatus()
-      this.isLoading = false
+      this.setIsloading(false)
     },
     async updateDataClicked() {
       // handle theme_ids
@@ -632,7 +631,7 @@ export default Vue.extend({
         return
       }
 
-      this.isLoading = true
+      this.setIsloading(true)
       const data = {
         locale: this.templateInfo.locale,
         tags_tw: this.templateInfo.tags_tw,
@@ -651,7 +650,7 @@ export default Vue.extend({
       this.isGetGroup = false
       this.unsetThemeTemplate = []
       this.groupErrorMsg = ''
-      this.isLoading = false
+      this.setIsloading(false)
     },
     updateParentIdClicked() {
       if (!this.updateParentIdChecked) {
