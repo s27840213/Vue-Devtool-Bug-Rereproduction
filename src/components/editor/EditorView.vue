@@ -326,7 +326,9 @@ export default Vue.extend({
         if (this.isSelecting) {
           this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement
-          this.handleSelectionData(selectionArea.getBoundingClientRect())
+          if (!this.isHandleShadow) {
+            this.handleSelectionData(selectionArea.getBoundingClientRect())
+          }
         }
       })
     },

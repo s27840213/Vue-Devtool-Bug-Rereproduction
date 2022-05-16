@@ -68,8 +68,6 @@ export default Vue.extend({
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, () => {
-      // this.show = this.btns.find(b => b.name === 'shadow')?.show || ''
-      console.log('emit show panel')
       this.show = 'panel-photo-shadow'
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
@@ -81,11 +79,6 @@ export default Vue.extend({
   components: {
     PopupAdjust,
     PanelPhotoShadow
-  },
-  watch: {
-    show() {
-      console.log(this.show)
-    }
   },
   computed: {
     ...mapGetters({
@@ -276,7 +269,6 @@ export default Vue.extend({
       this.show = this.show.includes(name) ? '' : name
     },
     handleOutside() {
-      console.log(123412)
       this.show = ''
     },
     handleClick(e: MouseEvent) {
@@ -287,11 +279,7 @@ export default Vue.extend({
         return
       }
       if (!(this.$refs.popup as Vue).$el.contains(e.target as Node)) {
-        // if (currLayer.styles.shadow.isTransparent || currLayer.styles.shadow.currentEffect === ShadowEffectType.imageMatched) {
-        //   return
-        // }
         if (!this.isHandleShadow) {
-          console.log('123')
           this.handleOutside()
         }
       }
