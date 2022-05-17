@@ -160,6 +160,17 @@ class ShortcutUtils {
     }
   }
 
+  textCut() {
+    const sel = window.getSelection()
+    if (sel) {
+      navigator.clipboard.writeText(sel.toString().replace(/\n\n/g, '\n'))
+      tiptapUtils.agent(editor => {
+        editor.commands.deleteSelection()
+        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
+      })
+    }
+  }
+
   textPaste() {
     navigator.clipboard.readText().then((text) => {
       tiptapUtils.agent(editor => {
@@ -334,6 +345,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y - (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 
   down(pressShift = false) {
@@ -341,6 +353,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y + (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 
   left(pressShift = false) {
@@ -348,6 +361,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x - (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 
   right(pressShift = false) {
@@ -355,6 +369,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x + (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 }
 

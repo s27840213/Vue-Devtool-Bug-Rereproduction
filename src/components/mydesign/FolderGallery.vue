@@ -11,9 +11,10 @@
       div(class="folder-gallery__title")
         span {{$tc('NN0253', 2)}}
     div(v-if="isExpanded" class="folder-gallery__folders")
-      folder-item(v-for="folder in allFolders"
+      folder-item(v-for="(folder, index) in allFolders"
                   :path="path"
                   :config="folder"
+                  :index="index"
                   @goto="handleGotoFolder(folder.id)"
                   :undraggable="limitFunctions"
                   :undroppable="limitFunctions"
@@ -23,7 +24,8 @@
                   :menuItemNum="menuItemSlots.length"
                   @moveItem="handleMoveItem"
                   @select="selectFolder(folder)"
-                  @deselect="deselectFolder(folder)")
+                  @deselect="deselectFolder(folder)"
+                  @metaSelectFolder="metaSelectFolder(index)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
           div(class="folder-menu-item" @click="handleFolderMenuAction(menuItemSlot.icon, folder)")
             div(class="folder-menu-item__icon")
@@ -85,7 +87,8 @@ export default Vue.extend({
       setExpand: 'SET_expand',
       setCurrLocation: 'SET_currLocation',
       addFolderToSelection: 'UPDATE_addFolderToSelection',
-      removeFolderFromSelection: 'UPDATE_removeFolderFromSelection'
+      removeFolderFromSelection: 'UPDATE_removeFolderFromSelection',
+      metaSelectFolder_: 'UPDATE_metaSelectFolder'
     }),
     expansionIconStyles() {
       return this.isExpanded ? {} : { transform: 'rotate(-90deg)' }
@@ -122,6 +125,13 @@ export default Vue.extend({
     deselectFolder(folder: IFolder) {
       if (!this.selectable) return
       this.removeFolderFromSelection(folder)
+    },
+    metaSelectFolder(index: number) {
+      if (!this.selectable) return
+      this.metaSelectFolder_({
+        folders: this.allFolders,
+        index
+      })
     }
   }
 })

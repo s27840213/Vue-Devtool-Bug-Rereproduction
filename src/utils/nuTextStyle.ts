@@ -387,6 +387,10 @@ export default Extension.create({
         shortcutUtils.textCopy()
         return true
       },
+      'Mod-x': () => {
+        shortcutUtils.textCut()
+        return true
+      },
       'Mod-v': () => {
         shortcutUtils.textPaste()
         return true

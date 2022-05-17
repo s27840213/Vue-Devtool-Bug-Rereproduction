@@ -56,6 +56,8 @@
             @keydown.native.meta.67.exact.stop.self
             @keydown.native.ctrl.86.exact.stop.self
             @keydown.native.meta.86.exact.stop.self
+            @keydown.native.ctrl.88.exact.stop.self
+            @keydown.native.meta.88.exact.stop.self
             @keydown.native.ctrl.65.exact.stop.self
             @keydown.native.meta.65.exact.stop.self
             @keydown.native.ctrl.90.exact.stop.self
