@@ -11,6 +11,26 @@ interface BillingInfoInput {
 
 class PaymentData {
   // For Pricing.vue
+  colorBlock() {
+    return [{
+      name: 'vector_pink1.svg',
+      top: 171,
+      left: -129
+    }, {
+      name: 'vector_green1.svg',
+      top: 82,
+      left: 70
+    }, {
+      name: 'vector_blue2.svg',
+      top: -27,
+      left: 363
+    }, {
+      name: 'oval_yellow1.svg',
+      top: 73,
+      left: 597
+    }]
+  }
+
   periodOptions() {
     return [{
       label: i18n.t('TMP0010'),

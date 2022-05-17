@@ -5,6 +5,9 @@
       div(class="pricing-top")
         span(class="pricing-top__title" v-html="$t('TMP0001')")
         span(class="pricing-top__description") {{$t('TMP0002')}}
+        img(v-for="cb in colorBlock" class="pricing-top__cb"
+            :src="require('@/assets/img/svg/color-block/' + cb.name)"
+            :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
       div(class="pricing-plan")
         div(class="pricing-plan-left")
           div(class="pricing-plan-left__top")
@@ -71,6 +74,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      colorBlock: paymentData.colorBlock(),
       periods: paymentData.periodOptions(),
       compareTable: paymentData.compareTable(),
       faqs: paymentData.faqs(),
@@ -134,6 +138,7 @@ export default Vue.extend({
 .pricing-top {
   display: flex;
   flex-direction: column;
+  position: relative;
   margin: 110px 0;
   &__title {
     @include text-H2;
@@ -144,6 +149,10 @@ export default Vue.extend({
     @include body-LG;
     color: setColor(gray-2);
   }
+  &__cb {
+    position: absolute;
+    z-index: -1;
+  }
 }
 
 .pricing-plan {
@@ -152,6 +161,7 @@ export default Vue.extend({
   width: 1128px;
   height: 367px;
   flex-shrink: 0;
+  background-color: setColor(white);
   border: 1px solid setColor(gray-4);
   border-radius: 16px;
 }
