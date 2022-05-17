@@ -17,11 +17,6 @@
         :src="shadowSrc"
         @error="onError()"
         @load="onLoad()")
-    //- template(v-if="isAdjustImage")
-    //- nu-adjust-image(v-if="isAdjustImage"
-    //-   :src="finalSrc"
-    //-   :styles="adjustImgStyles"
-    //-   :style="imgStyles")
     template(v-if="isAdjustImage")
       svg(:viewBox="svgViewBox"
         :width="svgImageWidth"
@@ -72,6 +67,7 @@ import imageShadowUtils, { CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE } from '@/uti
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
+import { IUploadShadowImg } from '@/store/module/shadow'
 
 export default Vue.extend({
   props: {
@@ -170,20 +166,6 @@ export default Vue.extend({
         this.$nextTick(() => this.handleNewShadowEffect())
       }
     },
-    shadowSrc() {
-      // if (!this.shadowSrc && this.currentShadowEffect !== ShadowEffectType.none && !this.forRender) {
-      //   if (this.canvas) {
-      //     this.handleNewShadowEffect()
-      //   } else {
-      //     this.$nextTick(() => {
-      //       this.handleNewShadowEffect()
-      //     })
-      //   }
-      // }
-      // if (!this.shadowSrc) {
-      //   (this.canvasShadowImg as any)[this.currentShadowEffect] = undefined
-      // }
-    },
     showCanvas(val) {
       if (val) {
         setTimeout(() => this.handleNewShadowEffect(false))
@@ -200,6 +182,16 @@ export default Vue.extend({
           this.redrawShadow(true)
         }
       }
+    },
+    'shadow.srcObj'(val) {
+      if (val.type === 'upload' && val.assetId) {
+        const uploadData = (this.uploadShadowImgs as Array<IUploadShadowImg>)
+          .find((data: IUploadShadowImg) => data.id === val.assetId)
+        if (uploadData) {
+          imageShadowUtils.updateShadowSrc(this.layerInfo, uploadData.srcObj)
+          imageShadowUtils.updateShadowStyles(this.layerInfo, uploadData.styles)
+        }
+      }
     }
   },
   components: { NuAdjustImage },
@@ -209,7 +201,7 @@ export default Vue.extend({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
-    ...mapState('shadow', ['uploadId']),
+    ...mapState('shadow', ['uploadId', 'uploadShadowImgs']),
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
@@ -342,6 +334,9 @@ export default Vue.extend({
       const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
       const isCurrLayerActive = config.active
       const isCurrShadowEffectApplied = this.currentShadowEffect !== ShadowEffectType.none
+      // console.log('isPhotoShadowPanelOpen', isPhotoShadowPanelOpen)
+      // console.log('isCurrLayerActive', isCurrLayerActive)
+      // console.log('isCurrShadowEffectApplied', isCurrShadowEffectApplied)
       const isShadowUploading = uploadId.pageId === pageUtils.getPage(pageIndex).id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
           const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup

@@ -5,7 +5,7 @@ import { IShadowProps } from './imgShadow'
 import { LayerProcessType } from '@/store/types'
 
 export const jsonVer = '1.0.7'
-export interface LayerIdentifier {
+export interface ILayerIdentifier {
   pageId: string,
   layerId: string,
   subLayerId?: string

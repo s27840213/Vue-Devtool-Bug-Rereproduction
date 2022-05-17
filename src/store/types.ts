@@ -35,7 +35,7 @@ export interface IEditorState {
   clipboard: Array<ITmp>,
   currSelectedInfo: ICurrSelectedInfo,
   currSubSelectedInfo: ICurrSubSelectedInfo,
-  isColorPickerOpened: boolean,
+  isColorPanelOpened: boolean,
   isMoving: boolean,
   currSelectedResInfo: Record<string, never> | {
     userName: string,
@@ -85,7 +85,6 @@ export enum FunctionPanelType {
   none,
   group,
   textSetting,
-  colorPicker,
   pageSetting,
   photoSetting,
   photoShadow,

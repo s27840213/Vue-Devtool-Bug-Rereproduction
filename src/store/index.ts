@@ -82,7 +82,7 @@ const getDefaultState = (): IEditorState => ({
     index: -1,
     type: ''
   },
-  isColorPickerOpened: false,
+  isColorPanelOpened: false,
   currSelectedResInfo: {},
   asset: {},
   textInfo: {
@@ -219,9 +219,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedTypes(state: IEditorState) {
     return state.currSelectedInfo.types
-  },
-  getIsColorPickerOpened(state: IEditorState) {
-    return state.isColorPickerOpened
   },
   getCurrSelectedResInfo(state: IEditorState) {
     return state.currSelectedResInfo
@@ -614,8 +611,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
   },
-  SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
-    state.isColorPickerOpened = isOpened
+  SET_isColorPanelOpened(state: IEditorState, isOpened: boolean) {
+    state.isColorPanelOpened = isOpened
   },
   SET_currSelectedResInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedResInfo = data

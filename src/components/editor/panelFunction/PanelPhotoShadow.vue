@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="photo-effect-setting mt-25")
+  div(class="photo-effect-setting mt-25" ref="panel" tabindex="0" @keydown.stop)
     div(class="action-bar")
       div(class="flex-between photo-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
@@ -22,7 +22,6 @@
               :value="getFieldValue(field)"
               :name="field"
               @change="handleEffectUpdate"
-              @blur="recordChange"
               type="number")
           input(class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
@@ -30,7 +29,6 @@
             :min="fieldRange[currentEffect][field].min"
             :name="field"
             @input="handleEffectUpdate"
-            @mouseup="recordChange"
             v-ratio-change
             type="range")
         template(v-if="currentEffect !== 'none'")
@@ -62,7 +60,6 @@
               :value="getFieldValue(field)"
               :name="field"
               @change="handleEffectUpdate"
-              @blur="recordChange"
               type="number")
           input(class="photo-effect-setting__range-input"
             :value="getFieldValue(field)"
@@ -70,7 +67,6 @@
             :min="fieldRange[currentEffect][field].min"
             :name="field"
             @input="handleEffectUpdate"
-            @mouseup="recordChange"
             v-ratio-change
             type="range")
         div(v-if="!['none', 'imageMatched'].includes(currentEffect)"
@@ -94,11 +90,11 @@ import Vue from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType, FunctionPanelType, LayerType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import imageShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
@@ -132,11 +128,10 @@ export default Vue.extend({
     if (layerData) {
       const { config, primarylayerId } = layerData
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
-      const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = primarylayerId
-        ? layerUtils.getLayerInfoById(pageId, primarylayerId, config.id as string)
-        : layerUtils.getLayerInfoById(pageId, config.id as string, '')
-
-      // If the shadow effct has already got the img src, return
+      const layerId = primarylayerId || config.id || ''
+      const subLayerId = primarylayerId ? config.id : ''
+      const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+      /** If the shadow effct has already got the img src, return */
       if (config.styles.shadow.srcObj.type) {
         return
       }
@@ -146,9 +141,11 @@ export default Vue.extend({
         this.setIsUploading(pageId, config.id as string, '', true)
       }
 
-      // If the canvas has been painted, stop showing the inProcess icon
+      const uploadAssetId = generalUtils.generateRandomString(6)
+      this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
+      /** If the canvas has been painted, stop showing the inProcess icon */
       if (config.styles.shadow.hasPaintOnCanvas) {
-        layerUtils.updateLayerProps(_pageIndex, _layerIndex, { inProcess: false }, _subLayerIdx)
+        layerUtils.updateLayerProps(_pageIndex, _layerIndex, { inProcess: LayerProcessType.none }, _subLayerIdx)
       }
 
       const assetId = generalUtils.generateAssetId()
@@ -247,15 +244,12 @@ export default Vue.extend({
         needCompressed: false,
         id: assetId,
         pollingCallback: (json: IUploadAssetResponse) => {
+          const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
           const srcObj = {
             type: this.isAdmin ? 'public' : 'private',
             userId: json.data.team_id,
             assetId: this.isAdmin ? json.data.id : json.data.asset_index
           }
-          const { pageIndex, layerIndex, subLayerIdx } = primarylayerId
-            ? layerUtils.getLayerInfoById(pageId, primarylayerId, config.id as string)
-            : layerUtils.getLayerInfoById(pageId, config.id as string, '')
-
           if (pageIndex !== -1 && layerIndex !== -1) {
             const layer = layerUtils.getLayer(pageIndex, layerIndex)
             const newWidth = (updateCanvas.width - right - left) / drawCanvasW * config.styles.width
@@ -264,18 +258,30 @@ export default Vue.extend({
             const newImg = new Image()
             newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: '' }, subLayerIdx)
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
               if (srcObjIdentifier !== config.srcObj.type + config.srcObj.userId + config.srcObj.assetId) {
                 return
               }
-              imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, {
+              const shadowImgStyles = {
                 imgWidth: newWidth,
                 imgHeight: newHeight,
                 imgX: newWidth * 0.5 - (config.styles.width * leftShadowThickness + config.styles.width * 0.5),
                 imgY: newHeight * 0.5 - (config.styles.height * topShadowThickness + config.styles.height * 0.5)
+              }
+              /** update the upload img in shadow module */
+              imageShadowUtils.addUploadImg({
+                id: uploadAssetId,
+                owner: { pageId, layerId, subLayerId },
+                srcObj,
+                styles: shadowImgStyles
               })
-              layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
-              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+              const targetLayer = (subLayerIdx === -1 ? layer : (layer as IGroup).layers[subLayerIdx]) as IImage
+              if (targetLayer.styles.shadow.srcObj.type === 'upload') {
+                imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+                imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+                layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
+              }
+
               if (subLayerIdx !== -1) {
                 /** Handle the primary layer size update */
                 const primaryLayer = layer as IGroup
@@ -308,7 +314,9 @@ export default Vue.extend({
     }
   },
   destroyed() {
-    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.none)
+    this.$nextTick(() => {
+      this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
+    })
   },
   computed: {
     ...mapGetters({
@@ -359,7 +367,6 @@ export default Vue.extend({
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
-      this.recordChange()
     },
     handleEffectUpdate(event: Event): void {
       const { currentEffect, fieldRange } = this
@@ -373,13 +380,11 @@ export default Vue.extend({
             Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
         })
       }
+      this.focusOnPanel()
     },
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
       imageShadowUtils.setEffect(currentEffect, { color })
-    },
-    recordChange() {
-      stepsUtils.record()
     },
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
@@ -414,6 +419,19 @@ export default Vue.extend({
       layerUtils.updateLayerProps(pageIndex, layerIndex, {
         isUploading
       }, subLayerIdx)
+    },
+    focusOnPanel() {
+      const panel = this.$refs.panel as HTMLElement
+      panel.focus()
+    },
+    setUploadingData(layerIdentifier: ILayerIdentifier, id: string) {
+      const { pageId, layerId, subLayerId } = layerIdentifier
+      const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId || '')
+      imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, {
+        type: 'upload',
+        assetId: id,
+        userId: ''
+      })
     }
   }
 })

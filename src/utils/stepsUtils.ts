@@ -217,6 +217,7 @@ class StepsUtils {
   }
 
   record() {
+    console.warn('record!')
     const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
     // const modifiedPage = pageUtils.getPage(middlemostPageIndex) as IPage
     // if (modifiedPage.designId.length !== 0) {
@@ -250,6 +251,7 @@ class StepsUtils {
   }
 
   async undo() {
+    console.warn('undo')
     if (this.steps.length === 0 || this.currStep === 0) {
       return
     }
