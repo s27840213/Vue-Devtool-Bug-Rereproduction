@@ -22,7 +22,9 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import appJson from '@/assets/json/app.json'
 import generalUtils from '@/utils/generalUtils'
+
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -300,6 +302,8 @@ router.beforeEach(async (to, from, next) => {
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
     const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
+
+    // const json = appJson
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 

@@ -7,22 +7,23 @@
         span {{ $t('NN0322') }}
     div(class="py-10 px-15")
       div(class="popup-theme__title body-2 mb-5") {{ $t('NN0321') }}
-      download-check-button(class="popup-theme__checkbox body-3 text-gray-2 pl-5"
-        type="checkbox"
-        iconSize="12px"
-        :label="$t('NN0324')"
-        value="all"
-        :default-checked="all"
-        @change="handleAllCheck")
-      download-check-button(v-for="theme in themes"
-        type="checkbox"
-        class="popup-theme__checkbox body-3 text-gray-2 pl-5"
-        iconSize="12px"
-        :key="theme.id"
-        :label="theme.title"
-        :value="`${theme.id}`"
-        :default-checked="selected[`${theme.id}`]"
-        @change="handleChange")
+      div(class="popup-theme__checkbox-section scrollbar-gray-thin")
+        download-check-button(class="popup-theme__checkbox body-3 text-gray-2 pl-5"
+          type="checkbox"
+          iconSize="12px"
+          :label="$t('NN0324')"
+          value="all"
+          :default-checked="all"
+          @change="handleAllCheck")
+        download-check-button(v-for="theme in themes"
+          type="checkbox"
+          class="popup-theme__checkbox body-3 text-gray-2 pl-5"
+          iconSize="12px"
+          :key="theme.id"
+          :label="theme.title"
+          :value="`${theme.id}`"
+          :default-checked="selected[`${theme.id}`]"
+          @change="handleChange")
     div(class="flex px-20 flex-between")
       btn(class="popup-theme__btn popup-theme__btn--cancel rounded"
         type="primary-sm"
@@ -121,6 +122,13 @@ export default Vue.extend({
     font-weight: 800;
     letter-spacing: 2px;
   }
+  &__checkbox-section {
+    @media screen and (max-width: 769px) {
+      height: 40vh;
+    }
+    overflow-y: scroll;
+  }
+
   &__checkbox {
     line-height: 24px;
     margin-bottom: 4px;

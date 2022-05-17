@@ -1,13 +1,13 @@
 <template lang="pug">
   div(class="panel-spacing")
-    mobile-slider(:name="`${$t('NN0109')}`"
+    mobile-slider(:title="`${$t('NN0109')}`"
       :value="lineHeight"
       :min="fieldRange.lineHeight.min"
       :max="fieldRange.lineHeight.max"
       :step="0.01"
       :propKey="'lh'"
       @update:lh="updateLineHeight")
-    mobile-slider(:name="`${$t('NN0110')}`"
+    mobile-slider(:title="`${$t('NN0110')}`"
       :value="fontSpacing"
       :min="fieldRange.fontSpacing.min"
       :max="fieldRange.fontSpacing.max"
@@ -77,6 +77,8 @@ export default Vue.extend({
           case 'fontSpacing':
             value = value / 1000
         }
+
+        console.log(value)
         const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
         window.requestAnimationFrame(() => {
           if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {

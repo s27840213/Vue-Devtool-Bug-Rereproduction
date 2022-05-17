@@ -6,14 +6,14 @@
         :class="{'visible-hidden': panelTitle !== ''}")
       div
         svg-icon(class="mobile-panel__left-btn"
-          :class="{'visible-hidden': true}"
+          :class="{'visible-hidden': false}"
           iconName="check-circle"
           :iconColor="'white'"
           :iconWidth="'20px'")
         span(class="mobile-panel__title"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
         svg-icon(class="mobile-panel__right-btn"
-          :class="{'visible-hidden': true}"
+          :class="{'visible-hidden': false}"
           :iconName="'check-circle'"
           :iconColor="'white'"
           :iconWidth="'20px'")
@@ -22,6 +22,7 @@
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
           class="border-box"
           v-bind="dynamicBindProps"
+          v-on="dynamicBindMethod"
           @close="closeMobilePanel")
 </template>
 <script lang="ts">
@@ -45,6 +46,7 @@ import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue
 import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
+import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 import { mapGetters } from 'vuex'
@@ -80,10 +82,12 @@ export default Vue.extend({
     PanelFontSpacing,
     PopupDownload,
     PanelMore,
-    PanelColor
+    PanelColor,
+    PanelTextEffect
   },
   data() {
     return {
+      panelHistory: [] as Array<string>
     }
   },
   computed: {
@@ -93,10 +97,13 @@ export default Vue.extend({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
+    },
+    halfSize(): boolean {
+      return ['fonts'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -119,7 +126,7 @@ export default Vue.extend({
     },
     panelStyle(): { [index: string]: string } {
       return {
-        height: this.fixSize ? 'initial' : '100%',
+        height: this.halfSize ? '50%' : this.fixSize ? 'initial' : '100%',
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
         ...(this.fixSize && { 'max-height': '80%' })
@@ -142,8 +149,27 @@ export default Vue.extend({
             hideContainer: true
           }
         }
+        case 'text-effect': {
+          return Object.assign(defaultVal, {
+            panelHistory: this.panelHistory
+          })
+        }
         default: {
           return defaultVal
+        }
+      }
+    },
+    dynamicBindMethod(): { [index: string]: any } {
+      switch (this.currActivePanel) {
+        case 'text-effect': {
+          return {
+            pushHistory: (history: string) => {
+              this.panelHistory.push(history)
+            }
+          }
+        }
+        default: {
+          return {}
         }
       }
     }
@@ -151,6 +177,7 @@ export default Vue.extend({
   methods: {
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
+      this.panelHistory = []
     }
   }
 })
@@ -189,7 +216,7 @@ export default Vue.extend({
   &__bottom-section {
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow: hidden;
     @include no-scrollbar;
   }
 

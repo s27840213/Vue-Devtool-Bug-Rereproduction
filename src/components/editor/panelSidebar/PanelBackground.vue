@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="panel-bg")
-    search-bar(class="mb-15"
+    tabs(:tabs="['圖片','顏色']" @switchTab="switchTab")
+    search-bar(v-if="showImageTab" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keyword"
@@ -62,6 +63,8 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
+import Tabs from '@/components/Tabs.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -69,7 +72,8 @@ export default Vue.extend({
     ColorPicker,
     CategoryList,
     CategoryListRows,
-    CategoryBackgroundItem
+    CategoryBackgroundItem,
+    Tabs
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -77,7 +81,8 @@ export default Vue.extend({
   data() {
     return {
       openColorPicker: false,
-      scrollTop: 0
+      scrollTop: 0,
+      currActiveTabIndex: 0
     }
   },
   computed: {
@@ -111,7 +116,7 @@ export default Vue.extend({
         id: key,
         type: key,
         // size: (this.$refs.colorBlock as HTMLElement).style.height
-        size: 150
+        size: generalUtils.isMobile() ? 180 : 150
       }]
     },
     listCategories(): any[] {
@@ -148,9 +153,11 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.defaultBackgroundColors
-        .concat(this.listCategories)
-        .concat(this.listResult)
+      return this.showImageTab ? this.listCategories
+        .concat(this.listResult) : this.defaultBackgroundColors
+      // return this.defaultBackgroundColors
+      //   .concat(this.listCategories)
+      //   .concat(this.listResult)
     },
     currentPageColor(): string {
       const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
@@ -162,6 +169,9 @@ export default Vue.extend({
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0004', 1) })}` : ''
+    },
+    showImageTab(): boolean {
+      return this.currActiveTabIndex === 0
     }
   },
   async mounted() {
@@ -204,7 +214,8 @@ export default Vue.extend({
       ]
     ),
     ...mapMutations({
-      _setBgColor: 'SET_backgroundColor'
+      _setBgColor: 'SET_backgroundColor',
+      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
     }),
     colorStyles(color: string) {
       return {
@@ -222,6 +233,10 @@ export default Vue.extend({
         pageIndex: pageUtils.currFocusPageIndex,
         color: color
       })
+
+      if (generalUtils.isMobile()) {
+        this.setCloseMobilePanelFlag(true)
+      }
     },
     async handleSearch(keyword: string) {
       this.resetContent()
@@ -249,6 +264,9 @@ export default Vue.extend({
     },
     recordChange() {
       this.$nextTick(() => stepsUtils.record())
+    },
+    switchTab(tabIndex: number) {
+      this.currActiveTabIndex = tabIndex
     }
   }
 })

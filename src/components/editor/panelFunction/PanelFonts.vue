@@ -2,7 +2,9 @@
   div(class="panel-fonts")
     div(v-if="!noTitle" class="panel-fonts__title")
       span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
-      svg-icon(class="panel-fonts__close pointer"
+      svg-icon(
+        v-if="!isMobile"
+        class="panel-fonts__close pointer"
         :iconName="'close'"
         :iconWidth="'30px'"
         :iconColor="'gray-2'"
@@ -55,6 +57,7 @@ import { IListServiceContentData, IListServiceContentDataItem } from '@/interfac
 import uploadUtils from '@/utils/uploadUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -112,6 +115,9 @@ export default Vue.extend({
       getLayer: 'getLayer',
       assetFonts: 'user/getAssetFonts'
     }),
+    isMobile(): boolean {
+      return generalUtils.isMobile()
+    },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },

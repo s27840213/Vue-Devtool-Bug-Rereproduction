@@ -1,13 +1,15 @@
 <template lang="pug">
   div(class="mobile-slider")
     div
-      span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{name}}
+      span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{title}}
       input(class="mobile-slider__text body-2 text-gray-2"
         type="number"
         v-model.number="propsVal"
+        :name="name"
         @change="handleChangeStop")
     input(class="mobile-slider__range-input input__slider--range"
       v-model.number="propsVal"
+      :name="name"
       :max="max"
       :min="min"
       :step="step"
@@ -26,6 +28,7 @@ export default Vue.extend({
     }
   },
   props: {
+    title: String,
     name: String,
     value: {
       type: Number,
@@ -60,7 +63,7 @@ export default Vue.extend({
         if (this.propKey !== '') {
           this.$emit(`update:${this.propKey}`, val)
         } else {
-          this.$emit('update', val)
+          this.$emit('update', val, this.name)
         }
       }
     }

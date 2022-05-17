@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="footer-tabs")
+  div(class="footer-tabs" ref="tabs")
     div(class="footer-tabs__item" v-for="(tab, index) in tabs"
         :class="{'click-disabled': (tab.disabled || isLocked)}"
         @click="handleTabAction(tab)")
@@ -57,13 +57,13 @@ export default Vue.extend({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
-        { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+        { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true }
+        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,
       fontTabs: [
         mainMenu,
         { icon: 'font', text: `${this.$t('NN0353')}`, panelType: 'fonts' },
-        { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size', disabled: true },
+        { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -77,10 +77,10 @@ export default Vue.extend({
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object', disabled: true },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
-        { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true },
-        { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+        { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true }
+        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,
       objectTabs: [
         mainMenu,
@@ -193,6 +193,10 @@ export default Vue.extend({
       if (newVal === 0) {
         this.$emit('switchTab', 'none')
       }
+    },
+    tabs() {
+      const tabs = this.$refs.tabs as HTMLElement
+      tabs.scrollTo(0, 0)
     }
   },
   methods: {

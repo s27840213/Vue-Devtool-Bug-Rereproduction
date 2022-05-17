@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-opacity")
-    mobile-slider(:name="`${$t('NN0030')}`"
+    mobile-slider(:title="`${$t('NN0030')}`"
       :value="opacity"
       :min="0"
       :max="100"
