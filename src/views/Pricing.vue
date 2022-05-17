@@ -86,7 +86,8 @@ export default Vue.extend({
       isCancelingPro: 'isCancelingPro',
       plans: 'plans',
       card: 'cardInfo',
-      planSelected: 'planSelected'
+      planSelected: 'planSelected',
+      userCountryUi: 'userCountryUi'
     }),
     ...mapFields({
       periodUi: 'periodUi'
@@ -96,7 +97,7 @@ export default Vue.extend({
   },
   async mounted() {
     await this.getBillingInfo()
-    this.getPrice()
+    this.getPrice(this.userCountryUi)
   },
   methods: {
     ...mapActions({

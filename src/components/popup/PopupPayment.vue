@@ -46,7 +46,6 @@
           //- case cancel2
           template(v-if="view === 'cancel2'")
             div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
-              //- todo: for label prop
               radio-btn(:isSelected="reasonIndex === idx"
                         :formatKey="String(idx)" circleColor="gray-4"
                         @select="selectCancelReason(idx)")
@@ -187,9 +186,6 @@ export default Vue.extend({
         case 'finish':
           this.getBillingInfo()
           break
-        // case 'already pro':
-        //   this.finishTextId = 'TMP0059'
-        //   break
         case 'switch1':
           this.getSwitchPrice()
           this.title = i18n.t('TMP0061', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string
@@ -201,11 +197,11 @@ export default Vue.extend({
           break
         case 'switch2':
           this.title = i18n.t('TMP0048') as string
-          this.description = 'test'
+          this.description = 'Pay with card'
           this.buttons = [{
             text: i18n.t('TMP0061', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
-            func: () => {
-              this.switch()
+            func: async () => {
+              await this.switch()
               this.closePopup() // refresh or double check?
             }
           }]

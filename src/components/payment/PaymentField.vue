@@ -71,7 +71,7 @@ export default Vue.extend({
   },
   watch: {
     userCountryUi() {
-      this.getPrice()
+      this.getPrice(this.userCountryUi)
     }
   },
   computed: {

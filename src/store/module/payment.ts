@@ -209,12 +209,13 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
-  async getPrice({ commit }) {
-    if (state.userCountryUi === '') {
+  async getPrice({ commit }, country: string) {
+    if (country === '') {
       commit('SET_state', { userCountryUi: i18n.locale })
+      country = i18n.locale
     }
 
-    return paymentApi.planList(state.userCountryUi).then((response) => {
+    return paymentApi.planList(country).then((response) => {
       const res = response.data.data
       commit('SET_state', {
         planSelected: res[0].plan_id,
