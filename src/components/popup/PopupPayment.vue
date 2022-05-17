@@ -51,7 +51,7 @@
                         @select="selectCancelReason(idx)")
               span {{can}}
             input(class="payment-left-content-cancel__other"
-                  v-model="otherReason" :placeholder="$t('TMP0079')")
+                  v-model="otherReason" :placeholder="$t('TMP0080')")
         div(class="payment-left-button")
           btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
               @click.native="button.func()"
@@ -197,7 +197,7 @@ export default Vue.extend({
           break
         case 'switch2':
           this.title = i18n.t('TMP0048') as string
-          this.description = 'Pay with card'
+          this.description = i18n.t('TMP0065') as string
           this.buttons = [{
             text: i18n.t('TMP0061', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: async () => {
@@ -207,19 +207,19 @@ export default Vue.extend({
           }]
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0065') as string
+          this.title = i18n.t('TMP0066') as string
           this.buttons = [{
-            text: i18n.t('TMP0071') as string,
+            text: i18n.t('TMP0072') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            text: i18n.t('TMP0070') as string,
+            text: i18n.t('TMP0071') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0072') as string
+          this.title = i18n.t('TMP0073') as string
           this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'

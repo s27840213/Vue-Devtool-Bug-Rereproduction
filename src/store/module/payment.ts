@@ -396,14 +396,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
       prime: state.prime
     }).then((response) => {
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('TMP0125') as string })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0126') as string })
       return response
     })
   },
   async stripeUpdate({ dispatch }) {
     return paymentApi.stripeUpdate().then((response) => {
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('TMP0125') as string })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0126') as string })
       return response
     })
   },
@@ -425,7 +425,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       is_bundle: 1 - Number(getters.getIsBundle)
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      Vue.notify({ group: 'copy', text: i18n.t('TMP0122', { period: getters.getIsBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0123', { period: getters.getIsBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string })
       dispatch('getBillingInfo')
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
@@ -433,21 +433,21 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('TMP0123') as string })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0124') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async resume({ dispatch }) {
     return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('TMP0124') as string })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0125') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async deleteCard({ dispatch }) {
     return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: i18n.t('TMP0126') as string })
+      Vue.notify({ group: 'copy', text: i18n.t('TMP0127') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async toAbort({ dispatch }) {
