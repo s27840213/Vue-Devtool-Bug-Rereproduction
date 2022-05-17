@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="field")
-    div(class="field__close")
+    div(v-if="isChange" class="field__close")
       svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
               class="pointer" @click.native="close()")
     span(v-if="isChange" class="field__title") {{$t('TMP0097')}}
