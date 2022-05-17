@@ -60,8 +60,8 @@
               span {{button.text}}
         img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
         div(v-if="view === 'finish'" class="payment-finish")
-          animation(path="/lottie/pro.json")
-          div(class="payment-finish-description")
+          div(class="payment-finish-content")
+            animation(path="/lottie/pro.json")
             span {{$t('TMP0058')}}
             btn(type="primary-mid" @click.native="closePopup()") {{$t('TMP0060')}}
 </template>
@@ -273,7 +273,7 @@ export default Vue.extend({
 
 .payment {
   display: flex;
-  // position: relative;
+  position: relative;
   width: min(792px, 90vw);
   height: min(704px, 80vw);
   flex-shrink: 0;
@@ -395,20 +395,18 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   background-color: white;
-  .animation { height: 100%; }
-  &-description {
+  &-content {
     @include body-SM;
-    position: absolute;
-    top: 55%;
-    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     text-align: center;
-    >button {
-      @include btn-LG;
-      margin: 20px auto;
-    }
+    width: 560px;
+    height: 310px;
+    >button { @include btn-LG; }
   }
 }
 </style>
