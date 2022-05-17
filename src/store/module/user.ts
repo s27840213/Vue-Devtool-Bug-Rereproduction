@@ -30,7 +30,7 @@ export interface IUserModule {
   subscribe: number,
   userAssets: IUserAssetsData,
   downloadUrl: string
-  verUni: number,
+  verUni: string,
   imgSizeMap: Array<{ [key: string]: string | number }>,
   avatar: {
     prev: string,
@@ -72,7 +72,7 @@ const getDefaultState = (): IUserModule => ({
     }
   },
   downloadUrl: '',
-  verUni: 0,
+  verUni: '',
   imgSizeMap: [],
   avatar: {
     prev: '',
