@@ -69,8 +69,8 @@ class FrameUtils {
         }
       })])
       this.updateFrameLayerStyles(LayerUtils.pageIndex, layerIndex, idx, {
-        imgWidth: clip.styles.initWidth,
-        imgHeight: clip.styles.initHeight,
+        imgWidth: clip.styles.width,
+        imgHeight: clip.styles.height,
         imgX: 0,
         imgY: 0,
         opacity: 100,
