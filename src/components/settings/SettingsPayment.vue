@@ -37,7 +37,7 @@
       div(class="sp-usage-disk")
         div(class="sp-usage-disk-total")
           div(class="sp-usage-disk-used" :style="diskPercent")
-        span {{`${usage.diskUsed}/${usage.diskTotal}`}}
+        span {{`${usage.diskUsed}/${usage.diskTotal} GB`}}
       span(class="body-XS")             {{$t('TMP0094')}}
     hr(v-if="card.status !== 'none'")
     div(v-if="card.status !== 'none'" class="sp-card")

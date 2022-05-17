@@ -58,8 +58,6 @@
                 @click.native="button.func()"
                 :disabled="button.disabled ? button.disabled() : false")
               span {{button.text}}
-            span(v-if="view === 'step1' && trialStatus === 'not used'"
-                class="payment-left-button-description") {{$t('TMP0047')}}
         img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
         div(v-if="view === 'finish'" class="payment-finish")
           animation(path="/lottie/pro.json")

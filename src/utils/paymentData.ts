@@ -116,8 +116,8 @@ class PaymentData {
 
   TWonly():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0052') as string,
-      ph: i18n.t('TMP0053') as string,
+      label: i18n.t('TMP0054') as string,
+      ph: i18n.t('TMP0054') as string,
       key: 'phone',
       error: i18n.t('TMP0128') as string
     }, {

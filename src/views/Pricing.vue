@@ -23,7 +23,8 @@
         div(class="pricing-plan-right")
           img(class="pricing-plan-right-off"
               :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
-          slide-toggle(:options="periods" v-model="periodUi" bgColor="#F4F5F7")
+          slide-toggle(class="body-XS" :options="periods"
+                      v-model="periodUi" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
             span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('TMP0012')}`}}
             br
@@ -169,8 +170,8 @@ export default Vue.extend({
 .pricing-plan-left {
   display: grid;
   grid-template-rows: 1fr 24px 1fr;
-  width: calc(68% - 96px);
-  padding: 64px 24px 64px 72px;
+  width: calc(68% - 80px);
+  padding: 64px 24px 64px 60px;
   text-align: left;
   &__top {
     display: flex;
@@ -190,7 +191,7 @@ export default Vue.extend({
     display: flex;
     color: setColor(blue-1);
     >hr {
-      width: 521px;
+      width: 500px;
       border: 0.5px solid rgba(18, 17, 39, 0.12);
       margin: auto
     }
