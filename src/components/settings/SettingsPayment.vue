@@ -78,6 +78,7 @@
         payment-field(isChange @next="closeCardPopup")
     div(v-if="showPaymentPopup" class="popup-window")
       popup-payment(:initView="paymentView" @close="closePaymentPopup()")
+    spinner(v-if="isLoading" :textContent="$t('NN0454')")
 </template>
 
 <script lang="ts">
@@ -134,7 +135,8 @@ export default Vue.extend({
       userCountryInfo: 'userCountryInfo',
       usage: 'usage',
       bi: 'billingInfo',
-      biv: 'billingInfoInvalid'
+      biv: 'billingInfoInvalid',
+      isLoading: 'isLoading'
     }),
     ...mapState('payment', {
       status: 'status',

@@ -77,7 +77,8 @@ export default Vue.extend({
   computed: {
     ...mapFields({
       userCountryUi: 'userCountryUi',
-      bi: 'billingInfo'
+      bi: 'billingInfo',
+      isLoading: 'isLoading'
     }),
     ...mapState('payment', {
       plans: 'plans',
@@ -99,11 +100,13 @@ export default Vue.extend({
       else return '$0.00'
     },
     submitText(): string {
-      return (this.isChange
-        ? i18n.t('NN0133')
-        : this.trialStatus === 'not used'
-          ? i18n.t('TMP0056')
-          : i18n.t('TMP0057')) as string
+      return (this.isLoading
+        ? i18n.t('NN0454')
+        : this.isChange
+          ? i18n.t('NN0133')
+          : this.trialStatus === 'not used'
+            ? i18n.t('TMP0056')
+            : i18n.t('TMP0057')) as string
     },
     invoiceReady():boolean { // Check if input is empty
       for (const item of this.invoiceInput) {
@@ -192,6 +195,7 @@ export default Vue.extend({
       for (const item of this.invoiceInput) { // Check invoice input validity
         if (item.error && await this.checkBillingInfo(item.key)) return
       }
+      this.isLoading = true
       const callback = (result: any) => {
         return new Promise<void>((resolve) => {
           if (result.status !== 0) throw Error(result.msg)
@@ -206,6 +210,7 @@ export default Vue.extend({
       this.TPDirect.card.getPrime(callback)
     },
     stripeSubmit() {
+      this.isLoading = true
       this.stripe.confirmSetup({
         elements: this.stripeElement,
         confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountryUi } } } },

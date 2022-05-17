@@ -41,11 +41,12 @@
           span {{`$${totalPrice} USD`}}
         div(class="bill-invoice-note")
           span {{'NOTE'}}
+    spinner(v-if="isLoading" :textContent="$t('NN0454')")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
@@ -63,7 +64,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('payment', {
-      historys: 'billingHistory'
+      historys: 'billingHistory',
+      isLoading: 'isLoading'
     }),
     customerAddr():string {
       return [
@@ -88,14 +90,21 @@ export default Vue.extend({
     ...mapActions({
       getBillingHistroy: 'payment/getBillingHistroy'
     }),
-    pdf(index: number) {
+    ...mapMutations({
+      setIsLoading: 'payment/SET_isLoading'
+    }),
+    async pdf(index: number) {
+      this.setIsLoading(true)
       this.hisIndex = index
       const invoice = document.getElementById('bill-invoice')
       const opt = {
         html2canvas: { scale: 5 },
         jsPDF: { format: [160, 226.42] }
       }
-      html2pdf().set(opt).from(invoice).toPdf().save()
+      // html2pdf will freeze page, so sleep 100ms for showing loading spinner.
+      await new Promise(resolve => setTimeout(resolve, 100))
+      await html2pdf().set(opt).from(invoice).toPdf().save()
+      this.setIsLoading(false)
     }
   }
 })

@@ -5,6 +5,7 @@ import i18n from '@/i18n'
 import paymentApi from '@/apis/payment'
 
 interface IPaymentState {
+  isLoading: boolean
   // Constant
   status: string
   plans: Record<string, Record<string, Record<string, string>|string>>
@@ -105,6 +106,7 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
 }
 
 const getDefaultState = (): IPaymentState => ({
+  isLoading: false,
   // Constant
   status: 'Loading',
   plans: {
@@ -239,6 +241,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     })
   },
   async getBillingInfo({ commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.billingInfo().then((response) => {
       const data = response.data.data
       console.log('bill info', data) // todelete
@@ -276,9 +279,10 @@ const actions: ActionTree<IPaymentState, unknown> = {
           GUI: data.tax_id
         }
       })
-    })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async getBillingHistroy({ commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.billingHistory().then((response) => {
       console.log('his', response) // todelete
       commit('SET_state', {
@@ -307,7 +311,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           }
         })
       })
-    })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   checkBillingInfo({ commit }, key: keyof IPaymentState['billingInfoInvalid']):boolean {
     let value
@@ -332,7 +336,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
     })
     return state.billingInfoInvalid[key]
   },
-  async updateBillingInfo() {
+  async updateBillingInfo({ commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.updateBillingInfo({
       meta: JSON.stringify({
         country: state.userCountryInfo,
@@ -351,6 +356,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       if (data.flag) throw Error(data.msg)
     }).then(() => Vue.notify({ group: 'copy', text: 'Success' }))
       .catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async init({ commit }) {
     commit('SET_state', {
@@ -363,7 +369,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     })
   },
-  async tappayAdd({ dispatch }) {
+  async tappayAdd({ commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.tappayAdd({
       country: state.userCountryUi,
       plan_id: state.planSelected,
@@ -383,29 +390,33 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async stripeAdd() {
+  async stripeAdd({ commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.stripeAdd({
       country: state.userCountryUi,
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly')
-    })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async tappayUpdate({ dispatch }) {
+  async tappayUpdate({ dispatch, commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.tappayUpdate({
       prime: state.prime
     }).then((response) => {
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: i18n.t('TMP0126') as string })
       return response
-    })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async stripeUpdate({ dispatch }) {
+  async stripeUpdate({ dispatch, commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.stripeUpdate().then((response) => {
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: i18n.t('TMP0126') as string })
       return response
-    })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async getSwitchPrice({ commit, getters }) {
     return paymentApi.getSwitchPrice({
@@ -419,7 +430,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  async switch({ getters, dispatch }) {
+  async switch({ getters, dispatch, commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.switch({
       plan_id: state.planSelected,
       is_bundle: 1 - Number(getters.getIsBundle)
@@ -428,27 +440,34 @@ const actions: ActionTree<IPaymentState, unknown> = {
       Vue.notify({ group: 'copy', text: i18n.t('TMP0123', { period: getters.getIsBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string })
       dispatch('getBillingInfo')
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async cancel({ dispatch }, reason: string) {
+  async cancel({ dispatch, commit }, reason: string) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.cancel(reason).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: i18n.t('TMP0124') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async resume({ dispatch }) {
+  async resume({ dispatch, commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.resume().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: i18n.t('TMP0125') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async deleteCard({ dispatch }) {
+  async deleteCard({ dispatch, commit }) {
+    commit('SET_state', { isLoading: true })
     return paymentApi.deleteCard().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: i18n.t('TMP0127') as string })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async toAbort({ dispatch }) {
     return paymentApi.toAbort().then(({ data }) => {
@@ -475,12 +494,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
 
 const mutations: MutationTree<IPaymentState> = {
   updateField,
-  SET_plans(state: IPaymentState, plans) {
-    state.plans = plans
-  },
-  UPDATE(state: IPaymentState, data) {
-    state = Object.assign(state, data)
-  },
   SET_state(state: IPaymentState, data: Partial<IPaymentState>) {
     const newState = data || getDefaultState()
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
@@ -497,16 +510,19 @@ const mutations: MutationTree<IPaymentState> = {
       }
     })
   },
+  SET_isLoading(state: IPaymentState, isLoading) {
+    state.isLoading = isLoading
+  },
+  SET_plans(state: IPaymentState, plans) {
+    state.plans = plans
+  },
+  UPDATE(state: IPaymentState, data) {
+    state = Object.assign(state, data)
+  },
   // old
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime
   },
-  // SET_isBundle(state: IPaymentState, isBundle: number) {
-  //   state.isBundle = isBundle
-  // },
-  // SET_invoice(state: IPaymentState, invoice) {
-  //   state.invoice = invoice
-  // },
   SET_isPro(state: IPaymentState, isPro) {
     state.isPro = isPro
   }
