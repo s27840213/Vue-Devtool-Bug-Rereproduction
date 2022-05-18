@@ -4,7 +4,7 @@
       p {{$t('TMP0112')}}
     template(v-if="!historys.length")
       img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
-      p(class="text-H6") {{$t('TMP0118')}}
+      p(class="text-H6") {{$t('TMP0119')}}
     div(v-else class="bill-table")
       span {{$t('TMP0113')}}
       span {{$t('TMP0114')}}
@@ -14,7 +14,7 @@
         span {{his.date}}
         span {{his.description}}
         span {{his.price}}
-        span(v-if="his.success === false" class="text-red") {{'付款失敗'}}
+        span(v-if="his.success === false" class="text-red") {{$t('TMP0118')}}
         span(v-else-if="his.payType === 'tappay'")
         span(v-else class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0117')}}
     //- For invoice pdf generation

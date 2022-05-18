@@ -119,13 +119,13 @@ class PaymentData {
       label: i18n.t('TMP0054') as string,
       ph: i18n.t('TMP0054') as string,
       key: 'phone',
-      error: i18n.t('TMP0129') as string
+      error: i18n.t('TMP0130') as string
     }, {
       label: i18n.t('TMP0055') as string,
       ph: i18n.t('TMP0056') as string,
       key: 'GUI',
       optional: true,
-      error: i18n.t('TMP0130') as string
+      error: i18n.t('TMP0131') as string
     }]
   }
 
@@ -151,7 +151,7 @@ class PaymentData {
     }, {
       label: 'state & zip',
       key: 'zip',
-      error: i18n.t('TMP0131') as string
+      error: i18n.t('TMP0132') as string
     }]
   }
 

@@ -22,7 +22,7 @@
           type="primary-lg" @click.native="buy()")
         span                            {{$t('TMP0084')}}
       span(v-if="isFail"
-          class="text-red overline-LG") {{$t('TMP0123')}}
+          class="text-red overline-LG") {{$t('TMP0124')}}
       template(v-if="showPlan")
         span                            {{$t('TMP0086', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
         span(                     v-html="$t('TMP0087', { price: myPrice, date: myPaidDate  })")
@@ -44,7 +44,7 @@
       span(class="text-blue-1")         {{$t('TMP0096')}}
       card-info(:card="card" :trash="isCancelingPro")
       span(v-if="isFail"
-        class="text-red overline-LG")   {{$t('TMP0123')}}
+        class="text-red overline-LG")   {{$t('TMP0124')}}
       span(v-if="canUpdateCard" class="text-blue-1 body-SM"
         @click="openCardPopup()")       {{$t('TMP0098')}}
     hr
