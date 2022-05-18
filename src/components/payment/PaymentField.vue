@@ -272,8 +272,10 @@ export default Vue.extend({
 }
 
 .stripe {
-  display: flex;
-  justify-content: center;
+  >svg {
+    display: block;
+    margin: auto;
+  }
 }
 
 .field-content {
