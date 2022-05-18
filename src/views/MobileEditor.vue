@@ -2,15 +2,25 @@
   div(class="mobile-editor")
     div(class="mobile-editor__top")
       header-tabs(@switchTab="switchTab"
-        :currTab="currActivePanel")
+        @showAllPages="showAllPages"
+        :currTab="currActivePanel"
+        :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
-          mobile-editor-view(:isConfigPanelOpen="isConfigPanelOpen")
+        mobile-editor-view(v-if="!inAllPagesMode"
+          :isConfigPanelOpen="isConfigPanelOpen")
+        div(v-else class="mobile-editor__page-preview")
+          page-preview
               //- div(class="content__panel" :style="panelStyles()")
               //-   mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
       mobile-panel(v-if="currActivePanel !== 'none'"
         :currActivePanel="currActivePanel"
+        :currColorEvent="currColorEvent"
         @switchTab="switchTab")
-    footer-tabs(@switchTab="switchTab" :currTab="currActivePanel")
+    footer-tabs(class="mobile-editor__bottom"
+      @switchTab="switchTab"
+      :currTab="currActivePanel"
+      :inAllPagesMode="inAllPagesMode"
+      @showAllPages="showAllPages")
 </template>
 
 <script lang="ts">
@@ -29,6 +39,7 @@ import logUtils from '@/utils/logUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
+import PagePreview from '@/components/editor/PagePreview.vue'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -37,7 +48,8 @@ export default Vue.extend({
     MobilePanel,
     HeaderTabs,
     MobilePanelTextSetting,
-    FooterTabs
+    FooterTabs,
+    PagePreview
   },
   data() {
     return {
@@ -47,7 +59,8 @@ export default Vue.extend({
       isLoading: false,
       isSaving: false,
       currActivePanel: 'none',
-      currColorEvent: ''
+      currColorEvent: '',
+      inAllPagesMode: false
     }
   },
   computed: {
@@ -152,6 +165,9 @@ export default Vue.extend({
           }
         }
       }
+    },
+    showAllPages() {
+      this.inAllPagesMode = !this.inAllPagesMode
     }
   }
 })
@@ -162,7 +178,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   height: 100%;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(auto, 1fr) auto;
   grid-template-columns: 1fr;
 
   &__top {
@@ -173,10 +189,25 @@ export default Vue.extend({
     grid-template-rows: auto minmax(auto, 1fr);
     grid-template-columns: 1fr;
   }
+  &__bottom {
+    z-index: setZindex("footer");
+  }
 
   &__content {
+    position: relative;
     height: 100%;
     width: 100%;
+    overflow: scroll;
+  }
+
+  &__page-preview {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    z-index: setZindex("pages-preview");
+    background: setColor(gray-6);
+    box-sizing: border-box;
   }
 }
 </style>

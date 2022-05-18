@@ -1,6 +1,8 @@
 <template lang="pug">
-  div(class="panel-color")
+  div(class="panel-color scrollbar-gray-thin")
+    color-panel(v-if="!showColorPicker" :whiteTheme="true" :noPadding="true" @openColorPicker="openColorPicker")
     color-picker(
+      v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
@@ -8,11 +10,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
@@ -20,6 +21,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { IGroup } from '@/interfaces/layer'
+import ColorPanel from '@/components/editor/ColorPanel.vue'
 
 export default Vue.extend({
   data() {
@@ -32,11 +34,16 @@ export default Vue.extend({
     currEvent: {
       type: String,
       required: true
+    },
+    panelHistory: {
+      type: Array as PropType<string[]>,
+      default: () => []
     }
   },
   components: {
     MobileSlider,
-    ColorPicker
+    ColorPicker,
+    ColorPanel
   },
   mounted() {
     colorUtils.setCurrEvent(this.currEvent)
@@ -56,7 +63,16 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       layerIndex: 'getCurrSelectedIndex',
       getLayer: 'getLayer'
-    })
+    }),
+    historySize(): number {
+      return this.panelHistory.length
+    },
+    inInitialState(): boolean {
+      return this.historySize === 0
+    },
+    showColorPicker(): boolean {
+      return !this.inInitialState && this.panelHistory[this.historySize - 1] === 'color-picker'
+    }
   },
   methods: {
     handleChangeStop(color: string) {
@@ -97,6 +113,9 @@ export default Vue.extend({
     },
     recordChange() {
       stepsUtils.record()
+    },
+    openColorPicker() {
+      this.$emit('pushHistory', 'color-picker')
     }
   }
 })
@@ -105,5 +124,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-color {
   width: 100%;
+  max-height: 250px;
+  overflow-y: scroll;
 }
 </style>

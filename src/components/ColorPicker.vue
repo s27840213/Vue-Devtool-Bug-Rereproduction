@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="color-picker" ref="colorPicker")
+  div(class="color-picker" ref="colorPicker"
+      :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
     chrome-picker(
       class="color-picker__picker"
       :value="convertedHex"
@@ -9,6 +10,7 @@
       :disableFields="true"
       :disableAlpha="true"
       :isMobile="isMobile"
+      :fullWidth="isMobile"
       :aspectRatio="aspectRatio")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
@@ -198,9 +200,7 @@ export default Vue.extend({
 .color-picker {
   display: flex;
   flex-direction: column;
-  width: 225px;
   height: fit-content;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: white;
   &:focus {
     outline: none;

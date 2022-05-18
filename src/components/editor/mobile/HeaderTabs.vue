@@ -4,12 +4,12 @@
       :iconName="'chevron-left'"
       :iconColor="'white'"
       :iconWidth="'20px'"
-      @click.native="goHome()")
+      @click.native="backBtnAction()")
     div(class="header-bar__right")
       svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
         :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
         :iconName="tab.icon"
-        :iconColor="((tab.disabled || isLocked) && tab.icon !== 'lock') ? 'gray-2' : currTab ===  tab.icon ? 'blue-1' :'white'"
+        :iconColor="iconColor(tab)"
         :iconWidth="'20px'"
         @click.native="handleIconAction(tab.icon)")
 </template>
@@ -27,13 +27,17 @@ export default Vue.extend({
     currTab: {
       default: 'none',
       type: String
+    },
+    inAllPagesMode: {
+      type: Boolean,
+      required: true
     }
   },
   data() {
     return {
       homeTabs: [
         { icon: 'resize', disabled: true },
-        { icon: 'all-pages', disabled: true },
+        { icon: 'all-pages' },
         { icon: 'download' },
         { icon: 'more' }
       ]
@@ -100,6 +104,12 @@ export default Vue.extend({
     }
   },
   methods: {
+    iconColor(tab: { icon: string, disabled: boolean }): string {
+      if (tab.icon === 'all-pages') {
+        return this.inAllPagesMode ? 'blue-1' : 'white'
+      }
+      return ((tab.disabled || this.isLocked) && tab.icon !== 'lock') ? 'gray-2' : this.currTab === tab.icon ? 'blue-1' : 'white'
+    },
     targetIs(type: string): boolean {
       if (this.isGroup) {
         if (this.hasSubSelectedLayer) {
@@ -128,11 +138,22 @@ export default Vue.extend({
     goHome() {
       this.$router.push({ name: 'Home' })
     },
+    backBtnAction() {
+      if (this.inAllPagesMode) {
+        this.$emit('showAllPages')
+      } else {
+        this.goHome()
+      }
+    },
     handleIconAction(icon: string) {
       switch (icon) {
         case 'download':
         case 'more': {
           this.$emit('switchTab', icon)
+          break
+        }
+        case 'all-pages': {
+          this.$emit('showAllPages')
           break
         }
         default: {

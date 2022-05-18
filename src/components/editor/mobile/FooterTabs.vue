@@ -1,19 +1,21 @@
 <template lang="pug">
   div(class="footer-tabs" ref="tabs")
-    div(class="footer-tabs__item" v-for="(tab, index) in tabs"
-        :class="{'click-disabled': (tab.disabled || isLocked)}"
-        @click="handleTabAction(tab)")
-      svg-icon(class="mb-5"
-        :iconName="tab.icon"
-        :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-        :iconWidth="'20px'")
-      span(class="text-body-4 no-wrap"
-      :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+    template(v-for="(tab, index) in tabs")
+      div(v-if="!tab.disabled"
+          class="footer-tabs__item"
+          :class="{'click-disabled': (tab.disabled || isLocked)}"
+          @click="handleTabAction(tab)")
+        svg-icon(class="mb-5"
+          :iconName="tab.icon"
+          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
+          :iconWidth="'20px'")
+        span(class="text-body-4 no-wrap"
+        :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -22,6 +24,9 @@ import imageUtils from '@/utils/imageUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IFooterTab } from '@/interfaces/editor'
 import groupUtils from '@/utils/groupUtils'
+import pageUtils from '@/utils/pageUtils'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
   components: {
@@ -30,6 +35,10 @@ export default Vue.extend({
     currTab: {
       default: 'none',
       type: String
+    },
+    inAllPagesMode: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -90,6 +99,14 @@ export default Vue.extend({
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
+      ] as Array<IFooterTab>,
+      pageTabs: [
+        mainMenu,
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
+        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
+        { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
+        { icon: 'trash', text: `${this.$t('NN0141')}` }
+        // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ] as Array<IFooterTab>
     }
   },
@@ -104,7 +121,9 @@ export default Vue.extend({
       InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
     tabs(): Array<IFooterTab> {
-      if (this.showPhotoTabs) {
+      if (this.inAllPagesMode) {
+        return this.pageTabs
+      } else if (this.showPhotoTabs) {
         // this.$emit('switchTab', 'none')
         return this.photoTabs
       } else if (this.showFontTabs) {
@@ -200,6 +219,15 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      _addPage: 'ADD_page',
+      _addPageToPos: 'ADD_pageToPos',
+      _deletePage: 'DELETE_page',
+      _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
+      _setCurrActivePageIndex: 'SET_currActivePageIndex',
+      _setIsDragged: 'page/SET_IsDragged',
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
+    }),
     handleTabAction(tab: IFooterTab) {
       switch (tab.icon) {
         case 'crop': {
@@ -224,6 +252,33 @@ export default Vue.extend({
         case 'main-menu': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
+          if (this.inAllPagesMode) {
+            this.$emit('showAllPages')
+          }
+          break
+        }
+        case 'add-page': {
+          const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
+          pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
+          stepsUtils.record()
+          break
+        }
+        case 'duplicate-page': {
+          const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
+          pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
+          groupUtils.deselect()
+          this._setCurrActivePageIndex(pageUtils.currActivePageIndex + 1)
+          stepsUtils.record()
+          break
+        }
+        case 'trash': {
+          groupUtils.deselect()
+          this._deletePage(pageUtils.currActivePageIndex)
+          stepsUtils.record()
+          break
+        }
+        case 'text-format': {
+          tiptapUtils.agent(editor => editor.commands.selectAll())
           break
         }
         default: {

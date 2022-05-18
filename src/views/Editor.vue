@@ -135,7 +135,7 @@ export default Vue.extend({
       isBrandSettingsOpen: 'getIsSettingsOpen'
     }),
     isColorPanelOpen: {
-      get: function(): boolean {
+      get: function (): boolean {
         return this.colorPanelOpenState ? this.colorPanelOpenState.val : false
       },
       set: function (newVal: boolean) {
@@ -307,7 +307,7 @@ export default Vue.extend({
       position: absolute;
       bottom: 0;
       left: 0;
-      z-index: setZindex('color-panel');
+      z-index: setZindex("color-panel");
     }
   }
 

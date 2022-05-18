@@ -6,17 +6,19 @@
         :class="{'visible-hidden': panelTitle !== ''}")
       div
         svg-icon(class="mobile-panel__left-btn"
-          :class="{'visible-hidden': false}"
-          iconName="check-circle"
+          :class="{'visible-hidden': !showLeftBtn}"
+          :iconName="leftBtnName"
           :iconColor="'white'"
-          :iconWidth="'20px'")
+          :iconWidth="'20px'"
+          @click.native="leftButtonAction")
         span(class="mobile-panel__title"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
         svg-icon(class="mobile-panel__right-btn"
-          :class="{'visible-hidden': false}"
-          :iconName="'check-circle'"
+          :class="{'visible-hidden': !showRightBtn}"
+          :iconName="rightBtnName"
           :iconColor="'white'"
-          :iconWidth="'20px'")
+          :iconWidth="'20px'"
+          @click.native="rightButtonAction")
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -51,11 +53,19 @@ import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 import { mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
+import layerUtils from '@/utils/layerUtils'
+import imageUtils from '@/utils/imageUtils'
+import { IFrame } from '@/interfaces/layer'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   props: {
     currActivePanel: {
       default: 'none',
+      type: String
+    },
+    currColorEvent: {
+      default: 'text',
       type: String
     }
   },
@@ -116,10 +126,10 @@ export default Vue.extend({
       }
     },
     showRightBtn(): boolean {
-      return !this.whiteTheme
+      return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return !this.whiteTheme
+      return this.whiteTheme && this.panelHistory.length > 0
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop'
@@ -154,6 +164,12 @@ export default Vue.extend({
             panelHistory: this.panelHistory
           })
         }
+        case 'color': {
+          return Object.assign(defaultVal, {
+            currEvent: this.currColorEvent,
+            panelHistory: this.panelHistory
+          })
+        }
         default: {
           return defaultVal
         }
@@ -161,7 +177,8 @@ export default Vue.extend({
     },
     dynamicBindMethod(): { [index: string]: any } {
       switch (this.currActivePanel) {
-        case 'text-effect': {
+        case 'text-effect':
+        case 'color': {
           return {
             pushHistory: (history: string) => {
               this.panelHistory.push(history)
@@ -171,6 +188,50 @@ export default Vue.extend({
         default: {
           return {}
         }
+      }
+    },
+    leftBtnName(): string {
+      if (this.panelHistory.length > 0) {
+        return 'back-circle'
+      } else {
+        return 'check-circle'
+      }
+    },
+    rightBtnName(): string {
+      if (this.panelHistory.length > 0 || this.currActivePanel === 'crop') {
+        return 'check-circle'
+      } else {
+        return 'close-circle'
+      }
+    },
+    leftButtonAction(): () => void {
+      if (this.panelHistory.length > 0) {
+        return () => { this.panelHistory.pop() }
+      } else {
+        return () => { this.closeMobilePanel() }
+      }
+    },
+    rightButtonAction(): () => void {
+      return () => {
+        if (this.currActivePanel === 'crop') {
+          if (imageUtils.isImgControl()) {
+            imageUtils.setImgControlDefault()
+          } else {
+            let index
+            switch (layerUtils.getCurrLayer.type) {
+              case 'image':
+                layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                break
+              case 'frame':
+                index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                if (index >= 0) {
+                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                }
+                break
+            }
+          }
+        }
+        this.closeMobilePanel()
       }
     }
   },
