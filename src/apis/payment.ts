@@ -28,14 +28,15 @@ class Payment {
     })
   }
 
-  billingHistory (): AxiosPromise {
+  billingHistory (index: number): AxiosPromise {
     return axios.request<any>({
       url: '/billing-info',
       method: 'POST',
       data: {
         token: authToken().token || '',
         locale: i18n.locale,
-        type: 'history'
+        type: 'history',
+        page_index: index
       }
     })
   }

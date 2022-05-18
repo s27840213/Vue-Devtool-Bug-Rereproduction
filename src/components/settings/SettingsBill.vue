@@ -17,6 +17,7 @@
         span(v-if="his.success === false" class="text-red") {{$t('TMP0118')}}
         span(v-else-if="his.payType === 'tappay'")
         span(v-else class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0117')}}
+    observer-sentinel(@callback="getBillingHistroy")
     //- For invoice pdf generation
     div(v-if="historys.length" class="bill-invoice-wrapper")
       div(class="bill-invoice" id="bill-invoice")
@@ -49,6 +50,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
@@ -56,6 +58,7 @@ import html2pdf from 'html2pdf.js'
 export default Vue.extend({
   name: 'SettingsBill',
   components: {
+    ObserverSentinel
   },
   props: {
   },
@@ -84,9 +87,6 @@ export default Vue.extend({
           return acc + (cur.price as number)
         }, 0)
     }
-  },
-  mounted() {
-    this.getBillingHistroy()
   },
   methods: {
     ...mapActions({

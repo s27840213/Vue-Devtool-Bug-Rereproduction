@@ -31,6 +31,7 @@ interface IPaymentState {
     last4: string
     date: string
   }
+  nextBillingHistoryIndex: number
   billingHistory: {
     date: string
     description: string
@@ -154,6 +155,7 @@ const getDefaultState = (): IPaymentState => ({
     last4: '',
     date: ''
   },
+  nextBillingHistoryIndex: 0,
   billingHistory: [],
   // User input
   planSelected: '',
@@ -274,12 +276,12 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async getBillingHistroy({ commit }) {
+    if (state.nextBillingHistoryIndex === -1) return
     commit('SET_state', { isLoading: true })
-    return paymentApi.billingHistory().then((response) => {
-      console.log('his', response) // todelete
+    return paymentApi.billingHistory(state.nextBillingHistoryIndex).then((response) => {
       commit('SET_state', {
-        // todo filter unsuccessful history
-        billingHistory: response.data.data.map((item:Record<string, string|number>) => {
+        nextBillingHistoryIndex: response.data.next_page,
+        billingHistory: state.billingHistory.concat(response.data.data.map((item:Record<string, string|number>) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
             month: 'long',
@@ -302,7 +304,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
               price: item.price
             }]
           }
-        })
+        }))
       })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
