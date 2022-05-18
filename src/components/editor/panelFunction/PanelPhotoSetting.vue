@@ -169,13 +169,9 @@ export default Vue.extend({
         case this.btns.find(b => b.name === 'shadow')?.show || '': {
           const target = (currLayer.type === LayerType.group && subLayerIdx !== -1
             ? (currLayer as IGroup).layers[subLayerIdx] : currLayer) as IImage
-          if (target.isUploading) {
+          if (this.isUploadImgShadow) {
             return
           }
-          // const currentEffect = target.styles.shadow.currentEffect
-          // if (currentEffect !== ShadowEffectType.none) {
-          //   imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', userId: '', assetId: '' })
-          // }
           break
         }
         case 'crop':

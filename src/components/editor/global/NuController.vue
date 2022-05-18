@@ -709,26 +709,7 @@ export default Vue.extend({
         e.preventDefault()
         this.setCursorStyle('move')
         window.requestAnimationFrame(() => {
-          if (!this.config.moved) {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
-          }
-          const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
-          const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
-          GroupUtils.movingTmp(
-            this.pageIndex,
-            {
-              x: moveOffset.offsetX,
-              y: moveOffset.offsetY
-            }
-          )
-          const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
-          this.$emit('getClosestSnaplines')
-          const totalOffset = {
-            x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
-            y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
-          }
-          this.initialPos.x += totalOffset.x
-          this.initialPos.y += totalOffset.y
+          this.movingHandler(e)
         })
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
@@ -739,21 +720,38 @@ export default Vue.extend({
         }
       }
     },
+    movingHandler(e: MouseEvent) {
+      if (!this.config.moved) {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
+      }
+      const offsetPos = MouseUtils.getMouseRelPoint(e, this.initialPos)
+      const moveOffset = mathUtils.getActualMoveOffset(offsetPos.x, offsetPos.y)
+      GroupUtils.movingTmp(
+        this.pageIndex,
+        {
+          x: moveOffset.offsetX,
+          y: moveOffset.offsetY
+        }
+      )
+      const offsetSnap = this.snapUtils.calcMoveSnap(this.config, this.layerIndex)
+      this.$emit('getClosestSnaplines')
+      const totalOffset = {
+        x: offsetPos.x + (offsetSnap.x * this.scaleRatio / 100),
+        y: offsetPos.y + (offsetSnap.y * this.scaleRatio / 100)
+      }
+      this.initialPos.x += totalOffset.x
+      this.initialPos.y += totalOffset.y
+    },
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
+      this.movingHandler(e)
       this.setMoving(false)
       if (this.isActive) {
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
-        }
-        if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
-          // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
-          //   GroupUtils.deselect()
-          //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-          // }
         }
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
           if (this.getLayerType === 'text') {

@@ -56,7 +56,6 @@ const imgShadowMutations = {
       Object.assign(styles, payload)
     } else {
       Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.styles, payload)
-      console.log((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.styles)
     }
   },
   [SET_srcObj](state: IEditorState, data: { layerInfo: ILayerInfo, srcObj: SrcObj }) {

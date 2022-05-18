@@ -265,12 +265,13 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false }: {
     addToPage?: boolean,
     id?: string,
     pollingCallback?: (json: IUploadAssetResponse) => void,
     needCompressed?: boolean,
     brandId?: string
+    isShadow?: boolean
   } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
@@ -294,7 +295,7 @@ class UploadUtils {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original')}`)
-      formData.append('x-amz-meta-tn', needCompressed ? this.userId : `${this.userId},1`)
+      formData.append('x-amz-meta-tn', needCompressed ? this.userId : (isShadow ? `${this.userId},2` : `${this.userId},1`))
       const xhr = new XMLHttpRequest()
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
@@ -362,6 +363,7 @@ class UploadUtils {
                             assetId: assetId,
                             progress: 100
                           })
+                          console.log({ assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })

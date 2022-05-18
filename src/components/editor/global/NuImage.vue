@@ -150,7 +150,7 @@ export default Vue.extend({
     },
     shadowEffects: {
       handler(val) {
-        if (this.$refs.canvas) {
+        if (this.$refs.canvas && !this.isUploadingShadowImg) {
           !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
         }
       },
@@ -160,7 +160,7 @@ export default Vue.extend({
       if (this.forRender) {
         return
       }
-      if (this.$refs.canvas) {
+      if (this.$refs.canvas && this.shadow.srcObj.type !== 'upload') {
         this.handleNewShadowEffect()
       } else {
         this.$nextTick(() => this.handleNewShadowEffect())
@@ -198,7 +198,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'uploadShadowImgs']),
@@ -334,9 +335,6 @@ export default Vue.extend({
       const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
       const isCurrLayerActive = config.active
       const isCurrShadowEffectApplied = this.currentShadowEffect !== ShadowEffectType.none
-      // console.log('isPhotoShadowPanelOpen', isPhotoShadowPanelOpen)
-      // console.log('isCurrLayerActive', isCurrLayerActive)
-      // console.log('isCurrShadowEffectApplied', isCurrShadowEffectApplied)
       const isShadowUploading = uploadId.pageId === pageUtils.getPage(pageIndex).id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
           const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
@@ -524,7 +522,7 @@ export default Vue.extend({
     },
     handleNewShadowEffect(clearShadowSrc = true) {
       const { canvas, layerInfo } = this
-      if (!canvas) {
+      if (!canvas || this.isUploadingShadowImg) {
         console.warn('there is no canvas!')
         return
       }
@@ -631,7 +629,7 @@ export default Vue.extend({
     },
     updateShadowEffect(effects: IShadowEffects) {
       const { layerInfo, canvas } = this
-      if (!canvas) {
+      if (!canvas || this.isUploadingShadowImg) {
         return
       }
 

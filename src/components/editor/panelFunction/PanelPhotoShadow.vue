@@ -126,7 +126,8 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
-      const { config, primarylayerId } = layerData
+      const { config: _config, primarylayerId } = layerData
+      const config = generalUtils.deepCopy(_config) as IImage
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
@@ -140,9 +141,10 @@ export default Vue.extend({
       } else {
         this.setIsUploading(pageId, config.id as string, '', true)
       }
-
+      /** uploadAssetId used to identify the upload-shadow-img in undo/redo step */
       const uploadAssetId = generalUtils.generateRandomString(6)
       this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
+      stepsUtils.record()
       /** If the canvas has been painted, stop showing the inProcess icon */
       if (config.styles.shadow.hasPaintOnCanvas) {
         layerUtils.updateLayerProps(_pageIndex, _layerIndex, { inProcess: LayerProcessType.none }, _subLayerIdx)
@@ -228,7 +230,6 @@ export default Vue.extend({
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
       uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
-
       const drawnImg = new Image()
       drawnImg.src = updateCanvas.toDataURL('image/png;base64', 0.5)
       await new Promise<void>((resolve) => {
@@ -238,77 +239,73 @@ export default Vue.extend({
         }
       })
 
-      const srcObjIdentifier = config.srcObj.type + config.srcObj.userId + config.srcObj.assetId
+      // const srcObjIdentifier = config.srcObj.type + config.srcObj.userId + config.srcObj.assetId
       uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 0.5)], {
         addToPage: false,
         needCompressed: false,
         id: assetId,
+        isShadow: false,
         pollingCallback: (json: IUploadAssetResponse) => {
-          const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+          imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
             type: this.isAdmin ? 'public' : 'private',
             userId: json.data.team_id,
-            assetId: this.isAdmin ? json.data.id : json.data.asset_index
+            assetId: this.isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
           }
-          if (pageIndex !== -1 && layerIndex !== -1) {
+          const newWidth = (updateCanvas.width - right - left) / drawCanvasW * config.styles.width
+          const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * config.styles.height
+
+          const newImg = new Image()
+          newImg.crossOrigin = 'anonynous'
+          newImg.onload = () => {
+            const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             const layer = layerUtils.getLayer(pageIndex, layerIndex)
-            const newWidth = (updateCanvas.width - right - left) / drawCanvasW * config.styles.width
-            const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * config.styles.height
-
-            const newImg = new Image()
-            newImg.crossOrigin = 'anonynous'
-            newImg.onload = () => {
-              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
-              if (srcObjIdentifier !== config.srcObj.type + config.srcObj.userId + config.srcObj.assetId) {
-                return
-              }
-              const shadowImgStyles = {
-                imgWidth: newWidth,
-                imgHeight: newHeight,
-                imgX: newWidth * 0.5 - (config.styles.width * leftShadowThickness + config.styles.width * 0.5),
-                imgY: newHeight * 0.5 - (config.styles.height * topShadowThickness + config.styles.height * 0.5)
-              }
-              /** update the upload img in shadow module */
-              imageShadowUtils.addUploadImg({
-                id: uploadAssetId,
-                owner: { pageId, layerId, subLayerId },
-                srcObj,
-                styles: shadowImgStyles
-              })
-              const targetLayer = (subLayerIdx === -1 ? layer : (layer as IGroup).layers[subLayerIdx]) as IImage
-              if (targetLayer.styles.shadow.srcObj.type === 'upload') {
-                imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-                imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-                layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
-              }
-
-              if (subLayerIdx !== -1) {
-                /** Handle the primary layer size update */
-                const primaryLayer = layer as IGroup
-                const { width, height, initWidth, initHeight } = mathUtils
-                  .multipy(primaryLayer.styles.scale, calcTmpProps(primaryLayer.layers) as { [key: string] : number }) as ICalculatedGroupStyle
-                layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height, initWidth, initHeight })
-                /** Handle the sub-layer styles update */
-                const leftMargin = primaryLayer.layers.find(l => l.styles.x < 0)?.styles.x ?? 0
-                const topMargin = primaryLayer.layers.find(l => l.styles.y < 0)?.styles.y ?? 0
-                if (leftMargin || topMargin) {
-                  primaryLayer.layers
-                    .forEach((l, i) => {
-                      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-                        x: l.styles.x - leftMargin,
-                        y: l.styles.y - topMargin
-                      }, i)
-                    })
-                  layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-                    x: primaryLayer.styles.x + leftMargin * primaryLayer.styles.scale,
-                    y: primaryLayer.styles.y + topMargin * primaryLayer.styles.scale
-                  })
-                }
-              }
+            layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
+            const shadowImgStyles = {
+              imgWidth: newWidth,
+              imgHeight: newHeight,
+              imgX: newWidth * 0.5 - (config.styles.width * leftShadowThickness + config.styles.width * 0.5),
+              imgY: newHeight * 0.5 - (config.styles.height * topShadowThickness + config.styles.height * 0.5)
             }
-            newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
+            /** update the upload img in shadow module */
+            imageShadowUtils.addUploadImg({
+              id: uploadAssetId,
+              owner: { pageId, layerId, subLayerId },
+              srcObj,
+              styles: shadowImgStyles
+            })
+            const targetLayer = (subLayerIdx === -1 ? layer : (layer as IGroup).layers[subLayerIdx]) as IImage
+            if (targetLayer.styles.shadow.srcObj.type === 'upload' && targetLayer.styles.shadow.srcObj.assetId === uploadAssetId) {
+              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+              imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+              layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
+            }
+
+            // if (subLayerIdx !== -1) {
+            //   /** Handle the primary layer size update */
+            //   const primaryLayer = layer as IGroup
+            //   const { width, height, initWidth, initHeight } = mathUtils
+            //     .multipy(primaryLayer.styles.scale, calcTmpProps(primaryLayer.layers) as { [key: string] : number }) as ICalculatedGroupStyle
+            //   layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height, initWidth, initHeight })
+            //   /** Handle the sub-layer styles update */
+            //   const leftMargin = primaryLayer.layers.find(l => l.styles.x < 0)?.styles.x ?? 0
+            //   const topMargin = primaryLayer.layers.find(l => l.styles.y < 0)?.styles.y ?? 0
+            //   if (leftMargin || topMargin) {
+            //     primaryLayer.layers
+            //       .forEach((l, i) => {
+            //         layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+            //           x: l.styles.x - leftMargin,
+            //           y: l.styles.y - topMargin
+            //         }, i)
+            //       })
+            //     layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+            //       x: primaryLayer.styles.x + leftMargin * primaryLayer.styles.scale,
+            //       y: primaryLayer.styles.y + topMargin * primaryLayer.styles.scale
+            //     })
+            //   }
+            // }
           }
-          imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+          newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
         }
       })
     }
