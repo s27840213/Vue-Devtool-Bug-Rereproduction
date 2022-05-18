@@ -3,7 +3,7 @@
     div(v-if="isChange" class="field__close")
       svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
               class="pointer" @click.native="close()")
-    span(v-if="isChange" class="field__title") {{$t('TMP0097')}}
+    span(v-if="isChange" class="field__title") {{$t('TMP0098')}}
     //- todo rearrange class name
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
@@ -105,8 +105,8 @@ export default Vue.extend({
         : this.isChange
           ? i18n.t('NN0133')
           : this.trialStatus === 'not used'
-            ? i18n.t('TMP0056')
-            : i18n.t('TMP0057')) as string
+            ? i18n.t('TMP0057')
+            : i18n.t('TMP0058')) as string
     },
     invoiceReady():boolean { // Check if input is empty
       for (const item of this.invoiceInput) {

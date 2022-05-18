@@ -75,21 +75,21 @@ class PaymentData {
   // For PopupPayment.vue
   cancel1() {
     return [
-      i18n.t('TMP0067'),
       i18n.t('TMP0068'),
       i18n.t('TMP0069'),
-      i18n.t('TMP0070')
+      i18n.t('TMP0070'),
+      i18n.t('TMP0071')
     ]
   }
 
   cancel2() {
     return [
-      i18n.t('TMP0074'),
       i18n.t('TMP0075'),
       i18n.t('TMP0076'),
       i18n.t('TMP0077'),
       i18n.t('TMP0078'),
-      i18n.t('TMP0079')
+      i18n.t('TMP0079'),
+      i18n.t('TMP0080')
     ]
   }
 
@@ -104,12 +104,12 @@ class PaymentData {
   gerneral():BillingInfoInput[] {
     return [{
       label: i18n.tc('NN0173', 1) as string,
-      ph: i18n.t('TMP0099') as string,
+      ph: i18n.t('TMP0100') as string,
       key: 'email',
       error: i18n.t('NN0297') as string
     }, {
       label: i18n.t('NN0172') as string,
-      ph: i18n.t('TMP0100') as string,
+      ph: i18n.t('TMP0101') as string,
       key: 'name'
     }]
   }
@@ -119,51 +119,51 @@ class PaymentData {
       label: i18n.t('TMP0054') as string,
       ph: i18n.t('TMP0054') as string,
       key: 'phone',
-      error: i18n.t('TMP0128') as string
+      error: i18n.t('TMP0129') as string
     }, {
-      label: i18n.t('TMP0054') as string,
-      ph: i18n.t('TMP0055') as string,
+      label: i18n.t('TMP0055') as string,
+      ph: i18n.t('TMP0056') as string,
       key: 'GUI',
       optional: true,
-      error: i18n.t('TMP0129') as string
+      error: i18n.t('TMP0130') as string
     }]
   }
 
   USonly():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0101') as string,
-      ph: i18n.t('TMP0102') as string,
+      label: i18n.t('TMP0102') as string,
+      ph: i18n.t('TMP0103') as string,
       key: 'company',
       optional: true
     }, {
-      label: i18n.t('TMP0105', { number: 1 }) as string,
-      ph: i18n.t('TMP0106') as string,
+      label: i18n.t('TMP0106', { number: 1 }) as string,
+      ph: i18n.t('TMP0107') as string,
       key: 'address1'
     }, {
-      label: i18n.t('TMP0105', { number: 2 }) as string,
-      ph: i18n.t('TMP0107') as string,
+      label: i18n.t('TMP0106', { number: 2 }) as string,
+      ph: i18n.t('TMP0108') as string,
       key: 'address2',
       optional: true
     }, {
-      label: i18n.t('TMP0108') as string,
-      ph: i18n.t('TMP0108') as string,
+      label: i18n.t('TMP0109') as string,
+      ph: i18n.t('TMP0109') as string,
       key: 'city'
     }, {
       label: 'state & zip',
       key: 'zip',
-      error: i18n.t('TMP0130') as string
+      error: i18n.t('TMP0131') as string
     }]
   }
 
   others():BillingInfoInput[] {
     return [{
-      label: i18n.t('TMP0101') as string,
-      ph: i18n.t('TMP0102') as string,
+      label: i18n.t('TMP0102') as string,
+      ph: i18n.t('TMP0103') as string,
       key: 'company',
       optional: true
     }, {
-      label: i18n.t('TMP0103') as string,
-      ph: i18n.t('TMP0104') as string,
+      label: i18n.t('TMP0104') as string,
+      ph: i18n.t('TMP0105') as string,
       key: 'address1'
     }]
   }
