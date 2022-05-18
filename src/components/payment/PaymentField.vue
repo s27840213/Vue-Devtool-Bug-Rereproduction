@@ -124,6 +124,7 @@ export default Vue.extend({
   mounted() {
     this.tappayInit()
     this.stripeInit()
+    this.getPrice(this.userCountryUi)
   },
   methods: {
     ...mapActions({

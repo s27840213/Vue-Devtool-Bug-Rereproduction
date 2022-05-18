@@ -43,7 +43,7 @@
           span {{`$${totalPrice} USD`}}
         div(class="bill-invoice-note")
           span {{'NOTE'}}
-    spinner(v-if="isLoading" :textContent="$t('NN0454')")
+    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">

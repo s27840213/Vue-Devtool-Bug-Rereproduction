@@ -54,7 +54,7 @@
       template(v-for="input in billingInfoInput")
         //- case country
         options(v-if="input.label === 'country'" class="my-10"
-                :options="countryData" v-model="userCountryInfo")
+                :options="countryData" :value="userCountryInfo" @input="setUserCountryInfo")
         //- case state & zip
         div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
           span
@@ -78,7 +78,7 @@
         payment-field(isChange @next="closeCardPopup")
     div(v-if="showPaymentPopup" class="popup-window")
       popup-payment(:initView="paymentView" @close="closePaymentPopup()")
-    spinner(v-if="isLoading" :textContent="$t('NN0454')")
+    spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
@@ -115,16 +115,6 @@ export default Vue.extend({
       showCardPopup: false,
       showPaymentPopup: false,
       paymentView: ''
-    }
-  },
-  watch: {
-    userCountryInfo(newVal, oldVal) {
-      if (newVal === 'tw' && oldVal !== 'tw' && oldVal !== '') {
-        this.$nextTick(() => {
-          this.userCountryInfo = oldVal
-          Vue.notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
-        })
-      }
     }
   },
   computed: {
@@ -214,6 +204,18 @@ export default Vue.extend({
     resume() {
       if (this.card.status !== 'none') this.resumeApi()
       else this.buy()
+    },
+    setUserCountryInfo(userCountryInfo: string) {
+      const oldVal = this.userCountryInfo
+      this.userCountryInfo = userCountryInfo
+
+      if (userCountryInfo === 'tw') {
+        Vue.notify({ group: 'error', text: '如要取消開立統編，請先取消訂閱後選擇台灣再次訂閱。' })
+        this.$nextTick(() => {
+          // userCountryInfo should be set to other value and set back to oldVal, or it will display tw in dropdown.
+          this.userCountryInfo = oldVal
+        })
+      }
     },
     openCardPopup() {
       this.init()
