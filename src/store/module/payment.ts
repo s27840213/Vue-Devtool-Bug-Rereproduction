@@ -89,6 +89,12 @@ const ITrialStatue = {
   2: 'ended'
 }
 
+const IPayType = {
+  0: '',
+  1: 'tappay',
+  2: 'stripe'
+}
+
 function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
   if (!isPro && !isCancelingPro && cardStatus === 2) return '-1'
   else if (!isPro && !isCancelingPro && cardStatus === 0) return 'Fail'
@@ -148,21 +154,7 @@ const getDefaultState = (): IPaymentState => ({
     last4: '',
     date: ''
   },
-  billingHistory: [{
-    date: '',
-    description: '',
-    price: 0,
-    id: '',
-    name: '',
-    address: '',
-    email: '',
-    success: true,
-    items: [{
-      description: '',
-      date: '',
-      price: ''
-    }]
-  }],
+  billingHistory: [],
   // User input
   planSelected: '',
   userPlan: '',
@@ -294,6 +286,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
             day: 'numeric'
           })
           return {
+            success: item.success === 1,
+            payType: IPayType[item.pay_type as keyof typeof IPayType],
             date: date,
             description: item.title,
             price: item.price,
@@ -302,7 +296,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
             company: item.company,
             address: item.country !== 'us' ? item.address_line1 : `${item.address_line1}${item.address_line2 ? `, ${item.address_line2}` : ''}\n${item.address_city}, ${item.address_state} ${item.postal_code} US`,
             email: item.email,
-            success: item.success === 1,
             items: [{
               description: item.title,
               date: date,

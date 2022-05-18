@@ -288,7 +288,7 @@ export default Vue.extend({
   justify-content: space-between;
   // align-items: center;
   width: calc(50% - 40px);
-  padding: 12% 20px 15% 20px;
+  padding: 12% 30px 15% 30px;
   &-top, &-content, &-button { width: 100%; }
   &-top {
     @include body-MD;

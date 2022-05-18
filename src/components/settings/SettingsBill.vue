@@ -14,11 +14,13 @@
         span {{his.date}}
         span {{his.description}}
         span {{his.price}}
-        span(class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0117')}}
+        span(v-if="his.success === false" class="text-red") {{'付款失敗'}}
+        span(v-else-if="his.payType === 'tappay'")
+        span(v-else class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0117')}}
+    //- For invoice pdf generation
     div(v-if="historys.length" class="bill-invoice-wrapper")
       div(class="bill-invoice" id="bill-invoice")
         div(class="bill-invoice__title")
-          //- svg-icon(iconName="logo" iconWidth="143px" style="height: 50px;")
           img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
           span {{'INVOICE'}}
         div(class="bill-invoice__invoice-number") {{`Invoice number: ${historys[hisIndex].id}`}}
