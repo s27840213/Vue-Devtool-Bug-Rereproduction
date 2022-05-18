@@ -185,6 +185,9 @@ export default Vue.extend({
             }
           }
         }
+        case 'background': {
+          return this.$listeners
+        }
         default: {
           return {}
         }

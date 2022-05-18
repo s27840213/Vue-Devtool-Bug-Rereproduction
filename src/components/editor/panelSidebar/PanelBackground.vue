@@ -255,6 +255,10 @@ export default Vue.extend({
       this.getMoreContent()
     },
     handleColorModal(color: string) {
+      if (generalUtils.isMobile()) {
+        this.$emit('openExtraColorModal')
+        return
+      }
       colorUtils.setCurrEvent(ColorEventType.background)
       colorUtils.setCurrColor(color)
       this.$emit('toggleColorPanel', true)

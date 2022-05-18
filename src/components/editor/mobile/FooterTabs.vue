@@ -25,7 +25,6 @@ import frameUtils from '@/utils/frameUtils'
 import { IFooterTab } from '@/interfaces/editor'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
-import textUtils from '@/utils/textUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 
 export default Vue.extend({
@@ -86,14 +85,21 @@ export default Vue.extend({
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect', disabled: true },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
         { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,
       objectTabs: [
         mainMenu,
-        { icon: 'color', text: `${this.$t('NN0495')}`, panelType: 'photo', disabled: true },
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
@@ -104,7 +110,7 @@ export default Vue.extend({
         mainMenu,
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
-        { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
+        // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
         { icon: 'trash', text: `${this.$t('NN0141')}` }
         // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ] as Array<IFooterTab>

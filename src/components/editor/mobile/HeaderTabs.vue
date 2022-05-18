@@ -1,10 +1,21 @@
 <template lang="pug">
   div(class="header-bar")
-    svg-icon(class="header-bar__feature-icon"
-      :iconName="'chevron-left'"
-      :iconColor="'white'"
-      :iconWidth="'20px'"
-      @click.native="backBtnAction()")
+    div(class="header-bar__left")
+      svg-icon(class="header-bar__feature-icon"
+        :iconName="'chevron-left'"
+        :iconColor="'white'"
+        :iconWidth="'20px'"
+        @click.native="backBtnAction()")
+      svg-icon(class="header-bar__feature-icon"
+        :iconName="'undo'"
+        :iconColor="'white'"
+        :iconWidth="'20px'"
+        @click.native="undo()")
+      svg-icon(class="header-bar__feature-icon"
+        :iconName="'redo'"
+        :iconColor="'white'"
+        :iconWidth="'20px'"
+        @click.native="redo()")
     div(class="header-bar__right")
       svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
         :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
@@ -19,6 +30,8 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import shotcutUtils from '@/utils/shortcutUtils'
 
 export default Vue.extend({
   components: {
@@ -53,6 +66,12 @@ export default Vue.extend({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
+    isInFirstStep(): boolean {
+      return stepsUtils.isInFirstStep
+    },
+    isInLastStep(): boolean {
+      return stepsUtils.isInLastStep
+    },
     layerTabs(): Array<{ icon: string, disabled?: boolean }> {
       return [
         { icon: 'copy' },
@@ -161,6 +180,59 @@ export default Vue.extend({
           break
         }
       }
+    },
+    undo() {
+      if (this.inBgRemoveMode) {
+        // BgRemoveArea will listen to Ctrl/Cmd + Z event, so I dispatch an event to make the undo function in BgRemoveArea.vue conducted
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: false,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shotcutUtils.undo()
+        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        //   this.$nextTick(() => {
+        //     tiptapUtils.agent(editor => {
+        //       const currLayer = LayerUtils.getCurrLayer as IText
+        //       if (!currLayer.active || currLayer.type !== 'text') return
+        //       editor.chain().sync().focus().run()
+        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+        //       textPropUtils.updateTextPropsState()
+        //     })
+        //   })
+        // }
+      }
+    },
+    redo() {
+      if (this.inBgRemoveMode) {
+        const event = new KeyboardEvent('keydown', {
+          ctrlKey: true,
+          metaKey: true,
+          shiftKey: true,
+          key: 'z',
+          repeat: false
+        })
+        window.dispatchEvent(event)
+      } else {
+        shotcutUtils.redo()
+        // const currSelectedInfo = this.currSelectedInfo as ICurrSelectedInfo
+        // if (currSelectedInfo.layers.length === 1 && currSelectedInfo.types.has('text')) {
+        //   this.$nextTick(() => {
+        //     tiptapUtils.agent(editor => {
+        //       const currLayer = LayerUtils.getCurrLayer as IText
+        //       if (!currLayer.active || currLayer.type !== 'text') return
+        //       editor.chain().sync().focus().run()
+        //       tiptapUtils.prevText = tiptapUtils.getText(editor)
+        //       textPropUtils.updateTextPropsState()
+        //     })
+        //   })
+        // }
+      }
     }
   }
 })
@@ -176,6 +248,13 @@ export default Vue.extend({
   padding: 0px 16px;
   box-sizing: border-box;
 
+  &__left {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: auto;
+    grid-auto-columns: auto;
+    column-gap: 16px;
+  }
   &__right {
     display: grid;
     grid-auto-flow: column;

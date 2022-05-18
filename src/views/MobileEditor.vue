@@ -15,7 +15,13 @@
       mobile-panel(v-if="currActivePanel !== 'none'"
         :currActivePanel="currActivePanel"
         :currColorEvent="currColorEvent"
+        @openExtraColorModal="openExtraColorModal"
         @switchTab="switchTab")
+      //- mobile-panel(v-if="showExtraColorPanel"
+      //-   :currActivePanel="'color'"
+      //-   :currColorEvent="ColorEventType.background"
+      //-   :isExtraPanel="true"
+      //-   @switchTab="switchTab")
     footer-tabs(class="mobile-editor__bottom"
       @switchTab="switchTab"
       :currTab="currActivePanel"
@@ -31,7 +37,7 @@ import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { FunctionPanelType, SidebarPanelType } from '@/store/types'
+import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
 import stepsUtils from '@/utils/stepsUtils'
@@ -60,7 +66,9 @@ export default Vue.extend({
       isSaving: false,
       currActivePanel: 'none',
       currColorEvent: '',
-      inAllPagesMode: false
+      inAllPagesMode: false,
+      showExtraColorPanel: false,
+      ColorEventType
     }
   },
   computed: {
@@ -126,10 +134,10 @@ export default Vue.extend({
   },
   watch: {
     closeMobilePanelFlag(newVal) {
-      console.log(newVal)
       if (newVal) {
         this.setCloseMobilePanelFlag(false)
         this.currActivePanel = 'none'
+        this.showExtraColorPanel = false
       }
     }
   },
@@ -168,6 +176,10 @@ export default Vue.extend({
     },
     showAllPages() {
       this.inAllPagesMode = !this.inAllPagesMode
+    },
+    openExtraColorModal() {
+      console.log('hihi')
+      this.showExtraColorPanel = !this.showExtraColorPanel
     }
   }
 })
