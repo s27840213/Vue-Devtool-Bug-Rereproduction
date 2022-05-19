@@ -269,7 +269,9 @@ class ImageShadowUtils {
     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
     const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString() + img.src
     if (!(this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
-      // const mappingScale = 1600 / Math.max(drawCanvasW as number, drawCanvasH as number)
+      // const mappingScale = _imgWidth > _imgHeight
+      //   ? 1600 / (drawCanvasW as number)
+      //   : 1600 / (drawCanvasH as number)
       const mappingScale = _imgWidth > _imgHeight
         ? (layerWidth / _imgWidth) * 1600 / (drawCanvasW as number)
         : (layerHeight / _imgHeight) * 1600 / (drawCanvasH as number)
@@ -293,8 +295,9 @@ class ImageShadowUtils {
 
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * 4 : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * 4 : 0
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.imageMatched.distance.weighting * (layerWidth / _imgWidth) : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.imageMatched.distance.weighting * (layerHeight / _imgHeight) : 0
+        console.log(offsetX, offsetY, canvasMaxSize.width, canvasMaxSize.height)
         ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
 
         ctxT.clearRect(0, 0, canvas.width, canvas.height)
@@ -302,12 +305,6 @@ class ImageShadowUtils {
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalAlpha = 1
 
-        // if (!timeout) {
-        //   const { drawCanvasW, drawCanvasH } = options
-        //   const x = (canvas.width - (drawCanvasW as number)) * 0.5
-        //   const y = (canvas.height - (drawCanvasH as number)) * 0.5
-        //   ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x, y, drawCanvasW as number, drawCanvasH as number)
-        // }
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         ctx.drawImage(canvasT, 0, 0)
@@ -417,8 +414,8 @@ class ImageShadowUtils {
       const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
       if (this.handlerId === handlerId) {
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.shadow.distance.weighting : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.shadow.distance.weighting : 0
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.shadow.distance.weighting * (layerWidth / _imgWidth) : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.shadow.distance.weighting * (layerHeight / _imgHeight) : 0
         ctxMaxSize.putImageData(bluredData, offsetX, offsetY)
       } else {
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
@@ -856,7 +853,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   imageMatched: {
-    distance: { max: 100, min: 0, weighting: 2 },
+    distance: { max: 100, min: 0, weighting: 4 },
     angle: { max: 180, min: -180, weighting: 2 },
     size: { max: 120, min: 50, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 1 },

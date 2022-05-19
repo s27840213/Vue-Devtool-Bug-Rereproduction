@@ -121,6 +121,7 @@ export default Vue.extend({
   mounted() {
     colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoShadow)
+    setTimeout(() => this.focusOnPanel())
   },
   async beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
@@ -244,7 +245,7 @@ export default Vue.extend({
         addToPage: false,
         needCompressed: false,
         id: assetId,
-        isShadow: false,
+        isShadow: true,
         pollingCallback: (json: IUploadAssetResponse) => {
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
@@ -359,11 +360,11 @@ export default Vue.extend({
       colorUtils.setCurrColor(this.currentStyle.shadow.effects.color)
     },
     onEffectClick(effectName: ShadowEffectType): void {
-      const alreadySetEffect = effectName === ShadowEffectType.none
-        ? true : Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
+      const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
+      this.focusOnPanel()
     },
     handleEffectUpdate(event: Event): void {
       const { currentEffect, fieldRange } = this

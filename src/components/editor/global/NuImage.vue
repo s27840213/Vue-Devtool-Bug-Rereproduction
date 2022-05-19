@@ -150,17 +150,17 @@ export default Vue.extend({
     },
     shadowEffects: {
       handler(val) {
-        if (this.$refs.canvas && !this.isUploadingShadowImg) {
-          !this.forRender && this.currentShadowEffect !== ShadowEffectType.none && this.updateShadowEffect(val)
+        if (!this.forRender && this.$refs.canvas && !this.isUploadingShadowImg && this.currentShadowEffect !== ShadowEffectType.none) {
+          this.updateShadowEffect(val)
         }
       },
       deep: true
     },
-    currentShadowEffect() {
+    currentShadowEffect(val) {
       if (this.forRender) {
         return
       }
-      if (this.$refs.canvas && this.shadow.srcObj.type !== 'upload') {
+      if (this.$refs.canvas) {
         this.handleNewShadowEffect()
       } else {
         this.$nextTick(() => this.handleNewShadowEffect())
@@ -192,6 +192,15 @@ export default Vue.extend({
           imageShadowUtils.updateShadowStyles(this.layerInfo, uploadData.styles)
         }
       }
+    },
+    'shadow.uploadShadowImgs': {
+      handler() {
+        // imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+        // imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+        // layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
+        console.log('update shadow Img')
+      },
+      deep: true
     }
   },
   components: { NuAdjustImage },

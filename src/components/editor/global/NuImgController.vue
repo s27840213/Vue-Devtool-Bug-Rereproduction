@@ -67,9 +67,15 @@ export default Vue.extend({
     }
   },
   destroyed() {
+    const shadow = (this.config as IImage).styles.shadow
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
+      }
+    }
+    if (!this.forRender) {
+      if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
+        stepsUtils.record()
       }
     }
   },
@@ -301,11 +307,11 @@ export default Vue.extend({
         x: Math.abs(e.clientX - this.initialPos.x),
         y: Math.abs(e.clientY - this.initialPos.y)
       }
-      if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-        this.updateLayerProps({ imgControl: false })
-        stepsUtils.record()
-        this.updateLayerProps({ imgControl: true })
-      }
+      // if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+      //   this.updateLayerProps({ imgControl: false })
+      //   stepsUtils.record()
+      //   this.updateLayerProps({ imgControl: true })
+      // }
       this.setCursorStyle('default')
       window.removeEventListener('mouseup', this.moveEnd)
       window.removeEventListener('mousemove', this.moving)
@@ -438,11 +444,11 @@ export default Vue.extend({
         x: Math.abs(e.clientX - this.initialPos.x),
         y: Math.abs(e.clientY - this.initialPos.y)
       }
-      if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-        this.updateLayerProps({ imgControl: false })
-        stepsUtils.record()
-        this.updateLayerProps({ imgControl: true })
-      }
+      // if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+      //   this.updateLayerProps({ imgControl: false })
+      //   stepsUtils.record()
+      //   this.updateLayerProps({ imgControl: true })
+      // }
       this.isControlling = false
       this.setCursorStyle('default')
       window.removeEventListener('mousemove', this.scaling, false)

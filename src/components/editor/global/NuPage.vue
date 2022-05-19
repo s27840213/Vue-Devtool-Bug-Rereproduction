@@ -148,6 +148,7 @@
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSelectedIndex"
                                     :pageIndex="pageIndex"
+                                    :forRender="true"
                                     :config="getCurrLayer")
           div(v-if="isBackgroundImageControl"
               class="background-control"
