@@ -314,7 +314,7 @@ export default Vue.extend({
 
 .sp-field{
   width: 320px;
-  height: 240px;
+  // height: 240px;
   padding: 20px 60px 40px 60px;
   background-color: white;
 }

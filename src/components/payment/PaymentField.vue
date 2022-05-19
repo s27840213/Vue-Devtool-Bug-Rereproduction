@@ -182,10 +182,16 @@ export default Vue.extend({
       this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
-        appearance: { labels: 'floating' }
+        appearance: { labels: 'floating' },
+        loader: 'always'
       })
       const stripePaymentElement = this.stripeElement.create('payment', {
-        fields: { billingDetails: { address: { country: 'never' } } }
+        fields: { billingDetails: { address: { country: 'never' } } },
+        // terms: { card: 'never' }, // ask bruce
+        wallets: {
+          applePay: 'never',
+          googlePay: 'never'
+        }
       })
       stripePaymentElement.mount('#stripe')
       stripePaymentElement.on('change', (event) => {
@@ -241,7 +247,7 @@ export default Vue.extend({
   flex-direction: column;
   // justify-content: space-between;
   position: relative;
-  height: 100%;
+  // height: 100%;
   &__close {
     position: absolute;
     top: -7px;
