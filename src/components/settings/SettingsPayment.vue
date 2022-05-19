@@ -149,7 +149,7 @@ export default Vue.extend({
     canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
     canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
     diskPercent():Record<string, string> {
-      return { width: `${this.usage.diskUsed / this.usage.diskTotal * 200}px` }
+      return { width: `${this.usage.diskPercent * 200}px` }
     },
     billingInfoInput():ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountryInfo) {

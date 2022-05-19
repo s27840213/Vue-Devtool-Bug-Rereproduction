@@ -29,9 +29,10 @@ interface Item {
 }
 
 class BrandKitUtils {
+  // to-delete
   get isBrandkitAvailable(): boolean {
-    return store.getters['user/isAdmin']
-    // return true // for testing private assets
+    // return store.getters['user/isAdmin']
+    return true // for testing private assets
   }
 
   createTestingDefaultBrand(): IBrand {

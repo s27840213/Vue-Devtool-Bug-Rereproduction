@@ -22,8 +22,10 @@ interface IPaymentState {
   usage: {
     bgrmRemain: number
     bgrmTotal: number
+    bgrmOver: boolean
     diskUsed: number
     diskTotal: number
+    diskPercent: number
   }
   cardInfo: {
     status: string
@@ -146,8 +148,10 @@ const getDefaultState = (): IPaymentState => ({
   usage: {
     bgrmRemain: 0,
     bgrmTotal: 100,
+    bgrmOver: false,
     diskUsed: 0,
-    diskTotal: 100
+    diskTotal: 100,
+    diskPercent: 0
   },
   cardInfo: {
     status: 'none',
@@ -251,8 +255,11 @@ const actions: ActionTree<IPaymentState, unknown> = {
         usage: {
           bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
+          bgrmOver: data.bg_credit_current <= 0,
           diskUsed: Number(data.capacity_current.toFixed(2)),
-          diskTotal: data.capacity
+          diskTotal: data.capacity,
+          // diskPercent: 0.85
+          diskPercent: Number(data.capacity_current.toFixed(2)) / data.capacity
         },
         cardInfo: {
           status: ICardStatue[data.card_valid as keyof typeof ICardStatue],
