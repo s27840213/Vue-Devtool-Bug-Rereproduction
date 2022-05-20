@@ -1,13 +1,13 @@
 <template lang="pug">
   div(v-if="!cur.hidden" class="warning")
-    div(v-if="size === 'small'" class="warning-small" :style="bgcolor")
+    div(v-if="size === 'small' && !dismiss" class="warning-small" :style="bgcolor")
       svg-icon(iconName="error" iconColor="white" iconWidth="24px")
       div(class="warning-small-title") {{cur.title}}
         div(class="warning-small-title-disk-total")
           div(class="warning-small-title-disk-used" :style="diskStyle")
       div(class="warning-small-desc") {{cur.small.desc}}
       svg-icon(iconName="close" iconColor="white"
-              iconWidth="24px" @click.native="skip()")
+              iconWidth="24px" @click.native="close()")
     div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
       div(class="warning-large-title") {{cur.title}}
       div(class="warning-large-desc") {{cur.large.desc}}
@@ -34,7 +34,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      skiped: localStorage.skipDiskWarning === '1'
+      skiped: localStorage.skipDiskWarning === '1',
+      dismiss: false
     }
   },
   computed: {
@@ -42,13 +43,16 @@ export default Vue.extend({
       isPro: 'isPro',
       usage: 'usage'
     }),
+    diskPercent(): string {
+      return (this.usage.diskPercent * 100).toFixed(2)
+    },
     preset():Record<string, Record<string, Record<string, unknown>>> {
       return {
         pro: {
           0: { hidden: true },
           80: { hidden: true },
           100: {
-            title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }),
+            title: i18n.t('TMP0133', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
               desc: i18n.t('TMP0137'),
@@ -70,7 +74,7 @@ export default Vue.extend({
         free: {
           0: { hidden: true },
           80: {
-            title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }) as string,
+            title: i18n.t('TMP0133', { disk: this.diskPercent }),
             bgcolor: '#FFBA49',
             large: {
               desc: i18n.t('TMP0134'),
@@ -89,7 +93,7 @@ export default Vue.extend({
             }
           },
           100: {
-            title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }) as string,
+            title: i18n.t('TMP0133', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
               desc: i18n.t('TMP0135'),
@@ -111,17 +115,15 @@ export default Vue.extend({
       }
     },
     type():string {
-      return this.usage.diskPercent >= 1
+      return this.usage.diskPercent > 1
         ? '100'
-        : this.skiped
-          ? '0'
-          : this.usage.diskPercent >= 0.8
-            ? '80'
-            : '0'
+        : this.usage.diskPercent >= 0.8
+          ? '80'
+          : '0'
     },
     cur():Record<string, unknown> {
       const plan = this.isPro ? 'pro' : 'free'
-      const type = this.type
+      const type = this.skiped && !this.isPro && this.type === '80' && this.size === 'large' ? '0' : this.type
       return this.preset[plan][type]
     },
     bgcolor():Record<string, string> {
@@ -142,6 +144,9 @@ export default Vue.extend({
     ...mapMutations({
       setInitView: 'payment/SET_initView'
     }),
+    close() {
+      this.dismiss = true
+    },
     skip() {
       console.log('skip')
       localStorage.setItem('skipDiskWarning', '1')
@@ -151,7 +156,13 @@ export default Vue.extend({
       this.setInitView('step1')
       popupUtils.openPopup('payment')
     },
-    contact() { location.href = 'mailto:service@vivipic.com' }
+    contact() {
+      location.href = i18n.locale === 'tw'
+        ? 'mailto:tw@vivipic.com'
+        : i18n.locale === 'jp'
+          ? 'mailto:jp@vivipic.com'
+          : 'mailto:service@vivipic.com '
+    }
   }
 })
 </script>

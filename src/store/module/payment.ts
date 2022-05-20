@@ -261,7 +261,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           diskUsed: Number(data.capacity_current.toFixed(2)),
           diskTotal: data.capacity,
           // diskPercent: 0.85
-          diskPercent: Number(data.capacity_current.toFixed(2)) / data.capacity
+          diskPercent: data.capacity_current / data.capacity
         },
         cardInfo: {
           status: ICardStatue[data.card_valid as keyof typeof ICardStatue],

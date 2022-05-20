@@ -36,7 +36,7 @@
       @click="modifyCapacity(102297)")  {{'set capacity 99.9GB'}}
     br
     span(class="text-gray-3 pointer"
-      @click="modifyCapacity(102400)")  {{'set capacity 100GB'}}
+      @click="modifyCapacity(102401)")  {{'set capacity 100.01GB'}}
     div(class="sp-plan")
       span(class="text-blue-1 body-MD") {{$t('TMP0083')}}
       svg-icon(v-if="isFreeIcon" iconName="free")
