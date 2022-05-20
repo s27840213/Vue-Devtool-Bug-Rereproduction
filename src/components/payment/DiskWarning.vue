@@ -6,18 +6,19 @@
         div(class="warning-small-title-disk-total")
           div(class="warning-small-title-disk-used" :style="diskStyle")
       div(class="warning-small-desc") {{cur.desc}}
-      svg-icon(iconName="close" iconColor="white" iconWidth="24px")
+      svg-icon(iconName="close" iconColor="white"
+              iconWidth="24px" @click.native="skip()")
     div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
       div(class="warning-large-title") {{cur.title}}
       div(class="warning-large-desc") {{cur.desc}}
       div(class="warning-large-btn")
         btn(v-for="btn in cur.buttons" type="light-mid"
-            @click.native="btn.func") {{btn.text}}
+            @click.native="btn.func()") {{btn.text}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import i18n from '@/i18n'
 
 export default Vue.extend({
@@ -32,6 +33,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      skiped: localStorage.skipDiskWarning === '1'
     }
   },
   computed: {
@@ -49,10 +51,10 @@ export default Vue.extend({
             buttons: [
               {
                 text: i18n.t('NN0271'),
-                func: () => { console.log('skip') }
+                func: this.skip
               }, {
                 text: i18n.t('TMP0058'),
-                func: () => { console.log('pro') }
+                func: this.pro
               }
             ]
           },
@@ -67,10 +69,10 @@ export default Vue.extend({
             buttons: [
               {
                 text: i18n.t('TMP0137'),
-                func: () => { console.log('reload') }
+                func: this.reload
               }, {
                 text: i18n.t('TMP0138'),
-                func: () => { console.log('contact') }
+                func: this.contact
               }
             ]
           },
@@ -83,9 +85,11 @@ export default Vue.extend({
     type():string {
       return this.usage.diskPercent >= 1
         ? '100'
-        : this.usage.diskPercent >= 0.8
-          ? '80'
-          : '0'
+        : this.skiped
+          ? '0'
+          : this.usage.diskPercent >= 0.8
+            ? '80'
+            : '0'
     },
     cur():Record<string, unknown> {
       const type = this.type
@@ -104,6 +108,20 @@ export default Vue.extend({
   // mounted() {
   // },
   methods: {
+    ...mapActions({
+      reload: 'payment/reloadDiskCapacity'
+    }),
+    skip() {
+      console.log('skip')
+      localStorage.setItem('skipDiskWarning', '1')
+      this.skiped = true
+    },
+    pro() {
+      this.$router.push('/pricing')
+    },
+    contact() {
+      // this.$router.push('/pricing')
+    }
   }
 })
 </script>

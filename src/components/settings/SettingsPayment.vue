@@ -10,6 +10,30 @@
     br
     span(class="text-gray-3 pointer"
       @click="toFail()")  {{'goto Fail'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(3993)")  {{'set capacity 3.9GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(4096)")  {{'set capacity 4GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(5017)")  {{'set capacity 4.9GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(5120)")  {{'set capacity 5GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(81817)")  {{'set capacity 79.9GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(81920)")  {{'set capacity 80GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(102297)")  {{'set capacity 99.9GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyCapacity(102400)")  {{'set capacity 100GB'}}
     div(class="sp-plan")
       span(class="text-blue-1 body-MD") {{$t('TMP0083')}}
       svg-icon(v-if="isFreeIcon" iconName="free")
@@ -193,7 +217,8 @@ export default Vue.extend({
       resumeApi: 'payment/resume',
       toAbort: 'payment/toAbort',
       toInitial: 'payment/toInitial',
-      toFail: 'payment/toFail'
+      toFail: 'payment/toFail',
+      modifyCapacity: 'payment/modifyCapacity'
     }),
     async updateBillingInfo() {
       for (const item of this.billingInfoInput) {

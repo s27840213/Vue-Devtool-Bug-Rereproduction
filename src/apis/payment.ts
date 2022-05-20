@@ -2,6 +2,7 @@ import i18n from '@/i18n'
 import axios from '@/apis'
 import authToken from './auth-token'
 import { AxiosPromise } from 'axios'
+import store from '@/store'
 
 class Payment {
   planList (country: string): AxiosPromise {
@@ -220,6 +221,19 @@ class Payment {
         token: authToken().token || '',
         admin_token: 'vKLyK56ICyAn1dLQ',
         status: 'fail'
+      }
+    })
+  }
+
+  modifyCapacity(capacity: number): AxiosPromise {
+    return axios.request<any>({
+      url: '/modify-capacity',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        admin_token: 'vKLyK56ICyAn1dLQ',
+        team_id: store.getters['user/getTeamId'],
+        value: capacity
       }
     })
   }

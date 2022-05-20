@@ -471,6 +471,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
       .finally(() => { commit('SET_state', { isLoading: false }) })
   },
+  async reloadDiskCapacity() {
+    console.log('store reload')
+  },
   async toAbort({ dispatch }) {
     return paymentApi.toAbort().then(({ data }) => {
       if (data.flag) throw Error(data.msg)
@@ -490,6 +493,13 @@ const actions: ActionTree<IPaymentState, unknown> = {
       if (data.flag) throw Error(data.msg)
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: 'goto Fail' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async modifyCapacity({ dispatch }, capacity) {
+    return paymentApi.modifyCapacity(capacity).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: 'disk capacity update' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
 }
