@@ -5,7 +5,7 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
+import { IUserImageContentData } from '@/interfaces/api'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 
