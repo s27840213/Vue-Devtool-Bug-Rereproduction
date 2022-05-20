@@ -35,7 +35,7 @@ class ImageUtils {
   getSrc(config: Partial<IImage>, size?: string | number, ver?: number): string {
     if (!config.srcObj && !config.src_obj) return ''
     if (config.previewSrc) {
-      return config.previewSrc + FORCE_UPDATE_VER
+      return config.previewSrc
     }
 
     const { type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj
