@@ -304,11 +304,12 @@ const actions: ActionTree<IUserModule, unknown> = {
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
-      commit('payment/SET_state', {
-        isPro: data.data.plan_subscribe === 1,
-        isCancelingPro: data.data.plan_stop_subscribe === 1,
-        myPaidDate: data.data.plan_due_time
-      }, { root: true })
+      // commit('payment/SET_state', {
+      //   isPro: data.data.plan_subscribe === 1,
+      //   isCancelingPro: data.data.plan_stop_subscribe === 1,
+      //   myPaidDate: data.data.plan_due_time
+      // }, { root: true })
+      dispatch('payment/getBillingInfo', {}, { root: true })
 
       // locale settings
       process.env.NODE_ENV === 'development' && console.log(data.data)

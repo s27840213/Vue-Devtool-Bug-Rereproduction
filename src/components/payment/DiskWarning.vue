@@ -1,18 +1,18 @@
 <template lang="pug">
-  div(v-if="type !== '0'" class="warning")
+  div(v-if="!cur.hidden" class="warning")
     div(v-if="size === 'small'" class="warning-small" :style="bgcolor")
       svg-icon(iconName="error" iconColor="white" iconWidth="24px")
       div(class="warning-small-title") {{cur.title}}
         div(class="warning-small-title-disk-total")
           div(class="warning-small-title-disk-used" :style="diskStyle")
-      div(class="warning-small-desc") {{cur.desc}}
+      div(class="warning-small-desc") {{cur.small.desc}}
       svg-icon(iconName="close" iconColor="white"
               iconWidth="24px" @click.native="skip()")
     div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
       div(class="warning-large-title") {{cur.title}}
-      div(class="warning-large-desc") {{cur.desc}}
+      div(class="warning-large-desc") {{cur.large.desc}}
       div(class="warning-large-btn")
-        btn(v-for="btn in cur.buttons" type="light-mid"
+        btn(v-for="btn in cur.large.buttons" type="light-mid"
             @click.native="btn.func()") {{btn.text}}
 </template>
 
@@ -38,46 +38,73 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('payment', {
+      isPro: 'isPro',
       usage: 'usage'
     }),
-    preset():Record<string, Record<string, unknown>> {
+    preset():Record<string, Record<string, Record<string, unknown>>> {
       return {
-        0: { large: {}, small: {} },
-        80: {
-          title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }),
-          desc: i18n.t('TMP0134'),
-          bgcolor: '#FFBA49',
-          large: {
-            buttons: [
-              {
-                text: i18n.t('NN0271'),
-                func: this.skip
-              }, {
-                text: i18n.t('TMP0058'),
-                func: this.pro
-              }
-            ]
-          },
-          small: {
+        pro: {
+          0: { hidden: true },
+          80: { hidden: true },
+          100: {
+            title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }),
+            bgcolor: '#4EABE6',
+            large: {
+              desc: i18n.t('TMP0137'),
+              buttons: [
+                {
+                  text: i18n.t('TMP0139'),
+                  func: this.reload
+                }, {
+                  text: i18n.t('TMP0140'),
+                  func: this.contact
+                }
+              ]
+            },
+            small: {
+              desc: i18n.t('TMP0138')
+            }
           }
         },
-        100: {
-          title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }),
-          bgcolor: '#4EABE6',
-          large: {
-            desc: i18n.t('TMP0135'),
-            buttons: [
-              {
-                text: i18n.t('TMP0137'),
-                func: this.reload
-              }, {
-                text: i18n.t('TMP0138'),
-                func: this.contact
-              }
-            ]
+        free: {
+          0: { hidden: true },
+          80: {
+            title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }) as string,
+            bgcolor: '#FFBA49',
+            large: {
+              desc: i18n.t('TMP0134'),
+              buttons: [
+                {
+                  text: i18n.t('NN0271'),
+                  func: this.skip
+                }, {
+                  text: i18n.t('TMP0058'),
+                  func: this.pro
+                }
+              ]
+            },
+            small: {
+              desc: i18n.t('TMP0134')
+            }
           },
-          small: {
-            desc: i18n.t('TMP0136')
+          100: {
+            title: i18n.t('TMP0133', { disk: this.usage.diskPercent * 100 }) as string,
+            bgcolor: '#4EABE6',
+            large: {
+              desc: i18n.t('TMP0135'),
+              buttons: [
+                {
+                  text: i18n.t('TMP0139'),
+                  func: this.reload
+                }, {
+                  text: i18n.t('TMP0058'),
+                  func: this.pro
+                }
+              ]
+            },
+            small: {
+              desc: i18n.t('TMP0136')
+            }
           }
         }
       }
@@ -92,9 +119,9 @@ export default Vue.extend({
             : '0'
     },
     cur():Record<string, unknown> {
+      const plan = this.isPro ? 'pro' : 'free'
       const type = this.type
-      const size = this.size as 'large' | 'small'
-      return Object.assign(this.preset[type], this.preset[type][size])
+      return this.preset[plan][type]
     },
     bgcolor():Record<string, string> {
       return {
@@ -119,9 +146,7 @@ export default Vue.extend({
     pro() {
       this.$router.push('/pricing')
     },
-    contact() {
-      // this.$router.push('/pricing')
-    }
+    contact() { location.href = 'mailto:service@vivipic.com' }
   }
 })
 </script>
