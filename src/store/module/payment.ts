@@ -558,6 +558,9 @@ const getters: GetterTree<IPaymentState, any> = {
   getIsBundle(state) {
     return state.periodInfo === 'yearly'
   },
+  canUploadAsset(state) {
+    return state.usage.diskPercent <= 1
+  },
   // old
   getPrime(state) {
     return state.prime

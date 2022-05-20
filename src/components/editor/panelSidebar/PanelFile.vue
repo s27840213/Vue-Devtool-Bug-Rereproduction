@@ -4,9 +4,8 @@
       @dragover.prevent,
       @dragenter.prevent)
     span(class="panel-file__title text-blue-1 label-lg") {{$t('NN0006')}}
-    btn(class="full-width mb-20"
-      :type="'primary-mid'"
-      @click.native="uploadImage()") {{$t('NN0014')}}
+    btn(class="full-width mb-20" :type="'primary-mid'"
+        :disabled="!canUploadAsset" @click.native="uploadImage()") {{$t('NN0014')}}
     image-gallery(
       ref="gallery"
       :myfile="myfileImages"
@@ -74,7 +73,8 @@ export default Vue.extend({
       'pending'
     ]),
     ...mapGetters({
-      checkedAssets: 'file/getCheckedAssets'
+      checkedAssets: 'file/getCheckedAssets',
+      canUploadAsset: 'payment/canUploadAsset'
     }),
     margin(): number {
       return this.galleryUtils.margin

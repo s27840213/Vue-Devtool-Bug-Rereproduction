@@ -33,7 +33,7 @@
       @click="modifyCapacity(81920)")  {{'set capacity 80GB'}}
     br
     span(class="text-gray-3 pointer"
-      @click="modifyCapacity(102297)")  {{'set capacity 99.9GB'}}
+      @click="modifyCapacity(102400)")  {{'set capacity 100GB'}}
     br
     span(class="text-gray-3 pointer"
       @click="modifyCapacity(102401)")  {{'set capacity 100.01GB'}}

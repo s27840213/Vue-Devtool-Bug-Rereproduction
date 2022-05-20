@@ -26,7 +26,8 @@ export interface IUploadAssetResponse {
     update_time: string,
     ver: number,
     width: number
-  }
+  },
+  msg?: string
 }
 
 export interface IUploadAssetFontResponse {

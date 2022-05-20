@@ -252,7 +252,7 @@ class UploadUtils {
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
                     modalUtils.setIsModalOpen(true)
-                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`], '')
+                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`, `Error type: ${json.msg}`], '')
                   }
                 })
               }
@@ -370,7 +370,8 @@ class UploadUtils {
                           }
                         }
                       } else {
-                        console.log('Failed to upload the file')
+                        modalUtils.setIsModalOpen(true)
+                        modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`, `Error type: ${json.msg}`], '')
                       }
                     })
                   }
