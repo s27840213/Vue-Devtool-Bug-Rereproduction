@@ -181,7 +181,6 @@ export default Vue.extend({
         const config = this.image.config as IImage
         if (config.previewSrc) {
           this.src = config.previewSrc
-          config.previewSrc = ''
         } else if (config.srcObj.type === 'background') {
           this.src = ImageUtils.getSrc(this.image.config, 'prev', this.image.config.ver)
         }

@@ -245,8 +245,9 @@ class UploadUtils {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
+                    store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
