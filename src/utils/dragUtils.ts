@@ -190,7 +190,7 @@ class DragUtils {
 
   onImageDragLeave(e: DragEvent) {
     const { layerIndex, subLayerIdx, styles, srcObj } = this.imgBuff
-    if (store.state.currDraggedPhoto.srcObj.type) {
+    if (store.state.currDraggedPhoto.srcObj.type && srcObj.type) {
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj }, subLayerIdx)
       layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
     }

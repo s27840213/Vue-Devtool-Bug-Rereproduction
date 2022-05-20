@@ -1417,7 +1417,7 @@ export default Vue.extend({
       if (e.dataTransfer?.getData('data')) {
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image') {
+        } else if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           StepsUtils.record()
           const layerIdentifier = `${this.layerIndex}-_`
           eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
@@ -1624,10 +1624,14 @@ export default Vue.extend({
       })
     },
     dragEnter(e: DragEvent) {
-      this.getLayerType === 'image' && this.dragUtils.onImageDragEnter(e, this.config as IImage)
+      if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+        this.dragUtils.onImageDragEnter(e, this.config as IImage)
+      }
     },
     dragLeave(e: DragEvent) {
-      this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
+      if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+        this.dragUtils.onImageDragLeave(e)
+      }
     },
     handleScaleOffset(e: KeyboardEvent) {
       e.preventDefault()

@@ -146,9 +146,6 @@ class ImageShadowUtils {
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
-      this.setIsProcess(layerInfo, true)
-    }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
@@ -162,8 +159,13 @@ class ImageShadowUtils {
     const ellipseX = canvasMaxW * 0.5
     const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
     const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
+    const hasBuffRecorded = (this.dataBuff.effect === ShadowEffectType.floating && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)
 
-    if (!(this.dataBuff.effect === ShadowEffectType.floating && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
+    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas) && !hasBuffRecorded) {
+      this.setIsProcess(layerInfo, true)
+    }
+
+    if (!hasBuffRecorded) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
       const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
@@ -175,7 +177,7 @@ class ImageShadowUtils {
 
       if (this.handlerId === handlerId) {
         this.dataBuff.effect = ShadowEffectType.floating
-        this.dataBuff.spread = spread
+        this.dataBuff.radius = radius
         this.dataBuff.size = size
         this.dataBuff.data = bluredData
         this.dataBuff.layerIdentifier = layerIdentifier
@@ -255,10 +257,13 @@ class ImageShadowUtils {
     const blurImgX = (canvas.width - drawCanvasW) * 0.5
     const blurImgY = (canvas.height - drawCanvasH) * 0.5
 
+    const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString() + img.src
+    const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier
+
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
+    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas) && !hasBuffRecorded) {
       this.setIsProcess(layerInfo, true)
     }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
@@ -267,11 +272,8 @@ class ImageShadowUtils {
     }
 
     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
-    const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString() + img.src
-    if (!(this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)) {
-      // const mappingScale = _imgWidth > _imgHeight
-      //   ? 1600 / (drawCanvasW as number)
-      //   : 1600 / (drawCanvasH as number)
+
+    if (!hasBuffRecorded) {
       const mappingScale = _imgWidth > _imgHeight
         ? (layerWidth / _imgWidth) * 1600 / (drawCanvasW as number)
         : (layerHeight / _imgHeight) * 1600 / (drawCanvasH as number)
@@ -338,14 +340,7 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-      /**
-       * Show the process icon as:
-       * 1. this drawing is not an uploading draw -> timeout !== 0
-       * 2. or, this drawing is an uploading draw and the canvas is empty
-       */
-      if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
-        this.setIsProcess(layerInfo, true)
-      }
+
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
       const imgX = _imgX * scaleRatio
@@ -365,6 +360,16 @@ class ImageShadowUtils {
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
       const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + imgX.toString() + imgY.toString()
+      const hasBuffRecorded = this.dataBuff.spread === unifiedSpread && this.dataBuff.effect === currentEffect && this.dataBuff.layerIdentifier === layerIdentifier
+
+      /**
+       * Show the process icon as:
+       * 1. this drawing is not an uploading draw -> timeout !== 0
+       * 2. or, this drawing is an uploading draw and the canvas is empty
+       */
+      if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
+        this.setIsProcess(layerInfo, true)
+      }
 
       if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
         canvasT.setAttribute('width', `${canvas.width}`)
@@ -373,7 +378,7 @@ class ImageShadowUtils {
 
       let alphaVal = 1
       /** Calculating the spread */
-      if (this.dataBuff.spread !== unifiedSpread || this.dataBuff.effect !== currentEffect || this.dataBuff.layerIdentifier !== layerIdentifier) {
+      if (!hasBuffRecorded) {
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {

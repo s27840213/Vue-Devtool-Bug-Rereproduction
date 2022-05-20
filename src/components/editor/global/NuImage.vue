@@ -665,7 +665,6 @@ export default Vue.extend({
           case ShadowEffectType.shadow:
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
-            console.log(shadowBuff.canvasShadowImg.shadow)
             if (shadowBuff.canvasShadowImg.shadow as HTMLImageElement) {
               imageShadowUtils.drawShadow(canvas, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
                 layerInfo,

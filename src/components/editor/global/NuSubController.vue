@@ -68,6 +68,7 @@ import imageUtils from '@/utils/imageUtils'
 import formatUtils from '@/utils/formatUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
+import eventUtils, { ImageEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   props: {
@@ -119,7 +120,8 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadImgShadow: 'shadow/isUploading'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -450,7 +452,9 @@ export default Vue.extend({
           this.getLayerType === 'image' && this.onFrameDragEnter(e)
           return
         case 'group':
-          this.getLayerType === 'image' && this.dragUtils.onImageDragEnter(e, this.config as IImage)
+          if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+            this.dragUtils.onImageDragEnter(e, this.config as IImage)
+          }
       }
     },
     onDragLeave(e: DragEvent) {
@@ -459,7 +463,9 @@ export default Vue.extend({
           this.getLayerType === 'image' && this.onFrameDragLeave(e)
           return
         case 'group':
-          this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
+          if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+            this.dragUtils.onImageDragLeave(e)
+          }
       }
     },
     onDrop(e: DragEvent) {
@@ -471,9 +477,11 @@ export default Vue.extend({
             this.getLayerType === 'image' && this.onFrameDrop(e)
             return
           case 'group':
-            if (this.getLayerType === 'image') {
+            if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
               this.dragUtils.onImgDrop(e)
               LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+              const layerIdentifier = `${this.primaryLayerIndex}-${this.layerIndex}`
+              eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
             }
         }
       }
