@@ -18,8 +18,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import i18n from '@/i18n'
+import popupUtils from '@/utils/popupUtils'
 
 export default Vue.extend({
   name: 'DiskWarning',
@@ -79,7 +80,7 @@ export default Vue.extend({
                   func: this.skip
                 }, {
                   text: i18n.t('TMP0058'),
-                  func: this.pro
+                  func: this.openPaymentPopup
                 }
               ]
             },
@@ -98,7 +99,7 @@ export default Vue.extend({
                   func: this.reload
                 }, {
                   text: i18n.t('TMP0058'),
-                  func: this.pro
+                  func: this.openPaymentPopup
                 }
               ]
             },
@@ -138,13 +139,17 @@ export default Vue.extend({
     ...mapActions({
       reload: 'payment/reloadDiskCapacity'
     }),
+    ...mapMutations({
+      setInitView: 'payment/SET_initView'
+    }),
     skip() {
       console.log('skip')
       localStorage.setItem('skipDiskWarning', '1')
       this.skiped = true
     },
-    pro() {
-      this.$router.push('/pricing')
+    openPaymentPopup() {
+      this.setInitView('step1')
+      popupUtils.openPopup('payment')
     },
     contact() { location.href = 'mailto:service@vivipic.com' }
   }

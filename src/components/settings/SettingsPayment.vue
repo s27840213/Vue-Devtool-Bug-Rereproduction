@@ -12,6 +12,9 @@
       @click="toFail()")  {{'goto Fail'}}
     br
     span(class="text-gray-3 pointer"
+      @click="modifyCapacity(0)")  {{'set capacity 0GB'}}
+    br
+    span(class="text-gray-3 pointer"
       @click="modifyCapacity(3993)")  {{'set capacity 3.9GB'}}
     br
     span(class="text-gray-3 pointer"
@@ -100,14 +103,13 @@
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
         payment-field(isChange @next="closeCardPopup")
-    div(v-if="showPaymentPopup" class="popup-window")
-      popup-payment(:initView="paymentView" @close="closePaymentPopup()")
+    popup-payment(v-if="showPaymentPopup" @close="closePaymentPopup()")
     spinner(v-if="isLoading")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import Options from '@/components/global/Options.vue'
@@ -137,8 +139,7 @@ export default Vue.extend({
       countryData: paymentData.countryList(),
       stateData: paymentData.usState(),
       showCardPopup: false,
-      showPaymentPopup: false,
-      paymentView: ''
+      showPaymentPopup: false
     }
   },
   computed: {
@@ -220,6 +221,9 @@ export default Vue.extend({
       toFail: 'payment/toFail',
       modifyCapacity: 'payment/modifyCapacity'
     }),
+    ...mapMutations({
+      setInitView: 'payment/SET_initView'
+    }),
     async updateBillingInfo() {
       for (const item of this.billingInfoInput) {
         if (item.error && await this.checkBillingInfo(item.key)) return
@@ -249,15 +253,15 @@ export default Vue.extend({
     closeCardPopup() { this.showCardPopup = false },
     closePaymentPopup() { this.showPaymentPopup = false },
     buy() {
-      this.paymentView = 'step1'
+      this.setInitView('step1')
       this.showPaymentPopup = true
     },
     switchPeriod() {
-      this.paymentView = 'switch1'
+      this.setInitView('switch1')
       this.showPaymentPopup = true
     },
     cancelSub() {
-      this.paymentView = 'cancel1'
+      this.setInitView('cancel1')
       this.showPaymentPopup = true
     }
   }

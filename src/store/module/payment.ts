@@ -6,6 +6,7 @@ import paymentApi from '@/apis/payment'
 
 interface IPaymentState {
   isLoading: boolean
+  initView: string
   // Constant
   status: string
   plans: Record<string, Record<string, Record<string, string>|string>>
@@ -116,6 +117,7 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
 
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
+  initView: '',
   // Constant
   status: 'Loading',
   plans: {
@@ -528,9 +530,12 @@ const mutations: MutationTree<IPaymentState> = {
   SET_plans(state: IPaymentState, plans) {
     state.plans = plans
   },
-  UPDATE(state: IPaymentState, data) {
-    state = Object.assign(state, data)
+  SET_initView(state: IPaymentState, initView) {
+    state.initView = initView
   },
+  // UPDATE(state: IPaymentState, data) {
+  //   state = Object.assign(state, data)
+  // },
   // old
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime

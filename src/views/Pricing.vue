@@ -45,14 +45,12 @@
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
           p(v-html="item.A")
       nu-footer
-      div(v-if="showPopup" class="popup-window")
-        popup-payment(class="pricing-payment" :initView="paymentView"
-                      @close="closePopup()")
+      popup-payment(v-if="showPopup" @close="closePopup()")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
@@ -109,12 +107,15 @@ export default Vue.extend({
       getBillingInfo: 'payment/getBillingInfo',
       getPrice: 'payment/getPrice'
     }),
+    ...mapMutations({
+      setInitView: 'payment/SET_initView'
+    }),
     tryAddCard() {
       if (this.canAddCard) this.openPopup()
       else this.$router.push('/settings/payment')
     },
     openPopup() {
-      this.paymentView = (this.card.status === 'none' ? 'step1' : 'already pro')
+      this.setInitView('step1')
       this.showPopup = true
     },
     closePopup() { this.showPopup = false }
