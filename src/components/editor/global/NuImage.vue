@@ -68,6 +68,7 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { IUploadShadowImg } from '@/store/module/shadow'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   props: {
@@ -107,6 +108,8 @@ export default Vue.extend({
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
           img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
         }
+      } else {
+        stepsUtils.record()
       }
     })
   },

@@ -127,14 +127,14 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
-      const markStart = 'mark_start'
-      const mark1 = 'mark_after_load_the_MAX_IMG'
-      const mark2 = 'mark_after_drawing_canvas'
-      const mark3 = 'mark_after_compute_the_edges'
-      const mark4 = 'mark_after_convert_update_canvas_to_base64'
-      const mark5 = 'mark_after_load_the_edge-trimmed_IMG_and_drawing'
-      const mark6 = 'mark_after_convert_upload_canvas_to_base64'
-      const mark7 = 'mark_after_load_the_final_png'
+      const markStart = 'MARK_start'
+      const mark1 = 'MARK1:after_load_MAX_IMG'
+      const mark2 = 'MARK2:after_drawing_canvas'
+      const mark3 = 'MARK3:after_compute_edges'
+      const mark4 = 'MARK4:after_convert_update_canvas_to_base64'
+      const mark5 = 'MARK5:after_load_edge-trimmed_IMG_and_drawing'
+      const mark6 = 'MARK6:after_convert_upload_canvas_to_base64'
+      const mark7 = 'MARK7:after_load_final_png'
 
       performance.clearMeasures()
       performance.mark(markStart)
@@ -186,6 +186,7 @@ export default Vue.extend({
       })
 
       performance.mark(mark1)
+      console.log('mark1 finish')
 
       const updateCanvas = document.createElement('canvas')
       const { width, height, imgWidth, imgHeight } = config.styles
@@ -239,12 +240,14 @@ export default Vue.extend({
       // setTimeout(() => document.body.removeChild(updateCanvas), 15000)
 
       performance.mark(mark2)
+      console.log('mark2 finish')
 
-      const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
+      const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
 
       performance.mark(mark3)
+      console.log('mark3 finish')
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -254,6 +257,7 @@ export default Vue.extend({
       drawnImg.src = updateCanvas.toDataURL('image/png;base64', 0.5)
 
       performance.mark(mark4)
+      console.log('mark4 finish')
 
       await new Promise<void>((resolve) => {
         drawnImg.onload = () => {
@@ -263,10 +267,12 @@ export default Vue.extend({
       })
 
       performance.mark(mark5)
+      console.log('mark5 finish')
 
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 0.5)]
 
       performance.mark(mark6)
+      console.log('mark6 finish')
 
       // const srcObjIdentifier = config.srcObj.type + config.srcObj.userId + config.srcObj.assetId
       uploadUtils.uploadAsset('image', uploadImg, {
@@ -276,6 +282,7 @@ export default Vue.extend({
         isShadow: true,
         pollingCallback: (json: IUploadAssetResponse) => {
           performance.mark(mark7)
+          console.log('mark7 finish')
 
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
@@ -307,13 +314,13 @@ export default Vue.extend({
           }
           newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
 
-          performance.measure(`measure from ${markStart} to ${mark1}`, markStart, mark1)
-          performance.measure(`measure from ${mark1} to ${mark2}`, mark1, mark2)
-          performance.measure(`measure from ${mark2} to ${mark3}`, mark2, mark3)
-          performance.measure(`measure from ${mark3} to ${mark4}`, mark3, mark4)
-          performance.measure(`measure from ${mark4} to ${mark5}`, mark4, mark5)
-          performance.measure(`measure from ${mark5} to ${mark6}`, mark5, mark6)
-          performance.measure(`measure from ${mark6} to ${mark7}`, mark6, mark7)
+          performance.measure(`${markStart} to ${mark1}`, markStart, mark1)
+          performance.measure(`${mark1} to ${mark2}`, mark1, mark2)
+          performance.measure(`${mark2} to ${mark3}`, mark2, mark3)
+          performance.measure(`${mark3} to ${mark4}`, mark3, mark4)
+          performance.measure(`${mark4} to ${mark5}`, mark4, mark5)
+          performance.measure(`${mark5} to ${mark6}`, mark5, mark6)
+          performance.measure(`${mark6} to ${mark7}`, mark6, mark7)
           console.log(performance.getEntriesByType('measure')
             .map(e => [e.name, e.duration]))
         }
