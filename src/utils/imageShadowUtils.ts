@@ -594,30 +594,31 @@ class ImageShadowUtils {
 
   async getImgEdgeWidth(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    let imageData = [] as number[][][]
+    // let imageData = [] as number[][][]
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
     const start = performance.now()
 
-    await this.asyncProcessing(() => {
-      const _imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        .data.reduce((pixel, c, i) => {
-          if (i % 4 === 0) {
-            pixel.push([c])
-          } else {
-            pixel[pixel.length - 1].push(c)
-          }
-          return pixel
-        }, [] as Array<Array<number>>)
-        .reduce((row, p, i) => {
-          if (i % canvas.width === 0) {
-            row.push([p])
-          } else {
-            row[row.length - 1].push(p)
-          }
-          return row
-        }, [] as Array<Array<Array<number>>>)
-      imageData = _imageData
-    })
+    // await this.asyncProcessing(() => {
+    //   const _imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    //     .data.reduce((pixel, c, i) => {
+    //       if (i % 4 === 0) {
+    //         pixel.push([c])
+    //       } else {
+    //         pixel[pixel.length - 1].push(c)
+    //       }
+    //       return pixel
+    //     }, [] as Array<Array<number>>)
+    //     .reduce((row, p, i) => {
+    //       if (i % canvas.width === 0) {
+    //         row.push([p])
+    //       } else {
+    //         row[row.length - 1].push(p)
+    //       }
+    //       return row
+    //     }, [] as Array<Array<Array<number>>>)
+    //   imageData = _imageData
+    // })
 
     const duration1 = performance.now() - start
     const start2 = performance.now()
@@ -625,25 +626,23 @@ class ImageShadowUtils {
     const HORIZONTAL_STEP = Math.floor(canvas.width / 10)
     const VERTICAL_STEP = Math.floor(canvas.height / 10)
     const TRAVERSE_STEP = 200
-    let i = 0
-    let j = 0
+
+    const ROW_PIXELS = imageData.data.length / canvas.height
+    const COL_PIXELS = imageData.data.length / canvas.width
+
     let reach = false
     let top = 0
     await this.asyncProcessing(() => {
-      while (!reach && top < canvas.height) {
-        for (i = 0; i < canvas.width; i += HORIZONTAL_STEP) {
-          if (imageData[top][i][3]) {
+      while (!reach && top <= COL_PIXELS / 4) {
+        let count = 0
+        // for (let i = top * ROW_PIXELS + 3; i <= (top + 1) * ROW_PIXELS + 3; i += 4) {
+        for (let i = top * ROW_PIXELS + 3; count < ROW_PIXELS / 4; i += 4, count++) {
+          if (imageData.data[i]) {
             reach = true
             break
           }
         }
-        !reach && (top += TRAVERSE_STEP)
-      }
-      for (let count = 0; count < TRAVERSE_STEP; count++) {
-        top--
-        if (!imageData[top][i][3]) {
-          break
-        }
+        top++
       }
     })
 
@@ -653,20 +652,16 @@ class ImageShadowUtils {
     reach = false
     let bottom = 0
     await this.asyncProcessing(() => {
-      while (!reach && bottom < canvas.height) {
-        for (i = 0; i < canvas.width; i += HORIZONTAL_STEP) {
-          if (imageData[canvas.height - bottom - 1][i][3]) {
+      while (!reach && bottom <= COL_PIXELS / 4) {
+        let count = 0
+        // for (let i = bottom * ROW_PIXELS; i <= (bottom + 1) * ROW_PIXELS; i += 4) {
+        for (let i = bottom * ROW_PIXELS; count < ROW_PIXELS / 4; i += 4, count++) {
+          if (imageData.data[imageData.data.length - i - 1]) {
             reach = true
             break
           }
         }
-        !reach && (bottom += TRAVERSE_STEP)
-      }
-      for (let count = 0; count < TRAVERSE_STEP; count++) {
-        bottom--
-        if (!imageData[canvas.height - bottom - 1][i][3]) {
-          break
-        }
+        bottom++
       }
     })
 
@@ -676,42 +671,31 @@ class ImageShadowUtils {
     reach = false
     let left = 0
     await this.asyncProcessing(() => {
-      while (!reach && left < canvas.width) {
-        for (j = 0; j < canvas.height; j += VERTICAL_STEP) {
-          if (imageData[j][left][3]) {
+      while (!reach && left <= ROW_PIXELS / 4) {
+        for (let j = left * 4 + 3; j <= imageData.data.length; j += ROW_PIXELS) {
+          if (imageData.data[j]) {
             reach = true
             break
           }
         }
-        !reach && (left += TRAVERSE_STEP)
-      }
-      for (let count = 0; count < TRAVERSE_STEP; count++) {
-        left--
-        if (!imageData[j][left][3]) {
-          break
-        }
+        left++
       }
     })
 
     reach = false
     let right = 0
     await this.asyncProcessing(() => {
-      while (!reach && right < canvas.width) {
-        for (j = 0; j < canvas.height; j += VERTICAL_STEP) {
-          if (imageData[j][canvas.width - right - 1][3]) {
+      while (!reach && right <= ROW_PIXELS / 4) {
+        for (let j = right * 4; j <= imageData.data.length; j += ROW_PIXELS) {
+          if (imageData.data[imageData.data.length - j - 1]) {
             reach = true
             break
           }
         }
-        !reach && (right += TRAVERSE_STEP)
-      }
-      for (let count = 0; count < TRAVERSE_STEP; count++) {
-        right--
-        if (!imageData[j][canvas.width - right - 1][3]) {
-          break
-        }
+        right++
       }
     })
+    console.log(right, left, top, bottom)
     return { right, left, top, bottom }
   }
 
