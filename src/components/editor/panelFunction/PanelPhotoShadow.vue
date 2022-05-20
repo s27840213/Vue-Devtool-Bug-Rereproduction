@@ -260,7 +260,6 @@ export default Vue.extend({
           newImg.crossOrigin = 'anonynous'
           newImg.onload = () => {
             const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-            const layer = layerUtils.getLayer(pageIndex, layerIndex)
             layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
             const shadowImgStyles = {
               imgWidth: newWidth,
@@ -275,36 +274,6 @@ export default Vue.extend({
               srcObj,
               styles: shadowImgStyles
             })
-            const targetLayer = (subLayerIdx === -1 ? layer : (layer as IGroup).layers[subLayerIdx]) as IImage
-            if (targetLayer.styles.shadow.srcObj.type === 'upload' && targetLayer.styles.shadow.srcObj.assetId === uploadAssetId) {
-              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
-              imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-              layerUtils.updateLayerStyles(pageIndex, layerIndex, { scale: 1 }, subLayerIdx)
-            }
-
-            // if (subLayerIdx !== -1) {
-            //   /** Handle the primary layer size update */
-            //   const primaryLayer = layer as IGroup
-            //   const { width, height, initWidth, initHeight } = mathUtils
-            //     .multipy(primaryLayer.styles.scale, calcTmpProps(primaryLayer.layers) as { [key: string] : number }) as ICalculatedGroupStyle
-            //   layerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height, initWidth, initHeight })
-            //   /** Handle the sub-layer styles update */
-            //   const leftMargin = primaryLayer.layers.find(l => l.styles.x < 0)?.styles.x ?? 0
-            //   const topMargin = primaryLayer.layers.find(l => l.styles.y < 0)?.styles.y ?? 0
-            //   if (leftMargin || topMargin) {
-            //     primaryLayer.layers
-            //       .forEach((l, i) => {
-            //         layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-            //           x: l.styles.x - leftMargin,
-            //           y: l.styles.y - topMargin
-            //         }, i)
-            //       })
-            //     layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-            //       x: primaryLayer.styles.x + leftMargin * primaryLayer.styles.scale,
-            //       y: primaryLayer.styles.y + topMargin * primaryLayer.styles.scale
-            //     })
-            //   }
-            // }
           }
           newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
         }
@@ -438,6 +407,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .photo-effect-setting {
   font-size: 14px;
+  outline: none;
   &__form {
     background: #fff;
     padding: 12px;

@@ -363,7 +363,6 @@ class UploadUtils {
                             assetId: assetId,
                             progress: 100
                           })
-                          console.log({ assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })

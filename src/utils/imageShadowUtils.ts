@@ -297,7 +297,6 @@ class ImageShadowUtils {
       if (this.handlerId === handlerId) {
         const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.imageMatched.distance.weighting * (layerWidth / _imgWidth) : 0
         const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.imageMatched.distance.weighting * (layerHeight / _imgHeight) : 0
-        console.log(offsetX, offsetY, canvasMaxSize.width, canvasMaxSize.height)
         ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
 
         ctxT.clearRect(0, 0, canvas.width, canvas.height)
@@ -394,10 +393,12 @@ class ImageShadowUtils {
           })
         }
         ctxT.globalAlpha = 1
-        this.dataBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-        this.dataBuff.effect = currentEffect
-        this.dataBuff.spread = unifiedSpread
-        this.dataBuff.layerIdentifier = layerIdentifier
+        if (this.handlerId === handlerId) {
+          this.dataBuff.data = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
+          this.dataBuff.effect = currentEffect
+          this.dataBuff.spread = unifiedSpread
+          this.dataBuff.layerIdentifier = layerIdentifier
+        }
       } else {
         ctxT.putImageData(this.dataBuff.data, 0, 0)
       }
