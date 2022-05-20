@@ -518,9 +518,9 @@ class UploadUtils {
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
-    const type = router.currentRoute.query.type
-    const designId = router.currentRoute.query.design_id
-    const teamId = router.currentRoute.query.team_id
+    let type = router.currentRoute.query.type
+    let designId = router.currentRoute.query.design_id
+    let teamId = router.currentRoute.query.team_id
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
@@ -539,6 +539,9 @@ class UploadUtils {
       TeamId: ${teamId}`)
       putAssetDesignType = PutAssetDesignType.UPDATE_BOTH
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
+      type = router.currentRoute.query.type
+      designId = router.currentRoute.query.design_id
+      teamId = router.currentRoute.query.team_id
     }
 
     store.commit('SET_assetId', assetId)
