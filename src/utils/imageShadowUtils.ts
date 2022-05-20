@@ -612,50 +612,81 @@ class ImageShadowUtils {
         return row
       }, [] as Array<Array<Array<number>>>)
 
+    const HORIZONTAL_STEP = Math.floor(canvas.width / 10)
+    const VERTICAL_STEP = Math.floor(canvas.height / 10)
+    const TRAVERSE_STEP = 200
     let reach = false
     let top = 0
-    const alphaTresh = 0
+    let i = 0
+    let j = 0
     while (!reach && top < canvas.height) {
-      for (let i = 0; i < canvas.width; i++) {
-        if (imageData[top][i][3] > alphaTresh) {
+      for (i = 0; i < canvas.width; i += HORIZONTAL_STEP) {
+        if (imageData[top][i][3]) {
           reach = true
           break
         }
       }
-      top++
+      !reach && (top += TRAVERSE_STEP)
     }
+    for (let count = 0; count < TRAVERSE_STEP; count++) {
+      top--
+      if (!imageData[top][i][3]) {
+        break
+      }
+    }
+
     reach = false
     let bottom = 0
     while (!reach && bottom < canvas.height) {
-      for (let i = 0; i < canvas.width; i++) {
-        if (imageData[canvas.height - bottom - 1][i][3] > alphaTresh) {
+      for (i = 0; i < canvas.width; i += HORIZONTAL_STEP) {
+        if (imageData[canvas.height - bottom - 1][i][3]) {
           reach = true
           break
         }
       }
-      bottom++
+      !reach && (bottom += TRAVERSE_STEP)
     }
+    for (let count = 0; count < TRAVERSE_STEP; count++) {
+      bottom--
+      if (!imageData[canvas.height - bottom - 1][i][3]) {
+        break
+      }
+    }
+
     reach = false
     let left = 0
     while (!reach && left < canvas.width) {
-      for (let j = 0; j < canvas.height; j++) {
-        if (imageData[j][left][3] > alphaTresh) {
+      for (j = 0; j < canvas.height; j += VERTICAL_STEP) {
+        if (imageData[j][left][3]) {
           reach = true
           break
         }
       }
-      left++
+      !reach && (left += TRAVERSE_STEP)
     }
+    for (let count = 0; count < TRAVERSE_STEP; count++) {
+      left--
+      if (!imageData[j][left][3]) {
+        break
+      }
+    }
+
     reach = false
     let right = 0
     while (!reach && right < canvas.width) {
-      for (let j = 0; j < canvas.height; j++) {
-        if (imageData[j][canvas.width - right - 1][3] > alphaTresh) {
+      for (j = 0; j < canvas.height; j += VERTICAL_STEP) {
+        if (imageData[j][canvas.width - right - 1][3]) {
           reach = true
           break
         }
       }
-      right++
+      !reach && (right += TRAVERSE_STEP)
+    }
+    for (let count = 0; count < TRAVERSE_STEP; count++) {
+      right--
+      if (!imageData[j][canvas.width - right - 1][3]) {
+        break
+      }
     }
     return { right, left, top, bottom }
   }

@@ -1418,7 +1418,6 @@ export default Vue.extend({
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-          StepsUtils.record()
           const layerIdentifier = `${this.layerIndex}-_`
           eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
         }

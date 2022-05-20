@@ -127,6 +127,18 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
+      const markStart = 'mark_start'
+      const mark1 = 'mark_after_load_the_MAX_IMG'
+      const mark2 = 'mark_after_drawing_canvas'
+      const mark3 = 'mark_after_compute_the_edges'
+      const mark4 = 'mark_after_convert_update_canvas_to_base64'
+      const mark5 = 'mark_after_load_the_edge-trimmed_IMG_and_drawing'
+      const mark6 = 'mark_after_convert_upload_canvas_to_base64'
+      const mark7 = 'mark_after_load_the_final_png'
+
+      performance.clearMeasures()
+      performance.mark(markStart)
+
       const { config: _config, primarylayerId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
@@ -172,6 +184,9 @@ export default Vue.extend({
       await new Promise<void>((resolve) => {
         img.onload = () => resolve()
       })
+
+      performance.mark(mark1)
+
       const updateCanvas = document.createElement('canvas')
       const { width, height, imgWidth, imgHeight } = config.styles
       const drawCanvasW = width / imgWidth * img.naturalWidth
@@ -223,9 +238,13 @@ export default Vue.extend({
       // document.body.append(updateCanvas)
       // setTimeout(() => document.body.removeChild(updateCanvas), 15000)
 
+      performance.mark(mark2)
+
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
+
+      performance.mark(mark3)
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -233,6 +252,9 @@ export default Vue.extend({
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
       const drawnImg = new Image()
       drawnImg.src = updateCanvas.toDataURL('image/png;base64', 0.5)
+
+      performance.mark(mark4)
+
       await new Promise<void>((resolve) => {
         drawnImg.onload = () => {
           ctxUpload.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
@@ -240,13 +262,21 @@ export default Vue.extend({
         }
       })
 
+      performance.mark(mark5)
+
+      const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 0.5)]
+
+      performance.mark(mark6)
+
       // const srcObjIdentifier = config.srcObj.type + config.srcObj.userId + config.srcObj.assetId
-      uploadUtils.uploadAsset('image', [uploadCanvas.toDataURL('image/png;base64', 0.5)], {
+      uploadUtils.uploadAsset('image', uploadImg, {
         addToPage: false,
         needCompressed: false,
         id: assetId,
         isShadow: true,
         pollingCallback: (json: IUploadAssetResponse) => {
+          performance.mark(mark7)
+
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
             type: this.isAdmin ? 'public' : 'private',
@@ -276,6 +306,16 @@ export default Vue.extend({
             })
           }
           newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
+
+          performance.measure(`measure from ${markStart} to ${mark1}`, markStart, mark1)
+          performance.measure(`measure from ${mark1} to ${mark2}`, mark1, mark2)
+          performance.measure(`measure from ${mark2} to ${mark3}`, mark2, mark3)
+          performance.measure(`measure from ${mark3} to ${mark4}`, mark3, mark4)
+          performance.measure(`measure from ${mark4} to ${mark5}`, mark4, mark5)
+          performance.measure(`measure from ${mark5} to ${mark6}`, mark5, mark6)
+          performance.measure(`measure from ${mark6} to ${mark7}`, mark6, mark7)
+          console.log(performance.getEntriesByType('measure')
+            .map(e => [e.name, e.duration]))
         }
       })
     }
