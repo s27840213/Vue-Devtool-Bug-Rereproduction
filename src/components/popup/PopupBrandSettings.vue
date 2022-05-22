@@ -191,7 +191,11 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .popup-brand-settings {
   &__window {
-    @include size(900px, 800px);
+    // @include size(900px, 800px);
+    width: 80vw;
+    max-width: 900px;
+    height: 90%;
+    max-height: 800px;
     position: fixed;
     top: 50%;
     left: 50%;

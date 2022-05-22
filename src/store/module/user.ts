@@ -10,6 +10,7 @@ import themeUtils from '@/utils/themeUtils'
 import i18n from '@/i18n'
 // import apiUtils from '@/utils/apiUtils'
 import generalUtils from '@/utils/generalUtils'
+import logUtils from '@/utils/logUtils'
 
 const SET_TOKEN = 'SET_TOKEN' as const
 const SET_STATE = 'SET_STATE' as const
@@ -225,31 +226,31 @@ const actions: ActionTree<IUserModule, unknown> = {
       console.log(error)
     }
   },
-  async putAssetDesign({ commit, dispatch }, { assetId, type }) {
+  async putAssetDesign({ dispatch }, { assetId, type }) {
     try {
       if (type === 0) {
-        console.log('Update DB')
+        logUtils.setLog('Update DB')
       } else if (type === 1) {
-        console.log('Update preview')
+        logUtils.setLog('Update preview')
       } else if (type === 2) {
-        console.log('Update DB and preview')
+        logUtils.setLog('Update DB and preview')
       }
       const { data } = await userApis.putAssetDesign(state.token, state.teamId || state.userId, assetId, type)
-      const { flag } = data
+      const { flag, msg } = data
       if (flag === 0) {
-        console.log('Put asset success')
+        logUtils.setLog(`Put asset success: ${msg}`)
         dispatch('getAllAssets', { token: state.token })
         Vue.notify({ group: 'copy', text: `${i18n.t('NN0357')}` })
       }
       if (flag === 1) {
-        console.log('Put asset failed')
+        logUtils.setLog(`Put asset failed: ${msg}`)
         Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       } else if (flag === 2) {
-        console.log('Token invalid!')
+        logUtils.setLog(`Token invalid!: ${msg}`)
         Vue.notify({ group: 'error', text: `${i18n.t('NN0360')}` })
       }
     } catch (error) {
-      console.log(error)
+      logUtils.setLog(error as string)
     }
   },
   async login({ commit, dispatch }, { token, account, password }) {
