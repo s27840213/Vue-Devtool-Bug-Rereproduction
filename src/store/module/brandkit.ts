@@ -54,6 +54,14 @@ function isPrivate(srcObj: SrcObj): string {
   return (srcObj && srcObj.type === 'logo-private') ? srcObj.assetId.toString() : ''
 }
 
+function errorShower(msg?: string) {
+  if (msg === 'NONPRO') {
+    // dosomething
+    return
+  }
+  showNetworkError()
+}
+
 const state = getDefaultState()
 const getters: GetterTree<IBrandKitState, unknown> = {
   getBrands(state: IBrandKitState): IBrand[] {
@@ -211,9 +219,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       brand.name = newName
     }, () => {
       brand.name = oldName
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async createBrand({ commit }) {
     const brand = brandkitUtils.createDefaultBrand()
@@ -226,9 +232,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('SET_currentBrand', brand)
     }, () => {
       commit('UPDATE_deleteBrand', brand)
-    }, () => {
-      showNetworkError()
-    }, (data) => {
+    }, errorShower, (data) => {
       const realCreateTime = data.createTime
       commit('UPDATE_replaceBrandTime', { brand, createTime: realCreateTime })
     })
@@ -245,9 +249,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_addBrand', newBrand)
     }, () => {
       commit('UPDATE_deleteBrand', newBrand)
-    }, () => {
-      showNetworkError()
-    }, (data) => {
+    }, errorShower, (data) => {
       commit('UPDATE_replaceBrand', { id: newBrand.id, brand: data.data })
     })
   },
@@ -269,9 +271,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       } else {
         commit('UPDATE_addBrand', brand)
       }
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
     return needCreateDefault && success
   },
   async removeLogo({ commit }, logo: IBrandLogo) {
@@ -283,9 +283,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deleteLogo', { brand: currentBrand, logo })
     }, () => {
       commit('UPDATE_addLogo', { brand: currentBrand, logo })
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async removePalette({ commit }, palette: IBrandColorPalette) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -298,9 +296,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deletePalette', { brand: currentBrand, palette })
     }, () => {
       commit('UPDATE_addPalette', { brand: currentBrand, palette })
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async createPalette({ commit }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -314,9 +310,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_addPalette', { brand: currentBrand, palette })
     }, () => {
       commit('UPDATE_deletePalette', { brand: currentBrand, palette })
-    }, () => {
-      showNetworkError()
-    }, (data) => {
+    }, errorShower, (data) => {
       const realCreateTime = data.createTime
       commit('UPDATE_replacePaletteTime', { brand: currentBrand, palette, createTime: realCreateTime })
     })
@@ -334,9 +328,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       palette.name = newName
     }, () => {
       palette.name = oldName
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async removeColor({ state, commit }, updateInfo: { paletteId: string, color: IBrandColor }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -349,9 +341,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deleteColor', { brand: currentBrand, ...updateInfo })
     }, () => {
       commit('UPDATE_addColor', { brand: currentBrand, ...updateInfo })
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async createColor({ state, commit }, paletteId: string) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -368,9 +358,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_addColor', { brand: currentBrand, paletteId, color: newColor })
     }, () => {
       commit('UPDATE_deleteColor', { brand: currentBrand, paletteId, color: newColor })
-    }, () => {
-      showNetworkError()
-    }, (data) => {
+    }, errorShower, (data) => {
       const realCreateTime = data.createTime
       commit('UPDATE_replaceColorTime', { brand: currentBrand, palette, color: newColor, createTime: realCreateTime })
     })
@@ -385,9 +373,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       // do nothing
     }, () => {
       // do nothing
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async updateColorTemp({ state, commit }, updateInfo: { paletteId: string, id: string, color: string }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -401,9 +387,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_deleteFont', font)
     }, () => {
       commit('UPDATE_addFont', font)
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async updateTextStyle({ state, commit }, updateInfo: { type: string, style: Partial<IBrandTextStyle> }) {
     const currentBrand = brandkitUtils.findBrand(state.brands, state.currentBrandId)
@@ -422,9 +406,7 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: { ...updateInfo.style, isDefault: false } })
     }, () => {
       commit('UPDATE_updateTextStyle', { brand: currentBrand, type: updateInfo.type, style: currentStyle })
-    }, () => {
-      showNetworkError()
-    })
+    }, errorShower)
   },
   async refreshFontAsset({ commit }, font: IBrandFont | string) {
     const assetIndex = typeof font === 'string' ? font as string : (font as IBrandFont).asset_index.toString()
