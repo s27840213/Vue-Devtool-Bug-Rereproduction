@@ -157,7 +157,6 @@ const actions: ActionTree<ITextState, unknown> = {
         state.pending = face
         commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
         const cssUrl = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
-        console.log(cssUrl)
         if (cssUrl !== '') {
           const link = document.createElement('link')
           link.href = cssUrl
