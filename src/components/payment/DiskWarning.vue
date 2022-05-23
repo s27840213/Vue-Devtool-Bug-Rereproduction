@@ -52,63 +52,63 @@ export default Vue.extend({
           0: { hidden: true },
           80: { hidden: true },
           100: {
-            title: i18n.t('TMP0133', { disk: this.diskPercent }),
+            title: i18n.t('TMP0131', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
-              desc: i18n.t('TMP0137'),
+              desc: i18n.t('TMP0135'),
               buttons: [
                 {
-                  text: i18n.t('TMP0139'),
+                  text: i18n.t('TMP0137'),
                   func: this.reload
                 }, {
-                  text: i18n.t('TMP0140'),
+                  text: i18n.t('TMP0138'),
                   func: this.contact
                 }
               ]
             },
             small: {
-              desc: i18n.t('TMP0138')
+              desc: i18n.t('TMP0136')
             }
           }
         },
         free: {
           0: { hidden: true },
           80: {
-            title: i18n.t('TMP0133', { disk: this.diskPercent }),
+            title: i18n.t('TMP0131', { disk: this.diskPercent }),
             bgcolor: '#FFBA49',
             large: {
-              desc: i18n.t('TMP0134'),
+              desc: i18n.t('TMP0132'),
               buttons: [
                 {
                   text: i18n.t('NN0271'),
                   func: this.skip
                 }, {
-                  text: i18n.t('TMP0058'),
+                  text: i18n.t('TMP0057'),
+                  func: this.openPaymentPopup
+                }
+              ]
+            },
+            small: {
+              desc: i18n.t('TMP0132')
+            }
+          },
+          100: {
+            title: i18n.t('TMP0131', { disk: this.diskPercent }),
+            bgcolor: '#4EABE6',
+            large: {
+              desc: i18n.t('TMP0133'),
+              buttons: [
+                {
+                  text: i18n.t('TMP0137'),
+                  func: this.reload
+                }, {
+                  text: i18n.t('TMP0057'),
                   func: this.openPaymentPopup
                 }
               ]
             },
             small: {
               desc: i18n.t('TMP0134')
-            }
-          },
-          100: {
-            title: i18n.t('TMP0133', { disk: this.diskPercent }),
-            bgcolor: '#4EABE6',
-            large: {
-              desc: i18n.t('TMP0135'),
-              buttons: [
-                {
-                  text: i18n.t('TMP0139'),
-                  func: this.reload
-                }, {
-                  text: i18n.t('TMP0058'),
-                  func: this.openPaymentPopup
-                }
-              ]
-            },
-            small: {
-              desc: i18n.t('TMP0136')
             }
           }
         }

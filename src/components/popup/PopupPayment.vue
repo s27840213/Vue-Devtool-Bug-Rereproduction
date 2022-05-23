@@ -37,8 +37,8 @@
               template(v-if="view === 'switch2'")
                 card-info(:card="card")
                 div(class="payment-left-content-switch2")
-                  span(v-if="switchPaidDate") {{$t('TMP0049', {date: switchPaidDate})}}
-                  span(v-else) {{$t('TMP0050')}}
+                  span(v-if="switchPaidDate") {{$t('TMP0048', {date: switchPaidDate})}}
+                  span(v-else) {{$t('TMP0049')}}
                   span {{`$${switchPrice}`}}
               //- case cancel1
               template(v-if="view === 'cancel1'")
@@ -53,7 +53,7 @@
                             @select="selectCancelReason(idx)")
                   span {{can}}
                 input(class="payment-left-content-cancel__other"
-                      v-model="otherReason" :placeholder="$t('TMP0081')")
+                      v-model="otherReason" :placeholder="$t('TMP0080')")
             div(class="payment-left-button")
               btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
                   @click.native="button.func()"
@@ -63,8 +63,8 @@
           div(v-if="view === 'finish'" class="payment-finish")
             div(class="payment-finish-content")
               animation(path="/lottie/pro.json")
-              span {{$t('TMP0059')}}
-              btn(type="primary-mid" @click.native="closePopup()") {{$t('TMP0061')}}
+              span {{$t('TMP0058')}}
+              btn(type="primary-mid" @click.native="closePopup()") {{$t('TMP0059')}}
 </template>
 
 <script lang="ts">
@@ -186,7 +186,7 @@ export default Vue.extend({
           break
         case 'step2':
           this.currentStep = 2
-          this.title = i18n.t('TMP0048') as string
+          this.title = i18n.t('TMP0047') as string
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
           this.img = 'pro-template.jpg'
@@ -196,18 +196,18 @@ export default Vue.extend({
           break
         case 'switch1':
           this.getSwitchPrice()
-          this.title = i18n.t('TMP0062', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string
-          this.description = (this.isBundle ? i18n.t('TMP0064') : i18n.t('TMP0063')) as string
+          this.title = i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string
+          this.description = (this.isBundle ? i18n.t('TMP0062') : i18n.t('TMP0061')) as string
           this.buttons = [{
-            text: i18n.t('TMP0065', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
+            text: i18n.t('TMP0063', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => this.changeView('switch2')
           }]
           break
         case 'switch2':
-          this.title = i18n.t('TMP0048') as string
-          this.description = i18n.t('TMP0066') as string
+          this.title = i18n.t('TMP0047') as string
+          this.description = i18n.t('TMP0064') as string
           this.buttons = [{
-            text: i18n.t('TMP0062', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
+            text: i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: async () => {
               await this.switch()
               this.closePopup() // refresh or double check?
@@ -216,19 +216,19 @@ export default Vue.extend({
           this.img = 'pro-template.jpg'
           break
         case 'cancel1':
-          this.title = i18n.t('TMP0067') as string
+          this.title = i18n.t('TMP0065') as string
           this.buttons = [{
-            text: i18n.t('TMP0073') as string,
+            text: i18n.t('TMP0071') as string,
             func: () => this.closePopup()
           }, {
             type: 'light-lg',
-            text: i18n.t('TMP0072') as string,
+            text: i18n.t('TMP0070') as string,
             func: () => this.changeView('cancel2')
           }]
           this.img = 'pro-template2.jpg'
           break
         case 'cancel2':
-          this.title = i18n.t('TMP0074') as string
+          this.title = i18n.t('TMP0072') as string
           this.buttons[1].disabled = () => ['', undefined].includes(this.cancelReason)
           this.buttons[1].func = this.cancel
           this.img = 'brandkit.jpg'
