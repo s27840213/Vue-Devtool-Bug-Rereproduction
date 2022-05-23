@@ -2,6 +2,7 @@ import { IBrandFont } from '@/interfaces/brandkit'
 import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import brandkitUtils from '@/utils/brandkitUtils'
+import errorHandleUtils from '@/utils/errorHandleUtils'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -155,10 +156,13 @@ const actions: ActionTree<ITextState, unknown> = {
       if (!font) {
         state.pending = face
         commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
-        const link = document.createElement('link')
-        link.href = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
-        link.rel = 'stylesheet'
-        document.head.appendChild(link)
+        const cssUrl = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
+        if (cssUrl !== '') {
+          const link = document.createElement('link')
+          link.href = cssUrl
+          link.rel = 'stylesheet'
+          document.head.appendChild(link)
+        }
         commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
         state.pending = ''
         // await new Promise(resolve => setTimeout(resolve, 10000))
@@ -186,17 +190,41 @@ const actions: ActionTree<ITextState, unknown> = {
 }
 
 const getFontUrl = async (type: string, url: string, face: string, userId: string, assetId: string, ver = 0): Promise<string> => {
+  let cssUrl
+  let response
   switch (type) {
     case 'public':
-      return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+      cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
+      try {
+        response = await fetch(cssUrl)
+        if (response.ok) return url
+        throw Error(response.status.toString())
+      } catch (error) {
+        if (error instanceof Error && error.message === '404') {
+          errorHandleUtils.addMissingDesign('font', face)
+        }
+        console.log(error)
+      }
+      return ''
     case 'admin':
-      return `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}`
+      cssUrl = `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`
+      try {
+        response = await fetch(cssUrl)
+        if (response.ok) return url
+        throw Error(response.status.toString())
+      } catch (error) {
+        if (error instanceof Error && error.message === '404') {
+          errorHandleUtils.addMissingDesign('asset-font', assetId)
+        }
+        console.log(error)
+      }
+      return ''
     case 'private': {
       let urlMap = brandkitUtils.getFontUrlMap(assetId)
       if (urlMap) { // if font is in font-list or has been seen before
-        const finalUrl = getCssUrl(urlMap, ver)
-        const response = await fetch(finalUrl) // check if the url is still valid
-        if (response.ok) return finalUrl
+        cssUrl = getCssUrl(urlMap, ver)
+        response = await fetch(cssUrl) // check if the url is still valid
+        if (response.ok) return cssUrl
         urlMap = await brandkitUtils.refreshFontAsset(assetId)
         return getCssUrl(urlMap, ver)
       } else { // font is not seen before, fetch it
@@ -207,12 +235,23 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'URL':
       return url
   }
-  return `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}`
+  cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
+  try {
+    response = await fetch(cssUrl)
+    if (response.ok) return url
+    throw Error(response.status.toString())
+  } catch (error) {
+    if (error instanceof Error && error.message === '404') {
+      errorHandleUtils.addMissingDesign('font', face)
+    }
+    console.log(error)
+  }
+  return ''
 }
 
 const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
   const cssUrl = urlMap.css
-  return cssUrl ? `${cssUrl}&ver=${ver}` : ''
+  return cssUrl ? `${cssUrl}&ver=${ver}&origin=true` : ''
 }
 
 export default {
