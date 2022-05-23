@@ -1665,7 +1665,6 @@ export default Vue.extend({
     }
     &__text {
       margin-right: 5px;
-      font-family: Mulish;
       font-weight: 400;
       font-size: 14px;
       color: setColor(gray-2);

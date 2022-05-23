@@ -184,7 +184,6 @@ export default Vue.extend({
     &-block {
       border-radius: 10px;
       text-align: left;
-      font-family: 'Mulish';
       padding: 2vw 2.5vw;
     }
     .block-basic {

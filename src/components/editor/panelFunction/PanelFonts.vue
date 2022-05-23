@@ -243,21 +243,6 @@ export default Vue.extend({
       this.resetContent()
       this.$emit('closeFontsPanel')
     },
-    // TODO //
-    updateFontPreset(e: any) {
-      const target = e.target.files[0]
-      const fontName: string = target.name.split('.')[0]
-      const objectUrl = window.URL.createObjectURL(target)
-      const style = document.createElement('style')
-      style.innerHTML = `
-      @font-face {
-        font-family: ${fontName};
-        src: url(${objectUrl});
-      }
-    `
-      document.head.appendChild(style)
-      TextUtils.updateFontFace({ name: fontName, face: fontName, loaded: true })
-    },
     handleLoadMore(moreType: string | undefined) {
       if (moreType === 'asset') {
         this.fetchMoreFonts()

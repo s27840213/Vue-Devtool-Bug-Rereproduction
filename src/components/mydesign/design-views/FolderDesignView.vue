@@ -376,7 +376,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .folder-design-view {
   text-align: left;
-  font-family: NotoSansTC;
   @include hide-scrollbar-white;
   > div {
     margin-left: 55px;
@@ -472,7 +471,6 @@ export default Vue.extend({
     width: max-content;
     z-index: 1;
     > span {
-      font-family: "NotoSansTC";
       font-weight: 400;
       font-size: 10px;
       line-height: 20px;
@@ -553,7 +551,6 @@ export default Vue.extend({
           text-overflow: ellipsis;
           display: block;
           overflow: hidden;
-          font-family: NotoSansTC;
           font-weight: 400;
           font-size: 14px;
           line-height: 22px;
@@ -565,7 +562,6 @@ export default Vue.extend({
         > span {
           width: 143px;
           display: block;
-          font-family: NotoSansTC;
           font-weight: 400;
           font-size: 10px;
           line-height: 16px;
@@ -604,7 +600,6 @@ export default Vue.extend({
             display: flex;
             align-items: center;
             > span {
-              font-family: NotoSansTC;
               font-weight: 400;
               font-size: 12px;
               line-height: 16px;
@@ -669,7 +664,6 @@ export default Vue.extend({
           display: flex;
           align-items: center;
           > span {
-            font-family: NotoSansTC;
             font-weight: 400;
             font-size: 12px;
             line-height: 16px;
@@ -699,7 +693,6 @@ export default Vue.extend({
     height: calc(100% - 270px);
     &__text {
       display: block;
-      font-family: NotoSansTC;
       font-weight: 400;
       font-size: 30px;
       line-height: 30px;

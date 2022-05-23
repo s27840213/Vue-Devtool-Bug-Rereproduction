@@ -843,7 +843,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-setting {
   @include size(100%, 100%);
-  font-family: NotoSansTC;
   text-align: left;
   &__title {
     & span {
@@ -870,7 +869,6 @@ export default Vue.extend({
       box-sizing: border-box;
       & input {
         line-height: 16px;
-        font-family: NotoSansTC;
       }
     }
   }
@@ -977,7 +975,6 @@ export default Vue.extend({
           & input {
             line-height: 16px;
             background-color: transparent;
-            font-family: NotoSansTC;
           }
           &.border-blue-1 {
             @extend .border-blue-1;
@@ -991,19 +988,13 @@ export default Vue.extend({
         margin-top: 31px;
         margin-bottom: 31px;
       }
-      &__text {
-        font-family: Mulish;
-      }
       &__recently {
-        @extend .page-setting__suggestion-panel__body__text;
         width: 88%;
       }
       &__typical-name {
-        @extend .page-setting__suggestion-panel__body__text;
         width: 37%;
       }
       &__typical-size {
-        @extend .page-setting__suggestion-panel__body__text;
         width: 45%;
         white-space: nowrap;
         transform: scale(0.85);

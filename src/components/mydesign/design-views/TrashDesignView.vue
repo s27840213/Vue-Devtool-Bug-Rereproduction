@@ -112,7 +112,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .trash-design-view {
   text-align: left;
-  font-family: NotoSansTC;
   @include hide-scrollbar-white;
   > div {
     margin-left: 55px;
@@ -160,7 +159,6 @@ export default Vue.extend({
       background-color: setColor(gray-2);
       border-radius: 5px;
       > span {
-        font-family: Mulish;
         font-weight: 400;
         font-size: 12px;
         line-height: 28px;

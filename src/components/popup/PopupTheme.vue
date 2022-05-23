@@ -4,7 +4,7 @@
     div(class="popup-theme__recommend px-10")
       btn(class="full-width body-3 rounded mb-10"
         @click.native="handleRecommend")
-        span {{ $t('NN0322') }}
+        span(v-html="$t('NN0322')")
     div(class="py-10 px-15")
       div(class="popup-theme__title body-2 mb-5") {{ $t('NN0321') }}
       download-check-button(class="popup-theme__checkbox body-3 text-gray-2 pl-5"

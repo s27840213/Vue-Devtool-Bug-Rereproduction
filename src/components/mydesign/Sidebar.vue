@@ -267,7 +267,6 @@ export default Vue.extend({
   margin-bottom: 10px;
   cursor: pointer;
   &__text {
-    font-family: "NotoSansTC";
     text-align: left;
     color: white;
     font-size: 14px;
@@ -291,7 +290,6 @@ export default Vue.extend({
     padding: 2px 8px;
     z-index: 1000;
     > span {
-      font-family: "NotoSansTC";
       font-weight: 400;
       font-size: 10px;
       line-height: 20px;
@@ -345,7 +343,6 @@ export default Vue.extend({
     justify-content: center;
   }
   &__text {
-    font-family: "NotoSansTC";
     text-align: left;
     color: white;
     font-size: 14px;

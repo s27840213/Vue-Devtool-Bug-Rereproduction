@@ -490,10 +490,9 @@ export default Vue.extend({
   &__type-desc {
     font-size: 18px;
     color: setColor(gray-3);
-    white-space: nowrap;
     transform: scale(0.5);
     transform-origin: left;
-    width: 0;
+    width: 200%;
   }
   &__hr {
     border: none;
@@ -529,7 +528,6 @@ export default Vue.extend({
   .btn,
   .property-bar,
   input {
-    font-family: "Mulish";
     font-size: 12px;
     line-height: 22px;
   }
