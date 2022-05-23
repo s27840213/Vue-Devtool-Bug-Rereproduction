@@ -45,7 +45,7 @@
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
           p(v-html="item.A")
       nu-footer
-      popup-payment(v-if="showPopup" @close="closePopup()")
+    popup-payment(v-if="showPopup" @close="closePopup()")
 </template>
 
 <script lang="ts">

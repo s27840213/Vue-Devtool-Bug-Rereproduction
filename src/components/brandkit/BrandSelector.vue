@@ -152,7 +152,8 @@ export default Vue.extend({
     handleMouseLeave() {
       this.currentHoverBrandId = ''
     },
-    handleCopyBrand(brand: IBrand) {
+    async handleCopyBrand(brand: IBrand) {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       brandkitUtils.copyBrand(brand)
     },
     handleDeleteBrand(brand: IBrand) {

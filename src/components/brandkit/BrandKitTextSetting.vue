@@ -157,7 +157,8 @@ export default Vue.extend({
         this.refreshFont(this.textStyle.fontAssetId)
       }
     },
-    handleToggleConfig() {
+    async handleToggleConfig() {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       if (!this.isConfigOpen) {
         this.isConfigOpen = true
         this.refreshFontSizeBuffer()

@@ -399,12 +399,9 @@ class UploadUtils {
                         this.emitFontUploadEvent('none')
                       }, 2000)
                     } else {
-                      this.emitFontUploadEvent('fail')
+                      modalUtils.setIsModalOpen(true)
+                      modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`, `Error type: ${json.msg}`], '')
                       brandkitUtils.deleteFont(tempId)
-                      console.log('Failed to upload the file')
-                      setTimeout(() => {
-                        this.emitFontUploadEvent('none')
-                      }, 2000)
                     }
                   })
                 }
@@ -467,12 +464,9 @@ class UploadUtils {
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
                     } else {
-                      Vue.notify({
-                        group: 'error',
-                        text: `${i18n.t('NN0137')}`
-                      })
+                      modalUtils.setIsModalOpen(true)
+                      modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`, `Error type: ${json.msg}`], '')
                       brandkitUtils.deleteLogo(brandId, tempId)
-                      console.log('Failed to upload the file')
                     }
                   })
                 }

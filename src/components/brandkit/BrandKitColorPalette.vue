@@ -92,7 +92,8 @@ export default Vue.extend({
         content: palette
       })
     },
-    handleSelectColor(paletteId: string, color: IBrandColor) {
+    async handleSelectColor(paletteId: string, color: IBrandColor) {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       if (this.checkSelected(paletteId, color)) {
         this.handleDeSelectColor()
       } else {
@@ -132,7 +133,8 @@ export default Vue.extend({
         }
       })
     },
-    handleAddColor(id: string) {
+    async handleAddColor(id: string) {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       brandkitUtils.createColor(id)
       this.$nextTick(() => {
         this.$emit('selectColor', {

@@ -118,7 +118,8 @@ export default Vue.extend({
       fetchBrands: 'fetchBrands',
       fetchFonts: 'fetchFonts'
     }),
-    addNewBrand() {
+    async addNewBrand() {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       brandkitUtils.addNewBrand()
     },
     isDragDropValid(): boolean {
@@ -134,9 +135,11 @@ export default Vue.extend({
     handleDragLeave() {
       this.isDraggedOver = false
     },
-    handleDrop(e: DragEvent) {
+    async handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {
         if (!files) return

@@ -31,11 +31,13 @@ export interface IUploadAssetResponse {
 }
 
 export interface IUploadAssetFontResponse {
-  flag: number,
+  flag: number
   data: IUserFontContentData
+  msg?: string
 }
 
 export interface IUploadAssetLogoResponse {
-  flag: number,
+  flag: number
   data: IUserLogoContentData
+  msg?: string
 }

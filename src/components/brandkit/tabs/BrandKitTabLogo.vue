@@ -107,7 +107,8 @@ export default Vue.extend({
         this.menuOpenLogoId = logo.id
       }
     },
-    handleUploadLogo() {
+    async handleUploadLogo() {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {

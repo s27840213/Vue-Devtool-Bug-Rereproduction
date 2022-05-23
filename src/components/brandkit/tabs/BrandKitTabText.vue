@@ -77,7 +77,7 @@ export default Vue.extend({
           text: `${this.$t('NN0135')}`
         })
       }
-      if (status === 'fail') {
+      if (status === 'fail') { // Fail will not goto here
         this.$notify({
           group: 'error',
           text: `${this.$t('NN0137')}`
@@ -128,7 +128,8 @@ export default Vue.extend({
       fetchMoreFonts: 'fetchMoreFonts',
       refreshFontAsset: 'refreshFontAsset'
     }),
-    handleUploadFont() {
+    async handleUploadFont() {
+      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
       uploadUtils.chooseAssets('font')
     },
     handleDeleteFont(font: IBrandFont) {

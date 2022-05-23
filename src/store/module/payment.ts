@@ -3,6 +3,7 @@ import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
 import i18n from '@/i18n'
 import paymentApi from '@/apis/payment'
+import popupUtils from '@/utils/popupUtils'
 
 interface IPaymentState {
   isLoading: boolean
@@ -211,6 +212,14 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
+  checkIsPro({ commit }, initView) {
+    if (!state.isPro) {
+      commit('SET_initView', initView)
+      popupUtils.openPopup('payment')
+      return false
+    }
+    return true
+  },
   async getPrice({ commit }, country: string) {
     if (country === '') {
       commit('SET_state', { userCountryUi: i18n.locale })

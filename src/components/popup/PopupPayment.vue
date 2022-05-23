@@ -130,6 +130,7 @@ export default Vue.extend({
     }),
     ...mapState('payment', {
       initView: 'initView',
+      userCountryUi: 'userCountryUi',
       switchPaidDate: 'switchPaidDate',
       switchPrice: 'switchPrice',
       card: 'cardInfo',
@@ -161,7 +162,8 @@ export default Vue.extend({
       init: 'payment/init',
       getSwitchPrice: 'payment/getSwitchPrice',
       switch: 'payment/switch',
-      cancelApi: 'payment/cancel'
+      cancelApi: 'payment/cancel',
+      getPrice: 'payment/getPrice'
     }),
     ...mapMutations({
       setInitView: 'SET_initView'
@@ -170,6 +172,7 @@ export default Vue.extend({
       this.view = name
       switch (name) {
         case 'step1':
+          this.getPrice(this.userCountryUi)
           this.init()
           this.currentStep = 1
           this.totalStep = 2

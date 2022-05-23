@@ -64,7 +64,6 @@ export default Vue.extend({
       'roleRaw',
       'adminMode']),
     ...mapGetters({
-      isPopupOpen: 'popup/isPopupOpen',
       popupComponent: 'popup/getPopupComponent',
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
