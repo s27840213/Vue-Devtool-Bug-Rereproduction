@@ -251,7 +251,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
 
 const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
   const cssUrl = urlMap.css
-  return cssUrl ? `${cssUrl}&ver=${ver}` : ''
+  return cssUrl ? `${cssUrl}&ver=${ver}&origin=true` : ''
 }
 
 export default {
