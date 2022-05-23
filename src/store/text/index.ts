@@ -157,6 +157,7 @@ const actions: ActionTree<ITextState, unknown> = {
         state.pending = face
         commit(UPDATE_FONTFACE, { name: face, face, loaded: false })
         const cssUrl = await getFontUrl(type, url, face, userId, assetId, ver ?? 0)
+        console.log(cssUrl)
         if (cssUrl !== '') {
           const link = document.createElement('link')
           link.href = cssUrl
@@ -197,7 +198,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
       try {
         response = await fetch(cssUrl)
-        if (response.ok) return url
+        if (response.ok) return cssUrl
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -210,7 +211,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       cssUrl = `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`
       try {
         response = await fetch(cssUrl)
-        if (response.ok) return url
+        if (response.ok) return cssUrl
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -238,7 +239,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
   try {
     response = await fetch(cssUrl)
-    if (response.ok) return url
+    if (response.ok) return cssUrl
     throw Error(response.status.toString())
   } catch (error) {
     if (error instanceof Error && error.message === '404') {
