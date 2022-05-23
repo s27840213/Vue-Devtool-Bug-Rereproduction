@@ -285,12 +285,13 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async getBillingHistroy({ commit }) {
-    if (state.nextBillingHistoryIndex === -1) return
+    // Bruce said don't do pagination in billing history.
+    // if (state.nextBillingHistoryIndex === -1) return
     commit('SET_state', { isLoading: true })
-    return paymentApi.billingHistory(state.nextBillingHistoryIndex).then((response) => {
+    return paymentApi.billingHistory(0/* state.nextBillingHistoryIndex */).then((response) => {
       commit('SET_state', {
         nextBillingHistoryIndex: response.data.next_page,
-        billingHistory: state.billingHistory.concat(response.data.data.map((item:Record<string, string|number>) => {
+        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item:Record<string, string|number>) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
             month: 'long',
@@ -313,7 +314,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
               price: item.price
             }]
           }
-        }))
+        })/* ) */
       })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },

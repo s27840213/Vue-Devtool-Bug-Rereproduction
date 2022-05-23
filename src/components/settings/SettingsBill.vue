@@ -17,7 +17,7 @@
         span(v-if="his.success === false" class="text-red") {{$t('TMP0118')}}
         span(v-else-if="his.payType === 'tappay'")
         span(v-else class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0117')}}
-    observer-sentinel(@callback="getBillingHistroy")
+    //- observer-sentinel(@callback="getBillingHistroy")
     //- For invoice pdf generation
     div(v-if="historys.length" class="bill-invoice-wrapper")
       div(class="bill-invoice" id="bill-invoice")
@@ -87,6 +87,9 @@ export default Vue.extend({
           return acc + (cur.price as number)
         }, 0)
     }
+  },
+  mounted() {
+    this.getBillingHistroy()
   },
   methods: {
     ...mapActions({

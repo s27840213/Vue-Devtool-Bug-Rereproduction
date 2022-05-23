@@ -103,7 +103,7 @@ export default Vue.extend({
       return (this.isLoading
         ? i18n.t('NN0454')
         : this.isChange
-          ? i18n.t('NN0133')
+          ? i18n.tc('NN0133', 2)
           : this.trialStatus === 'not used'
             ? i18n.t('TMP0057')
             : i18n.t('TMP0058')) as string
@@ -187,7 +187,7 @@ export default Vue.extend({
       })
       const stripePaymentElement = this.stripeElement.create('payment', {
         fields: { billingDetails: { address: { country: 'never' } } },
-        // terms: { card: 'never' }, // ask bruce
+        terms: { card: 'never' },
         wallets: {
           applePay: 'never',
           googlePay: 'never'
