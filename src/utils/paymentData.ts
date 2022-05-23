@@ -10,6 +10,29 @@ interface BillingInfoInput {
 }
 
 class PaymentData {
+  // For setting sidebar.vue & popupAccount.vue
+  viewList() {
+    return [{
+      name: 'account',
+      label: i18n.tc('NN0165', 1),
+      icon: 'settings'
+    }, {
+      name: 'security',
+      label: i18n.tc('NN0166', 1),
+      icon: 'lock'
+    }, {
+      name: 'hr'
+    }, {
+      name: 'payment',
+      label: i18n.t('TMP0082'),
+      icon: 'pro'
+    }, {
+      name: 'billing',
+      label: i18n.t('TMP0112'),
+      icon: 'invoice'
+    }]
+  }
+
   // For Pricing.vue
   colorBlock() {
     return [{

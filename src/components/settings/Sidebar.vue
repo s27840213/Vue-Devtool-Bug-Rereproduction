@@ -25,6 +25,7 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
+import paymentData from '@/utils/paymentData'
 
 export default Vue.extend({
   props: {
@@ -36,25 +37,7 @@ export default Vue.extend({
   data() {
     return {
       optionSelected: '',
-      viewList: [{
-        name: 'account',
-        label: i18n.tc('NN0165', 1),
-        icon: 'settings'
-      }, {
-        name: 'security',
-        label: i18n.tc('NN0166', 1),
-        icon: 'lock'
-      }, {
-        name: 'hr'
-      }, {
-        name: 'payment',
-        label: i18n.t('TMP0082'),
-        icon: 'pro'
-      }, {
-        name: 'billing',
-        label: i18n.t('TMP0112'),
-        icon: 'invoice'
-      }]
+      viewList: paymentData.viewList()
     }
   },
   created() {
@@ -156,6 +139,7 @@ export default Vue.extend({
       padding: 0 10px 0 20px;
     }
     &__link {
+      width: 100%;
       display: flex;
       align-items: center;
       color: unset;
