@@ -1,11 +1,12 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
-import { IEditorState } from '../types'
+import { IEditorState, ILayerInfo } from '../types'
 
 const SET_UPLOAD_ID = 'SET_UPLOAD_ID' as const
 const SET_PROCESS_ID = 'SET_PROCESS_ID' as const
 const ADD_UPLOAD_IMG = 'ADD_UPLOAD_IMG' as const
+const SET_IMG_CONTROL_LAYER = 'SET_IMG_CONTROL_LAYER' as const
 
 export interface IUploadShadowImg {
   id: string,

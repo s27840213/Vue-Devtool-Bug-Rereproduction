@@ -85,13 +85,10 @@ export default Vue.extend({
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
-    const { layerIndex, subLayerIndex } = this
-    const layerIdentifier = `${layerIndex}-${subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined' ? subLayerIndex : '_'}`
+    const layerIdentifier = `${this.config.id}`
     eventUtils.on(ImageEvent.redrawCanvasShadow + layerIdentifier, () => {
-      if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
-        this.redrawShadow(true)
-      } else if (this.currentShadowEffect !== ShadowEffectType.none) {
-        if (this.shadow.isTransparent) {
+      if (this.currentShadowEffect !== ShadowEffectType.none) {
+        if (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent) {
           this.redrawShadow(true)
         } else {
           const img = new Image()
@@ -352,7 +349,6 @@ export default Vue.extend({
         .some(val => typeof val === 'number' && val !== 0)
     },
     showCanvas(): boolean {
-      // return this.currentShadowEffect !== ShadowEffectType.none
       const { pageIndex, layerIndex, subLayerIndex, config, uploadId } = this
       const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
       const isCurrLayerActive = config.active
@@ -431,6 +427,9 @@ export default Vue.extend({
       return ImageUtils.getSrcSize(this.config.srcObj.type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
     },
     shadowSrc(): string {
+      if (!this.shadow || !this.shadow.srcObj) {
+        return ''
+      }
       return ImageUtils.getSrc(this.shadow.srcObj, ImageUtils.getSrcSize(this.shadow.srcObj.type, this.getImgDimension))
     }
   },

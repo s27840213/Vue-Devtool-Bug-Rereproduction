@@ -21,6 +21,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import modalUtils from '@/utils/modalUtils'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -39,10 +40,11 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       uploadingImgs: 'file/getUploadingImgs',
       isUploadShadowImg: 'shadow/isUploading',
-      isProcessShadowImg: 'shadow/isProcessing'
+      isProcessShadowImg: 'shadow/isProcessing',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     isHandlingShadow(): boolean {
-      return this.isUploadShadowImg || this.isProcessShadowImg
+      return this.isUploadShadowImg || this.isProcessShadowImg || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
     }
   },
   methods: {

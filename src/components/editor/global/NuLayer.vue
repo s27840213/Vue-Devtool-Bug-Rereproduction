@@ -77,7 +77,7 @@ export default Vue.extend({
     },
     hasShadowSrc(): boolean {
       if (this.config.type === LayerType.image) {
-        return this.config.styles.shadow.srcObj.type
+        return this.config.styles.shadow && this.config.styles.shadow.srcObj && this.config.styles.shadow.srcObj.type
       } else {
         return false
       }

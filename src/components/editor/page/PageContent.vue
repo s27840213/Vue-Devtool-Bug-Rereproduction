@@ -33,7 +33,7 @@ div(class="overflow-container"
 <script lang="ts">
 import Vue from 'vue'
 import imageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import mouseUtils from '@/utils/mouseUtils'
@@ -47,6 +47,8 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
 import layerUtils from '@/utils/layerUtils'
+import generalUtils from '@/utils/generalUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -150,6 +152,8 @@ export default Vue.extend({
     pageClickHandler(): void {
       if (!this.isHandleShadow) {
         groupUtils.deselect()
+      } else {
+        imageUtils.setImgControlDefault()
       }
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()

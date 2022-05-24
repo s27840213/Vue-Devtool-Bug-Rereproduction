@@ -594,39 +594,7 @@ class ImageShadowUtils {
 
   async getImgEdgeWidth(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    // let imageData = [] as number[][][]
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-
-    const start = performance.now()
-
-    // await this.asyncProcessing(() => {
-    //   const _imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    //     .data.reduce((pixel, c, i) => {
-    //       if (i % 4 === 0) {
-    //         pixel.push([c])
-    //       } else {
-    //         pixel[pixel.length - 1].push(c)
-    //       }
-    //       return pixel
-    //     }, [] as Array<Array<number>>)
-    //     .reduce((row, p, i) => {
-    //       if (i % canvas.width === 0) {
-    //         row.push([p])
-    //       } else {
-    //         row[row.length - 1].push(p)
-    //       }
-    //       return row
-    //     }, [] as Array<Array<Array<number>>>)
-    //   imageData = _imageData
-    // })
-
-    const duration1 = performance.now() - start
-    const start2 = performance.now()
-
-    const HORIZONTAL_STEP = Math.floor(canvas.width / 10)
-    const VERTICAL_STEP = Math.floor(canvas.height / 10)
-    const TRAVERSE_STEP = 200
-
     const ROW_PIXELS = imageData.data.length / canvas.height
     const COL_PIXELS = imageData.data.length / canvas.width
 
@@ -634,9 +602,7 @@ class ImageShadowUtils {
     let top = 0
     await this.asyncProcessing(() => {
       while (!reach && top <= COL_PIXELS / 4) {
-        let count = 0
-        // for (let i = top * ROW_PIXELS + 3; i <= (top + 1) * ROW_PIXELS + 3; i += 4) {
-        for (let i = top * ROW_PIXELS + 3; count < ROW_PIXELS / 4; i += 4, count++) {
+        for (let i = top * ROW_PIXELS + 3; i <= (top + 1) * ROW_PIXELS + 3; i += 4) {
           if (imageData.data[i]) {
             reach = true
             break
@@ -646,16 +612,11 @@ class ImageShadowUtils {
       }
     })
 
-    const duration2 = performance.now() - start2
-    const start3 = performance.now()
-
     reach = false
     let bottom = 0
     await this.asyncProcessing(() => {
       while (!reach && bottom <= COL_PIXELS / 4) {
-        let count = 0
-        // for (let i = bottom * ROW_PIXELS; i <= (bottom + 1) * ROW_PIXELS; i += 4) {
-        for (let i = bottom * ROW_PIXELS; count < ROW_PIXELS / 4; i += 4, count++) {
+        for (let i = bottom * ROW_PIXELS; i <= (bottom + 1) * ROW_PIXELS; i += 4) {
           if (imageData.data[imageData.data.length - i - 1]) {
             reach = true
             break
@@ -664,9 +625,6 @@ class ImageShadowUtils {
         bottom++
       }
     })
-
-    const duration3 = performance.now() - start3
-    console.log(duration1, duration2, duration3)
 
     reach = false
     let left = 0
@@ -695,7 +653,6 @@ class ImageShadowUtils {
         right++
       }
     })
-    console.log(right, left, top, bottom)
     return { right, left, top, bottom }
   }
 

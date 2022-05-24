@@ -278,6 +278,8 @@ export default Vue.extend({
         if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
           if (!this.isHandleShadow) {
             GroupUtils.deselect()
+          } else {
+            imageUtils.setImgControlDefault()
           }
         }
         this.isSelecting = true
@@ -314,6 +316,8 @@ export default Vue.extend({
       if (this.isSelecting) {
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
+        } else {
+          imageUtils.setImgControlDefault()
         }
       }
       /**
@@ -328,6 +332,8 @@ export default Vue.extend({
           const selectionArea = this.$refs.selectionArea as HTMLElement
           if (!this.isHandleShadow) {
             this.handleSelectionData(selectionArea.getBoundingClientRect())
+          } else {
+            imageUtils.setImgControlDefault()
           }
         }
       })

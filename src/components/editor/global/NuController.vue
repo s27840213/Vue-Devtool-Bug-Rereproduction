@@ -153,6 +153,7 @@ import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -218,8 +219,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
-    ...mapGetters('text', ['getDefaultFonts']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
       lastSelectedLayerIndex: 'getLastSelectedLayerIndex',
       scaleRatio: 'getPageScaleRatio',
@@ -607,6 +608,11 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
+      if (this.isProcessImgShadow) {
+        return
+      } else {
+        ImageUtils.setImgControlDefault()
+      }
       this.movingByControlPoint = false
       const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && !this.contentEditable
       if (!this.isLocked) {
@@ -1418,13 +1424,16 @@ export default Vue.extend({
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-          const layerIdentifier = `${this.layerIndex}-_`
+          const layerIdentifier = `${this.config.id}`
           eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
         }
-        if (this.currSelectedInfo.index < 0) {
-          this.setLastSelectedLayerIndex(this.layerIndex)
-          GroupUtils.select(this.pageIndex, [this.layerIndex])
-        }
+        GroupUtils.deselect()
+        this.setLastSelectedLayerIndex(this.layerIndex)
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+        // if (this.currSelectedInfo.index < 0) {
+        //   this.setLastSelectedLayerIndex(this.layerIndex)
+        //   GroupUtils.select(this.pageIndex, [this.layerIndex])
+        // }
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
