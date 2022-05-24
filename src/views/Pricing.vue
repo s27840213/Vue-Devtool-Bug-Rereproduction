@@ -124,10 +124,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.pricing {
-  height: 100%;
-  font-family: 'Poppins'; // may need i18n
-}
+.pricing { height: 100%; }
 
 .pricing-content {
   display: flex;

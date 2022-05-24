@@ -534,6 +534,10 @@ const mutations: MutationTree<IPaymentState> = {
       }
     })
   },
+  REDUCE_bgrmRemain(state: IPaymentState) {
+    state.usage.bgrmRemain -= 1
+    state.usage.bgrmOver = state.usage.bgrmRemain <= 0
+  },
   SET_isLoading(state: IPaymentState, isLoading) {
     state.isLoading = isLoading
   },

@@ -9,7 +9,7 @@
         ref="btn"
         :key="btn.name"
         @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="isImage && isAdmin && !isFrame"
+      btn(v-if="isImage && !isFrame"
         class="full-width"
         type="gray-mid"
         ref="btn"
@@ -34,6 +34,7 @@ import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
+import modalUtils from '@/utils/modalUtils'
 
 export default Vue.extend({
   data() {
@@ -121,7 +122,8 @@ export default Vue.extend({
       setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       setIsProcessing: 'bgRemove/SET_isProcessing',
-      setIdInfo: 'bgRemove/SET_idInfo'
+      setIdInfo: 'bgRemove/SET_idInfo',
+      recudeBgrmRemain: 'payment/REDUCE_bgrmRemain'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -132,7 +134,7 @@ export default Vue.extend({
       if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
       return false
     },
-    handleShow(name: string) {
+    async handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
         if (this.isCropping) {
@@ -153,6 +155,7 @@ export default Vue.extend({
         }
         this.show = ''
       } else if (name === 'remove-bg') {
+        if (!await this.$store.dispatch('payment/checkIsPro', 'bgrm')) return
         const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
 
         this.setIsProcessing(true)
@@ -179,6 +182,7 @@ export default Vue.extend({
           if (data.flag === 0) {
             uploadUtils.polling(data.url, (json: any) => {
               if (json.flag === 0 && json.data) {
+                this.recudeBgrmRemain()
                 const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
                 const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
 
@@ -207,8 +211,9 @@ export default Vue.extend({
                   layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                     inProcess: false
                   })
-
-                  this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
+                  modalUtils.setIsModalOpen(true)
+                  modalUtils.setModalInfo('上傳失敗', [`Error type: ${json.msg}`], '')
+                  // this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
                 }
 
                 return true

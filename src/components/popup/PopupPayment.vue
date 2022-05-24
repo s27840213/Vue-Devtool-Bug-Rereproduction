@@ -40,8 +40,8 @@
                   span(v-if="switchPaidDate") {{$t('TMP0048', {date: switchPaidDate})}}
                   span(v-else) {{$t('TMP0049')}}
                   span {{`$${switchPrice}`}}
-              //- case cancel1
-              template(v-if="view === 'cancel1'")
+              //- case cancel1 or brandkit or bgrm
+              template(v-if="showFeature")
                 div(v-for="can in cancel1" class="payment-left-content-cancel")
                   svg-icon(iconName="pro" iconWidth="24px")
                   span {{can}}
@@ -146,6 +146,9 @@ export default Vue.extend({
     showPreStep(): boolean {
       return ['step2', 'switch2'].includes(this.view)
     },
+    showFeature(): boolean {
+      return ['cancel1', 'brandkit', 'bgrm'].includes(this.view)
+    },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
         ? this.cancel2[Number(this.reasonIndex)] as string
@@ -171,6 +174,16 @@ export default Vue.extend({
     changeView(name: string) {
       this.view = name
       switch (name) {
+        case 'brandkit':
+        case 'bgrm':
+          this.title = i18n.t('TMP0003') as string
+          this.description = i18n.t('TMP0079') as string
+          this.buttons = [{
+            text: i18n.t('TMP0139') as string,
+            func: () => this.changeView('step1')
+          }]
+          this.img = name === 'bgrm' ? 'remover.jpg' : 'brandkit.jpg'
+          break
         case 'step1':
           this.getPrice(this.userCountryUi)
           this.init()
