@@ -197,7 +197,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
       try {
         response = await fetch(cssUrl)
-        if (response.ok) return url
+        if (response.ok) return cssUrl
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -210,7 +210,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       cssUrl = `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`
       try {
         response = await fetch(cssUrl)
-        if (response.ok) return url
+        if (response.ok) return cssUrl
         throw Error(response.status.toString())
       } catch (error) {
         if (error instanceof Error && error.message === '404') {
@@ -238,7 +238,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
   try {
     response = await fetch(cssUrl)
-    if (response.ok) return url
+    if (response.ok) return cssUrl
     throw Error(response.status.toString())
   } catch (error) {
     if (error instanceof Error && error.message === '404') {

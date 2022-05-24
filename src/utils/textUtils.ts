@@ -999,6 +999,7 @@ class TextUtils {
     while (shouldContinue) {
       const autoDimension = autoSize[dimension]
       const currDiff = Math.abs(autoDimension - originDimension)
+      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
       if (currDiff < minDiff) {
         minDiff = currDiff
         minDiffWidLimit = widthLimit
