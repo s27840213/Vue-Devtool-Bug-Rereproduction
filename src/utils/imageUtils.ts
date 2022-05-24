@@ -5,7 +5,7 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
+import { IUserImageContentData } from '@/interfaces/api'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 
@@ -33,9 +33,10 @@ class ImageUtils {
   }
 
   getSrc(config: Partial<IImage>, size?: string | number, ver?: number): string {
+    // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
     if (!config.srcObj && !config.src_obj) return ''
     if (config.previewSrc) {
-      return config.previewSrc + FORCE_UPDATE_VER
+      return config.previewSrc
     }
 
     const { type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj

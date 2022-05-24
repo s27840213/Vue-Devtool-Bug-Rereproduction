@@ -182,11 +182,12 @@ export default Vue.extend({
       newChrome = false,
       ...prevSubmission
     } = JSON.parse(localStorage.getItem(submission) || '{}')
+
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
-      selectedTypeVal: selectedTypeVal || 'png',
+      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
+      selectedTypeVal: selectedTypeVal || 'jpg',
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev,
@@ -356,7 +357,10 @@ export default Vue.extend({
       this.exportId ? this.handleDownload(useDev) : (this.functionQueue = [() => this.handleDownload(useDev)])
     },
     handleSubmissionInfo() {
+      const pageLimit = pageUtils.getPages.length - 1
+      this.pageRange = this.pageRange.filter((pageIndex: number) => pageIndex <= pageLimit)
       const { selectedDetailPage, saveSubmission, selected, selectedTypeVal, rangeType, pageRange, selectedDev, newChrome } = this
+
       const info = {
         ...selected,
         selectedTypeVal,
@@ -366,6 +370,7 @@ export default Vue.extend({
         selectedDev,
         newChrome
       }
+
       saveSubmission
         ? localStorage.setItem(submission, JSON.stringify(info))
         : localStorage.removeItem(submission)
@@ -375,11 +380,9 @@ export default Vue.extend({
       const {
         exportId,
         selected,
-        pageRange,
         rangeType,
         selectedTypeVal
       } = this
-
       this.handleSubmissionInfo()
 
       const fileInfo = {
@@ -397,7 +400,7 @@ export default Vue.extend({
       }
 
       if (['spec', 'current'].includes(rangeType)) {
-        fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : pageRange.join(',')
+        fileInfo.pageIndex = rangeType === 'current' ? `${this.currentPageIndex}` : this.pageRange.join(',')
       }
       this.$emit('inprogress', true)
       DownloadUtil
@@ -442,12 +445,10 @@ export default Vue.extend({
           }, 1000)
           break
         case 1:
-          console.log(response)
           this.$notify({ group: 'error', text: `${this.$t('NN0462')} (${msg})` })
           this.$emit('close')
           break
         case 2:
-          console.log('progress: ', progress)
           this.progress = progress
           setTimeout(() => {
             DownloadUtil

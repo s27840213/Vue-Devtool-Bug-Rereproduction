@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="editor-view scrollbar-gray-thin"
+  div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
       @mousedown.left="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"

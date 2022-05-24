@@ -113,7 +113,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
         type: 'image',
         update_type: 'delete',
         src_asset: keyList,
-        target: '1'
+        target: '2'
       }
       userApis.updateAsset({ ...params }).then(() => {
         commit('SET_STATE', {

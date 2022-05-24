@@ -56,6 +56,8 @@
             @keydown.native.meta.67.exact.stop.self
             @keydown.native.ctrl.86.exact.stop.self
             @keydown.native.meta.86.exact.stop.self
+            @keydown.native.ctrl.88.exact.stop.self
+            @keydown.native.meta.88.exact.stop.self
             @keydown.native.ctrl.65.exact.stop.self
             @keydown.native.meta.65.exact.stop.self
             @keydown.native.ctrl.90.exact.stop.self
@@ -1420,8 +1422,10 @@ export default Vue.extend({
       e && this.onDrop(e)
     },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
+      const config = generalUtils.deepCopy(this.config)
+      config.paragraphs = payload.paragraphs
+      this.isCurveText ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, !!tiptapUtils.editor?.view?.composing)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.isCurveText ? this.curveTextSizeRefresh(this.config) : this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
