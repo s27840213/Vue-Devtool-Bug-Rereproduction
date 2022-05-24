@@ -61,6 +61,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand } from '@/interfaces/brandkit'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   props: {
@@ -152,8 +153,8 @@ export default Vue.extend({
     handleMouseLeave() {
       this.currentHoverBrandId = ''
     },
-    async handleCopyBrand(brand: IBrand) {
-      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+    handleCopyBrand(brand: IBrand) {
+      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.copyBrand(brand)
     },
     handleDeleteBrand(brand: IBrand) {

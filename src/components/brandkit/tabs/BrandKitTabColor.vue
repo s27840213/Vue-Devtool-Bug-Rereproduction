@@ -22,6 +22,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
 import BrandKitColorPalette from '@/components/brandkit/BrandKitColorPalette.vue'
 import { IBrand, IBrandColorPalette, IDeletingItem } from '@/interfaces/brandkit'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   data() {
@@ -57,8 +58,8 @@ export default Vue.extend({
     ...mapActions('brandkit', {
       fetchPalettes: 'fetchPalettes'
     }),
-    async handleCreatePalette() {
-      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+    handleCreatePalette() {
+      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.createPalette().then(id => {
         this.$nextTick(() => {
           const colorPalette = brandkitUtils.getColorPalette(this.colorPalettes, id)

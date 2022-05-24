@@ -60,6 +60,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -118,8 +119,8 @@ export default Vue.extend({
       fetchBrands: 'fetchBrands',
       fetchFonts: 'fetchFonts'
     }),
-    async addNewBrand() {
-      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+    addNewBrand() {
+      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.addNewBrand()
     },
     isDragDropValid(): boolean {
@@ -135,10 +136,10 @@ export default Vue.extend({
     handleDragLeave() {
       this.isDraggedOver = false
     },
-    async handleDrop(e: DragEvent) {
+    handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+      if (!paymentUtils.checkIsPro('brandkit')) return
 
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {

@@ -270,7 +270,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
           bgrmOver: data.bg_credit_current <= 0,
           diskUsed: Number(data.capacity_current.toFixed(2)),
           diskTotal: data.capacity,
-          // diskPercent: 0.85
           diskPercent: data.capacity_current / data.capacity
         },
         cardInfo: {
@@ -580,6 +579,9 @@ const getters: GetterTree<IPaymentState, any> = {
   },
   canUploadAsset(state) {
     return state.usage.diskPercent <= 1
+  },
+  getIsPro(state) {
+    return state.isPro
   },
   // old
   getPrime(state) {

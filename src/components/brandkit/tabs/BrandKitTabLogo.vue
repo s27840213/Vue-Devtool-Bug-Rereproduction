@@ -56,6 +56,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   data() {
@@ -107,8 +108,8 @@ export default Vue.extend({
         this.menuOpenLogoId = logo.id
       }
     },
-    async handleUploadLogo() {
-      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+    handleUploadLogo() {
+      if (!paymentUtils.checkIsPro('brandkit')) return
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {

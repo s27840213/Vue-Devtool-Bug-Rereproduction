@@ -35,6 +35,7 @@ import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   data() {
@@ -134,7 +135,7 @@ export default Vue.extend({
       if (btn.name === 'remove-bg' && this.inBgRemoveMode) return true
       return false
     },
-    async handleShow(name: string) {
+    handleShow(name: string) {
       this.show = this.show.includes(name) ? '' : name
       if (name === 'crop') {
         if (this.isCropping) {
@@ -155,7 +156,7 @@ export default Vue.extend({
         }
         this.show = ''
       } else if (name === 'remove-bg') {
-        if (!await this.$store.dispatch('payment/checkIsPro', 'bgrm')) return
+        if (!paymentUtils.checkIsPro('bgrm')) return
         const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
 
         this.setIsProcessing(true)
@@ -211,11 +212,8 @@ export default Vue.extend({
                   layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
                     inProcess: false
                   })
-                  modalUtils.setIsModalOpen(true)
-                  modalUtils.setModalInfo('上傳失敗', [`Error type: ${json.msg}`], '')
-                  // this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
                 }
-
+                paymentUtils.errorHandler(json.msg)
                 return true
               }
 

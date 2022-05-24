@@ -233,6 +233,21 @@ class Payment {
         token: authToken().token || '',
         admin_token: 'vKLyK56ICyAn1dLQ',
         team_id: store.getters['user/getTeamId'],
+        type: 'storage',
+        value: capacity
+      }
+    })
+  }
+
+  modifyBgrm(capacity: number): AxiosPromise {
+    return axios.request<any>({
+      url: '/modify-capacity',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        admin_token: 'vKLyK56ICyAn1dLQ',
+        team_id: store.getters['user/getTeamId'],
+        type: 'bg',
         value: capacity
       }
     })

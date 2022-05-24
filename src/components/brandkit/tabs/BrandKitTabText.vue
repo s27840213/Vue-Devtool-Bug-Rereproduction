@@ -53,6 +53,7 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 interface IUrledFont extends IBrandFont {
   namePrevUrl?: string,
@@ -128,8 +129,8 @@ export default Vue.extend({
       fetchMoreFonts: 'fetchMoreFonts',
       refreshFontAsset: 'refreshFontAsset'
     }),
-    async handleUploadFont() {
-      if (!await this.$store.dispatch('payment/checkIsPro', 'brandkit')) return
+    handleUploadFont() {
+      if (!paymentUtils.checkIsPro('brandkit')) return
       uploadUtils.chooseAssets('font')
     },
     handleDeleteFont(font: IBrandFont) {
