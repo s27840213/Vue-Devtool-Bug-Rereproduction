@@ -15,17 +15,20 @@
         span {{his.description}}
         span {{his.price}}
         span(v-if="his.success === false" class="text-red") {{$t('TMP0116')}}
-        span(v-else-if="his.payType === 'tappay'")
-        span(v-else class="text-blue-1 pointer" @click="pdf(idx)") {{$t('TMP0115')}}
+        a(v-else-if="his.payType === 'tappay' && his.url" class="text-blue-1"
+          :href="his.url") {{$t('TMP0115')}}
+        span(v-else-if="his.payType === 'stripe'" class="text-blue-1 pointer"
+            @click="pdf(idx)") {{$t('TMP0115')}}
+        span(v-else)
     //- observer-sentinel(@callback="getBillingHistroy")
-    //- For invoice pdf generation
+    //- For Stripe invoice pdf generation
     div(v-if="historys.length" class="bill-invoice-wrapper")
       div(class="bill-invoice" id="bill-invoice")
         div(class="bill-invoice__title")
           img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
           span {{'INVOICE'}}
-        div(class="bill-invoice__invoice-number") {{`Invoice number: ${historys[hisIndex].id}`}}
-        div(class="bill-invoice__invoice-date") {{`Invoice date: ${historys[hisIndex].date}`}}
+        div(class="bill-invoice__invoice-number") {{`Invoice number: ${curInvoice.id}`}}
+        div(class="bill-invoice__invoice-date") {{`Invoice date: ${curInvoice.date}`}}
         div(class="bill-invoice-fromto")
           span {{'From:'}}
           span {{'To:'}}
@@ -35,7 +38,7 @@
           span {{'Descriptions'}}
           span {{'Date'}}
           span {{'Price'}}
-          template(v-for="item in historys[hisIndex].items")
+          template(v-for="item in curInvoice.items")
             span {{item.description}}
             span {{item.date}}
             span {{item.price}}
@@ -72,17 +75,20 @@ export default Vue.extend({
       historys: 'billingHistory',
       isLoading: 'isLoading'
     }),
+    curInvoice(): Record<string, string | Array<Record<string, string>>> {
+      return this.historys[this.hisIndex]
+    },
     customerAddr():string {
       return [
-        this.historys[this.hisIndex].name,
-        this.historys[this.hisIndex].company,
-        this.historys[this.hisIndex].address,
-        this.historys[this.hisIndex].email
+        this.curInvoice.name,
+        this.curInvoice.company,
+        this.curInvoice.address,
+        this.curInvoice.email
       ].filter((item) => item !== '')
         .join('\n')
     },
     totalPrice():number {
-      return this.historys[this.hisIndex].items
+      return (this.curInvoice.items as Array<Record<string, string>>)
         .reduce((acc: number, cur: Record<string, unknown>) => {
           return acc + (cur.price as number)
         }, 0)
@@ -108,7 +114,7 @@ export default Vue.extend({
       }
       // html2pdf will freeze page, so sleep 100ms for showing loading spinner.
       await new Promise(resolve => setTimeout(resolve, 100))
-      await html2pdf().set(opt).from(invoice).toPdf().save()
+      await html2pdf().set(opt).from(invoice).toPdf().save(this.curInvoice.id)
       this.setIsLoading(false)
     }
   }
@@ -130,6 +136,7 @@ export default Vue.extend({
     >span { height: 45px; }
     >span:nth-child(4n+1) { text-align: left; }
     >span:nth-child(-n+4) { color: setColor(gray-3); }
+    >a { text-decoration: none; }
   }
 }
 

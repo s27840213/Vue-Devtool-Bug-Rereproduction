@@ -195,6 +195,7 @@ const state = getDefaultState()
 
 function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
   const weight = [1, 2, 1, 2, 1, 2, 4, 1]
+  const divisor = 5
   if (GUI === '') return true // Special case, because GUI is option field.
   else if (GUI.length !== 8) return false
 
@@ -207,8 +208,8 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
   })
 
   return GUI[6] === '7' // Check if divisible by 5
-    ? GUIsum % 5 === 0 || (GUIsum + 1) % 5 === 0
-    : GUIsum % 5 === 0
+    ? GUIsum % divisor === 0 || (GUIsum + 1) % divisor === 0
+    : GUIsum % divisor === 0
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
@@ -309,6 +310,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           return {
             success: item.success === 1,
             payType: IPayType[item.pay_type as keyof typeof IPayType],
+            url: item.signed_url,
             date: date,
             description: item.title,
             price: item.price,
@@ -340,6 +342,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         value = !state.billingInfo.phone.match(/^[-0-9]{9,12}$/)
         break
       case 'GUI':
+        commit('DEL_guiWhiteSpace') // Eat white space
         value = !isLegalGUI(state.billingInfo.GUI)
         break
     }
@@ -546,6 +549,9 @@ const mutations: MutationTree<IPaymentState> = {
   },
   SET_initView(state: IPaymentState, initView) {
     state.initView = initView
+  },
+  DEL_guiWhiteSpace(state: IPaymentState) {
+    state.billingInfo.GUI = state.billingInfo.GUI.replace(/\s/g, '')
   },
   // UPDATE(state: IPaymentState, data) {
   //   state = Object.assign(state, data)
