@@ -5,8 +5,8 @@ import { IEditorState, ILayerInfo } from '../types'
 
 const SET_UPLOAD_ID = 'SET_UPLOAD_ID' as const
 const SET_PROCESS_ID = 'SET_PROCESS_ID' as const
+const SET_HANDLE_ID = 'SET_HANDLE_ID' as const
 const ADD_UPLOAD_IMG = 'ADD_UPLOAD_IMG' as const
-const SET_IMG_CONTROL_LAYER = 'SET_IMG_CONTROL_LAYER' as const
 
 export interface IUploadShadowImg {
   id: string,
@@ -17,15 +17,23 @@ export interface IUploadShadowImg {
 interface IShadowState {
   uploadId: ILayerIdentifier,
   processId: ILayerIdentifier,
+  /**
+   * handling means the whole image-shadow applied process,
+   * start from open the panel-photo-shadow to the end as finishing uploading
+   */
+  handleId: ILayerIdentifier,
   uploadShadowImgs: Array<IUploadShadowImg>
 }
 
 const getters: GetterTree<IShadowState, IEditorState> = {
   isUploading(state): boolean {
-    return state.uploadId.layerId !== '' && state.uploadId.pageId !== ''
+    return state.uploadId.pageId !== '' && state.uploadId.layerId !== ''
   },
   isProcessing(state): boolean {
-    return state.processId.layerId !== '' && state.processId.layerId !== ''
+    return state.processId.pageId !== '' && state.processId.layerId !== ''
+  },
+  isHandling(state): boolean {
+    return state.handleId.pageId !== '' && state.handleId.layerId !== ''
   }
 }
 const state: IShadowState = {
@@ -39,6 +47,11 @@ const state: IShadowState = {
     layerId: '',
     subLayerId: ''
   },
+  handleId: {
+    pageId: '',
+    layerId: '',
+    subLayerId: ''
+  },
   uploadShadowImgs: []
 }
 
@@ -48,6 +61,9 @@ const mutations: MutationTree<IShadowState> = {
   },
   [SET_PROCESS_ID](state, id: ILayerIdentifier) {
     Object.assign(state.processId, id)
+  },
+  [SET_HANDLE_ID](state, id: ILayerIdentifier) {
+    Object.assign(state.handleId, id)
   },
   [ADD_UPLOAD_IMG](state, data: IUploadShadowImg) {
     state.uploadShadowImgs.push(data)

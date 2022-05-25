@@ -120,6 +120,24 @@ export default Vue.extend({
   mounted() {
     colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoShadow)
+    const target = layerUtils.getCurrConfig as IImage
+    if (target && target.type === LayerType.image) {
+      if (typeof layerUtils.subLayerIdx !== 'undefined' && layerUtils.subLayerIdx !== -1) {
+        imageShadowUtils.setHandleId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: layerUtils.getCurrLayer.id || '',
+          subLayerId: target.id || ''
+        })
+      } else {
+        imageShadowUtils.setHandleId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: target.id || '',
+          subLayerId: ''
+        })
+      }
+    } else {
+      console.error('The layer should be image layer')
+    }
     setTimeout(() => this.focusOnPanel())
   },
   async beforeDestroy() {
@@ -262,6 +280,7 @@ export default Vue.extend({
           performance.mark(mark7)
 
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+          imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
             type: this.isAdmin ? 'public' : 'private',
             userId: json.data.team_id,
@@ -302,6 +321,8 @@ export default Vue.extend({
           // .map(e => [e.name, e.duration]))
         }
       })
+    } else {
+      imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     }
   },
   destroyed() {

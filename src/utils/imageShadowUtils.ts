@@ -790,6 +790,10 @@ class ImageShadowUtils {
     store.commit('shadow/SET_PROCESS_ID', id)
   }
 
+  setHandleId(id: ILayerIdentifier) {
+    store.commit('shadow/SET_HANDLE_ID', id)
+  }
+
   addUploadImg(data: IUploadShadowImg) {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
   }

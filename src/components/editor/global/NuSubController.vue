@@ -123,7 +123,9 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-      isUploadImgShadow: 'shadow/isUploading'
+      isProcessShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading',
+      isHandleShadow: 'shadow/isHandling'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -295,8 +297,13 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      this.isPrimaryActive = this.primaryLayer.active
+      if (this.isProcessShadow || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        return
+      } else {
+        imageUtils.setImgControlDefault(false)
+      }
 
+      this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
@@ -397,6 +404,10 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (this.isHandleShadow) {
+        return
+      }
+      imageUtils.setImgControlDefault(false)
       if (!this.isLocked) {
         this.setIsLayerDropdownsOpened(true)
         this.$nextTick(() => {

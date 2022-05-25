@@ -143,7 +143,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import FrameUtils from '@/utils/frameUtils'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
+import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import NuTextEditor from '@/components/editor/global/NuTextEditor.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
@@ -230,7 +230,9 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      isHandleShadow: 'shadow/isHandling',
+      currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -314,9 +316,6 @@ export default Vue.extend({
             })
       }
       return false
-    },
-    isHandleShadow(): boolean {
-      return this.isProcessImgShadow || this.isUploadImgShadow
     },
     lockIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
@@ -610,10 +609,11 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
-      if (this.isProcessImgShadow) {
+      console.log()
+      if (this.isProcessImgShadow || this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         return
       } else {
-        ImageUtils.setImgControlDefault()
+        ImageUtils.setImgControlDefault(false)
       }
       this.movingByControlPoint = false
       const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && !this.contentEditable
@@ -1592,6 +1592,10 @@ export default Vue.extend({
       LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
     dblSubController(targetIndex: number) {
+      if (this.isHandleShadow) {
+        return
+      }
+
       let updateSubLayerProps = null as any
       let target = undefined as ILayer | undefined
       switch (this.getLayerType) {
