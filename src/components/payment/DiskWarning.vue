@@ -95,7 +95,7 @@ export default Vue.extend({
             },
             small: {
               desc: 'TMP0132',
-              buttonText: i18n.t('TMP0003'),
+              buttonText: i18n.tc('TMP0003', 1),
               func: this.openPaymentPopup
             }
           },
@@ -116,7 +116,7 @@ export default Vue.extend({
             },
             small: {
               desc: 'TMP0134',
-              buttonText: i18n.t('TMP0003'),
+              buttonText: i18n.tc('TMP0003', 1),
               func: this.openPaymentPopup
             }
           }

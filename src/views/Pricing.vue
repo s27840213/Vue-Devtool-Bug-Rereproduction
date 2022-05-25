@@ -11,7 +11,7 @@
       div(class="pricing-plan")
         div(class="pricing-plan-left")
           div(class="pricing-plan-left__top")
-            span(class="pricing-plan-left__top__title") {{$t('TMP0003')}}
+            span(class="pricing-plan-left__top__title") {{$tc('TMP0003', 1)}}
             span(class="pricing-plan-left__top__description") {{$t('TMP0004')}}
           div(class="pricing-plan-left__divider")
             span {{$t('TMP0005')}}

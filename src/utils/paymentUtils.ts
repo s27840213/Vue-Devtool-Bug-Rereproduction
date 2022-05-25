@@ -36,7 +36,7 @@ class PaymentUtils {
       ? 'mailto:tw@vivipic.com'
       : i18n.locale === 'jp'
         ? 'mailto:jp@vivipic.com'
-        : 'mailto:service@vivipic.com '
+        : 'mailto:service@vivipic.com'
   }
 
   errorHandler(msg?: string, initView = 'brandkit') {

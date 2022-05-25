@@ -12,7 +12,7 @@
                 svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
                         iconColor="gray1" @click.native="preStep()")
                 span(v-if="totalStep") {{$t('TMP0040')}} {{currentStep}} of {{totalStep}}
-              div(class="payment-left-top__title") {{title}}
+              div(class="payment-left-top__title" v-html="title")
               div(v-if="description" class="payment-left-top__description") {{description}}
             //- switch(view)
             div(class="payment-left-content" :view="view")
@@ -177,10 +177,10 @@ export default Vue.extend({
       switch (name) {
         case 'brandkit':
         case 'bgrm':
-          this.title = i18n.t('TMP0003') as string
+          this.title = i18n.tc('TMP0003', 2) as string
           this.description = i18n.t('TMP0079') as string
           this.buttons = [{
-            text: i18n.t('TMP0139') as string,
+            text: i18n.t('TMP0057') as string,
             func: () => this.changeView('step1')
           }]
           this.img = name === 'bgrm' ? 'remover.jpg' : 'brandkit.jpg'
@@ -209,14 +209,14 @@ export default Vue.extend({
           this.getBillingInfo()
           break
         case 'switch1':
-          await this.getPrice(this.userCountryInfo)
-          this.getSwitchPrice()
           this.title = i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string
           this.description = (this.isBundle ? i18n.t('TMP0062') : i18n.t('TMP0061')) as string
           this.buttons = [{
             text: i18n.t('TMP0063', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string,
             func: () => this.changeView('switch2')
           }]
+          await this.getPrice(this.userCountryInfo)
+          this.getSwitchPrice()
           break
         case 'switch2':
           this.title = i18n.t('TMP0047') as string
@@ -432,5 +432,25 @@ export default Vue.extend({
     height: 310px;
     >button { @include btn-LG; }
   }
+}
+
+@media screen and (max-width: 768px) {
+  .wrapper1 {
+    position: absolute;
+    bottom: 0;
+    width: 100%; height: calc(100% - #{$header-height});
+    .wrapper2, .payment { width: 100%; height: 100%; }
+    .close {
+      background-color: transparent;
+      right: 0px; top: 0px;
+      >svg { transform: scale(0.647); }
+    }
+  }
+  .payment-left {
+    width: 100%;
+    padding-top: 120px;
+  }
+  .payment-right { display: none; }
+  .payment-finish span { width: 80%;}
 }
 </style>

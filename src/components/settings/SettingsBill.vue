@@ -14,11 +14,12 @@
         span {{his.date}}
         span {{his.description}}
         span {{his.price}}
-        span(v-if="his.success === false" class="text-red") {{$t('TMP0116')}}
-        a(v-else-if="his.payType === 'tappay' && his.url" class="text-blue-1"
-          :href="his.url") {{$t('TMP0115')}}
-        span(v-else-if="his.payType === 'stripe'" class="text-blue-1 pointer"
-            @click="pdf(idx)") {{$t('TMP0115')}}
+        div(v-if="his.success === false" class="text-red")
+          span {{$t('TMP0116')}}
+          svg-icon(iconName="error" iconWidth="24px" iconColor="red")
+        div(v-else-if="canDownloadInvoice" class="text-blue-1" @click="pdf(idx, his)")
+          span {{$t('TMP0115')}}
+          svg-icon(iconName="download" iconWidth="24px" iconColor="gray-2")
         span(v-else)
     //- observer-sentinel(@callback="getBillingHistroy")
     //- For Stripe invoice pdf generation
@@ -92,6 +93,10 @@ export default Vue.extend({
         .reduce((acc: number, cur: Record<string, unknown>) => {
           return acc + (cur.price as number)
         }, 0)
+    },
+    canDownloadInvoice(): (his:Record<string, string>)=>boolean {
+      return (his: Record<string, string>) =>
+        Boolean((his.payType === 'tappay' && his.url) || his.payType === 'stripe')
     }
   },
   mounted() {
@@ -104,7 +109,12 @@ export default Vue.extend({
     ...mapMutations({
       setIsLoading: 'payment/SET_isLoading'
     }),
-    async pdf(index: number) {
+    async pdf(index: number, his: Record<string, string>) {
+      if (his.payType === 'tappay') {
+        location.href = his.url
+        return
+      }
+
       this.setIsLoading(true)
       this.hisIndex = index
       const invoice = document.getElementById('bill-invoice')
@@ -137,6 +147,7 @@ export default Vue.extend({
     >span:nth-child(4n+1) { text-align: left; }
     >span:nth-child(-n+4) { color: setColor(gray-3); }
     >a { text-decoration: none; }
+    >div >svg { display: none; }
   }
 }
 
@@ -181,5 +192,13 @@ export default Vue.extend({
     >span:nth-last-child(-n+2) { font-weight: bold; }
   }
   &-note { margin-top: 50px; }
+}
+
+@media screen and (max-width: 768px) {
+  .bill { padding: 24px 24px }
+  .bill-table >div {
+    >span { display: none; }
+    >svg { display: inline; }
+  }
 }
 </style>

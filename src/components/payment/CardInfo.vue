@@ -83,4 +83,11 @@ export default Vue.extend({
     }
   }
 }
+
+@media screen and (max-width: 768px) {
+  .card-popup {
+    position: absolute;
+    bottom: 0px;
+  }
+}
 </style>

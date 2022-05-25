@@ -284,6 +284,7 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    text-align: left;
   }
   &-plan, &-info { @include body-SM; }
   &-plan, &-usage {
@@ -321,11 +322,11 @@ export default Vue.extend({
 }
 
 .sp-info {
-  width: 350px;
+  max-width: 350px;
   label { color: setColor(gray-3); }
   input {
-    width: 330px;
-    height: 18px;
+    box-sizing: border-box;
+    height: 40px;
     margin: 10px 0;
     padding: 10px;
     border: 1px solid setColor(gray-4);
@@ -350,8 +351,15 @@ export default Vue.extend({
 
 .sp-field{
   width: 320px;
-  // height: 240px;
   padding: 20px 60px 40px 60px;
   background-color: white;
+}
+
+@media screen and (max-width: 768px) {
+  .sp { padding: 24px 24px }
+  .sp-field {
+    position: absolute;
+    bottom: 0px;
+  }
 }
 </style>
