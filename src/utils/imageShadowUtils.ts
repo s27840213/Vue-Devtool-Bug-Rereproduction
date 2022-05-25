@@ -161,7 +161,7 @@ class ImageShadowUtils {
     const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
     const hasBuffRecorded = (this.dataBuff.effect === ShadowEffectType.floating && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier)
 
-    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas) && !hasBuffRecorded) {
+    if (layerInfo && timeout && !hasBuffRecorded) {
       this.setIsProcess(layerInfo, true)
     }
 
@@ -204,7 +204,6 @@ class ImageShadowUtils {
         ctx.drawImage(canvasT, 0, 0)
         if (layerInfo) {
           this.setIsProcess(layerInfo, false)
-          this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
       }
@@ -263,7 +262,7 @@ class ImageShadowUtils {
     if (!layerInfo || !Object.keys(layerInfo)) {
       layerInfo = this.layerData?.options?.layerInfo
     }
-    if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas) && !hasBuffRecorded) {
+    if (layerInfo && timeout && !hasBuffRecorded) {
       this.setIsProcess(layerInfo, true)
     }
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
@@ -311,7 +310,6 @@ class ImageShadowUtils {
         ctx.drawImage(canvasT, 0, 0)
         if (layerInfo) {
           this.setIsProcess(layerInfo, false)
-          this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         cb && cb()
@@ -367,7 +365,7 @@ class ImageShadowUtils {
        * 1. this drawing is not an uploading draw -> timeout !== 0
        * 2. or, this drawing is an uploading draw and the canvas is empty
        */
-      if (layerInfo && (timeout || !config.styles.shadow.hasPaintOnCanvas)) {
+      if (layerInfo && timeout) {
         this.setIsProcess(layerInfo, true)
       }
 
@@ -443,8 +441,7 @@ class ImageShadowUtils {
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.drawImage(canvasT, 0, 0)
           if (layerInfo) {
-            this.setIsProcess(layerInfo, false)
-            this.updateEffectProps(layerInfo, { hasPaintOnCanvas: true })
+            timeout && this.setIsProcess(layerInfo, false)
           }
           this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
           cb && cb()

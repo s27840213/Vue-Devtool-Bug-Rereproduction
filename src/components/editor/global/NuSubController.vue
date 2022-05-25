@@ -12,7 +12,6 @@
             @dragenter="onDragEnter($event)"
             @dragleave="onDragLeave($event)"
             @mouseenter="onFrameMouseEnter($event)"
-            @mouseleave="onFrameMouseLeave($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -116,6 +115,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('shadow', ['uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -563,6 +563,9 @@ export default Vue.extend({
       if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto) {
         return
       }
+      if ((LayerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+        return
+      }
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
@@ -602,6 +605,7 @@ export default Vue.extend({
           verticalFlip: currLayer.styles.verticalFlip
         })
         const controller = this.$refs.body as HTMLElement
+        controller.addEventListener('mouseleave', this.onFrameMouseLeave)
         controller.addEventListener('mouseup', this.onFrameMouseUp)
       }
     },
@@ -629,6 +633,7 @@ export default Vue.extend({
       }
       const controller = this.$refs.body as HTMLElement
       controller.removeEventListener('mouseup', this.onFrameMouseUp)
+      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
     },
     onFrameMouseUp(e: MouseEvent) {
       if (this.isDraggedPanelPhoto) return
@@ -642,6 +647,7 @@ export default Vue.extend({
       }
       const controller = this.$refs.body as HTMLElement
       controller.removeEventListener('mouseup', this.onFrameMouseUp)
+      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
     }
   }
 })

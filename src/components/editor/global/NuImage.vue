@@ -549,7 +549,6 @@ export default Vue.extend({
       }
       clearShadowSrc && this.clearShadowSrc()
       imageShadowUtils.clearLayerData()
-      imageShadowUtils.updateEffectProps(this.layerInfo, { hasPaintOnCanvas: false })
       const { width, height } = this.config.styles
       const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
       const _canvasW = (width + CANVAS_SPACE * spaceScale)

@@ -158,10 +158,6 @@ export default Vue.extend({
       const uploadAssetId = generalUtils.generateRandomString(6)
       this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
       stepsUtils.record()
-      /** If the canvas has been painted, stop showing the inProcess icon */
-      if (config.styles.shadow.hasPaintOnCanvas) {
-        layerUtils.updateLayerProps(_pageIndex, _layerIndex, { inProcess: LayerProcessType.none }, _subLayerIdx)
-      }
 
       const assetId = generalUtils.generateAssetId()
       this.$store.commit('file/SET_UPLOADING_IMGS', {
@@ -253,18 +249,6 @@ export default Vue.extend({
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
       uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
-      // const drawnImg = new Image()
-      // drawnImg.src = updateCanvas.toDataURL('image/png;base64', 0.5)
-
-      // performance.mark(mark4)
-      // console.log('mark4 finish')
-
-      // await new Promise<void>((resolve) => {
-      //   drawnImg.onload = () => {
-      //     ctxUpload.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
-      //     resolve()
-      //   }
-      // })
       ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
       performance.mark(mark5)
