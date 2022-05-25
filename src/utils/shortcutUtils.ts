@@ -160,6 +160,17 @@ class ShortcutUtils {
     }
   }
 
+  textCut() {
+    const sel = window.getSelection()
+    if (sel) {
+      navigator.clipboard.writeText(sel.toString().replace(/\n\n/g, '\n'))
+      tiptapUtils.agent(editor => {
+        editor.commands.deleteSelection()
+        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
+      })
+    }
+  }
+
   textPaste() {
     navigator.clipboard.readText().then((text) => {
       tiptapUtils.agent(editor => {
@@ -265,60 +276,65 @@ class ShortcutUtils {
   }
 
   async undo() {
-    const currLayer = LayerUtils.getCurrLayer
-    if (currLayer) {
-      switch (currLayer.type) {
-        case 'frame':
-          if ((currLayer as IFrame).clips.some(img => img.imgControl)) {
-            return
-          }
-          break
-        case 'group':
-          if ((currLayer as IGroup).layers.some(l => l.type === 'image' && l.imgControl)) {
-            return
-          }
-          break
-        case 'image':
-          if (currLayer.imgControl) {
-            return
-          }
+    if (!StepsUtils.isInFirstStep) {
+      const currLayer = LayerUtils.getCurrLayer
+      if (currLayer) {
+        switch (currLayer.type) {
+          case 'frame':
+            if ((currLayer as IFrame).clips.some(img => img.imgControl)) {
+              return
+            }
+            break
+          case 'group':
+            if ((currLayer as IGroup).layers.some(l => l.type === 'image' && l.imgControl)) {
+              return
+            }
+            break
+          case 'image':
+            if (currLayer.imgControl) {
+              return
+            }
+        }
       }
-    }
-    await StepsUtils.undo()
-    Vue.nextTick(() => {
-      tiptapUtils.agent(editor => {
-        const currLayer = LayerUtils.getCurrLayer
-        if (!currLayer.active) return
-        if (currLayer.type === 'group') {
-          const subLayerIndex = LayerUtils.subLayerIdx
-          if (subLayerIndex === -1) return
-          const subLayer = (currLayer as IGroup).layers[subLayerIndex]
-          if (!subLayer.active || subLayer.type !== 'text') return
-        } else if (currLayer.type !== 'text') return
-        editor.chain().sync().focus().run()
-        tiptapUtils.prevText = tiptapUtils.getText(editor)
-        TextPropUtils.updateTextPropsState()
+      await StepsUtils.undo()
+      Vue.nextTick(() => {
+        tiptapUtils.agent(editor => {
+          const currLayer = LayerUtils.getCurrLayer
+          if (!currLayer.active) return
+          if (currLayer.type === 'group') {
+            const subLayerIndex = LayerUtils.subLayerIdx
+            if (subLayerIndex === -1) return
+            const subLayer = (currLayer as IGroup).layers[subLayerIndex]
+            if (!subLayer.active || subLayer.type !== 'text') return
+          } else if (currLayer.type !== 'text') return
+          editor.chain().sync().focus().run()
+          tiptapUtils.prevText = tiptapUtils.getText(editor)
+          TextPropUtils.updateTextPropsState()
+        })
       })
-    })
+    }
   }
 
   async redo() {
-    await StepsUtils.redo()
-    Vue.nextTick(() => {
-      tiptapUtils.agent(editor => {
-        const currLayer = LayerUtils.getCurrLayer
-        if (!currLayer.active) return
-        if (currLayer.type === 'group') {
-          const subLayerIndex = LayerUtils.subLayerIdx
-          if (subLayerIndex === -1) return
-          const subLayer = (currLayer as IGroup).layers[subLayerIndex]
-          if (!subLayer.active || subLayer.type !== 'text') return
-        } else if (currLayer.type !== 'text') return
-        editor.chain().sync().focus().run()
-        tiptapUtils.prevText = tiptapUtils.getText(editor)
-        TextPropUtils.updateTextPropsState()
+    console.log(StepsUtils.isInLastStep)
+    if (!StepsUtils.isInLastStep) {
+      await StepsUtils.redo()
+      Vue.nextTick(() => {
+        tiptapUtils.agent(editor => {
+          const currLayer = LayerUtils.getCurrLayer
+          if (!currLayer.active) return
+          if (currLayer.type === 'group') {
+            const subLayerIndex = LayerUtils.subLayerIdx
+            if (subLayerIndex === -1) return
+            const subLayer = (currLayer as IGroup).layers[subLayerIndex]
+            if (!subLayer.active || subLayer.type !== 'text') return
+          } else if (currLayer.type !== 'text') return
+          editor.chain().sync().focus().run()
+          tiptapUtils.prevText = tiptapUtils.getText(editor)
+          TextPropUtils.updateTextPropsState()
+        })
       })
-    })
+    }
   }
 
   zoomIn() {
@@ -334,6 +350,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y - (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 
   down(pressShift = false) {
@@ -341,6 +358,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       y: this.currSelectedLayerStyles.y + (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 
   left(pressShift = false) {
@@ -348,6 +366,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x - (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 
   right(pressShift = false) {
@@ -355,6 +374,7 @@ class ShortcutUtils {
     LayerUtils.updateLayerStyles(this.currSelectedPageIndex, this.currSelectedLayerIndex, {
       x: this.currSelectedLayerStyles.x + (moveOffset * (100 / this.scaleRatio))
     })
+    StepsUtils.record()
   }
 }
 

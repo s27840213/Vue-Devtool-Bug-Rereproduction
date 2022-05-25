@@ -18,6 +18,7 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import generalUtils from '@/utils/generalUtils'
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -32,7 +33,7 @@ const MOBILE_ROUTES = [
 
 // Ingore some normal router console error
 const originalPush = VueRouter.prototype.push
-VueRouter.prototype.push = function push(location: RawLocation):Promise<Route> {
+VueRouter.prototype.push = function push(location: RawLocation): Promise<Route> {
   return (originalPush.call(this, location) as unknown as Promise<Route>)
     .catch(err => {
       switch (err.name) {
@@ -46,7 +47,7 @@ VueRouter.prototype.push = function push(location: RawLocation):Promise<Route> {
 }
 
 const originalReplace = VueRouter.prototype.replace
-VueRouter.prototype.replace = function repalce(location: RawLocation):Promise<Route> {
+VueRouter.prototype.replace = function repalce(location: RawLocation): Promise<Route> {
   return (originalReplace.call(this, location) as unknown as Promise<Route>)
     .catch(err => {
       switch (err.name) {
@@ -267,7 +268,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
-    const response = await fetch('https://template.vivipic.com/static/app.json')
+    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)

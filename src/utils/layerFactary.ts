@@ -19,7 +19,6 @@ class LayerFactary {
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
-      previewSrc: config.previewSrc,
       srcObj: {
         ...config.srcObj
       },

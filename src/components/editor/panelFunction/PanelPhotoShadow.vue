@@ -10,8 +10,7 @@
           :class="{ 'photo-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-2"
-          v-hint="$t(shadowPropI18nMap[icon]._effectName)"
-        )
+          v-hint="$t(shadowPropI18nMap[icon]._effectName)")
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
         :class="['w-full', currentEffect !== 'none' ? 'photo-effect-setting__form' : '']")
         div(v-for="field in shadowFields"

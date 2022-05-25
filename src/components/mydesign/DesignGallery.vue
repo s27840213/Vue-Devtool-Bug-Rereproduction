@@ -11,8 +11,9 @@
       div(class="design-gallery__title")
         span {{$tc('NN0252', 2)}}
     div(v-if="isExpanded" class="design-gallery__designs")
-      design-item(v-for="design in allDesigns"
+      design-item(v-for="(design, index) in allDesigns"
                   :key="design.asset_index"
+                  :index="index"
                   :config="design"
                   :favorable="!limitFunctions"
                   :undraggable="limitFunctions"
@@ -24,7 +25,8 @@
                   :menuItemNum="menuItemSlots.length"
                   @like="toggleFavorite(design)"
                   @select="selectDesign(design)"
-                  @deselect="deselectDesign(design)")
+                  @deselect="deselectDesign(design)"
+                  @metaSelect="metaSelectDesign(index)")
         template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
           div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, design)")
             div(class="design-menu-item__icon")
@@ -93,7 +95,8 @@ export default Vue.extend({
       addToSelection: 'UPDATE_addToSelection',
       removeFromSelection: 'UPDATE_removeFromSelection',
       addToFavorite: 'UPDATE_addToFavorite',
-      removeFromFavorite: 'UPDATE_removeFromFavorite'
+      removeFromFavorite: 'UPDATE_removeFromFavorite',
+      metaSelect: 'UPDATE_metaSelect'
     }),
     checkSelected(assetIndex: string): boolean {
       return !!this.selectedDesigns[assetIndex]
@@ -127,6 +130,12 @@ export default Vue.extend({
     },
     deselectDesign(design: IDesign) {
       this.removeFromSelection(design)
+    },
+    metaSelectDesign(index: number) {
+      this.metaSelect({
+        designs: this.allDesigns,
+        index
+      })
     }
   }
 })
@@ -166,18 +175,8 @@ export default Vue.extend({
   &__designs {
     display: grid;
     grid-gap: 25px;
-    justify-items: stretch;
     margin-bottom: 20px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    @media(min-width: 976px) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    @media(min-width: 1260px) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-    @media(min-width: 1560px) {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
   }
   &__loading {
     display: flex;

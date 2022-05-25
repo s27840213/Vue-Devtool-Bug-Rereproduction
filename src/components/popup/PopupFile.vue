@@ -113,6 +113,7 @@ export default Vue.extend({
       this.showPreference = true
     },
     togglerRuler() {
+      localStorage.setItem('showRuler', `${!rulerUtils.showRuler}`)
       rulerUtils.setShowRuler(!rulerUtils.showRuler)
     },
     toggleGuideline() {

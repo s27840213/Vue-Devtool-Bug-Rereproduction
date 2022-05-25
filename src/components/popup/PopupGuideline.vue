@@ -25,21 +25,21 @@ export default Vue.extend({
     shortcutMenu() {
       return [
         {
-          text: '刪除此參考線',
+          text: `${this.$t('NN0502')}`,
           shortcutText: '',
           action: () => {
             rulerUtils.deleteLastMapedGuideline()
           }
         },
         {
-          text: '刪除所有參考線',
+          text: `${this.$t('NN0075')}`,
           shortcutText: '',
           action: () => {
             rulerUtils.clearGuidelines()
           }
         },
         {
-          text: '隱藏所有參考線',
+          text: `${this.$t('NN0074')}`,
           shortcutText: '',
           action: () => {
             rulerUtils.setShowGuideline(false)

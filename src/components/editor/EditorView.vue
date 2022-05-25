@@ -191,7 +191,7 @@ export default Vue.extend({
       getLayer: 'getLayer',
       getPageSize: 'getPageSize',
       pageScaleRatio: 'getPageScaleRatio',
-      showRuler: 'getShowRuler',
+      _showRuler: 'getShowRuler',
       lockGuideline: 'getLockGuideline',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
@@ -230,6 +230,9 @@ export default Vue.extend({
     },
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
+    },
+    showRuler(): boolean {
+      return this._showRuler && !this.inBgRemoveMode
     }
   },
   methods: {
@@ -425,8 +428,9 @@ export default Vue.extend({
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('v').outOfPage) {
         this.isShowGuidelineV = false
-      } else {
         StepsUtils.record()
+      } else {
+        this.closeGuidelineV(true)
       }
       this.$nextTick(() => {
         window.removeEventListener('mousemove', this.draggingV)
@@ -438,7 +442,7 @@ export default Vue.extend({
       const guidelineV = this.$refs.guidelineV as HTMLElement
       guidelineV.style.transform = `translate(${pos.x}px,0px)`
     },
-    closeGuidelineV() {
+    closeGuidelineV(need2Record = false) {
       if (!this.isDragging) {
         this.isShowGuidelineV = false
         if (this.from !== -1) {
@@ -447,6 +451,9 @@ export default Vue.extend({
           RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
         }
         this.from = -1
+        if (need2Record) {
+          StepsUtils.record()
+        }
       }
     },
     dragEditorViewStart(e: MouseEvent) {
@@ -492,8 +499,11 @@ export default Vue.extend({
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('h').outOfPage) {
         this.isShowGuidelineH = false
-      } else {
         StepsUtils.record()
+      } else {
+        // close EditorView guideline then put it into page
+        // or the record point will have some trouble
+        this.closeGuidelineH(true)
       }
       this.$nextTick(() => {
         window.removeEventListener('mousemove', this.draggingH)
@@ -511,7 +521,7 @@ export default Vue.extend({
       const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
       return result
     },
-    closeGuidelineH() {
+    closeGuidelineH(need2Record = false) {
       if (!this.isDragging) {
         this.isShowGuidelineH = false
         if (this.from !== -1) {
@@ -520,6 +530,9 @@ export default Vue.extend({
           RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
         }
         this.from = -1
+        if (need2Record) {
+          StepsUtils.record()
+        }
       }
     },
     setTranslateOfPos(event: MouseEvent, type: string) {

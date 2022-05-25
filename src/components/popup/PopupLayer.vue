@@ -71,7 +71,7 @@
         div(class="shortcut")
           span(class="ml-10 body-2 text-gray-3") {{data.shortcutText}}
     hr(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))" class="popup-layer__hr")
-    div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image'))"
+    div(v-if="(currSelectedInfo.layers.length === 1) && (currSelectedInfo.types.has('image')) && currSelectedInfo.layers[0].previewSrc === undefined"
         class="popup-layer__item"
         @click="setBackgroundImage")
       svg-icon(
@@ -355,7 +355,7 @@ export default Vue.extend({
         this._setBgImgSrc({
           pageIndex: pageIndex,
           srcObj: image.srcObj,
-          previewSrc: src
+          previewSrc: image.previewSrc
         })
         // this._setBackgroundImage({
         //   pageIndex: pageIndex,

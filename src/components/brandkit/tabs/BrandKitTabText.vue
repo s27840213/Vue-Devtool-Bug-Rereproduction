@@ -172,6 +172,7 @@ export default Vue.extend({
 .brand-kit-tab-text {
   display: flex;
   gap: 145px;
+  min-width: 800px;
   &__font-column {
     margin-left: 10px;
     display: flex;

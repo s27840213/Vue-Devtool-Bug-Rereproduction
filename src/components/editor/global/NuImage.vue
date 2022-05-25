@@ -69,6 +69,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import stepsUtils from '@/utils/stepsUtils'
+import errorHandle from '@/utils/errorHandleUtils'
 
 export default Vue.extend({
   props: {
@@ -443,12 +444,21 @@ export default Vue.extend({
     onError() {
       this.isOnError = true
       let updater
-      if (this.config.srcObj.type === 'private') {
-        updater = async () => await this.updateImages({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
+      const srcObj = this.config.srcObj
+      switch (srcObj.type) {
+        case 'private':
+          updater = async () => await this.updateImages({ assetSet: new Set<string>([srcObj.assetId]) })
+          break
+        case 'logo-private':
+          updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
+          break
+        case 'public':
+          errorHandle.addMissingDesign('asset-image', srcObj.assetId)
+          break
+        case 'background':
+          errorHandle.addMissingDesign('background', srcObj.assetId)
       }
-      if (this.config.srcObj.type === 'logo-private') {
-        updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.config.srcObj.assetId]) })
-      }
+
       if (updater !== undefined) {
         try {
           updater().then(() => {

@@ -113,13 +113,13 @@ export default {
       // })
     }
   },
-  async updateApiWrapper(apiSender: () => Promise<any>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+  async updateApiWrapper(apiSender: () => Promise<any>, updater: () => void, fallbacker: () => void, errorShower: (msg?: string) => void, responseHandler?: (response: any) => void): Promise<boolean> {
     updater()
     try {
       const response = await apiSender()
       if (response.data.flag !== 0) {
         fallbacker()
-        errorShower()
+        errorShower(response.data.msg)
         return false
       }
       if (responseHandler) {
@@ -128,12 +128,12 @@ export default {
     } catch (error) {
       console.error(error)
       fallbacker()
-      errorShower()
+      errorShower((error as Error).message)
       return false
     }
     return true
   },
-  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: () => void, responseHandler?: (response: any) => void): Promise<boolean> {
+  async updateBrandsWrapper(params: Partial<IBrandParams>, updater: () => void, fallbacker: () => void, errorShower: (msg?: string) => void, responseHandler?: (response: any) => void): Promise<boolean> {
     return await this.updateApiWrapper(async () => {
       return await this.updateBrands(this.getToken(), this.getLocale(), this.getUserId(), params)
     }, updater, fallbacker, errorShower, responseHandler)

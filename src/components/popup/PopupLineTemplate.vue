@@ -2,9 +2,9 @@
   div(class="popup-line-template bg-white")
     div(class="popup-line-template__group")
       div(class="body-3")
-        span 選擇標線版型
+        span {{$t('NN0501')}}
       div(class="popup-line-template__options")
-        span(class="popup-line-template__subtitle text-gray-3 mb-5") line推播支援
+        span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0152', {media: 'Line'})}}
         div(class="popup-line-template__grid-4")
           svg-icon(v-for="(template,index) in lineTemplate1"
               :key="`line-template-1-${index}`"
@@ -16,7 +16,7 @@
       hr(class="popup-line-template__hr")
       div(class="popup-line-template__row2" :style="row2Styles")
         div(v-if="isFbCover" class="popup-line-template__fb-cover")
-          span(class="popup-line-template__subtitle text-gray-3 mb-5") FB粉絲頁封面
+          span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$tc('NN0151', 2,{ media: 'FB' })}}
           div
             svg-icon(class="popup-line-template__icon pointer"
               :iconName="'line-template-fb-cover'"
@@ -24,7 +24,7 @@
               :iconColor="'gray-1'"
               @click.native="addLineToSpecPos(fbCover)")
         div(class="popup-line-template__options")
-          span(class="popup-line-template__subtitle text-gray-3 mb-5") 其他
+          span(class="popup-line-template__subtitle text-gray-3 mb-5") {{$t('NN0452')}}
           div(class="popup-line-template__grid-3")
             svg-icon(v-for="(template,index) in lineTemplate2"
                 :key="`line-template-2-${index}`"
