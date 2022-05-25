@@ -49,6 +49,7 @@
             @change="handleNameEditEnd"
             @keyup="checkNameEnter")
       span(v-else
+          :title="config.name"
           @dblclick="handleNameEditStart"
           @click.right.stop.prevent="handleNameEditStart") {{ config.name }}
     transition(name="fade")
