@@ -279,7 +279,7 @@ export default Vue.extend({
           if (!this.isHandleShadow) {
             GroupUtils.deselect()
           } else {
-            imageUtils.setImgControlDefault()
+            imageUtils.setImgControlDefault(false)
           }
         }
         this.isSelecting = true
@@ -317,7 +317,7 @@ export default Vue.extend({
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
-          imageUtils.setImgControlDefault()
+          imageUtils.setImgControlDefault(false)
         }
       }
       /**
@@ -333,7 +333,7 @@ export default Vue.extend({
           if (!this.isHandleShadow) {
             this.handleSelectionData(selectionArea.getBoundingClientRect())
           } else {
-            imageUtils.setImgControlDefault()
+            imageUtils.setImgControlDefault(false)
           }
         }
       })

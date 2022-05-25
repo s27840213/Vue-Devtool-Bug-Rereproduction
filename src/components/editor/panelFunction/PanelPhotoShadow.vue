@@ -182,7 +182,6 @@ export default Vue.extend({
       })
 
       performance.mark(mark1)
-      console.log('mark1 finish')
 
       const updateCanvas = document.createElement('canvas')
       const { width, height, imgWidth, imgHeight } = config.styles
@@ -236,14 +235,12 @@ export default Vue.extend({
       // setTimeout(() => document.body.removeChild(updateCanvas), 15000)
 
       performance.mark(mark2)
-      console.log('mark2 finish')
 
       const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
 
       performance.mark(mark3)
-      console.log('mark3 finish')
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -252,14 +249,11 @@ export default Vue.extend({
       ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
       performance.mark(mark5)
-      console.log('mark5 finish')
 
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 0.5)]
 
       performance.mark(mark6)
-      console.log('mark6 finish')
 
-      // const srcObjIdentifier = config.srcObj.type + config.srcObj.userId + config.srcObj.assetId
       uploadUtils.uploadAsset('image', uploadImg, {
         addToPage: false,
         needCompressed: false,
@@ -267,7 +261,6 @@ export default Vue.extend({
         isShadow: true,
         pollingCallback: (json: IUploadAssetResponse) => {
           performance.mark(mark7)
-          console.log('mark7 finish')
 
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {

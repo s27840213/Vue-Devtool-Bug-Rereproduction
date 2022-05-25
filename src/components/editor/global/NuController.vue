@@ -1430,10 +1430,6 @@ export default Vue.extend({
         GroupUtils.deselect()
         this.setLastSelectedLayerIndex(this.layerIndex)
         GroupUtils.select(this.pageIndex, [this.layerIndex])
-        // if (this.currSelectedInfo.index < 0) {
-        //   this.setLastSelectedLayerIndex(this.layerIndex)
-        //   GroupUtils.select(this.pageIndex, [this.layerIndex])
-        // }
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)

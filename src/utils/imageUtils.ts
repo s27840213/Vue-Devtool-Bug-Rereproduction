@@ -176,7 +176,7 @@ class ImageUtils {
     return tokens[tokens.length - 3]
   }
 
-  setImgControlDefault() {
+  setImgControlDefault(deselect = true) {
     const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
     if (currLayer) {
       switch (currLayer.type) {
@@ -186,12 +186,12 @@ class ImageUtils {
         case 'group': {
           const primaryLayer = currLayer as IGroup
           for (let i = 0; i < primaryLayer.layers.length; i++) {
-            const props = {
-              active: false
-            } as { [key: string]: boolean | string | number }
-
+            const props = {} as { [key: string]: boolean | string | number }
             if (primaryLayer.layers[i].type === 'image') {
               props.imgControl = false
+            }
+            if (deselect) {
+              props.active = false
             }
             LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
           }

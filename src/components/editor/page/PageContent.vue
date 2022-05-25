@@ -153,7 +153,7 @@ export default Vue.extend({
       if (!this.isHandleShadow) {
         groupUtils.deselect()
       } else {
-        imageUtils.setImgControlDefault()
+        imageUtils.setImgControlDefault(false)
       }
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
