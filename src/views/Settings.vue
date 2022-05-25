@@ -2,7 +2,7 @@
   div(class="settings")
     nu-header(v-header-border="true")
     div(class="settings__content")
-      sidebar(class="settings__sidebar"
+      sidebar(class="settings__sidebar" :style="sidebarStyle"
         @switch="switchView"
         :current="currentView")
       section(class="settings__view")
@@ -48,6 +48,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    sidebarStyle(): Record<string, string> {
+      return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
+    }
   },
   created() {
     if (!this.view) {

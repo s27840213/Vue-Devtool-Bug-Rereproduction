@@ -28,12 +28,9 @@
           avatar(class="mr-10"
             :textSize="14"
             :avatarSize="35")
-        div(class="nav__option")
-          router-link(to="/settings/account"
+        div(class="nav__option" @click="close()")
+          router-link(to="/settings/menu"
             class="mobile-menu__link") {{$tc('NN0165', 1)}}
-        div(class="nav__option")
-          router-link(to="/settings/security"
-            class="mobile-menu__link") {{$tc('NN0166', 1)}}
         div(class="nav__option"
           @click="onLogoutClicked()")
           span {{$tc('NN0167', 1)}}
@@ -108,7 +105,8 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    }
+    },
+    close() { this.$emit('closeMenu') }
   }
 })
 </script>
@@ -149,6 +147,8 @@ export default Vue.extend({
   &__link {
     color: unset;
     text-decoration: unset;
+    width: 100%;
+    text-align: left;
   }
 }
 .nav {

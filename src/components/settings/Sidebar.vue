@@ -22,7 +22,6 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import i18n from '@/i18n'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/paymentData'

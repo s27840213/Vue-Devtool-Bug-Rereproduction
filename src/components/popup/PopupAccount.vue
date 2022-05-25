@@ -33,7 +33,6 @@
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapState, mapGetters } from 'vuex'
-import i18n from '@/i18n'
 import Avatar from '@/components/Avatar.vue'
 import paymentData from '@/utils/paymentData'
 
