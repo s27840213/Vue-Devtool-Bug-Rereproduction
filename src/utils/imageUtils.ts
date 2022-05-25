@@ -33,6 +33,7 @@ class ImageUtils {
   }
 
   getSrc(config: Partial<IImage>, size?: string | number, ver?: number): string {
+    // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
     if (!config.srcObj && !config.src_obj) return ''
     if (config.previewSrc) {
       return config.previewSrc

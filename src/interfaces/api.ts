@@ -373,3 +373,9 @@ export interface IUpdateAssetParams {
   src_folder?: string,
   target?: string
 }
+
+export interface IUploadMissingDesign {
+  token: string,
+  type: 'svg' | 'background' | 'asset-image' | 'asset-font' | 'font',
+  design_id: string
+}

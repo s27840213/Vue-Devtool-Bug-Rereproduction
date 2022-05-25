@@ -5,14 +5,14 @@
     div(v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="src"
+          @error="onError"
           :styles="adjustImgStyles")
       img(v-else :src="src"
         draggable="false"
         :style="imgStyles()"
         class="body"
+        @error="onError"
         ref="body")
-      //- img(v-else :src="src" :style="imgStyles()")
-      //- div(v-else :style="bgStyles")
 </template>
 
 <script lang="ts">
@@ -25,6 +25,7 @@ import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
+import errorHandle from '@/utils/errorHandleUtils'
 
 export default Vue.extend({
   props: {
@@ -156,20 +157,30 @@ export default Vue.extend({
     ...mapMutations({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
-    onError() { // deprecated?
+    onError() {
       console.log('image on error')
       let updater
-      if (this.image.config.srcObj.type === 'private') {
-        updater = async () => await this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
+      const srcObj = this.image.config.srcObj
+      switch (srcObj.type) {
+        case 'private':
+          updater = async () => await this.updateImages({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
+          break
+        case 'logo-private':
+          updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
+          break
+        case 'public':
+          errorHandle.addMissingDesign('asset-image', srcObj.assetId)
+          break
+        case 'background':
+          errorHandle.addMissingDesign('background', srcObj.assetId)
       }
-      if (this.image.config.srcObj.type === 'logo-private') {
-        updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
-      }
+
       if (updater !== undefined) {
         try {
-          updater()
+          updater().then(() => {
+            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+          })
         } catch (error) {
-          console.log(error)
         }
       }
     },
