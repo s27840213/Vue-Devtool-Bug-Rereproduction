@@ -989,7 +989,7 @@ class TextUtils {
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
     if (router.currentRoute.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: index-${LayerUtils.getLayerIndexById(0, config.id ?? '')} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode}`)
     }
     if (limitDiff / initSize.widthLimit > 0.05) {
       return initSize.widthLimit
