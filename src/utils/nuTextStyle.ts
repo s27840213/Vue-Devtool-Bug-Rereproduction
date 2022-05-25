@@ -394,6 +394,14 @@ export default Extension.create({
       'Mod-v': () => {
         shortcutUtils.textPaste()
         return true
+      },
+      'Mod--': () => {
+        shortcutUtils.zoomOut()
+        return true
+      },
+      'Mod-=': () => {
+        shortcutUtils.zoomIn()
+        return true
       }
     }
   },

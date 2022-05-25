@@ -12,7 +12,7 @@
           @click.self="handleClick")
     div(class="design-item__name")
       div(class="design-item__name__container")
-        span {{ config.name }}
+        span(:title="config.name") {{ config.name }}
 </template>
 
 <script lang="ts">

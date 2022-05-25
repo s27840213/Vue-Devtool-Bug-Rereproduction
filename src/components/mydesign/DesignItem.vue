@@ -79,7 +79,7 @@
                 iconWidth="13px"
                 iconColor="gray-3"
                 style="color: transparent")
-        span {{ config.name }}
+        span(:title="config.name") {{ config.name }}
         svg-icon(v-if="isNameMouseOver"
                 iconName="pen"
                 iconWidth="13px"

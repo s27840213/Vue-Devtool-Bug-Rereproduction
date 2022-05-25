@@ -17,7 +17,7 @@
               @mouseenter="handleFolderNameMouseEnter"
               @mouseleave="handleFolderNameMouseLeave"
               @click="handleFolderNameClick")
-          span {{ folderName }}
+          span(:title="folderName") {{ folderName }}
           svg-icon(iconName="pen"
                   iconWidth="20px"
                   iconColor="gray-3")
@@ -37,7 +37,7 @@
           span(class="folder-design-view__path__node" @click="goToParent(index + 1)") {{ parent + ' ' }}
           span(class="folder-design-view__path__text") {{ ' > ' }}
           span(class="folder-design-view__path__text") {{ ' ' }}
-        span(class="folder-design-view__path__node") {{ folderName }}
+        span(class="folder-design-view__path__node" :title="folderName") {{ folderName }}
       div(class="folder-design-view__actions")
         div(class="folder-design-view__more"
             @click="toggleFolderMenu"
@@ -52,7 +52,7 @@
               class="folder-design-view__more__menu"
               @click.stop)
             div(class="folder-design-view__more__menu__title")
-              span {{ folderName }}
+              span(:title="folderName") {{ folderName }}
             div(class="folder-design-view__more__menu__text")
               span {{ `${$t('NN0196', { name:folder ? folder.author : '' })} | ${$t('NN0197', { num:itemCount })}` }}
             div(class="folder-design-view__more__menu__divider")
