@@ -72,6 +72,11 @@ class LayerFactary {
         }
       }
     }
+    /** some old json has different config with the shadow effect */
+    if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
+      config.styles.shadow = basicConfig.styles.shadow
+    }
+
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 

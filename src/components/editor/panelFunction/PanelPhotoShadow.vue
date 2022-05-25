@@ -253,18 +253,19 @@ export default Vue.extend({
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
       uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
-      const drawnImg = new Image()
-      drawnImg.src = updateCanvas.toDataURL('image/png;base64', 0.5)
+      // const drawnImg = new Image()
+      // drawnImg.src = updateCanvas.toDataURL('image/png;base64', 0.5)
 
-      performance.mark(mark4)
-      console.log('mark4 finish')
+      // performance.mark(mark4)
+      // console.log('mark4 finish')
 
-      await new Promise<void>((resolve) => {
-        drawnImg.onload = () => {
-          ctxUpload.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
-          resolve()
-        }
-      })
+      // await new Promise<void>((resolve) => {
+      //   drawnImg.onload = () => {
+      //     ctxUpload.drawImage(drawnImg, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
+      //     resolve()
+      //   }
+      // })
+      ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
       performance.mark(mark5)
       console.log('mark5 finish')
@@ -314,15 +315,15 @@ export default Vue.extend({
           }
           newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
 
-          performance.measure(`${markStart} to ${mark1}`, markStart, mark1)
-          performance.measure(`${mark1} to ${mark2}`, mark1, mark2)
-          performance.measure(`${mark2} to ${mark3}`, mark2, mark3)
-          performance.measure(`${mark3} to ${mark4}`, mark3, mark4)
-          performance.measure(`${mark4} to ${mark5}`, mark4, mark5)
-          performance.measure(`${mark5} to ${mark6}`, mark5, mark6)
-          performance.measure(`${mark6} to ${mark7}`, mark6, mark7)
-          console.log(performance.getEntriesByType('measure')
-            .map(e => [e.name, e.duration]))
+          // performance.measure(`${markStart} to ${mark1}`, markStart, mark1)
+          // performance.measure(`${mark1} to ${mark2}`, mark1, mark2)
+          // performance.measure(`${mark2} to ${mark3}`, mark2, mark3)
+          // performance.measure(`${mark3} to ${mark4}`, mark3, mark4)
+          // performance.measure(`${mark4} to ${mark5}`, mark4, mark5)
+          // performance.measure(`${mark5} to ${mark6}`, mark5, mark6)
+          // performance.measure(`${mark6} to ${mark7}`, mark6, mark7)
+          // console.log(performance.getEntriesByType('measure')
+          // .map(e => [e.name, e.duration]))
         }
       })
     }

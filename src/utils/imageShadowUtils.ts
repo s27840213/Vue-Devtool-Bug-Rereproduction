@@ -356,7 +356,7 @@ class ImageShadowUtils {
       const y = (canvas.height - drawCanvasH) * 0.5
 
       const unifiedScale = Math.max(drawCanvasW, drawCanvasH) / Math.max(layerWidth, layerHeight) * config.styles.scale
-      const unifiedSpread = spread * unifiedScale
+      const unifiedSpread = Math.ceil(spread * unifiedScale)
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
       const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + imgX.toString() + imgY.toString()
