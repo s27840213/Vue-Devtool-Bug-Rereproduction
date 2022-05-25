@@ -53,6 +53,7 @@ class PaymentUtils {
         store.commit('payment/SET_initView', initView)
         popupUtils.openPopup('payment')
         break
+      case 'Quota depleted': // to-delete
       case 'QUOTA_DEPLETED':
         if (store.getters['payment/getIsBundle']) {
           modalUtils.setModalInfo(i18n.t('TMP0142') as string,

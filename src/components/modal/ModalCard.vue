@@ -96,6 +96,7 @@ export default Vue.extend({
     > button {
       transition: background-color 0.3s;
       border-radius: 5px;
+      width: 180px;
     }
   }
 }

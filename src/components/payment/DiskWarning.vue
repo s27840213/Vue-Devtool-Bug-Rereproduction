@@ -5,7 +5,9 @@
       div(class="warning-small-title") {{cur.title}}
         div(class="warning-small-title-disk-total")
           div(class="warning-small-title-disk-used" :style="diskStyle")
-      div(class="warning-small-desc") {{cur.small.desc}}
+      i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
+        template(#button)
+          span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonText}}
       svg-icon(iconName="close" iconColor="white"
               iconWidth="24px" @click.native="close()")
     div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
@@ -68,7 +70,9 @@ export default Vue.extend({
               ]
             },
             small: {
-              desc: i18n.t('TMP0136')
+              desc: 'TMP0136',
+              buttonText: i18n.t('TMP0138'),
+              func: this.contact
             }
           }
         },
@@ -90,7 +94,9 @@ export default Vue.extend({
               ]
             },
             small: {
-              desc: i18n.t('TMP0132')
+              desc: 'TMP0132',
+              buttonText: i18n.t('TMP0003'),
+              func: this.openPaymentPopup
             }
           },
           100: {
@@ -109,7 +115,9 @@ export default Vue.extend({
               ]
             },
             small: {
-              desc: i18n.t('TMP0134')
+              desc: 'TMP0134',
+              buttonText: i18n.t('TMP0003'),
+              func: this.openPaymentPopup
             }
           }
         }
@@ -191,7 +199,13 @@ export default Vue.extend({
       }
     }
   }
-  &-desc { margin: 0 auto 0 18px; }
+  &-desc {
+    margin: 0 auto 0 18px;
+    &__btn {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
 }
 
 .warning-large {
