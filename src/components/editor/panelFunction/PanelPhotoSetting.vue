@@ -34,7 +34,6 @@ import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
-import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
@@ -156,7 +155,7 @@ export default Vue.extend({
         }
         this.show = ''
       } else if (name === 'remove-bg') {
-        if (!paymentUtils.checkIsPro('bgrm')) return
+        if (!paymentUtils.checkBgrmCredit()) return
         const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
 
         this.setIsProcessing(true)
@@ -213,12 +212,14 @@ export default Vue.extend({
                     inProcess: false
                   })
                 }
-                paymentUtils.errorHandler(json.msg)
+                this.$notify({ group: 'error', text: `${this.$t('NN0349')}` })
                 return true
               }
 
               return false
             })
+          } else {
+            paymentUtils.errorHandler(data.msg)
           }
         })
         this.show = ''

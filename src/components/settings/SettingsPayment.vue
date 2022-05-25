@@ -37,6 +37,12 @@
     br
     span(class="text-gray-3 pointer"
       @click="modifyCapacity(102401)")  {{'set capacity 100.01GB'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyBgrm(0)")  {{'set brgm 0'}}
+    br
+    span(class="text-gray-3 pointer"
+      @click="modifyBgrm(1200)")  {{'set bgrm 1200'}}
     div(class="sp-plan")
       span(class="text-blue-1 body-MD") {{$t('TMP0082')}}
       svg-icon(v-if="isFreeIcon" iconName="free")
@@ -219,7 +225,8 @@ export default Vue.extend({
       toAbort: 'payment/toAbort',
       toInitial: 'payment/toInitial',
       toFail: 'payment/toFail',
-      modifyCapacity: 'payment/modifyCapacity'
+      modifyCapacity: 'payment/modifyCapacity',
+      modifyBgrm: 'payment/modifyBgrm'
     }),
     ...mapMutations({
       setInitView: 'payment/SET_initView'

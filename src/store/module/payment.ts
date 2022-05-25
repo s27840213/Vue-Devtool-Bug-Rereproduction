@@ -24,7 +24,6 @@ interface IPaymentState {
   usage: {
     bgrmRemain: number
     bgrmTotal: number
-    bgrmOver: boolean
     diskUsed: number
     diskTotal: number
     diskPercent: number
@@ -151,7 +150,6 @@ const getDefaultState = (): IPaymentState => ({
   usage: {
     bgrmRemain: 0,
     bgrmTotal: 100,
-    bgrmOver: false,
     diskUsed: 0,
     diskTotal: 100,
     diskPercent: 0
@@ -213,14 +211,6 @@ function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
-  checkIsPro({ commit }, initView) {
-    if (!state.isPro) {
-      commit('SET_initView', initView)
-      popupUtils.openPopup('payment')
-      return false
-    }
-    return true
-  },
   async getPrice({ commit }, country: string) {
     if (country === '') {
       commit('SET_state', { userCountryUi: i18n.locale })
@@ -267,7 +257,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
         usage: {
           bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
-          bgrmOver: data.bg_credit_current <= 0,
           diskUsed: Number(data.capacity_current.toFixed(2)),
           diskTotal: data.capacity,
           diskPercent: data.capacity_current / data.capacity
@@ -515,6 +504,13 @@ const actions: ActionTree<IPaymentState, unknown> = {
       dispatch('getBillingInfo')
       Vue.notify({ group: 'copy', text: 'disk capacity update' })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  async modifyBgrm({ dispatch }, capacity) {
+    return paymentApi.modifyBgrm(capacity).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      dispatch('getBillingInfo')
+      Vue.notify({ group: 'copy', text: 'disk capacity update' })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
 }
 
@@ -538,7 +534,6 @@ const mutations: MutationTree<IPaymentState> = {
   },
   REDUCE_bgrmRemain(state: IPaymentState) {
     state.usage.bgrmRemain -= 1
-    state.usage.bgrmOver = state.usage.bgrmRemain <= 0
   },
   SET_isLoading(state: IPaymentState, isLoading) {
     state.isLoading = isLoading
@@ -579,6 +574,9 @@ const getters: GetterTree<IPaymentState, any> = {
   },
   canUploadAsset(state) {
     return state.usage.diskPercent <= 1
+  },
+  canBgrm(state) {
+    return state.usage.bgrmRemain > 0
   },
   getIsPro(state) {
     return state.isPro

@@ -21,6 +21,7 @@ import Vue from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import i18n from '@/i18n'
 import popupUtils from '@/utils/popupUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   name: 'DiskWarning',
@@ -156,13 +157,7 @@ export default Vue.extend({
       this.setInitView('step1')
       popupUtils.openPopup('payment')
     },
-    contact() {
-      location.href = i18n.locale === 'tw'
-        ? 'mailto:tw@vivipic.com'
-        : i18n.locale === 'jp'
-          ? 'mailto:jp@vivipic.com'
-          : 'mailto:service@vivipic.com '
-    }
+    contact() { paymentUtils.contactUs() }
   }
 })
 </script>

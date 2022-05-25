@@ -131,6 +131,7 @@ export default Vue.extend({
     ...mapState('payment', {
       initView: 'initView',
       userCountryUi: 'userCountryUi',
+      userCountryInfo: 'userCountryInfo',
       switchPaidDate: 'switchPaidDate',
       switchPrice: 'switchPrice',
       card: 'cardInfo',
@@ -171,7 +172,7 @@ export default Vue.extend({
     ...mapMutations({
       setInitView: 'SET_initView'
     }),
-    changeView(name: string) {
+    async changeView(name: string) {
       this.view = name
       switch (name) {
         case 'brandkit':
@@ -208,6 +209,7 @@ export default Vue.extend({
           this.getBillingInfo()
           break
         case 'switch1':
+          await this.getPrice(this.userCountryInfo)
           this.getSwitchPrice()
           this.title = i18n.t('TMP0060', { period: this.isBundle ? i18n.t('TMP0010') : i18n.t('TMP0011') }) as string
           this.description = (this.isBundle ? i18n.t('TMP0062') : i18n.t('TMP0061')) as string
