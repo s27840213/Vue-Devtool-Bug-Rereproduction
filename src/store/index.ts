@@ -90,7 +90,7 @@ const getDefaultState = (): IEditorState => ({
     body: []
   },
   isMoving: false,
-  showRuler: false,
+  showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
   themes: [],
