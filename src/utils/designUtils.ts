@@ -1,5 +1,6 @@
-import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 import { IDesign, IFolder, IPathedFolder } from '@/interfaces/design'
+import designApis from '@/apis/design'
 import router from '@/router'
 import store from '@/store'
 import assetUtils from './assetUtils'
@@ -491,6 +492,8 @@ class DesignUtils {
       parentFolder: designData.parent_folder,
       path: designData.path
     })
+    store.commit('SET_pagesName', designData.name)
+    store.commit('SET_assetIndex', designData.asset_index)
     await uploadUtils.getDesign('design', { designId: assetId, teamId, fetchTarget: designData.url_map['config.json'] }, params)
   }
 
@@ -622,6 +625,19 @@ class DesignUtils {
 
   getPrivateDesignId(jsonUrl?: string): string {
     return (jsonUrl ?? '').match(/design\/(.*)\/config\.json/)?.[1] ?? ''
+  }
+
+  async renameDesign(name: string) {
+    let assetIndex = store.getters.getAssetIndex
+    if (assetIndex === -1) {
+      const teamId = designApis.getTeamId()
+      const assetId = store.getters.getAssetId
+      const designData = await store.dispatch('design/fetchDesign', { teamId, assetId })
+      assetIndex = designData.asset_index
+      store.commit('SET_assetIndex', assetIndex)
+    }
+    designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getTeamId(),
+      'rename', assetIndex.toString(), null, name)
   }
 }
 
