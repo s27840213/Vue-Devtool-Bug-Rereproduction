@@ -1,6 +1,9 @@
 <template lang="pug">
   div(class="settings")
     nu-header(v-header-border="true")
+    div(class="settings__top mobile")
+      svg-icon(iconName="left-arrow" iconWidth="24px" iconColor="gray-1" @click.native="back()")
+      span {{viewLabel}}
     div(class="settings__content")
       sidebar(class="settings__sidebar" :style="sidebarStyle"
         @switch="switchView"
@@ -21,6 +24,8 @@ import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
+import paymentData from '@/utils/paymentData'
+import _ from 'lodash'
 
 export default Vue.extend({
   name: 'Settings',
@@ -50,6 +55,9 @@ export default Vue.extend({
   computed: {
     sidebarStyle(): Record<string, string> {
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
+    },
+    viewLabel(): string {
+      return _.find(paymentData.viewList(true), ['name', this.view]).label
     }
   },
   created() {
@@ -61,6 +69,10 @@ export default Vue.extend({
   methods: {
     switchView(view: string) {
       this.currentView = view
+    },
+    back() {
+      if (window.history.length > 2) this.$router.back()
+      else this.$router.push('/')
     }
   }
 })
@@ -70,24 +82,33 @@ export default Vue.extend({
 .settings {
   @include size(100%, 100%);
   max-height: 100%;
+  &__top { display: none; }
   &__content {
     position: relative;
     height: calc(100% - #{$header-height});
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: auto 1fr;
-    @include layout-mobile {
-      grid-template-columns: auto;
-    }
-  }
-  &__sidebar {
-    @include layout-mobile {
-      display: none;
-    }
   }
   &__view {
     position: relative;
     overflow-y: scroll;
   }
+}
+
+@include layout-mobile {
+  .nu-header { display: none; }
+  .settings__top {
+    @include text-H6;
+    display: grid;
+    grid-template-columns: 72px 1fr 72px;
+    justify-items: center;
+    align-items: center;
+    height: 64px;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    svg { padding: 20px }
+  }
+  .settings__content { grid-template-columns: auto; }
+  .settings__sidebar { display: none; }
 }
 </style>

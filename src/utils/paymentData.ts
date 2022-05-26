@@ -1,5 +1,6 @@
 import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
+import _ from 'lodash'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -10,9 +11,13 @@ interface BillingInfoInput {
 }
 
 class PaymentData {
-  // For setting sidebar.vue & popupAccount.vue
-  viewList() {
-    return [{
+  // For Settings
+  viewList(all = false) {
+    const list = [{
+      name: 'menu',
+      label: i18n.tc('NN0165', 1),
+      hidden: true
+    }, {
       name: 'account',
       label: i18n.tc('NN0165', 1),
       icon: 'settings'
@@ -31,6 +36,8 @@ class PaymentData {
       label: i18n.t('TMP0110'),
       icon: 'invoice'
     }]
+    if (all) return list
+    else return _.filter(list, (it: Record<string, string>) => !it.hidden)
   }
 
   // For Pricing.vue
