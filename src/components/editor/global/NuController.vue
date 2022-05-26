@@ -609,7 +609,6 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
-      console.log()
       if (this.isProcessImgShadow || this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         return
       } else {
@@ -1426,8 +1425,7 @@ export default Vue.extend({
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-          const layerIdentifier = `${this.config.id}`
-          eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
+          eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
         }
         GroupUtils.deselect()
         this.setLastSelectedLayerIndex(this.layerIndex)

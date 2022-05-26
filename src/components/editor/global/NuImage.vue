@@ -2,10 +2,9 @@
   div(class="nu-image"
     :style="styles"
     draggable="false")
-    //- div(v-if="showCanvas && !shadowSrc"
     div(v-if="showCanvas"
       class="shadow__canvas-wrapper"
-      :style="canvasWrapperStyle")
+      :style="{ ...canvasWrapperStyle, ...flipStyles }")
       canvas(ref="canvas")
     div(v-if="shadowSrc"
       class="shadow__picture"
@@ -86,8 +85,7 @@ export default Vue.extend({
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
-    const layerIdentifier = `${this.config.id}`
-    eventUtils.on(ImageEvent.redrawCanvasShadow + layerIdentifier, () => {
+    eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
         if (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent) {
           this.redrawShadow(true)
@@ -275,6 +273,23 @@ export default Vue.extend({
       const { adjust } = this.adjustImgStyles
       return imageAdjustUtil.convertAdjustToSvgFilter(adjust || {})
     },
+    flipStyles(): any {
+      const { horizontalFlip, verticalFlip } = this.config.styles
+      let scaleX = horizontalFlip ? -1 : 1
+      let scaleY = verticalFlip ? -1 : 1
+
+      if (typeof this.subLayerIndex !== 'undefined') {
+        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
+        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
+          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
+          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
+        }
+      }
+      return {
+        transform: `scale(${scaleX}, ${scaleY})`,
+        ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
+      }
+    },
     canvasWrapperStyle(): any {
       if (this.forRender) {
         return {}
@@ -309,28 +324,12 @@ export default Vue.extend({
         return {}
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
+      const { horizontalFlip, verticalFlip } = this.config.styles
       const { scale } = this.config.styles
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
-        transform: `translate(${imgX * scale}px, ${imgY * scale}px) scale(${scale})`
-      }
-    },
-    flipStyles(): any {
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      let scaleX = horizontalFlip ? -1 : 1
-      let scaleY = verticalFlip ? -1 : 1
-
-      if (typeof this.subLayerIndex !== 'undefined') {
-        const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
-        if (primaryLayer.type === 'frame' && this.config.srcObj.type === 'frame') {
-          scaleX = primaryLayer.styles.horizontalFlip ? -1 : 1
-          scaleY = primaryLayer.styles.verticalFlip ? -1 : 1
-        }
-      }
-      return {
-        transform: `scale(${scaleX}, ${scaleY})`,
-        ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
+        transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px) scale(${scale})`
       }
     },
     getImgDimension(): number {

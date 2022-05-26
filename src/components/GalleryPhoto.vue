@@ -153,14 +153,16 @@ export default Vue.extend({
             ...srcObj
           },
           styles: { width: photoWidth, height: photoHeight },
-          isPreview: this.isUploading
+          isPreview: this.isUploading,
+          previewsrc: this.previewSrc
         })
       }
     },
     dragEnd() {
       this.setCurrDraggedPhoto({
         srcObj: { type: '', assetId: '', userId: '' },
-        styles: { width: 0, height: 0 }
+        styles: { width: 0, height: 0 },
+        previewsrc: ''
       })
     },
     addImage(photo: IAssetPhoto) {

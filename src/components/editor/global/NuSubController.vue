@@ -491,14 +491,32 @@ export default Vue.extend({
             return
           case 'group':
             if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-              this.dragUtils.onImgDrop(e)
+              e.stopPropagation()
+              groupUtils.deselect()
+              groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
               LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-              const layerIdentifier = `${this.primaryLayerIndex}-${this.layerIndex}`
-              eventUtils.emit(ImageEvent.redrawCanvasShadow + layerIdentifier)
+              eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
             }
         }
       }
     },
+    //     onDrop(e: DragEvent) {
+    //   switch (this.type) {
+    //     case 'frame':
+    //       this.getLayerType === 'image' && this.onFrameDrop(e)
+    //       return
+    //     case 'group':
+    //       if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+    //         // this.dragUtils.onImgDrop(e)
+    //         groupUtils.deselect()
+    //         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
+    //         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+    //         LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+    //         console.log(this.config.active)
+    //         eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+    //       }
+    //   }
+    // },
     onFrameDragEnter(e: DragEvent) {
       const { primaryLayer } = this
       if (!primaryLayer.locked) {
