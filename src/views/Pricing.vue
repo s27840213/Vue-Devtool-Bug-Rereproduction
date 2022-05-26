@@ -3,49 +3,48 @@
     nu-header(v-header-border)
     div(class="pricing-content")
       div(class="pricing-top")
-        span(class="pricing-top__title" v-html="$t('TMP0001')")
-        span(class="pricing-top__description") {{$t('TMP0002')}}
+        span(class="text-H2 mb-20" v-html="$t('TMP0001')")
+        span(class="body-LG text-gray-2") {{$t('TMP0002')}}
         img(v-for="cb in colorBlock" class="pricing-top__cb"
             :src="require('@/assets/img/svg/color-block/' + cb.name)"
             :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
       div(class="pricing-plan")
         div(class="pricing-plan-left")
-          div(class="pricing-plan-left__top")
-            span(class="pricing-plan-left__top__title") {{$tc('TMP0003', 1)}}
-            span(class="pricing-plan-left__top__description") {{$t('TMP0004')}}
-          div(class="pricing-plan-left__divider")
+          div(class="pricing-plan-left-top")
+            span(class="text-H4 mb-15") {{$tc('TMP0003', 1)}}
+            span(class="body-LG text-gray-3") {{$t('TMP0004')}}
+          div(class="pricing-plan-left-divider")
             span {{$t('TMP0005')}}
             hr
-          div(class="pricing-plan-left__bottom")
+          div(class="pricing-plan-left-bottom")
             div(v-for="item in ['TMP0006', 'TMP0007', 'TMP0008', 'TMP0009']")
               svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
-          img(class="pricing-plan-right-off"
-              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
           slide-toggle(class="body-XS" :options="periods"
                       v-model="periodUi" bgColor="#F4F5F7")
           div(class="pricing-plan-right-price")
+            img(class="pricing-plan-right-price-off"
+              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
             span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('TMP0012')}`}}
             br
             span(class="pricing-plan-right-price__dollar") {{'$ '}}
             span(class="text-H1") {{plans[planSelected][periodUi].now}}
             span {{' ' + $t('TMP0012')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
-            span {{canAddCard ? $t('TMP0013') : $t('TMP0014')}}
-        span(class="pricing-plan-currency") {{$t('TMP0015')}}
+            span(class="btn-LG") {{canAddCard ? $t('TMP0013') : $t('TMP0014')}}
+      span(class="pricing-currency") {{$t('TMP0015')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
           svg-icon(v-if="item === true" iconName="feature-true")
           span(v-else) {{item}}
       div(class="pricing-faq")
-        span(class="pricing-faq__title") {{$t('TMP0029')}}
+        span(class="text-H2 mb-20") {{$t('TMP0029')}}
         details(v-for="item in faqs")
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-          p(v-html="item.A")
+          p(class="body-MD text-gray-2 mt-20" v-html="item.A")
       nu-footer
-    popup-payment(v-if="showPopup" @close="closePopup()")
 </template>
 
 <script lang="ts">
@@ -57,6 +56,7 @@ import NuFooter from '@/components/NuFooter.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
 import paymentData from '@/utils/paymentData'
+import popupUtils from '@/utils/popupUtils'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -76,27 +76,20 @@ export default Vue.extend({
       colorBlock: paymentData.colorBlock(),
       periods: paymentData.periodOptions(),
       compareTable: paymentData.compareTable(),
-      faqs: paymentData.faqs(),
-      showPopup: false,
-      paymentView: ''
+      faqs: paymentData.faqs()
     }
   },
   computed: {
-    ...mapGetters({
-      isUiTW: 'payment/isUiTW'
-    }),
+    ...mapGetters({ isUiTW: 'payment/isUiTW' }),
     ...mapState('payment', {
-      isCancelingPro: 'isCancelingPro',
       plans: 'plans',
-      card: 'cardInfo',
       planSelected: 'planSelected',
-      userCountryUi: 'userCountryUi'
+      userCountryUi: 'userCountryUi',
+      status: 'status'
     }),
-    ...mapFields({
-      periodUi: 'periodUi'
-    }),
+    ...mapFields({ periodUi: 'periodUi' }),
     off():string { return this.isUiTW ? '26off' : '25off' },
-    canAddCard():boolean { return this.isCancelingPro && this.card.status === 'none' }
+    canAddCard():boolean { return ['Initial', 'Deleted'].includes(this.status) }
   },
   async mounted() {
     await this.getBillingInfo()
@@ -111,14 +104,11 @@ export default Vue.extend({
       setInitView: 'payment/SET_initView'
     }),
     tryAddCard() {
-      if (this.canAddCard) this.openPopup()
-      else this.$router.push('/settings/payment')
-    },
-    openPopup() {
-      this.setInitView('step1')
-      this.showPopup = true
-    },
-    closePopup() { this.showPopup = false }
+      if (this.canAddCard) {
+        this.setInitView('step1')
+        popupUtils.openPopup('payment')
+      } else this.$router.push('/settings/payment')
+    }
   }
 })
 </script>
@@ -130,7 +120,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-y: scroll;
+  overflow: hidden scroll;
   height: calc(100% - #{$header-height});
 }
 
@@ -139,15 +129,6 @@ export default Vue.extend({
   flex-direction: column;
   position: relative;
   margin: 110px 0;
-  &__title {
-    @include text-H2;
-    color: setColor(gray-1);
-    margin-bottom: 20px;
-  }
-  &__description {
-    @include body-LG;
-    color: setColor(gray-2);
-  }
   &__cb {
     position: absolute;
     z-index: -1;
@@ -156,81 +137,73 @@ export default Vue.extend({
 
 .pricing-plan {
   display: flex;
-  position: relative;
   width: 1128px;
   height: 367px;
   flex-shrink: 0;
   background-color: setColor(white);
   border: 1px solid setColor(gray-4);
   border-radius: 16px;
+  overflow: hidden;
 }
 
 .pricing-plan-left {
   display: grid;
-  grid-template-rows: 1fr 24px 1fr;
-  width: calc(68% - 80px);
+  grid-template-rows: 1fr 44px 1fr;
+  box-sizing: border-box;
+  width: 68%;
   padding: 64px 24px 64px 60px;
   text-align: left;
-  &__top {
+  &-top {
     display: flex;
     flex-direction: column;
-    &__title {
-      @include text-H4;
-      color: #121127;
-      margin-bottom: 16px;
-    }
-    &__description {
-      @include body-LG;
-      color: rgba(18, 17, 39, 0.56);
-    }
   }
-  &__divider {
+  &-divider {
     @include overline-LG;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    margin: 10px 0;
     color: setColor(blue-1);
     >hr {
-      width: 500px;
-      border: 0.5px solid rgba(18, 17, 39, 0.12);
-      margin: auto
+      width: calc(100% - 12px);
+      border: 0.5px solid setColor(gray-4);;
+      margin-left: 12px;
     }
   }
-  &__bottom {
+  &-bottom {
     @include body-MD;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    margin-top: 20px;
+    align-items: flex-end;
     color: setColor(gray-2);
     >div {
       display: flex;
-      align-items: center;
+      svg {
+        flex-shrink: 0;
+        margin: 4.4px 13.66px 4.4px 1.67px;
+      }
     }
-    span { margin-left: 12px; }
   }
 }
 
 .pricing-plan-right {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
   width: 32%;
+  padding: 72px 32px;
   background-color: setColor(blue-1);
-  border-radius: 0 16px 16px 0;
-  &-off {
-    position: absolute;
-    top: 40px;
-    right: 25px;
-  }
-  &-period {
-    @include body-XS;
-    background-color: setColor(gray-5);
-    border-radius: 16px;
-  }
   &-price {
     @include body-MD;
     position: relative;
-    margin: 30px 0;
     color: white;
+    &-off {
+      position: absolute;
+      top: -55px;
+      right: -80px;
+    }
     &__del {
       position: absolute;
       left: 0;
@@ -245,18 +218,13 @@ export default Vue.extend({
   &-buy {
     width: 80%;
     border-radius: 8px;
-    span {
-      @include btn-LG;
-    }
   }
 }
 
-.pricing-plan-currency {
+.pricing-currency {
   @include body-XS;
   color: setColor(gray-3);
-  position: absolute;
-  right: 20px;
-  bottom: -21.6px
+  margin-left: 950px;
 }
 
 .pricing-compare {
@@ -270,44 +238,63 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 60px;
   }
   >div:nth-child(1)    { @include text-H6; }
   >div:nth-child(3)    { @include text-H5; }
+  >div:nth-child(-n+3)    {
+    padding: 8px 0;
+    word-break: keep-all; // H6?
+  }
+  >div:nth-child(2), >div:nth-child(3) { text-align: center; } // H6?
   >div:nth-child(3n)   { background-color: setColor(blue-4); }
   >div:nth-child(3n+1) { justify-content: flex-start; }
-  >div:nth-child(n+4)  { border-bottom: 1px solid setColor(gray-4); }
+  >div:nth-child(n+4)  {
+    padding: 20px 0;
+    border-bottom: 1px solid setColor(gray-4);
+  }
 }
 
 .pricing-faq {
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 1024px;
-  &__title {
-    @include text-H2;
-    color: setColor(nav);
-    margin-bottom: 20px;
-  }
+  color: setColor(gray-1);
   >details {
-    width: 100%;
     text-align: left;
     margin-top: 20px;
     >summary {
       @include text-H6;
       display: flex;
       justify-content: space-between;
-      color: setColor(gray-1);
-      list-style: none;
       border-bottom: 1px solid setColor(gray-4);
       padding-bottom: 20px;
-    }
-    >p {
-      @include body-MD; // set default?
-      color: setColor(gray-2);
-      margin-top: 20px;
+      >svg { flex-shrink: 0; }
     }
   }
   >details[open] >summary >svg { transform: scaleY(-1); }
+}
+
+@media screen and (max-width: 768px) {
+  .pricing-top__cb { display: none; }
+  .pricing-content { padding: 20px; }
+  .pricing-plan, .pricing-compare, .pricing-faq { width: 100%; }
+  .pricing-plan {
+    flex-direction: column;
+    height: fit-content;
+    &-left, &-right { width: 100%; }
+    &-left {
+      display: block;
+      padding: 18px;
+      &-bottom { grid-template-columns: auto; }
+    }
+    &-right {
+      height: 282px;
+      padding: 30px 20px;
+    }
+  }
+  .pricing-currency { margin-left: auto; }
+  .pricing-compare {
+    grid-template-columns: 1.2fr 1fr 1fr;
+  }
 }
 </style>

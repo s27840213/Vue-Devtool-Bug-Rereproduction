@@ -29,7 +29,8 @@ const MOBILE_ROUTES = [
   'SignUp',
   'Login',
   'MobileWarning',
-  'Preview'
+  'Preview',
+  'Pricing'
 ]
 
 // Ingore some normal router console error
