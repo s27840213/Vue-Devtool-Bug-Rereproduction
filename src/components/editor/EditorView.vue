@@ -2,7 +2,7 @@
   div(class="editor-view scrollbar-gray-thin"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
-      @mousedown.left="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
+      @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
@@ -70,6 +70,7 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import eventUtils from '@/utils/eventUtils'
 
 export default Vue.extend({
   components: {
@@ -262,9 +263,9 @@ export default Vue.extend({
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
-      window.addEventListener('mousemove', this.selecting)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.selecting)
+      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.selectEnd)
       window.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      window.addEventListener('mouseup', this.selectEnd)
     },
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
@@ -309,9 +310,9 @@ export default Vue.extend({
        * Use nextTick to trigger the following function after DOM updating
        */
       this.$nextTick(() => {
-        window.removeEventListener('mousemove', this.selecting)
+        eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.selecting)
         window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
-        window.removeEventListener('mouseup', this.selectEnd)
+        eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement

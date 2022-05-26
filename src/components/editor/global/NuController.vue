@@ -19,7 +19,7 @@
         @dragover.prevent
         @click.right.stop="onRightClick"
         @contextmenu.prevent
-        @pointerdown.prevent="moveStart"
+        @pointerdown="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
@@ -1525,6 +1525,9 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
+      if (this.isMobile) {
+        return
+      }
       /**
        * If current-selected-layer is exact this layer, record the sub-active-layer.
        * After deselecting, set it to active

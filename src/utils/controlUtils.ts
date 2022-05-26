@@ -1,9 +1,8 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
 import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
-import { stringToArray } from 'konva/types/shapes/Text'
-import { SidebarPanelType } from '@/store/types'
 import shapeUtils from '@/utils/shapeUtils'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'
 class Controller {
   getLength(vect: ICoordinate): number {
@@ -28,13 +27,15 @@ class Controller {
 
   getControlPoints = (resizerShort: number, resizerLong: number) => {
     const scaleRatio = store.getters.getPageScaleRatio
+    const isMobile = generalUtils.isMobile()
+    const scalerSize = isMobile ? 12 : 8
     return {
       scalers: [
         {
           cursor: 0,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             left: '0',
             top: '0',
             transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
@@ -44,8 +45,8 @@ class Controller {
         {
           cursor: 2,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
             right: '0',
             top: '0',
@@ -55,8 +56,8 @@ class Controller {
         {
           cursor: 4,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio})`,
             right: '0',
             bottom: '0',
@@ -66,8 +67,8 @@ class Controller {
         {
           cursor: 6,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
             left: '0',
             bottom: '0',
@@ -77,16 +78,16 @@ class Controller {
       ],
       lineEnds: [
         {
-          width: '8px',
-          height: '8px',
+          width: `${scalerSize}px`,
+          height: `${scalerSize}px`,
           left: '0',
           top: '50%',
           transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
           borderRadius: '50%'
         },
         {
-          width: '8px',
-          height: '8px',
+          width: `${scalerSize}px`,
+          height: `${scalerSize}px`,
           transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
           right: '0',
           top: '50%',
@@ -177,7 +178,7 @@ class Controller {
     }
   }
 
-  getAbsPointByQuadrant(point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+  getAbsPointByQuadrant(point: number[], styles: { x: number, y: number, width: number, initWidth: number }, scale: number, quadrant: number): ICoordinate {
     const { width, height, baseDegree } = shapeUtils.lineDimension(point)
     const dx = 2 * scale * Math.sin(baseDegree)
     const dy = 2 * scale * Math.cos(baseDegree)
@@ -196,7 +197,7 @@ class Controller {
     }
   }
 
-  getAbsPointWithRespectToReferencePoint(referencePoint: ICoordinate, point: number[], styles: {width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+  getAbsPointWithRespectToReferencePoint(referencePoint: ICoordinate, point: number[], styles: { width: number, initWidth: number }, scale: number, quadrant: number): ICoordinate {
     const { width, height, baseDegree } = shapeUtils.lineDimension(point)
     const dx = 2 * scale * Math.sin(baseDegree)
     const dy = 2 * scale * Math.cos(baseDegree)
@@ -215,15 +216,14 @@ class Controller {
     }
   }
 
-  getTranslateCompensationForLine(markerIndex: number, referencePoint: ICoordinate, styles: {width: number, initWidth: number}, scale: number, newPoint: number[]): ICoordinate {
+  getTranslateCompensationForLine(markerIndex: number, referencePoint: ICoordinate, styles: { width: number, initWidth: number }, scale: number, newPoint: number[]): ICoordinate {
     const newNormalQuadrant = shapeUtils.getLineQuadrant(newPoint)
     const newQuadrantByMarkerIndex = (markerIndex === 0) ? (newNormalQuadrant - 1 + 2) % 4 + 1 : newNormalQuadrant
     // If the startMarker is dragged, take the symmetric version (w.r.t. the origin) of the quadrant
     return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
   }
 
-  getControllerStyleParameters(point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number, rotate: number}, isLine: boolean, scale: number):
-  {x: number, y: number, width: number, height: number, rotate: number} {
+  getControllerStyleParameters(point: number[], styles: { x: number, y: number, width: number, height: number, initWidth: number, rotate: number }, isLine: boolean, scale: number): { x: number, y: number, width: number, height: number, rotate: number } {
     if (isLine) {
       scale = scale ?? 1
       const { x, y, width, height } = styles
@@ -244,7 +244,7 @@ class Controller {
     }
   }
 
-  getMarkerIndex(control: {xSign: number, ySign: number}, quadrant: number) {
+  getMarkerIndex(control: { xSign: number, ySign: number }, quadrant: number) {
     if ([2, 3].includes(quadrant)) {
       return (1 - control.xSign) / 2 // -1 => 1, 1 => 0
     } else {

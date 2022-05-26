@@ -32,16 +32,12 @@ div(class="overflow-container"
 
 <script lang="ts">
 import Vue from 'vue'
-import imageUtils from '@/utils/imageUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
-import mouseUtils from '@/utils/mouseUtils'
 import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { SidebarPanelType } from '@/store/types'
-import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
@@ -183,7 +179,8 @@ export default Vue.extend({
 }
 
 .pages-loading {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background-color: setColor(gray-4);
 }
 </style>
