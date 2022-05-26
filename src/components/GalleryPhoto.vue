@@ -36,6 +36,7 @@ import { IAssetPhoto } from '@/interfaces/api'
 import networkUtils from '@/utils/networkUtils'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -140,13 +141,14 @@ export default Vue.extend({
           offsetY: 15
         })
 
-        const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
-        const imgPreload = new Image()
-        imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
-        const imgPreloadPre = new Image()
-        imgPreloadPre.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'pre'))
-        const imgPreloadNext = new Image()
-        imgPreloadNext.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'next'))
+        const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)
+        const imgPreview = new Image()
+        imgPreview.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, previewSize))
+        imgPreview.onload = () => {
+          const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
+          const imgPreload = new Image()
+          imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
+        }
 
         this.setCurrDraggedPhoto({
           srcObj: {

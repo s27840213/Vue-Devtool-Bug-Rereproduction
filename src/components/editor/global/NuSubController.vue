@@ -10,7 +10,6 @@
             @click.left.stop="onClickEvent($event)"
             @drop.prevent="onDrop($event)"
             @dragenter="onDragEnter($event)"
-            @dragleave="onDragLeave($event)"
             @mouseenter="onFrameMouseEnter($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
@@ -462,22 +461,34 @@ export default Vue.extend({
     onDragEnter(e: DragEvent) {
       switch (this.type) {
         case 'frame':
-          this.getLayerType === 'image' && this.onFrameDragEnter(e)
+          if (this.getLayerType === 'image') {
+            this.onFrameDragEnter(e)
+            const body = this.$refs.body as HTMLElement
+            body.addEventListener('dragleave', this.onFrameDragLeave)
+          }
           return
         case 'group':
           if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             this.dragUtils.onImageDragEnter(e, this.config as IImage)
+            const body = this.$refs.body as HTMLElement
+            body.addEventListener('dragleave', this.onDragLeave)
           }
       }
     },
     onDragLeave(e: DragEvent) {
       switch (this.type) {
         case 'frame':
-          this.getLayerType === 'image' && this.onFrameDragLeave(e)
+          if (this.getLayerType === 'image') {
+            this.onFrameDragLeave(e)
+            const body = this.$refs.body as HTMLElement
+            body.removeEventListener('dragleave', this.onFrameDragLeave)
+          }
           return
         case 'group':
           if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             this.dragUtils.onImageDragLeave(e)
+            const body = this.$refs.body as HTMLElement
+            body.removeEventListener('dragleave', this.onDragLeave)
           }
       }
     },
@@ -487,7 +498,11 @@ export default Vue.extend({
       } else {
         switch (this.type) {
           case 'frame':
-            this.getLayerType === 'image' && this.onFrameDrop(e)
+            if (this.getLayerType === 'image') {
+              this.onFrameDrop(e)
+              const body = this.$refs.body as HTMLElement
+              body.removeEventListener('dragleave', this.onFrameDragLeave)
+            }
             return
           case 'group':
             if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
@@ -496,27 +511,12 @@ export default Vue.extend({
               groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
               LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
               eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+              const body = this.$refs.body as HTMLElement
+              body.removeEventListener('dragleave', this.onDragLeave)
             }
         }
       }
     },
-    //     onDrop(e: DragEvent) {
-    //   switch (this.type) {
-    //     case 'frame':
-    //       this.getLayerType === 'image' && this.onFrameDrop(e)
-    //       return
-    //     case 'group':
-    //       if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-    //         // this.dragUtils.onImgDrop(e)
-    //         groupUtils.deselect()
-    //         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
-    //         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-    //         LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-    //         console.log(this.config.active)
-    //         eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-    //       }
-    //   }
-    // },
     onFrameDragEnter(e: DragEvent) {
       const { primaryLayer } = this
       if (!primaryLayer.locked) {

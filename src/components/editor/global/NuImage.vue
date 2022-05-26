@@ -9,7 +9,7 @@
     div(v-if="shadowSrc"
       class="shadow__picture"
       :style="imgShadowStyles")
-      img(ref="img"
+      img(ref="shadow-img"
         :style="flipStyles"
         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
         draggable="false"
