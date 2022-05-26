@@ -218,7 +218,7 @@ export default Vue.extend({
     top: 0;
     left: 0;
     & > span {
-      display: block;
+      display: inline-block;
     }
   }
 }
