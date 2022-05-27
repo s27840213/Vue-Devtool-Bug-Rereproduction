@@ -2,17 +2,16 @@ import ControlUtils from '@/utils/controlUtils'
 import store from '@/store'
 import { ILayer, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp, IGroup, IImage, IShape } from '@/interfaces/layer'
 import { IFont, ISelection } from '@/interfaces/text'
-import CssConveter from '@/utils/cssConverter'
 import GeneralUtils from './generalUtils'
 import LayerUtils from './layerUtils'
 import { IPage } from '@/interfaces/page'
-import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
-import LayerFactary from '@/utils/layerFactary'
+import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
 import textShapeUtils from './textShapeUtils'
 import mathUtils from './mathUtils'
+import router from '@/router'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -612,8 +611,8 @@ class TextUtils {
 
     const scale = content.styles.scale ?? 1
     const textHW = {
-      width: body.style.width !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().width * scale),
-      height: body.style.height !== 'max-content' ? Math.ceil(widthLimit) : Math.ceil(body.getBoundingClientRect().height * scale),
+      width: body.style.width !== 'max-content' ? widthLimit : body.getBoundingClientRect().width * scale,
+      height: body.style.height !== 'max-content' ? widthLimit : body.getBoundingClientRect().height * scale,
       body: body
     }
     document.body.removeChild(body)
@@ -985,36 +984,66 @@ class TextUtils {
 
   autoResize(config: IText, initSize: { width: number, height: number, widthLimit: number }): number {
     if (config.widthLimit === -1) return config.widthLimit
+    const { widthLimit, otherDimension } = this.autoResizeCore(config, initSize)
+    const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
+    const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
+    if (router.currentRoute.name === 'Preview') {
+      const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode}`)
+    }
+    if (limitDiff / initSize.widthLimit > 0.05) {
+      return initSize.widthLimit
+    } else {
+      return widthLimit
+    }
+  }
+
+  autoResizeCore(config: IText, initSize: { width: number, height: number, widthLimit: number }): {
+    widthLimit: number,
+    otherDimension: number
+  } {
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const scale = config.styles.scale
     let direction = 0
     let shouldContinue = true
     let widthLimit = initSize.widthLimit
+    let autoDimension = -1
     let autoSize = this.getTextHW(config, widthLimit)
     const originDimension = initSize[dimension]
     let prevDiff = Number.MAX_VALUE
     let prevWidthLimit = -1
+    let prevDimension = -1
     let minDiff = Number.MAX_VALUE
     let minDiffWidLimit = -1
+    let minDiffDimension = -1
     while (shouldContinue) {
-      const autoDimension = autoSize[dimension]
+      autoDimension = autoSize[dimension]
       const currDiff = Math.abs(autoDimension - originDimension)
+      // console.log(autoDimension, originDimension, currDiff, widthLimit, config.widthLimit)
       if (currDiff < minDiff) {
         minDiff = currDiff
         minDiffWidLimit = widthLimit
+        minDiffDimension = autoDimension
       }
       if (currDiff > prevDiff) {
         if (prevWidthLimit !== -1) {
-          return prevWidthLimit
+          return {
+            widthLimit: prevWidthLimit,
+            otherDimension: prevDimension
+          }
         } else {
-          return config.widthLimit
+          return {
+            widthLimit: initSize.widthLimit,
+            otherDimension: originDimension
+          }
         }
       }
       prevDiff = currDiff
       prevWidthLimit = widthLimit
+      prevDimension = autoDimension
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
-        if (direction >= 100) return minDiffWidLimit
+        if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
         widthLimit += scale
         direction += 1
         autoSize = this.getTextHW(config, widthLimit)
@@ -1022,7 +1051,7 @@ class TextUtils {
       }
       if (originDimension - autoDimension > 5 * scale) {
         if (direction > 0) break
-        if (direction <= -100) return minDiffWidLimit
+        if (direction <= -100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }
         widthLimit -= scale
         direction -= 1
         autoSize = this.getTextHW(config, widthLimit)
@@ -1030,7 +1059,10 @@ class TextUtils {
       }
       shouldContinue = false
     }
-    return widthLimit
+    return {
+      widthLimit,
+      otherDimension: autoDimension
+    }
   }
 }
 

@@ -191,8 +191,8 @@ export default Vue.extend({
     const prevInfo = {
       saveSubmission: true,
       // saveSubmission: !!selectedTypeVal,
-      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('png'),
-      selectedTypeVal: selectedTypeVal || 'png',
+      selected: selectedTypeVal ? prevSubmission : DownloadUtil.getTypeAttrs('jpg'),
+      selectedTypeVal: selectedTypeVal || 'jpg',
       rangeType,
       pageRange: rangeType === 'spec' ? pageRange : [],
       selectedDev,

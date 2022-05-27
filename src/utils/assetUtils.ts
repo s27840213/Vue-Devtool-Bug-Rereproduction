@@ -21,6 +21,7 @@ import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
+import errorHandleUtils from './errorHandleUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -130,10 +131,14 @@ class AssetUtils {
           store.commit('SET_assetJson', { [id]: asset })
           return asset
         }).catch((error) => {
-          Vue.notify({
-            group: 'error',
-            text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
-          })
+          if (asset.type === 5 && error.message === '404') {
+            errorHandleUtils.addMissingDesign('svg', asset.id)
+          } else {
+            Vue.notify({
+              group: 'error',
+              text: `網路異常，請確認網路正常後再嘗試。(ErrorCode: ${error.message === 'Failed to fetch' ? 19 : error.message})`
+            })
+          }
           return asset
         })
       }

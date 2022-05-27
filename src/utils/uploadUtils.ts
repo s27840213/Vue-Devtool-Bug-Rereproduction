@@ -245,8 +245,9 @@ class UploadUtils {
                       assetId: assetId,
                       progress: 100
                     })
-                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, type: this.isAdmin ? 'public' : 'private' })
+                    store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
                     store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
+                    store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
@@ -517,9 +518,9 @@ class UploadUtils {
 
   async uploadDesign(putAssetDesignType?: PutAssetDesignType) {
     const typeMap = ['UPDATE_DB', 'UPDATE_PREV', 'UPDATE_BOTH']
-    const type = router.currentRoute.query.type
-    const designId = router.currentRoute.query.design_id
-    const teamId = router.currentRoute.query.team_id
+    let type = router.currentRoute.query.type
+    let designId = router.currentRoute.query.design_id
+    let teamId = router.currentRoute.query.team_id
     // const exportIds = router.currentRoute.query.export_ids
     const assetId = this.assetId.length !== 0 ? this.assetId : generalUtils.generateAssetId()
 
@@ -538,6 +539,9 @@ class UploadUtils {
       TeamId: ${teamId}`)
       putAssetDesignType = PutAssetDesignType.UPDATE_BOTH
       router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: assetId, team_id: this.teamId }) })
+      type = router.currentRoute.query.type
+      designId = router.currentRoute.query.design_id
+      teamId = router.currentRoute.query.team_id
     }
 
     store.commit('SET_assetId', assetId)

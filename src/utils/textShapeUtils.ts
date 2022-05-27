@@ -161,7 +161,11 @@ class Controller {
 
     spans.forEach(spanData => {
       const span = document.createElement('span')
-      span.textContent = spanData.text
+      if (spanData.text === ' ') {
+        span.innerHTML = '&nbsp;'
+      } else {
+        span.textContent = spanData.text
+      }
 
       const spanStyleObject = tiptapUtils.textStylesRaw(spanData.styles)
       spanStyleObject.textIndent = spanStyleObject['letter-spacing'] || 'initial'
@@ -260,6 +264,7 @@ class Controller {
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
     const scale = config.styles.scale
     const { textWidth, minHeight } = this.getTextHWs(config)
+    console.log(textWidth)
     const transforms = this.convertTextShape(textWidth, bend)
     const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, config)
     return { areaWidth, areaHeight, minHeight }

@@ -9,6 +9,7 @@
           @change="handleNameEditEnd"
           @keyup="checkNameEnter")
         span(v-else
+          :title="paletteName"
           @click="handleNameClick") {{ paletteName }}
       div(class="brand-kit-color-palette__right")
         div(class="brand-kit-color-palette__trash pointer"
