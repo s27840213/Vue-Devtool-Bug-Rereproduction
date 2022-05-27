@@ -1,9 +1,9 @@
 <template lang="pug">
   div(class="field")
-    div(v-if="isChange" class="field__close")
-      svg-icon(iconName="page-close" iconWidth="10px" iconColor="gray-0"
-              class="pointer" @click.native="close()")
-    span(v-if="isChange" class="field__title") {{$t('TMP0096')}}
+    template(v-if="isChange")
+      svg-icon(iconName="page-close" iconWidth="10px"
+              iconColor="gray-0" class="field__close pointer" @click.native="close()")
+      span(class="text-H6 text-gray-2 mb-40") {{$t('TMP0096')}}
     //- todo rearrange class name
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
@@ -245,18 +245,10 @@ export default Vue.extend({
 .field {
   display: flex;
   flex-direction: column;
-  // justify-content: space-between;
-  position: relative;
-  // height: 100%;
-  &__close {
+  &__close { // Relaive to SettingsPayment.vue .sp-field
     position: absolute;
-    top: -7px;
-    right: -47px;
-  }
-  &__title { // move to html?
-    @include text-H6;
-    color: setColor(gray-2);
-    margin-bottom: 40px;
+    top: 0px; right: 0px;
+    padding: 10px;
   }
   >button {
     @include btn-LG;

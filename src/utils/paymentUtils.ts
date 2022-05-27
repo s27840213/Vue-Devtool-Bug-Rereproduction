@@ -39,7 +39,7 @@ class PaymentUtils {
         : 'mailto:service@vivipic.com'
   }
 
-  errorHandler(msg?: string, initView = 'brandkit') {
+  errorHandler(msg: string, initView = 'brandkit') {
     switch (msg) {
       case 'EXCEED_SIZE_LIMIT':
         modalUtils.setModalInfo(i18n.t('NN0137') as string, [i18n.t('TMP0141') as string], '')

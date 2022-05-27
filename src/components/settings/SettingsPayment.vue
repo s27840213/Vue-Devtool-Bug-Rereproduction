@@ -109,6 +109,7 @@
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
         payment-field(isChange @next="closeCardPopup")
+    //- to-delete
     popup-payment(v-if="showPaymentPopup" @close="closePaymentPopup()")
     spinner(v-if="isLoading")
 </template>
@@ -350,15 +351,17 @@ export default Vue.extend({
 }
 
 .sp-field{
-  width: 320px;
+  box-sizing: border-box;
+  width: min(440px, 100%);
   padding: 20px 60px 40px 60px;
   background-color: white;
+  position: absolute;
 }
 
 @media screen and (max-width: 768px) {
-  .sp { padding: 24px 24px }
+  .sp { padding: 26px 24px 20px 24px }
   .sp-field {
-    position: absolute;
+    padding: 60px 28px;
     bottom: 0px;
   }
 }

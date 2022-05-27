@@ -203,6 +203,7 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 768px) {
+  .home-content { padding: 0 24px; }
   .home-top {
     min-height: 400px;
     width: 327px;

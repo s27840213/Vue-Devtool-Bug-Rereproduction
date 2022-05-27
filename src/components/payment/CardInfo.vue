@@ -65,7 +65,9 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
   width: 390px; height: 215px;
+  padding: 37px;
   background-color: setColor(white);
   &-title {
     @include text-H6;
@@ -88,6 +90,8 @@ export default Vue.extend({
   .card-popup {
     position: absolute;
     bottom: 0px;
+    height: 262px;
+    padding: 56px 30px;
   }
 }
 </style>

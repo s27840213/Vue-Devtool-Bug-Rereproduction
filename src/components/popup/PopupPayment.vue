@@ -5,6 +5,7 @@
         div(class="close pointer")
           svg-icon(iconName="page-close" iconWidth="17px" iconColor="gray-0"
                   @click.native="closePopup()")
+        //- todo del v-click-outside
         div(class="payment" v-click-outside="closePopup")
           div(class="payment-left")
             div(class="payment-left-top")
@@ -439,7 +440,12 @@ export default Vue.extend({
     position: absolute;
     bottom: 0;
     width: 100%; height: calc(100% - #{$header-height});
-    .wrapper2, .payment { width: 100%; height: 100%; }
+    .wrapper2  { width: 100%; height: 100%; }
+    .payment  {
+      width: 100%;
+      height: fit-content;
+      min-height: 100%;
+    }
     .close {
       background-color: transparent;
       right: 0px; top: 0px;

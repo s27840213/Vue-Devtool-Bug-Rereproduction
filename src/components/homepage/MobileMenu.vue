@@ -15,6 +15,10 @@
         div(class="nav__option")
           a(:href="faqPage"
             class="mobile-menu__link") {{$t('NN0147')}}
+        div(class="nav__option")
+          div(:class="{'text-blue-1': currentPage === 'Pricing'}")
+            router-link(to="/pricing"
+              class="mobile-menu__link") Pricing
     div(class="nav mobile-menu__bottom")
       template(v-if="!isLogin")
         div(class="nav__option")
