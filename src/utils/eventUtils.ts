@@ -26,7 +26,7 @@ class EventUtils {
     if (window.PointerEvent) {
       window.addEventListener(type, callback)
     } else {
-      const targetEvent = generalUtils.isMobile() ? mobileHash[type] : computerHash[type]
+      const targetEvent = generalUtils.isTouchDevice() ? mobileHash[type] : computerHash[type]
 
       window.addEventListener(targetEvent, callback)
     }
@@ -36,7 +36,7 @@ class EventUtils {
     if (window.PointerEvent) {
       window.removeEventListener(type, callback)
     } else {
-      const targetEvent = generalUtils.isMobile() ? mobileHash[type] : computerHash[type]
+      const targetEvent = generalUtils.isTouchDevice() ? mobileHash[type] : computerHash[type]
 
       window.removeEventListener(targetEvent, callback)
     }

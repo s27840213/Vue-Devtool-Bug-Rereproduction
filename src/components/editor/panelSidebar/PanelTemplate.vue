@@ -167,9 +167,9 @@ export default Vue.extend({
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 200, 10)
+        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 200, 10)
       } else {
-        galleryUtils = new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 140, 10)
+        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 140, 10)
       }
       const idContainerHeight = this.showTemplateId ? 24 : 0
       const result = galleryUtils

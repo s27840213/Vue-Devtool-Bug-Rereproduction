@@ -3,7 +3,7 @@ import generalUtils from './generalUtils'
 
 class EditorUtils {
   setCloseMobilePanelFlag(bool: boolean): void {
-    if (generalUtils.isMobile()) {
+    if (generalUtils.isTouchDevice()) {
       store.commit('SET_closeMobilePanelFlag', bool)
     }
   }

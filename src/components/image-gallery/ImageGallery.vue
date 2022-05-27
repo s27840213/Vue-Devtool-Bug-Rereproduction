@@ -54,12 +54,12 @@ export default Vue.extend({
     }
   },
   data() {
-    console.log(generalUtils.isMobile())
+    console.log(generalUtils.isTouchDevice())
     return {
       nextIndex: 0,
       rows: [] as any[],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(generalUtils.isMobile() ? window.innerWidth - 20 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 20 : 300, 95, 5)
     }
   },
   watch: {

@@ -227,7 +227,7 @@ export default Vue.extend({
       this.$emit('toggleColorPanel', false)
     },
     openColorPanel(event: MouseEvent) {
-      if (generalUtils.isMobile()) {
+      if (generalUtils.isTouchDevice()) {
         this.$emit('openColorPicker')
       }
       colorUtils.setIsColorPickerOpen(true)

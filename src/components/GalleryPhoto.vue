@@ -187,7 +187,7 @@ export default Vue.extend({
           ...(this.isUploading && { isPreview: true, assetId: photo.id })
         }
       )
-      if (generalUtils.isMobile()) {
+      if (generalUtils.isTouchDevice()) {
         this.setCloseMobilePanelFlag(true)
       }
     },

@@ -66,7 +66,7 @@ export default Vue.extend({
       getPage: 'getPage'
     }),
     isMobile(): boolean {
-      return generalUtils.isMobile()
+      return generalUtils.isTouchDevice()
     },
     pointerEvents(): string {
       return this.forRender ? 'none' : 'initial'

@@ -300,10 +300,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
-    const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
-    const json = await response.json()
+    /**
+     * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
+     */
+    // const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
+    // const json = await response.json()
 
-    // const json = appJson
+    const json = appJson
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 

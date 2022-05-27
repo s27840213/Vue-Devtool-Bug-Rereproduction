@@ -116,7 +116,7 @@ export default Vue.extend({
         id: key,
         type: key,
         // size: (this.$refs.colorBlock as HTMLElement).style.height
-        size: generalUtils.isMobile() ? 180 : 150
+        size: generalUtils.isTouchDevice() ? 180 : 150
       }]
     },
     listCategories(): any[] {
@@ -234,7 +234,7 @@ export default Vue.extend({
         color: color
       })
 
-      if (generalUtils.isMobile()) {
+      if (generalUtils.isTouchDevice()) {
         this.setCloseMobilePanelFlag(true)
       }
     },
@@ -255,7 +255,7 @@ export default Vue.extend({
       this.getMoreContent()
     },
     handleColorModal(color: string) {
-      if (generalUtils.isMobile()) {
+      if (generalUtils.isTouchDevice()) {
         this.$emit('openExtraColorModal')
         return
       }

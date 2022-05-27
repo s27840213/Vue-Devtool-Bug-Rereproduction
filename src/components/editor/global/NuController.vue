@@ -211,7 +211,8 @@ export default Vue.extend({
       hasChangeTextContent: false,
       movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
-      isMoved: false
+      isMoved: false,
+      isFirstClick: false
     }
   },
   mounted() {
@@ -329,7 +330,7 @@ export default Vue.extend({
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
     isMobile(): boolean {
-      return generalUtils.isMobile()
+      return generalUtils.isTouchDevice()
     }
   },
   watch: {
@@ -339,6 +340,7 @@ export default Vue.extend({
     isActive(val) {
       if (!val) {
         this.isControlling = false
+        this.isFirstClick = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
@@ -622,6 +624,8 @@ export default Vue.extend({
           const targetClassList = (event.target as HTMLElement).classList
           const isMoveBar = targetClassList.contains('control-point__move-bar')
           const isMover = targetClassList.contains('control-point__mover')
+
+          // if the text layer is already active and contentEditable
           if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
           } else if (!this.isActive) {
@@ -645,11 +649,17 @@ export default Vue.extend({
             return
           }
 
-          if (isMover || isMoveBar) {
-            this.movingByControlPoint = true
-          } else {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-          }
+          /**
+           * @NeedCodeReview - with Steve or TingAn
+           * The cotentEditable updated timing will be move to the moveEnd instead of moveStart
+           * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
+           */
+
+          // if (isMover || isMoveBar) {
+          //   this.movingByControlPoint = true
+          // } else {
+          //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+          // }
           break
         }
         case 'group':
@@ -658,6 +668,7 @@ export default Vue.extend({
             return
           }
       }
+
       if (!this.config.locked && !inSelectionMode) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
@@ -746,12 +757,12 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
-          // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
-          //   GroupUtils.deselect()
-          //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
-          // }
-        }
+        // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
+        //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
+        //   //   GroupUtils.deselect()
+        //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
+        //   // }
+        // }
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
@@ -771,13 +782,16 @@ export default Vue.extend({
 
             LayerUtils.deleteSelectedLayer(false)
             LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
-          } else {
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
+          } else {
             StepsUtils.record()
           }
         } else {
           if (this.getLayerType === 'text') {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+              isTyping: true,
+              ...(this.isFirstClick && { contentEditable: true })
+            })
             if (this.movingByControlPoint) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             }
@@ -785,6 +799,7 @@ export default Vue.extend({
           this.isMoved = false
         }
         this.isControlling = false
+        this.isFirstClick = true
         this.setCursorStyle('')
         eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
         eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)

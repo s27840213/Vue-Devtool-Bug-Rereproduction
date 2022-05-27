@@ -54,7 +54,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      galleryUtils: new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 75, 5),
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 75, 5),
       online: true,
       scrollTop: 0
     }

@@ -47,7 +47,7 @@ export default Vue.extend({
     return {
       rows: [],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(generalUtils.isMobile() ? window.innerWidth : 300, 95, 5)
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 95, 5)
     }
   },
   watch: {

@@ -371,7 +371,7 @@ export default Vue.extend({
       return false
     },
     isMobile(): boolean {
-      return generalUtils.isMobile()
+      return generalUtils.isTouchDevice()
     }
   },
   watch: {

@@ -147,7 +147,7 @@ class GeneralUtils {
     a.click()
   }
 
-  isMobile(): boolean {
+  isTouchDevice(): boolean {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
   }
 

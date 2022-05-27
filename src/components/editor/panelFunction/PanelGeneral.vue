@@ -26,8 +26,8 @@
       )
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
-        :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="iconAction('unlock')"
+        :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        @click.native="iconAction(isLocked ? 'lock' : 'unlock')"
         v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
       )
       svg-icon(class="feature-button p-5"
@@ -172,7 +172,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     iconAction(icon: string) {
-      if (this.isLocked && icon !== 'unlock') return
+      if (this.isLocked && icon !== 'lock') return
       MappingUtils.mappingIconAction(icon)
     },
     openOrderPopup() {

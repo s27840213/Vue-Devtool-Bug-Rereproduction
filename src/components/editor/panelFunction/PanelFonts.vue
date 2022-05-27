@@ -116,7 +116,7 @@ export default Vue.extend({
       assetFonts: 'user/getAssetFonts'
     }),
     isMobile(): boolean {
-      return generalUtils.isMobile()
+      return generalUtils.isTouchDevice()
     },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable

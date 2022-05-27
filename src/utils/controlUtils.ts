@@ -27,7 +27,7 @@ class Controller {
 
   getControlPoints = (resizerShort: number, resizerLong: number) => {
     const scaleRatio = store.getters.getPageScaleRatio
-    const isMobile = generalUtils.isMobile()
+    const isMobile = generalUtils.isTouchDevice()
     const scalerSize = isMobile ? 12 : 8
     return {
       scalers: [
