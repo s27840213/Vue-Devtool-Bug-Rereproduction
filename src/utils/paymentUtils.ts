@@ -39,7 +39,7 @@ class PaymentUtils {
         : 'mailto:service@vivipic.com'
   }
 
-  errorHandler(msg: string, initView = 'brandkit') {
+  errorHandler(msg?: string, initView = 'brandkit') {
     switch (msg) {
       case 'EXCEED_SIZE_LIMIT':
         modalUtils.setModalInfo(i18n.t('NN0137') as string, [i18n.t('TMP0141') as string], '')
@@ -57,14 +57,14 @@ class PaymentUtils {
       case 'QUOTA_DEPLETED':
         if (store.getters['payment/getIsBundle']) {
           modalUtils.setModalInfo(i18n.t('TMP0142') as string,
-            (i18n.t('TMP0144') as string).split('<br>'), '', {
+            [i18n.t('TMP0144') as string], '', {
               msg: i18n.t('TMP0138') as string,
               style: { width: '230px', height: '44px' },
               action: this.contactUs
             })
         } else {
           modalUtils.setModalInfo(i18n.t('TMP0142') as string,
-            (i18n.t('TMP0143') as string).split('<br>'), '',
+            [i18n.t('TMP0143') as string], '',
             {
               msg: i18n.t('TMP0138') as string,
               class: 'btn-light-mid',

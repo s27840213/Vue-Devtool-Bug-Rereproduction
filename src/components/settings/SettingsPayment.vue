@@ -70,7 +70,7 @@
       div(class="sp-usage-disk")
         div(class="sp-usage-disk-total")
           div(class="sp-usage-disk-used" :style="diskPercent")
-        span {{`${usage.diskUsed}/${usage.diskTotal} GB`}}
+        span {{`${diskUsedUi}/${usage.diskTotal} GB`}}
       span(class="body-XS")             {{$t('TMP0093')}}
     hr(v-if="card.status !== 'none'")
     div(v-if="card.status !== 'none'" class="sp-card")
@@ -151,7 +151,9 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isBundle: 'payment/getIsBundle'
+      isBundle: 'payment/getIsBundle',
+      _diskPercent: 'payment/getDiskPercent',
+      diskUsedUi: 'payment/getDiskUsedUi'
     }),
     ...mapFields({
       userCountryInfo: 'userCountryInfo',
@@ -181,7 +183,7 @@ export default Vue.extend({
     canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
     canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
     diskPercent():Record<string, string> {
-      return { width: `${this.usage.diskPercent * 200}px` }
+      return { width: `${this._diskPercent * 200}px` }
     },
     billingInfoInput():ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountryInfo) {

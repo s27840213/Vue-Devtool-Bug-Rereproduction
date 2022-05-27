@@ -188,6 +188,25 @@ class Payment {
     })
   }
 
+  calcUserAsset(procId: string): AxiosPromise {
+    return axios.request<any>({
+      url: '/calc-user-asset',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        team_id: store.getters['user/getTeamId'],
+        proc_id: procId
+      }
+    })
+  }
+
+  calcDone(procId: string, callback: (e: MessageEvent)=>void): void {
+    const ws = new WebSocket(`${'wss://proc.vivipic.com'}?token=${authToken().token || ''}&proc_id=${procId}`)
+    ws.onmessage = callback
+    ws.onerror = (event) => { console.log('socket error', event) }
+  }
+
   // Only for testing
   toAbort(): AxiosPromise {
     return axios.request<any>({

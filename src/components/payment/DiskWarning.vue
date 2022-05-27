@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import i18n from '@/i18n'
 import popupUtils from '@/utils/popupUtils'
 import paymentUtils from '@/utils/paymentUtils'
@@ -46,8 +46,14 @@ export default Vue.extend({
       isPro: 'isPro',
       usage: 'usage'
     }),
+    ...mapGetters({
+      _diskPercent: 'payment/getDiskPercent'
+    }),
     diskPercent(): string {
-      return (this.usage.diskPercent * 100).toFixed(2)
+      return (this._diskPercent * 100).toFixed(2)
+    },
+    recalc(): string {
+      return (this.usage.diskLoading ? i18n.t('NN0454') : i18n.t('TMP0137')) as string
     },
     preset():Record<string, Record<string, Record<string, unknown>>> {
       return {
@@ -61,7 +67,7 @@ export default Vue.extend({
               desc: i18n.t('TMP0135'),
               buttons: [
                 {
-                  text: i18n.t('TMP0137'),
+                  text: this.recalc,
                   func: this.reload
                 }, {
                   text: i18n.t('TMP0138'),
@@ -106,7 +112,7 @@ export default Vue.extend({
               desc: i18n.t('TMP0133'),
               buttons: [
                 {
-                  text: i18n.t('TMP0137'),
+                  text: this.recalc,
                   func: this.reload
                 }, {
                   text: i18n.t('TMP0057'),
@@ -124,9 +130,9 @@ export default Vue.extend({
       }
     },
     type():string {
-      return this.usage.diskPercent > 1
+      return this._diskPercent > 1
         ? '100'
-        : this.usage.diskPercent >= 0.8
+        : this._diskPercent >= 0.8
           ? '80'
           : '0'
     },
@@ -141,7 +147,7 @@ export default Vue.extend({
       }
     },
     diskStyle():Record<string, string> {
-      return { width: `${this.usage.diskPercent * 121}px` }
+      return { width: `${this._diskPercent * 121}px` }
     }
   },
   // mounted() {

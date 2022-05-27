@@ -82,11 +82,11 @@ export default Vue.extend({
   }
 
   &__content {
-    width: 100%;
+    width: 490px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    // align-items: flex-start;
+    text-align: left;
   }
 
   &__button {

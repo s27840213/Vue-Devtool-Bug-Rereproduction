@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
 import { getField, updateField } from 'vuex-map-fields'
+import store from '..'
 import i18n from '@/i18n'
 import paymentApi from '@/apis/payment'
-import popupUtils from '@/utils/popupUtils'
+import generalUtils from '@/utils/generalUtils'
 
 interface IPaymentState {
   isLoading: boolean
@@ -24,9 +25,9 @@ interface IPaymentState {
   usage: {
     bgrmRemain: number
     bgrmTotal: number
+    diskLoading: boolean
     diskUsed: number
     diskTotal: number
-    diskPercent: number
   }
   cardInfo: {
     status: string
@@ -150,9 +151,9 @@ const getDefaultState = (): IPaymentState => ({
   usage: {
     bgrmRemain: 0,
     bgrmTotal: 100,
+    diskLoading: false,
     diskUsed: 0,
-    diskTotal: 100,
-    diskPercent: 0
+    diskTotal: 100
   },
   cardInfo: {
     status: 'none',
@@ -257,9 +258,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
         usage: {
           bgrmRemain: data.bg_credit_current,
           bgrmTotal: data.bg_credit,
-          diskUsed: Number(data.capacity_current.toFixed(2)),
-          diskTotal: data.capacity,
-          diskPercent: data.capacity_current / data.capacity
+          diskLoading: false,
+          diskUsed: data.capacity_current,
+          diskTotal: data.capacity
         },
         cardInfo: {
           status: ICardStatue[data.card_valid as keyof typeof ICardStatue],
@@ -474,8 +475,25 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
       .finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async reloadDiskCapacity() {
-    console.log('store reload')
+  reloadDiskCapacity({ commit }) {
+    commit('SET_diskLoading', true)
+    const userId = store.getters['user/getTeamId']
+    const timestamp = generalUtils.generateTimeStamp()
+    const procId = `${userId}${timestamp}reloadDiskCapacity`
+    const callback = (event: MessageEvent) => {
+      const payload = JSON.parse(JSON.parse(event.data).message).payload
+      if (payload.flag) Vue.notify({ group: 'error', text: payload.msg })
+      else {
+        commit('SET_state', {
+          usage: Object.assign(state.usage, {
+            diskUsed: Number(payload.size) / 1024
+          })
+        })
+      }
+      commit('SET_diskLoading', false)
+    }
+    paymentApi.calcUserAsset(procId)
+    paymentApi.calcDone(procId, callback)
   },
   async toAbort({ dispatch }) {
     return paymentApi.toAbort().then(({ data }) => {
@@ -532,6 +550,9 @@ const mutations: MutationTree<IPaymentState> = {
       }
     })
   },
+  SET_diskLoading(state: IPaymentState, loading: boolean) {
+    state.usage.diskLoading = loading
+  },
   REDUCE_bgrmRemain(state: IPaymentState) {
     state.usage.bgrmRemain -= 1
   },
@@ -569,11 +590,17 @@ const getters: GetterTree<IPaymentState, any> = {
   // getPlans(state) {
   //   return state.plans
   // },
+  getDiskPercent(): number {
+    return state.usage.diskUsed / state.usage.diskTotal
+  },
+  getDiskUsedUi() {
+    return Number(state.usage.diskUsed.toFixed(2))
+  },
   getIsBundle(state) {
     return state.periodInfo === 'yearly'
   },
   canUploadAsset(state) {
-    return state.usage.diskPercent <= 1
+    return (state.usage.diskUsed / state.usage.diskTotal) <= 1
   },
   canBgrm(state) {
     return state.usage.bgrmRemain > 0
