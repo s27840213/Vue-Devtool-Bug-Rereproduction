@@ -987,9 +987,10 @@ class TextUtils {
     const { widthLimit, otherDimension } = this.autoResizeCore(config, initSize)
     const dimension = config.styles.writingMode.includes('vertical') ? 'width' : 'height'
     const limitDiff = Math.abs(widthLimit - initSize.widthLimit)
+    const firstPText = config.paragraphs[0].spans.map(span => span.text).join('')
     if (router.currentRoute.name === 'Preview') {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
-      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode}`)
+      console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText}`)
     }
     if (limitDiff / initSize.widthLimit > 0.05) {
       return initSize.widthLimit

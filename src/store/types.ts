@@ -17,6 +17,7 @@ export interface IEditorState {
   name: string,
   designId: string,
   assetId: string,
+  assetIndex: number,
   groupId: string,
   exportIds: string,
   groupType: number,

@@ -4,6 +4,7 @@ import { IImage } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
+import designUtils from './designUtils'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
@@ -109,7 +110,7 @@ class PageUtils {
 
   setPagesName(name: string) {
     store.commit('SET_pagesName', name)
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+    designUtils.renameDesign(name)
   }
 
   resizePage(format: { width: number, height: number }) {
