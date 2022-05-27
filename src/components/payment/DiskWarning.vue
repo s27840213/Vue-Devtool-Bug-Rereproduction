@@ -14,8 +14,8 @@
       div(class="warning-large-title") {{cur.title}}
       div(class="warning-large-desc") {{cur.large.desc}}
       div(class="warning-large-btn")
-        btn(v-for="btn in cur.large.buttons" type="light-mid"
-            @click.native="btn.func()") {{btn.text}}
+        btn(v-for="btn in cur.large.buttons" :type="btn.type || 'light-mid'"
+            :disabled="btn.disabled" @click.native="btn.func()") {{btn.text}}
 </template>
 
 <script lang="ts">
@@ -68,7 +68,9 @@ export default Vue.extend({
               buttons: [
                 {
                   text: this.recalc,
-                  func: this.reload
+                  func: this.reload,
+                  disabled: this.usage.diskLoading,
+                  type: 'transparent-mid'
                 }, {
                   text: i18n.t('TMP0138'),
                   func: this.contact
@@ -113,7 +115,9 @@ export default Vue.extend({
               buttons: [
                 {
                   text: this.recalc,
-                  func: this.reload
+                  func: this.reload,
+                  disabled: this.usage.diskLoading,
+                  type: 'transparent-mid'
                 }, {
                   text: i18n.t('TMP0057'),
                   func: this.openPaymentPopup
@@ -227,10 +231,6 @@ export default Vue.extend({
       margin-left: 16px;
       border-radius: 50px;
       border: 1px solid setColor(white);;
-    }
-    >button:first-child {
-      background-color: transparent;
-      color: white
     }
   }
 }

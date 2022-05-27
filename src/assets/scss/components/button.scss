@@ -9,7 +9,8 @@ $buttons: (
 	gray-active: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none,
-	light: setColor(white)
+	light: setColor(white),
+	transparent: transparent
 );
 
 $hoveredColor: (
@@ -20,7 +21,8 @@ $hoveredColor: (
 	gray-active: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none,
-	light: setColor(white)
+	light: setColor(white),
+	transparent: transparent
 );
 
 $textColor: (
@@ -31,7 +33,8 @@ $textColor: (
 	gray-active: setColor(blue-1),
 	inactive: setColor(white),
 	icon: none,
-	light: setColor(blue-1)
+	light: setColor(blue-1),
+	transparent: setColor(white)
 );
 
 $borderColor: (
@@ -42,7 +45,8 @@ $borderColor: (
 	gray-active: setColor(blue-1),
 	inactive: setColor(white),
 	icon: none,
-	light: setColor(blue-1)
+	light: setColor(blue-1),
+	transparent: setColor(white)
 );
 
 $padding: (
