@@ -191,11 +191,15 @@ export default Vue.extend({
 
       // Handle the params for drawing
       const img = new Image()
+      let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, ['public', 'private'].includes(config.srcObj.type) ? 'larg' : 1600)
+      img.src = imageUtils.getSrc(config, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600)
       img.src += `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve) => {
-        img.onload = () => resolve()
+        img.onload = () => {
+          resolve()
+          MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+        }
       })
 
       performance.mark(mark1)
@@ -215,8 +219,8 @@ export default Vue.extend({
 
       spaceScale *= width > height ? CANVAS_SIZE / _canvasW : CANVAS_SIZE / _canvasH
       spaceScale *= imgWidth > imgHeight
-        ? (width / imgWidth) * 1600 / drawCanvasWOri
-        : (height / imgHeight) * 1600 / drawCanvasHOri
+        ? (width / imgWidth) * MAXSIZE / drawCanvasWOri
+        : (height / imgHeight) * MAXSIZE / drawCanvasHOri
 
       const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
       const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale

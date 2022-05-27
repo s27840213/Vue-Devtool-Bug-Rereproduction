@@ -4,7 +4,7 @@
     draggable="false")
     div(v-if="showCanvas"
       class="shadow__canvas-wrapper"
-      :style="{ ...canvasWrapperStyle, ...flipStyles }")
+      :style="canvasWrapperStyle")
       canvas(ref="canvas")
     div(v-if="shadowSrc"
       class="shadow__picture"
@@ -294,11 +294,15 @@ export default Vue.extend({
       if (this.forRender) {
         return {}
       }
+      const { horizontalFlip, verticalFlip, scale } = this.config.styles
       const { width, height } = this.shadowBuff.canvasSize
+      const scaleX = horizontalFlip ? -scale : scale
+      const scaleY = verticalFlip ? -scale : scale
+
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${this.config.styles.scale})`
+        transform: `scale(${scaleX}, ${scaleY})`
       }
     },
     imgWrapperstyle(): any {
@@ -598,7 +602,7 @@ export default Vue.extend({
               this.shadowBuff.canvasShadowImg.shadow = img
             }
             img.src = ImageUtils.getSrc(this.config,
-              ['private', 'public'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE) +
+              ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE) +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
           }
           break

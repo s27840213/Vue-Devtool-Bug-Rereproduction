@@ -1578,16 +1578,18 @@ export default Vue.extend({
           layers = (LayerUtils.getCurrLayer as IFrame).clips
       }
 
-      if (this.currSubSelectedInfo.index !== -1) {
-        for (let idx = 0; idx < layers.length; idx++) {
-          updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
-          if (this.currSubSelectedInfo.type === 'image') {
-            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
+      if (!this.isHandleShadow) {
+        if (this.currSubSelectedInfo.index !== -1) {
+          for (let idx = 0; idx < layers.length; idx++) {
+            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+            if (this.currSubSelectedInfo.type === 'image') {
+              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
+            }
           }
         }
+        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+        LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
-      updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
-      LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
     },
     dblSubController(targetIndex: number) {
       if (this.isHandleShadow) {

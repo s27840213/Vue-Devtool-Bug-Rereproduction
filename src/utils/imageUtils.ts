@@ -5,9 +5,11 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { IUserImageContentData } from '@/interfaces/api'
+import { IImageSize, IUserImageContentData } from '@/interfaces/api'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
+import imageApi from '@/apis/image-api'
+import { AxiosPromise } from 'axios'
 
 const FORCE_UPDATE_VER = '&ver=303120221747'
 class ImageUtils {
@@ -169,6 +171,45 @@ class ImageUtils {
         return src
       default:
         return ''
+    }
+  }
+
+  getImgSize(srcObj: SrcObj): AxiosPromise<IImageSize> | undefined {
+    const { type: _type, assetId, userId } = srcObj
+    switch (_type) {
+      case 'private':
+      case 'public':
+      case 'logo-private':
+      case 'logo-public': {
+        const type = _type.includes('logo') ? 'logo' : 'image'
+        if (!userId && typeof assetId === 'number') {
+          return imageApi.getImgSize({
+            token: '',
+            type,
+            asset_index: assetId as number,
+            cache: true
+          })
+        } else if (typeof userId === 'string' && typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type,
+            asset_id: assetId,
+            team_id: userId,
+            cache: true
+          })
+        }
+        break
+      }
+      case 'background': {
+        if (typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type: 'background',
+            key_id: assetId,
+            cache: true
+          })
+        }
+      }
     }
   }
 
