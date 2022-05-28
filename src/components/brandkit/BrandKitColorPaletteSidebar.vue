@@ -84,7 +84,7 @@ export default Vue.extend({
     },
     handleSetTextColor(color: string): number {
       const { layerIndex, pageIndex, subLayerIdx } = layerUtils
-      textPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
+      textPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex, subLayerIdx)
       tiptapUtils.updateHtml()
       textEffectUtils.refreshColor()
       textPropUtils.updateTextPropsState({ color })

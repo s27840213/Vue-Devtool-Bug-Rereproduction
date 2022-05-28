@@ -299,7 +299,7 @@ export default Vue.extend({
         case 'tmp':
         case 'group':
           if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
-            TextPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
+            TextPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex, subLayerIdx)
             if (subLayerIdx !== -1) {
               tiptapUtils.updateHtml()
             }
