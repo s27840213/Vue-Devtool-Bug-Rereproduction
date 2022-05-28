@@ -290,25 +290,8 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = LayerUtils
-
-      switch (currLayer.type) {
-        case 'text':
-          tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-          break
-        case 'tmp':
-        case 'group':
-          if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
-            TextPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex, subLayerIdx)
-            if (subLayerIdx !== -1) {
-              tiptapUtils.updateHtml()
-            }
-          } else {
-            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-          }
-      }
-      textEffectUtils.refreshColor()
-      TextPropUtils.updateTextPropsState({ color })
+      const hex = tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color)
+      tiptapUtils.spanStyleHandler('color', hex)
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
@@ -320,11 +303,8 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      tiptapUtils.applySpanStyle('size', value)
-      tiptapUtils.agent(editor => {
-        LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        StepsUtils.record()
-      })
+      tiptapUtils.spanStyleHandler('size', value)
+      tiptapUtils.forceUpdate(true)
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
       textEffectUtils.refreshSize()
     },
@@ -539,11 +519,8 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', parseFloat(value))
-          tiptapUtils.agent(editor => {
-            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-            StepsUtils.record()
-          })
+          tiptapUtils.spanStyleHandler('size', parseFloat(value))
+          tiptapUtils.forceUpdate(true)
           TextPropUtils.updateTextPropsState({ fontSize: value })
           textEffectUtils.refreshSize()
         })
