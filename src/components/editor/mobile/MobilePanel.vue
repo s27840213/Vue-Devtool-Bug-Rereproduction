@@ -136,7 +136,7 @@ export default Vue.extend({
     },
     panelStyle(): { [index: string]: string } {
       return {
-        height: this.halfSize ? '50%' : this.fixSize ? 'initial' : '100%',
+        height: this.halfSize ? '50%' : this.fixSize ? 'initial' : '90%',
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
         ...(this.fixSize && { 'max-height': '80%' })

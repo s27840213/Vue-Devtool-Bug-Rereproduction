@@ -71,6 +71,7 @@ export default Vue.extend({
       ] as Array<IFooterTab>,
       fontTabs: [
         mainMenu,
+        { icon: 'edit', text: `${this.$t('NN0504')}` },
         { icon: 'font', text: `${this.$t('NN0353')}`, panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
@@ -295,6 +296,13 @@ export default Vue.extend({
         }
         case 'text-format': {
           tiptapUtils.agent(editor => editor.commands.selectAll())
+          break
+        }
+        case 'edit': {
+          const { index, pageIndex } = layerUtils.currSelectedInfo
+          layerUtils.updateLayerProps(pageIndex, index, {
+            contentEditable: true
+          })
           break
         }
         default: {
