@@ -5,7 +5,6 @@
         div(class="close pointer")
           svg-icon(iconName="page-close" iconWidth="17px" iconColor="gray-0"
                   @click.native="closePopup()")
-        //- todo del v-click-outside
         div(class="payment" v-click-outside="closePopup")
           div(class="payment-left")
             div(class="payment-left-top")
@@ -291,7 +290,7 @@ export default Vue.extend({
   .wrapper2 {
     @include hide-scrollbar;
     // position: relative;
-    width: min(792px, min(90vw));
+    width: min(792px, 90vw);
     height: min(704px, min(80vw, 90vh));
   }
 }

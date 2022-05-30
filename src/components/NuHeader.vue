@@ -181,7 +181,7 @@ export default Vue.extend({
         condition: this.isLogin, // todo: modify condition
         name: 'Pricing',
         url: '/pricing',
-        text: 'Pricing' // todo: i18n
+        text: i18n.t('TMP0139')
       }, {
         condition: this.isLogin,
         name: 'MyDesign',

@@ -109,8 +109,6 @@
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")
         payment-field(isChange @next="closeCardPopup")
-    //- to-delete
-    popup-payment(v-if="showPaymentPopup" @close="closePaymentPopup()")
     spinner(v-if="isLoading")
 </template>
 
@@ -124,6 +122,7 @@ import PaymentField from '@/components/payment/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
 import paymentData from '@/utils/paymentData'
+import popupUtils from '@/utils/popupUtils'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -145,8 +144,7 @@ export default Vue.extend({
     return {
       countryData: paymentData.countryList(),
       stateData: paymentData.usState(),
-      showCardPopup: false,
-      showPaymentPopup: false
+      showCardPopup: false
     }
   },
   computed: {
@@ -261,18 +259,17 @@ export default Vue.extend({
       this.showCardPopup = true
     },
     closeCardPopup() { this.showCardPopup = false },
-    closePaymentPopup() { this.showPaymentPopup = false },
     buy() {
       this.setInitView('step1')
-      this.showPaymentPopup = true
+      popupUtils.openPopup('payment')
     },
     switchPeriod() {
       this.setInitView('switch1')
-      this.showPaymentPopup = true
+      popupUtils.openPopup('payment')
     },
     cancelSub() {
       this.setInitView('cancel1')
-      this.showPaymentPopup = true
+      popupUtils.openPopup('payment')
     }
   }
 })

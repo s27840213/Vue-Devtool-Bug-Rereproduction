@@ -66,13 +66,8 @@ const routes: Array<RouteConfig> = [
   {
     path: '',
     name: 'Home',
-    component: Home, // todo rename
+    component: Home,
     beforeEnter: async (to, from, next) => {
-      // const locale = from.params.locale
-      // if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
-      //   i18n.locale = mappingUtils.mappingLocales(locale)
-      // }
-      // to.params.locale = 'en'
       try {
         next()
       } catch (error) {
