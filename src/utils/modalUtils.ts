@@ -1,5 +1,3 @@
-import { IGroup, IStyle, ITextStyle, ITmp, ILayer } from '@/interfaces/layer'
-import { IBounding } from '@/interfaces/math'
 import { IModalButton } from '@/interfaces/modal'
 import store from '@/store'
 

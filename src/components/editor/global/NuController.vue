@@ -79,8 +79,8 @@
             :key="index"
             :marker-index="index"
             :style="Object.assign(end, {'cursor': 'pointer'})"
-            @mousedown.left.stop="lineEndMoveStart"
-            @touchstart.prevent.stop="lineEndMoveStart")
+            @pointerdown.stop="lineEndMoveStart"
+            @touchstart="disableTouchEvent")
         div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
@@ -96,8 +96,7 @@
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
         div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-            @mousedown.left.stop="moveStart($event)"
-            @touchstart.prevent.stop="moveStart($event)")
+            @pointerdown="moveStart")
           div(class="control-point__resize-bar control-point__move-bar"
               :key="index"
               :style="resizerBarStyles(resizer.styles)")
@@ -108,13 +107,12 @@
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
             :style='lineControlPointStyles()'
-            @mousedown.native.left.stop="lineRotateStart"
-            @touchstart.native.prevent.stop="lineRotateStart")
+            @pointerdown.native.stop="lineRotateStart"
+            @touchstart.native="lineRotateStart")
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
-            @mousedown.left.stop="moveStart"
-            @touchstart.prevent.stop="moveStart")
+            @pointerdown="moveStart")
         template(v-else)
           div(class="control-point__controller-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
@@ -122,14 +120,14 @@
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
               :style='controlPointStyles()'
-              @mousedown.native.left.stop="rotateStart"
-              @touchstart.native.prevent.stop="rotateStart")
+              @pointerdown.native.stop="rotateStart"
+              @touchstart.native="disableTouchEvent")
             img(class="control-point__mover"
               v-if="config.type !== 'text' || !contentEditable"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
-              @mousedown.left.stop="moveStart"
-              @touchstart.prevent.stop="moveStart")
+              @pointerdown="moveStart"
+              @touchstart="disableTouchEvent")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -655,11 +653,10 @@ export default Vue.extend({
            * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
            */
 
-          // if (isMover || isMoveBar) {
-          //   this.movingByControlPoint = true
-          // } else {
-          //   LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-          // }
+          if (isMover || isMoveBar) {
+            this.movingByControlPoint = true
+          }
+
           break
         }
         case 'group':
@@ -1271,7 +1268,7 @@ export default Vue.extend({
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
     },
-    rotateStart(event: MouseEvent) {
+    rotateStart(event: MouseEvent | PointerEvent) {
       this.setCursorStyle('move')
       this.isRotating = true
       this.isControlling = true

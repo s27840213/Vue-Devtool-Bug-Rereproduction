@@ -85,13 +85,13 @@ export interface IParagraph {
 export interface IText extends ILayer<ITextStyle> {
   paragraphs: Array<IParagraph>,
   widthLimit: number,
-  editing: boolean,
   isHeading?: boolean,
   isSubheading?: boolean,
   isBody?: boolean,
+  editing: boolean,
   isEdited: boolean,
-  selection: ITiptapSelection,
   contentEditable: boolean
+  selection: ITiptapSelection,
 }
 
 export interface IShape extends ILayer<IStyle> {
