@@ -199,7 +199,7 @@ class Controller {
       minHeight = Math.max(minHeight, offsetHeight)
     }
 
-    // document.body.removeChild(body)
+    document.body.removeChild(body)
     return { textWidth, textHeight, minHeight }
   }
 

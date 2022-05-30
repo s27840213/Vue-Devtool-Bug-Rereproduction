@@ -19,15 +19,20 @@
                         class="no-trans"
                         key="sentinel"
                         @callback="handleLoadMore")
-        div(v-else
-          class="brand-kit-tab-text__font-column__item pointer relative"
-          :key="font.id.replace('new_', '')")
-          template(v-if="checkUploading(font)")
-            div(class="brand-kit-tab-text__font-column__font-img loading")
-              svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
-            div(class="brand-kit-tab-text__font-column__font-img loading")
-              svg-icon(iconName="loading" iconWidth="24px" iconColor="gray-3")
-          template(v-else)
+        template(v-else)
+          div(v-if="checkUploading(font)"
+            class="brand-kit-tab-text__font-column__item-uploading"
+            :key="font.id.replace('new_', '')")
+            div(class="brand-kit-tab-text__font-column__item-uploading-imgs")
+              div(class="brand-kit-tab-text__font-column__font-img loading")
+                svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
+              div(class="brand-kit-tab-text__font-column__font-img loading")
+                svg-icon(iconName="loading" iconWidth="34px" iconColor="gray-3")
+            div(class="brand-kit-tab-text__font-column__item-uploading-text")
+              span {{ $t('NN0503') }}
+          div(v-else
+            class="brand-kit-tab-text__font-column__item pointer relative"
+            :key="font.id")
             div(class="brand-kit-tab-text__font-column__font-img")
               img(:src="font.namePrevUrl" @error="onError(font)")
             div(class="brand-kit-tab-text__font-column__font-img")
@@ -214,6 +219,35 @@ export default Vue.extend({
         display: flex;
         padding: 11px 33px;
         gap: 19px;
+      }
+    }
+    &__item-uploading {
+      width: 310px;
+      height: fit-content;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid setColor(gray-3);
+      box-sizing: border-box;
+      border-radius: 4px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0px;
+      gap: 10px;
+      &-imgs {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+      }
+      &-text {
+        @include body-XS;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        padding: 0px 10px;
+        color: setColor(gray-2);
       }
     }
     &__loading {

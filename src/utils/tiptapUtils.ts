@@ -9,10 +9,12 @@ import layerUtils from '@/utils/layerUtils'
 import store from '@/store'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
+import textPropUtils from './textPropUtils'
+import textEffectUtils from './textEffectUtils'
 
 class TiptapUtils {
   event: any
-  eventHandler: undefined | ((editor: Editor) => void)
+  eventHandler: undefined | ((toRecord: boolean) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
 
@@ -61,9 +63,9 @@ class TiptapUtils {
     this.agent(editor => editor.on(event, handler))
   }
 
-  onForceUpdate(handler: (editor: Editor) => void): void {
-    const fullHandler = () => {
-      this.agent(editor => handler(editor))
+  onForceUpdate(handler: (editor: Editor, toRecord: boolean) => void): void {
+    const fullHandler = (toRecord: boolean) => {
+      this.agent(editor => handler(editor, toRecord))
     }
     if (this.eventHandler) {
       this.event.off('update', this.eventHandler)
@@ -72,8 +74,8 @@ class TiptapUtils {
     this.event.on('update', fullHandler)
   }
 
-  forceUpdate() {
-    this.event.emit('update')
+  forceUpdate(toRecord = false) {
+    this.event.emit('update', toRecord)
   }
 
   isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
@@ -296,8 +298,7 @@ class TiptapUtils {
   }
 
   applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: {[key: string]: any} = {}) {
-    const item: {[string: string]: any} = {}
-    item[key] = value
+    const item = { [key]: value }
     Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
     const contentEditable = subLayerIdx === -1 ? getCurrLayer.contentEditable : (getCurrLayer as IGroup).layers[subLayerIdx].contentEditable
@@ -322,9 +323,33 @@ class TiptapUtils {
           }
         }
       } else {
-        editor.chain().selectAll().updateAttributes('textStyle', item).run()
+        textPropUtils.applyPropsToAll('span,paragraph', item)
+        this.updateHtml()
       }
     })
+  }
+
+  spanStyleHandler(updateKey: string, updateValue: string | boolean | number) {
+    const item = { [updateKey]: updateValue }
+    const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
+
+    switch (currLayer.type) {
+      case 'text':
+        this.applySpanStyle(updateKey, updateValue)
+        break
+      case 'tmp':
+      case 'group':
+        if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+          textPropUtils.applyPropsToAll('span,paragraph', item, layerIndex, subLayerIdx)
+          if (subLayerIdx !== -1) {
+            this.updateHtml()
+          }
+        } else {
+          this.applySpanStyle(updateKey, updateValue)
+        }
+    }
+    textEffectUtils.refreshColor()
+    textPropUtils.updateTextPropsState(item)
   }
 
   applyParagraphStyle(key: string, value: any, setFocus = true) {

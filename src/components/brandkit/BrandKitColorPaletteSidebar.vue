@@ -2,7 +2,7 @@
   div(class="brand-kit-color-palette")
     div(class="brand-kit-color-palette__header")
       div(class="brand-kit-color-palette__name")
-        span {{ paletteName }}
+        span(:title="paletteName") {{ paletteName }}
     div(class="brand-kit-color-palette__colors")
       div(v-for="(color, index) in colorPalette.colors"
         class="brand-kit-color-palette__colors__color-wrapper")
@@ -84,7 +84,7 @@ export default Vue.extend({
     },
     handleSetTextColor(color: string): number {
       const { layerIndex, pageIndex, subLayerIdx } = layerUtils
-      textPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
+      textPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex, subLayerIdx)
       tiptapUtils.updateHtml()
       textEffectUtils.refreshColor()
       textPropUtils.updateTextPropsState({ color })

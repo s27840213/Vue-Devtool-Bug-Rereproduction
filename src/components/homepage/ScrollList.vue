@@ -91,7 +91,7 @@ export default Vue.extend({
       templateTitle: {
         '1,2': i18n.t('NN0368'),
         3: i18n.t('NN0026'),
-        8: i18n.t('NN0151', { media: 'Facebook' }),
+        8: i18n.tc('NN0151', 2, { media: 'Facebook' }),
         6: i18n.t('NN0028'),
         5: i18n.t('NN0027'),
         7: i18n.t('NN0369'),
@@ -103,10 +103,10 @@ export default Vue.extend({
     ...mapGetters({
       mydesignData: 'design/getAllDesigns'
     }),
-    listContentSytle():Record<string, string> {
+    listContentSytle(): Record<string, string> {
       return { width: this.type === 'theme' ? 'fit-content' : '80vw' }
     },
-    templateImgStyle():Record<string, string> {
+    templateImgStyle(): Record<string, string> {
       return ['3', '7'].includes(this.theme)
         ? { 'max-width': '160px' }
         : { 'max-height': '160px' }
@@ -170,7 +170,7 @@ export default Vue.extend({
       const items = this.$refs.items as HTMLElement
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
     },
-    templateUrl(item: Record<string, Record<string, string>>):string {
+    templateUrl(item: Record<string, Record<string, string>>): string {
       return this.theme === '7'
         ? `editor?type=product-page-template&design_id=${item.group_id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
         : `/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
@@ -193,7 +193,8 @@ export default Vue.extend({
   align-items: center;
   position: relative;
   max-width: 80vw;
-  &__lefticon, &__righticon {
+  &__lefticon,
+  &__righticon {
     position: absolute;
     cursor: pointer;
   }
@@ -237,30 +238,36 @@ export default Vue.extend({
 @media screen and (max-width: 768px) {
   .list-content-items__theme-item {
     &-new {
-      width: 63px; height: 63px;
+      width: 63px;
+      height: 63px;
     }
-    &-preset{
-      width: 98px; height: 84px;
+    &-preset {
+      width: 98px;
+      height: 84px;
     }
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 768.02px) {
   .list-content-items__theme-item {
-    &-new{
-      width: 90px; height: 90px;
+    &-new {
+      width: 90px;
+      height: 90px;
     }
-    &-preset{
-      width: 140px; height: 120px;
+    &-preset {
+      width: 140px;
+      height: 120px;
     }
   }
 }
 @media screen and (min-width: 1440.02px) {
   .list-content-items__theme-item {
     &-new {
-      width: 90px; height: 90px;
+      width: 90px;
+      height: 90px;
     }
-    &-preset{
-      width: 140px; height: 120px;
+    &-preset {
+      width: 140px;
+      height: 120px;
     }
   }
 }

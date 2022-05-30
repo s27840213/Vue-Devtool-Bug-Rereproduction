@@ -623,11 +623,15 @@ export default Vue.extend({
     },
     undo() {
       ShortcutUtils.undo()
-      this.$emit('stepChange')
+      if (!StepsUtils.isInFirstStep) {
+        this.$emit('stepChange')
+      }
     },
     redo() {
       ShortcutUtils.redo()
-      this.$emit('stepChange')
+      if (!StepsUtils.isInLastStep) {
+        this.$emit('stepChange')
+      }
     }
   }
 })

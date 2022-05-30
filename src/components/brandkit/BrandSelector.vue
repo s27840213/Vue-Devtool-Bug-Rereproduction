@@ -15,6 +15,7 @@
         @change="handleNameEditEnd"
         @keyup="checkNameEnter")
       span(v-else
+        :title="brandName"
         @click="handleNameClick") {{ brandName }}
     div(class="brand-selector__dropdown pointer"
       :class="`${theme}-theme`"
@@ -33,7 +34,7 @@
           @mouseenter="handleMouseEnter(brand)"
           @mouseleave="handleMouseLeave()"
           @click="handleSetCurrentBrand(brand)")
-          span {{ getDisplayedBrandName(brand) }}
+          span(:title="getDisplayedBrandName(brand)") {{ getDisplayedBrandName(brand) }}
           template(v-if="theme === 'brandkit'")
             div(class="brand-selector__brand-list__item-menu-icon pointer" @click.stop="handleBrandMenu(brand)")
               svg-icon(iconName="more_vertical" iconWidth="24px" iconColor="gray-2")
