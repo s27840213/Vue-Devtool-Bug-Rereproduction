@@ -153,15 +153,15 @@ class TextPropUtils {
   removeInvalidStyles(paragraphs: IParagraph[], isVertical: boolean, pHandler?: (paragraph: IParagraph) => void, spanHandler?: (span: ISpan) => void) {
     paragraphs.forEach((p) => {
       pHandler && pHandler(p)
-      if (isVertical && p.styles.spanStyle) {
-        const pStyle = tiptapUtils.generateSpanStyle(p.styles.spanStyle as string)
+      if (isVertical && p.spanStyle) {
+        const pStyle = tiptapUtils.generateSpanStyle(p.spanStyle as string)
         if (pStyle.style === 'italic') {
           pStyle.style = 'normal'
         }
         if (pStyle.decoration === 'underline') {
           pStyle.decoration = 'none'
         }
-        p.styles.spanStyle = tiptapUtils.textStyles(pStyle)
+        p.spanStyle = tiptapUtils.textStyles(pStyle)
       }
       const paragraphStyles = p.styles
       for (const span of p.spans) {
@@ -346,10 +346,10 @@ class TextPropUtils {
     for (let pIndex = spIndex; pIndex <= epIndex; pIndex++) {
       const paragraph = config.paragraphs[pIndex]
       Object.assign(paragraph.styles, prop)
-      if (paragraph.styles.spanStyle) {
-        const spanStyle = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+      if (paragraph.spanStyle) {
+        const spanStyle = tiptapUtils.generateSpanStyle(paragraph.spanStyle as string)
         Object.assign(spanStyle, prop)
-        paragraph.styles.spanStyle = tiptapUtils.textStyles(spanStyle)
+        paragraph.spanStyle = tiptapUtils.textStyles(spanStyle)
       }
       for (const span of paragraph.spans) {
         Object.assign(span.styles, prop)
@@ -1300,10 +1300,10 @@ class TextPropUtils {
         .forEach(p => {
           if (propType.includes('paragraph')) {
             Object.assign(p.styles, prop)
-            if (p.styles.spanStyle) {
-              const spanStyle = tiptapUtils.generateSpanStyle(p.styles.spanStyle as string)
+            if (p.spanStyle) {
+              const spanStyle = tiptapUtils.generateSpanStyle(p.spanStyle as string)
               Object.assign(spanStyle, prop)
-              p.styles.spanStyle = tiptapUtils.textStyles(spanStyle)
+              p.spanStyle = tiptapUtils.textStyles(spanStyle)
             }
           }
           if (propType.includes('span')) {

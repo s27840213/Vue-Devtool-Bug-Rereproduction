@@ -43,6 +43,7 @@ const getDefaultState = (): IEditorState => ({
   groupId: '',
   groupType: -1,
   assetId: '',
+  assetIndex: -1,
   exportIds: '',
   folderInfo: {
     isRoot: true,
@@ -90,7 +91,7 @@ const getDefaultState = (): IEditorState => ({
     body: []
   },
   isMoving: false,
-  showRuler: false,
+  showRuler: localStorage.getItem('showRuler') === 'true' ?? false,
   showGuideline: true,
   lockGuideline: false,
   themes: [],
@@ -122,6 +123,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getAssetId(state: IEditorState): string {
     return state.assetId
+  },
+  getAssetIndex(state: IEditorState): number {
+    return state.assetIndex
   },
   getGroupId(state: IEditorState): string {
     return state.groupId
@@ -267,7 +271,6 @@ const mutations: MutationTree<IEditorState> = {
       state.pages = newPages
     } else {
       state.pages = newPages.loadDesign ? pageUtils.newPages(newPages.pages) : newPages.pages
-      state.name = newPages.name
       state.groupId = newPages.groupId || state.groupId
       state.groupType = newPages.groupType || state.groupType
       state.exportIds = newPages.exportIds || state.exportIds
@@ -293,6 +296,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_assetId(state: IEditorState, assetId: string) {
     state.assetId = assetId
+  },
+  SET_assetIndex(state: IEditorState, assetIndex: number) {
+    state.assetIndex = assetIndex
   },
   SET_groupId(state: IEditorState, groupId: string) {
     state.groupId = groupId

@@ -1421,9 +1421,14 @@ export default Vue.extend({
       const { e } = attrs as { e: DragEvent }
       e && this.onDrop(e)
     },
-    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
+      const config = generalUtils.deepCopy(this.config)
+      config.paragraphs = payload.paragraphs
+      this.isCurveText ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, !!tiptapUtils.editor?.view?.composing)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.isCurveText ? this.curveTextSizeRefresh(this.config) : this.textSizeRefresh(this.config, !!tiptapUtils.editor?.view?.composing)
+      if (payload.toRecord) {
+        StepsUtils.record()
+      }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
