@@ -5,7 +5,7 @@
     div(class="nu-controller__body"
         ref="body"
         :style="styles()"
-        @pointerdown.prevent="moveStart"
+        @pointerdown.stop="moveStart"
         @touchstart="disableTouchEvent")
       div(v-for="(scaler, index) in controlPoints.scalers"
           class="controller-point"
