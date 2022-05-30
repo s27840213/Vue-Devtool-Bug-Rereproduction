@@ -392,7 +392,7 @@ export default Vue.extend({
   }
   &__menu {
     position: absolute;
-    width: 77px;
+    min-width: 77px;
     box-sizing: border-box;
     border-radius: 2px;
     display: flex;
@@ -436,6 +436,7 @@ export default Vue.extend({
           font-size: 12px;
           line-height: 12px;
           color: setColor(gray-2);
+          white-space: nowrap;
         }
       }
       &__right {

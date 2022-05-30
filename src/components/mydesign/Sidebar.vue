@@ -326,7 +326,7 @@ export default Vue.extend({
   &__container {
     grid-template-columns: 20px auto;
     padding: 10px 18px 10px 13px;
-    width: 171px;
+    min-width: 171px;
     display: grid;
     grid-column-gap: 10px;
     align-items: center;

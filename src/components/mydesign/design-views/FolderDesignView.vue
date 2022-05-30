@@ -632,7 +632,7 @@ export default Vue.extend({
     }
     &__menu {
       position: absolute;
-      width: 178px;
+      min-width: 178px;
       top: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%);
@@ -663,12 +663,14 @@ export default Vue.extend({
           height: 16px;
           display: flex;
           align-items: center;
+          margin-right: 30px;
           > span {
             font-weight: 400;
             font-size: 12px;
             line-height: 16px;
             letter-spacing: 0.03em;
             color: setColor(gray-2);
+            white-space: nowrap;
           }
         }
         > .sort-menu-right {
