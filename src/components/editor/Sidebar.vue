@@ -154,7 +154,7 @@ export default Vue.extend({
   &__text {
     transition: color 0.2s;
     &.us {
-      transform: scale(0.8);
+      transform: scale(0.9);
     }
   }
 }
