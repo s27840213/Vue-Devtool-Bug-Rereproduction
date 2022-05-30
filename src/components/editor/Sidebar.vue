@@ -16,8 +16,8 @@
             :iconName="item.icon"
             :iconColor="(currPanel === index && !inBgRemoveMode) ? 'blue-1' : 'gray-3'"
             :iconWidth="'24px'")
-          div(class="nav-item-text body-3"
-            :class="(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3'") {{item.text}}
+          div(class="nav-item__text body-3"
+            :class="[(currPanel === index && !inBgRemoveMode) ? 'text-blue-1' : 'text-gray-3', $i18n.locale]") {{item.text}}
     div(class="sidebar__chevron pointer"
         :class="[{'rotate-hr': isSidebarPanelOpen}]"
         @click="toggleSidebarPanel")
@@ -140,6 +140,7 @@ export default Vue.extend({
   grid-auto-rows: auto;
   row-gap: 10px;
   width: 100%;
+  justify-content: center;
 }
 .nav-item {
   width: 100%;
@@ -152,6 +153,9 @@ export default Vue.extend({
   padding: 5px;
   &__text {
     transition: color 0.2s;
+    &.us {
+      transform: scale(0.8);
+    }
   }
 }
 </style>
