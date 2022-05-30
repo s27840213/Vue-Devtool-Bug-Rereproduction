@@ -654,10 +654,12 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: 1fr;
     grid-template-columns: auto 1fr;
-    column-gap: 20px;
+    column-gap: 15px;
     box-sizing: border-box;
     position: relative;
     > div:nth-child(1) {
+      width: 135px;
+      box-sizing: border-box;
       > img {
         width: 100px;
       }
@@ -682,7 +684,7 @@ export default Vue.extend({
     align-items: center;
     border: 1px solid setColor(gray-4);
     border-radius: 3px;
-    width: 100%;
+    width: 135px;
     height: 50px;
     box-sizing: border-box;
     &__hex {
