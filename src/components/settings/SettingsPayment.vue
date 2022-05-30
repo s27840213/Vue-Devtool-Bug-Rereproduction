@@ -104,7 +104,7 @@
           input(:id="input.key" v-model="bi[input.key]"
                 :placeholder="input.ph" :invalid="biv[input.key]")
           span(v-if="biv[input.key]" class="sp-info__invalid") {{input.error}}
-      btn(type="primary-sm" @click.native="updateBillingInfo()"
+      btn(type="primary-mid" @click.native="updateBillingInfo()"
           :disabled="!billingInfoCheck") {{$t('NN0176')}}
     div(v-if="showCardPopup" class="popup-window" )
       div(class="sp-field" v-click-outside="closeCardPopup")

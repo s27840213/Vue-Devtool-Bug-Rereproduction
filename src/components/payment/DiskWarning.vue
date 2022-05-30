@@ -94,7 +94,8 @@ export default Vue.extend({
               buttons: [
                 {
                   text: i18n.t('NN0271'),
-                  func: this.skip
+                  func: this.skip,
+                  type: 'transparent-mid'
                 }, {
                   text: i18n.t('TMP0057'),
                   func: this.openPaymentPopup
