@@ -1,16 +1,17 @@
 <template lang="pug">
   div(class="footer-tabs" ref="tabs")
-    template(v-for="(tab, index) in tabs")
-      div(v-if="!tab.disabled"
-          class="footer-tabs__item"
-          :class="{'click-disabled': (tab.disabled || isLocked)}"
-          @click="handleTabAction(tab)")
-        svg-icon(class="mb-5"
-          :iconName="tab.icon"
-          :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-          :iconWidth="'20px'")
-        span(class="text-body-4 no-wrap"
-        :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+    div(class="footer-tabs__container" :style="containerStyles")
+      template(v-for="(tab, index) in tabs")
+        div(v-if="!tab.disabled"
+            class="footer-tabs__item"
+            :class="{'click-disabled': (tab.disabled || isLocked)}"
+            @click="handleTabAction(tab)")
+          svg-icon(class="mb-5"
+            :iconName="tab.icon"
+            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
+            :iconWidth="'20px'")
+          span(class="text-body-4 no-wrap"
+          :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -211,6 +212,15 @@ export default Vue.extend({
           return currLayer.type
         })()
       }
+    },
+    contentEditable(): boolean {
+      return this.currSelectedInfo.layers[0]?.contentEditable
+    },
+    containerStyles(): { [index: string]: any } {
+      return {
+        transform: `translate3d(0,${this.contentEditable ? 100 : 0}%,0)`,
+        opacity: `${this.contentEditable ? 0 : 1}`
+      }
     }
   },
   watch: {
@@ -327,16 +337,20 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .footer-tabs {
-  overflow: scroll;
-  display: grid;
-  grid-template-rows: auto;
-  grid-auto-flow: column;
-  grid-auto-columns: 60px;
-  column-gap: 32px;
-
-  background-color: setColor(nav);
-  padding: 8px 12px;
-  @include no-scrollbar;
+  overflow: hidden;
+  background-color: setColor(gray-5);
+  &__container {
+    overflow: scroll;
+    display: grid;
+    grid-template-rows: auto;
+    grid-auto-flow: column;
+    grid-auto-columns: 60px;
+    column-gap: 32px;
+    background-color: setColor(nav);
+    padding: 8px 12px;
+    @include no-scrollbar;
+    transition: transform 0.3s, opacity 0.4s;
+  }
 
   &__item {
     display: flex;

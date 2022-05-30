@@ -10,8 +10,6 @@
           :isConfigPanelOpen="isConfigPanelOpen")
         div(v-else class="mobile-editor__page-preview")
           page-preview
-              //- div(class="content__panel" :style="panelStyles()")
-              //-   mobile-panel-text-setting(v-if="showTextSetting" @toggleColorPanel="toggleColorPanel" @toggleConfigPanel="toggleConfigPanel")
       mobile-panel(v-if="currActivePanel !== 'none'"
         :currActivePanel="currActivePanel"
         :currColorEvent="currColorEvent"
