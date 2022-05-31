@@ -620,6 +620,9 @@ export default Vue.extend({
       margin-top: 0px;
     }
   }
+  &__text-preview {
+    font-size: 14px;
+  }
   &__row1 {
     display: grid;
     grid-template-rows: 1fr;
