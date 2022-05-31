@@ -134,8 +134,8 @@ class TiptapUtils {
   }
 
   makeParagraphStyle(attributes: any): IParagraphStyle {
-    const { font, lineHeight, fontSpacing, size, align } = attributes
-    return { font, lineHeight, fontSpacing, size, align }
+    const { font, lineHeight, fontSpacing, size, align, type, userId, assetId } = attributes
+    return { font, lineHeight, fontSpacing, size, align, type, userId, assetId }
   }
 
   generateSpanStyle(spanStyleStr: string): ISpanStyle {

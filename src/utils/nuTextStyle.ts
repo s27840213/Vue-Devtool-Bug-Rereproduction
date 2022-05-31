@@ -244,49 +244,55 @@ export default Extension.create({
               return textAlign
             },
             renderHTML: attributes => {
+              const pAttrs = attributes.spanStyle ? attributes : tiptapUtils.makeParagraphStyle(attributes)
               return {
-                style: tiptapUtils.textStyles(attributes) + '; margin: 0;'
+                style: tiptapUtils.textStyles(pAttrs) + '; margin: 0;'
               }
             }
           },
           weight: {
             default: 'normal',
             parseHTML: element => {
-              const paragraphStyle = element.style
-              if (paragraphStyle.fontWeight) {
-                return paragraphStyle.fontWeight === 'bold' ? 'bold' : 'normal'
-              }
-              const stroke = paragraphStyle.getPropertyValue('-webkit-text-stroke-width')
-              if (stroke === '') return null
-              return stroke.includes('+') ? 'bold' : 'normal'
+              return element.getAttribute('data-weight')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-weight': attributes.weight
+              }
+            }
           },
           decoration: {
             default: 'none',
             parseHTML: element => {
-              const paragraphStyle = element.style
-              const decoration = paragraphStyle.textDecorationLine ? paragraphStyle.textDecorationLine : paragraphStyle.getPropertyValue('-webkit-text-decoration-line')
-              return decoration === 'underline' ? 'underline' : 'none'
+              return element.getAttribute('data-decoration')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-decoration': attributes.decoration
+              }
+            }
           },
           style: {
             default: 'normal',
             parseHTML: element => {
-              const paragraphStyle = element.style
-              return paragraphStyle.fontStyle === 'italic' ? 'italic' : 'normal'
+              return element.getAttribute('data-style')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-style': attributes.style
+              }
+            }
           },
           color: {
             default: '#000000',
             parseHTML: element => {
-              const paragraphStyle = element.style
-              if (paragraphStyle.color === '') return null
-              return tiptapUtils.isValidHexColor(paragraphStyle.color) ? paragraphStyle.color : tiptapUtils.rgbToHex(paragraphStyle.color)
+              return element.getAttribute('data-color')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-color': attributes.color
+              }
+            }
           },
           type: {
             default: 'public',
