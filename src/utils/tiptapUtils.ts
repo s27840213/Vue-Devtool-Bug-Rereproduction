@@ -11,6 +11,7 @@ import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } f
 import { EventEmitter } from 'events'
 import textPropUtils from './textPropUtils'
 import textEffectUtils from './textEffectUtils'
+import generalUtils from './generalUtils'
 
 class TiptapUtils {
   event: any
@@ -101,15 +102,16 @@ class TiptapUtils {
   }
 
   toJSON(paragraphs: IParagraph[]): any {
+    // console.log(generalUtils.deepCopy(paragraphs))
     return {
       type: 'doc',
       content: paragraphs.map(p => {
         const pObj = {
           type: 'paragraph'
         } as {[key: string]: any}
-        const attrs = this.makeParagraphStyle(p.styles)
+        const attrs = this.makeParagraphStyle(p.styles) as any
         if (p.spanStyle) {
-          attrs.spanStyle = p.spanStyle as string
+          attrs.spanStyle = true
           const sStyles = this.generateSpanStyle(p.spanStyle as string)
           Object.assign(attrs, this.extractSpanStyleForParagraph(sStyles))
         }
@@ -167,6 +169,7 @@ class TiptapUtils {
   }
 
   extractFontProps(str: string): { type: string, userId: string, assetId: string, fontUrl: string } {
+    // console.trace()
     const result = {
       type: 'public',
       userId: '',
@@ -211,20 +214,19 @@ class TiptapUtils {
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
-          let spanStyle: string
+          let sStyles: ISpanStyle
           if (paragraph.attrs.spanStyle) {
-            spanStyle = paragraph.attrs.spanStyle
+            sStyles = this.makeSpanStyle(paragraph.attrs)
           } else {
-            spanStyle = defaultStyle
+            sStyles = this.generateSpanStyle(defaultStyle)
           }
-          const sStyles = this.generateSpanStyle(spanStyle)
           if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
         if (paragraph.attrs.spanStyle) {
-          const sStyles = this.generateSpanStyle(paragraph.attrs.spanStyle)
+          const sStyles = this.makeSpanStyle(paragraph.attrs)
           spans.push({ text: '', styles: sStyles })
           pStyles.size = sStyles.size
           pStyles.font = sStyles.font
@@ -232,7 +234,7 @@ class TiptapUtils {
           pStyles.userId = sStyles.userId
           pStyles.assetId = sStyles.assetId
           pStyles.fontUrl = sStyles.fontUrl
-          result.push({ spans, styles: pStyles, spanStyle: paragraph.attrs.spanStyle })
+          result.push({ spans, styles: pStyles, spanStyle: this.textStyles(sStyles) })
         } else {
           isSetContentRequired = true
           const sStyles = this.generateSpanStyle(defaultStyle)
@@ -315,7 +317,7 @@ class TiptapUtils {
               editor.commands.focus()
             }, 10)
           } else {
-            editor.chain().updateAttributes('textStyle', item).run()
+            editor.chain().updateAttributes('textStyle', item).updateAttributes('paragraph', item).run()
             setTimeout(() => {
               editor.chain().focus().selectPrevious().run()
             }, 10)
