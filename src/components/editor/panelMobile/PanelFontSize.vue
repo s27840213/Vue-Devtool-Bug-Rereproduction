@@ -13,8 +13,7 @@
       max="144"
       min="1"
       step="1"
-      type="range"
-      @mouseup="handleChangeStop")
+      type="range")
 </template>
 
 <script lang="ts">
