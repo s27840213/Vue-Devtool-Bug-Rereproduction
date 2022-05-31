@@ -221,6 +221,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
+    ...mapState('shadow', ['processId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
@@ -609,7 +610,7 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(e: MouseEvent) {
-      if (this.isProcessImgShadow || this.currFunctionPanelType === FunctionPanelType.photoShadow) {
+      if (this.isProcessImgShadow && this.processId.id !== this.config.id) {
         return
       } else {
         ImageUtils.setImgControlDefault(false)

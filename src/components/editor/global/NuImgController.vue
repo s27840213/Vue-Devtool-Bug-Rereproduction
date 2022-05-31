@@ -58,12 +58,14 @@ export default Vue.extend({
       return
     }
     const shadow = (this.config as IImage).styles.shadow
-    if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
-      imageShadowUtils.setProcessId({
-        pageId: pageUtils.currFocusPage.id,
-        layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
-        subLayerId: this.primaryLayer ? this.config.id : undefined
-      })
+    if (shadow.currentEffect !== ShadowEffectType.none) {
+      if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
+        imageShadowUtils.setProcessId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
+          subLayerId: this.primaryLayer ? this.config.id : undefined
+        })
+      }
     }
   },
   destroyed() {

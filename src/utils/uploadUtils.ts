@@ -311,10 +311,6 @@ class UploadUtils {
           const img = new Image()
           img.src = src
           img.onload = (evt) => {
-            store.commit('file/ADD_PREVIEW', {
-              imageFile: img,
-              assetId: assetId
-            })
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
@@ -330,21 +326,27 @@ class UploadUtils {
             }
             xhr.open('POST', this.loginOutput.upload_map.url, true)
             let increaseInterval = undefined as any
-            xhr.upload.onprogress = (event) => {
-              const uploadProgress = Math.floor(event.loaded / event.total * 100)
-              store.commit('file/UPDATE_PROGRESS', {
-                assetId: assetId,
-                progress: uploadProgress / 2
+            if (!isShadow) {
+              store.commit('file/ADD_PREVIEW', {
+                imageFile: img,
+                assetId: assetId
               })
-              if (uploadProgress === 100) {
-                increaseInterval = setInterval(() => {
-                  const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
-                    return img.id === assetId
-                  })
-                  const curr = this.images[targetIndex].progress as number
-                  const increaseNum = (90 - curr) * 0.05
-                  this.images[targetIndex].progress = curr + increaseNum
-                }, 10)
+              xhr.upload.onprogress = (event) => {
+                const uploadProgress = Math.floor(event.loaded / event.total * 100)
+                store.commit('file/UPDATE_PROGRESS', {
+                  assetId: assetId,
+                  progress: uploadProgress / 2
+                })
+                if (uploadProgress === 100) {
+                  increaseInterval = setInterval(() => {
+                    const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
+                      return img.id === assetId
+                    })
+                    const curr = this.images[targetIndex].progress as number
+                    const increaseNum = (90 - curr) * 0.05
+                    this.images[targetIndex].progress = curr + increaseNum
+                  }, 10)
+                }
               }
             }
             xhr.send(formData)
@@ -357,14 +359,17 @@ class UploadUtils {
                     clearInterval(interval)
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
+                      console.log(generalUtils.deepCopy(json))
                       if (json.flag === 0) {
                         console.log('Successfully upload the file')
                         if (type === 'image') {
-                          store.commit('file/UPDATE_PROGRESS', {
-                            assetId: assetId,
-                            progress: 100
-                          })
-                          store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                          if (!isShadow) {
+                            store.commit('file/UPDATE_PROGRESS', {
+                              assetId: assetId,
+                              progress: 100
+                            })
+                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                          }
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                           if (pollingCallback) {

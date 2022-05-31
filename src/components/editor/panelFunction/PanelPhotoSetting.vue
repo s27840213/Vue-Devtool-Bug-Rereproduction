@@ -54,9 +54,9 @@ export default Vue.extend({
           label: `${this.$t('NN0429')}`,
           show: 'panel-photo-shadow',
           condition: (): boolean => {
-            if (!this.$store.getters['user/isAdmin']) {
-              return false
-            }
+            // if (!this.$store.getters['user/isAdmin']) {
+            //   return false
+            // }
             const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
             if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
               return (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image

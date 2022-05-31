@@ -286,33 +286,44 @@ export default Vue.extend({
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
-            type: this.isAdmin ? 'public' : 'private',
-            userId: json.data.team_id,
+            type: this.isAdmin ? 'public' : 'shadow-private',
+            userId: json.data.team_id || '',
             assetId: this.isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
           }
-          const newWidth = (updateCanvas.width - right - left) / drawCanvasW * config.styles.width
-          const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * config.styles.height
+          const _width = config.styles.width / config.styles.scale
+          const _height = config.styles.height / config.styles.scale
+          const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
+          const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
 
-          const newImg = new Image()
-          newImg.crossOrigin = 'anonynous'
-          newImg.onload = () => {
-            const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-            layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
-            const shadowImgStyles = {
-              imgWidth: newWidth,
-              imgHeight: newHeight,
-              imgX: newWidth * 0.5 - (config.styles.width * leftShadowThickness + config.styles.width * 0.5),
-              imgY: newHeight * 0.5 - (config.styles.height * topShadowThickness + config.styles.height * 0.5)
+          new Promise<void>((resolve, reject) => {
+            if (!this.isAdmin) {
+              this.addShadowImg([srcObj.assetId])
+                .then(() => resolve())
+            } else {
+              resolve()
             }
-            /** update the upload img in shadow module */
-            imageShadowUtils.addUploadImg({
-              id: uploadAssetId,
-              owner: { pageId, layerId, subLayerId },
-              srcObj,
-              styles: shadowImgStyles
-            })
-          }
-          newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
+          }).then(() => {
+            const newImg = new Image()
+            newImg.crossOrigin = 'anonynous'
+            newImg.onload = () => {
+              const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+              layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
+              const shadowImgStyles = {
+                imgWidth: newWidth,
+                imgHeight: newHeight,
+                imgX: newWidth * 0.5 - (_width * leftShadowThickness + _width * 0.5),
+                imgY: newHeight * 0.5 - (_height * topShadowThickness + _height * 0.5)
+              }
+              /** update the upload img in shadow module */
+              imageShadowUtils.addUploadImg({
+                id: uploadAssetId,
+                owner: { pageId, layerId, subLayerId },
+                srcObj,
+                styles: shadowImgStyles
+              })
+            }
+            newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
+          }).catch((e) => console.error(e))
 
           // performance.measure(`${markStart} to ${mark1}`, markStart, mark1)
           // performance.measure(`${mark1} to ${mark2}`, mark1, mark2)
@@ -368,6 +379,9 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       removeBg: 'user/removeBg'
+    }),
+    ...mapActions('shadow', {
+      addShadowImg: 'ADD_SHADOW_IMG'
     }),
     optionStyle(idx: number) {
       return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }

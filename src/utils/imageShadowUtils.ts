@@ -520,7 +520,7 @@ class ImageShadowUtils {
       }, [] as Array<Array<number>>)
 
     const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
-    return pivots.some(p => p[3] === 0)
+    return pivots.some(p => p[3] !== 255)
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {

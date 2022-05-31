@@ -10,6 +10,7 @@ import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import imageApi from '@/apis/image-api'
 import { AxiosPromise } from 'axios'
+import { IShadowAsset } from '@/store/module/shadow'
 
 const FORCE_UPDATE_VER = '&ver=303120221747'
 class ImageUtils {
@@ -82,6 +83,15 @@ class ImageUtils {
         return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
+      case 'shadow-private': {
+        const shadowImgs = (store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>)
+        if (typeof assetId === 'number') {
+          if (shadowImgs.has(assetId)) {
+            return (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+          }
+        }
+        return ''
+      }
       default:
         return ''
     }

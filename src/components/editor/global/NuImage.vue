@@ -66,7 +66,7 @@ import imageShadowUtils, { CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE } from '@/uti
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
-import { IUploadShadowImg } from '@/store/module/shadow'
+import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import stepsUtils from '@/utils/stepsUtils'
 import errorHandle from '@/utils/errorHandleUtils'
 
@@ -85,8 +85,13 @@ export default Vue.extend({
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
+    if (this.shadow.srcObj.type === 'shadow-private') {
+      this.fetchShadowImg()
+    }
     eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
+      console.log('outside')
       if (this.currentShadowEffect !== ShadowEffectType.none) {
+        console.log('inside')
         if (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent) {
           this.redrawShadow(true)
         } else {
@@ -333,6 +338,7 @@ export default Vue.extend({
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
+        // transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px)`
         transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px) scale(${scale})`
       }
     },
@@ -365,7 +371,8 @@ export default Vue.extend({
           return layerUtils.getLayer(pageIndex, layerIndex).id === uploadId.layerId
         }
       })()
-      return (isPhotoShadowPanelOpen && isCurrLayerActive && isCurrShadowEffectApplied) || isShadowUploading
+      return isCurrShadowEffectApplied && (!this.shadowSrc || isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
+      // return (isPhotoShadowPanelOpen && isCurrLayerActive && isCurrShadowEffectApplied) || isShadowUploading
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -557,7 +564,6 @@ export default Vue.extend({
     handleNewShadowEffect(clearShadowSrc = true) {
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
-        console.warn('there is no canvas!')
         return
       }
       clearShadowSrc && this.clearShadowSrc()
@@ -722,6 +728,21 @@ export default Vue.extend({
         this.handleNewShadowEffect()
         openPanel && eventUtils.emit(PanelEvent.showPhotoShadow)
       })
+    },
+    fetchShadowImg() {
+      const { assetId } = (this.config as IImage).styles.shadow.srcObj
+      const shadowImgs = (this.$store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>)
+      if (typeof assetId === 'number') {
+        if (!shadowImgs.has(assetId)) {
+          this.$store.dispatch('shadow/ADD_SHADOW_IMG', [assetId])
+            .then(() => {
+              imageShadowUtils.updateShadowSrc(this.layerInfo, {
+                ...(this.config as IImage).styles.shadow.srcObj,
+                userId: generalUtils.generateRandomString(8)
+              })
+            })
+        }
+      }
     }
   }
 })
