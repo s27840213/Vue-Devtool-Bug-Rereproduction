@@ -21,7 +21,7 @@
         div(class="field-content__info-today")
           span {{$t('TMP0049')}}
           span {{priceToday}}
-    div(v-if="!isChange && useTappay" class="field-invoice")
+    div(v-if="!isChange" class="field-invoice")
       span(class="field-invoice__title") {{$t('TMP0050')}}
       div(v-for="inv in invoiceInput" class="field-invoice__input")
         input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
@@ -59,7 +59,6 @@ export default Vue.extend({
   data() {
     return {
       countryData: paymentData.countryList(),
-      invoiceInput: [...paymentData.gerneral(), ...paymentData.TWonly()],
       // Stripe
       stripePayReady: false,
       stripe: null as unknown as Stripe,
@@ -91,6 +90,7 @@ export default Vue.extend({
       trialStatus: 'trialStatus'
     }),
     useTappay():boolean {
+      // When update credit card (isChange true), use countryInfo instead of countryUi.
       return this.isChange ? this.userCountryInfo === 'tw'
         : this.userCountryUi === 'tw'
     },
@@ -118,10 +118,18 @@ export default Vue.extend({
     payReady():boolean {
       return this.useTappay
         ? this.tappayPayReady && this.invoiceReady
-        : this.stripePayReady
+        : this.stripePayReady && this.invoiceReady
     },
     disableSubmit():boolean {
       return !this.payReady || this.isLoading
+    },
+    invoiceInput():ReturnType<typeof paymentData.gerneral> {
+      switch (this.userCountryUi) {
+        case 'tw':
+          return [...paymentData.gerneral(), ...paymentData.TWonly()]
+        default:
+          return paymentData.gerneral()
+      }
     }
   },
   mounted() {
@@ -206,6 +214,7 @@ export default Vue.extend({
         if (item.error && await this.checkBillingInfo(item.key)) return
       }
       this.isLoading = true
+
       const callback = (result: any) => {
         return new Promise<void>((resolve) => {
           if (result.status !== 0) throw Error(result.msg)
@@ -222,8 +231,12 @@ export default Vue.extend({
       }
       this.TPDirect.card.getPrime(callback)
     },
-    stripeSubmit() {
+    async stripeSubmit() {
+      for (const item of this.invoiceInput) { // Check invoice input validity
+        if (item.error && await this.checkBillingInfo(item.key)) return
+      }
       this.isLoading = true
+
       this.stripe.confirmSetup({
         elements: this.stripeElement,
         confirmParams: { payment_method_data: { billing_details: { address: { country: this.userCountryUi } } } },

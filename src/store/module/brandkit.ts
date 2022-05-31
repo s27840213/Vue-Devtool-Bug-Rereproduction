@@ -58,6 +58,7 @@ function isPrivate(srcObj: SrcObj): string {
 function errorShower(msg?: string) {
   if (msg === 'NOT_SUBSCRIBED') {
     paymentUtils.errorHandler(msg)
+    store.commit('brandkit/SET_isSettingsOpen', false)
     return
   }
   showNetworkError()

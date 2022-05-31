@@ -15,6 +15,7 @@ class PaymentUtils {
     if (!store.getters['payment/getIsPro']) {
       store.commit('payment/SET_initView', initView)
       popupUtils.openPopup('payment')
+      if (initView === 'brandkit') store.commit('brandkit/SET_isSettingsOpen', false)
       return false
     }
     return true

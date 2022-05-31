@@ -365,15 +365,19 @@ const actions: ActionTree<IPaymentState, unknown> = {
       .finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async init({ commit }) {
-    commit('SET_state', {
-      stripeClientSecret: paymentApi.init().then(({ data }) => {
-        if (data.flag) throw Error(data.msg)
-        commit('SET_state', {
-          stripeClientSecret: data.client_secret,
-          paymentPaidDate: data.charge_time
-        })
-      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-    })
+    paymentApi.init().then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+      commit('SET_state', {
+        stripeClientSecret: data.client_secret,
+        paymentPaidDate: data.charge_time
+      })
+    }).then(() => { // If we know user email, fill in automatically.
+      if (state.billingInfo.email) return
+      const userEmail = store.getters['user/getEmail']
+      commit('SET_state', {
+        billingInfo: Object.assign(state.billingInfo, { email: userEmail })
+      })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
   async tappayAdd({ commit }) {
     commit('SET_state', { isLoading: true })
@@ -381,7 +385,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       country: state.userCountryUi,
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
-      prime: state.prime
+      prime: state.prime,
+      email: state.billingInfo.email
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
     }).then(() => {
@@ -403,8 +408,19 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.stripeAdd({
       country: state.userCountryUi,
       plan_id: state.planSelected,
-      is_bundle: Number(state.periodUi === 'yearly')
-    }).finally(() => { commit('SET_state', { isLoading: false }) })
+      is_bundle: Number(state.periodUi === 'yearly'),
+      email: state.billingInfo.email
+    }).then(({ data }) => {
+      if (data.flag) throw Error(data.msg)
+    }).then(() => {
+      return paymentApi.updateBillingInfo({
+        meta: JSON.stringify({
+          email: state.billingInfo.email,
+          name: state.billingInfo.name
+        })
+      })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      .finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async tappayUpdate({ dispatch, commit }) {
     commit('SET_state', { isLoading: true })

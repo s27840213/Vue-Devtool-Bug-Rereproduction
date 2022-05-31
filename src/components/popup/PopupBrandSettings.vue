@@ -65,7 +65,7 @@ import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } fro
 import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
-  name: 'BrandKit',
+  name: 'PopupBrandSettings',
   components: {
     NuHeader,
     NuFooter,
