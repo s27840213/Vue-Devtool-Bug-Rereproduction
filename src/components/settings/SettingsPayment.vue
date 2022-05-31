@@ -333,7 +333,7 @@ export default Vue.extend({
     border-radius: 4px;
     color: setColor(gray-2);
     &:focus { border-color: setColor(blue-1); }
-    &[invalid="true"] { border-color: red; }
+    &[invalid=true] { border-color: red; }
   }
   &__invalid {
     color: setColor(red);
@@ -344,7 +344,6 @@ export default Vue.extend({
     column-gap: 10px;
     text-align: left;
     >select, >input { margin: 10px 0; }
-    >input { width: 150px; }
   }
   >button { margin: 10px 0 0 auto; }
 }
@@ -358,7 +357,7 @@ export default Vue.extend({
 }
 
 @media screen and (max-width: 768px) {
-  .sp { padding: 26px 24px 20px 24px }
+  .sp { padding: 26px 6.4% 20px 6.4% }
   .sp-field {
     padding: 60px 28px;
     bottom: 0px;

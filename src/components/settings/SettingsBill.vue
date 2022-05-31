@@ -195,7 +195,7 @@ export default Vue.extend({
 }
 
 @media screen and (max-width: 768px) {
-  .bill { padding: 24px 24px }
+  .bill { padding: 24px 6.4% }
   .bill-table >div {
     >span { display: none; }
     >svg { display: inline; }

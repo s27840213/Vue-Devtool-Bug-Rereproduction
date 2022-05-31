@@ -1,9 +1,10 @@
 <template lang="pug">
   div(class="settings")
     nu-header(v-header-border="true")
-    div(class="settings__top mobile")
+    div(class="settings__top")
       svg-icon(iconName="left-arrow" iconWidth="24px" iconColor="gray-1" @click.native="back()")
       span {{viewLabel}}
+      svg-icon(iconWidth="24px" iconColor="gray-1" @click.native="openMobileMenu()")
     div(class="settings__content")
       sidebar(class="settings__sidebar" :style="sidebarStyle"
         @switch="switchView"
@@ -13,13 +14,20 @@
         settings-security(v-if="currentView === 'security'")
         settings-payment(v-if="currentView === 'payment'")
         settings-bill(v-if="currentView === 'billing'")
+    transition(name="slide-x-right")
+      div(v-if="showMobileMenu"
+          class="settings-mobileMenu popup-window")
+        mobile-menu(v-if="showMobileMenu" @closeMenu="closeMobileMenu()"
+                    v-click-outside="closeMobileMenu")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import router from '@/router'
+import vClickOutside from 'v-click-outside'
 import Sidebar from '@/components/settings/Sidebar.vue'
 import NuHeader from '@/components/NuHeader.vue'
+import MobileMenu from '@/components/homepage/MobileMenu.vue'
 import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
@@ -32,9 +40,13 @@ export default Vue.extend({
   props: {
     view: String
   },
+  directives: {
+    clickOutside: vClickOutside.directive
+  },
   components: {
     Sidebar,
     NuHeader,
+    MobileMenu,
     SettingsAccount,
     SettingsSecurity,
     SettingsPayment,
@@ -42,7 +54,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      currentView: 'account'
+      currentView: 'account',
+      showMobileMenu: false
     }
   },
   watch: {
@@ -73,7 +86,9 @@ export default Vue.extend({
     back() {
       if (window.history.length > 2) this.$router.back()
       else this.$router.push('/')
-    }
+    },
+    openMobileMenu() { this.showMobileMenu = true },
+    closeMobileMenu() { this.showMobileMenu = false }
   }
 })
 </script>
@@ -93,6 +108,19 @@ export default Vue.extend({
   &__view {
     position: relative;
     overflow-y: scroll;
+  }
+}
+
+.settings-mobileMenu {
+  justify-content: flex-start;
+  left: -24px;
+  &.slide-x-right {
+    &-enter-active, &-leave-active {
+      transition: 0.5s;
+    }
+    &-enter, &-leave-to {
+      opacity: 0;
+    }
   }
 }
 

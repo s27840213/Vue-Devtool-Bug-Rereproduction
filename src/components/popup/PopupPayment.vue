@@ -172,18 +172,29 @@ export default Vue.extend({
     ...mapMutations({
       setInitView: 'SET_initView'
     }),
+    getAd(name: string): string[] {
+      switch (name) {
+        case 'brandkit':
+          return [i18n.t('TMP0079') as string, 'brandkit.jpg']
+        case 'bgrm':
+          return [i18n.t('TMP0148') as string, 'remover.jpg']
+        case 'pro template':
+        default:
+          return [i18n.t('TMP0149') as string, 'pro-template.jpg']
+      }
+    },
     async changeView(name: string) {
       this.view = name
       switch (name) {
         case 'brandkit':
         case 'bgrm':
+        case 'pro template':
           this.title = i18n.tc('TMP0003', 2) as string
-          this.description = i18n.t('TMP0079') as string
+          [this.description, this.img] = this.getAd(name)
           this.buttons = [{
             text: i18n.t('TMP0057') as string,
             func: () => this.changeView('step1')
           }]
-          this.img = name === 'bgrm' ? 'remover.jpg' : 'brandkit.jpg'
           break
         case 'step1':
           this.getPrice(this.userCountryUi)
@@ -385,6 +396,7 @@ export default Vue.extend({
   &:not([isSelected]) &__off { color: setColor(red-1); }
   &[isSelected] {
     background-color: setColor(blue-1);
+    border: 1px solid setColor(blue-1);
     color: white;
   }
 }
@@ -399,6 +411,7 @@ export default Vue.extend({
 .payment-left-content-cancel {
   @include body-MD;
   display: flex;
+  margin-bottom: 10px;
   >svg, >div {
     flex-shrink: 0;
     margin-right: 15px;

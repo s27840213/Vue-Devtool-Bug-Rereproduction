@@ -34,7 +34,7 @@
             :avatarSize="35")
         div(class="nav__option" @click="close()")
           router-link(to="/settings/menu"
-            class="mobile-menu__link") {{$tc('NN0165', 1)}}
+            class="mobile-menu__link") {{$tc('TMP0145')}}
         div(class="nav__option"
           @click="onLogoutClicked()")
           span {{$tc('NN0167', 1)}}

@@ -15,7 +15,7 @@ class PaymentData {
   viewList(all = false) {
     const list = [{
       name: 'menu',
-      label: i18n.tc('NN0165', 1),
+      label: i18n.tc('TMP0145'),
       hidden: true
     }, {
       name: 'account',
@@ -98,7 +98,8 @@ class PaymentData {
       { Q: i18n.t('TMP0032'), A: i18n.t('TMP0033') },
       { Q: i18n.t('TMP0034'), A: this.addLink(i18n.t('TMP0035') as string) },
       { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') },
-      { Q: i18n.t('TMP0038'), A: i18n.t('TMP0039') }
+      { Q: i18n.t('TMP0038'), A: i18n.t('TMP0039') },
+      { Q: i18n.t('TMP0146'), A: i18n.t('TMP0147') }
     ]
   }
 

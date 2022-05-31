@@ -50,7 +50,7 @@ export default Vue.extend({
       _diskPercent: 'payment/getDiskPercent'
     }),
     diskPercent(): string {
-      return (this._diskPercent * 100).toFixed(2)
+      return (this._diskPercent * 100).toFixed(0)
     },
     recalc(): string {
       return (this.usage.diskLoading ? i18n.t('NN0454') : i18n.t('TMP0137')) as string
@@ -90,7 +90,7 @@ export default Vue.extend({
             title: i18n.t('TMP0131', { disk: this.diskPercent }),
             bgcolor: '#FFBA49',
             large: {
-              desc: i18n.t('TMP0132'),
+              desc: i18n.t('TMP0132', { button: i18n.t('TMP0057') }),
               buttons: [
                 {
                   text: i18n.t('NN0271'),
@@ -191,8 +191,12 @@ export default Vue.extend({
 .warning-small {
   display: flex;
   align-items: center;
+  padding: 5px 0 5px 4px;
   border-radius: 4px;
-  >svg { margin: 8px; }
+  >svg {
+    margin: 8px;
+    flex-shrink: 0;
+  }
   &-title {
     @include caption-SM;
     font-size: 11px;

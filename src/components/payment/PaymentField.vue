@@ -27,7 +27,7 @@
         input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
         span(v-if="biv[inv.key]") {{inv.error}}
     btn(class="rounded" type="primary-lg"
-        :disabled="!payReady" @click.native="submit()") {{submitText}}
+        :disabled="disableSubmit" @click.native="submit()") {{submitText}}
 </template>
 
 <script lang="ts">
@@ -119,6 +119,9 @@ export default Vue.extend({
       return this.useTappay
         ? this.tappayPayReady && this.invoiceReady
         : this.stripePayReady
+    },
+    disableSubmit():boolean {
+      return !this.payReady || this.isLoading
     }
   },
   mounted() {
@@ -212,6 +215,9 @@ export default Vue.extend({
           return this.isChange ? this.tappayUpdate() : this.tappayAdd()
         }).then(() => {
           this.close()
+        }).catch(msg => {
+          Vue.notify({ group: 'error', text: msg })
+          this.isLoading = false
         })
       }
       this.TPDirect.card.getPrime(callback)
@@ -229,7 +235,10 @@ export default Vue.extend({
       }).then(({ data }) => {
         if (data.flag) throw Error(data.msg)
         this.close()
-      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      }).catch(msg => {
+        Vue.notify({ group: 'error', text: msg })
+        this.isLoading = false
+      })
     },
     submit() {
       this.useTappay ? this.tappaySubmit() : this.stripeSubmit()

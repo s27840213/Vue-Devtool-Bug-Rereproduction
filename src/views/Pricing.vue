@@ -80,7 +80,10 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapGetters({ isUiTW: 'payment/isUiTW' }),
+    ...mapGetters({
+      isUiTW: 'payment/isUiTW',
+      isLogin: 'user/isLogin'
+    }),
     ...mapState('payment', {
       plans: 'plans',
       planSelected: 'planSelected',
@@ -104,10 +107,14 @@ export default Vue.extend({
       setInitView: 'payment/SET_initView'
     }),
     tryAddCard() {
-      if (this.canAddCard) {
+      if (!this.isLogin) {
+        this.$router.push('login')
+      } else if (this.canAddCard) {
         this.setInitView('step1')
         popupUtils.openPopup('payment')
-      } else this.$router.push('/settings/payment')
+      } else {
+        this.$router.push('/settings/payment')
+      }
     }
   }
 })
@@ -270,13 +277,14 @@ export default Vue.extend({
       padding-bottom: 20px;
       >svg { flex-shrink: 0; }
     }
+    summary::-webkit-details-marker { display:none; } // Romove detail arrow
   }
   >details[open] >summary >svg { transform: scaleY(-1); }
 }
 
 @media screen and (max-width: 768px) {
   .pricing-top__cb { display: none; }
-  .pricing-content { padding: 20px; }
+  .pricing-content { padding: 20px 5.34%; }
   .pricing-plan, .pricing-compare, .pricing-faq { width: 100%; }
   .pricing-plan {
     flex-direction: column;
@@ -285,7 +293,10 @@ export default Vue.extend({
     &-left {
       display: block;
       padding: 18px;
-      &-bottom { grid-template-columns: auto; }
+      &-bottom {
+        grid-template-columns: auto;
+        >div + div { margin-top: 10px; }
+      }
     }
     &-right {
       height: 282px;
