@@ -33,11 +33,16 @@ class PaymentUtils {
   }
 
   contactUs() {
-    location.href = i18n.locale === 'tw'
-      ? 'mailto:tw@vivipic.com'
-      : i18n.locale === 'jp'
-        ? 'mailto:jp@vivipic.com'
-        : 'mailto:service@vivipic.com'
+    switch (i18n.locale) {
+      case 'tw':
+        location.href = 'https://blog.vivipic.com/tw/contactus/'
+        break
+      case 'jp':
+        location.href = 'https://blog.vivipic.com/jp/help/'
+        break
+      default:
+        location.href = 'https://blog.vivipic.com/us/contact/'
+    }
   }
 
   errorHandler(msg?: string, initView = 'brandkit') {
