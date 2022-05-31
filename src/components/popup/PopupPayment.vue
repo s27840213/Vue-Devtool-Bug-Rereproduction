@@ -59,7 +59,7 @@
                   @click.native="button.func()"
                   :disabled="button.disabled ? button.disabled() : false")
                 span {{button.text}}
-          img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${img}`)")
+          img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
           div(v-if="view === 'finish'" class="payment-finish")
             div(class="payment-finish-content")
               animation(path="/lottie/pro.json")
@@ -139,6 +139,7 @@ export default Vue.extend({
       planSelected: 'planSelected',
       trialStatus: 'trialStatus'
     }),
+    locale():string { return i18n.locale },
     userPeriod():string {
       return ['switch1', 'switch2'].includes(this.view)
         ? (this.isBundle ? 'monthly' : 'yearly')
@@ -328,7 +329,7 @@ export default Vue.extend({
   &-top {
     @include body-MD;
     position: relative;
-    margin-bottom: 16px;
+    margin-bottom: 28px;
     color: setColor(gray-1);
     &__step {
       display: flex;
@@ -356,15 +357,15 @@ export default Vue.extend({
       @include btn-LG;
       width: 100%;
       border-radius: 4px;
+      margin-top: 2px;
     }
+    >button:nth-child(1) { margin-top: 42px; }
     >button:nth-child(2) {
-      margin-top: 20px;
       border: none;
-    }
-    &-description {
-      position: absolute;
-      bottom: -60%;
-      white-space: nowrap;
+      &.btn-inactive-lg{
+        background-color: white;
+        color: setColor(gray-3);
+      }
     }
   }
 }
@@ -373,10 +374,10 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   height: 52px; // ?
-  margin: 16px 0;
   padding: 10px;
   border: 1px solid setColor(gray-3);
   border-radius: 4px;
+  +div { margin-top: 25px }
   &-price {
     display: flex;
     flex-direction: column;
@@ -466,7 +467,7 @@ export default Vue.extend({
   }
   .payment-left {
     width: 100%;
-    padding-top: 120px;
+    padding: 120px 7.467% 173px 7.467%;
   }
   .payment-right { display: none; }
   .payment-finish span { width: 80%;}

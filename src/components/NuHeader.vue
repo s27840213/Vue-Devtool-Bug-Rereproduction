@@ -178,7 +178,7 @@ export default Vue.extend({
         url: this.faqPage,
         text: i18n.t('NN0147')
       }, {
-        condition: this.isLogin, // todo: modify condition
+        condition: this.isLogin,
         name: 'Pricing',
         url: '/pricing',
         text: i18n.t('TMP0139')
@@ -188,7 +188,7 @@ export default Vue.extend({
         url: '/mydesign',
         text: i18n.t('NN0080')
       }, {
-        condition: this.isLogin && brandkitUtils.isBrandkitAvailable,
+        condition: this.isLogin && brandkitUtils.isBrandkitAvailable, // todelete isBrandkitAvailable
         name: 'BrandKit',
         url: '/brandkit',
         text: i18n.t('NN0007')

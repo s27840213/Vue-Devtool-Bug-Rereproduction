@@ -254,6 +254,7 @@ export default Vue.extend({
 .field {
   display: flex;
   flex-direction: column;
+  height: 100%; // Let button at the same position as popup payment step1
   &__close { // Relaive to SettingsPayment.vue .sp-field
     position: absolute;
     top: 0px; right: 0px;
