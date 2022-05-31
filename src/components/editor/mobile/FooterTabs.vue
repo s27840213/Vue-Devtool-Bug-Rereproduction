@@ -233,6 +233,11 @@ export default Vue.extend({
     tabs() {
       const tabs = this.$refs.tabs as HTMLElement
       tabs.scrollTo(0, 0)
+    },
+    contentEditable(newVal) {
+      if (newVal) {
+        this.$emit('switchTab', 'none')
+      }
     }
   },
   methods: {
@@ -300,6 +305,7 @@ export default Vue.extend({
         }
         case 'edit': {
           const { index, pageIndex } = layerUtils.currSelectedInfo
+
           layerUtils.updateLayerProps(pageIndex, index, {
             contentEditable: true
           })
