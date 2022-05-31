@@ -318,6 +318,10 @@ class PageUtils {
     }
   }
 
+  setScaleRatio(val: number) {
+    store.commit('SET_pageScaleRatio', val)
+  }
+
   fitPage() {
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
     const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.currFocusPageSize.width

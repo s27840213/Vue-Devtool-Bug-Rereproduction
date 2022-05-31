@@ -2,7 +2,6 @@
   div(class="editor-view"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
-      @mousedown.left="!inBgRemoveMode ? selectStart($event) : null"
       @wheel="handleWheel"
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
@@ -20,8 +19,6 @@
                   :style="{'z-index': `${getPageZIndex(index)}`}"
                   :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")
-          div(v-show="isSelecting" class="selection-area" ref="selectionArea"
-            :style="{'z-index': `${pageNum+1}`}")
         //- bg-remove-area(v-else :editorView="editorView")
     //-   template(v-if="showRuler")
     //-     ruler-hr(:canvasRect="canvasRect"
@@ -67,8 +64,8 @@ import popupUtils from '@/utils/popupUtils'
 import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
-import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import Hammer from 'hammerjs'
 
 export default Vue.extend({
   components: {
@@ -82,7 +79,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      isSelecting: false,
       isShowGuidelineV: false,
       isShowGuidelineH: false,
       initialAbsPos: { x: 0, y: 0 },
@@ -102,7 +98,9 @@ export default Vue.extend({
       from: -1,
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
-      scrollHeight: 0
+      scrollHeight: 0,
+      hammer: null as unknown as any,
+      tmpScaleRatio: 0
     }
   },
   mounted() {
@@ -111,6 +109,22 @@ export default Vue.extend({
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
     pageUtils.fitPage()
+
+    // setup the hammer settings
+    this.hammer = new Hammer(this.editorView)
+    this.hammer.get('pinch').set({ enable: true })
+
+    this.hammer.on('pinch', (event: any) => {
+      pageUtils.setScaleRatio(this.tmpScaleRatio * event.scale)
+      // console.log(event.additionalEvent)
+      // console.log(event.type)
+      // console.log(event.scale)
+    })
+
+    this.hammer.on('pinchstart', (event: any) => {
+      this.tmpScaleRatio = pageUtils.scaleRatio
+    })
+
     this.$nextTick(() => {
       pageUtils.findCentralPageIndexInfo()
     })
@@ -162,6 +176,18 @@ export default Vue.extend({
     screenHeight() {
       pageUtils.findCentralPageIndexInfo(true)
     }
+  },
+  beforeDestroy() {
+    this.hammer.off('pinch', (event: any) => {
+      pageUtils.setScaleRatio(this.tmpScaleRatio * event.scale)
+      // console.log(event.additionalEvent)
+      // console.log(event.type)
+      // console.log(event.scale)
+    })
+
+    this.hammer.off('pinchstart', () => {
+      this.tmpScaleRatio = pageUtils.scaleRatio
+    })
   },
   computed: {
     ...mapState('user', [
@@ -239,35 +265,8 @@ export default Vue.extend({
         }
       }
     },
-    selectStart(e: MouseEvent) {
-      if (this.hasCopiedFormat) {
-        formatUtils.clearCopiedFormat()
-      }
-      if (this.isTyping) return
-      if (imageUtils.isImgControl()) {
-        ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
-      }
-      this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
-      document.documentElement.addEventListener('mousemove', this.selecting)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.selectEnd)
-    },
-    selecting(e: MouseEvent) {
-      if (!this.isSelecting) {
-        if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
-          GroupUtils.deselect()
-        }
-        this.isSelecting = true
-        this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
-        return
-      }
-      this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
-      this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
-    },
     scrollUpdate() {
-      if (this.isSelecting || RulerUtils.isDragging) {
+      if (RulerUtils.isDragging) {
         const event = new MouseEvent('mousemove', {
           clientX: this.currentAbsPos.x,
           clientY: this.currentAbsPos.y
@@ -287,63 +286,6 @@ export default Vue.extend({
        * So prevent changing focus when a text editor is focused.
        */
       pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
-    },
-    selectEnd() {
-      if (this.isSelecting) {
-        GroupUtils.deselect()
-      }
-      /**
-       * Use nextTick to trigger the following function after DOM updating
-       */
-      this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.selecting)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate, { capture: true })
-        document.documentElement.removeEventListener('mouseup', this.selectEnd)
-        if (this.isSelecting) {
-          this.isSelecting = false
-          const selectionArea = this.$refs.selectionArea as HTMLElement
-          this.handleSelectionData(selectionArea.getBoundingClientRect())
-        }
-      })
-    },
-    handleSelectionData(selectionData: DOMRect) {
-      const layers = [...document.querySelectorAll(`.nu-layer--p${pageUtils.currFocusPageIndex}`)]
-      const layerIndexs: number[] = []
-      layers.forEach((layer) => {
-        const layerData = layer.getBoundingClientRect()
-        if (((layerData.top <= selectionData.bottom) && (layerData.left <= selectionData.right) &&
-          (layerData.bottom >= selectionData.top) && (layerData.right >= selectionData.left))) {
-          layerIndexs.push(parseInt((layer as HTMLElement).dataset.index as string, 10))
-        }
-      })
-
-      if (layerIndexs.length > 0) {
-        // this.addSelectedLayer(layerIndexs as number[])
-        GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
-      }
-    },
-    mapSelectionRectToPage(selectionData: DOMRect): { x: number, y: number, width: number, height: number } {
-      const targetPageIndex = pageUtils.currFocusPageIndex
-      const targetPage: IPage = this.currFocusPage
-
-      const pageRect = document.getElementsByClassName(`nu-page-${targetPageIndex}`)[0].getBoundingClientRect()
-
-      return {
-        x: (selectionData.left - pageRect.left) / (pageUtils.scaleRatio / 100),
-        y: (selectionData.top - pageRect.top) / (pageUtils.scaleRatio / 100),
-        width: (selectionData.right - selectionData.left) / (pageUtils.scaleRatio / 100),
-        height: (selectionData.bottom - selectionData.top) / (pageUtils.scaleRatio / 100)
-      }
-    },
-    renderSelectionArea(initPoint: { x: number, y: number }, endPoint: { x: number, y: number }) {
-      const minX = Math.min(initPoint.x, endPoint.x)
-      const maxX = Math.max(initPoint.x, endPoint.x)
-      const minY = Math.min(initPoint.y, endPoint.y)
-      const maxY = Math.max(initPoint.y, endPoint.y)
-      const selectionArea = this.$refs.selectionArea as HTMLElement
-      selectionArea.style.transform = `translate(${Math.round(minX)}px,${Math.round(minY)}px)`
-      selectionArea.style.width = `${Math.round((maxX - minX))}px`
-      selectionArea.style.height = `${Math.round((maxY - minY))}px`
     },
     addSelectedLayer(layerIndexs: Array<number>) {
       this.addLayer({

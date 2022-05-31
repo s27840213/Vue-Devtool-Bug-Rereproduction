@@ -88,7 +88,8 @@ export default Vue.extend({
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page'
+      _deletePage: 'DELETE_page',
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
     }),
     ...mapActions({
       updatePageImages: 'file/updatePageImages',
@@ -139,6 +140,7 @@ export default Vue.extend({
     },
     pageClickHandler(): void {
       groupUtils.deselect()
+      this.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {

@@ -207,7 +207,7 @@ class GeneralUtils {
   //     console.log(data)
   //   } else {
   //     store.commit('SET_LOG' {
-  //       params += 'time'
+  //       params += 'time'e
   //     })
   //     logData.push(params)
   //   }

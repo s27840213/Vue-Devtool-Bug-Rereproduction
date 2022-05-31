@@ -233,7 +233,8 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      currHoveredPageIndex: 'getCurrHoveredPageIndex'
+      currHoveredPageIndex: 'getCurrHoveredPageIndex',
+      inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -327,7 +328,7 @@ export default Vue.extend({
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
     },
-    isMobile(): boolean {
+    isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
     }
   },
@@ -392,7 +393,8 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -607,7 +609,8 @@ export default Vue.extend({
     },
     moveStart(event: MouseEvent | PointerEvent) {
       this.movingByControlPoint = false
-      const inSelectionMode = generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
       if (!this.isLocked) {
         event.stopPropagation()
       }
@@ -1539,7 +1542,9 @@ export default Vue.extend({
       ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
     },
     onRightClick(event: MouseEvent) {
-      if (this.isMobile) {
+      if (this.isTouchDevice) {
+        // in touch device, right click will be triggered by long click
+        this.setInMultiSelectionMode(true)
         return
       }
       /**
@@ -1648,7 +1653,7 @@ export default Vue.extend({
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.isMobile) {
+      if (this.isTouchDevice) {
         e.preventDefault()
         e.stopPropagation()
       }

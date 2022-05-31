@@ -70,7 +70,8 @@ export interface IEditorState {
   isMobile: boolean
   isLargeDesktop: boolean,
   closeMobilePanelFlag: boolean,
-  isGlobalLoading: boolean
+  isGlobalLoading: boolean,
+  inMultiSelectionMode: boolean
 }
 
 export enum SidebarPanelType {
