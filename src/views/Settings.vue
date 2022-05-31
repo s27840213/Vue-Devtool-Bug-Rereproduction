@@ -32,7 +32,7 @@ import SettingsAccount from '@/components/settings/SettingsAccount.vue'
 import SettingsSecurity from '@/components/settings/SettingsSecurity.vue'
 import SettingsPayment from '@/components/settings/SettingsPayment.vue'
 import SettingsBill from '@/components/settings/SettingsBill.vue'
-import paymentData from '@/utils/paymentData'
+import paymentData from '@/utils/constantData'
 import _ from 'lodash'
 
 export default Vue.extend({

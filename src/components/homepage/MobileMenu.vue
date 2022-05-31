@@ -1,24 +1,13 @@
 <template lang="pug">
   div(class="mobile-menu")
     div(class="nav mobile-menu__top")
-        div(class="nav__option")
-          div(:class="{'text-blue-1': currentPage === 'Home'}")
-            router-link(to="/"
-              class="mobile-menu__link") {{$t('NN0144')}}
-        div(class="nav__option")
-          div(:class="{'text-blue-1': currentPage === 'TemplateCenter'}")
-            router-link(to="/templates"
-              class="mobile-menu__link") {{$t('NN0145')}}
-        div(class="nav__option")
-          a(:href="tutorialPage"
-            class="mobile-menu__link") {{$t('NN0146')}}
-        div(class="nav__option")
-          a(:href="faqPage"
-            class="mobile-menu__link") {{$t('NN0147')}}
-        div(class="nav__option")
-          div(:class="{'text-blue-1': currentPage === 'Pricing'}")
-            router-link(to="/pricing"
-              class="mobile-menu__link") {{$t('TMP0139')}}
+      template(v-for="item in navItems")
+        div(v-if="item.condition" class="nav__option"
+            :class="{'text-blue-1': currentPage === item.name}")
+          a(v-if="item.url.startsWith('http')" :href="item.url"
+            class="mobile-menu__link") {{item.label}}
+          router-link(v-else :to="item.url"
+                      class="mobile-menu__link") {{item.label}}
     div(class="nav mobile-menu__bottom")
       template(v-if="!isLogin")
         div(class="nav__option")
@@ -41,9 +30,9 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import localeUtils from '@/utils/localeUtils'
 import { mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
+import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
@@ -51,6 +40,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      navItems: constantData.headerItem(true),
       optionSelected: 0
     }
   },
@@ -63,49 +53,9 @@ export default Vue.extend({
     },
     currPath(): string {
       return this.$route.path || '/'
-    },
-    currLocale(): string {
-      return localeUtils.currLocale()
-    },
-    tutorialPage(): string {
-      if (this.currLocale === 'tw') {
-        return 'https://blog.vivipic.com/tw/tutorial/'
-      } else if (this.currLocale === 'us') {
-        return 'https://blog.vivipic.com/us-tutorial/'
-      } else {
-        return 'https://www.facebook.com/vivipic' + this.currLocale
-      }
-    },
-    faqPage(): string {
-      if (this.currLocale === 'tw') {
-        return 'https://blog.vivipic.com/tw/faq/'
-      } else if (this.currLocale === 'us') {
-        return 'https://blog.vivipic.com/us-faq/'
-      } else {
-        return 'https://www.facebook.com/vivipic' + this.currLocale
-      }
     }
   },
   methods: {
-    goToPage(pageName = '' as string, queryString = '') {
-      if (pageName === this.currentPage) {
-        // this.$router.go(0)
-      } else if (pageName === 'Login' || pageName === 'SignUp') {
-        this.$router.push({ name: pageName, query: { redirect: this.$route.path } })
-      } else if (pageName === 'Home' || pageName === 'Pricing' || pageName === 'MyDesign') {
-        this.$router.push({ name: pageName })
-      } else if (pageName === 'TemplateCenter') {
-        if (queryString.length > 0) {
-          this.$router.push({ name: pageName, query: { q: queryString } })
-        } else {
-          this.$router.push({ name: pageName })
-        }
-      } else {
-        // this.$router.push({ path: pageName })
-        this.$router.push({ name: 'Home' })
-      }
-      // ----------------------
-    },
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'

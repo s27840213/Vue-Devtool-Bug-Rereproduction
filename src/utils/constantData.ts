@@ -1,5 +1,7 @@
+import store from '@/store'
 import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
+import brandkitUtils from './brandkitUtils'
 import _ from 'lodash'
 
 interface BillingInfoInput {
@@ -11,6 +13,63 @@ interface BillingInfoInput {
 }
 
 class PaymentData {
+  isLogin(): boolean {
+    return store.getters['user/isLogin']
+  }
+
+  // For header.vue and mobileMenu.vue
+  headerItem(mobile = false) {
+    const tutorialPage = {
+      tw: 'https://blog.vivipic.com/tw/tutorial/',
+      us: 'https://blog.vivipic.com/us-tutorial/',
+      jp: 'https://www.facebook.com/vivipicjp'
+    }
+    const faqPage = {
+      tw: 'https://blog.vivipic.com/tw/faq/',
+      us: 'https://blog.vivipic.com/us-faq/',
+      jp: 'https://www.facebook.com/vivipicjp'
+    }
+
+    const list = [{
+      condition: true,
+      name: 'Home',
+      url: '/',
+      label: i18n.t('NN0144')
+    }, {
+      condition: true,
+      name: 'TemplateCenter',
+      url: '/templates',
+      label: i18n.t('NN0145')
+    }, {
+      condition: true,
+      name: 'Toturial',
+      url: tutorialPage[i18n.locale as keyof typeof tutorialPage],
+      label: i18n.t('NN0146')
+    }, {
+      condition: true,
+      name: 'Faq',
+      url: faqPage[i18n.locale as keyof typeof faqPage],
+      label: i18n.t('NN0147')
+    }, {
+      condition: this.isLogin(),
+      name: 'Pricing',
+      url: '/pricing',
+      label: i18n.t('TMP0139')
+    }, {
+      condition: this.isLogin(),
+      name: 'MyDesign',
+      url: '/mydesign',
+      label: i18n.t('NN0080')
+    }, {
+      condition: this.isLogin() && brandkitUtils.isBrandkitAvailable, // todelete isBrandkitAvailable
+      name: 'BrandKit',
+      url: '/brandkit',
+      label: i18n.t('NN0007')
+    }]
+    if (mobile) return _.filter(list, (it: Record<string, string>) => !['MyDesign', 'BrandKit'].includes(it.name))
+    else return list
+  }
+
   // For Settings
   viewList(all = false) {
     const list = [{

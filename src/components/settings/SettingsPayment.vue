@@ -121,7 +121,7 @@ import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
-import paymentData from '@/utils/paymentData'
+import paymentData from '@/utils/constantData'
 import popupUtils from '@/utils/popupUtils'
 
 const { mapFields } = createHelpers({

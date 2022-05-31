@@ -24,7 +24,7 @@
 import Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
-import paymentData from '@/utils/paymentData'
+import paymentData from '@/utils/constantData'
 
 export default Vue.extend({
   props: {

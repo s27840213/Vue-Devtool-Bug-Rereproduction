@@ -77,7 +77,7 @@ import PaymentField from '@/components/payment/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
-import paymentData from '@/utils/paymentData'
+import paymentData from '@/utils/constantData'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',

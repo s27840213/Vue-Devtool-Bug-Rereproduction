@@ -55,7 +55,7 @@ import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
-import paymentData from '@/utils/paymentData'
+import paymentData from '@/utils/constantData'
 import popupUtils from '@/utils/popupUtils'
 
 const { mapFields } = createHelpers({

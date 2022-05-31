@@ -38,7 +38,7 @@ import { createHelpers } from 'vuex-map-fields'
 import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
-import paymentData from '@/utils/paymentData'
+import paymentData from '@/utils/constantData'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
