@@ -96,6 +96,12 @@ class GeneralUtils {
     return value.match(/^#[0-9A-F]{6}$/)
   }
 
+  boundValue(value: number, min: number, max: number): string {
+    if (value < min) return min.toString()
+    else if (value > max) return max.toString()
+    return value.toString()
+  }
+
   copyText(text: string) {
     if (navigator.clipboard && window.isSecureContext) {
       return navigator.clipboard.writeText(text)

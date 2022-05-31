@@ -21,11 +21,7 @@ import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import { mapState } from 'vuex'
-import textPropUtils from '@/utils/textPropUtils'
 import textUtils from '@/utils/textUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
-import { IGroup, ITmp } from '@/interfaces/layer'
-import { toNumber } from 'lodash'
 export default Vue.extend({
   components: {
     MobileSlider
@@ -46,10 +42,10 @@ export default Vue.extend({
       return layerUtils.getCurrOpacity
     },
     lineHeight(): number {
-      return toNumber(this.props.lineHeight)
+      return this.props.lineHeight
     },
     fontSpacing(): number {
-      return toNumber(this.props.fontSpacing)
+      return this.props.fontSpacing * 1000
     }
   },
   methods: {
@@ -59,40 +55,8 @@ export default Vue.extend({
     updateFontSpacing(val: number) {
       this.setParagraphProp('fontSpacing', val)
     },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
-    setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
-      if (this.isValidFloat(_value.toString())) {
-        let value = parseFloat(this.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
-        switch (prop) {
-          case 'lineHeight':
-            value = toNumber((value).toFixed(2))
-            break
-          case 'fontSpacing':
-            value = value / 1000
-        }
-
-        console.log(value)
-        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
-        window.requestAnimationFrame(() => {
-          if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
-            (currLayer as IGroup | ITmp).layers
-              .forEach((l, idx) => {
-                l.type === 'text' && textPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
-                l.type === 'text' && textUtils.updateGroupLayerSizeByShape(layerUtils.pageIndex, layerIndex, idx)
-              })
-          } else {
-            tiptapUtils.applyParagraphStyle(prop, value, false)
-            textPropUtils.updateTextPropsState({ [prop]: value })
-          }
-        })
-      }
+    setParagraphProp(prop: 'lineHeight' | 'fontSpacing', value: number) {
+      textUtils.setParagraphProp(prop, value)
     }
   }
 })

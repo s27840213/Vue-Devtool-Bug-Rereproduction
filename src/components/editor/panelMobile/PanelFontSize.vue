@@ -115,9 +115,6 @@ export default Vue.extend({
       else if (value > max) return max.toString()
       return value.toString()
     },
-    updateLayerOpacity(val: number) {
-      layerUtils.updateLayerOpacity(val)
-    },
     fontSizeStepping(step: number, tickInterval = 100) {
       const startTime = new Date().getTime()
       const interval = setInterval(() => {
@@ -171,9 +168,6 @@ export default Vue.extend({
         input.focus()
         input.select()
       }
-    },
-    handleChangeStop() {
-      console.log('hi')
     }
   }
 })
