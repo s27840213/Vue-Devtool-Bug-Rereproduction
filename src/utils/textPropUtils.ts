@@ -1160,8 +1160,7 @@ class TextPropUtils {
       size: span ? span.styles.size : NaN,
       decoration: span ? span.styles.decoration : '',
       style: span ? span.styles.style : '',
-      color: span ? span.styles.color : '',
-      opacity: span ? span.styles.opacity : NaN
+      color: span ? span.styles.color : ''
     }
     return Object.assign(spanStyles, prop)
   }

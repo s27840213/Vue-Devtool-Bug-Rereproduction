@@ -18,11 +18,13 @@ export interface ITextState {
     lineHeight: string,
     font: string,
     color: string,
-    opacity: number,
     weight: string,
     style: string,
     decoration: string,
-    isVertical: boolean
+    isVertical: boolean,
+    type: string,
+    assetId: string,
+    userId: string
   },
   pending: string,
   fontStore: Array<IFont>,
@@ -56,11 +58,13 @@ const getDefaultState = (): ITextState => ({
     lineHeight: '--',
     font: 'multi-fonts',
     color: '#000000',
-    opacity: 100,
     weight: 'normal',
     style: 'normal',
     decoration: 'none',
-    isVertical: false
+    isVertical: false,
+    type: 'public',
+    assetId: '',
+    userId: ''
   },
   currTextInfo: {
     config: {} as IText,

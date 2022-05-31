@@ -146,19 +146,18 @@ class TiptapUtils {
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
       color: this.isValidHexColor(spanStyle.color) ? spanStyle.color : this.rgbToHex(spanStyle.color),
-      opacity: parseInt(spanStyle.opacity),
       ...fontProps
     } as ISpanStyle
   }
 
   makeSpanStyle(attributes: any): ISpanStyle {
-    const { font, weight, size, decoration, style, color, opacity, type, userId, assetId, fontUrl } = attributes
-    return { font, weight, size, decoration, style, color, opacity, type, userId, assetId, fontUrl } as ISpanStyle
+    const { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } = attributes
+    return { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } as ISpanStyle
   }
 
   extractSpanStyleForParagraph(attributes: any): Partial<ISpanStyle> {
-    const { weight, decoration, style, color } = attributes
-    return { weight, decoration, style, color }
+    const { weight, decoration, style, color, font, size, type, userId, assetId } = attributes
+    return { weight, decoration, style, color, font, size, type, userId, assetId }
   }
 
   str2css(str: string): CSSStyleDeclaration {

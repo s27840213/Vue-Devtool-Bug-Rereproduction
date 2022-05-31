@@ -67,8 +67,7 @@ export interface ISpanStyle {
   color: string,
   size: number,
   decoration: string,
-  style: string,
-  opacity: number
+  style: string
 }
 
 export interface ISpan {
