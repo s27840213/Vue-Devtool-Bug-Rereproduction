@@ -359,7 +359,7 @@ export default Vue.extend({
 @media screen and (max-width: 768px) {
   .sp { padding: 26px 6.4% 20px 6.4% }
   .sp-field {
-    padding: 60px 28px;
+    padding: 65px 7.466% 175px 7.466%;
     bottom: 0px;
   }
 }

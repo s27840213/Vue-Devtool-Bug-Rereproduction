@@ -1,13 +1,13 @@
 <template lang="pug">
   div(class="card")
     img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
-    span {{`···· ···· ···· ${card.last4}`}}
+    span {{`**** ${card.last4}`}}
     span {{`Expires ${card.date}`}}
     svg-icon(v-if="trash" class="pointer" iconName="trash"
             iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
     div(v-if="showPopup" class="popup-window")
       div(class="card-popup" v-click-outside="closePopup")
-        div(class="card-popup-title") {{$t('TMP0118')}}
+        div(class="text-H6") {{$t('TMP0118')}}
         i18n(class="card-popup-description" path="TMP0119" tag="div")
           template(#payment-method)
             span {{$t('TMP0120')}}
@@ -69,9 +69,6 @@ export default Vue.extend({
   width: 390px; height: 215px;
   padding: 37px;
   background-color: setColor(white);
-  &-title {
-    @include text-H6;
-  }
   &-description {
     @include body-XS;
     margin: 30px 0;
@@ -92,6 +89,10 @@ export default Vue.extend({
     bottom: 0px;
     height: 262px;
     padding: 56px 30px;
+  }
+  .card-popup {
+    height: 395px;
+    padding: 56px 37px 175px 37px;
   }
 }
 </style>

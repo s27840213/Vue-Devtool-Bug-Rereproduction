@@ -3,7 +3,7 @@
     div(class="wrapper1" )
       div(class="wrapper2")
         div(class="close pointer")
-          svg-icon(iconName="page-close" iconWidth="17px" iconColor="gray-0"
+          svg-icon(iconName="close" iconWidth="36px" iconColor="gray-0"
                   @click.native="closePopup()")
         div(class="payment" v-click-outside="closePopup")
           div(class="payment-left")
@@ -270,7 +270,7 @@ export default Vue.extend({
       else if (this.view === 'switch2') this.changeView('switch1')
     },
     curPlan(period: string):string {
-      return this.view === 'switch1' && period !== this.userPeriod ? '(current plan)' : ''
+      return this.view === 'switch1' && period !== this.userPeriod ? `(${i18n.t('TMP0151')})` : ''
     },
     selectCancelReason(index: string) {
       this.reasonIndex = index
@@ -291,13 +291,11 @@ export default Vue.extend({
   position: relative;
   .close {
     position: absolute;
-    top: -18px;
-    right: -18px;
+    top: -18px; right: -18px;
     width: 36px; height: 36px;
     background-color: setColor(white);
     border-radius: 100px;
     z-index: 1;
-    >svg { margin: 9.5px; }
   }
   .wrapper2 {
     @include hide-scrollbar;
@@ -462,12 +460,13 @@ export default Vue.extend({
     .close {
       background-color: transparent;
       right: 0px; top: 0px;
-      >svg { transform: scale(0.647); }
+      width: 40px; height: 40px;
+      >svg { transform: scale(0.667); }
     }
   }
   .payment-left {
     width: 100%;
-    padding: 120px 7.467% 173px 7.467%;
+    padding: 105px 7.467% 175px 7.467%;
   }
   .payment-right { display: none; }
   .payment-finish span { width: 80%;}

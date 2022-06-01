@@ -148,7 +148,10 @@ class PaymentData {
 
   addLink(text: string):string {
     const link = text.match(/(https:\/\/[\w./]+)/)?.[0] as string
-    return text.replace(link, `<a href=${link}>${link}</a>`)
+    text = text.replace(link, `<a href=${link}>${link}</a>`)
+    const email = text.match(/([\w]+@vivipic.com)/)?.[0] as string
+    text = text.replace(email, `<a href=mailto:${email}>${email}</a>`)
+    return text
   }
 
   faqs() {
