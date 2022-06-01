@@ -43,7 +43,10 @@
         details(v-for="item in faqs")
           summary {{item.Q}}
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
-          p(class="body-MD text-gray-2 mt-20" v-html="item.A")
+          i18n(v-if="item.isPath" :path="item.A" tag="p" class="body-MD text-gray-2 mt-20")
+            template(#history)
+              router-link(to="settings/billing") {{$t('TMP0110')}}
+          p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
       nu-footer
 </template>
 

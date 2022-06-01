@@ -171,8 +171,9 @@ class PaymentData {
       Q: i18n.t('TMP0038'),
       A: i18n.t('TMP0039')
     }, {
+      isPath: true,
       Q: i18n.t('TMP0146'),
-      A: i18n.t('TMP0147')
+      A: 'TMP0147'
     }]
   }
 
