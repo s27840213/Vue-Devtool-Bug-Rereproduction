@@ -147,7 +147,6 @@ export default Vue.extend({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   overflow: hidden;
-  user-select: none;
   text-rendering: geometricPrecision;
 }
 
