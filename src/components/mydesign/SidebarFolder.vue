@@ -312,7 +312,6 @@ $maxLevels: 5;
     margin-bottom: 10px;
     cursor: pointer;
     &__text {
-      font-family: 'NotoSansTC';
       text-align: left;
       color: white;
       font-size: 14px;
@@ -323,7 +322,6 @@ $maxLevels: 5;
     &__input {
       width: 144px;
       padding: 4px 5px;
-      font-family: 'NotoSansTC';
       text-align: left;
       color: white;
       font-size: 14px;

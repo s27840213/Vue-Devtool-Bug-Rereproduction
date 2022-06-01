@@ -116,7 +116,6 @@ export default Vue.extend({
     align-items: center;
     justify-content: center;
     > span {
-      font-family: NotoSansTC;
       font-weight: 700;
       font-size: min(4vw, 20px);
       display: block;
@@ -141,7 +140,6 @@ export default Vue.extend({
     align-items: center;
     justify-content: center;
     > span {
-      font-family: NotoSansTC;
       font-weight: 400;
       font-size: min(3vw, 14px);
       display: block;
@@ -184,7 +182,6 @@ export default Vue.extend({
     align-items: center;
     justify-content: center;
     > span {
-      font-family: NotoSansTC;
       font-weight: 700;
       font-size: 14px;
       display: block;

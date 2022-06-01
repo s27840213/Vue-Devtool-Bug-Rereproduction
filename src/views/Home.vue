@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="home" :style="homeStyle")
+  div(class="home")
     nu-header(v-header-border)
     div(class="home-content")
       div(class="home-top")
@@ -128,9 +128,6 @@ export default Vue.extend({
       return i18n.locale === 'us' ? 'GRSlz37Njo0'
         : i18n.locale === 'jp' ? 'FzPHWU0O1uI'
           : i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
-    },
-    homeStyle(): Record<string, string> {
-      return i18n.locale === 'us' ? { 'font-family': 'Poppins' } : { 'font-family': 'NOTO SANS TC' }
     }
   },
   created() {

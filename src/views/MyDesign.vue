@@ -600,7 +600,6 @@ export default Vue.extend({
       align-items: center;
       justify-content: center;
       > span {
-        font-family: Mulish;
         font-weight: 700;
         font-size: 14px;
         line-height: 20px;
@@ -668,7 +667,6 @@ export default Vue.extend({
       justify-content: center;
       height: 25px;
       > span {
-        font-family: NotoSansTC;
         font-weight: 400;
         font-size: 16px;
         line-height: 25px;
@@ -687,7 +685,6 @@ export default Vue.extend({
       border-radius: 18px;
       cursor: pointer;
       > span {
-        font-family: NotoSansTC;
         font-weight: 700;
         font-size: 16px;
         line-height: 25px;
@@ -739,7 +736,6 @@ export default Vue.extend({
       align-items: center;
       justify-content: center;
       > span {
-        font-family: "NotoSansTC";
         font-size: 14px;
         font-weight: 700;
         line-height: 20px;
@@ -786,7 +782,6 @@ export default Vue.extend({
       justify-content: center;
       cursor: pointer;
       > span {
-        font-family: NotoSansTC;
         font-size: 12px;
         line-height: 25px;
         display: block;
@@ -803,7 +798,6 @@ export default Vue.extend({
       justify-content: center;
       cursor: pointer;
       > span {
-        font-family: NotoSansTC;
         font-size: 12px;
         line-height: 25px;
         display: block;
@@ -841,7 +835,6 @@ export default Vue.extend({
       background-color: setColor(gray-2);
       border-radius: 5px;
       > span {
-        font-family: Mulish;
         font-weight: 400;
         font-size: 12px;
         line-height: 28px;
@@ -889,7 +882,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       justify-content: center;
       height: 26px;
       > span {
-        font-family: NotoSansTC;
         font-weight: 700;
         font-size: 14px;
         line-height: 26px;
@@ -902,7 +894,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       justify-content: center;
       height: 12px;
       > span {
-        font-family: NotoSansTC;
         font-weight: 400;
         font-size: 12px;
         line-height: 12px;
@@ -924,7 +915,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
         cursor: pointer;
         padding: 0 12px;
         > span {
-          font-family: NotoSansTC;
           font-weight: 400;
           font-size: 12px;
           line-height: 25px;

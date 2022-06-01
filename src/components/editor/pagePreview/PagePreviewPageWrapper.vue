@@ -300,7 +300,6 @@ export default Vue.extend({
     width: 100%;
     height: 30px;
     font-size: 16px;
-    font-family: Mulish;
     font-weight: bold;
   }
   &-icon {
