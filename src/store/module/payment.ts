@@ -365,22 +365,26 @@ const actions: ActionTree<IPaymentState, unknown> = {
       .finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async init({ commit }) {
-    paymentApi.init().then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      commit('SET_state', {
-        stripeClientSecret: data.client_secret,
-        paymentPaidDate: data.charge_time
-      })
-    }).then(() => { // Fill in email and name if empty.
-      const userEmail = state.billingInfo.email || store.getters['user/getEmail']
-      const userName = state.billingInfo.name || store.getters['user/getEmail']
-      commit('SET_state', {
-        billingInfo: Object.assign(state.billingInfo, {
-          email: userEmail,
-          name: userName
+    commit('SET_state', {
+      // !IMPORTANT! Give stripeCS a promise first, so that stripe init can await for it.
+      stripeClientSecret: paymentApi.init().then(({ data }) => {
+        if (data.flag) throw Error(data.msg)
+        commit('SET_state', {
+          // Write real stripeCS to store.
+          stripeClientSecret: data.client_secret,
+          paymentPaidDate: data.charge_time
         })
-      })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+      }).then(() => { // Fill in email and name if empty.
+        const userEmail = state.billingInfo.email || store.getters['user/getEmail']
+        const userName = state.billingInfo.name || store.getters['user/getEmail']
+        commit('SET_state', {
+          billingInfo: Object.assign(state.billingInfo, {
+            email: userEmail,
+            name: userName
+          })
+        })
+      }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+    })
   },
   async tappayAdd({ commit }) {
     commit('SET_state', { isLoading: true })

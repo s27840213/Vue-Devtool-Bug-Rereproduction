@@ -193,7 +193,8 @@ export default Vue.extend({
       this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
-        appearance: { labels: 'floating' },
+        // todo: Floating will cause layout issue if user first choose TW and than choose other country in Chrome.
+        // appearance: { labels: 'floating' },
         loader: 'always'
       })
       const stripePaymentElement = this.stripeElement.create('payment', {
