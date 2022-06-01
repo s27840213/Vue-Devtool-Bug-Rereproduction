@@ -371,11 +371,14 @@ const actions: ActionTree<IPaymentState, unknown> = {
         stripeClientSecret: data.client_secret,
         paymentPaidDate: data.charge_time
       })
-    }).then(() => { // If we know user email, fill in automatically.
-      if (state.billingInfo.email) return
-      const userEmail = store.getters['user/getEmail']
+    }).then(() => { // Fill in email and name if empty.
+      const userEmail = state.billingInfo.email || store.getters['user/getEmail']
+      const userName = state.billingInfo.name || store.getters['user/getEmail']
       commit('SET_state', {
-        billingInfo: Object.assign(state.billingInfo, { email: userEmail })
+        billingInfo: Object.assign(state.billingInfo, {
+          email: userEmail,
+          name: userName
+        })
       })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },

@@ -32,16 +32,16 @@ class PaymentUtils {
     return true
   }
 
-  contactUs() {
+  contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
     switch (i18n.locale) {
       case 'tw':
-        location.href = 'https://blog.vivipic.com/tw/contactus/'
+        window.open('https://blog.vivipic.com/tw/contactus/', '_blank')
         break
       case 'jp':
-        location.href = 'https://blog.vivipic.com/jp/help/'
+        window.open('https://blog.vivipic.com/jp/help/', '_blank')
         break
       default:
-        location.href = 'https://blog.vivipic.com/us/contact/'
+        window.open('https://blog.vivipic.com/us/contact/', '_blank')
     }
   }
 
