@@ -59,7 +59,6 @@ export default Vue.extend({
       fetchPalettes: 'fetchPalettes'
     }),
     handleCreatePalette() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.createPalette().then(id => {
         this.$nextTick(() => {
           const colorPalette = brandkitUtils.getColorPalette(this.colorPalettes, id)

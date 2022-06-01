@@ -155,7 +155,6 @@ export default Vue.extend({
       this.currentHoverBrandId = ''
     },
     handleCopyBrand(brand: IBrand) {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.copyBrand(brand)
     },
     handleDeleteBrand(brand: IBrand) {

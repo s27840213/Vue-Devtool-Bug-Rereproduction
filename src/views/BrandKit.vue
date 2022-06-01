@@ -120,7 +120,6 @@ export default Vue.extend({
       fetchFonts: 'fetchFonts'
     }),
     addNewBrand() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.addNewBrand()
     },
     isDragDropValid(): boolean {
@@ -139,7 +138,6 @@ export default Vue.extend({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-      if (!paymentUtils.checkIsPro('brandkit')) return
 
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {

@@ -135,7 +135,6 @@ export default Vue.extend({
       refreshFontAsset: 'refreshFontAsset'
     }),
     handleUploadFont() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       uploadUtils.chooseAssets('font')
     },
     handleDeleteFont(font: IBrandFont) {

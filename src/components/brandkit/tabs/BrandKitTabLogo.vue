@@ -109,7 +109,6 @@ export default Vue.extend({
       }
     },
     handleUploadLogo() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       uploadUtils.chooseAssets('logo')
     },
     handleDownload(logo: IBrandLogo) {

@@ -159,7 +159,6 @@ export default Vue.extend({
       }
     },
     handleToggleConfig() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       if (!this.isConfigOpen) {
         this.isConfigOpen = true
         this.refreshFontSizeBuffer()

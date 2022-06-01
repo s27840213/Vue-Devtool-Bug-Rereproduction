@@ -95,7 +95,6 @@ export default Vue.extend({
       })
     },
     handleSelectColor(paletteId: string, color: IBrandColor) {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       if (this.checkSelected(paletteId, color)) {
         this.handleDeSelectColor()
       } else {
@@ -136,7 +135,6 @@ export default Vue.extend({
       })
     },
     handleAddColor(id: string) {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.createColor(id)
       this.$nextTick(() => {
         this.$emit('selectColor', {

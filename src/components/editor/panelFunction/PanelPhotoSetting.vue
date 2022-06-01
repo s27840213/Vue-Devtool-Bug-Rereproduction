@@ -155,7 +155,6 @@ export default Vue.extend({
         }
         this.show = ''
       } else if (name === 'remove-bg') {
-        if (!paymentUtils.checkBgrmCredit()) return
         const { layers, pageIndex, index } = this.currSelectedInfo as ICurrSelectedInfo
 
         this.setIsProcessing(true)
