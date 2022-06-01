@@ -152,14 +152,25 @@ class PaymentData {
   }
 
   faqs() {
-    return [
-      { Q: i18n.t('TMP0030'), A: i18n.t('TMP0031') },
-      { Q: i18n.t('TMP0032'), A: i18n.t('TMP0033') },
-      { Q: i18n.t('TMP0034'), A: this.addLink(i18n.t('TMP0035') as string) },
-      { Q: i18n.t('TMP0036'), A: i18n.t('TMP0037') },
-      { Q: i18n.t('TMP0038'), A: i18n.t('TMP0039') },
-      { Q: i18n.t('TMP0146'), A: i18n.t('TMP0147') }
-    ]
+    return [{
+      Q: i18n.t('TMP0030'),
+      A: i18n.t('TMP0031')
+    }, {
+      Q: i18n.t('TMP0032'),
+      A: this.addLink(i18n.t('TMP0033') as string)
+    }, {
+      Q: i18n.t('TMP0034'),
+      A: this.addLink(i18n.t('TMP0035') as string)
+    }, {
+      Q: i18n.t('TMP0036'),
+      A: i18n.t('TMP0037')
+    }, {
+      Q: i18n.t('TMP0038'),
+      A: i18n.t('TMP0039')
+    }, {
+      Q: i18n.t('TMP0146'),
+      A: i18n.t('TMP0147')
+    }]
   }
 
   // For PopupPayment.vue
