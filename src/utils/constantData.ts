@@ -51,7 +51,7 @@ class PaymentData {
       url: faqPage[i18n.locale as keyof typeof faqPage],
       label: i18n.t('NN0147')
     }, {
-      condition: this.isLogin(),
+      condition: true,
       name: 'Pricing',
       url: '/pricing',
       label: i18n.t('TMP0139')

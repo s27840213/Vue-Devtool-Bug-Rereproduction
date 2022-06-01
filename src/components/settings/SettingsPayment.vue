@@ -60,7 +60,7 @@
         span                            {{$t('TMP0085', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
         span(                     v-html="$t('TMP0086', { price: myPrice, date: myPaidDate  })")
       span(v-if="canSwitch" class="text-blue-1 pointer"
-          @click="switchPeriod()")      {{$t('TMP0087', { period: isBundle ? $t('TMP0010') : $t('TMP0011')})}}
+          @click="switchPeriod()")      {{isBundle ? $t('TMP0087') : $t('TMP0150')}}
       span(v-if="canCancel" class="text-gray-3 pointer"
           @click="cancelSub()")         {{$t('TMP0088')}}
     div(v-if="showUsage" class="sp-usage")
