@@ -278,11 +278,11 @@ class LayerFactary {
               paragraph.styles.assetId = ''
               paragraph.styles.fontUrl = ''
             }
-            if (paragraph.styles.spanStyle) {
-              delete paragraph.styles.spanStyle
+            if (paragraph.spanStyle) {
+              delete paragraph.spanStyle
             }
-          } else if (paragraph.styles.spanStyle) {
-            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
+          } else if (paragraph.spanStyle) {
+            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.spanStyle as string)
             paragraph.styles.font = spanStyles.font
             paragraph.styles.type = spanStyles.type ?? 'public'
             paragraph.styles.userId = spanStyles.userId ?? ''

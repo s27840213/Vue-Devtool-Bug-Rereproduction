@@ -449,7 +449,6 @@ export default Vue.extend({
     text-align: center;
     min-width: 50px;
     box-sizing: border-box;
-    font-family: Poppins;
     @include body-XS;
     line-height: unset;
   }
@@ -493,7 +492,7 @@ export default Vue.extend({
   }
   &__menu {
     position: absolute;
-    width: 108px;
+    min-width: 108px;
     box-sizing: border-box;
     border-radius: 2px;
     display: flex;
@@ -529,12 +528,13 @@ export default Vue.extend({
         align-items: center;
         justify-content: start;
         height: 12px;
+        margin-right: 20px;
         > span {
-          font-family: NotoSansTC;
           font-weight: 400;
           font-size: 12px;
           line-height: 12px;
           color: setColor(gray-2);
+          white-space: nowrap;
         }
       }
       &__right {
@@ -581,7 +581,6 @@ export default Vue.extend({
       }
       > span {
         height: 20px;
-        font-family: Mulish;
         font-size: 16px;
         font-weight: 400;
         color: setColor(gray-1);
@@ -596,7 +595,6 @@ export default Vue.extend({
         > input {
           padding: 0;
           height: 20px;
-          font-family: Mulish;
           font-size: 16px;
           font-weight: 400;
           color: setColor(gray-1);
@@ -612,7 +610,6 @@ export default Vue.extend({
     justify-content: center;
     margin-top: -5px;
     > span {
-      font-family: Mulish;
       font-size: 12px;
       font-weight: 400;
       color: setColor(gray-3);

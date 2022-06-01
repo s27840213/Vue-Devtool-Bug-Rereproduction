@@ -904,7 +904,8 @@ class TextUtils {
           }
         }
         paragraph.spans && Object.assign(result, { spans: this.initialParagraphsScale({ diff, scale, size }, paragraph.spans || []) })
-        paragraph.text && Object.assign(result, { text: paragraph.text })
+        typeof paragraph.text === 'string' && Object.assign(result, { text: paragraph.text })
+        typeof paragraph.spanStyle === 'string' && Object.assign(result, { spanStyle: paragraph.spanStyle })
         return result
       })
   }
