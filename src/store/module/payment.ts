@@ -376,7 +376,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
         })
       }).then(() => { // Fill in email and name if empty.
         const userEmail = state.billingInfo.email || store.getters['user/getEmail']
-        const userName = state.billingInfo.name || store.getters['user/getEmail']
+        const userName = state.billingInfo.name || store.getters['user/getUname']
         commit('SET_state', {
           billingInfo: Object.assign(state.billingInfo, {
             email: userEmail,

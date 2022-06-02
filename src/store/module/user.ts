@@ -106,6 +106,9 @@ const getters: GetterTree<IUserModule, any> = {
   getEmail(state) {
     return state.email
   },
+  getUname(state) {
+    return state.uname
+  },
   getUpassUpdate(state) {
     return state.upassUpdate
   },

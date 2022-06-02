@@ -30,6 +30,7 @@ class PaymentUtils {
         break
       case 'NOT_SUBSCRIBED':
         store.commit('payment/SET_initView', initView)
+        store.commit('brandkit/SET_isSettingsOpen', false)
         popupUtils.openPopup('payment')
         break
       case 'BG_DEPLETED_FREE':
