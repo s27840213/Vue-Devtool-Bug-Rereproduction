@@ -508,7 +508,7 @@
   "NN0501": "Select a guide type",
   "NN0502": "Delete this guide",
   "NN0503": "Uploading the font may take up to 5 mins, please wait.",
-  "NN0504": "",
+  "NN0504": "Edit",
   "NN0505": "<blue>Design</blue> better and faster.",
   "NN0506": "Start a 14-day free trial. Cancel anytime.",
   "NN0507": "Vivipic PRO | <blue>Vivipic PRO<blue>",
@@ -682,5 +682,6 @@
   "SHR0001": "Present Type",
   "SHR0002": "Single Page View",
   "SHR0003": "Flipbook Preview",
-  "SHR0004": "Web Preview"
+  "SHR0004": "Web Preview",
+  "SHR0005": "Present"
 }

@@ -679,8 +679,9 @@
   "SKT0017": "{editor} 正在編輯，請稍後再試",
   "SKT0018": "開始編輯",
   "SKT0019": "找不到該設計",
-  "SHR0001": "Present Type",
-  "SHR0002": "Single Page View",
-  "SHR0003": "Flipbook Preview",
-  "SHR0004": "Web Preview"
+  "SHR0001": "預覽模式",
+  "SHR0002": "單頁預覽",
+  "SHR0003": "書本預覽",
+  "SHR0004": "連頁預覽",
+  "SHR0005": "預覽"
 }
