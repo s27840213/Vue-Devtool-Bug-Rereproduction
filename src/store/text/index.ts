@@ -3,6 +3,7 @@ import { IGroup, IParagraph, ISpanStyle, IText } from '@/interfaces/layer'
 import { ISelection, IFont } from '@/interfaces/text'
 import brandkitUtils from '@/utils/brandkitUtils'
 import errorHandleUtils from '@/utils/errorHandleUtils'
+import generalUtils from '@/utils/generalUtils'
 import { ModuleTree, MutationTree, GetterTree, ActionTree } from 'vuex'
 
 const UPDATE_STATE = 'UPDATE_STATE' as const
@@ -196,7 +197,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'public':
       cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
       try {
-        response = await fetch(cssUrl)
+        response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
         throw Error(response.status.toString())
       } catch (error) {
@@ -209,7 +210,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     case 'admin':
       cssUrl = `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`
       try {
-        response = await fetch(cssUrl)
+        response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
         throw Error(response.status.toString())
       } catch (error) {
@@ -223,7 +224,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       let urlMap = brandkitUtils.getFontUrlMap(assetId)
       if (urlMap) { // if font is in font-list or has been seen before
         cssUrl = getCssUrl(urlMap, ver)
-        response = await fetch(cssUrl) // check if the url is still valid
+        response = await fetch(randomizeVer(cssUrl)) // check if the url is still valid
         if (response.ok) return cssUrl
         urlMap = await brandkitUtils.refreshFontAsset(assetId)
         return getCssUrl(urlMap, ver)
@@ -247,6 +248,10 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
     console.log(error)
   }
   return ''
+}
+
+const randomizeVer = (url: string): string => {
+  return url.replace(/ver=[0-9]+/g, `ver=${generalUtils.generateRandomString(6)}`)
 }
 
 const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
