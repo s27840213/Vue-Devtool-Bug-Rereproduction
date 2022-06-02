@@ -63,10 +63,10 @@
           span(v-if="biv[input.key]" class="sp-info__invalid") {{input.error}}
       btn(type="primary-mid" @click.native="updateBillingInfo()"
           :disabled="!billingInfoCheck") {{$t('NN0176')}}
-    div(v-if="showCardPopup" class="popup-window" )
+    div(v-if="showCardPopup" class="popup-window")
       div(class="sp-field" v-click-outside="closeCardPopup")
         payment-field(isChange @next="closeCardPopup")
-    spinner(v-if="isLoading")
+    spinner(v-if="isLoading" class="sp-rocket")
 </template>
 
 <script lang="ts">
@@ -293,13 +293,15 @@ export default Vue.extend({
   >button { margin: 10px 0 0 auto; }
 }
 
-.sp-field{
+.sp-field {
   box-sizing: border-box;
   width: min(440px, 100%);
   padding: 20px 60px 40px 60px;
   background-color: white;
   position: absolute;
 }
+
+div.sp-rocket { z-index: 23; }
 
 @media screen and (max-width: 768px) {
   .sp { padding: 26px 6.4% 20px 6.4% }
