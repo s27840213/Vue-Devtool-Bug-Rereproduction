@@ -570,36 +570,6 @@ export default Vue.extend({
         })
       }
     },
-    setOpacity(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidInt(value)) {
-        value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
-        if (!this.isGroup) {
-          if (this.currSelectedInfo.layers.length === 1) {
-            this.$store.commit('UPDATE_layerStyles', {
-              pageIndex: pageUtils.currFocusPageIndex,
-              layerIndex: this.currSelectedIndex,
-              styles: {
-                opacity: parseInt(value)
-              }
-            })
-          } else {
-            this.$store.commit('UPDATE_selectedLayersStyles', {
-              styles: {
-                opacity: parseInt(value)
-              }
-            })
-          }
-        } else {
-          this.$store.commit('UPDATE_groupLayerStyles', {
-            styles: {
-              opacity: parseInt(value)
-            }
-          })
-        }
-        TextPropUtils.updateTextPropsState({ opacity: parseInt(value) })
-      }
-    },
     onBlur() {
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
       TextPropUtils.updateTextPropsState()

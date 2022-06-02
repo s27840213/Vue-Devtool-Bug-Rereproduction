@@ -1,10 +1,6 @@
 <template lang="pug">
-  div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
-    svg-icon(iconName="loading"
-            iconWidth="50px"
-            iconColor="gray-3")
   transition-group(v-else class="brand-kit-tab-logo" name="logo-list" tag="div")
-    template(v-for="logo in logos")
+    template(v-for="logo in renderedLogos")
       div(v-if="logo === 'add'"
         class="brand-kit-tab-logo__item add pointer relative"
         key="add"
@@ -17,6 +13,17 @@
                 iconName="plus-origin"
                 iconWidth="16px"
                 iconColor="gray-2")
+      div(v-else-if="logo === 'loading'"
+          class="brand-kit-tab-logo-loading no-trans"
+          key="loading")
+        svg-icon(iconName="loading"
+                iconWidth="50px"
+                iconColor="gray-3")
+      observer-sentinel(v-else-if="logo === 'sentinel'"
+                        class="no-trans"
+                        key="sentinel"
+                        :target="$route.name === 'Editor' ? '.popup-brand-settings__window' : undefined"
+                        @callback="handleLoadMore")
       div(v-else
         class="brand-kit-tab-logo__item relative"
         :class="{hovered: checkMenuOpen(logo)}"
@@ -52,6 +59,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
@@ -65,6 +73,9 @@ export default Vue.extend({
   },
   mounted() {
     brandkitUtils.fetchLogos(this.fetchLogos)
+  },
+  components: {
+    ObserverSentinel
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -80,15 +91,26 @@ export default Vue.extend({
   computed: {
     ...mapGetters('brandkit', {
       currentBrand: 'getCurrentBrand',
-      isLogosLoading: 'getIsLogosLoading'
+      isLogosLoading: 'getIsLogosLoading',
+      logosPageIndex: 'getLogosPageIndex'
     }),
-    logos(): (IBrandLogo | string)[] {
-      return ['add', ...(this.currentBrand as IBrand).logos]
+    logos(): IBrandLogo[] {
+      return (this.currentBrand as IBrand).logos
+    },
+    renderedLogos(): (IBrandLogo | string)[] {
+      const res = ['add', ...this.logos]
+      if (this.isLogosLoading) {
+        res.push('loading')
+      } else if (this.logosPageIndex >= 0) {
+        res.push('sentinel')
+      }
+      return res
     }
   },
   methods: {
     ...mapActions('brandkit', {
       fetchLogos: 'fetchLogos',
+      fetchMoreLogos: 'fetchMoreLogos',
       refreshLogoAsset: 'refreshLogoAsset'
     }),
     getUrl(logo: IBrandLogo): string {
@@ -136,6 +158,9 @@ export default Vue.extend({
         type: 'logo',
         content: logo
       })
+    },
+    handleLoadMore() {
+      brandkitUtils.fetchLogos(this.fetchMoreLogos, false)
     },
     startDownloading(url: string, name: string) {
       const a = document.createElement('a')
@@ -281,13 +306,17 @@ export default Vue.extend({
 .logo-list {
   &-enter-active,
   &-leave-active {
-    transition: 0.3s ease;
+    &:not(.no-trans) {
+      transition: 0.1s ease;
+    }
   }
 
   &-enter,
   &-leave-to {
-    transform: translateY(-30%);
-    opacity: 0;
+    &:not(.no-trans) {
+      transform: translateY(-30%);
+      opacity: 0;
+    }
   }
 }
 </style>

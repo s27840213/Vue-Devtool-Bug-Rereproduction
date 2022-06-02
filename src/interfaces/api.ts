@@ -379,3 +379,19 @@ export interface IUploadMissingDesign {
   type: 'svg' | 'background' | 'asset-image' | 'asset-font' | 'font',
   design_id: string
 }
+
+export interface IGetImageSize {
+  token: string,
+  type: string,
+  asset_index?: number,
+  team_id?: string,
+  asset_id?: string,
+  key_id?: string,
+  cache: boolean
+}
+export interface IImageSize {
+  flag: number,
+  msg: string,
+  width: number,
+  height: number
+}

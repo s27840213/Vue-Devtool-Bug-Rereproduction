@@ -13,6 +13,7 @@ import text, { ITextState } from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import shadow from '@/store/module/shadow'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
@@ -83,7 +84,7 @@ const getDefaultState = (): IEditorState => ({
     index: -1,
     type: ''
   },
-  isColorPickerOpened: false,
+  isColorPanelOpened: false,
   currSelectedResInfo: {},
   asset: {},
   textInfo: {
@@ -224,9 +225,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedTypes(state: IEditorState) {
     return state.currSelectedInfo.types
-  },
-  getIsColorPickerOpened(state: IEditorState) {
-    return state.isColorPickerOpened
   },
   getCurrSelectedResInfo(state: IEditorState) {
     return state.currSelectedResInfo
@@ -410,7 +408,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string }) {
     state.currDraggedPhoto.srcObj = {
       ...state.currDraggedPhoto.srcObj,
       ...photo.srcObj
@@ -420,6 +418,7 @@ const mutations: MutationTree<IEditorState> = {
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
+    state.currDraggedPhoto.previewSrc = photo.previewSrc
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value
@@ -624,8 +623,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
   },
-  SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
-    state.isColorPickerOpened = isOpened
+  SET_isColorPanelOpened(state: IEditorState, isOpened: boolean) {
+    state.isColorPanelOpened = isOpened
   },
   SET_currSelectedResInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedResInfo = data
@@ -826,6 +825,7 @@ export default new Vuex.Store({
     unsplash,
     bgRemove,
     file,
-    payment
+    payment,
+    shadow
   }
 })

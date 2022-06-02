@@ -44,6 +44,7 @@
     "open": "^8.4.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
+    "stackblur-canvas": "^2.5.0",
     "tinycolor": "^0.0.1",
     "tiptap-commands": "^1.17.1",
     "uuid": "^8.3.2",

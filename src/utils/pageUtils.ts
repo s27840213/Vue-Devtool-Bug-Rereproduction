@@ -184,7 +184,6 @@ class PageUtils {
       pagesTmp[index] = json
       store.commit('SET_pages', this.newPages(pagesTmp))
     }
-
     console.log('Update spec page')
   }
 

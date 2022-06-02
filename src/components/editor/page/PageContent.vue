@@ -33,19 +33,22 @@ div(class="overflow-container"
 <script lang="ts">
 import Vue from 'vue'
 import imageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
 import assetUtils from '@/utils/assetUtils'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
+import layerUtils from '@/utils/layerUtils'
+import generalUtils from '@/utils/generalUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -68,8 +71,13 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      setLayersDone: 'file/getSetLayersDone'
-    })
+      setLayersDone: 'file/getSetLayersDone',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
+    }),
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
+    }
   },
   mounted() {
     if (this.setLayersDone) {
@@ -142,7 +150,11 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
-      groupUtils.deselect()
+      if (!this.isHandleShadow) {
+        groupUtils.deselect()
+      } else {
+        imageUtils.setImgControlDefault(false)
+      }
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
@@ -152,10 +164,15 @@ export default Vue.extend({
     },
     onRightClick(event: MouseEvent) {
       this.setCurrActivePageIndex(this.pageIndex)
-      groupUtils.deselect()
+      if (!this.isHandleShadow) {
+        groupUtils.deselect()
+      }
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
+      if (!this.isHandleShadow) {
+        return
+      }
       const { srcObj, locked } = this.config.backgroundImage.config
       if ((srcObj?.assetId ?? '') !== '' && !locked) {
         pageUtils.startBackgroundImageControl(this.pageIndex)

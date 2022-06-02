@@ -26,7 +26,7 @@ class ResizeUtils {
         const { imgWidth, imgHeight, imgX, imgY } = (layer as IImage).styles
         imageUtils.updateImgSize(pageIndex, layerIndex, imgWidth * targetScale, imgHeight * targetScale)
         imageUtils.updateImgPos(pageIndex, layerIndex, imgX * targetScale, imgY * targetScale)
-        scale = 1
+        // scale = 1
         break
       }
       case 'text':

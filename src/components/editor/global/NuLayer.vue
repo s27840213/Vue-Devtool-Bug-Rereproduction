@@ -7,10 +7,12 @@
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
-        component(:is="`nu-${config.type}`" :config="config" class="transition-none"
-        :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
-    div(v-if="appendShadowEffect" class="img-shadow-effect" :style="shadowStyles()")
-    div(v-if="config.inProcess" class="nu-layer__inProcess")
+        component(:is="`nu-${config.type}`"
+          class="transition-none"
+          :config="config"
+          :imgControl="imgControl"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+    div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
       //-   :iconName="'spiner'"
@@ -30,6 +32,7 @@ import imageUtils from '@/utils/imageUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import SquareLoading from '@/components/global/SqureLoading.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -72,10 +75,20 @@ export default Vue.extend({
     getCos(): number {
       return MathUtils.cos(this.config.styles.rotate)
     },
-    appendShadowEffect(): boolean {
+    hasShadowSrc(): boolean {
+      if (this.config.type === LayerType.image) {
+        return this.config.styles.shadow && this.config.styles.shadow.srcObj && this.config.styles.shadow.srcObj.type
+      } else {
+        return false
+      }
+    },
+    showSpinner(): boolean {
       const { config } = this
-      if (config.type !== LayerType.image || !config.styles.shadow) return false
-      return [ShadowEffectType.projection, ShadowEffectType.halo].includes(config.styles.shadow.currentEffect)
+      const shadow = this.config.styles.shadow
+      const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+      const isHandleBgRemove = config.inProcess === 'bgRemove'
+      const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
+      return isHandleBgRemove || isHandleShadow
     }
   },
   methods: {
@@ -103,15 +116,17 @@ export default Vue.extend({
       }
       return styles
     },
-    shadowStyles() {
-      return imageShadowUtils.convertShadowEffect(this.config)
-    },
     scaleStyles() {
       let { width, height } = this.config.styles
-      const { scale, scaleX, scaleY, zindex } = this.config.styles
+      const { scale, scaleX, scaleY, zindex, shadow } = this.config.styles
       const { type } = this.config
       width /= (type === LayerType.image ? 1 : scale)
       height /= (type === LayerType.image ? 1 : scale)
+
+      const transform = type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+      // if (type === LayerType.image && shadow.currentEffect === 'shadow') {
+      //   transform = `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+      // }
 
       /**
        * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.

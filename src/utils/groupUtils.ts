@@ -13,6 +13,7 @@ import ImageUtils from './imageUtils'
 import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
 import pageUtils from './pageUtils'
+import { LayerType } from '@/store/types'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -120,7 +121,6 @@ class GroupUtils {
         }
       })
     stepsUtils.record()
-    // console.log(GeneralUtils.deepCopy(store.state.currSelectedInfo.layers))
   }
 
   ungroup() {
@@ -258,7 +258,15 @@ class GroupUtils {
           ImageUtils.setImgControlDefault()
         }
       } else {
-        const tmpLayer = this.tmpLayer
+        const tmpLayer = this.tmpLayer as ITmp
+        tmpLayer.layers
+          .forEach((l, i) => {
+            if (l.type === LayerType.image) {
+              LayerUtils.updateLayerStyles(this.pageIndex, LayerUtils.layerIndex, {
+                scale: l.styles.scale * tmpLayer.styles.scale
+              }, i)
+            }
+          })
         store.commit('DELETE_selectedLayer')
         store.commit('SET_lastSelectedLayerIndex', -1)
         LayerUtils.addLayersToPos(this.currSelectedInfo.pageIndex,
