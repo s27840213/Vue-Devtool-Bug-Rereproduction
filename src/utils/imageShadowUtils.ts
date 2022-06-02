@@ -163,7 +163,7 @@ class ImageShadowUtils {
     const canvasMaxW = canvas.width * mappingScale
     const ellipseX = canvasMaxW * 0.5
     const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
-    const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString()
+    const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.floating &&
       this.dataBuff.radius === radius && this.dataBuff.size === size &&
       this.dataBuff.layerIdentifier === layerIdentifier && this.dataBuff.thinkness === thinkness
@@ -263,7 +263,7 @@ class ImageShadowUtils {
     const blurImgX = (canvas.width - drawCanvasW) * 0.5
     const blurImgY = (canvas.height - drawCanvasH) * 0.5
 
-    const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + img.width.toString() + img.width.toString() + img.src
+    const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}${imgX}${imgY}${_imgHeight}${_imgWidth}${img.src}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier
 
     if (!layerInfo || !Object.keys(layerInfo)) {
@@ -372,7 +372,7 @@ class ImageShadowUtils {
       const unifiedSpread = Math.ceil(spread * unifiedScale)
       const unifiedSpreadRadius = this.SPREAD_RADIUS * unifiedScale
       const _spread = 1 / unifiedSpreadRadius
-      const layerIdentifier = (config.id ?? '') + layerWidth.toString() + layerHeight.toString() + imgX.toString() + imgY.toString()
+      const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}${imgX}${imgY}${_imgHeight}${_imgWidth}${img.src}`
       const hasBuffRecorded = this.dataBuff.spread === unifiedSpread && this.dataBuff.effect === currentEffect && this.dataBuff.layerIdentifier === layerIdentifier
 
       /**
@@ -459,7 +459,7 @@ class ImageShadowUtils {
           ctxT.globalCompositeOperation = 'source-in'
           ctxT.globalAlpha = opacity * 0.01
           ctxT.fillStyle = effects.color
-          ctxT.fillRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+          ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
           ctxT.globalAlpha = 1
           ctxT.globalCompositeOperation = 'source-over'
 
