@@ -405,10 +405,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           tax_id: state.billingInfo.GUI
         })
       })
-    }).then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async stripeAdd({ commit }) {
     commit('SET_state', { isLoading: true })
@@ -426,8 +423,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           name: state.billingInfo.name
         })
       })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-      .finally(() => { commit('SET_state', { isLoading: false }) })
+    }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async tappayUpdate({ dispatch, commit }) {
     commit('SET_state', { isLoading: true })

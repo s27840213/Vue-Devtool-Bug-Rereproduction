@@ -150,7 +150,7 @@ export default Vue.extend({
       setPrime: 'payment/SET_prime'
     }),
     tappayInit() {
-      this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'sandbox')
+      this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'production')
 
       this.TPDirect.card.setup({
         fields: {
@@ -190,7 +190,7 @@ export default Vue.extend({
     },
     async stripeInit() {
       await this.clientSecret // Wait for api promise
-      this.stripe = await loadStripe('pk_test_51HPpbIJuHmbesNZIuUI72j9lqXbbTTRJvlaYP8G9RB7VVsLvywU9MgQcxm2n0z6VigfQYa0NQ9yVeIfeOErnDzSp00rgpdMoAr') as Stripe
+      this.stripe = await loadStripe('pk_live_51HPpbIJuHmbesNZIbXTLIiElWHqRqS9xLnCkoJ9LynKfQO2G9JIVpeEdogBdBU7aiqvXrTjjJQPUVVGQBdSxwmoc00bJcj9VG2') as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
         // todo: Floating will cause layout issue if user first choose TW and than choose other country in Chrome.
@@ -223,7 +223,8 @@ export default Vue.extend({
           resolve()
         }).then(() => {
           return this.isChange ? this.tappayUpdate() : this.tappayAdd()
-        }).then(() => {
+        }).then(({ data }) => {
+          if (data.flag) throw Error(data.msg)
           this.close()
         }).catch(msg => {
           Vue.notify({ group: 'error', text: msg })
