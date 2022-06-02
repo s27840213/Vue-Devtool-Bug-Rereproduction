@@ -1,48 +1,5 @@
 <template lang="pug">
   div(class="sp")
-    span {{`status: ${status}`}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="toInitial()")  {{'goto Initial'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="toAbort()")  {{'goto Abort'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="toFail()")  {{'goto Fail'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(0)")  {{'set capacity 0GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(3993)")  {{'set capacity 3.9GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(4096)")  {{'set capacity 4GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(5017)")  {{'set capacity 4.9GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(5120)")  {{'set capacity 5GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(81817)")  {{'set capacity 79.9GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(81920)")  {{'set capacity 80GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(102400)")  {{'set capacity 100GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(102401)")  {{'set capacity 100.01GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyBgrm(0)")  {{'set brgm 0'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyBgrm(1200)")  {{'set bgrm 1200'}}
     div(class="sp-plan")
       span(class="text-blue-1 body-MD") {{$t('TMP0082')}}
       svg-icon(v-if="isFreeIcon" iconName="free")

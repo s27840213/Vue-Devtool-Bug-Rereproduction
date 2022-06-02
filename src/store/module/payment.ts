@@ -517,41 +517,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }
     paymentApi.calcUserAsset(procId)
     paymentApi.calcDone(procId, callback)
-  },
-  async toAbort({ dispatch }) {
-    return paymentApi.toAbort().then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'goto Abort' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-  },
-  async toInitial({ dispatch }) {
-    return paymentApi.toInitial().then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'goto Initial' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-  },
-  async toFail({ dispatch }) {
-    return paymentApi.toFail().then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'goto Fail' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-  },
-  async modifyCapacity({ dispatch }, capacity) {
-    return paymentApi.modifyCapacity(capacity).then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'disk capacity update' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
-  },
-  async modifyBgrm({ dispatch }, capacity) {
-    return paymentApi.modifyBgrm(capacity).then(({ data }) => {
-      if (data.flag) throw Error(data.msg)
-      dispatch('getBillingInfo')
-      Vue.notify({ group: 'copy', text: 'disk capacity update' })
-    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   }
 }
 
