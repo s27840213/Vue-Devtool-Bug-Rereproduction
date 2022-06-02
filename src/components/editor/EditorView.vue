@@ -70,6 +70,8 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import layerUtils from '@/utils/layerUtils'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -195,7 +197,9 @@ export default Vue.extend({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       prevScrollPos: 'bgRemove/getPrevScrollPos',
-      getInInGestureMode: 'getInGestureToolMode'
+      getInInGestureMode: 'getInGestureToolMode',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -224,6 +228,9 @@ export default Vue.extend({
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
     },
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
+    },
     showRuler(): boolean {
       return this._showRuler && !this.inBgRemoveMode
     }
@@ -246,7 +253,7 @@ export default Vue.extend({
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode) {
-        GroupUtils.deselect()
+        !this.isHandleShadow && GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
         pageUtils.findCentralPageIndexInfo()
@@ -272,7 +279,11 @@ export default Vue.extend({
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
         if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
-          GroupUtils.deselect()
+          if (!this.isHandleShadow) {
+            GroupUtils.deselect()
+          } else {
+            imageUtils.setImgControlDefault(false)
+          }
         }
         this.isSelecting = true
         this.renderSelectionArea({ x: 0, y: 0 }, { x: 0, y: 0 })
@@ -306,7 +317,11 @@ export default Vue.extend({
     },
     selectEnd() {
       if (this.isSelecting) {
-        GroupUtils.deselect()
+        if (!this.isHandleShadow) {
+          GroupUtils.deselect()
+        } else {
+          imageUtils.setImgControlDefault(false)
+        }
       }
       /**
        * Use nextTick to trigger the following function after DOM updating
@@ -318,7 +333,11 @@ export default Vue.extend({
         if (this.isSelecting) {
           this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement
-          this.handleSelectionData(selectionArea.getBoundingClientRect())
+          if (!this.isHandleShadow) {
+            this.handleSelectionData(selectionArea.getBoundingClientRect())
+          } else {
+            imageUtils.setImgControlDefault(false)
+          }
         }
       })
     },

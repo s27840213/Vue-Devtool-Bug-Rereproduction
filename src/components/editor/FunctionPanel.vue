@@ -56,7 +56,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-import { LayerType } from '@/store/types'
+import { FunctionPanelType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
@@ -87,7 +87,10 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isProcessImgShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading'
     }),
     functionPanelStyles(): { [index: string]: string } {
       return this.isShowPagePreview ? {
@@ -95,6 +98,9 @@ export default Vue.extend({
       } : {
         'pointer-events': 'auto'
       }
+    },
+    isHandleShadow(): boolean {
+      return this.isProcessImgShadow || this.isUploadImgShadow
     },
     selectedLayerNum(): number {
       return this.currSelectedInfo.layers.length
@@ -154,15 +160,8 @@ export default Vue.extend({
         this.targetIs('text')
     },
     showPhotoSetting(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
-        this.targetIs('image') && this.singleTargetType()
-    },
-    showPhotoShadow(): boolean {
-      return !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
-        this.isSuperUser &&
-        this.targetIs('image') && this.selectedLayerNum === 1 && // for non group
-        (!this.isGroup || this.hasSubSelectedLayer) && // for group and has sub selected layer
-        !this.currSelectedInfo.types.has('frame') // for frame
+      return (!this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked &&
+        this.targetIs('image') && this.singleTargetType())
     },
     showShapeSetting(): boolean {
       const { getCurrConfig } = LayerUtils

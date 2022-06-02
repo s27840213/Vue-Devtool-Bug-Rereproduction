@@ -1243,7 +1243,7 @@ class TextPropUtils {
         case 'isVertical': {
           if (currLayer.type === 'text') {
             value = currLayer.styles.writingMode.includes('vertical')
-          } else if (subLayerIdx !== -1) {
+          } else if (subLayerIdx !== -1 && currLayer.layers[subLayerIdx].type === 'text') {
             value = currLayer.layers[subLayerIdx].styles.writingMode.includes('vertical')
           } else { // tmp or group w/ subLayerIdx
             value = true

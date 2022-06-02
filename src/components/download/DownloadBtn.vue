@@ -1,10 +1,11 @@
 <template lang="pug">
-  div(class="download-btn")
+  div(class="download-btn"
+    v-hint="isHandlingShadow ? $t('NN0500') : ''")
     btn(:hasIcon="true"
       :iconName="'download'"
       :iconWidth="'18px'"
       :type="'primary-sm'"
-      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0"
+      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow"
       class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
       span(v-if="!inprogress") {{$t('NN0010')}}
@@ -20,6 +21,7 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import modalUtils from '@/utils/modalUtils'
+import { FunctionPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -36,8 +38,14 @@ export default Vue.extend({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       isLogin: 'user/isLogin',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      uploadingImgs: 'file/getUploadingImgs'
-    })
+      uploadingImgs: 'file/getUploadingImgs',
+      isUploadShadowImg: 'shadow/isUploading',
+      isProcessShadowImg: 'shadow/isProcessing',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
+    }),
+    isHandlingShadow(): boolean {
+      return this.isUploadShadowImg || this.isProcessShadowImg || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
+    }
   },
   methods: {
     handleInprogress(inprogress: boolean) {

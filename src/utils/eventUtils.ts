@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import generalUtils from './generalUtils'
 
 export enum EventType {
@@ -18,6 +19,13 @@ const mobileHash = {
   pointerdown: 'touchend'
 }
 
+export enum PanelEvent {
+  showPhotoShadow = 'showPhotoShadow'
+}
+
+export enum ImageEvent {
+  redrawCanvasShadow = 'redrawCanvasShadow'
+}
 class EventUtils {
   static readonly EventType = EventType
   readonly EventType = EventUtils.EventType
@@ -38,6 +46,28 @@ class EventUtils {
       const targetEvent = generalUtils.isMobile() ? mobileHash[type] : computerHash[type]
 
       window.addEventListener(targetEvent, callback)
+    }
+  }
+
+  private event: any
+  private eventHash: { [index: string]: (event: string) => void }
+  constructor() {
+    this.event = new EventEmitter()
+    this.eventHash = {}
+  }
+
+  on(type: string, callback: (type?: string) => void) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+    this.event.on(type, callback)
+    this.eventHash[type] = callback
+  }
+
+  emit(type: string) {
+    if (this.eventHash[type]) {
+      this.event.emit(type)
     }
   }
 }
