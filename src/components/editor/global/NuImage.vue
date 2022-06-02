@@ -743,7 +743,8 @@ export default Vue.extend({
             .then(() => {
               imageShadowUtils.updateShadowSrc(this.layerInfo, {
                 ...(this.config as IImage).styles.shadow.srcObj,
-                userId: generalUtils.generateRandomString(8)
+                // only used to make vue update the value, this userId is not meaningful
+                userId: 'ver=' + generalUtils.generateRandomString(8)
               })
             })
         }

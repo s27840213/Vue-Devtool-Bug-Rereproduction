@@ -207,8 +207,6 @@ export default Vue.extend({
 
       const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
       const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
-      console.log('canvasW', canvasW)
-      console.log('canvasH', canvasH)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
 
@@ -268,11 +266,6 @@ export default Vue.extend({
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
-          console.log('config.styles.scale', config.styles.scale)
-          console.log('(updateCanvas.width - right - left) / drawCanvasW', (updateCanvas.width - right - left) / drawCanvasW)
-          console.log('drawCanvasW', drawCanvasW)
-          console.log('left', left)
-          console.log('_width', _width)
 
           new Promise<void>((resolve) => {
             if (!this.isAdmin) {

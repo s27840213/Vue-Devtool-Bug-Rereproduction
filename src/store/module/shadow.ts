@@ -6,6 +6,7 @@ import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import { IEditorState, ILayerInfo } from '../types'
 import authToken from '@/apis/auth-token'
 import apiUtils from '@/utils/apiUtils'
+import store from '..'
 
 const SET_UPLOAD_ID = 'SET_UPLOAD_ID' as const
 const SET_PROCESS_ID = 'SET_PROCESS_ID' as const
@@ -95,11 +96,10 @@ const mutations: MutationTree<IShadowState> = {
 const actions: ActionTree<IShadowState, unknown> = {
   async [ADD_SHADOW_IMG]({ state }, assetIndices: Array<number>) {
     await apiUtils.requestWithRetry(() => {
-      return user.getAllAssets(authToken().token || '', {
+      return user.getAllAssets(store.getters['user/getToken'] || authToken().token || '', {
         asset_list: assetIndices.join(',')
       })
     }).then((data) => {
-      console.log(data)
       state.shadowImgs.set(assetIndices[0], { urls: data.data.url_map[assetIndices[0]] })
     }).catch((e) => {
       console.error(e)
