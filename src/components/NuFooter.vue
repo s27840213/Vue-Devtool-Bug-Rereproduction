@@ -350,6 +350,7 @@ export default Vue.extend({
         padding-top: 40px;
       }
       &-copyright {
+        align-self: center;
         font-size: 12px;
         white-space: nowrap;
         transform: scale(0.8);

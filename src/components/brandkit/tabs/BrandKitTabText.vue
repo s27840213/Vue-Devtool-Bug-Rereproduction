@@ -82,7 +82,7 @@ export default Vue.extend({
           text: `${this.$t('NN0135')}`
         })
       }
-      if (status === 'fail') {
+      if (status === 'fail') { // Fail will not goto here
         this.$notify({
           group: 'error',
           text: `${this.$t('NN0137')}`

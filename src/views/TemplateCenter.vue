@@ -15,9 +15,9 @@
     nu-header(class="non-tab-show" :noSearchbar="true" v-header-border="'.template-center'")
     div(class="template-center__search-container")
       div(class="template-center__search__title non-mobile-show")
-        span(v-html="title")
+        span(v-html="$t('NN0486', { newline: '<br>' })")
       div(class="template-center__search__title non-tab-show")
-        span(v-html="mobileTitle")
+        span(v-html="$t('NN0487', { newline: '<br>' })")
       div(class="template-center__search__text non-mobile-show")
         i18n(path="NN0488" tag="span")
           template(#newline)
@@ -395,17 +395,7 @@ export default Vue.extend({
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
-    }),
-    title(): string {
-      return `${this.$t('NN0486', { newline: '<br>' })}`
-        .replace('<blue>', '<span class="text-blue-1">')
-        .replace('</blue>', '</span>')
-    },
-    mobileTitle(): string {
-      return `${this.$t('NN0487', { newline: '<br>' })}`
-        .replace('<blue>', '<span class="text-blue-1">')
-        .replace('</blue>', '</span>')
-    }
+    })
   },
   methods: {
     ...mapActions('hashtag', {

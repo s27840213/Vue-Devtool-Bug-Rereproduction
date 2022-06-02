@@ -12,6 +12,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import userApis from '@/apis/user'
 import _ from 'lodash'
 import apiUtils from '@/utils/apiUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -59,8 +60,9 @@ function isPrivate(srcObj: SrcObj): string {
 }
 
 function errorShower(msg?: string) {
-  if (msg === 'NONPRO') {
-    // dosomething
+  if (msg === 'NOT_SUBSCRIBED') {
+    paymentUtils.errorHandler(msg)
+    store.commit('brandkit/SET_isSettingsOpen', false)
     return
   }
   showNetworkError()

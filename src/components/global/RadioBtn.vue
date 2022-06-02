@@ -38,7 +38,7 @@ export default Vue.extend({
 .radio-btn {
   &__hover-effect {
     position: absolute;
-    top: 0;
+    top: 0px;
     left: -6px;
     width: 24px;
     height: 24px;

@@ -15,9 +15,9 @@
             div(v-if="item.condition" class="p-5 pointer"
                 :class="{'text-blue-1': currentPage === item.name}")
               a(v-if="item.url.startsWith('http')" :href="item.url"
-                class="nu-header__container__link") {{item.text}}
+                class="nu-header__container__link") {{item.label}}
               router-link(v-else :to="item.url"
-                          class="nu-header__container__link") {{item.text}}
+                          class="nu-header__container__link") {{item.label}}
         div(v-else class="body-2" key="no-navigation")
       div(class="body-2")
         //- div(v-if="!isLogin")
@@ -99,6 +99,7 @@ import localeUtils from '@/utils/localeUtils'
 import i18n from '@/i18n'
 import VueI18n from 'vue-i18n'
 import brandkitUtils from '@/utils/brandkitUtils'
+import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
@@ -117,6 +118,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      navItems: constantData.headerItem(),
       StepsUtils,
       keys: [] as string[],
       isAccountPopup: false,
@@ -147,70 +149,8 @@ export default Vue.extend({
     isLogin(): boolean {
       return store.getters['user/isLogin']
     },
-    isAdmin(): boolean {
-      return this.role === 0
-    },
-    isMobile(): boolean {
-      return document.body.clientWidth / document.body.clientHeight < 1
-    },
     currLocale(): string {
       return localeUtils.currLocale()
-    },
-    navItems(): Record<string, string | boolean | VueI18n.TranslateResult>[] {
-      return [{
-        condition: true,
-        name: 'Home',
-        url: '/',
-        text: i18n.t('NN0144')
-      }, {
-        condition: true,
-        name: 'TemplateCenter',
-        url: '/templates',
-        text: i18n.t('NN0145')
-      }, {
-        condition: true,
-        name: 'Toturial',
-        url: this.tutorialPage,
-        text: i18n.t('NN0146')
-      }, {
-        condition: true,
-        name: 'Faq',
-        url: this.faqPage,
-        text: i18n.t('NN0147')
-      // }, {
-      //   condition: this.isLogin && this.isAdmin, // todo: modify condition
-      //   name: 'Pricing',
-      //   url: '/pricing',
-      //   text: 'Pricing' // todo: i18n
-      }, {
-        condition: this.isLogin,
-        name: 'MyDesign',
-        url: '/mydesign',
-        text: i18n.t('NN0080')
-      }, {
-        condition: this.isLogin && brandkitUtils.isBrandkitAvailable,
-        name: 'BrandKit',
-        url: '/brandkit',
-        text: i18n.t('NN0007')
-      }]
-    },
-    tutorialPage(): string {
-      if (this.currLocale === 'tw') {
-        return 'https://blog.vivipic.com/tw/tutorial/'
-      } else if (this.currLocale === 'us') {
-        return 'https://blog.vivipic.com/us-tutorial/'
-      } else {
-        return 'https://www.facebook.com/vivipic' + this.currLocale
-      }
-    },
-    faqPage(): string {
-      if (this.currLocale === 'tw') {
-        return 'https://blog.vivipic.com/tw/faq/'
-      } else if (this.currLocale === 'us') {
-        return 'https://blog.vivipic.com/us-faq/'
-      } else {
-        return 'https://www.facebook.com/vivipic' + this.currLocale
-      }
     }
   },
   methods: {

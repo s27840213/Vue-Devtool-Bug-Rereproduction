@@ -1,235 +1,310 @@
 <template lang="pug">
   div(class="pricing")
-    nu-header(v-header-border="true")
+    nu-header(v-header-border)
     div(class="pricing-content")
-      div(class="pricing-header")
-        img(:src="require('@/assets/img/png/pricing/header.png')")
-        div(class="pricing-header-title") 簡單方案任您選擇
-        div(class="pricing-header-subtitle") 馬上成為 Vivipic 的一員，海量電商模板免費取用！
-      div(class="pricing-cases pt-50")
-        div(class="pricing-case")
-          div(class="pricing-case-title heading-4") 基礎版
-          div(class="pricing-case-block block-basic")
-            div(class="pricing-case-price")
-              span(class="heading-5") $0
-              span(class="label-mid") {{' /月'}}
-            div(class="pricing-case-features")
-              div(v-for="item in basicFeature"
-                class="pricing-case-feature")
-                svg-icon(class="pointer"
-                  iconWidth="25px"
-                  iconName="check"
-                  iconColor="blue-1")
-                span {{item}}
-            div(style="padding-top: 150px;")
-              div(class="pricing-case-btn"
-                style="width: 60%;"
-                @click="goToPage('Editor')") 註 冊 即 享 用
-        div(class="pricing-case")
-          div(class="pricing-case-title heading-4")
-            span 專業版
-            div(style="position: relative;")
-              div(class="ml-25 label-mid label")
-            span(class="body-1 label-text") 限 時 優 惠
-          div(class="pricing-case-block block-pri")
-            div(class="pricing-case-price")
-              span(class="heading-5"
-                style="text-decoration: line-through;") $349
-              span(class="label-mid") {{' /月'}}
-              span(class="pl-40 heading-2 text-yellow") $0
-              span(class="label-lg text-yellow") {{' /月'}}
-            div(class="pricing-case-features")
-              div(v-for="item in priBasicFeature"
-                class="pricing-case-feature")
-                svg-icon(class="pointer"
-                  iconWidth="25px"
-                  iconName="check"
-                  iconColor="blue-3")
-                span {{item}}
-            div(class="mt-20 dividing")
-            div(class="pricing-case-features")
-              div(v-for="item in priFeature"
-                class="pricing-case-feature text-yellow")
-                svg-icon(class="pointer"
-                  iconWidth="25px"
-                  iconName="check"
-                  iconColor="yellow")
-                span {{item}}
-            div(class="pt-50")
-              div(class="pricing-case-btn"
-                style="width: 50%;"
-                @click="goToPage('Editor')") 立 即 註 冊 免 費 享 用
-    nu-footer
+      div(class="pricing-top")
+        span(class="text-H2 mb-20" v-html="$t('NN0505')")
+        span(class="body-LG text-gray-2") {{$t('NN0506')}}
+        img(v-for="cb in colorBlock" class="pricing-top__cb"
+            :src="require('@/assets/img/svg/color-block/' + cb.name)"
+            :style="{'top': `${cb.top}px`, 'left': `${cb.left}px`}")
+      div(class="pricing-plan")
+        div(class="pricing-plan-left")
+          div(class="pricing-plan-left-top")
+            span(class="text-H4 mb-15") {{$tc('NN0507', 1)}}
+            span(class="body-LG text-gray-3") {{$t('NN0508')}}
+          div(class="pricing-plan-left-divider")
+            span {{$t('NN0509')}}
+            hr
+          div(class="pricing-plan-left-bottom")
+            div(v-for="item in ['NN0510', 'NN0511', 'NN0512', 'NN0513']")
+              svg-icon(iconName="item-check" iconWidth="20px")
+              span {{$t(item)}}
+        div(class="pricing-plan-right")
+          slide-toggle(class="body-XS" :options="periods"
+                      v-model="periodUi" bgColor="#F4F5F7")
+          div(class="pricing-plan-right-price")
+            img(class="pricing-plan-right-price-off"
+              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
+            span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('NN0516')}`}}
+            br
+            span(class="pricing-plan-right-price__dollar") {{'$ '}}
+            span(class="text-H1") {{plans[planSelected][periodUi].now}}
+            span {{' ' + $t('NN0516')}}
+          btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
+            span(class="btn-LG") {{canAddCard ? $t('NN0517') : $t('NN0518')}}
+      span(class="pricing-currency") {{$t('NN0519')}}
+      div(class="pricing-compare")
+        div(v-for="item in compareTable")
+          svg-icon(v-if="item === true" iconName="feature-true")
+          span(v-else) {{item}}
+      div(class="pricing-faq")
+        span(class="text-H2 mb-20") {{$t('NN0533')}}
+        details(v-for="item in faqs")
+          summary {{item.Q}}
+            svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
+          i18n(v-if="item.isPath" :path="item.A" tag="p" class="body-MD text-gray-2 mt-20")
+            template(#history)
+              router-link(to="/settings/billing") {{$t('NN0614')}}
+          p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
+      nu-footer
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import { createHelpers } from 'vuex-map-fields'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
+import PopupPayment from '@/components/popup/PopupPayment.vue'
+import SlideToggle from '@/components/global/SlideToggle.vue'
+import paymentData from '@/utils/constantData'
+import paymentUtils from '@/utils/paymentUtils'
+
+const { mapFields } = createHelpers({
+  getterType: 'payment/getField',
+  mutationType: 'payment/updateField'
+})
 
 export default Vue.extend({
   name: 'Pricing',
   components: {
     NuHeader,
-    NuFooter
+    NuFooter,
+    PopupPayment,
+    SlideToggle
   },
   data() {
     return {
-      basicFeature: [
-        '永久免費',
-        '精美素材媒體庫',
-        '無限次數下載',
-        '上千個精美模板',
-        '超過 200 萬張的可商用圖庫'
-      ],
-      priBasicFeature: [
-        '限時優惠',
-        '精美素材媒體庫',
-        '無限次數下載',
-        '上千個精美模板',
-        '超過 200 萬張的可商用圖庫'
-      ],
-      priFeature: [
-        '付費模板無限暢用',
-        '付費素材無限暢用'
-      ]
+      colorBlock: paymentData.colorBlock(),
+      periods: paymentData.periodOptions(),
+      compareTable: paymentData.compareTable(),
+      faqs: paymentData.faqs()
     }
   },
   computed: {
+    ...mapGetters({
+      isUiTW: 'payment/isUiTW',
+      isLogin: 'user/isLogin'
+    }),
+    ...mapState('payment', {
+      plans: 'plans',
+      planSelected: 'planSelected',
+      userCountryUi: 'userCountryUi',
+      status: 'status'
+    }),
+    ...mapFields({ periodUi: 'periodUi' }),
+    off():string { return this.isUiTW ? '26off' : '25off' },
+    canAddCard():boolean { return ['Initial', 'Deleted'].includes(this.status) }
+  },
+  async mounted() {
+    await this.getBillingInfo()
+    this.getPrice(this.userCountryUi)
   },
   methods: {
-    goToPage(pageName: string) {
-      this.$router.push({ name: pageName })
+    ...mapActions({
+      getBillingInfo: 'payment/getBillingInfo',
+      getPrice: 'payment/getPrice'
+    }),
+    tryAddCard() {
+      if (!this.isLogin) {
+        this.$router.push('login')
+      } else if (this.canAddCard) {
+        paymentUtils.openPayment('step1')
+      } else {
+        this.$router.push('/settings/payment')
+      }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.pricing {
+.pricing { height: 100%; }
+
+.pricing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden scroll;
+  height: calc(100% - #{$header-height});
+}
+
+.pricing-top {
+  display: flex;
+  flex-direction: column;
   position: relative;
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  margin: 110px 0;
+  &__cb {
+    position: absolute;
+    z-index: -1;
+  }
+}
 
-  &-content {
+.pricing-plan {
+  display: flex;
+  width: 1128px;
+  height: 367px;
+  flex-shrink: 0;
+  background-color: setColor(white);
+  border: 1px solid setColor(gray-4);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pricing-plan-left {
+  display: grid;
+  grid-template-rows: 1fr 44px 1fr;
+  box-sizing: border-box;
+  width: 68%;
+  padding: 64px 24px 64px 60px;
+  text-align: left;
+  &-top {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding-bottom: 100px;
   }
-
-  &-header {
-    display: flex;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-
-    > img {
-      width: 100%;
-    }
-
-    &-title {
-      position: absolute;
-      top: 35%;
-      font-size: 2.4vw;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-
-    &-subtitle {
-      position: absolute;
-      top: 55%;
-      font-size: 1.3vw;
-      color: white;
-    }
-  }
-
-  &-cases {
+  &-divider {
+    @include overline-LG;
     display: grid;
-    grid-auto-flow: column;
-    column-gap: 2vw;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    margin: 10px 0;
+    color: setColor(blue-1);
+    >hr {
+      width: calc(100% - 12px);
+      border: 0.5px solid setColor(gray-4);;
+      margin-left: 12px;
+    }
   }
-
-  &-case {
-    display: flex;
-    flex-direction: column;
-
-    &-title {
+  &-bottom {
+    @include body-MD;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: flex-end;
+    color: setColor(gray-2);
+    >div {
       display: flex;
-      position: relative;
-      text-align: left;
-      color: setColor(blue-1);
-      padding-bottom: 30px;
-
-      .label {
-        width: 110px;
-        height: 30px;
-        color: white;
-        background: setColor(red);
-        transform: skewX(-20deg);
-        position: absolute;
-        left: 0;
-        top: 5px;
-      }
-      .label-text {
-        color: white;
-        padding: 7px 0 0 40px;
-        z-index: 2;
-      }
-
-    }
-
-    &-block {
-      border-radius: 10px;
-      text-align: left;
-      padding: 2vw 2.5vw;
-    }
-    .block-basic {
-      width: 28vw;
-      background: setColor(gray-5);
-    }
-    .block-pri {
-      width: 35vw;
-      background: setColor(blue-1);
-      color: white;
-    }
-
-    &-features {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 14vw);
-      row-gap: 20px;
-      padding-top: 3vh;
-    }
-
-    &-feature {
-      display: flex;
-      align-items: center;
-    }
-
-    &-btn {
-      cursor: pointer;
-      background: white;
-      color: setColor(blue-1);
-      text-align: center;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 15px;
-
-      &:hover{
-        transition: all .2s ease-in-out;
-        background: setColor(gray-4);
-        box-shadow: 3px 3px 10px 0 rgba(48, 55, 66, 0.15);
-        transform: translate(0, -3px);
+      svg {
+        flex-shrink: 0;
+        margin: 4.4px 13.66px 4.4px 1.67px;
       }
     }
   }
 }
 
-.dividing {
-  width: 100%;
-  border: 1px #fff solid;
+.pricing-plan-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  width: 32%;
+  padding: 72px 32px;
+  background-color: setColor(blue-1);
+  &-price {
+    @include body-MD;
+    position: relative;
+    color: white;
+    &-off {
+      position: absolute;
+      top: -55px;
+      right: -80px;
+    }
+    &__del {
+      position: absolute;
+      left: 0;
+      text-decoration-line: line-through;
+    }
+    &__dollar {
+      position: relative;
+      bottom: 20px;
+      margin-bottom: 20px;
+    }
+  }
+  &-buy.btn {
+    width: 80%;
+    border-radius: 8px;
+  }
+}
+
+.pricing-currency {
+  @include body-XS;
+  color: setColor(gray-3);
+  margin-left: 950px;
+}
+
+.pricing-compare {
+  @include body-MD;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  width: 960px;
+  margin: 78px 0;
+  text-align: left;
+  >div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  >div:nth-child(1)    { @include text-H6; }
+  >div:nth-child(3)    { @include text-H5; }
+  >div:nth-child(-n+3)    {
+    padding: 8px 0;
+    word-break: keep-all; // H6?
+  }
+  >div:nth-child(2), >div:nth-child(3) { text-align: center; } // H6?
+  >div:nth-child(3n)   { background-color: setColor(blue-4); }
+  >div:nth-child(3n+1) { justify-content: flex-start; }
+  >div:nth-child(n+4)  {
+    padding: 20px 0;
+    border-bottom: 1px solid setColor(gray-4);
+  }
+}
+
+.pricing-faq {
+  display: flex;
+  flex-direction: column;
+  width: 1024px;
+  color: setColor(gray-1);
+  >details {
+    text-align: left;
+    margin-top: 20px;
+    >summary {
+      @include text-H6;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid setColor(gray-4);
+      padding-bottom: 20px;
+      >svg { flex-shrink: 0; }
+    }
+    summary::-webkit-details-marker { display:none; } // Romove detail arrow
+  }
+  >details[open] >summary >svg { transform: scaleY(-1); }
+}
+
+@media screen and (max-width: 768px) {
+  .pricing-top__cb { display: none; }
+  .pricing-content { padding: 20px 5.34%; }
+  .pricing-plan, .pricing-compare, .pricing-faq { width: 100%; }
+  .pricing-plan {
+    flex-direction: column;
+    height: fit-content;
+    &-left, &-right { width: 100%; }
+    &-left {
+      display: block;
+      padding: 18px;
+      &-bottom {
+        grid-template-columns: auto;
+        >div + div { margin-top: 10px; }
+      }
+    }
+    &-right {
+      height: 282px;
+      padding: 30px 20px;
+    }
+  }
+  .pricing-currency { margin-left: auto; }
+  .pricing-compare {
+    grid-template-columns: 1.2fr 1fr 1fr;
+  }
 }
 </style>
