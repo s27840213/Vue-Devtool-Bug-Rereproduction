@@ -69,6 +69,7 @@ import pageUtils from '@/utils/pageUtils'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import stepsUtils from '@/utils/stepsUtils'
 import errorHandle from '@/utils/errorHandleUtils'
+import groupUtils from '@/utils/groupUtils'
 
 export default Vue.extend({
   props: {
@@ -89,9 +90,7 @@ export default Vue.extend({
       this.fetchShadowImg()
     }
     eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
-      console.log('outside')
       if (this.currentShadowEffect !== ShadowEffectType.none) {
-        console.log('inside')
         if (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent) {
           this.redrawShadow(true)
         } else {
@@ -371,8 +370,8 @@ export default Vue.extend({
           return layerUtils.getLayer(pageIndex, layerIndex).id === uploadId.layerId
         }
       })()
-      return isCurrShadowEffectApplied && (!this.shadowSrc || isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
-      // return (isPhotoShadowPanelOpen && isCurrLayerActive && isCurrShadowEffectApplied) || isShadowUploading
+      return isCurrShadowEffectApplied && (isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
+      // return isCurrShadowEffectApplied && (!this.shadowSrc || isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -568,6 +567,7 @@ export default Vue.extend({
       }
       clearShadowSrc && this.clearShadowSrc()
       imageShadowUtils.clearLayerData()
+      // const { initWidth: width, initHeight: height } = this.config.styles
       const { width, height } = this.config.styles
       const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
       const _canvasW = (width + CANVAS_SPACE * spaceScale)
@@ -724,6 +724,11 @@ export default Vue.extend({
     redrawShadow(openPanel: boolean) {
       imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
       layerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { scale: 1 }, this.subLayerIndex)
+      groupUtils.deselect()
+      groupUtils.select(this.pageIndex, [this.layerIndex])
+      if (typeof this.subLayerIndex && this.subLayerIndex !== -1) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true }, this.subLayerIndex)
+      }
       this.$nextTick(() => {
         this.handleNewShadowEffect()
         openPanel && eventUtils.emit(PanelEvent.showPhotoShadow)

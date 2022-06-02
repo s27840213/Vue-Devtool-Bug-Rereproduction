@@ -91,7 +91,7 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils, { CANVAS_FLOATING_SCALE, CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import generalUtils from '@/utils/generalUtils'
@@ -101,10 +101,6 @@ import uploadUtils from '@/utils/uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from '@/utils/pageUtils'
 import imageUtils from '@/utils/imageUtils'
-import groupUtils, { calcTmpProps } from '@/utils/groupUtils'
-import mathUtils from '@/utils/mathUtils'
-import { ICalculatedGroupStyle } from '@/interfaces/group'
-import { SrcObj } from '@/interfaces/gallery'
 
 export default Vue.extend({
   components: {
@@ -144,18 +140,6 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
-      const markStart = 'MARK_start'
-      const mark1 = 'MARK1:after_load_MAX_IMG'
-      const mark2 = 'MARK2:after_drawing_canvas'
-      const mark3 = 'MARK3:after_compute_edges'
-      const mark4 = 'MARK4:after_convert_update_canvas_to_base64'
-      const mark5 = 'MARK5:after_load_edge-trimmed_IMG_and_drawing'
-      const mark6 = 'MARK6:after_convert_upload_canvas_to_base64'
-      const mark7 = 'MARK7:after_load_final_png'
-
-      performance.clearMeasures()
-      performance.mark(markStart)
-
       const { config: _config, primarylayerId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const pageId = layerUtils.getPage(layerUtils.pageIndex).id
@@ -202,9 +186,8 @@ export default Vue.extend({
         }
       })
 
-      performance.mark(mark1)
-
       const updateCanvas = document.createElement('canvas')
+      // const { initWidth: width, initHeight: height, imgWidth, imgHeight } = config.styles
       const { width, height, imgWidth, imgHeight } = config.styles
       const drawCanvasW = width / imgWidth * img.naturalWidth
       const drawCanvasH = height / imgHeight * img.naturalHeight
@@ -224,6 +207,8 @@ export default Vue.extend({
 
       const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
       const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
+      console.log('canvasW', canvasW)
+      console.log('canvasH', canvasH)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
 
@@ -246,8 +231,8 @@ export default Vue.extend({
         default:
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
-      // updateCanvas.style.width = (updateCanvas.width / 4).toString() + 'px'
-      // updateCanvas.style.height = (updateCanvas.height / 4).toString() + 'px'
+      // updateCanvas.style.width = (updateCanvas.width).toString() + 'px'
+      // updateCanvas.style.height = (updateCanvas.height).toString() + 'px'
       // updateCanvas.style.position = 'absolute'
       // updateCanvas.style.zIndex = '1000'
       // updateCanvas.style.top = '0'
@@ -255,13 +240,9 @@ export default Vue.extend({
       // document.body.append(updateCanvas)
       // setTimeout(() => document.body.removeChild(updateCanvas), 15000)
 
-      performance.mark(mark2)
-
       const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
-
-      performance.mark(mark3)
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -269,20 +250,13 @@ export default Vue.extend({
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
       ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
-      performance.mark(mark5)
-
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 0.5)]
-
-      performance.mark(mark6)
-
       uploadUtils.uploadAsset('image', uploadImg, {
         addToPage: false,
         needCompressed: false,
         id: assetId,
         isShadow: true,
         pollingCallback: (json: IUploadAssetResponse) => {
-          performance.mark(mark7)
-
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
@@ -294,8 +268,13 @@ export default Vue.extend({
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
+          console.log('config.styles.scale', config.styles.scale)
+          console.log('(updateCanvas.width - right - left) / drawCanvasW', (updateCanvas.width - right - left) / drawCanvasW)
+          console.log('drawCanvasW', drawCanvasW)
+          console.log('left', left)
+          console.log('_width', _width)
 
-          new Promise<void>((resolve, reject) => {
+          new Promise<void>((resolve) => {
             if (!this.isAdmin) {
               this.addShadowImg([srcObj.assetId])
                 .then(() => resolve())
@@ -324,16 +303,6 @@ export default Vue.extend({
             }
             newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
           }).catch((e) => console.error(e))
-
-          // performance.measure(`${markStart} to ${mark1}`, markStart, mark1)
-          // performance.measure(`${mark1} to ${mark2}`, mark1, mark2)
-          // performance.measure(`${mark2} to ${mark3}`, mark2, mark3)
-          // performance.measure(`${mark3} to ${mark4}`, mark3, mark4)
-          // performance.measure(`${mark4} to ${mark5}`, mark4, mark5)
-          // performance.measure(`${mark5} to ${mark6}`, mark5, mark6)
-          // performance.measure(`${mark6} to ${mark7}`, mark6, mark7)
-          // console.log(performance.getEntriesByType('measure')
-          // .map(e => [e.name, e.duration]))
         }
       })
     } else {
@@ -363,7 +332,10 @@ export default Vue.extend({
     },
     currentEffect(): ShadowEffectType {
       const { shadow } = this.currentStyle as IImageStyle
-      return shadow.currentEffect || 'none'
+      if (shadow) {
+        return shadow.currentEffect || ShadowEffectType.none
+      }
+      return ShadowEffectType.none
     },
     effects(): { [key: string]: string[] } {
       return {

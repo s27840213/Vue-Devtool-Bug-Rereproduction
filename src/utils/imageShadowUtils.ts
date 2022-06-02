@@ -50,7 +50,6 @@ class ImageShadowUtils {
     config: IImage,
     /** This identifier is used to indexing the sub-layer */
     primarylayerId?: string,
-    // isTransparentBg: boolean,
     options?: DrawOptions
   } | null
 
@@ -70,38 +69,35 @@ class ImageShadowUtils {
   }
 
   private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
-    if (!this._layerData) {
-      const { canvasT } = this
-      const ctxT = canvasT.getContext('2d')
-      if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
-        canvasT.setAttribute('width', `${canvas.width}`)
-        canvasT.setAttribute('height', `${canvas.height}`)
-      }
-      if (ctxT) {
+    const { canvasT } = this
+    const ctxT = canvasT.getContext('2d')
+    if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
+      canvasT.setAttribute('width', `${canvas.width}`)
+      canvasT.setAttribute('height', `${canvas.height}`)
+    }
+    if (ctxT) {
+      this._layerData = { img, config }
+      const { layerInfo } = options || {}
+      if (layerInfo) {
+        // TODO no need the below line
+        const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+        this._layerData.primarylayerId = primarylayerId
+        this.setProcessId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: primarylayerId || config.id || '',
+          subLayerId: primarylayerId ? config.id || '' : ''
+        })
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
-        this._layerData = { img, config }
-
-        const { layerInfo } = options || {}
-        if (layerInfo) {
-          // TODO no need the below line
-          const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
-          this._layerData.primarylayerId = primarylayerId
-          this.setProcessId({
-            pageId: pageUtils.currFocusPage.id,
-            layerId: primarylayerId || config.id || '',
-            subLayerId: primarylayerId ? config.id || '' : ''
-          })
-          this.updateEffectProps(layerInfo, {
-            isTransparent: this.isTransparentBg(canvasT)
-          })
-        }
-        if (options) {
-          this._layerData.options = {
-            ...this._layerData.options,
-            ...options
-          }
-        }
+        this.updateEffectProps(layerInfo, {
+          isTransparent: this.isTransparentBg(canvasT)
+        })
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+      }
+      if (options) {
+        this._layerData.options = {
+          ...this._layerData.options,
+          ...options
+        }
       }
     }
     if (this._draw) {
@@ -396,7 +392,7 @@ class ImageShadowUtils {
 
       let alphaVal = 1
       /** Calculating the spread */
-      if (!hasBuffRecorded) {
+      if (!hasBuffRecorded || !timeout) {
         for (let i = -unifiedSpread; i <= unifiedSpread && this.handlerId === handlerId; i++) {
           await this.asyncProcessing(() => {
             for (let j = -unifiedSpread; j <= unifiedSpread && this.handlerId === handlerId; j++) {
