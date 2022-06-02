@@ -52,7 +52,7 @@ export default Vue.extend({
       return (this._diskPercent * 100).toFixed(0)
     },
     recalc(): string {
-      return (this.usage.diskLoading ? i18n.t('NN0454') : i18n.t('TMP0137')) as string
+      return (this.usage.diskLoading ? i18n.t('NN0454') : i18n.t('NN0641')) as string
     },
     preset():Record<string, Record<string, Record<string, unknown>>> {
       return {
@@ -60,10 +60,10 @@ export default Vue.extend({
           0: { hidden: true },
           80: { hidden: true },
           100: {
-            title: i18n.t('TMP0131', { disk: this.diskPercent }),
+            title: i18n.t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
-              desc: i18n.t('TMP0135'),
+              desc: i18n.t('NN0639'),
               buttons: [
                 {
                   text: this.recalc,
@@ -71,14 +71,14 @@ export default Vue.extend({
                   disabled: this.usage.diskLoading,
                   type: 'transparent-mid'
                 }, {
-                  text: i18n.t('TMP0138'),
+                  text: i18n.t('NN0642'),
                   func: this.contact
                 }
               ]
             },
             small: {
-              desc: 'TMP0136',
-              buttonText: i18n.t('TMP0138'),
+              desc: 'NN0640',
+              buttonText: i18n.t('NN0642'),
               func: this.contact
             }
           }
@@ -86,32 +86,32 @@ export default Vue.extend({
         free: {
           0: { hidden: true },
           80: {
-            title: i18n.t('TMP0131', { disk: this.diskPercent }),
+            title: i18n.t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#FFBA49',
             large: {
-              desc: i18n.t('TMP0132', { button: i18n.t('TMP0057') }),
+              desc: i18n.t('NN0636', { button: i18n.t('NN0561') }),
               buttons: [
                 {
                   text: i18n.t('NN0271'),
                   func: this.skip,
                   type: 'transparent-mid'
                 }, {
-                  text: i18n.t('TMP0057'),
+                  text: i18n.t('NN0561'),
                   func: this.openPaymentPopup
                 }
               ]
             },
             small: {
-              desc: 'TMP0132',
-              buttonText: i18n.tc('TMP0003', 1),
+              desc: 'NN0636',
+              buttonText: i18n.tc('NN0507', 1),
               func: this.openPaymentPopup
             }
           },
           100: {
-            title: i18n.t('TMP0131', { disk: this.diskPercent }),
+            title: i18n.t('NN0635', { disk: this.diskPercent }),
             bgcolor: '#4EABE6',
             large: {
-              desc: i18n.t('TMP0133'),
+              desc: i18n.t('NN0637'),
               buttons: [
                 {
                   text: this.recalc,
@@ -119,14 +119,14 @@ export default Vue.extend({
                   disabled: this.usage.diskLoading,
                   type: 'transparent-mid'
                 }, {
-                  text: i18n.t('TMP0057'),
+                  text: i18n.t('NN0561'),
                   func: this.openPaymentPopup
                 }
               ]
             },
             small: {
-              desc: 'TMP0134',
-              buttonText: i18n.tc('TMP0003', 1),
+              desc: 'NN0638',
+              buttonText: i18n.tc('NN0507', 1),
               func: this.openPaymentPopup
             }
           }
