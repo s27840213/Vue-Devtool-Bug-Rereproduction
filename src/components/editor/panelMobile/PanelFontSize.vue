@@ -24,7 +24,6 @@ import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import pageUtils from '@/utils/pageUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
 export default Vue.extend({

@@ -47,12 +47,12 @@ export default Vue.extend({
     return {
       isFontsPanelOpened: false,
       homeTabs: [
-        { icon: 'template', text: `${this.$t('NN0001')}`, panelType: 'template' },
-        { icon: 'photo', text: `${this.$t('NN0002')}`, panelType: 'photo' },
-        { icon: 'shape', text: `${this.$t('NN0003')}`, panelType: 'object' },
-        { icon: 'bg', text: `${this.$t('NN0004')}`, panelType: 'background' },
-        { icon: 'text', text: `${this.$t('NN0005')}`, panelType: 'text' },
-        { icon: 'upload', text: `${this.$t('NN0006')}`, panelType: 'file' },
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
+        { icon: 'shape', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
+        { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
+        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
         { panelType: 'brand', text: `${this.$t('NN0007')}`, disabled: true }
       ] as Array<IFooterTab>,
       photoTabs: [

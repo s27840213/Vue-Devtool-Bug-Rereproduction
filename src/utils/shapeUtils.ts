@@ -1,11 +1,69 @@
 import store from '@/store'
 import { IListServiceContentDataItem } from '@/interfaces/api'
-import { ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
 import { IMarker } from '@/interfaces/shape'
 import AssetUtils from './assetUtils'
 import { IAsset } from '@/interfaces/module'
+import layerUtils from './layerUtils'
+import { LayerType } from '@/store/types'
 
 class ShapeUtils {
+  /**
+   * @param hasMultiColors - if the curr layer is tmp or groupe, and there isn't any selected sub layer
+   */
+  get hasMultiColors() {
+    const currLayer = layerUtils.getCurrLayer
+    let oneColorObjNum = 0
+
+    if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+      for (const layer of (currLayer as IGroup).layers) {
+        if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+          oneColorObjNum++
+        }
+      }
+      return oneColorObjNum >= 2 && !(currLayer as IGroup).layers
+        .some(l => l.type === 'shape' && l.active)
+    }
+    return false
+  }
+
+  get getDocumentColors() {
+    const layer = layerUtils.getCurrLayer
+    switch (layer.type) {
+      case 'shape':
+        return (layer as IShape).color || []
+      case 'tmp':
+      case 'group': {
+        const { subLayerIdx } = layerUtils
+        if (subLayerIdx === -1) {
+          if (!this.hasMultiColors) {
+            const layers = (layer as IGroup).layers
+              .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
+            return (layers.length ? layers[0].color : []) as string[]
+          } else return []
+        } else {
+          const subLayer = (layer as IGroup).layers[subLayerIdx]
+          if (subLayer.type === LayerType.frame) {
+            const { decoration, decorationTop } = subLayer as unknown as IFrame
+            return [...(decoration?.color || []), ...(decorationTop?.color || [])]
+          }
+          if (subLayer.type === LayerType.shape) {
+            const colors = (subLayer as IShape).color
+            return colors
+          }
+          return []
+        }
+      }
+      case 'frame': {
+        const { decoration, decorationTop } = layerUtils.getCurrLayer as IFrame
+        return [...(decoration?.color || []), ...(decorationTop?.color || [])]
+      }
+      default:
+        console.error('Wrong with the right-side-panel color')
+        return []
+    }
+  }
+
   addStyleTag(styleText: string): Text {
     const style = document.createElement('style') as HTMLStyleElement
     const textNode = document.createTextNode(styleText)
@@ -268,7 +326,7 @@ class ShapeUtils {
     return `${-dx - 1} ${-dy - 1} ${width + 2 * dx + 2} ${height + 2 * dy + 2}` // add 1px in both directions to compensate float error
   }
 
-  computePointForDimensions(quadrant: number, scale: number, width: number, height: number): {point: number[], realWidth: number, realHeight: number} {
+  computePointForDimensions(quadrant: number, scale: number, width: number, height: number): { point: number[], realWidth: number, realHeight: number } {
     const baseDegree = Math.atan2(height, width)
     const dx = 2 * scale * Math.sin(baseDegree)
     const dy = 2 * scale * Math.cos(baseDegree)
@@ -297,7 +355,7 @@ class ShapeUtils {
     }
   }
 
-  computePointForAngle(length: number, angle: number, scale: number): {point: number[], realWidth: number, realHeight: number} {
+  computePointForAngle(length: number, angle: number, scale: number): { point: number[], realWidth: number, realHeight: number } {
     const rad = angle * Math.PI / 180
     const vectX = length * Math.cos(rad)
     const vectY = length * Math.sin(rad)
@@ -458,7 +516,7 @@ class ShapeUtils {
     return [...startPoint, ...endPoint]
   }
 
-  lineDimension(point: number[]): {xDiff: number, yDiff: number, width: number, height: number, baseDegree: number, angle: number} {
+  lineDimension(point: number[]): { xDiff: number, yDiff: number, width: number, height: number, baseDegree: number, angle: number } {
     const xDiff = point[2] - point[0]
     const yDiff = point[3] - point[1]
     const width = Math.abs(xDiff)
@@ -468,8 +526,7 @@ class ShapeUtils {
     return { xDiff, yDiff, width, height, baseDegree, angle }
   }
 
-  updatedDimensions(point: number[], scale: number, styles: {width: number, height: number, initWidth: number, initHeight: number}):
-  {width: number, height: number, initWidth: number, initHeight: number} {
+  updatedDimensions(point: number[], scale: number, styles: { width: number, height: number, initWidth: number, initHeight: number }): { width: number, height: number, initWidth: number, initHeight: number } {
     const ratio = styles.width / styles.initWidth
     const { width, height, baseDegree } = this.lineDimension(point)
     const dx = 2 * scale * Math.sin(baseDegree)
@@ -488,8 +545,7 @@ class ShapeUtils {
     return res
   }
 
-  getTranslateCompensationForLineWidth(point: number[], styles: {x: number, y: number}, scale: number, newScale: number):
-  {x: number, y: number} {
+  getTranslateCompensationForLineWidth(point: number[], styles: { x: number, y: number }, scale: number, newScale: number): { x: number, y: number } {
     const { baseDegree } = this.lineDimension(point)
     const dx = 2 * (scale - newScale) * Math.sin(baseDegree)
     const dy = 2 * (scale - newScale) * Math.cos(baseDegree)

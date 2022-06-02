@@ -1,12 +1,21 @@
 <template lang="pug">
   div(class="panel-color scrollbar-gray-thin")
-    color-panel(v-if="!showColorPicker" :whiteTheme="true" :noPadding="true" @openColorPicker="openColorPicker")
+    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" @openColorPicker="openColorPicker")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
       @final="handleChangeStop")
+    div(class="panel-color__document-colors")
+      div(v-if="hasMultiColors"
+        class="panel-color__document-color"
+        :style="groupColorStyles()"
+        @click="selectColor(0)")
+      div(v-else v-for="(color, index) in getDocumentColors"
+        class="panel-color__document-color"
+        :style="colorStyles(color, index)"
+        @click="selectColor(index)")
 </template>
 
 <script lang="ts">
@@ -25,6 +34,7 @@ import ColorPanel from '@/components/editor/ColorPanel.vue'
 import { ColorEventType, LayerType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
+import shapeUtils from '@/utils/shapeUtils'
 
 export default Vue.extend({
   data() {
@@ -57,7 +67,7 @@ export default Vue.extend({
         break
       }
       case ColorEventType.shape: {
-        colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
+        colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
         break
       }
       default: {
@@ -86,76 +96,38 @@ export default Vue.extend({
     inInitialState(): boolean {
       return this.historySize === 0
     },
+    lastHistory(): string {
+      return this.panelHistory[this.historySize - 1]
+    },
     showColorPicker(): boolean {
-      return !this.inInitialState && this.panelHistory[this.historySize - 1] === 'color-picker'
+      return !this.inInitialState && this.lastHistory === 'color-picker'
     },
-    inGrouped(): boolean {
-      const currLayer = layerUtils.getCurrLayer
-      let oneColorObjNum = 0
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        for (const layer of (currLayer as IGroup).layers) {
-          if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-            oneColorObjNum++
-          }
-        }
-        return oneColorObjNum >= 2 && !(currLayer as IGroup).layers
-          .some(l => l.type === 'shape' && l.active)
-      }
-      return false
+    showDocumentColors(): boolean {
+      return this.inInitialState && this.currEvent === ColorEventType.shape
     },
-    getColors(): string[] {
-      const layer = layerUtils.getCurrLayer
-      switch (layer.type) {
-        case 'shape':
-          return (layer as IShape).color || []
-        case 'tmp':
-        case 'group': {
-          const { subLayerIdx } = layerUtils
-          if (subLayerIdx === -1) {
-            if (!this.inGrouped) {
-              const layers = (layer as IGroup).layers
-                .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
-              return (layers.length ? layers[0].color : []) as string[]
-            } else return []
-          } else {
-            const subLayer = (layer as IGroup).layers[subLayerIdx]
-            if (subLayer.type === LayerType.frame) {
-              const { decoration, decorationTop } = subLayer as unknown as IFrame
-              return [...(decoration?.color || []), ...(decorationTop?.color || [])]
-            }
-            if (subLayer.type === LayerType.shape) {
-              const colors = (subLayer as IShape).color
-              return colors
-            }
-            return []
-          }
-        }
-        case 'frame': {
-          const { decoration, decorationTop } = layerUtils.getCurrLayer as IFrame
-          return [...(decoration?.color || []), ...(decorationTop?.color || [])]
-        }
-        default:
-          console.error('Wrong with the right-side-panel color')
-          return []
-      }
+    showPalette(): boolean {
+      return this.lastHistory === 'color-palette' || (this.inInitialState && !this.showDocumentColors)
+    },
+    hasMultiColors(): boolean {
+      return shapeUtils.hasMultiColors
+    },
+    getDocumentColors(): string[] {
+      return shapeUtils.getDocumentColors
     }
   },
   methods: {
     handleChangeStop(color: string) {
-      console.log('change update')
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currStopEvent, color)
       })
     },
     handleDragUpdate(color: string) {
-      console.log('drag update')
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currEvent, color)
         colorUtils.setCurrColor(color)
       })
     },
     handleColorUpdate(newColor: string) {
-      console.log('handleColor update')
       if (this.currEvent === ColorEventType.text) {
         if (newColor === this.props.color) return
         const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
@@ -182,7 +154,7 @@ export default Vue.extend({
         const currLayer = layerUtils.getCurrLayer
         switch (currLayer.type) {
           case 'shape': {
-            const color = [...this.getColors]
+            const color = [...this.getDocumentColors]
             color[this.currSelectedColorIndex] = newColor
             layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
             break
@@ -202,7 +174,7 @@ export default Vue.extend({
                 this.handleFrameColorUpdate(newColor)
               }
               if (subLayerType === 'shape') {
-                const color = [...this.getColors]
+                const color = [...this.getDocumentColors]
                 color[this.currSelectedColorIndex] = newColor
                 layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { newColor })
               }
@@ -244,6 +216,39 @@ export default Vue.extend({
     },
     openColorPicker() {
       this.$emit('pushHistory', 'color-picker')
+    },
+    openColorPalette() {
+      this.$emit('pushHistory', 'color-palette')
+    },
+    colorStyles(color: string, index: number) {
+      return {
+        backgroundColor: color,
+        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
+      }
+    },
+    groupColorStyles() {
+      const currLayer = this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex)
+      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
+        const origin = currLayer.layers
+          .find((l: ILayer) => l.type === 'shape' && (l as IShape).color.length === 1).color[0]
+        const isGroupSameColor = (() => {
+          for (const layer of currLayer.layers) {
+            if (layer.type === 'shape' && (layer as IShape).color.length === 1 && (layer as IShape).color[0] !== origin) {
+              return false
+            }
+          }
+          return true
+        })()
+        return isGroupSameColor ? {
+          backgroundColor: origin,
+          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1.5px #fff'
+        } : {
+          backgroundImage: `url(${require('@/assets/img/jpg/multi-color.jpg')})`,
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
+        }
+      }
     }
   }
 })
@@ -254,5 +259,27 @@ export default Vue.extend({
   width: 100%;
   max-height: 250px;
   overflow-y: scroll;
+
+  &__document-colors {
+    width: 100%;
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    @media (max-width: 1260px) {
+      gap: 10px;
+    }
+  }
+  &__document-color {
+    width: 100%;
+    padding-top: calc(100% - 3px);
+    border: 1.5px solid setColor(gray-4);
+    border-radius: 4px;
+    box-sizing: border-box;
+    &:hover {
+      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
+    }
+    transition: box-shadow 0.2s ease-in-out;
+  }
 }
 </style>
