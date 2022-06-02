@@ -49,7 +49,6 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
 import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   data() {

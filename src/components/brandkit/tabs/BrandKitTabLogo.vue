@@ -56,7 +56,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   data() {

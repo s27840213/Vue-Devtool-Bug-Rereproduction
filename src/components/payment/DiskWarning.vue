@@ -20,9 +20,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import i18n from '@/i18n'
-import popupUtils from '@/utils/popupUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
@@ -161,9 +160,6 @@ export default Vue.extend({
     ...mapActions({
       reload: 'payment/reloadDiskCapacity'
     }),
-    ...mapMutations({
-      setInitView: 'payment/SET_initView'
-    }),
     close() {
       this.dismiss = true
     },
@@ -173,8 +169,7 @@ export default Vue.extend({
       this.skiped = true
     },
     openPaymentPopup() {
-      this.setInitView('step1')
-      popupUtils.openPopup('payment')
+      paymentUtils.openPayment('step1')
     },
     contact() { paymentUtils.contactUs() }
   }

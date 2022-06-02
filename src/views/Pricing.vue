@@ -45,21 +45,21 @@
             svg-icon(iconName="chevron-down" iconColor="gray-2" iconWidth="24px")
           i18n(v-if="item.isPath" :path="item.A" tag="p" class="body-MD text-gray-2 mt-20")
             template(#history)
-              router-link(to="settings/billing") {{$t('TMP0110')}}
+              router-link(to="/settings/billing") {{$t('TMP0110')}}
           p(v-else class="body-MD text-gray-2 mt-20" v-html="item.A")
       nu-footer
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
 import paymentData from '@/utils/constantData'
-import popupUtils from '@/utils/popupUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -106,15 +106,11 @@ export default Vue.extend({
       getBillingInfo: 'payment/getBillingInfo',
       getPrice: 'payment/getPrice'
     }),
-    ...mapMutations({
-      setInitView: 'payment/SET_initView'
-    }),
     tryAddCard() {
       if (!this.isLogin) {
         this.$router.push('login')
       } else if (this.canAddCard) {
-        this.setInitView('step1')
-        popupUtils.openPopup('payment')
+        paymentUtils.openPayment('step1')
       } else {
         this.$router.push('/settings/payment')
       }

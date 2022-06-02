@@ -60,7 +60,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   name: 'BrandKit',

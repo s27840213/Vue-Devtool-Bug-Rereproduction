@@ -58,7 +58,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandFont, IBrandTextStyleSetting } from '@/interfaces/brandkit'
 import textUtils from '@/utils/textUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 interface IUrledFont extends IBrandFont {
   namePrevUrl?: string,

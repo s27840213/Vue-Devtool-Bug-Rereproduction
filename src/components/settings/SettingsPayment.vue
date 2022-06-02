@@ -71,15 +71,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
+import paymentUtils from '@/utils/paymentUtils'
 import paymentData from '@/utils/constantData'
-import popupUtils from '@/utils/popupUtils'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -186,9 +186,6 @@ export default Vue.extend({
       modifyCapacity: 'payment/modifyCapacity',
       modifyBgrm: 'payment/modifyBgrm'
     }),
-    ...mapMutations({
-      setInitView: 'payment/SET_initView'
-    }),
     async updateBillingInfo() {
       for (const item of this.billingInfoInput) {
         if (item.error && await this.checkBillingInfo(item.key)) return
@@ -216,18 +213,9 @@ export default Vue.extend({
       this.showCardPopup = true
     },
     closeCardPopup() { this.showCardPopup = false },
-    buy() {
-      this.setInitView('step1')
-      popupUtils.openPopup('payment')
-    },
-    switchPeriod() {
-      this.setInitView('switch1')
-      popupUtils.openPopup('payment')
-    },
-    cancelSub() {
-      this.setInitView('cancel1')
-      popupUtils.openPopup('payment')
-    }
+    buy() { paymentUtils.openPayment('step1') },
+    cancelSub() { paymentUtils.openPayment('cancel1') },
+    switchPeriod() { paymentUtils.openPayment('switch1') }
   }
 })
 </script>

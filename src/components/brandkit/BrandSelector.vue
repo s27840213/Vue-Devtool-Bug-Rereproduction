@@ -62,7 +62,6 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand } from '@/interfaces/brandkit'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   props: {

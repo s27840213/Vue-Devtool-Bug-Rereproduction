@@ -5,6 +5,12 @@ import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
 
 class PaymentUtils {
+  openPayment(initView: string) {
+    store.commit('brandkit/SET_isSettingsOpen', false)
+    store.commit('payment/SET_initView', initView)
+    popupUtils.openPopup('payment')
+  }
+
   contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
     switch (i18n.locale) {
       case 'tw':
@@ -29,13 +35,10 @@ class PaymentUtils {
         modalUtils.setIsModalOpen(true)
         break
       case 'NOT_SUBSCRIBED':
-        store.commit('payment/SET_initView', initView)
-        store.commit('brandkit/SET_isSettingsOpen', false)
-        popupUtils.openPopup('payment')
+        this.openPayment(initView)
         break
       case 'BG_DEPLETED_FREE':
-        store.commit('payment/SET_initView', 'bgrm')
-        popupUtils.openPopup('payment')
+        this.openPayment('bgrm')
         break
       case 'BG_DEPLETED_TRIAL':
       case 'BG_DEPLETED_YEAR':
@@ -59,8 +62,7 @@ class PaymentUtils {
             msg: i18n.t('TMP0060', { period: i18n.t('TMP0011') }) as string,
             style: { width: '230px', height: '44px' },
             action: () => {
-              store.commit('payment/SET_initView', 'switch1')
-              popupUtils.openPopup('payment')
+              this.openPayment('switch1')
             }
           })
         modalUtils.setIsModalOpen(true)
