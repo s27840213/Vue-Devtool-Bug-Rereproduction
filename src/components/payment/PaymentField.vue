@@ -3,7 +3,7 @@
     template(v-if="isChange")
       svg-icon(iconName="page-close" iconWidth="10px"
               iconColor="gray-0" class="field__close pointer" @click.native="close()")
-      span(class="text-H6 text-gray-2 mb-40") {{$t('TMP0096')}}
+      span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
     //- todo rearrange class name
     div(class="field-content")
       options(v-if="!isChange" class="mb-10"
@@ -16,13 +16,13 @@
         svg-icon(iconName="loading" iconColor="gray-1")
       template(v-if="!isChange")
         div(v-if="paymentPaidDate" class="field-content__info")
-          span {{$t('TMP0048', {date: paymentPaidDate})}}
+          span {{$t('NN0552', {date: paymentPaidDate})}}
           span {{'$'+plans[planSelected][periodUi].nextPaid}}
         div(class="field-content__info-today")
-          span {{$t('TMP0049')}}
+          span {{$t('NN0553')}}
           span {{priceToday}}
     div(v-if="!isChange" class="field-invoice")
-      span(class="field-invoice__title") {{$t('TMP0050')}}
+      span(class="field-invoice__title") {{$t('NN0554')}}
       div(v-for="inv in invoiceInput" class="field-invoice__input")
         input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
         span(v-if="biv[inv.key]") {{inv.error}}
@@ -105,8 +105,8 @@ export default Vue.extend({
         : this.isChange
           ? i18n.tc('NN0133', 2)
           : this.trialStatus === 'not used'
-            ? i18n.t('TMP0056')
-            : i18n.t('TMP0057')) as string
+            ? i18n.t('NN0560')
+            : i18n.t('NN0561')) as string
     },
     invoiceReady():boolean { // Check if input is empty
       for (const item of this.invoiceInput) {

@@ -7,14 +7,14 @@
             iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
     div(v-if="showPopup" class="popup-window")
       div(class="card-popup" v-click-outside="closePopup")
-        div(class="text-H6") {{$t('TMP0118')}}
-        i18n(class="card-popup-description" path="TMP0119" tag="div")
+        div(class="text-H6") {{$t('NN0622')}}
+        i18n(class="card-popup-description" path="NN0623" tag="div")
           template(#payment-method)
-            span {{$t('TMP0120')}}
+            span {{$t('NN0624')}}
         div(class="card-popup-button")
           btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}
           btn(class="card-popup-button-delete"
-              @click.native="deleteCard()") {{$t('TMP0121')}}
+              @click.native="deleteCard()") {{$t('NN0625')}}
 </template>
 
 <script lang="ts">
