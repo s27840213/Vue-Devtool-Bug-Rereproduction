@@ -218,6 +218,16 @@ export default Vue.extend({
               return false
             })
           } else {
+            const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
+            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+
+            if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
+              layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+                inProcess: false
+              })
+            }
+
+            this.setIsProcessing(false)
             paymentUtils.errorHandler(data.msg)
           }
         })
