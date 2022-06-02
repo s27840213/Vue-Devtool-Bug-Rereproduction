@@ -575,7 +575,6 @@ class UploadUtils {
     })
 
     const resultJSON = {
-      name: pageUtils.pagesName,
       pages: pagesJSON,
       groupId: store.state.groupId,
       groupType: store.state.groupType,

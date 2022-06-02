@@ -462,10 +462,15 @@ export default Vue.extend({
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
           break
         case 'public':
-          errorHandle.addMissingDesign('asset-image', srcObj.assetId)
+        case 'background': {
+          fetch(this.src)
+            .then(res => {
+              if (res.status === 404) {
+                errorHandle.addMissingDesign(srcObj.type === 'public' ? 'asset-image' : 'background', srcObj.assetId)
+              }
+            })
           break
-        case 'background':
-          errorHandle.addMissingDesign('background', srcObj.assetId)
+        }
       }
 
       if (updater !== undefined) {

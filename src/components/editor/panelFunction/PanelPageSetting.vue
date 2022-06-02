@@ -211,6 +211,11 @@
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="templateInfo.tags_jp")
+          div(class="pt-10") plan(0：預設一般 / 1：Pro)
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0"
+                v-model="templateInfo.plan")
           div(class="pt-10")
             btn(:type="'primary-sm'" class="rounded my-5"
               style="padding: 8px 0; margin: 0 auto; width: 70%;"
@@ -311,6 +316,7 @@ export default Vue.extend({
         tags_us: '' as string,
         tags_jp: '' as string,
         locale: '' as string,
+        plan: '' as string,
         width: '' as string,
         height: '' as string,
         theme_ids: '' as string,
@@ -349,6 +355,7 @@ export default Vue.extend({
         tags_us: '',
         tags_jp: '',
         locale: '',
+        plan: '',
         width: '',
         height: '',
         theme_ids: '',
@@ -634,6 +641,7 @@ export default Vue.extend({
       this.setIsloading(true)
       const data = {
         locale: this.templateInfo.locale,
+        plan: this.templateInfo.plan ? this.templateInfo.plan : '0',
         tags_tw: this.templateInfo.tags_tw,
         tags_us: this.templateInfo.tags_us,
         tags_jp: this.templateInfo.tags_jp,
@@ -843,7 +851,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .page-setting {
   @include size(100%, 100%);
-  font-family: NotoSansTC;
   text-align: left;
   &__title {
     & span {
@@ -870,7 +877,6 @@ export default Vue.extend({
       box-sizing: border-box;
       & input {
         line-height: 16px;
-        font-family: NotoSansTC;
       }
     }
   }
@@ -977,7 +983,6 @@ export default Vue.extend({
           & input {
             line-height: 16px;
             background-color: transparent;
-            font-family: NotoSansTC;
           }
           &.border-blue-1 {
             @extend .border-blue-1;
@@ -991,19 +996,13 @@ export default Vue.extend({
         margin-top: 31px;
         margin-bottom: 31px;
       }
-      &__text {
-        font-family: Mulish;
-      }
       &__recently {
-        @extend .page-setting__suggestion-panel__body__text;
         width: 88%;
       }
       &__typical-name {
-        @extend .page-setting__suggestion-panel__body__text;
         width: 37%;
       }
       &__typical-size {
-        @extend .page-setting__suggestion-panel__body__text;
         width: 45%;
         white-space: nowrap;
         transform: scale(0.85);

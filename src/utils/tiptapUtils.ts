@@ -9,10 +9,13 @@ import layerUtils from '@/utils/layerUtils'
 import store from '@/store'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
+import textPropUtils from './textPropUtils'
+import textEffectUtils from './textEffectUtils'
+import generalUtils from './generalUtils'
 
 class TiptapUtils {
   event: any
-  eventHandler: undefined | ((editor: Editor) => void)
+  eventHandler: undefined | ((toRecord: boolean) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
 
@@ -61,9 +64,9 @@ class TiptapUtils {
     this.agent(editor => editor.on(event, handler))
   }
 
-  onForceUpdate(handler: (editor: Editor) => void): void {
-    const fullHandler = () => {
-      this.agent(editor => handler(editor))
+  onForceUpdate(handler: (editor: Editor, toRecord: boolean) => void): void {
+    const fullHandler = (toRecord: boolean) => {
+      this.agent(editor => handler(editor, toRecord))
     }
     if (this.eventHandler) {
       this.event.off('update', this.eventHandler)
@@ -72,8 +75,8 @@ class TiptapUtils {
     this.event.on('update', fullHandler)
   }
 
-  forceUpdate() {
-    this.event.emit('update')
+  forceUpdate(toRecord = false) {
+    this.event.emit('update', toRecord)
   }
 
   isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
@@ -99,15 +102,16 @@ class TiptapUtils {
   }
 
   toJSON(paragraphs: IParagraph[]): any {
+    // console.log(generalUtils.deepCopy(paragraphs))
     return {
       type: 'doc',
       content: paragraphs.map(p => {
         const pObj = {
           type: 'paragraph'
         } as {[key: string]: any}
-        const attrs = this.makeParagraphStyle(p.styles)
+        const attrs = this.makeParagraphStyle(p.styles) as any
         if (p.spanStyle) {
-          attrs.spanStyle = p.spanStyle as string
+          attrs.spanStyle = true
           const sStyles = this.generateSpanStyle(p.spanStyle as string)
           Object.assign(attrs, this.extractSpanStyleForParagraph(sStyles))
         }
@@ -130,8 +134,8 @@ class TiptapUtils {
   }
 
   makeParagraphStyle(attributes: any): IParagraphStyle {
-    const { font, lineHeight, fontSpacing, size, align } = attributes
-    return { font, lineHeight, fontSpacing, size, align }
+    const { font, lineHeight, fontSpacing, size, align, type, userId, assetId } = attributes
+    return { font, lineHeight, fontSpacing, size, align, type, userId, assetId }
   }
 
   generateSpanStyle(spanStyleStr: string): ISpanStyle {
@@ -144,19 +148,18 @@ class TiptapUtils {
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
       color: this.isValidHexColor(spanStyle.color) ? spanStyle.color : this.rgbToHex(spanStyle.color),
-      opacity: parseInt(spanStyle.opacity),
       ...fontProps
     } as ISpanStyle
   }
 
   makeSpanStyle(attributes: any): ISpanStyle {
-    const { font, weight, size, decoration, style, color, opacity, type, userId, assetId, fontUrl } = attributes
-    return { font, weight, size, decoration, style, color, opacity, type, userId, assetId, fontUrl } as ISpanStyle
+    const { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } = attributes
+    return { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } as ISpanStyle
   }
 
   extractSpanStyleForParagraph(attributes: any): Partial<ISpanStyle> {
-    const { weight, decoration, style, color } = attributes
-    return { weight, decoration, style, color }
+    const { weight, decoration, style, color, font, size, type, userId, assetId } = attributes
+    return { weight, decoration, style, color, font, size, type, userId, assetId }
   }
 
   str2css(str: string): CSSStyleDeclaration {
@@ -166,6 +169,7 @@ class TiptapUtils {
   }
 
   extractFontProps(str: string): { type: string, userId: string, assetId: string, fontUrl: string } {
+    // console.trace()
     const result = {
       type: 'public',
       userId: '',
@@ -210,20 +214,19 @@ class TiptapUtils {
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
-          let spanStyle: string
+          let sStyles: ISpanStyle
           if (paragraph.attrs.spanStyle) {
-            spanStyle = paragraph.attrs.spanStyle
+            sStyles = this.makeSpanStyle(paragraph.attrs)
           } else {
-            spanStyle = defaultStyle
+            sStyles = this.generateSpanStyle(defaultStyle)
           }
-          const sStyles = this.generateSpanStyle(spanStyle)
           if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
         if (paragraph.attrs.spanStyle) {
-          const sStyles = this.generateSpanStyle(paragraph.attrs.spanStyle)
+          const sStyles = this.makeSpanStyle(paragraph.attrs)
           spans.push({ text: '', styles: sStyles })
           pStyles.size = sStyles.size
           pStyles.font = sStyles.font
@@ -231,7 +234,7 @@ class TiptapUtils {
           pStyles.userId = sStyles.userId
           pStyles.assetId = sStyles.assetId
           pStyles.fontUrl = sStyles.fontUrl
-          result.push({ spans, styles: pStyles, spanStyle: paragraph.attrs.spanStyle })
+          result.push({ spans, styles: pStyles, spanStyle: this.textStyles(sStyles) })
         } else {
           isSetContentRequired = true
           const sStyles = this.generateSpanStyle(defaultStyle)
@@ -296,8 +299,7 @@ class TiptapUtils {
   }
 
   applySpanStyle(key: string, value: any, applyToRange: boolean | undefined = undefined, otherUpdates: {[key: string]: any} = {}) {
-    const item: {[string: string]: any} = {}
-    item[key] = value
+    const item = { [key]: value }
     Object.assign(item, otherUpdates)
     const { subLayerIdx, getCurrLayer } = layerUtils
     const contentEditable = subLayerIdx === -1 ? getCurrLayer.contentEditable : (getCurrLayer as IGroup).layers[subLayerIdx].contentEditable
@@ -315,16 +317,40 @@ class TiptapUtils {
               editor.commands.focus()
             }, 10)
           } else {
-            editor.chain().updateAttributes('textStyle', item).run()
+            editor.chain().updateAttributes('textStyle', item).updateAttributes('paragraph', item).run()
             setTimeout(() => {
               editor.chain().focus().selectPrevious().run()
             }, 10)
           }
         }
       } else {
-        editor.chain().selectAll().updateAttributes('textStyle', item).run()
+        textPropUtils.applyPropsToAll('span,paragraph', item)
+        this.updateHtml()
       }
     })
+  }
+
+  spanStyleHandler(updateKey: string, updateValue: string | boolean | number) {
+    const item = { [updateKey]: updateValue }
+    const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
+
+    switch (currLayer.type) {
+      case 'text':
+        this.applySpanStyle(updateKey, updateValue)
+        break
+      case 'tmp':
+      case 'group':
+        if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+          textPropUtils.applyPropsToAll('span,paragraph', item, layerIndex, subLayerIdx)
+          if (subLayerIdx !== -1) {
+            this.updateHtml()
+          }
+        } else {
+          this.applySpanStyle(updateKey, updateValue)
+        }
+    }
+    textEffectUtils.refreshColor()
+    textPropUtils.updateTextPropsState(item)
   }
 
   applyParagraphStyle(key: string, value: any, setFocus = true) {

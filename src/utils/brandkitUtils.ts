@@ -326,7 +326,7 @@ class BrandKitUtils {
   replaceLogo(id: string, apiLogo: IUserLogoContentData, brandId: string) {
     const logo = this.apiLogo2IBrandLogo(apiLogo)
     if (logo.width === undefined || logo.height === undefined) {
-      const url = this.getLogoUrl(logo, brandId, 'original')
+      const url = this.getLogoUrl(logo, brandId, 'tiny')
       imageUtils.getImageSize(url, 24, 24).then(size => {
         if (!size.exists) {
           this.deleteLogo(brandId, id)

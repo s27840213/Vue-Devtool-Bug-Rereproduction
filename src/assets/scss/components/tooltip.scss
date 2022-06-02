@@ -1,16 +1,15 @@
 .v-popper--theme-hint {
 	color: setColor(white);
 	.v-popper__inner {
-			background-color: setColor(gray-2);
-			font-family: Mulish;
-      font-size: 12px;
-			padding: 4px 8px;
-			border-radius: 3px;
+		background-color: setColor(gray-2);
+		font-size: 12px;
+		padding: 4px 8px;
+		border-radius: 3px;
 	}
 
 	.v-popper__arrow-outer {
 		border-width: 7px;
 		border-top: 0px;
-    border-color: setColor(gray-2);
+		border-color: setColor(gray-2);
 	}
 }
