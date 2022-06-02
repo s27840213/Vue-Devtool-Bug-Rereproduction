@@ -35,6 +35,7 @@ import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
+import payment from '@/store/module/payment'
 
 Vue.use(Vuex)
 
@@ -824,6 +825,7 @@ export default new Vuex.Store({
     unsplash,
     bgRemove,
     file,
+    payment,
     shadow
   }
 })

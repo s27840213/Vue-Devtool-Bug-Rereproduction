@@ -23,6 +23,7 @@ import logUtils from './logUtils'
 import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
+import paymentUtils from './paymentUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -252,8 +253,7 @@ class UploadUtils {
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
-                    modalUtils.setIsModalOpen(true)
-                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`], '')
+                    paymentUtils.errorHandler(json.msg)
                   }
                 })
               }
@@ -377,7 +377,7 @@ class UploadUtils {
                           }
                         }
                       } else {
-                        console.log('Failed to upload the file')
+                        paymentUtils.errorHandler(json.msg)
                       }
                     })
                   }
@@ -405,12 +405,8 @@ class UploadUtils {
                         this.emitFontUploadEvent('none')
                       }, 2000)
                     } else {
-                      this.emitFontUploadEvent('fail')
+                      paymentUtils.errorHandler(json.msg)
                       brandkitUtils.deleteFont(tempId)
-                      console.log('Failed to upload the file')
-                      setTimeout(() => {
-                        this.emitFontUploadEvent('none')
-                      }, 2000)
                     }
                   })
                 }
@@ -473,12 +469,8 @@ class UploadUtils {
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
                     } else {
-                      Vue.notify({
-                        group: 'error',
-                        text: `${i18n.t('NN0137')}`
-                      })
+                      paymentUtils.errorHandler(json.msg)
                       brandkitUtils.deleteLogo(brandId, tempId)
-                      console.log('Failed to upload the file')
                     }
                   })
                 }

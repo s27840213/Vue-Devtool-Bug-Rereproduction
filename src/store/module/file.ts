@@ -172,7 +172,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       })
     })
   },
-  initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData] }) {
+  initImages(context, { imgs }: { 'imgs': [IUserImageContentData] }) {
     if (state.initialized) {
       return
     }

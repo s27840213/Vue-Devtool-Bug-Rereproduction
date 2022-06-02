@@ -8,6 +8,7 @@
       @mousewheel="handleWheel"
       @contextmenu.prevent
       ref="editorView")
+    disk-warning(class="editor-view__warning" size="large")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
           ref="canvas"
@@ -70,15 +71,15 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import layerUtils from '@/utils/layerUtils'
-import { LayerType } from '@/store/types'
+import DiskWarning from '@/components/payment/DiskWarning.vue'
 
 export default Vue.extend({
   components: {
     EditorHeader,
     RulerHr,
     RulerVr,
-    BgRemoveArea
+    BgRemoveArea,
+    DiskWarning
   },
   data() {
     return {
@@ -575,6 +576,10 @@ $REULER_SIZE: 20px;
   position: relative;
   z-index: setZindex("editor-view");
 
+  &__warning {
+    width: 90%;
+    margin: 54px auto 0 auto;
+  }
   &__grid {
     position: absolute;
     min-width: 100%;

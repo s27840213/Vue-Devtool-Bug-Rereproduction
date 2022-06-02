@@ -11,7 +11,7 @@
           :disabled="isUploadImgShadow || (btn.name !== 'shadow' && (isHandleShadow || show === 'panel-photo-shadow'))"
           :key="btn.name"
           @click.native="handleShow(btn.show)") {{ btn.label }}
-      btn(v-if="isImage && isAdmin && !isFrame"
+      btn(v-if="isImage && !isFrame"
         class="full-width"
         type="gray-mid"
         ref="btn"
@@ -36,9 +36,8 @@ import pageUtils from '@/utils/pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import uploadUtils from '@/utils/uploadUtils'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
+import paymentUtils from '@/utils/paymentUtils'
 import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
-import imageShadowUtils from '@/utils/imageShadowUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
@@ -152,7 +151,8 @@ export default Vue.extend({
       setAutoRemoveResult: 'bgRemove/SET_autoRemoveResult',
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       setIsProcessing: 'bgRemove/SET_isProcessing',
-      setIdInfo: 'bgRemove/SET_idInfo'
+      setIdInfo: 'bgRemove/SET_idInfo',
+      recudeBgrmRemain: 'payment/REDUCE_bgrmRemain'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -223,6 +223,7 @@ export default Vue.extend({
             if (data.flag === 0) {
               uploadUtils.polling(data.url, (json: any) => {
                 if (json.flag === 0 && json.data) {
+                  this.recudeBgrmRemain()
                   const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
                   const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
 
@@ -260,6 +261,18 @@ export default Vue.extend({
 
                 return false
               })
+            } else {
+              const targetPageIndex = pageUtils.getPageIndexById(targetPageId)
+              const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, targetLayerId ?? '')
+
+              if (targetPageIndex !== -1 && targetLayerIndex !== -1) {
+                layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+                  inProcess: false
+                })
+              }
+
+              this.setIsProcessing(false)
+              paymentUtils.errorHandler(data.msg)
             }
           })
           this.show = ''

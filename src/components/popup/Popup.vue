@@ -2,7 +2,8 @@
   div(class="popup bg-white")
     component(:is="component"
     v-click-outside="vcoConfig"
-    :updateOptions="sharedUpdateOptions")
+    :updateOptions="sharedUpdateOptions"
+    @close="close")
 </template>
 
 <script lang="ts">
@@ -20,6 +21,7 @@ import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
 import PopupSubmit from '@/components/popup/PopupSubmit.vue'
+import PopupPayment from '@/components/popup/PopupPayment.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
@@ -39,7 +41,8 @@ export default Vue.extend({
     PopupGuideline,
     PopupDownload,
     PopupPageScale,
-    PopupSubmit
+    PopupSubmit,
+    PopupPayment
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -61,7 +64,6 @@ export default Vue.extend({
       'roleRaw',
       'adminMode']),
     ...mapGetters({
-      isPopupOpen: 'popup/isPopupOpen',
       popupComponent: 'popup/getPopupComponent',
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',

@@ -27,6 +27,7 @@ export interface IUserModule {
   adminMode: boolean,
   isAuthenticated: boolean,
   account: string,
+  email: string
   upassUpdate: string,
   subscribe: number,
   userAssets: IUserAssetsData,
@@ -52,6 +53,7 @@ const getDefaultState = (): IUserModule => ({
   adminMode: true,
   isAuthenticated: false,
   account: '',
+  email: '',
   upassUpdate: '',
   subscribe: 1,
   userAssets: {
@@ -100,6 +102,12 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getAccount(state) {
     return state.account
+  },
+  getEmail(state) {
+    return state.email
+  },
+  getUname(state) {
+    return state.uname
   },
   getUpassUpdate(state) {
     return state.upassUpdate
@@ -300,11 +308,13 @@ const actions: ActionTree<IUserModule, unknown> = {
         role: data.data.role,
         roleRaw: data.data.roleRaw,
         account: data.data.account,
+        email: data.data.email,
         upassUpdate: data.data.upass_update,
         subscribe: data.data.subscribe,
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
+      dispatch('payment/getBillingInfo', {}, { root: true })
 
       // locale settings
       process.env.NODE_ENV === 'development' && console.log(data.data)
