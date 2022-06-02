@@ -221,7 +221,7 @@ export default Vue.extend({
       margin-bottom: 20px;
     }
   }
-  &-buy {
+  &-buy.btn {
     width: 80%;
     border-radius: 8px;
   }
