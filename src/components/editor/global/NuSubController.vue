@@ -8,7 +8,6 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @click.left.stop="onClickEvent($event)"
-            @drop.prevent="onDrop($event)"
             @dragenter="onDragEnter($event)"
             @mouseenter="onFrameMouseEnter($event)"
             @mousedown="onMousedown($event)")
@@ -462,40 +461,42 @@ export default Vue.extend({
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     },
     onDragEnter(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.addEventListener('drop', this.onDrop)
       switch (this.type) {
         case 'frame':
           if (this.getLayerType === 'image') {
             this.onFrameDragEnter(e)
-            const body = this.$refs.body as HTMLElement
             body.addEventListener('dragleave', this.onFrameDragLeave)
           }
           return
         case 'group':
           if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             this.dragUtils.onImageDragEnter(e, this.config as IImage)
-            const body = this.$refs.body as HTMLElement
             body.addEventListener('dragleave', this.onDragLeave)
           }
       }
     },
     onDragLeave(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('drop', this.onDrop)
       switch (this.type) {
         case 'frame':
           if (this.getLayerType === 'image') {
             this.onFrameDragLeave(e)
-            const body = this.$refs.body as HTMLElement
             body.removeEventListener('dragleave', this.onFrameDragLeave)
           }
           return
         case 'group':
           if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             this.dragUtils.onImageDragLeave(e)
-            const body = this.$refs.body as HTMLElement
             body.removeEventListener('dragleave', this.onDragLeave)
           }
       }
     },
     onDrop(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('drop', this.onDrop)
       if (!this.currDraggedPhoto.srcObj.type) {
         // Propagated to NuController.vue onDrop()
       } else {
@@ -503,7 +504,6 @@ export default Vue.extend({
           case 'frame':
             if (this.getLayerType === 'image') {
               this.onFrameDrop(e)
-              const body = this.$refs.body as HTMLElement
               body.removeEventListener('dragleave', this.onFrameDragLeave)
             }
             return

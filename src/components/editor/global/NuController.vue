@@ -13,9 +13,7 @@
         ref="body"
         :layer-index="`${layerIndex}`"
         :style="styles(getLayerType)"
-        @drop.prevent="onDrop($event)"
         @dragenter="dragEnter($event)"
-        @dragleave="dragLeave($event)"
         @dragover.prevent
         @click.right.stop="onRightClick"
         @contextmenu.prevent
@@ -1421,11 +1419,15 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     onDrop(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.dragLeave)
+      body.removeEventListener('drop', this.onDrop)
+
       const dt = e.dataTransfer
       if (e.dataTransfer?.getData('data')) {
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+        } else if (this.getLayerType === 'image' && !this.isHandleShadow) {
           eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
         }
         GroupUtils.deselect()
@@ -1640,12 +1642,18 @@ export default Vue.extend({
       })
     },
     dragEnter(e: DragEvent) {
-      if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+      const body = this.$refs.body as HTMLElement
+      body.addEventListener('dragleave', this.dragLeave)
+      body.addEventListener('drop', this.onDrop)
+      if (this.getLayerType === 'image' && !this.isHandleShadow) {
         this.dragUtils.onImageDragEnter(e, this.config as IImage)
       }
     },
     dragLeave(e: DragEvent) {
-      if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.dragLeave)
+      body.removeEventListener('drop', this.onDrop)
+      if (this.getLayerType === 'image' && !this.isHandleShadow) {
         this.dragUtils.onImageDragLeave(e)
       }
     },
