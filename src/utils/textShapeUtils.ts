@@ -264,7 +264,6 @@ class Controller {
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
     const scale = config.styles.scale
     const { textWidth, minHeight } = this.getTextHWs(config)
-    console.log(textWidth)
     const transforms = this.convertTextShape(textWidth, bend)
     const { areaWidth, areaHeight } = this.calcArea(transforms, minHeight, scale, config)
     return { areaWidth, areaHeight, minHeight }

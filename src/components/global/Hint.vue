@@ -44,7 +44,6 @@ export default Vue.extend({
     padding: 4px 8px;
     border-radius: 3px;
     > span {
-      font-family: Mulish;
       font-size: 12px;
       display: block;
     }

@@ -43,6 +43,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    if (this.isSettingsOpen) return
     brandkitUtils.fetchLogos(this.fetchLogos)
   },
   directives: {
@@ -57,13 +58,15 @@ export default Vue.extend({
       this.logosUpdate()
     },
     currentBrand() {
+      if (this.isSettingsOpen) return
       brandkitUtils.fetchLogos(this.fetchLogos)
     }
   },
   computed: {
     ...mapGetters('brandkit', {
       currentBrand: 'getCurrentBrand',
-      isLogosLoading: 'getIsLogosLoading'
+      isLogosLoading: 'getIsLogosLoading',
+      isSettingsOpen: 'getIsSettingsOpen'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
@@ -75,6 +78,7 @@ export default Vue.extend({
   methods: {
     ...mapActions('brandkit', {
       fetchLogos: 'fetchLogos',
+      fetchMoreLogos: 'fetchMoreLogos',
       refreshLogoAsset: 'refreshLogoAsset'
     }),
     checkUploading(logo: IBrandLogo) {
@@ -91,6 +95,9 @@ export default Vue.extend({
           size: (row[0].preview?.height ?? 0) + this.galleryUtils.margin,
           brandId: this.currentBrand.id
         }))
+      if (this.rows.length) {
+        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+      }
     },
     imageStyle(preview: any) {
       return {
@@ -120,8 +127,9 @@ export default Vue.extend({
       }
     },
     handleLoadMore(item: any): void {
+      if (this.isSettingsOpen) return
       item.sentinel = false
-      this.$emit('loadMore')
+      brandkitUtils.fetchLogos(this.fetchMoreLogos, false)
     }
   }
 })

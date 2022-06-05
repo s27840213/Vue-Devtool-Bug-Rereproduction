@@ -186,6 +186,11 @@
             property-bar
               input(class="body-2 text-gray-2" min="0"
                 v-model="svgInfo.tags_jp")
+          div(class="shape-setting__info__line") plan(0：預設一般 / 1：Pro)
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0"
+                v-model="svgInfo.plan")
           div(class="pt-10")
             btn(:type="'primary-sm'"
               class="shape-setting__info__button rounded my-5"
@@ -263,7 +268,8 @@ export default Vue.extend({
         tags_tw: '' as string,
         tags_us: '' as string,
         tags_jp: '' as string,
-        locale: '' as string
+        locale: '' as string,
+        plan: '' as string
       },
       localeOptions: ['tw', 'us', 'jp']
     }
@@ -417,7 +423,8 @@ export default Vue.extend({
         tags_tw: '',
         tags_us: '',
         tags_jp: '',
-        locale: ''
+        locale: '',
+        plan: ''
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
@@ -729,7 +736,8 @@ export default Vue.extend({
         locale: this.svgInfo.locale,
         tags_tw: this.svgInfo.tags_tw,
         tags_us: this.svgInfo.tags_us,
-        tags_jp: this.svgInfo.tags_jp
+        tags_jp: this.svgInfo.tags_jp,
+        plan: this.svgInfo.plan ? this.svgInfo.plan : '0'
       }
       const res = await designApis.updateDesignInfo(this.token, 'svg', this.svgInfo.key_id, 'update', JSON.stringify(data))
       if (res.data.flag === 0) {

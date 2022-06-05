@@ -38,7 +38,6 @@ export default Vue.extend({
     span {
       color: #fff;
       font-size: 22px;
-      font-family: Mulish;
       font-weight: 700;
       padding-top: 2vh;
     }

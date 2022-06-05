@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="modal-card")
-    div(class="h-5 text-gray-1 mb-12")
+    div(class="text-H6 text-gray-1 mb-20")
       span {{modalInfo.title}}
-    div(class="modal-card__content f-h5 text-gray-1 mb-20")
+    div(class="modal-card__content body-MD text-gray-2 mb-20")
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
         @keydown.ctrl.67.exact.stop
@@ -82,14 +82,11 @@ export default Vue.extend({
   }
 
   &__content {
-    width: 100%;
+    width: 490px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    // align-items: flex-start;
-    > span:nth-child(n + 1) {
-      margin-bottom: 4px;
-    }
+    text-align: left;
   }
 
   &__button {
@@ -99,7 +96,7 @@ export default Vue.extend({
     > button {
       transition: background-color 0.3s;
       border-radius: 5px;
-      max-width: 180px;
+      width: 180px;
     }
   }
 }

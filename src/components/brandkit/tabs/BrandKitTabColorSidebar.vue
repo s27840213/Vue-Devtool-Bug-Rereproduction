@@ -25,17 +25,20 @@ export default Vue.extend({
     BrandKitColorPaletteSidebar
   },
   mounted() {
+    if (this.isSettingsOpen) return
     brandkitUtils.fetchPalettes(this.fetchPalettes)
   },
   watch: {
     currentBrand() {
+      if (this.isSettingsOpen) return
       brandkitUtils.fetchPalettes(this.fetchPalettes)
     }
   },
   computed: {
     ...mapGetters('brandkit', {
       currentBrand: 'getCurrentBrand',
-      isPalettesLoading: 'getIsPalettesLoading'
+      isPalettesLoading: 'getIsPalettesLoading',
+      isSettingsOpen: 'getIsSettingsOpen'
     }),
     colorPalettes(): IBrandColorPalette[] {
       return (this.currentBrand as IBrand).colorPalettes

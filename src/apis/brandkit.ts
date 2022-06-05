@@ -31,18 +31,20 @@ export default {
       team_id: teamId ?? this.getTeamId()
     })
   },
-  async getLogos(brandId: string, token?: string, teamId?: string): Promise<any> {
+  async getLogos(brandId: string, token?: string, teamId?: string, params = {}): Promise<any> {
     return await this.sendApi('/list-logo', {
       token: token ?? this.getToken(),
       team_id: teamId ?? this.getTeamId(),
-      brand_id: brandId
+      brand_id: brandId,
+      ...params
     })
   },
-  async getPalettes(brandId: string, token?: string, teamId?: string): Promise<any> {
+  async getPalettes(brandId: string, token?: string, teamId?: string, params = {}): Promise<any> {
     return await this.sendApi('/list-palette', {
       token: token ?? this.getToken(),
       team_id: teamId ?? this.getTeamId(),
-      brand_id: brandId
+      brand_id: brandId,
+      ...params
     })
   },
   async getFonts(token?: string, teamId?: string, params = {}): Promise<any> {

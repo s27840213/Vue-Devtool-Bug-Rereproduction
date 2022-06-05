@@ -23,6 +23,7 @@ import logUtils from './logUtils'
 import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
+import paymentUtils from './paymentUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -252,8 +253,7 @@ class UploadUtils {
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
-                    modalUtils.setIsModalOpen(true)
-                    modalUtils.setModalInfo('上傳失敗', [`Asset ID: ${assetId}`], '')
+                    paymentUtils.errorHandler(json.msg)
                   }
                 })
               }
@@ -266,12 +266,13 @@ class UploadUtils {
   }
 
   // Upload the user's asset in my file panel
-  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId }: {
+  uploadAsset(type: 'image' | 'font' | 'avatar' | 'logo', files: FileList | Array<string>, { addToPage = false, id, pollingCallback, needCompressed = true, brandId, isShadow = false }: {
     addToPage?: boolean,
     id?: string,
     pollingCallback?: (json: IUploadAssetResponse) => void,
     needCompressed?: boolean,
     brandId?: string
+    isShadow?: boolean
   } = {}) {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
@@ -295,7 +296,7 @@ class UploadUtils {
         formData.append('key', `${this.loginOutput.upload_map.path}asset/${type}/${assetId}/original`)
       }
       formData.append('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(isFile ? (files[i] as File).name : 'original')}`)
-      formData.append('x-amz-meta-tn', needCompressed ? this.userId : `${this.userId},1`)
+      formData.append('x-amz-meta-tn', needCompressed ? this.userId : (isShadow ? `${this.userId},2` : `${this.userId},1`))
       const xhr = new XMLHttpRequest()
 
       const file = isFile ? files[i] : generalUtils.dataURLtoBlob(files[i] as string)
@@ -310,10 +311,6 @@ class UploadUtils {
           const img = new Image()
           img.src = src
           img.onload = (evt) => {
-            store.commit('file/ADD_PREVIEW', {
-              imageFile: img,
-              assetId: assetId
-            })
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
@@ -329,21 +326,27 @@ class UploadUtils {
             }
             xhr.open('POST', this.loginOutput.upload_map.url, true)
             let increaseInterval = undefined as any
-            xhr.upload.onprogress = (event) => {
-              const uploadProgress = Math.floor(event.loaded / event.total * 100)
-              store.commit('file/UPDATE_PROGRESS', {
-                assetId: assetId,
-                progress: uploadProgress / 2
+            if (!isShadow) {
+              store.commit('file/ADD_PREVIEW', {
+                imageFile: img,
+                assetId: assetId
               })
-              if (uploadProgress === 100) {
-                increaseInterval = setInterval(() => {
-                  const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
-                    return img.id === assetId
-                  })
-                  const curr = this.images[targetIndex].progress as number
-                  const increaseNum = (90 - curr) * 0.05
-                  this.images[targetIndex].progress = curr + increaseNum
-                }, 10)
+              xhr.upload.onprogress = (event) => {
+                const uploadProgress = Math.floor(event.loaded / event.total * 100)
+                store.commit('file/UPDATE_PROGRESS', {
+                  assetId: assetId,
+                  progress: uploadProgress / 2
+                })
+                if (uploadProgress === 100) {
+                  increaseInterval = setInterval(() => {
+                    const targetIndex = this.images.findIndex((img: IAssetPhoto) => {
+                      return img.id === assetId
+                    })
+                    const curr = this.images[targetIndex].progress as number
+                    const increaseNum = (90 - curr) * 0.05
+                    this.images[targetIndex].progress = curr + increaseNum
+                  }, 10)
+                }
               }
             }
             xhr.send(formData)
@@ -356,14 +359,17 @@ class UploadUtils {
                     clearInterval(interval)
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
+                      console.log(generalUtils.deepCopy(json))
                       if (json.flag === 0) {
                         console.log('Successfully upload the file')
                         if (type === 'image') {
-                          store.commit('file/UPDATE_PROGRESS', {
-                            assetId: assetId,
-                            progress: 100
-                          })
-                          store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                          if (!isShadow) {
+                            store.commit('file/UPDATE_PROGRESS', {
+                              assetId: assetId,
+                              progress: 100
+                            })
+                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                          }
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                           if (pollingCallback) {
@@ -371,7 +377,7 @@ class UploadUtils {
                           }
                         }
                       } else {
-                        console.log('Failed to upload the file')
+                        paymentUtils.errorHandler(json.msg)
                       }
                     })
                   }
@@ -399,12 +405,8 @@ class UploadUtils {
                         this.emitFontUploadEvent('none')
                       }, 2000)
                     } else {
-                      this.emitFontUploadEvent('fail')
+                      paymentUtils.errorHandler(json.msg)
                       brandkitUtils.deleteFont(tempId)
-                      console.log('Failed to upload the file')
-                      setTimeout(() => {
-                        this.emitFontUploadEvent('none')
-                      }, 2000)
                     }
                   })
                 }
@@ -467,12 +469,8 @@ class UploadUtils {
                       console.log('Successfully upload the file')
                       brandkitUtils.replaceLogo(tempId, json.data, brandId)
                     } else {
-                      Vue.notify({
-                        group: 'error',
-                        text: `${i18n.t('NN0137')}`
-                      })
+                      paymentUtils.errorHandler(json.msg)
                       brandkitUtils.deleteLogo(brandId, tempId)
-                      console.log('Failed to upload the file')
                     }
                   })
                 }

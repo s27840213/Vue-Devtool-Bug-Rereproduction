@@ -10,7 +10,7 @@ class ErrorHandle {
       url: '/add-missing-design',
       method: 'POST',
       data: {
-        token: authToken().token || token,
+        token: token || authToken().token,
         type,
         design_id
       } as IUploadMissingDesign

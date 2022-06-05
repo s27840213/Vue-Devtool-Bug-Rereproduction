@@ -1,9 +1,12 @@
+import { SrcObj } from './gallery'
+import { IImageStyle } from './layer'
+
 export enum ShadowEffectType {
   none = 'none',
   shadow = 'shadow',
-  halo = 'halo',
+  imageMatched = 'imageMatched',
   frame = 'frame',
-  projection = 'projection',
+  floating = 'floating',
   blur = 'blur',
 }
 export interface IShadowEffect {
@@ -26,7 +29,7 @@ export interface IFrameEffect {
   spread: number,
   opacity: number
 }
-export interface IHaloEffect {
+export interface IImageMatchedEffect {
   [key: string]: number
   size: number,
   distance: number,
@@ -34,13 +37,13 @@ export interface IHaloEffect {
   radius: number,
   opacity: number
 }
-export interface IProjectionEffect {
+export interface IFloatingEffect {
   [key: string]: number
-  spread: number,
   radius: number,
   x: number,
   y: number,
   opacity: number,
+  thinkness: number
   size: number
 }
 
@@ -49,11 +52,20 @@ export interface IShadowEffects {
   shadow?: IShadowEffect,
   blur?: IBlurEffect,
   frame?: IFrameEffect,
-  halo?: IHaloEffect,
-  projection?: IProjectionEffect
+  imageMatched?: IImageMatchedEffect,
+  floating?: IFloatingEffect
+}
+
+export interface IShadowStyles {
+  imgWidth: number,
+  imgHeight: number,
+  imgX: number,
+  imgY: number
 }
 export interface IShadowProps {
   currentEffect: ShadowEffectType,
-  filterId?: string,
-  effects: IShadowEffects
+  effects: IShadowEffects,
+  srcObj: SrcObj,
+  styles: IShadowStyles,
+  isTransparent?: boolean
 }

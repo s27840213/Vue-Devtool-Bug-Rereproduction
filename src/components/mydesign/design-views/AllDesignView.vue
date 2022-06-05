@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="all-design-view")
+    disk-warning(class="warning" size="small")
     div(class="all-design-view__folder-name") {{$t('NN0187')}}
     div(class="horizontal-rule")
     design-gallery(:noHeader="true"
@@ -15,10 +16,12 @@ import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import DesignGallery from '@/components/mydesign/DesignGallery.vue'
+import DiskWarning from '@/components/payment/DiskWarning.vue'
 
 export default Vue.extend({
   components: {
-    DesignGallery
+    DesignGallery,
+    DiskWarning
   },
   mounted() {
     designUtils.fetchDesigns(this.fetchAllDesigns)
@@ -60,9 +63,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+.warning { margin-top: 16px }
+
 .all-design-view {
   text-align: left;
-  font-family: NotoSansTC;
   @include hide-scrollbar-white;
   > div {
     margin-left: 55px;

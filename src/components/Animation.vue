@@ -15,8 +15,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import lottie from 'lottie-web'
 import axios from 'axios'
+import lottie, { AnimationItem } from 'lottie-web'
 
 export default Vue.extend({
   props: {
@@ -33,7 +33,7 @@ export default Vue.extend({
       default: -1
     },
     // The following is for lottie
-    lottieName: { // required if type is lottie
+    lottieName: { // required if type is lottie and source image in /image folder
       type: String
     },
     speed: {
@@ -65,7 +65,7 @@ export default Vue.extend({
         progressiveLoad: false,
         hideOnTransparent: true
       },
-      anim: null as unknown as ReturnType<typeof lottie.loadAnimation> // better way?
+      anim: null as unknown as AnimationItem
     }
   },
   computed: {

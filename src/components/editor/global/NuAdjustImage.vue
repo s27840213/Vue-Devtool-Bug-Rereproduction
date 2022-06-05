@@ -89,6 +89,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .nu-adjust-image {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 </style>

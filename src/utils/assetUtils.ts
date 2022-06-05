@@ -572,7 +572,7 @@ class AssetUtils {
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
-          this.addText(asset.jsonData, attrs)
+          this.addText(Object.assign(asset.jsonData, { designId: item.id }), attrs)
           break
         case 8:
           this.addFrame(Object.assign(asset.jsonData, { designId: item.id }), attrs)

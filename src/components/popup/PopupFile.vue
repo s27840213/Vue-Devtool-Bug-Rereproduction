@@ -54,6 +54,7 @@ import { mapGetters, mapState } from 'vuex'
 import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   components: {
@@ -108,6 +109,7 @@ export default Vue.extend({
     },
     clearGuideline() {
       rulerUtils.clearGuidelines()
+      stepsUtils.record()
     },
     showPrefSetting() {
       this.showPreference = true

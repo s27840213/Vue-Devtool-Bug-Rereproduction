@@ -11,6 +11,7 @@ import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } f
 import { EventEmitter } from 'events'
 import textPropUtils from './textPropUtils'
 import textEffectUtils from './textEffectUtils'
+import generalUtils from './generalUtils'
 
 class TiptapUtils {
   event: any
@@ -101,15 +102,16 @@ class TiptapUtils {
   }
 
   toJSON(paragraphs: IParagraph[]): any {
+    // console.log(generalUtils.deepCopy(paragraphs))
     return {
       type: 'doc',
       content: paragraphs.map(p => {
         const pObj = {
           type: 'paragraph'
         } as {[key: string]: any}
-        const attrs = this.makeParagraphStyle(p.styles)
+        const attrs = this.makeParagraphStyle(p.styles) as any
         if (p.spanStyle) {
-          attrs.spanStyle = p.spanStyle as string
+          attrs.spanStyle = true
           const sStyles = this.generateSpanStyle(p.spanStyle as string)
           Object.assign(attrs, this.extractSpanStyleForParagraph(sStyles))
         }
@@ -132,8 +134,8 @@ class TiptapUtils {
   }
 
   makeParagraphStyle(attributes: any): IParagraphStyle {
-    const { font, lineHeight, fontSpacing, size, align } = attributes
-    return { font, lineHeight, fontSpacing, size, align }
+    const { font, lineHeight, fontSpacing, size, align, type, userId, assetId } = attributes
+    return { font, lineHeight, fontSpacing, size, align, type, userId, assetId }
   }
 
   generateSpanStyle(spanStyleStr: string): ISpanStyle {
@@ -146,19 +148,18 @@ class TiptapUtils {
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
       color: this.isValidHexColor(spanStyle.color) ? spanStyle.color : this.rgbToHex(spanStyle.color),
-      opacity: parseInt(spanStyle.opacity),
       ...fontProps
     } as ISpanStyle
   }
 
   makeSpanStyle(attributes: any): ISpanStyle {
-    const { font, weight, size, decoration, style, color, opacity, type, userId, assetId, fontUrl } = attributes
-    return { font, weight, size, decoration, style, color, opacity, type, userId, assetId, fontUrl } as ISpanStyle
+    const { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } = attributes
+    return { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } as ISpanStyle
   }
 
   extractSpanStyleForParagraph(attributes: any): Partial<ISpanStyle> {
-    const { weight, decoration, style, color } = attributes
-    return { weight, decoration, style, color }
+    const { weight, decoration, style, color, font, size, type, userId, assetId } = attributes
+    return { weight, decoration, style, color, font, size, type, userId, assetId }
   }
 
   str2css(str: string): CSSStyleDeclaration {
@@ -168,6 +169,7 @@ class TiptapUtils {
   }
 
   extractFontProps(str: string): { type: string, userId: string, assetId: string, fontUrl: string } {
+    // console.trace()
     const result = {
       type: 'public',
       userId: '',
@@ -212,20 +214,19 @@ class TiptapUtils {
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
-          let spanStyle: string
+          let sStyles: ISpanStyle
           if (paragraph.attrs.spanStyle) {
-            spanStyle = paragraph.attrs.spanStyle
+            sStyles = this.makeSpanStyle(paragraph.attrs)
           } else {
-            spanStyle = defaultStyle
+            sStyles = this.generateSpanStyle(defaultStyle)
           }
-          const sStyles = this.generateSpanStyle(spanStyle)
           if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
       }
       if (spans.length === 0) {
         if (paragraph.attrs.spanStyle) {
-          const sStyles = this.generateSpanStyle(paragraph.attrs.spanStyle)
+          const sStyles = this.makeSpanStyle(paragraph.attrs)
           spans.push({ text: '', styles: sStyles })
           pStyles.size = sStyles.size
           pStyles.font = sStyles.font
@@ -233,7 +234,7 @@ class TiptapUtils {
           pStyles.userId = sStyles.userId
           pStyles.assetId = sStyles.assetId
           pStyles.fontUrl = sStyles.fontUrl
-          result.push({ spans, styles: pStyles, spanStyle: paragraph.attrs.spanStyle })
+          result.push({ spans, styles: pStyles, spanStyle: this.textStyles(sStyles) })
         } else {
           isSetContentRequired = true
           const sStyles = this.generateSpanStyle(defaultStyle)
@@ -316,7 +317,7 @@ class TiptapUtils {
               editor.commands.focus()
             }, 10)
           } else {
-            editor.chain().updateAttributes('textStyle', item).run()
+            editor.chain().updateAttributes('textStyle', item).updateAttributes('paragraph', item).run()
             setTimeout(() => {
               editor.chain().focus().selectPrevious().run()
             }, 10)

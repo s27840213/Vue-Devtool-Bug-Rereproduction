@@ -61,7 +61,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .favorite-design-view {
   text-align: left;
-  font-family: NotoSansTC;
   @include hide-scrollbar-white;
   > div {
     margin-left: 55px;

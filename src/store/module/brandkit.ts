@@ -12,6 +12,7 @@ import { SrcObj } from '@/interfaces/gallery'
 import userApis from '@/apis/user'
 import _ from 'lodash'
 import apiUtils from '@/utils/apiUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 interface IBrandKitState {
   brands: IBrand[],
@@ -24,6 +25,8 @@ interface IBrandKitState {
   selectedTab: string,
   fonts: IBrandFont[],
   fetchedFonts: {[key: string]: {[key: string]: string}},
+  logosPageIndex: number,
+  palettesPageIndex: number,
   fontsPageIndex: number,
   isSettingsOpen: boolean,
   editorViewLogos: Record<string, Record<string, string>>,
@@ -45,6 +48,8 @@ const getDefaultState = (): IBrandKitState => ({
   selectedTab: brandkitUtils.getTabKeys()[0],
   fonts: [],
   fetchedFonts: {},
+  logosPageIndex: 0,
+  palettesPageIndex: 0,
   fontsPageIndex: 0,
   isSettingsOpen: false,
   editorViewLogos: {}
@@ -55,8 +60,9 @@ function isPrivate(srcObj: SrcObj): string {
 }
 
 function errorShower(msg?: string) {
-  if (msg === 'NONPRO') {
-    // dosomething
+  if (msg === 'NOT_SUBSCRIBED') {
+    paymentUtils.errorHandler(msg)
+    store.commit('brandkit/SET_isSettingsOpen', false)
     return
   }
   showNetworkError()
@@ -91,8 +97,28 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   getSelectedTab(state: IBrandKitState): string {
     return state.selectedTab
   },
+  getLogos(state: IBrandKitState): (brandId: string) => IBrandLogo[] {
+    return (brandId: string) => {
+      const brand = brandkitUtils.findBrand(state.brands, brandId)
+      if (!brand) return []
+      return brand.logos
+    }
+  },
+  getPalettes(state: IBrandKitState): (brandId: string) => IBrandColorPalette[] {
+    return (brandId: string) => {
+      const brand = brandkitUtils.findBrand(state.brands, brandId)
+      if (!brand) return []
+      return brand.colorPalettes
+    }
+  },
   getFonts(state: IBrandKitState): IBrandFont[] {
     return state.fonts
+  },
+  getLogosPageIndex(state: IBrandKitState): number {
+    return state.logosPageIndex
+  },
+  getPalettesPageIndex(state: IBrandKitState): number {
+    return state.palettesPageIndex
   },
   getFontsPageIndex(state: IBrandKitState): number {
     return state.fontsPageIndex
@@ -132,9 +158,38 @@ const actions: ActionTree<IBrandKitState, unknown> = {
         throw new Error('fetch brands request failed')
       }
       const logos = data.logos.map((logo: IUserLogoContentData) => brandkitUtils.apiLogo2IBrandLogo(logo))
+      commit('SET_logosPageIndex', data.next_page)
       commit('SET_logos', {
         brandId: state.currentBrandId,
         logos
+      })
+      if (!store.getters['user/isAdmin']) {
+        const data: Record<string, any> = {}
+        for (const logo of logos) {
+          data[logo.asset_index] = logo.signed_url
+        }
+        commit('SET_editorViewLogos', Object.assign({}, state.editorViewLogos, data))
+      }
+    } catch (error) {
+      console.error(error)
+      showNetworkError()
+    }
+  },
+  async fetchMoreLogos({ commit, state, getters }) {
+    const pageIndex = getters.getLogosPageIndex
+    if (pageIndex < 0) return
+    try {
+      const { data } = await brandkitApi.getLogos(state.currentBrandId, undefined, undefined, {
+        page_index: pageIndex
+      })
+      if (data.flag !== 0) {
+        throw new Error('fetch brands request failed')
+      }
+      const logos = data.logos.map((logo: IUserLogoContentData) => brandkitUtils.apiLogo2IBrandLogo(logo))
+      commit('SET_logosPageIndex', data.next_page)
+      commit('SET_logos', {
+        brandId: state.currentBrandId,
+        logos: getters.getLogos(state.currentBrandId).concat(logos)
       })
       if (!store.getters['user/isAdmin']) {
         const data: Record<string, any> = {}
@@ -559,6 +614,12 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_fonts(state: IBrandKitState, fonts: IBrandFont[]) {
     state.fonts = fonts
+  },
+  SET_logosPageIndex(state: IBrandKitState, logosPageIndex: number) {
+    state.logosPageIndex = logosPageIndex
+  },
+  SET_palettesPageIndex(state: IBrandKitState, palettesPageIndex: number) {
+    state.palettesPageIndex = palettesPageIndex
   },
   SET_fontsPageIndex(state: IBrandKitState, fontsPageIndex: number) {
     state.fontsPageIndex = fontsPageIndex
