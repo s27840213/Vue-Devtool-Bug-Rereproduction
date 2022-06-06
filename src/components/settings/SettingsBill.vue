@@ -64,8 +64,6 @@ export default Vue.extend({
   components: {
     ObserverSentinel
   },
-  props: {
-  },
   data() {
     return {
       hisIndex: 0

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="toggle-outside" :style="outsideStyle")
+  div(class="toggle" :style="outsideStyle")
     div(v-for="op, idx in options" class="toggle-text"
         :style="textStyle(idx)" @click="setValue(idx)") {{op.label}}
     div(class="toggle-inside" :style="insideStyle")
@@ -109,7 +109,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.toggle-outside {
+.toggle {
   display: flex;
   position: relative;
   border-radius: 100px;

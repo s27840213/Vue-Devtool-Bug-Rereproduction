@@ -32,7 +32,7 @@
     hr(v-if="card.status !== 'none'")
     div(v-if="card.status !== 'none'" class="sp-card")
       span(class="text-blue-1")         {{$t('NN0598')}}
-      card-info(:card="card" :trash="isCancelingPro")
+      card-info(:card="card" :canDelete="isCancelingPro")
       span(v-if="isFail"
         class="text-red overline-LG")   {{$t('NN0626')}}
       span(v-if="canUpdateCard" class="text-blue-1 body-SM pointer"
@@ -40,7 +40,7 @@
     hr
     i18n(v-if="isErrorStatus" class="sp-error" path="NN0656" tag="div")
       template(#contactus)
-        a(class="text-blue-1" :href="contactUsUrl") {{$t('NN0642')}}
+        a(class="text-blue-1 pointer" :href="contactUsUrl") {{$t('NN0642')}}
       template(#status)
         span {{status}}
     div(v-if="showBillingInfo" class="sp-info")

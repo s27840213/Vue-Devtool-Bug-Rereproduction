@@ -95,13 +95,6 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
-  props: {
-    // Get initView from store
-    // initView: {
-    //   type: String,
-    //   required: true
-    // }
-  },
   data() {
     return {
       // View variable
@@ -158,7 +151,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    // this.getBillingInfo()
     this.changeView(this.initView)
   },
   methods: {
