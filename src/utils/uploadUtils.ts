@@ -23,7 +23,7 @@ import logUtils from './logUtils'
 import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
-import paymentUtils from './paymentUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {

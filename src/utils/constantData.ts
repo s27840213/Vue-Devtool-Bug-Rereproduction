@@ -18,7 +18,7 @@ class PaymentData {
   }
 
   // For header.vue and mobileMenu.vue
-  headerItem(mobile = false) {
+  headerItems(mobile = false) {
     const tutorialPage = {
       tw: 'https://blog.vivipic.com/tw/tutorial/',
       us: 'https://blog.vivipic.com/us-tutorial/',
@@ -71,7 +71,7 @@ class PaymentData {
   }
 
   // For Settings
-  viewList(all = false) {
+  settingsItems(all = false) {
     const list = [{
       name: 'menu',
       label: i18n.tc('NN0649'),

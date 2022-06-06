@@ -137,7 +137,6 @@ export default Vue.extend({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {
         if (!files) return

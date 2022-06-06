@@ -193,7 +193,6 @@ const routes: Array<RouteConfig> = [
     path: 'pricing',
     name: 'Pricing',
     component: Pricing
-
   }
 ]
 
