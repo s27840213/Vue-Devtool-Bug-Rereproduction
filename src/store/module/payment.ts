@@ -245,7 +245,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
     commit('SET_state', { isLoading: true })
     return paymentApi.billingInfo().then((response) => {
       const data = response.data.data
-      console.log('bill info', data) // todelete
       commit('SET_state', {
         status: getStatus(data.plan_subscribe, data.plan_stop_subscribe, data.card_valid),
         isPro: data.plan_subscribe === 1,
@@ -284,7 +283,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async getBillingHistroy({ commit }) {
-    // Bruce said don't do pagination in billing history.
+    // Bruce said don't do pagination in billing history, so comment pagination code.
     // if (state.nextBillingHistoryIndex === -1) return
     commit('SET_state', { isLoading: true })
     return paymentApi.billingHistory(0/* state.nextBillingHistoryIndex */).then((response) => {

@@ -11,17 +11,19 @@ class PaymentUtils {
     popupUtils.openPopup('payment')
   }
 
-  contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
+  contactUsUrl() {
     switch (i18n.locale) {
       case 'tw':
-        window.open('https://blog.vivipic.com/tw/contactus/', '_blank')
-        break
+        return 'https://blog.vivipic.com/tw/contactus/'
       case 'jp':
-        window.open('https://blog.vivipic.com/jp/help/', '_blank')
-        break
+        return 'https://blog.vivipic.com/jp/help/'
       default:
-        window.open('https://blog.vivipic.com/us/contact/', '_blank')
+        return 'https://blog.vivipic.com/us/contact/'
     }
+  }
+
+  contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
+    window.open(this.contactUsUrl(), '_blank')
   }
 
   errorHandler(msg?: string, initView = 'brandkit') {

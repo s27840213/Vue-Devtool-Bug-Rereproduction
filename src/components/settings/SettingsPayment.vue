@@ -38,6 +38,11 @@
       span(v-if="canUpdateCard" class="text-blue-1 body-SM pointer"
         @click="openCardPopup()")       {{$t('NN0600')}}
     hr
+    i18n(v-if="isErrorStatus" class="sp-error" path="NN0656" tag="div")
+      template(#contactus)
+        a(class="text-blue-1" :href="contactUsUrl") {{$t('NN0642')}}
+      template(#status)
+        span {{status}}
     div(v-if="showBillingInfo" class="sp-info")
       span(class="text-blue-1 body-MD") {{$t('NN0601')}}
       //- switch(input.label)
@@ -128,6 +133,7 @@ export default Vue.extend({
     isFreeIcon():boolean { return !this.isPro && this.isCancelingPro },
     proIconColor():string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
     isFail():boolean { return this.status === 'Fail' },
+    isErrorStatus(): boolean { return ['-1', '-2', '-3', '-4', 'Transient'].includes(this.status) },
     showDueDay():boolean { return ['Deleted', 'Canceled'].includes(this.status) },
     showPlan():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
     showUsage():boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
@@ -137,6 +143,7 @@ export default Vue.extend({
     canSwitch():boolean { return this.status === 'Subscribed' },
     canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
     canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
+    contactUsUrl():string { return paymentUtils.contactUsUrl() },
     diskPercent():Record<string, string> {
       return { width: `${this._diskPercent * 200}px` }
     },
@@ -224,17 +231,18 @@ export default Vue.extend({
 .sp {
   padding: 60px 13% 20px 13%;
   &-plan, &-usage, &-card, &-info, >hr { margin: 0 0 30px 0; }
-  &-plan, &-usage, &-card, &-info {
+  &-plan, &-usage, &-card, &-info, &-error {
     @include body-MD;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
   }
-  &-plan, &-info { @include body-SM; }
+  &-plan, &-info, &-error { @include body-SM; }
   &-plan, &-usage {
     >span, >button, >svg { margin: 1px 0; }
   }
+  &-error { display: block; }
   >hr {
     width: 100%;
     border: 0.5px solid setColor(gray-4);

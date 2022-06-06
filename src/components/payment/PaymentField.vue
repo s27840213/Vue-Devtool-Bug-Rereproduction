@@ -39,6 +39,7 @@ import Options from '@/components/global/Options.vue'
 import { Stripe, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js/pure'
 import paymentData from '@/utils/constantData'
+import mappingUtils from '@/utils/mappingUtils'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -190,7 +191,9 @@ export default Vue.extend({
     },
     async stripeInit() {
       await this.clientSecret // Wait for api promise
-      this.stripe = await loadStripe('pk_live_51HPpbIJuHmbesNZIbXTLIiElWHqRqS9xLnCkoJ9LynKfQO2G9JIVpeEdogBdBU7aiqvXrTjjJQPUVVGQBdSxwmoc00bJcj9VG2') as Stripe
+      this.stripe = await loadStripe('pk_live_51HPpbIJuHmbesNZIbXTLIiElWHqRqS9xLnCkoJ9LynKfQO2G9JIVpeEdogBdBU7aiqvXrTjjJQPUVVGQBdSxwmoc00bJcj9VG2', {
+        locale: mappingUtils.mappingLocales(i18n.locale) as 'zh-TW'// | 'ja-JP' | 'en-US'
+      }) as Stripe
       this.stripeElement = this.stripe.elements({
         clientSecret: this.clientSecret,
         // todo: Floating will cause layout issue if user first choose TW and than choose other country in Chrome.
