@@ -420,8 +420,7 @@ class TextUtils {
             : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
           decoration: spanEl.style.textDecorationLine,
           style: spanEl.style.fontStyle,
-          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
-          opacity: parseInt(spanEl.style.opacity)
+          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color)
         } as ISpanStyle
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {

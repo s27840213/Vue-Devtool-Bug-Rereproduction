@@ -39,7 +39,9 @@
         div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
           span {{ $t('NN0436') }}
         div(v-else class="delete-confirm__description")
-          span {{ $t('NN0459') }}
+          i18n(path="NN0459" tag="span")
+            template(#itemName)
+              span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
         div(class="delete-confirm__buttons")
           div(class="delete-confirm__buttons__cancel pointer"
             @click="handleClearDeletion")
@@ -60,7 +62,6 @@ import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
 import uploadUtils from '@/utils/uploadUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   name: 'BrandKit',
@@ -120,7 +121,6 @@ export default Vue.extend({
       fetchFonts: 'fetchFonts'
     }),
     addNewBrand() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.addNewBrand()
     },
     isDragDropValid(): boolean {
@@ -139,7 +139,6 @@ export default Vue.extend({
     handleDrop(e: DragEvent) {
       this.isDraggedOver = false
       if (!this.isDragDropValid()) return
-      if (!paymentUtils.checkIsPro('brandkit')) return
 
       const files = e.dataTransfer?.files
       if (this.selectedTab === 'text') {

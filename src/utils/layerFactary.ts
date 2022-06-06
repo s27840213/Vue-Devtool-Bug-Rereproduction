@@ -1,7 +1,7 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
 import store from '@/store'
-import { LayerType } from '@/store/types'
+import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
@@ -10,6 +10,8 @@ import localeUtils from './localeUtils'
 import textPropUtils from './textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
+import imageShadowUtils from './imageShadowUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -27,7 +29,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       imgControl: false,
-      inProcess: false,
+      inProcess: LayerProcessType.none,
       trace: config.trace ?? 0,
       isClipper: true,
       dragging: false,
@@ -35,7 +37,7 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        scale: 1,
+        scale: width / initWidth,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
@@ -52,12 +54,34 @@ class LayerFactary {
         horizontalFlip: false,
         verticalFlip: false,
         adjust: {},
-        shadow: { currentEffect: 'none', effects: {} }
+        shadow: {
+          currentEffect: 'none',
+          effects: {
+            color: '#000000',
+            ...Object.keys(ShadowEffectType)
+              .reduce((obj, effect) => {
+                return {
+                  ...obj,
+                  [effect]: {}
+                }
+              }, {})
+          },
+          srcObj: { type: '', assetId: '', userId: '' },
+          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 }
+        }
       }
     }
+    /** some old json has different config with the shadow effect */
+    if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
+      config.styles.shadow = basicConfig.styles.shadow
+    }
+
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
-    return Object.assign(basicConfig, config)
+
+    basicConfig.styles.scale = basicConfig.styles.width / basicConfig.styles.initWidth
+    const image = Object.assign(basicConfig, config)
+    return image
   }
 
   newFrame(config: IFrame): IFrame {
@@ -278,22 +302,9 @@ class LayerFactary {
               paragraph.styles.assetId = ''
               paragraph.styles.fontUrl = ''
             }
-            if (paragraph.spanStyle) {
+            if ((paragraph.spans.length > 1 || paragraph.spans[0].text !== '') && paragraph.spanStyle) {
               delete paragraph.spanStyle
             }
-          } else if (paragraph.spanStyle) {
-            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.spanStyle as string)
-            paragraph.styles.font = spanStyles.font
-            paragraph.styles.type = spanStyles.type ?? 'public'
-            paragraph.styles.userId = spanStyles.userId ?? ''
-            paragraph.styles.assetId = spanStyles.assetId ?? ''
-            paragraph.styles.fontUrl = spanStyles.fontUrl ?? ''
-          } else {
-            paragraph.styles.font = defaultFont
-            paragraph.styles.type = 'public'
-            paragraph.styles.userId = ''
-            paragraph.styles.assetId = ''
-            paragraph.styles.fontUrl = ''
           }
         }
       )

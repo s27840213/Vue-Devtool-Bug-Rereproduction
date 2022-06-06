@@ -5,9 +5,12 @@ import { IBounding, ISize } from '@/interfaces/math'
 import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
-import { IUserImageContentData } from '@/interfaces/api'
+import { IImageSize, IUserImageContentData } from '@/interfaces/api'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
+import imageApi from '@/apis/image-api'
+import { AxiosPromise } from 'axios'
+import { IShadowAsset } from '@/store/module/shadow'
 
 const FORCE_UPDATE_VER = '&ver=303120221747'
 class ImageUtils {
@@ -32,25 +35,36 @@ class ImageUtils {
     return false
   }
 
-  getSrc(config: Partial<IImage>, size?: string | number, ver?: number): string {
+  isSrcObj(srcObj: Partial<IImage> | SrcObj): srcObj is SrcObj {
+    return typeof srcObj.assetId !== 'undefined' && typeof srcObj.userId !== 'undefined' && typeof srcObj.type !== 'undefined'
+  }
+
+  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
-    if (!config.srcObj && !config.src_obj) return ''
-    if (config.previewSrc) {
-      return config.previewSrc
+    let { type, userId, assetId, brandId } = {} as SrcObj
+    let ratio = 1
+    if (this.isSrcObj(config)) {
+      ({ type, userId, assetId, brandId } = config)
+    } else {
+      if (!config.srcObj && !config.src_obj) return ''
+      if (config.previewSrc) {
+        return config.previewSrc
+      }
+      ({ type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj)
+      if (typeof size === 'undefined' && config.styles) {
+        const { imgWidth, imgHeight } = config.styles
+        const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
+        size = this.getSrcSize(
+          type,
+          config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
+        )
+      }
+      ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     }
 
-    const { type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj
-    if (typeof size === 'undefined' && config.styles) {
-      const { imgWidth, imgHeight } = config.styles
-      const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
-      size = this.getSrcSize(
-        type,
-        config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
-      )
-    }
     switch (type) {
       case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size}?origin=true` + FORCE_UPDATE_VER
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}?origin=true` + FORCE_UPDATE_VER
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
         return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
@@ -62,19 +76,31 @@ class ImageUtils {
         return editorLogo(assetId) ? editorLogo(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
       }
       case 'unsplash':
-        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&w=${size}&origin=true`
+        return `https://images.unsplash.com/${assetId}?cs=tinysrgb&q=80&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'pexels':
-        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&w=${size}&origin=true`
+        return `https://images.pexels.com/photos/${assetId}/pexels-photo-${assetId}.${userId}?auto=compress&cs=tinysrgb&${ratio >= 1 ? 'h' : 'w'}=${size || 766}&origin=true`
       case 'background':
         return `https://template.vivipic.com/background/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
       case 'frame':
         return require('@/assets/img/svg/frame.svg')
+      case 'shadow-private': {
+        const shadowImgs = (store.getters['shadow/shadowImgs'] as Map<number, IShadowAsset>)
+        if (typeof assetId === 'number') {
+          if (shadowImgs.has(assetId)) {
+            return (shadowImgs as Map<any, any>).get(assetId)?.urls[size as string || 'midd'] || ''
+          }
+        }
+        return ''
+      }
       default:
         return ''
     }
   }
 
   getSrcSize(type: string, dimension: number, preload = '') {
+    if (!type) {
+      return 0
+    }
     const key = type === 'pexels' || type === 'unsplash' ? 'size' : 'key'
     const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
@@ -158,13 +184,52 @@ class ImageUtils {
     }
   }
 
+  getImgSize(srcObj: SrcObj): AxiosPromise<IImageSize> | undefined {
+    const { type: _type, assetId, userId } = srcObj
+    switch (_type) {
+      case 'private':
+      case 'public':
+      case 'logo-private':
+      case 'logo-public': {
+        const type = _type.includes('logo') ? 'logo' : 'image'
+        if (!userId && typeof assetId === 'number') {
+          return imageApi.getImgSize({
+            token: '',
+            type,
+            asset_index: assetId as number,
+            cache: true
+          })
+        } else if (typeof userId === 'string' && typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type,
+            asset_id: assetId,
+            team_id: userId,
+            cache: true
+          })
+        }
+        break
+      }
+      case 'background': {
+        if (typeof assetId === 'string') {
+          return imageApi.getImgSize({
+            token: '',
+            type: 'background',
+            key_id: assetId,
+            cache: true
+          })
+        }
+      }
+    }
+  }
+
   getBrandId(src: string, type: string): string | undefined {
     if (type !== 'logo-public') return
     const tokens = src.split('/')
     return tokens[tokens.length - 3]
   }
 
-  setImgControlDefault() {
+  setImgControlDefault(deselect = true) {
     const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
     if (currLayer) {
       switch (currLayer.type) {
@@ -174,12 +239,12 @@ class ImageUtils {
         case 'group': {
           const primaryLayer = currLayer as IGroup
           for (let i = 0; i < primaryLayer.layers.length; i++) {
-            const props = {
-              active: false
-            } as { [key: string]: boolean | string | number }
-
+            const props = {} as { [key: string]: boolean | string | number }
             if (primaryLayer.layers[i].type === 'image') {
               props.imgControl = false
+            }
+            if (deselect) {
+              props.active = false
             }
             LayerUtils.updateSubLayerProps(pageIndex, layerIndex, i, props)
           }

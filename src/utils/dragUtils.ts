@@ -1,8 +1,11 @@
 /* eslint-disable indent */
+import { SrcObj } from '@/interfaces/gallery'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle, IShape } from '@/interfaces/layer'
 import store from '@/store'
 import assetUtils from './assetUtils'
 import generalUtils from './generalUtils'
+import imageShadowUtils from './imageShadowUtils'
 import layerUtils from './layerUtils'
 import mouseUtils from './mouseUtils'
 import pageUtils from './pageUtils'
@@ -157,16 +160,23 @@ class DragUtils {
     layerIndex: number,
     subLayerIdx: number,
     styles: Partial<IImageStyle>,
-    srcObj: { type: string, assetId: string | number, userId: string, brandId?: string }
+    srcObj: SrcObj
+    shadow: {
+      srcObj: SrcObj
+    }
   } = {
       layerIndex: -1,
       subLayerIdx: -1,
       styles: {},
-      srcObj: { type: '', assetId: '', userId: '' }
+      srcObj: { type: '', assetId: '', userId: '' },
+      shadow: {
+        srcObj: { type: '', assetId: '', userId: '' }
+      }
     }
 
   onImageDragEnter(e: DragEvent, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj
+    const previewSrc = store.state.currDraggedPhoto.previewSrc || ''
     const { layerIndex, subLayerIdx } = this.imgBuff
     if (store.state.currDraggedPhoto.srcObj.type) {
       const { imgWidth, imgHeight } = config.styles
@@ -181,18 +191,35 @@ class DragUtils {
           imgY: config.styles.imgY,
           imgWidth: config.styles.imgWidth,
           imgHeight: config.styles.imgHeight
+        },
+        shadow: {
+          srcObj: {
+            ...config.styles.shadow.srcObj
+          }
         }
       })
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj: DragSrcObj }, subLayerIdx)
       layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
+      if (config.styles.shadow.isTransparent || config.styles.shadow.currentEffect === ShadowEffectType.imageMatched) {
+        imageShadowUtils.updateShadowSrc({
+          pageIndex: layerUtils.pageIndex,
+          layerIndex,
+          subLayerIdx
+        }, { type: '', assetId: '', userId: '' })
+      }
     }
   }
 
   onImageDragLeave(e: DragEvent) {
-    const { layerIndex, subLayerIdx, styles, srcObj } = this.imgBuff
-    if (store.state.currDraggedPhoto.srcObj.type) {
+    const { layerIndex, subLayerIdx, styles, srcObj, shadow } = this.imgBuff
+    if (store.state.currDraggedPhoto.srcObj.type && srcObj.type) {
       layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj }, subLayerIdx)
       layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
+      imageShadowUtils.updateShadowSrc({
+        pageIndex: layerUtils.pageIndex,
+        layerIndex,
+        subLayerIdx
+      }, shadow.srcObj)
     }
   }
 
@@ -200,6 +227,15 @@ class DragUtils {
     if (store.state.currDraggedPhoto.srcObj.type) {
       e.stopPropagation()
       stepsUtils.record()
+    }
+  }
+
+  checkIsTransparent(src: string) {
+    if (src) {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+      // canvas.setAttribute('width', )
+      // ctx.drawImage
     }
   }
 }

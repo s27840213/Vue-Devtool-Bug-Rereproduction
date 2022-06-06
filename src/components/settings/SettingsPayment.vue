@@ -1,88 +1,45 @@
 <template lang="pug">
   div(class="sp")
-    span {{`status: ${status}`}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="toInitial()")  {{'goto Initial'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="toAbort()")  {{'goto Abort'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="toFail()")  {{'goto Fail'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(0)")  {{'set capacity 0GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(3993)")  {{'set capacity 3.9GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(4096)")  {{'set capacity 4GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(5017)")  {{'set capacity 4.9GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(5120)")  {{'set capacity 5GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(81817)")  {{'set capacity 79.9GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(81920)")  {{'set capacity 80GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(102400)")  {{'set capacity 100GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyCapacity(102401)")  {{'set capacity 100.01GB'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyBgrm(0)")  {{'set brgm 0'}}
-    br
-    span(class="text-gray-3 pointer"
-      @click="modifyBgrm(1200)")  {{'set bgrm 1200'}}
     div(class="sp-plan")
-      span(class="text-blue-1 body-MD") {{$t('TMP0082')}}
+      span(class="text-blue-1 body-MD") {{$t('NN0586')}}
       svg-icon(v-if="isFreeIcon" iconName="free")
       svg-icon(v-else            iconName="pro" :iconColor="proIconColor")
-      span(v-if="showDueDay")           {{$t('TMP0089', {date: myPaidDate})}}
+      span(v-if="showDueDay")           {{$t('NN0593', {date: myPaidDate})}}
       btn(v-if="canResume" class="rounded"
           type="primary-mid" @click.native="resume()")
-        span                            {{$t('TMP0084')}}
+        span                            {{$t('NN0588')}}
       btn(v-if="canAdd" class="rounded"
           type="primary-lg" @click.native="buy()")
-        span                            {{$t('TMP0083')}}
+        span                            {{$t('NN0587')}}
       span(v-if="isFail"
-          class="text-red overline-LG") {{$t('TMP0122')}}
+          class="text-red overline-LG") {{$t('NN0626')}}
       template(v-if="showPlan")
-        span                            {{$t('TMP0085', { period: isBundle ? $t('TMP0011') : $t('TMP0010') })}}
-        span(                     v-html="$t('TMP0086', { price: myPrice, date: myPaidDate  })")
+        span                            {{$t('NN0589', { period: isBundle ? $t('NN0515') : $t('NN0514') })}}
+        span(                     v-html="$t('NN0590', { price: myPrice, date: myPaidDate  })")
       span(v-if="canSwitch" class="text-blue-1 pointer"
-          @click="switchPeriod()")      {{isBundle ? $t('TMP0087') : $t('TMP0150')}}
+          @click="switchPeriod()")      {{isBundle ? $t('NN0591') : $t('NN0654')}}
       span(v-if="canCancel" class="text-gray-3 pointer"
-          @click="cancelSub()")         {{$t('TMP0088')}}
+          @click="cancelSub()")         {{$t('NN0592')}}
     div(v-if="showUsage" class="sp-usage")
-      span(class="text-blue-1 mt-30")   {{$t('TMP0090')}}
-      span(                       v-html="$t('TMP0091', { amount: usage.bgrmRemain, date: myPaidDate })")
-      span(class="text-blue-1")         {{$t('TMP0092')}}
+      span(class="text-blue-1 mt-30")   {{$t('NN0594')}}
+      span(                       v-html="$t('NN0595', { amount: usage.bgrmRemain, date: myPaidDate })")
+      span(class="text-blue-1")         {{$t('NN0596')}}
       div(class="sp-usage-disk")
         div(class="sp-usage-disk-total")
           div(class="sp-usage-disk-used" :style="diskPercent")
         span {{`${diskUsedUi}/${usage.diskTotal} GB`}}
-      span(class="body-XS")             {{$t('TMP0093')}}
+      span(class="body-XS")             {{$t('NN0597')}}
     hr(v-if="card.status !== 'none'")
     div(v-if="card.status !== 'none'" class="sp-card")
-      span(class="text-blue-1")         {{$t('TMP0094')}}
+      span(class="text-blue-1")         {{$t('NN0598')}}
       card-info(:card="card" :trash="isCancelingPro")
       span(v-if="isFail"
-        class="text-red overline-LG")   {{$t('TMP0122')}}
-      span(v-if="canUpdateCard" class="text-blue-1 body-SM"
-        @click="openCardPopup()")       {{$t('TMP0096')}}
+        class="text-red overline-LG")   {{$t('NN0626')}}
+      span(v-if="canUpdateCard" class="text-blue-1 body-SM pointer"
+        @click="openCardPopup()")       {{$t('NN0600')}}
     hr
     div(v-if="showBillingInfo" class="sp-info")
-      span(class="text-blue-1 body-MD") {{$t('TMP0097')}}
+      span(class="text-blue-1 body-MD") {{$t('NN0601')}}
       //- switch(input.label)
       template(v-for="input in billingInfoInput")
         //- case country
@@ -91,11 +48,11 @@
         //- case state & zip
         div(v-else-if="input.label === 'state & zip'" class="sp-info__half")
           span
-          label(for="zip") {{$t('TMP0109')}}
+          label(for="zip") {{$t('NN0613')}}
           options(:options="stateData"
-                  v-model="bi.state" :ph="$t('TMP0108')")
+                  v-model="bi.state" :ph="$t('NN0612')")
           input(id="zip" v-model="bi.zip" :invalid="biv.zip"
-                :placeholder="$t('TMP0109')")
+                :placeholder="$t('NN0613')")
           span
           span(v-if="biv.zip" class="sp-info__invalid") {{'zip error'}}
         //- defualt
@@ -106,23 +63,23 @@
           span(v-if="biv[input.key]" class="sp-info__invalid") {{input.error}}
       btn(type="primary-mid" @click.native="updateBillingInfo()"
           :disabled="!billingInfoCheck") {{$t('NN0176')}}
-    div(v-if="showCardPopup" class="popup-window" )
+    div(v-if="showCardPopup" class="popup-window")
       div(class="sp-field" v-click-outside="closeCardPopup")
         payment-field(isChange @next="closeCardPopup")
-    spinner(v-if="isLoading")
+    spinner(v-if="isLoading" class="sp-rocket")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import Options from '@/components/global/Options.vue'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import PopupPayment from '@/components/popup/PopupPayment.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
+import paymentUtils from '@/utils/paymentUtils'
 import paymentData from '@/utils/constantData'
-import popupUtils from '@/utils/popupUtils'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -229,9 +186,6 @@ export default Vue.extend({
       modifyCapacity: 'payment/modifyCapacity',
       modifyBgrm: 'payment/modifyBgrm'
     }),
-    ...mapMutations({
-      setInitView: 'payment/SET_initView'
-    }),
     async updateBillingInfo() {
       for (const item of this.billingInfoInput) {
         if (item.error && await this.checkBillingInfo(item.key)) return
@@ -259,18 +213,9 @@ export default Vue.extend({
       this.showCardPopup = true
     },
     closeCardPopup() { this.showCardPopup = false },
-    buy() {
-      this.setInitView('step1')
-      popupUtils.openPopup('payment')
-    },
-    switchPeriod() {
-      this.setInitView('switch1')
-      popupUtils.openPopup('payment')
-    },
-    cancelSub() {
-      this.setInitView('cancel1')
-      popupUtils.openPopup('payment')
-    }
+    buy() { paymentUtils.openPayment('step1') },
+    cancelSub() { paymentUtils.openPayment('cancel1') },
+    switchPeriod() { paymentUtils.openPayment('switch1') }
   }
 })
 </script>
@@ -348,7 +293,7 @@ export default Vue.extend({
   >button { margin: 10px 0 0 auto; }
 }
 
-.sp-field{
+.sp-field {
   box-sizing: border-box;
   width: min(440px, 100%);
   padding: 20px 60px 40px 60px;
@@ -356,10 +301,12 @@ export default Vue.extend({
   position: absolute;
 }
 
+div.sp-rocket { z-index: 23; }
+
 @media screen and (max-width: 768px) {
   .sp { padding: 26px 6.4% 20px 6.4% }
   .sp-field {
-    padding: 60px 28px;
+    padding: 65px 7.466% 175px 7.466%;
     bottom: 0px;
   }
 }

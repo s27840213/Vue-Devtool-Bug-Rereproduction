@@ -11,10 +11,10 @@ import _ from 'lodash'
 /**
  * Usage1: Text slide toggle
  * options: [{
-      label: i18n.t('TMP0010'),
+      label: i18n.t('NN0514'),
       value: 'monthly'
     }, {
-      label: i18n.t('TMP0011'),
+      label: i18n.t('NN0515'),
       value: 'yearly'
     }, {
       label: i18n.t('?'),

@@ -16,6 +16,8 @@
             div(class="brand-kit__header")
               div(class="brand-kit__selector")
                 brand-selector(@deleteItem="handleDeleteItem")
+              brand-kit-add-btn(:text="`${$t('NN0396')}`"
+                            @click.native="addNewBrand")
             div(class="brand-kit__tab")
               brand-kit-tab(@deleteItem="handleDeleteItem")
           div(v-if="isOverlayed" class="dim-background"

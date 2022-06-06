@@ -812,13 +812,11 @@ class TextPropUtils {
             startStyles = startP[sIndex].marks?.[0]?.attrs ?? {}
           }
           if (Object.keys(startStyles).length === 0) {
-            let spanStyle: string
             if (editor.getAttributes('paragraph').spanStyle) {
-              spanStyle = editor.getAttributes('paragraph').spanStyle
+              startStyles = tiptapUtils.makeSpanStyle(editor.getAttributes('paragraph'))
             } else {
-              spanStyle = editor.storage.nuTextStyle.spanStyle
+              startStyles = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
             }
-            startStyles = tiptapUtils.generateSpanStyle(spanStyle)
           }
 
           origin = startStyles[prop]
@@ -1029,10 +1027,6 @@ class TextPropUtils {
             } else {
               const pAttrs = paragraphs[i].attrs ?? {}
               pAttrs.size += step
-              const spanStyle = pAttrs.spanStyle ?? ''
-              const sStyles = tiptapUtils.generateSpanStyle(spanStyle)
-              sStyles.size += step
-              pAttrs.spanStyle = tiptapUtils.textStyles(sStyles)
             }
           }
           editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
@@ -1160,8 +1154,7 @@ class TextPropUtils {
       size: span ? span.styles.size : NaN,
       decoration: span ? span.styles.decoration : '',
       style: span ? span.styles.style : '',
-      color: span ? span.styles.color : '',
-      opacity: span ? span.styles.opacity : NaN
+      color: span ? span.styles.color : ''
     }
     return Object.assign(spanStyles, prop)
   }
@@ -1250,7 +1243,7 @@ class TextPropUtils {
         case 'isVertical': {
           if (currLayer.type === 'text') {
             value = currLayer.styles.writingMode.includes('vertical')
-          } else if (subLayerIdx !== -1) {
+          } else if (subLayerIdx !== -1 && currLayer.layers[subLayerIdx].type === 'text') {
             value = currLayer.layers[subLayerIdx].styles.writingMode.includes('vertical')
           } else { // tmp or group w/ subLayerIdx
             value = true

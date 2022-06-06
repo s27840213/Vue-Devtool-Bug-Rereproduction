@@ -1,20 +1,20 @@
 <template lang="pug">
   div(class="card")
     img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
-    span {{`···· ···· ···· ${card.last4}`}}
+    span {{`**** ${card.last4}`}}
     span {{`Expires ${card.date}`}}
     svg-icon(v-if="trash" class="pointer" iconName="trash"
             iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
     div(v-if="showPopup" class="popup-window")
       div(class="card-popup" v-click-outside="closePopup")
-        div(class="card-popup-title") {{$t('TMP0118')}}
-        i18n(class="card-popup-description" path="TMP0119" tag="div")
+        div(class="text-H6") {{$t('NN0622')}}
+        i18n(class="card-popup-description" path="NN0623" tag="div")
           template(#payment-method)
-            span {{$t('TMP0120')}}
+            span {{$t('NN0624')}}
         div(class="card-popup-button")
           btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}
           btn(class="card-popup-button-delete"
-              @click.native="deleteCard()") {{$t('TMP0121')}}
+              @click.native="deleteCard()") {{$t('NN0625')}}
 </template>
 
 <script lang="ts">
@@ -69,9 +69,6 @@ export default Vue.extend({
   width: 390px; height: 215px;
   padding: 37px;
   background-color: setColor(white);
-  &-title {
-    @include text-H6;
-  }
   &-description {
     @include body-XS;
     margin: 30px 0;
@@ -92,6 +89,10 @@ export default Vue.extend({
     bottom: 0px;
     height: 262px;
     padding: 56px 30px;
+  }
+  .card-popup {
+    height: 395px;
+    padding: 56px 37px 175px 37px;
   }
 }
 </style>

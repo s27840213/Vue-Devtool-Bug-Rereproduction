@@ -49,7 +49,6 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import vClickOutside from 'v-click-outside'
 import { IBrandColor, IBrandColorPalette } from '@/interfaces/brandkit'
 import generalUtils from '@/utils/generalUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   data() {
@@ -95,7 +94,6 @@ export default Vue.extend({
       })
     },
     handleSelectColor(paletteId: string, color: IBrandColor) {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       if (this.checkSelected(paletteId, color)) {
         this.handleDeSelectColor()
       } else {
@@ -136,7 +134,6 @@ export default Vue.extend({
       })
     },
     handleAddColor(id: string) {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       brandkitUtils.createColor(id)
       this.$nextTick(() => {
         this.$emit('selectColor', {

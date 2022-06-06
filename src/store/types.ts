@@ -36,7 +36,7 @@ export interface IEditorState {
   clipboard: Array<ITmp>,
   currSelectedInfo: ICurrSelectedInfo,
   currSubSelectedInfo: ICurrSubSelectedInfo,
-  isColorPickerOpened: boolean,
+  isColorPanelOpened: boolean,
   isMoving: boolean,
   currSelectedResInfo: Record<string, never> | {
     userName: string,
@@ -50,7 +50,8 @@ export interface IEditorState {
       width: number,
       height: number
     },
-    isPreview: boolean
+    isPreview: boolean,
+    previewSrc?: string
   },
   asset: {
     [key: string]: IAsset
@@ -87,9 +88,9 @@ export enum FunctionPanelType {
   none,
   group,
   textSetting,
-  colorPicker,
   pageSetting,
   photoSetting,
+  photoShadow,
   fonts,
   backgroundSetting
 }
@@ -120,10 +121,15 @@ export enum LayerType {
   tmp = 'tmp'
 }
 
+export enum LayerProcessType {
+  imgShadow = 'imgShadow',
+  bgRemove = 'bgRemove',
+  none = ''
+}
 export interface ILayerInfo {
   pageIndex: number,
   layerIndex: number,
-  subLayerIdx: number
+  subLayerIdx?: number
 }
 
 export enum LineTemplatesType {

@@ -50,7 +50,6 @@ import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions } from 'vuex'
 import tiptapUtils from '@/utils/tiptapUtils'
-import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   props: {
@@ -159,7 +158,6 @@ export default Vue.extend({
       }
     },
     handleToggleConfig() {
-      if (!paymentUtils.checkIsPro('brandkit')) return
       if (!this.isConfigOpen) {
         this.isConfigOpen = true
         this.refreshFontSizeBuffer()
