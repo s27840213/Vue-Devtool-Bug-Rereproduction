@@ -58,11 +58,11 @@ class PaymentUtils {
           {
             msg: i18n.t('NN0642') as string,
             class: 'btn-light-mid',
-            style: { width: '160px', height: '44px', border: '1px solid #4EABE6' },
+            style: { width: '140px', height: '44px', border: '1px solid #4EABE6' },
             action: this.contactUs
           }, {
             msg: i18n.t('NN0564', { period: i18n.t('NN0515') }) as string,
-            style: { width: '230px', height: '44px' },
+            style: { width: '243px', height: '44px' },
             action: () => {
               this.openPayment('switch1')
             }
