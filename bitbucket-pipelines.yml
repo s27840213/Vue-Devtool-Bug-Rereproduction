@@ -58,6 +58,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV5
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
             name: "dev4 Gary"
@@ -87,6 +88,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV4
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
             name: "dev3 HsingChi"
@@ -116,6 +118,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV3
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
             name: "dev2 TingAn"
@@ -145,6 +148,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV2
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
             name: "dev1 Nathan"
@@ -174,6 +178,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV1
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
             name: "dev0"
@@ -203,6 +208,7 @@ pipelines:
                   AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                   S3_BUCKET: $AWS_BUCKET_DEV0
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
             name: "create pull request"
@@ -265,6 +271,7 @@ pipelines:
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                 S3_BUCKET: $AWS_BUCKET_TEST
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
             - pipe: atlassian/email-notify:0.4.5
               variables:
@@ -302,6 +309,7 @@ pipelines:
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_EDIT
                 S3_BUCKET: $AWS_BUCKET_EDIT
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
             - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
             - pipe: atlassian/email-notify:0.4.5
@@ -340,6 +348,7 @@ pipelines:
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_PROD
                 S3_BUCKET: $AWS_BUCKET_PROD
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
             - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
     develop:
@@ -398,6 +407,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_RD
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "create pull request"
@@ -460,6 +470,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV5
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "dev4 Gary"
@@ -489,6 +500,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV4
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "dev3 HsingChi"
@@ -518,6 +530,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV3
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "dev2 TingAn"
@@ -547,6 +560,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV2
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "dev1 Nathan"
@@ -576,6 +590,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV1
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "dev0"
@@ -605,6 +620,7 @@ pipelines:
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV0
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                    EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
           - step:
               name: "create pull request"
