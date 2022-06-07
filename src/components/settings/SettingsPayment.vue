@@ -312,7 +312,7 @@ export default Vue.extend({
 div.sp-rocket { z-index: 23; }
 
 @media screen and (max-width: 768px) {
-  .sp { padding: 26px 6.4% 20px 6.4% }
+  .sp { padding: 24px 6.4% }
   .sp-field {
     padding: 65px 7.466% 175px 7.466%;
     bottom: 0px;
