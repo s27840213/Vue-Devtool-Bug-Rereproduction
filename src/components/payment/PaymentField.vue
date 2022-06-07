@@ -284,7 +284,7 @@ export default Vue.extend({
     height: 18px;
     margin: 4px 0;
     padding: 10px;
-    border: 1px solid setColor(gray-3);
+    border: 1px solid setColor(gray-4);
     border-radius: 4px;
   }
 }
