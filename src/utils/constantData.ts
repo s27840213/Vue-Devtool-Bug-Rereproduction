@@ -198,7 +198,53 @@ class PaymentData {
     ]
   }
 
-  // For SettingsPayment.vue billing info input
+  // For tappay and stripe config in PaymentField.vue
+  tappayConfig() {
+    return {
+      fields: {
+        number: {
+          element: '#card-number',
+          placeholder: '💳 信用卡卡號'
+        },
+        expirationDate: {
+          element: '#card-date',
+          placeholder: '到期日(MM / YY)'
+        },
+        ccv: {
+          element: '#card-ccv',
+          placeholder: '信用卡安全碼'
+        }
+      },
+      styles: {
+        input: {
+          color: '#969BAB',
+          'font-size': '16px'
+        },
+        ':focus': {
+          color: 'black'
+        },
+        '.valid': {
+          color: 'green'
+        },
+        '.invalid': {
+          color: 'red'
+        }
+      }
+    }
+  }
+
+  stripeOption() {
+    return {
+      fields: { billingDetails: { address: { country: 'never' } } },
+      terms: { card: 'never' },
+      wallets: {
+        applePay: 'never',
+        googlePay: 'never'
+      }
+    }
+  }
+
+  // For billing info input in PaymentField.vue and SettingsPayment.vue
   country():BillingInfoInput[] {
     return [{
       label: 'country',
@@ -273,7 +319,7 @@ class PaymentData {
     }]
   }
 
-  // For SettingPayment.vue dropdown
+  // For country dropdown in PaymentField.vue and SettingPayment.vue
   countryList() {
     return [
       { value: 'af', label: 'Afghanistan' },
@@ -527,6 +573,8 @@ class PaymentData {
       { value: 'zw', label: 'Zimbabwe' }
     ]
   }
+
+  // For US state dropdown in SettingPayment.vue
 
   usState() {
     return [

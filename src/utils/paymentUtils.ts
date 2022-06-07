@@ -63,9 +63,7 @@ class PaymentUtils {
           }, {
             msg: i18n.t('NN0564', { period: i18n.t('NN0515') }) as string,
             style: { width: '243px', height: '44px' },
-            action: () => {
-              this.openPayment('switch1')
-            }
+            action: () => { this.openPayment('switch1') }
           })
         modalUtils.setIsModalOpen(true)
         break

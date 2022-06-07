@@ -293,7 +293,7 @@ export default Vue.extend({
     @include hide-scrollbar;
     // position: relative;
     width: min(792px, 90vw);
-    height: min(704px, min(80vw, 90vh));
+    height: min(770px, min(80vw, 90vh));
   }
 }
 
@@ -301,11 +301,15 @@ export default Vue.extend({
   display: flex;
   position: relative;
   width: min(792px, 90vw);
-  height: min(704px, 80vw);
+  height: min(770px, 80vw);
   flex-shrink: 0;
   background-color: white; // ?
   // overflow: auto; // ?
   text-align: left;
+  &-left, &-right {
+    box-sizing: border-box;
+    width: 50%;
+  }
 }
 
 .payment-left {
@@ -313,13 +317,12 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: space-between;
   // align-items: center;
-  width: calc(50% - 40px);
-  padding: 12% 30px 15% 30px;
+  padding: 95px 30px 118px 30px;
   &-top, &-content, &-button { width: 100%; }
   &-top {
     @include body-MD;
     position: relative;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     color: setColor(gray-1);
     &__step {
       display: flex;

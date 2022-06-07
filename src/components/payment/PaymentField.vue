@@ -4,42 +4,41 @@
       svg-icon(iconName="page-close" iconWidth="10px"
               iconColor="gray-0" class="field__close pointer" @click.native="close()")
       span(class="text-H6 text-gray-2 mb-40") {{$t('NN0600')}}
-    //- todo rearrange class name
-    div(class="field-content")
+    div(class="field-card")
       options(v-if="!isChange" class="mb-10"
               :options="countryData" v-model="userCountryUi")
-      div(:class="{hidden: !useTappay}" class="field__tappay")
-        div(class="field__tappay-card" id="card-number")
-        div(class="field__tappay-date" id="card-date")
-        div(class="field__tappay-ccv" id="card-ccv")
-      div(:class="{hidden: useTappay}" id="stripe" class="stripe")
+      div(:class="{hidden: !useTappay}" class="field-card-tappay")
+        div(id="card-number")
+        div(id="card-date")
+        div(id="card-ccv")
+      div(:class="{hidden: useTappay}" class="field-card-stripe" id="stripe")
         svg-icon(iconName="loading" iconColor="gray-1")
       template(v-if="!isChange")
-        div(v-if="paymentPaidDate" class="field-content__info")
+        div(v-if="paymentPaidDate" class="field-card__info")
           span {{$t('NN0552', {date: paymentPaidDate})}}
           span {{'$'+plans[planSelected][periodUi].nextPaid}}
-        div(class="field-content__info-today")
+        div(class="field-card__info overline-LG")
           span {{$t('NN0553')}}
           span {{priceToday}}
     div(v-if="!isChange" class="field-invoice")
-      span(class="field-invoice__title") {{$t('NN0554')}}
+      div(class="text-H4 mb-25") {{$t('NN0554')}}
       div(v-for="inv in invoiceInput" class="field-invoice__input")
         input(:placeholder="inv.ph" :invalid="biv[inv.key]" v-model="bi[inv.key]")
-        span(v-if="biv[inv.key]") {{inv.error}}
-    btn(class="rounded" type="primary-lg"
+        span(v-if="biv[inv.key]" class="text-red") {{inv.error}}
+    btn(class="btn-LG mt-30 rounded" type="primary-lg"
         :disabled="disableSubmit" @click.native="submit()") {{submitText}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import i18n from '@/i18n'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
+import i18n from '@/i18n'
 import Options from '@/components/global/Options.vue'
-import { Stripe, StripeElements } from '@stripe/stripe-js'
-import { loadStripe } from '@stripe/stripe-js/pure'
 import paymentData from '@/utils/constantData'
 import mappingUtils from '@/utils/mappingUtils'
+import { Stripe, StripeElements, StripePaymentElementOptions } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js/pure'
 
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
@@ -91,7 +90,7 @@ export default Vue.extend({
       trialStatus: 'trialStatus'
     }),
     useTappay():boolean {
-      // When update credit card (isChange true), use countryInfo instead of countryUi.
+      // When update credit card (isChange is true), use countryInfo instead of countryUi.
       return this.isChange ? this.userCountryInfo === 'tw'
         : this.userCountryUi === 'tw'
     },
@@ -141,7 +140,7 @@ export default Vue.extend({
   methods: {
     ...mapActions({
       tappayAdd: 'payment/tappayAdd',
-      stripeAddApi: 'payment/stripeAdd',
+      stripeAdd: 'payment/stripeAdd',
       tappayUpdate: 'payment/tappayUpdate',
       stripeUpdate: 'payment/stripeUpdate',
       checkBillingInfo: 'payment/checkBillingInfo',
@@ -151,40 +150,12 @@ export default Vue.extend({
       setPrime: 'payment/SET_prime'
     }),
     tappayInit() {
-      this.TPDirect.setupSDK(122890, 'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60', 'production')
-
-      this.TPDirect.card.setup({
-        fields: {
-          number: {
-            element: '#card-number',
-            placeholder: '💳 信用卡卡號'
-          },
-          expirationDate: {
-            element: '#card-date',
-            placeholder: '到期日(MM / YY)'
-          },
-          ccv: {
-            element: '#card-ccv',
-            placeholder: '信用卡安全碼'
-          }
-        },
-        styles: {
-          input: {
-            color: '#969BAB',
-            'font-size': '16px'
-          },
-          ':focus': {
-            color: 'black'
-          },
-          '.valid': {
-            color: 'green'
-          },
-          '.invalid': {
-            color: 'red'
-          }
-        }
-      })
-
+      this.TPDirect.setupSDK(
+        122890,
+        'app_vCknZsetHXn07bficr2XQdp7o373nyvvxNoBEm6yIcqgQGFQA96WYtUTDu60',
+        'production'
+      )
+      this.TPDirect.card.setup(paymentData.tappayConfig())
       this.TPDirect.card.onUpdate((update: any) => {
         this.tappayPayReady = update.canGetPrime
       })
@@ -200,23 +171,23 @@ export default Vue.extend({
         // appearance: { labels: 'floating' },
         loader: 'always'
       })
-      const stripePaymentElement = this.stripeElement.create('payment', {
-        fields: { billingDetails: { address: { country: 'never' } } },
-        terms: { card: 'never' },
-        wallets: {
-          applePay: 'never',
-          googlePay: 'never'
-        }
-      })
+      const stripePaymentElement = this.stripeElement.create(
+        'payment',
+        paymentData.stripeOption() as StripePaymentElementOptions
+      )
       stripePaymentElement.mount('#stripe')
       stripePaymentElement.on('change', (event) => {
         this.stripePayReady = event.complete
       })
     },
-    async tappaySubmit() {
+    async checkInvoiceInput():Promise<boolean> {
       for (const item of this.invoiceInput) { // Check invoice input validity
-        if (item.error && await this.checkBillingInfo(item.key)) return
+        if (item.error && await this.checkBillingInfo(item.key)) return false
       }
+      return true
+    },
+    async tappaySubmit() {
+      if (!await this.checkInvoiceInput()) return
       this.isLoading = true
 
       const callback = (result: any) => {
@@ -237,9 +208,7 @@ export default Vue.extend({
       this.TPDirect.card.getPrime(callback)
     },
     async stripeSubmit() {
-      for (const item of this.invoiceInput) { // Check invoice input validity
-        if (item.error && await this.checkBillingInfo(item.key)) return
-      }
+      if (!await this.checkInvoiceInput()) return
       this.isLoading = true
 
       this.stripe.confirmSetup({
@@ -249,7 +218,7 @@ export default Vue.extend({
       }).then((response) => {
         if (response.error) throw Error(response.error.message)
       }).then(() => {
-        return this.isChange ? this.stripeUpdate() : this.stripeAddApi()
+        return this.isChange ? this.stripeUpdate() : this.stripeAdd()
       }).then(({ data }) => {
         if (data.flag) throw Error(data.msg)
         this.close()
@@ -270,6 +239,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .field {
+  @include body-SM;
   display: flex;
   flex-direction: column;
   height: 100%; // Let button at the same position as popup payment step1
@@ -278,62 +248,44 @@ export default Vue.extend({
     top: 0px; right: 0px;
     padding: 10px;
   }
-  >button {
-    @include btn-LG;
-    margin-top: 42px;
-  }
 }
 
-.field__tappay {
+.field-card-tappay {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-gap: 12px;
+  gap: 10px 20px;
   >div {
     height: 18px;
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
     padding: 10px;
   }
-  &-card { grid-column: 1 / 3; }
+  #card-number { grid-column: 1 / 3; }
 }
 
-.stripe {
+.field-card-stripe {
   >svg {
     display: block;
     margin: auto;
   }
 }
 
-.field-content {
-  height: 100%;
-  &__info, &__info-today {
-    @include body-SM;
-    color: setColor(gray-1);
-    display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-  }
-  &__info-today { @include overline-LG; }
+.field-card__info {
+  color: setColor(gray-1);
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
 .field-invoice {
   margin-top: 20px;
-  &__title {
-    @include text-H4;
-    margin-bottom: 6px;
-  }
-  &__input {
-    >input {
-      @include body-SM;
-      width: calc(100% - 22px);
-      height: 18px;
-      margin: 4px 0;
-      padding: 10px;
-      border: 1px solid setColor(gray-3);
-      border-radius: 4px;
-    }
-    // move to html class?
-    >span { color: setColor(red); }
+  &__input >input {
+    width: calc(100% - 22px);
+    height: 18px;
+    margin: 4px 0;
+    padding: 10px;
+    border: 1px solid setColor(gray-3);
+    border-radius: 4px;
   }
 }
 
