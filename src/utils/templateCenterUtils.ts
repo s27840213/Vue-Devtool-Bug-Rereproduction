@@ -8,7 +8,6 @@ class TemplateCenterUtils {
       res.push([])
       ratios.push(0)
     }
-    console.log(templates)
     const list = templates.list ?? []
     for (const template of list) {
       const cover = template.match_cover
@@ -25,6 +24,7 @@ class TemplateCenterUtils {
         height: cover.height,
         type: 6,
         ver: cover.ver,
+        plan: template.plan,
         content_ids: template.content_ids,
         group_type: template.group_type,
         group_id: template.group_id

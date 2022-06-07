@@ -12,6 +12,7 @@
           scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type) && useScrollablePreview"
                                       :contentIds="template.content_ids")
           img(v-else class="template-waterfall__column__template__img" :src="template.url" loading="lazy")
+          img(v-if="template.plan === 1" class="template-waterfall__column__template__pro" :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
           div(v-if="template.group_type !== 1" class="template-waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
           div(v-if="template.content_ids.length > 1" class="template-waterfall__column__template__multi")
             svg-icon(iconName="multiple-file"
@@ -122,6 +123,12 @@ export default Vue.extend({
         height: 100%;
         top: 0;
         left: 0;
+      }
+      &__pro {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        z-index: 2;
       }
       &__theme {
         position: absolute;
