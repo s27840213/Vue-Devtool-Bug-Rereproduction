@@ -211,6 +211,8 @@ export default Vue.extend({
           }]
           await this.getPrice(this.userCountryInfo)
           this.getSwitchPrice()
+          // A potential issue here: planId retury by getPrice may different from the planId user is subscribing,
+          // it will let user cannot switch plan since they should switch in the same plan.
           break
         case 'switch2':
           this.title = i18n.t('NN0551') as string
@@ -320,7 +322,6 @@ export default Vue.extend({
     height: 100%;
     input {
       &:focus { border-color: setColor(blue-1); }
-      &:invalid { border-color: red; }
     }
   }
   &-button {

@@ -660,7 +660,8 @@
   "NN0653": "Unlock this premium template and get unlimited access to over 1000+ PRO templates.",
   "NN0654": "Switch to yearly",
   "NN0655": "Current plan",
-  "NN0656": "",
+  "NN0656": "There's a problem with your account ({status}), please {contactus} .",
+  "NN0657": "Selected",
   "SKT0001": "Editing",
   "SKT0002": "Can edit",
   "SKT0003": "Switching editor...",
@@ -685,5 +686,8 @@
   "SHR0003": "Flipbook Preview",
   "SHR0004": "Web Preview",
   "SHR0005": "Present",
-  "SHR0006": "Share your design"
+  "SHR0006": "Share your design",
+  "SHR0007": "Collaborators need a vivipic account to review this design.",
+  "SHR0008": "Enter email address...",
+  "SHR0009": "Invite"
 }

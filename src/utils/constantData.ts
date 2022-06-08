@@ -100,7 +100,7 @@ class PaymentData {
   }
 
   // For Pricing.vue
-  colorBlock() {
+  pricingColorBlock() {
     return [{
       name: 'vector_pink1.svg',
       top: 171,
@@ -575,7 +575,6 @@ class PaymentData {
   }
 
   // For US state dropdown in SettingPayment.vue
-
   usState() {
     return [
       { value: 'Alabama', label: 'Alabama' },
