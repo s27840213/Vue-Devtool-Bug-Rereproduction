@@ -272,7 +272,7 @@ pipelines:
                   DELETE_FLAG: "true"
         - step:
             name: "create pull request"
-            trigger: manual
+            trigger: manual 
             script:
               - ./bash/create_pull_request.sh
   branches:
