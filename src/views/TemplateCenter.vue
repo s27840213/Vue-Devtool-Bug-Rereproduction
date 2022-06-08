@@ -966,7 +966,7 @@ body {
       display: flex;
       align-items: center;
       justify-content: center;
-      top: calc($header-height / 2);
+      top: calc(#{$header-height} / 2);
       right: 45px;
       width: 25px;
       height: 25px;

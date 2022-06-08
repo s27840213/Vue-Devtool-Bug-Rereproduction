@@ -423,7 +423,7 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image':
           return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
-          // return resizers
+        // return resizers
         case 'text':
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
@@ -752,7 +752,6 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      this.movingHandler(e)
       this.setMoving(false)
       if (this.isActive) {
         const posDiff = {
