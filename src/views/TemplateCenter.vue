@@ -158,6 +158,7 @@ import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
 import themeUtils from '@/utils/themeUtils'
 import generalUtils from '@/utils/generalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 const HEADER_HEIGHT = 72
 
@@ -202,6 +203,7 @@ export default Vue.extend({
       selectedTheme: undefined as Itheme | undefined,
       contentIds: [] as IContentTemplate[],
       groupId: '',
+      modalTemplate: {} as ITemplate,
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
@@ -388,6 +390,7 @@ export default Vue.extend({
     },
     handleClickWaterfall(template: ITemplate) {
       if (template.group_type === 1) {
+        if (!paymentUtils.checkProTemplate(template)) return
         const route = this.$router.resolve({
           name: 'Editor',
           query: {
@@ -402,6 +405,7 @@ export default Vue.extend({
         return
       }
       if (template.content_ids.length === 1) {
+        if (!paymentUtils.checkProTemplate(template)) return
         const matchedTheme = this.themes.find(theme => theme.id.toString() === template.theme_id)
         const format = matchedTheme ? {
           width: matchedTheme.width.toString(),
@@ -426,6 +430,7 @@ export default Vue.extend({
       } else {
         this.groupId = template.group_id ?? ''
         this.contentIds = template.content_ids
+        this.modalTemplate = template
         if (this.isMobile) {
           this.modal = 'mobile-pages'
         } else {
@@ -482,6 +487,7 @@ export default Vue.extend({
       })
     },
     handleTemplateClick(content: IContentTemplate) {
+      if (!paymentUtils.checkProTemplate(this.modalTemplate)) return
       this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
       const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]

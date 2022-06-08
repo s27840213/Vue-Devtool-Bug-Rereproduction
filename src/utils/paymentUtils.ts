@@ -3,6 +3,7 @@ import store from '@/store'
 import i18n from '@/i18n'
 import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
+import { ITemplate } from '@/interfaces/template'
 
 class PaymentUtils {
   openPayment(initView: string, templateImg = '') {
@@ -10,6 +11,14 @@ class PaymentUtils {
     store.commit('payment/SET_initView', initView)
     store.commit('payment/SET_templateImg', templateImg)
     popupUtils.openPopup('payment')
+  }
+
+  checkProTemplate(template: ITemplate) {
+    if (template.plan === 1 && !store.getters['payment/getIsPro']) {
+      this.openPayment('pro-template', template.url)
+      return false
+    }
+    return true
   }
 
   contactUsUrl() {

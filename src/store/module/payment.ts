@@ -556,7 +556,7 @@ const mutations: MutationTree<IPaymentState> = {
   }
 }
 
-const getters: GetterTree<IPaymentState, any> = {
+const getters: GetterTree<IPaymentState, unknown> = {
   getField,
   getDiskPercent(): number {
     return state.usage.diskUsed / state.usage.diskTotal
@@ -569,6 +569,9 @@ const getters: GetterTree<IPaymentState, any> = {
   },
   isUiTW(state) {
     return state.userCountryUi === 'tw'
+  },
+  getIsPro(state) {
+    return state.isPro
   }
 }
 
