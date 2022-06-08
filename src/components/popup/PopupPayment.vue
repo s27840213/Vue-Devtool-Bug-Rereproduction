@@ -56,7 +56,11 @@
               btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
                   :disabled="button.disabled ? button.disabled() : false"
                   @click.native="button.func()") {{button.label}}
-          img(class="payment-right" :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
+          div(class="payment-right")
+            img(class="payment-right-bg"
+                :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
+            img(v-if="view === 'pro-template'"
+                class="payment-right-temp"  :src="templateImg")
           div(v-if="view === 'finish'" class="payment-finish")
             div(class="payment-finish-content")
               animation(path="/lottie/pro.json")
@@ -116,6 +120,7 @@ export default Vue.extend({
     ...mapFields({ periodUi: 'periodUi' }),
     ...mapState('payment', {
       initView: 'initView',
+      templateImg: 'templateImg',
       userCountryUi: 'userCountryUi',
       userCountryInfo: 'userCountryInfo',
       switchPaidDate: 'switchPaidDate',
@@ -135,7 +140,7 @@ export default Vue.extend({
       return ['step2', 'switch2'].includes(this.view)
     },
     showFeature(): boolean {
-      return ['cancel1', 'brandkit', 'bgrm', 'pro template'].includes(this.view)
+      return ['cancel1', 'brandkit', 'bgrm', 'pro-template'].includes(this.view)
     },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
@@ -161,9 +166,9 @@ export default Vue.extend({
           return [i18n.t('NN0583') as string, 'brandkit.jpg']
         case 'bgrm':
           return [i18n.t('NN0652') as string, 'remover.jpg']
-        case 'pro template':
+        case 'pro-template':
         default:
-          return [i18n.t('NN0653') as string, 'pro-template.jpg']
+          return [i18n.t('NN0653') as string, 'templateBG.jpg']
       }
     },
     async changeView(name: string) {
@@ -171,7 +176,7 @@ export default Vue.extend({
       switch (name) {
         case 'brandkit':
         case 'bgrm':
-        case 'pro template':
+        case 'pro-template':
           this.title = i18n.tc('NN0507', 2) as string
           [this.description, this.img] = this.getAd(name)
           this.buttons = [{
@@ -197,7 +202,7 @@ export default Vue.extend({
           this.title = i18n.t('NN0551') as string
           this.description = ''
           this.buttons = [] // Use button in PaymentField.vue
-          this.img = 'pro-template.jpg'
+          this.img = 'pro-template1.jpg'
           break
         case 'finish':
           this.getBillingInfo()
@@ -224,7 +229,7 @@ export default Vue.extend({
               this.closePopup()
             }
           }]
-          this.img = 'pro-template.jpg'
+          this.img = 'pro-template1.jpg'
           break
         case 'cancel1':
           this.title = i18n.t('NN0569') as string
@@ -398,6 +403,19 @@ export default Vue.extend({
     padding: 10px;
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
+  }
+}
+
+.payment-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 25px;
+  &-bg { position: absolute; }
+  &-temp {
+    max-width: 100%;
+    max-height: 100%;
+    z-index: 1;
   }
 }
 

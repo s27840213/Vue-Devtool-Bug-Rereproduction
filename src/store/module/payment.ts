@@ -9,6 +9,7 @@ import generalUtils from '@/utils/generalUtils'
 interface IPaymentState {
   isLoading: boolean
   initView: string
+  templateImg: string
   // Constant
   status: string
   plans: Record<string, Record<string, Record<string, string>|string>>
@@ -120,6 +121,7 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
   initView: '',
+  templateImg: '',
   // Constant
   status: 'Loading',
   plans: {
@@ -542,6 +544,9 @@ const mutations: MutationTree<IPaymentState> = {
   },
   SET_initView(state: IPaymentState, initView) {
     state.initView = initView
+  },
+  SET_templateImg(state: IPaymentState, templateImg) {
+    state.templateImg = templateImg
   },
   DEL_guiWhiteSpace(state: IPaymentState) {
     state.billingInfo.GUI = state.billingInfo.GUI.replace(/\s/g, '')

@@ -5,9 +5,10 @@ import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
 
 class PaymentUtils {
-  openPayment(initView: string) {
+  openPayment(initView: string, templateImg = '') {
     store.commit('brandkit/SET_isSettingsOpen', false)
     store.commit('payment/SET_initView', initView)
+    store.commit('payment/SET_templateImg', templateImg)
     popupUtils.openPopup('payment')
   }
 
