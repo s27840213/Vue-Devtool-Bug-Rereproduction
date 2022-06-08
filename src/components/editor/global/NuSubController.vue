@@ -68,6 +68,7 @@ import formatUtils from '@/utils/formatUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   props: {
@@ -115,7 +116,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    ...mapState('shadow', ['uploadId']),
+    ...mapState('shadow', ['uploadId', 'handleId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -471,9 +472,13 @@ export default Vue.extend({
           }
           return
         case 'group':
-          if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-            this.dragUtils.onImageDragEnter(e, this.config as IImage)
-            body.addEventListener('dragleave', this.onDragLeave)
+          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+          if (this.getLayerType === 'image') {
+            const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
+            if (this.handleId.subLayerId !== this.config.id || !shadowEffectNeedRedraw) {
+              this.dragUtils.onImageDragEnter(e, this.config as IImage)
+              body.addEventListener('dragleave', this.onDragLeave)
+            }
           }
       }
     },
@@ -488,7 +493,8 @@ export default Vue.extend({
           }
           return
         case 'group':
-          if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+          if (this.getLayerType === 'image') {
             this.dragUtils.onImageDragLeave(e)
             body.removeEventListener('dragleave', this.onDragLeave)
           }
@@ -508,11 +514,14 @@ export default Vue.extend({
             }
             return
           case 'group':
-            if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+            // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+            if (this.getLayerType === 'image') {
               e.stopPropagation()
-              groupUtils.deselect()
-              groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-              LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+              if (!this.isHandleShadow) {
+                groupUtils.deselect()
+                groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+                LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+              }
               eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
               const body = this.$refs.body as HTMLElement
               body.removeEventListener('dragleave', this.onDragLeave)

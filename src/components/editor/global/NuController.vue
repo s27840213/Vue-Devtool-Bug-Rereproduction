@@ -219,7 +219,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props']),
-    ...mapState('shadow', ['processId']),
+    ...mapState('shadow', ['processId', 'handleId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters('text', ['getDefaultFonts']),
     ...mapGetters({
@@ -423,7 +423,7 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case 'image':
           return this.config.styles.shadow.currentEffect === ShadowEffectType.none ? resizers : []
-          // return resizers
+        // return resizers
         case 'text':
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
@@ -752,7 +752,6 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent) {
-      this.movingHandler(e)
       this.setMoving(false)
       if (this.isActive) {
         const posDiff = {
@@ -1418,6 +1417,25 @@ export default Vue.extend({
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
+    dragEnter(e: DragEvent) {
+      if (this.getLayerType === 'image') {
+        const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
+        if (this.handleId.layerId !== this.config.id || !shadowEffectNeedRedraw) {
+          const body = this.$refs.body as HTMLElement
+          body.addEventListener('dragleave', this.dragLeave)
+          body.addEventListener('drop', this.onDrop)
+          this.dragUtils.onImageDragEnter(e, this.config as IImage)
+        }
+      }
+    },
+    dragLeave(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('dragleave', this.dragLeave)
+      body.removeEventListener('drop', this.onDrop)
+      if (this.getLayerType === 'image') {
+        this.dragUtils.onImageDragLeave(e)
+      }
+    },
     onDrop(e: DragEvent) {
       const body = this.$refs.body as HTMLElement
       body.removeEventListener('dragleave', this.dragLeave)
@@ -1427,8 +1445,12 @@ export default Vue.extend({
       if (e.dataTransfer?.getData('data')) {
         if (!this.currDraggedPhoto.srcObj.type || this.getLayerType !== 'image') {
           this.dragUtils.itemOnDrop(e, this.pageIndex)
-        } else if (this.getLayerType === 'image' && !this.isHandleShadow) {
-          eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+        } else if (this.getLayerType === 'image') {
+          if (this.isHandleShadow) {
+            return
+          } else {
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+          }
         }
         GroupUtils.deselect()
         this.setLastSelectedLayerIndex(this.layerIndex)
@@ -1640,22 +1662,6 @@ export default Vue.extend({
           })
         }
       })
-    },
-    dragEnter(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.addEventListener('dragleave', this.dragLeave)
-      body.addEventListener('drop', this.onDrop)
-      if (this.getLayerType === 'image' && !this.isHandleShadow) {
-        this.dragUtils.onImageDragEnter(e, this.config as IImage)
-      }
-    },
-    dragLeave(e: DragEvent) {
-      const body = this.$refs.body as HTMLElement
-      body.removeEventListener('dragleave', this.dragLeave)
-      body.removeEventListener('drop', this.onDrop)
-      if (this.getLayerType === 'image' && !this.isHandleShadow) {
-        this.dragUtils.onImageDragLeave(e)
-      }
     },
     handleScaleOffset(e: KeyboardEvent) {
       e.preventDefault()
