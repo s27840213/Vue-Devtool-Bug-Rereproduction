@@ -74,77 +74,13 @@
               :class="{'selected': selectedSorting === sortingCriterium.key}"
               @click="handleSelectSorting(sortingCriterium.key)") {{ sortingCriterium.text }}
         div(class="template-center__sorter__right")
-      div(v-if="isPC" class="template-center__waterfall-wrapper")
-        div(class="template-center__waterfall")
-          div(v-for="waterfallTemplate in waterfallTemplatesPC"
-              class="template-center__waterfall__column")
-            div(v-for="template in waterfallTemplate"
-                class="template-center__waterfall__column__template"
-                :style="templateStyles(template.aspect_ratio)"
-                @click="handleClickWaterfall(template)"
-                @mouseenter="handleMouseEnter(template.group_id)"
-                @mouseleave="handleMouseLeave(template.group_id)")
-              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
-                                          :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
-              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
-              div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
-                svg-icon(iconName="multiple-file"
-                        iconWidth="24px"
-                        iconColor="gray-7")
-        div(v-if="!isTemplateReady" class="template-center__loading")
-          svg-icon(iconName="loading"
-                  iconWidth="24px"
-                  iconColor="gray-2")
-        observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                          @callback="handleLoadMore")
-      div(v-if="!isPC && !isMobile" class="template-center__waterfall-wrapper")
-        div(class="template-center__waterfall")
-          div(v-for="waterfallTemplate in waterfallTemplatesTAB"
-              class="template-center__waterfall__column")
-            div(v-for="template in waterfallTemplate"
-                class="template-center__waterfall__column__template"
-                :style="templateStyles(template.aspect_ratio)"
-                @click="handleClickWaterfall(template)"
-                @mouseenter="handleMouseEnter(template.group_id)"
-                @mouseleave="handleMouseLeave(template.group_id)")
-              scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type)"
-                                          :contentIds="template.content_ids")
-              img(v-else class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
-              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
-              div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
-                svg-icon(iconName="multiple-file"
-                        iconWidth="24px"
-                        iconColor="gray-7")
-        div(v-if="!isTemplateReady" class="template-center__loading")
-          svg-icon(iconName="loading"
-                  iconWidth="24px"
-                  iconColor="gray-2")
-        observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                          @callback="handleLoadMore")
-      div(v-if="isMobile" class="template-center__waterfall-wrapper")
-        div(class="template-center__waterfall")
-          div(v-for="waterfallTemplate in waterfallTemplatesMOBILE"
-              class="template-center__waterfall__column")
-            div(v-for="template in waterfallTemplate"
-                class="template-center__waterfall__column__template"
-                :style="templateStyles(template.aspect_ratio)"
-                @click="handleClickWaterfall(template)"
-                @mouseenter="handleMouseEnter(template.group_id)"
-                @mouseleave="handleMouseLeave(template.group_id)")
-              img(class="template-center__waterfall__column__template__img" :src="template.url" loading="lazy")
-              div(v-if="template.group_type !== 1" class="template-center__waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
-              div(v-if="template.content_ids.length > 1" class="template-center__waterfall__column__template__multi")
-                svg-icon(iconName="multiple-file"
-                        iconWidth="24px"
-                        iconColor="gray-7")
-        div(v-if="!isTemplateReady" class="template-center__loading")
-          svg-icon(iconName="loading"
-                  iconWidth="24px"
-                  iconColor="gray-2")
-        observer-sentinel(v-if="isTemplateReady && hasNextPage"
-                          @callback="handleLoadMore")
-        div(class="template-center__scroll-space")
+      template-waterfall(:waterfallTemplates="waterfallTemplates"
+                        :isTemplateReady="isTemplateReady"
+                        :useScrollablePreview="!isMobile"
+                        :useScrollSpace="isMobile"
+                        :themes="themes"
+                        @loadMore="handleLoadMore"
+                        @clickWaterfall="handleClickWaterfall")
     nu-footer(class="non-mobile-show")
     transition(name="fade-scale")
       div(v-if="snapToTop" class="template-center__to-top pointer non-mobile-show" @click="scrollToTop")
@@ -215,7 +151,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
-import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
+import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
@@ -232,7 +168,7 @@ export default Vue.extend({
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
-    ScrollableTemplatePreview,
+    TemplateWaterfall,
     ObserverSentinel
   },
   directives: {
@@ -269,7 +205,6 @@ export default Vue.extend({
       contentBuffer: undefined as IContentTemplate | undefined,
       modal: '',
       isShowOptions: false,
-      mouseInTemplate: '',
       isMobile: false,
       isPC: false
     }
@@ -395,7 +330,16 @@ export default Vue.extend({
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'
-    })
+    }),
+    waterfallTemplates(): ITemplate[][] {
+      if (this.isPC) {
+        return this.waterfallTemplatesPC
+      } else if (this.isMobile) {
+        return this.waterfallTemplatesMOBILE
+      } else {
+        return this.waterfallTemplatesTAB
+      }
+    }
   },
   methods: {
     ...mapActions('hashtag', {
@@ -413,9 +357,6 @@ export default Vue.extend({
     },
     mobileSearchStyles() {
       return this.mobileSnapToTop ? { zIndex: 10 } : {}
-    },
-    templateStyles(ratio: number) {
-      return { paddingTop: `${ratio * 100}%` }
     },
     multiThemeButtonStyles() {
       return this.$i18n.locale === 'tw' ? {
@@ -490,14 +431,6 @@ export default Vue.extend({
         } else {
           this.modal = 'pages'
         }
-      }
-    },
-    handleMouseEnter(id: string) {
-      this.mouseInTemplate = id
-    },
-    handleMouseLeave(id: string) {
-      if (this.mouseInTemplate === id) {
-        this.mouseInTemplate = ''
       }
     },
     scrollToTop() {
@@ -626,15 +559,8 @@ export default Vue.extend({
     getPrevUrl(content: IContentTemplate, scale: number): string {
       return templateCenterUtils.getPrevUrl(content, scale)
     },
-    getThemeTitle(themeId: string): string {
-      const theme = this.themes.find((theme) => theme.id.toString() === themeId)
-      return theme ? theme.title : `${this.$t('NN0258')}`
-    },
     checkSelected(theme: Itheme): boolean {
       return this.selectedTheme?.id === theme.id
-    },
-    checkMouseEntered(id: string, groupType: number): boolean {
-      return this.mouseInTemplate === id && groupType === 1
     }
   }
 })
@@ -804,66 +730,6 @@ body {
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-  }
-  &__waterfall-wrapper {
-    padding-bottom: 80px;
-  }
-  &__waterfall {
-    display: flex;
-    gap: 24px;
-    @media screen and (max-width: 540px) {
-      gap: 15px;
-      padding: 2px;
-    }
-    &__column {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      @media screen and (max-width: 540px) {
-        gap: 15px;
-      }
-      &__template {
-        position: relative;
-        width: 100%;
-        border: 1px solid setColor(gray-5);
-        overflow: hidden;
-        cursor: pointer;
-        &__img {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-        }
-        &__theme {
-          position: absolute;
-          bottom: -20px;
-          left: 0;
-          width: 100%;
-          height: 20px;
-          background-color: rgba(238, 239, 244, 0.8);
-          font-weight: 400;
-          font-size: 14px;
-          line-height: 20px;
-          color: setColor(gray-2);
-          text-align: left;
-          padding: 0;
-          padding-left: 8px;
-          transition: 0.2s ease;
-        }
-        &:hover &__theme {
-          bottom: 0;
-        }
-        &__multi {
-          position: absolute;
-          top: 4px;
-          right: 4px;
-          width: 24px;
-          height: 24px;
-        }
-      }
     }
   }
   &__mobile-search {

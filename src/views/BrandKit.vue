@@ -39,7 +39,9 @@
         div(v-if="deleteBuffer && deleteBuffer.type === 'palette'" class="delete-confirm__description")
           span {{ $t('NN0436') }}
         div(v-else class="delete-confirm__description")
-          span {{ $t('NN0459') }}
+          i18n(path="NN0459" tag="span")
+            template(#itemName)
+              span(class="delete-confirm__item-name") {{ deleteBuffer ? getDisplayedName(deleteBuffer) : '' }}
         div(class="delete-confirm__buttons")
           div(class="delete-confirm__buttons__cancel pointer"
             @click="handleClearDeletion")
