@@ -32,15 +32,15 @@ pipelines:
     - parallel:
         - step:
             name: "dev5 Alan"
-            deployment: dev5
+            deployment: dev5CESS_KEY_ID_TEST
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
+                  S3_BUCKET: $A
             trigger: manual
             script:
               - pipe: atlassian/aws-s3-deploy:1.1.0
                 variables:
-                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_TEST
-                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
-                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
-                  S3_BUCKET: $AWS_BUCKET_DEV5
+                  AWS_ACCESS_KEY_ID: $AWS_ACWS_BUCKET_DEV5
                   LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                   EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
               - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -332,15 +332,7 @@ pipelines:
                 S3_BUCKET: $AWS_BUCKET_TEST
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                 EXTRA_ARGS: "--exclude=*.js.map"
-                DELETE_FLAG: "true"
-            - pipe: atlassian/email-notify:0.4.5
-              variables:
-                USERNAME: "nuphoto.mail@gmail.com"
-                PASSWORD: $EMAIL_NOTIFY_PASSWORD
-                FROM: "nuphoto.mail@gmail.com"
-                TO: "nuphoto.bruce.486idj@zapiermail.com"
-                HOST: "smtp.gmail.com"
-                SUBJECT: "NEW TEST DEPLOYED"
+                DELETE_FLAG: "true"       
       - step:
           name: "deploy edit"
           deployment: staging
