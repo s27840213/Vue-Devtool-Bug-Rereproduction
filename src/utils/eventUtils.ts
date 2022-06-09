@@ -13,6 +13,29 @@ const mobileHash = {
 }
 
 class EventUtils {
+  checkIsMultiTouch(event: MouseEvent | TouchEvent | PointerEvent) {
+    switch (eventUtils.getEventType(event)) {
+      case 'pointer': {
+        if (!(event as PointerEvent).isPrimary) {
+          return true
+        }
+        break
+      }
+      case 'touch': {
+        if ((event as TouchEvent).touches.length > 1) {
+          return true
+        }
+        break
+      }
+    }
+
+    return false
+  }
+
+  getEventType(event: MouseEvent | TouchEvent | PointerEvent): 'pointer' | 'touch' | 'mouse' {
+    return event.type.includes('pointer') ? 'pointer' : event.type.includes('touch') ? 'touch' : 'mouse'
+  }
+
   addPointerEvent(type: 'pointerdown' | 'pointerup' | 'pointermove', callback: any) {
     if (window.PointerEvent) {
       window.addEventListener(type, callback)

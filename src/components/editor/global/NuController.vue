@@ -562,6 +562,11 @@ export default Vue.extend({
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
+        /**
+         * @Note - set touchAction to none because pointer event will be canceled by touch action
+         * So, if we want to control the layer, we need to set it to none.
+         * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
+         */
         touchAction: this.isActive ? 'none' : 'initial',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
@@ -612,7 +617,11 @@ export default Vue.extend({
     hintStyles() {
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
-    moveStart(event: MouseEvent | PointerEvent) {
+    moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
+
       if (this.isTouchDevice && !this.isActive && !this.isLocked) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -842,6 +851,10 @@ export default Vue.extend({
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
+
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
 
@@ -1106,6 +1119,10 @@ export default Vue.extend({
       this.$emit('clearSnap')
     },
     resizeStart(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
+
       this.isControlling = true
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')

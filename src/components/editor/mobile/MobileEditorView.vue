@@ -393,8 +393,6 @@ export default Vue.extend({
       this.isShowGuidelineH = false
     },
     pinchHandler(event: AnyTouchEvent) {
-      console.log(event.phase)
-
       switch (event.phase) {
         /**
          * @Note the very first event won't fire start phase, it's very strange and need to pay attention
