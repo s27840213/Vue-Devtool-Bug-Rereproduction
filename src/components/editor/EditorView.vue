@@ -266,8 +266,8 @@ export default Vue.extend({
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.selecting)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.selectEnd)
+      eventUtils.addPointerEvent('pointermove', this.selecting)
+      eventUtils.addPointerEvent('pointerup', this.selectEnd)
       window.addEventListener('scroll', this.scrollUpdate, { capture: true })
     },
     selecting(e: MouseEvent) {
@@ -313,9 +313,9 @@ export default Vue.extend({
        * Use nextTick to trigger the following function after DOM updating
        */
       this.$nextTick(() => {
-        eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.selecting)
+        eventUtils.removePointerEvent('pointermove', this.selecting)
         window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
-        eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.selectEnd)
+        eventUtils.removePointerEvent('pointerup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement
