@@ -28,6 +28,7 @@ import { mapGetters } from 'vuex'
 import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue'
 import assetUtils from '@/utils/assetUtils'
 import modalUtils from '@/utils/modalUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   components: { CategoryTemplateItem },
@@ -57,6 +58,7 @@ export default Vue.extend({
   },
   methods: {
     handleApplyGroupTemplate() {
+      if (!paymentUtils.checkProTemplateAsset(this.groupItem)) return
       assetUtils.addGroupTemplate(this.groupItem)
     },
     handleDeleteGroupTemplate() {

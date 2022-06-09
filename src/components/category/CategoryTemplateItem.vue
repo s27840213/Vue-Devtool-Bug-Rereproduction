@@ -8,6 +8,8 @@
         @error="handleNotFound"
         @dragstart="dragStart($event)"
         @click="addTemplate")
+      img(v-if="item.plan" class="category-template-item__pro"
+          :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
     div(v-if="showId"
       class="category-template-item__id"
       @click="copyId") {{ item.id }}
@@ -20,7 +22,7 @@ import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import page from '@/store/module/page'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   components: { ImageCarousel },
@@ -69,7 +71,8 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
-      console.log('Add template')
+      if (this.groupItem && !paymentUtils.checkProTemplateAsset(this.groupItem)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplateAsset(this.item)) return
       const { match_cover: matchCover = {} } = this.item
       let { height, width } = this.item
 
@@ -88,11 +91,9 @@ export default Vue.extend({
       const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
         ? (resize?: any) => {
-          console.log('Add group template')
           AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         }
         : (resize?: any) => {
-          console.log('Add normal template')
           AssetUtils.addAsset(this.item, resize)
           GeneralUtils.fbq('track', 'AddToWishlist', {
             content_ids: [this.item.id]
@@ -183,6 +184,11 @@ export default Vue.extend({
     background: rgba(24, 25, 31, 0.7);
     transform: scale(0.4);
     transform-origin: bottom right;
+  }
+  &__pro {
+    position: absolute;
+    top: 4px;
+    left: 4px;
   }
 }
 </style>

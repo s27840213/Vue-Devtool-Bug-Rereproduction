@@ -14,6 +14,8 @@
         :style="previewStyle"
         @error="handleNotFound")
       span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
+      img(v-if="item.plan" class="category-template-item__pro"
+          :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
     div(v-if="showId"
       class="category-template-item__id"
       @click.self.stop="copyId") {{ item.id }}
@@ -125,6 +127,11 @@ export default Vue.extend({
       background: rgba(24, 25, 31, 0.7);
       transform: scale(0.4);
       transform-origin: bottom right;
+    }
+    &__pro {
+      position: absolute;
+      top: 4px;
+      left: 4px;
     }
   }
 </style>

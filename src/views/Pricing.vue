@@ -60,6 +60,8 @@ import SlideToggle from '@/components/global/SlideToggle.vue'
 import paymentData from '@/utils/constantData'
 import paymentUtils from '@/utils/paymentUtils'
 
+// Pricing testing doc: https://www.notion.so/vivipic/Pricing
+
 const { mapFields } = createHelpers({
   getterType: 'payment/getField',
   mutationType: 'payment/updateField'

@@ -4,6 +4,8 @@ import i18n from '@/i18n'
 import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
 import { ITemplate } from '@/interfaces/template'
+import templateCenterUtils from './templateCenterUtils'
+import { IAssetTemplate } from '@/interfaces/api'
 
 class PaymentUtils {
   openPayment(initView: string, templateImg = '') {
@@ -13,7 +15,13 @@ class PaymentUtils {
     popupUtils.openPopup('payment')
   }
 
+  checkProTemplateAsset(assetTemplate: IAssetTemplate) {
+    const template = templateCenterUtils.iAssetTemplate2Template(assetTemplate, 4)
+    return this.checkProTemplate(template)
+  }
+
   checkProTemplate(template: ITemplate) {
+    if (store.getters['user/isAdmin']) return true
     if (template.plan === 1 && !store.getters['payment/getIsPro']) {
       this.openPayment('pro-template', template.url)
       return false
