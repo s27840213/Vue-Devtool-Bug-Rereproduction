@@ -104,7 +104,8 @@ export default Vue.extend({
     ...mapGetters({
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
-      bgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      bgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     whiteTheme(): boolean {
       return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
@@ -119,6 +120,12 @@ export default Vue.extend({
       switch (this.currActivePanel) {
         case 'crop': {
           return `${this.$t('NN0496')}`
+        }
+        case 'none': {
+          if (this.inMultiSelectionMode) {
+            return ''
+          }
+          return ''
         }
         default: {
           return ''

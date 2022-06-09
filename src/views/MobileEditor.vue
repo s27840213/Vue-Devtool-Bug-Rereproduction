@@ -10,7 +10,7 @@
           :isConfigPanelOpen="isConfigPanelOpen")
         div(v-else class="mobile-editor__page-preview")
           page-preview
-      mobile-panel(v-if="currActivePanel !== 'none'"
+      mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
         :currActivePanel="currActivePanel"
         :currColorEvent="currColorEvent"
         @openExtraColorModal="openExtraColorModal"
@@ -84,7 +84,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      isSidebarPanelOpen: 'getMobileSidebarPanelOpen'
+      isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
+      inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel

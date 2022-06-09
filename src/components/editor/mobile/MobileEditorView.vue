@@ -5,6 +5,7 @@
       @wheel="handleWheel"
       @scroll="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
+      @pinch="pinchHandler"
       ref="editorView")
     div(class="editor-view__grid")
       div(class="editor-view__canvas"
@@ -19,32 +20,6 @@
                   :style="{'z-index': `${getPageZIndex(index)}`}"
                   :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")
-        //- bg-remove-area(v-else :editorView="editorView")
-    //-   template(v-if="showRuler")
-    //-     ruler-hr(:canvasRect="canvasRect"
-    //-       :editorView="editorView"
-    //-       @mousedown.native.stop="dragStartH($event)")
-    //-     ruler-vr(:canvasRect="canvasRect"
-    //-       :editorView="editorView"
-    //-       @mousedown.native.stop="dragStartV($event)")
-    //-     div(class="corner-block")
-    //- div(v-if="!inBgRemoveMode"
-    //-     class="editor-view__guidelines-area"
-    //-     ref="guidelinesArea")
-    //-   div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
-    //-     :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-    //-     @mousedown.stop="lockGuideline ? null: dragStartV($event)"
-    //-     @mouseout.stop="closeGuidelineV()"
-    //-     @click.right.stop.prevent="openGuidelinePopup($event)")
-    //-     div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
-    //-       span {{rulerVPos}}
-    //-   div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
-    //-     :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-    //-     @mousedown.stop="lockGuideline ? null : dragStartH($event)"
-    //-     @mouseout.stop="closeGuidelineH()"
-    //-     @click.right.stop.prevent="openGuidelinePopup($event)")
-    //-     div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
-    //-       span {{rulerHPos}}
 </template>
 
 <script lang="ts">
@@ -65,7 +40,9 @@ import imageUtils from '@/utils/imageUtils'
 import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
-import Hammer from 'hammerjs'
+import generalUtils from '@/utils/generalUtils'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {
@@ -99,31 +76,29 @@ export default Vue.extend({
       screenWidth: document.documentElement.clientWidth,
       screenHeight: document.documentElement.clientHeight,
       scrollHeight: 0,
-      hammer: null as unknown as any,
-      tmpScaleRatio: 0
+      tmpScaleRatio: 0,
+      initialDist: 0,
+      minScaleRatio: 0
     }
   },
   mounted() {
+    const at = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
+    //  销毁
+    this.$on('hook:destroyed', () => {
+      at.destroy()
+    })
+
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
+
     pageUtils.fitPage()
+    this.tmpScaleRatio = pageUtils.scaleRatio
 
-    // setup the hammer settings
-    this.hammer = new Hammer(this.editorView)
-    this.hammer.get('pinch').set({ enable: true })
-
-    this.hammer.on('pinch', (event: any) => {
-      pageUtils.setScaleRatio(this.tmpScaleRatio * event.scale)
-      // console.log(event.additionalEvent)
-      // console.log(event.type)
-      // console.log(event.scale)
-    })
-
-    this.hammer.on('pinchstart', (event: any) => {
-      this.tmpScaleRatio = pageUtils.scaleRatio
-    })
+    if (generalUtils.isTouchDevice()) {
+      this.minScaleRatio = pageUtils.scaleRatio
+    }
 
     this.$nextTick(() => {
       pageUtils.findCentralPageIndexInfo()
@@ -177,18 +152,7 @@ export default Vue.extend({
       pageUtils.findCentralPageIndexInfo(true)
     }
   },
-  beforeDestroy() {
-    this.hammer.off('pinch', (event: any) => {
-      pageUtils.setScaleRatio(this.tmpScaleRatio * event.scale)
-      // console.log(event.additionalEvent)
-      // console.log(event.type)
-      // console.log(event.scale)
-    })
 
-    this.hammer.off('pinchstart', () => {
-      this.tmpScaleRatio = pageUtils.scaleRatio
-    })
-  },
   computed: {
     ...mapState('user', [
       'role',
@@ -243,7 +207,8 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      setInBgRemoveMode: 'SET_inBgRemoveMode'
+      setInBgRemoveMode: 'SET_inBgRemoveMode',
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
     }),
     brushCursorStyles() {
       const styles = {}
@@ -259,6 +224,7 @@ export default Vue.extend({
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
+        this.setInMultiSelectionMode(false)
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
@@ -425,7 +391,59 @@ export default Vue.extend({
     handleStepChange() {
       this.isShowGuidelineV = false
       this.isShowGuidelineH = false
+    },
+    pinchHandler(event: AnyTouchEvent) {
+      console.log(event.phase)
+
+      switch (event.phase) {
+        /**
+         * @Note the very first event won't fire start phase, it's very strange and need to pay attention
+         */
+        case 'start': {
+          this.tmpScaleRatio = pageUtils.scaleRatio
+          break
+        }
+        case 'move': {
+          pageUtils.setScaleRatio(this.tmpScaleRatio * event.scale)
+          break
+        }
+
+        case 'end': {
+          if (pageUtils.scaleRatio < this.minScaleRatio) {
+            pageUtils.setScaleRatio(this.minScaleRatio)
+          }
+          break
+        }
+      }
+
+      this.$nextTick(() => {
+        // here is a workaround to fix the problem of selecting layer after pinching
+        if (layerUtils.currSelectedInfo.layers.length > 0) {
+          GroupUtils.deselect()
+        }
+      })
     }
+    // pinchHandler(event: GestureState<'pinch'>) {
+    //   const { _lastEventType: type, da } = event
+
+    //   switch (type) {
+    //     case 'touchstart': {
+    //       this.tmpScaleRatio = pageUtils.scaleRatio
+    //       this.initialDist = da[0]
+    //       break
+    //     }
+    //     case 'touchend': {
+    //       if (this.tmpScaleRatio < this.minScaleRatio) {
+    //         pageUtils.setScaleRatio(this.minScaleRatio)
+    //       }
+    //       this.tmpScaleRatio = 0
+    //       return
+    //     }
+    //   }
+
+    //   const scaleFactor = (da[0] / this.initialDist)
+    //   pageUtils.setScaleRatio(this.tmpScaleRatio * scaleFactor)
+    // }
   }
 })
 </script>

@@ -87,7 +87,7 @@ export default Vue.extend({
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect', disabled: true },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
         { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }

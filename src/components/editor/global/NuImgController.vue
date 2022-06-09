@@ -238,8 +238,8 @@ export default Vue.extend({
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.moving)
+      eventUtils.addPointerEvent('pointerup', this.moveEnd)
+      eventUtils.addPointerEvent('pointermove', this.moving)
 
       this.setCursorStyle('move')
       this.setLastSelectedLayerIndex(this.layerIndex)
@@ -297,8 +297,8 @@ export default Vue.extend({
         this.updateLayerProps({ imgControl: true })
       }
       this.setCursorStyle('default')
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)
+      eventUtils.removePointerEvent('pointerup', this.moveEnd)
+      eventUtils.removePointerEvent('pointermove', this.moving)
     },
     scaleStart(event: MouseEvent) {
       this.isControlling = true
@@ -320,8 +320,8 @@ export default Vue.extend({
 
       this.currCursorStyling(event)
 
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.scaling)
+      eventUtils.addPointerEvent('pointerup', this.scaleEnd)
+      eventUtils.addPointerEvent('pointermove', this.scaling)
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
@@ -437,8 +437,8 @@ export default Vue.extend({
       this.isControlling = false
       this.setCursorStyle('default')
 
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.scaling)
+      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
+      eventUtils.removePointerEvent('pointermove', this.scaling)
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8

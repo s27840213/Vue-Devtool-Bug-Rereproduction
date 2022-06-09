@@ -1,11 +1,5 @@
 import generalUtils from './generalUtils'
 
-export enum EventType {
-  pointerDown = 'pointerdown',
-  pointerMove = 'pointermove',
-  pointerUp = 'pointerup'
-}
-
 const computerHash = {
   pointerup: 'mouseup',
   pointermove: 'mousemove',
@@ -19,10 +13,7 @@ const mobileHash = {
 }
 
 class EventUtils {
-  static readonly EventType = EventType
-  readonly EventType = EventUtils.EventType
-
-  addPointerEvent(type: EventType, callback: any) {
+  addPointerEvent(type: 'pointerdown' | 'pointerup' | 'pointermove', callback: any) {
     if (window.PointerEvent) {
       window.addEventListener(type, callback)
     } else {
@@ -32,7 +23,7 @@ class EventUtils {
     }
   }
 
-  removePointerEvent(type: EventType, callback: any) {
+  removePointerEvent(type: 'pointerdown' | 'pointerup' | 'pointermove', callback: any) {
     if (window.PointerEvent) {
       window.removeEventListener(type, callback)
     } else {

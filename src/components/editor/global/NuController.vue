@@ -210,7 +210,11 @@ export default Vue.extend({
       movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
       isMoved: false,
-      isFirstClick: false
+      /**
+       * @param {boolean} isFirstClick - used for the text, first click only make layer active, the second touch will make the text contenteditable
+       */
+      isFirstClick: false,
+      isDoingGestureAction: false
     }
   },
   mounted() {
@@ -220,8 +224,8 @@ export default Vue.extend({
     }
   },
   beforeDestroy() {
-    eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-    eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)
+    eventUtils.removePointerEvent('pointerup', this.moveEnd)
+    eventUtils.removePointerEvent('pointermove', this.moving)
     // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
@@ -382,8 +386,8 @@ export default Vue.extend({
     /**
      * While image is setted to frame, these event-listener should be removed
      */
-    eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-    eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)
+    eventUtils.removePointerEvent('pointerup', this.moveEnd)
+    eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
     this.setCursorStyle('')
     this.setMoving(false)
@@ -526,7 +530,7 @@ export default Vue.extend({
       }
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      if (this.isLine) return
+      if (this.isLine || this.isTouchDevice) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
@@ -558,6 +562,7 @@ export default Vue.extend({
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
+        touchAction: this.isActive ? 'none' : 'initial',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
@@ -608,6 +613,13 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(event: MouseEvent | PointerEvent) {
+      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        eventUtils.addPointerEvent('pointerup', this.moveEnd)
+        eventUtils.addPointerEvent('pointermove', this.moving)
+        return
+      }
+
       this.movingByControlPoint = false
       const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
       // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
@@ -644,8 +656,8 @@ export default Vue.extend({
             if (!this.config.locked) {
               this.isControlling = true
               this.initialPos = MouseUtils.getMouseAbsPoint(event)
-              eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-              eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.moving)
+              eventUtils.addPointerEvent('pointerup', this.moveEnd)
+              eventUtils.addPointerEvent('pointermove', this.moving)
             }
             return
           }
@@ -671,8 +683,8 @@ export default Vue.extend({
 
       if (!this.config.locked && !inSelectionMode) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
-        eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-        eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.moving)
+        eventUtils.addPointerEvent('pointerup', this.moveEnd)
+        eventUtils.addPointerEvent('pointermove', this.moving)
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -706,10 +718,22 @@ export default Vue.extend({
       }
     },
     moving(e: MouseEvent | TouchEvent | PointerEvent) {
+      const posDiff = {
+        x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+        y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+      }
+
+      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
+        if (posDiff.x > 0 && posDiff.y > 0) {
+          this.isDoingGestureAction = true
+        }
+        return
+      }
+
       this.isControlling = true
       if (this.isImgControl) {
-        eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-        eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
+        eventUtils.removePointerEvent('pointermove', this.moving)
         return
       }
       if (this.isActive) {
@@ -738,10 +762,6 @@ export default Vue.extend({
         this.initialPos.x += totalOffset.x
         this.initialPos.y += totalOffset.y
 
-        const posDiff = {
-          x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
-          y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
-        }
         if ((Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0)) {
           this.setMoving(true)
         }
@@ -751,18 +771,28 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent | TouchEvent) {
+      if (!this.isDoingGestureAction && !this.isActive) {
+        const targetIndex = this.config.styles.zindex - 1
+        this.setLastSelectedLayerIndex(this.layerIndex)
+        GroupUtils.select(this.pageIndex, [targetIndex])
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
+        eventUtils.removePointerEvent('pointermove', this.moving)
+        return
+      }
+
       this.setMoving(false)
       if (this.isActive) {
-        const posDiff = {
-          x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
-          y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
-        }
         // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
         //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
         //   //   GroupUtils.deselect()
         //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
         //   // }
         // }
+        const posDiff = {
+          x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
+          y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+        }
+
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
@@ -801,13 +831,14 @@ export default Vue.extend({
         this.isControlling = false
         this.isFirstClick = true
         this.setCursorStyle('')
-        eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.moveEnd)
-        eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.moving)
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
+        eventUtils.removePointerEvent('pointermove', this.moving)
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
 
+      this.isDoingGestureAction = false
       this.$emit('clearSnap')
     },
     scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
@@ -837,8 +868,8 @@ export default Vue.extend({
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
       this.currCursorStyling(event)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.scaling)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
+      eventUtils.addPointerEvent('pointermove', this.scaling)
+      eventUtils.addPointerEvent('pointerup', this.scaleEnd)
       window.addEventListener('keyup', this.handleScaleOffset)
       window.addEventListener('keydown', this.handleScaleOffset)
     },
@@ -1004,8 +1035,8 @@ export default Vue.extend({
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
       this.setCursorStyle('')
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.scaling)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.scaleEnd)
+      eventUtils.removePointerEvent('pointermove', this.scaling)
+      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
       window.removeEventListener('keyup', this.handleScaleOffset)
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
@@ -1033,8 +1064,8 @@ export default Vue.extend({
       this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
 
       this.currCursorStyling(event)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.lineEndMoving)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.lineEndMoveEnd)
+      eventUtils.addPointerEvent('pointermove', this.lineEndMoving)
+      eventUtils.addPointerEvent('pointerup', this.lineEndMoveEnd)
     },
     lineEndMoving(event: MouseEvent) {
       event.preventDefault()
@@ -1069,8 +1100,8 @@ export default Vue.extend({
       StepsUtils.record()
 
       this.setCursorStyle('')
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.lineEndMoving)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.lineEndMoveEnd)
+      eventUtils.removePointerEvent('pointermove', this.lineEndMoving)
+      eventUtils.removePointerEvent('pointerup', this.lineEndMoveEnd)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
@@ -1099,8 +1130,8 @@ export default Vue.extend({
       this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
         this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
 
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.resizing)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.resizeEnd)
+      eventUtils.addPointerEvent('pointermove', this.resizing)
+      eventUtils.addPointerEvent('pointerup', this.resizeEnd)
       window.addEventListener('keyup', this.handleScaleOffset)
       window.addEventListener('keydown', this.handleScaleOffset)
       switch (this.getLayerType) {
@@ -1265,8 +1296,8 @@ export default Vue.extend({
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
       this.setCursorStyle('')
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.resizing)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.resizeEnd)
+      eventUtils.removePointerEvent('pointermove', this.resizing)
+      eventUtils.removePointerEvent('pointerup', this.resizeEnd)
       window.removeEventListener('keyup', this.handleScaleOffset)
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
@@ -1291,8 +1322,8 @@ export default Vue.extend({
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.rotating)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.rotateEnd)
+      eventUtils.addPointerEvent('pointermove', this.rotating)
+      eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
       if (!this.config.moved) {
@@ -1331,8 +1362,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('')
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.rotating)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.rotateEnd)
+      eventUtils.removePointerEvent('pointermove', this.rotating)
+      eventUtils.removePointerEvent('pointerup', this.rotateEnd)
       this.$emit('setFocus')
     },
     lineRotateStart(event: MouseEvent) {
@@ -1356,8 +1387,8 @@ export default Vue.extend({
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerMove, this.lineRotating)
-      eventUtils.addPointerEvent(eventUtils.EventType.pointerUp, this.lineRotateEnd)
+      eventUtils.addPointerEvent('pointermove', this.lineRotating)
+      eventUtils.addPointerEvent('pointerup', this.lineRotateEnd)
     },
     lineRotating(event: MouseEvent) {
       if (!this.config.moved) {
@@ -1399,8 +1430,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('')
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerMove, this.lineRotating)
-      eventUtils.removePointerEvent(eventUtils.EventType.pointerUp, this.lineRotateEnd)
+      eventUtils.removePointerEvent('pointermove', this.lineRotating)
+      eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
@@ -1544,7 +1575,7 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
-        this.setInMultiSelectionMode(true)
+        // this.setInMultiSelectionMode(true)
         return
       }
       /**
@@ -1716,7 +1747,6 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
     transform-style: preserve-3d;
-    touch-action: none;
   }
   &__ctrl-points {
     display: flex;

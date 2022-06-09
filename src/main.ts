@@ -14,7 +14,6 @@ import FloatingVue from 'floating-vue'
 import TooltipUtils from './utils/tooltipUtils'
 import VueGtm from '@gtm-support/vue2-gtm'
 import svgIconUtils from './utils/svgIconUtils'
-import 'hammerjs'
 
 const tooltipUtils = new TooltipUtils()
 

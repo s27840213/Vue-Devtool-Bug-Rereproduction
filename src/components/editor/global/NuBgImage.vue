@@ -42,7 +42,7 @@ export default Vue.extend({
   watch: {
     srcObj: {
       deep: true,
-      handler: function() {
+      handler: function () {
         if (this.isColorBackground) {
           this.src = ''
         } else {
@@ -244,5 +244,4 @@ export default Vue.extend({
 .body {
   transition: opacity 1s;
 }
-
 </style>

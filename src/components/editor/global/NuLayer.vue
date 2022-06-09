@@ -83,7 +83,8 @@ export default Vue.extend({
       const styles = Object.assign(
         CssConveter.convertDefaultStyle(this.config.styles),
         {
-          'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+          // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+          'pointer-events': 'none'
         }
       )
       switch (this.config.type) {
