@@ -104,12 +104,6 @@
           span(class="pl-15 body-2"
             @click="copyText(groupId)") {{groupId}}
         div(class="pt-5 text-red body-2") {{groupErrorMsg}}
-        div(v-if="isGetGroup"
-          class="pb-10") plan(0：預設一般 / 1：Pro)
-          div
-            property-bar
-              input(class="body-2 text-gray-2" min="0"
-                v-model="groupPlan")
         div(v-for="id in unsetThemeTemplate"
           class="pt-5 text-red body-2"
           @click="copyText(id)") {{id}}
@@ -157,6 +151,8 @@
         img(v-if="key_id.length > 0" style="margin: 0 auto;"
           :src="`https://template.vivipic.com/template/${key_id}/prev?ver=${imgRandQuery}`")
         div(v-if="isGetTemplate")
+          div(v-if="groupId.length > 0 && !isGroupMember"
+            class="text-red") 此模板不是上列群組的成員
           div(class="template-information__line")
             span(class="body-1") key_id
             span(class="pl-15 body-2" @click="copyText(templateInfo.key_id)") {{templateInfo.key_id}}
@@ -172,6 +168,11 @@
           div(class="template-information__line")
             span(class="body-1") 模板尺寸
             span(class="pl-15 body-2") {{templateInfo.width}} x {{templateInfo.height}}
+          div(class="pt-10") plan(0：預設一般 / 1：Pro)
+          div
+            property-bar
+              input(class="body-2 text-gray-2" min="0"
+                v-model="templateInfo.plan")
           div(class="template-information__line")
             span(class="body-1") Theme_ids
           template(v-if="showDbTemplate")
@@ -317,6 +318,7 @@ export default Vue.extend({
         tags_us: '' as string,
         tags_jp: '' as string,
         locale: '' as string,
+        plan: '' as string,
         width: '' as string,
         height: '' as string,
         theme_ids: '' as string,
@@ -339,8 +341,7 @@ export default Vue.extend({
       templateThemes: [] as boolean[],
       dbTemplateThemes: [] as boolean[],
       groupErrorMsg: '',
-      unsetThemeTemplate: [] as string[],
-      groupPlan: 0 as number
+      unsetThemeTemplate: [] as string[]
     }
   },
   watch: {
@@ -356,6 +357,7 @@ export default Vue.extend({
         tags_us: '',
         tags_jp: '',
         locale: '',
+        plan: '',
         width: '',
         height: '',
         theme_ids: '',
@@ -430,6 +432,15 @@ export default Vue.extend({
     },
     key_id(): string {
       return this.getPage(pageUtils.currFocusPageIndex).designId
+    },
+    isGroupMember(): boolean {
+      if (this.groupId.length === 0) {
+        return false
+      } else if (this.groupInfo.contents.some(template => template.key_id === this.key_id)) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   methods: {
@@ -607,8 +618,7 @@ export default Vue.extend({
       this.setIsloading(true)
       const data = {
         cover_ids: coverId.join(),
-        contents: this.groupInfo.contents,
-        plan: this.groupPlan ? this.groupPlan : '0'
+        contents: this.groupInfo.contents
       }
 
       const res = await designApis.updateDesignInfo(this.token, 'group', this.groupId, 'update', JSON.stringify(data))
@@ -643,6 +653,7 @@ export default Vue.extend({
       this.setIsloading(true)
       const data = {
         locale: this.templateInfo.locale,
+        plan: this.templateInfo.plan ? this.templateInfo.plan : '0',
         tags_tw: this.templateInfo.tags_tw,
         tags_us: this.templateInfo.tags_us,
         tags_jp: this.templateInfo.tags_jp,
@@ -691,7 +702,6 @@ export default Vue.extend({
       this.groupInfo.cover_ids = data.data.cover_ids
       this.groupInfo.contents = data.data.contents
       this.themeList = data.data.themeList
-      this.groupPlan = data.data.plan
 
       // fill in contents
       this.groupInfo.contents.forEach((content, idx) => {
