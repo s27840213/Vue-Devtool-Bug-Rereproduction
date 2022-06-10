@@ -152,7 +152,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 
 const LAYER_SIZE_MIN = 10
@@ -611,6 +611,9 @@ export default Vue.extend({
       if (this.isProcessImgShadow && this.processId.id !== this.config.id) {
         return
       } else {
+        if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
+          eventUtils.emit(PanelEvent.showPhotoShadow)
+        }
         ImageUtils.setImgControlDefault(false)
       }
       this.movingByControlPoint = false
@@ -1420,7 +1423,7 @@ export default Vue.extend({
     dragEnter(e: DragEvent) {
       if (this.getLayerType === 'image') {
         const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-        if (this.handleId.layerId !== this.config.id || !shadowEffectNeedRedraw) {
+        if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
           const body = this.$refs.body as HTMLElement
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
@@ -1564,8 +1567,13 @@ export default Vue.extend({
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
       switch (this.getLayerType) {
-        case LayerType.image:
-          !this.isHandleShadow && ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+        case LayerType.image: {
+          const { shadow } = (this.config as IImage).styles
+          const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+          if (!(this.isHandleShadow && needRedrawShadow)) {
+            ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+          }
+        }
       }
     },
     onRightClick(event: MouseEvent) {

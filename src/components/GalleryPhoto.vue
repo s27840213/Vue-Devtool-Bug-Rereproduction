@@ -37,6 +37,8 @@ import networkUtils from '@/utils/networkUtils'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import { FunctionPanelType } from '@/store/types'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -73,6 +75,7 @@ export default Vue.extend({
       getPageSize: 'getPageSize',
       getLayers: 'getLayers',
       checkedAssets: 'file/getCheckedAssets',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
@@ -114,6 +117,9 @@ export default Vue.extend({
       if (!this.online) {
         networkUtils.notifyNetworkError()
         return
+      }
+      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        eventUtils.emit(PanelEvent.showPhotoShadow)
       }
       if (this.isUploading) {
         e.preventDefault()

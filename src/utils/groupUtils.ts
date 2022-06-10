@@ -397,11 +397,11 @@ class GroupUtils {
         layer.styles.imgY *= tmpLayer.styles.scale
 
         // const ratio = tmpLayer.styles.width / tmpLayer.styles.initWidth
-        const ratio = tmpLayer.styles.scale
-        const [x1, y1] = [layer.styles.x, layer.styles.y]
-        const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
-        layer.styles.x = shiftX
-        layer.styles.y = shiftY
+        // const ratio = tmpLayer.styles.scale
+        // const [x1, y1] = [layer.styles.x, layer.styles.y]
+        // const [shiftX, shiftY] = [x1 * ratio, y1 * ratio]
+        // layer.styles.x = shiftX
+        // layer.styles.y = shiftY
       } else if (layer.type === 'shape') {
         if (layer.category === 'D') {
           const [lineWidth] = (layer as IShape).size ?? [1]
