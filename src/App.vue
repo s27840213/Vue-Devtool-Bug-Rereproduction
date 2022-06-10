@@ -83,7 +83,7 @@ export default Vue.extend({
 
       // prevent swipe to navigate back gesture
       e.preventDefault()
-    }
+    })
   },
   beforeDestroy() {
     networkUtils.unregisterNetworkListener()
