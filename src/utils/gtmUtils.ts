@@ -30,6 +30,27 @@ class GtmUtils {
       })
     }
   }
+
+  // below code is used for Google Ads
+  subscribe(isYearly: boolean) {
+    // month : 8.99 usd (269 TWD), year: 79.99 usd (2388 TWD)
+    const conversionPrice = isYearly ? 79.99 : 8.99
+    const subScribePeriod = isYearly ? 365 : 30
+    if (this.isLogin) {
+      this.track('subscribe', {
+        conversionPrice,
+        subScribePeriod
+      })
+    }
+  }
+
+  startTrail(subScribePeriod: number) {
+    if (this.isLogin) {
+      this.track('startTrail', {
+        subScribePeriod
+      })
+    }
+  }
 }
 
 export default new GtmUtils()
