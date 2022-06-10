@@ -66,6 +66,7 @@ import themeUtils from '@/utils/themeUtils'
 import _ from 'lodash'
 import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
+import templateCenterUtils from '@/utils/templateCenterUtils'
 
 export default Vue.extend({
   name: 'ScrollList',
@@ -180,7 +181,8 @@ export default Vue.extend({
         : `/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
     },
     clickTemplate(item: IAssetTemplate) {
-      if (!paymentUtils.checkProTemplateAsset(item)) return
+      const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
+      if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')
     }
   }

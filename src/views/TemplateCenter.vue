@@ -487,7 +487,7 @@ export default Vue.extend({
       })
     },
     handleTemplateClick(content: IContentTemplate) {
-      if (!paymentUtils.checkProTemplate(this.modalTemplate)) return
+      if (!paymentUtils.checkProGroupTemplate(this.modalTemplate, content)) return
       this.matchedThemes = this.themes.filter((theme) => content.themes.includes(theme.id.toString()))
       const allSameSize = this.matchedThemes.reduce<[boolean, number | undefined, number | undefined]>((acc, theme) => {
         return [acc[0] && (acc[1] === undefined || ((acc[1] === theme.width) && (acc[2] === theme.height))), theme.width, theme.height]

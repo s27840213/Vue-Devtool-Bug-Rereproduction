@@ -24,15 +24,23 @@ class PaymentUtils {
     return true
   }
 
-  checkProTemplateAsset(assetTemplate: IAssetTemplate) {
-    const template = templateCenterUtils.iAssetTemplate2Template(assetTemplate, 4)
-    return this.checkProTemplate(template)
+  checkProGroupTemplate(group: {plan: number}, template: {id:string, ver:number}) {
+    const url = `https://template.vivipic.com/template/${template.id}/prev_4x?ver=${template.ver}`
+    return this._checkProTemplate(group.plan, url)
   }
 
-  checkProTemplate(template: ITemplate) {
+  checkProTemplate(template: {plan: number, url: string}) {
+    if (template.url) {
+      return this._checkProTemplate(template.plan, template.url)
+    } else {
+      return this.checkProGroupTemplate(template, template as unknown as {id:string, ver:number})
+    }
+  }
+
+  _checkProTemplate(plan:number, url: string) {
     if (store.getters['user/isAdmin']) return true
-    if (template.plan === 1 && !store.getters['payment/getIsPro']) {
-      this.openPayment('pro-template', template.url)
+    if (plan === 1 && !store.getters['payment/getIsPro']) {
+      this.openPayment('pro-template', url)
       return false
     }
     return true

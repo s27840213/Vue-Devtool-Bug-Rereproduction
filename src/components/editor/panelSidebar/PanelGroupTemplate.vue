@@ -58,7 +58,7 @@ export default Vue.extend({
   },
   methods: {
     handleApplyGroupTemplate() {
-      if (!paymentUtils.checkProTemplateAsset(this.groupItem)) return
+      if (!paymentUtils.checkProGroupTemplate(this.groupItem, this.groupItem.content_ids[0])) return
       assetUtils.addGroupTemplate(this.groupItem)
     },
     handleDeleteGroupTemplate() {

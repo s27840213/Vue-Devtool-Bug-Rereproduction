@@ -65,6 +65,8 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -74,8 +76,8 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
-      if (this.groupItem && !paymentUtils.checkProTemplateAsset(this.groupItem)) return
-      else if (!this.groupItem && !paymentUtils.checkProTemplateAsset(this.item)) return
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
       const { match_cover: matchCover = {} } = this.item
       let { height, width } = this.item
 
