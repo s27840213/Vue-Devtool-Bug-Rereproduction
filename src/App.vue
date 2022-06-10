@@ -82,7 +82,7 @@ export default Vue.extend({
       // if (e.target.pageX > 10 && e.pageX < window.innerWidth - 10) return
 
       // prevent swipe to navigate back gesture
-      e.preventDefault()
+      // e.preventDefault()
     })
   },
   beforeDestroy() {
@@ -163,6 +163,8 @@ export default Vue.extend({
   overflow: hidden;
   user-select: none;
   text-rendering: geometricPrecision;
+  // block swipe navagation, only work for Chrome & FireFox
+  overscroll-behavior-x: none;
 }
 
 // Debug used class, won't be released in production
