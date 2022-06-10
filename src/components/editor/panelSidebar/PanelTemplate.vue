@@ -347,7 +347,7 @@ export default Vue.extend({
     position: absolute;
     left: 20px;
     right: 20px;
-    max-height: calc(100vh - 105px);
+    max-height: calc(100vh - 85px);
   }
   &__search {
     position: relative;

@@ -6,7 +6,7 @@
         @click.native="handleRecommend")
         span(v-html="$t('NN0322')")
     div(class="popup-theme-items")
-      div(class="popup-theme-items__title body-2 mb-5") {{ $t('NN0321') }}
+      div(class="caption-LG body-2 mb-5") {{ $t('NN0321') }}
       download-check-button(class="popup-theme-items__checkbox body-3 text-gray-2 pl-5"
         type="checkbox"
         iconSize="12px"
@@ -123,10 +123,6 @@ export default Vue.extend({
 
 .popup-theme-items {
   overflow: auto;
-  &__title {
-    font-weight: 800;
-    letter-spacing: 2px;
-  }
   &__checkbox {
     line-height: 24px;
     margin-bottom: 4px;

@@ -181,7 +181,7 @@ export default Vue.extend({
     },
     clickTemplate(item: IAssetTemplate) {
       if (!paymentUtils.checkProTemplateAsset(item)) return
-      this.$router.push(this.templateUrl(item))
+      window.open(this.templateUrl(item), '_blank')
     }
   }
 })
@@ -239,9 +239,9 @@ export default Vue.extend({
     position: relative;
     &:hover {
       transition: all 0.2s ease-in-out;
-      box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
     }
+    img:hover { box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15); }
   }
 }
 @media screen and (max-width: 768px) {
