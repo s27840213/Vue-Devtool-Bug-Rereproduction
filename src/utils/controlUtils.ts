@@ -1,8 +1,6 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
-import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
-import { stringToArray } from 'konva/types/shapes/Text'
-import { SidebarPanelType } from '@/store/types'
+import { IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
 import layerUtils from './layerUtils'
 class Controller {
@@ -177,7 +175,7 @@ class Controller {
     }
   }
 
-  getAbsPointByQuadrant(point: number[], styles: {x: number, y: number, width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+  getAbsPointByQuadrant(point: number[], styles: { x: number, y: number, width: number, initWidth: number }, scale: number, quadrant: number): ICoordinate {
     const { width, height, baseDegree } = shapeUtils.lineDimension(point)
     const dx = 2 * scale * Math.sin(baseDegree)
     const dy = 2 * scale * Math.cos(baseDegree)
@@ -196,7 +194,7 @@ class Controller {
     }
   }
 
-  getAbsPointWithRespectToReferencePoint(referencePoint: ICoordinate, point: number[], styles: {width: number, initWidth: number}, scale: number, quadrant: number): ICoordinate {
+  getAbsPointWithRespectToReferencePoint(referencePoint: ICoordinate, point: number[], styles: { width: number, initWidth: number }, scale: number, quadrant: number): ICoordinate {
     const { width, height, baseDegree } = shapeUtils.lineDimension(point)
     const dx = 2 * scale * Math.sin(baseDegree)
     const dy = 2 * scale * Math.cos(baseDegree)
@@ -215,15 +213,14 @@ class Controller {
     }
   }
 
-  getTranslateCompensationForLine(markerIndex: number, referencePoint: ICoordinate, styles: {width: number, initWidth: number}, scale: number, newPoint: number[]): ICoordinate {
+  getTranslateCompensationForLine(markerIndex: number, referencePoint: ICoordinate, styles: { width: number, initWidth: number }, scale: number, newPoint: number[]): ICoordinate {
     const newNormalQuadrant = shapeUtils.getLineQuadrant(newPoint)
     const newQuadrantByMarkerIndex = (markerIndex === 0) ? (newNormalQuadrant - 1 + 2) % 4 + 1 : newNormalQuadrant
     // If the startMarker is dragged, take the symmetric version (w.r.t. the origin) of the quadrant
     return this.getAbsPointWithRespectToReferencePoint(referencePoint, newPoint, styles, scale, newQuadrantByMarkerIndex)
   }
 
-  getControllerStyleParameters(point: number[], styles: {x: number, y: number, width: number, height: number, initWidth: number, rotate: number}, isLine: boolean, scale: number):
-  {x: number, y: number, width: number, height: number, rotate: number} {
+  getControllerStyleParameters(point: number[], styles: { x: number, y: number, width: number, height: number, initWidth: number, rotate: number }, isLine: boolean, scale: number): { x: number, y: number, width: number, height: number, rotate: number } {
     if (isLine) {
       scale = scale ?? 1
       const { x, y, width, height } = styles
@@ -244,7 +241,7 @@ class Controller {
     }
   }
 
-  getMarkerIndex(control: {xSign: number, ySign: number}, quadrant: number) {
+  getMarkerIndex(control: { xSign: number, ySign: number }, quadrant: number) {
     if ([2, 3].includes(quadrant)) {
       return (1 - control.xSign) / 2 // -1 => 1, 1 => 0
     } else {

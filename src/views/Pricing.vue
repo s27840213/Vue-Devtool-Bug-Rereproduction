@@ -94,8 +94,8 @@ export default Vue.extend({
       status: 'status'
     }),
     ...mapFields({ periodUi: 'periodUi' }),
-    off():string { return this.isUiTW ? '26off' : '25off' },
-    canAddCard():boolean { return ['Initial', 'Deleted'].includes(this.status) }
+    off(): string { return this.isUiTW ? '26off' : '25off' },
+    canAddCard(): boolean { return ['Initial', 'Deleted'].includes(this.status) }
   },
   async mounted() {
     await this.getBillingInfo()
@@ -120,7 +120,9 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.pricing { height: 100%; }
+.pricing {
+  height: 100%;
+}
 
 .pricing-content {
   display: flex;
@@ -170,9 +172,9 @@ export default Vue.extend({
     align-items: center;
     margin: 10px 0;
     color: setColor(blue-1);
-    >hr {
+    > hr {
       width: calc(100% - 12px);
-      border: 0.5px solid setColor(gray-4);;
+      border: 0.5px solid setColor(gray-4);
       margin-left: 12px;
     }
   }
@@ -182,7 +184,7 @@ export default Vue.extend({
     grid-template-columns: 1fr 1fr;
     align-items: flex-end;
     color: setColor(gray-2);
-    >div {
+    > div {
       display: flex;
       svg {
         flex-shrink: 0;
@@ -240,21 +242,32 @@ export default Vue.extend({
   width: 960px;
   margin: 78px 0;
   text-align: left;
-  >div {
+  > div {
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  >div:nth-child(1)    { @include text-H6; }
-  >div:nth-child(3)    { @include text-H5; }
-  >div:nth-child(-n+3)    {
+  > div:nth-child(1) {
+    @include text-H6;
+  }
+  > div:nth-child(3) {
+    @include text-H5;
+  }
+  > div:nth-child(-n + 3) {
     padding: 8px 0;
     word-break: keep-all; // H6?
   }
-  >div:nth-child(2), >div:nth-child(3) { text-align: center; } // H6?
-  >div:nth-child(3n)   { background-color: setColor(blue-4); }
-  >div:nth-child(3n+1) { justify-content: flex-start; }
-  >div:nth-child(n+4)  {
+  > div:nth-child(2),
+  > div:nth-child(3) {
+    text-align: center;
+  } // H6?
+  > div:nth-child(3n) {
+    background-color: setColor(blue-4);
+  }
+  > div:nth-child(3n + 1) {
+    justify-content: flex-start;
+  }
+  > div:nth-child(n + 4) {
     padding: 20px 0;
     border-bottom: 1px solid setColor(gray-4);
   }
@@ -265,36 +278,55 @@ export default Vue.extend({
   flex-direction: column;
   width: 1024px;
   color: setColor(gray-1);
-  >details {
+  > details {
     text-align: left;
     margin-top: 20px;
-    >summary {
+    > summary {
       @include text-H6;
       display: flex;
       justify-content: space-between;
       border-bottom: 1px solid setColor(gray-4);
       padding-bottom: 20px;
-      >svg { flex-shrink: 0; }
+      > svg {
+        flex-shrink: 0;
+      }
     }
-    summary::-webkit-details-marker { display:none; } // Romove detail arrow
+    summary::-webkit-details-marker {
+      display: none;
+    } // Romove detail arrow
   }
-  >details[open] >summary >svg { transform: scaleY(-1); }
+  > details[open] > summary > svg {
+    transform: scaleY(-1);
+  }
 }
 
 @media screen and (max-width: 768px) {
-  .pricing-top__cb { display: none; }
-  .pricing-content { padding: 20px 5.34%; }
-  .pricing-plan, .pricing-compare, .pricing-faq { width: 100%; }
+  .pricing-top__cb {
+    display: none;
+  }
+  .pricing-content {
+    padding: 20px 5.34%;
+  }
+  .pricing-plan,
+  .pricing-compare,
+  .pricing-faq {
+    width: 100%;
+  }
   .pricing-plan {
     flex-direction: column;
     height: fit-content;
-    &-left, &-right { width: 100%; }
+    &-left,
+    &-right {
+      width: 100%;
+    }
     &-left {
       display: block;
       padding: 18px;
       &-bottom {
         grid-template-columns: auto;
-        >div + div { margin-top: 10px; }
+        > div + div {
+          margin-top: 10px;
+        }
       }
     }
     &-right {
@@ -302,7 +334,9 @@ export default Vue.extend({
       padding: 30px 20px;
     }
   }
-  .pricing-currency { margin-left: auto; }
+  .pricing-currency {
+    margin-left: auto;
+  }
   .pricing-compare {
     grid-template-columns: 1.2fr 1fr 1fr;
   }

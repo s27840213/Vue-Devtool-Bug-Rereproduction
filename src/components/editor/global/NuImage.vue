@@ -224,7 +224,7 @@ export default Vue.extend({
       isUploadingShadowImg: 'shadow/isUploading'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
-    ...mapState('shadow', ['uploadId', 'uploadShadowImgs']),
+    ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
@@ -358,20 +358,28 @@ export default Vue.extend({
         .some(val => typeof val === 'number' && val !== 0)
     },
     showCanvas(): boolean {
-      const { pageIndex, layerIndex, subLayerIndex, config, uploadId } = this
-      const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
-      const isCurrLayerActive = config.active
+      const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
+      // const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
+      // const isCurrLayerActive = config.active
+      // const isShadowUploading = uploadId.pageId === pageUtils.getPage(pageIndex).id && (() => {
+      //   if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
+      //     const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+      //     return primaryLayer.id === uploadId.layerId && primaryLayer.layers[subLayerIndex].id === uploadId.subLayerId
+      //   } else {
+      //     return layerUtils.getLayer(pageIndex, layerIndex).id === uploadId.layerId
+      //   }
+      // })()
       const isCurrShadowEffectApplied = this.currentShadowEffect !== ShadowEffectType.none
-      const isShadowUploading = uploadId.pageId === pageUtils.getPage(pageIndex).id && (() => {
+      const isHandling = handleId.pageId === pageUtils.getPage(pageIndex).id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
           const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
-          return primaryLayer.id === uploadId.layerId && primaryLayer.layers[subLayerIndex].id === uploadId.subLayerId
+          return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId
         } else {
-          return layerUtils.getLayer(pageIndex, layerIndex).id === uploadId.layerId
+          return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
         }
       })()
-      return isCurrShadowEffectApplied && (isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
-      // return isCurrShadowEffectApplied && (!this.shadowSrc || isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
+      return isCurrShadowEffectApplied && isHandling
+      // return isCurrShadowEffectApplied && (isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
