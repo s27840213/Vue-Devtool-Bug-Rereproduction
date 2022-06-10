@@ -7,14 +7,16 @@
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
         mobile-editor-view(v-if="!inAllPagesMode"
-          :isConfigPanelOpen="isConfigPanelOpen")
+          :isConfigPanelOpen="isConfigPanelOpen"
+          :inAllPagesMode="inAllPagesMode")
         div(v-else class="mobile-editor__page-preview")
           page-preview
-      mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
-        :currActivePanel="currActivePanel"
-        :currColorEvent="currColorEvent"
-        @openExtraColorModal="openExtraColorModal"
-        @switchTab="switchTab")
+      transition(name="panel-up")
+        mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
+          :currActivePanel="currActivePanel"
+          :currColorEvent="currColorEvent"
+          @openExtraColorModal="openExtraColorModal"
+          @switchTab="switchTab")
       //- mobile-panel(v-if="showExtraColorPanel"
       //-   :currActivePanel="'color'"
       //-   :currColorEvent="ColorEventType.background"

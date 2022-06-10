@@ -23,7 +23,7 @@
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
+      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -781,6 +781,7 @@ export default Vue.extend({
     },
     moveEnd(e: MouseEvent | TouchEvent) {
       if (!this.isDoingGestureAction && !this.isActive) {
+        GroupUtils.deselect()
         const targetIndex = this.config.styles.zindex - 1
         this.setLastSelectedLayerIndex(this.layerIndex)
         GroupUtils.select(this.pageIndex, [targetIndex])

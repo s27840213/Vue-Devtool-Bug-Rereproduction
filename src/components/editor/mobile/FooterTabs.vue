@@ -9,7 +9,7 @@
           svg-icon(class="mb-5"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
-            :iconWidth="'20px'")
+            :iconWidth="'24px'")
           span(class="text-body-4 no-wrap"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>

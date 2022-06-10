@@ -229,6 +229,7 @@ export default Vue.extend({
     openColorPanel(event: MouseEvent) {
       if (generalUtils.isTouchDevice()) {
         this.$emit('openColorPicker')
+        return
       }
       colorUtils.setIsColorPickerOpen(true)
       Vue.nextTick(() => {

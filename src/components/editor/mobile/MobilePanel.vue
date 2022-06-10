@@ -264,6 +264,7 @@ export default Vue.extend({
   background-color: setColor(sidebar-panel);
   z-index: setZindex(mobile-panel);
   border-radius: 10px 10px 0 0;
+  box-shadow: 0px -2px 5px setColor(gray-4, 0.5);
 
   display: grid;
   grid-template-columns: 1fr;

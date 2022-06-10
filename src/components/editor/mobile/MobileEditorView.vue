@@ -7,19 +7,22 @@
       @mousewheel="handleWheel"
       @pinch="pinchHandler"
       ref="editorView")
-    div(class="editor-view__grid")
-      div(class="editor-view__canvas"
-          ref="canvas"
+    div(class="editor-view__canvas"
+        ref="canvas"
+        @swipeup="swipeUpHandler"
+        @swipedown="swipeDownHandler")
+      div(v-for="(page,index) in pages"
+          :key="`page-${index}`"
+          class="editor-view__card"
+          :style="cardStyle(index)"
           @mousedown.left.self="outerClick($event)")
-        template(v-if="!inBgRemoveMode")
-          nu-page(v-for="(page,index) in pages"
-                  :ref="`page-${index}`"
-                  :key="`page-${index}`"
-                  :pageIndex="index"
-                  :editorView="editorView"
-                  :style="{'z-index': `${getPageZIndex(index)}`}"
-                  :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
-                  @stepChange="handleStepChange")
+        nu-page(
+          :ref="`page-${index}`"
+          :pageIndex="index"
+          :editorView="editorView"
+          :style="{'z-index': `${getPageZIndex(index)}`}"
+          :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+          @stepChange="handleStepChange")
 </template>
 
 <script lang="ts">
@@ -52,7 +55,11 @@ export default Vue.extend({
     BgRemoveArea
   },
   props: {
-    isConfigPanelOpen: Boolean
+    isConfigPanelOpen: Boolean,
+    inAllPagesMode: {
+      type: Boolean,
+      required: true
+    }
   },
   data() {
     return {
@@ -78,14 +85,17 @@ export default Vue.extend({
       scrollHeight: 0,
       tmpScaleRatio: 0,
       initialDist: 0,
-      minScaleRatio: 0
+      minScaleRatio: 0,
+      currCardIndex: 0
     }
   },
   mounted() {
-    const at = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
+    const editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
+    const canvasAt = new AnyTouch(this.$refs.canvas as HTMLElement, { preventDefault: false })
     //  销毁
     this.$on('hook:destroyed', () => {
-      at.destroy()
+      editorViewAt.destroy()
+      canvasAt.destroy()
     })
 
     StepsUtils.record()
@@ -150,6 +160,11 @@ export default Vue.extend({
     },
     screenHeight() {
       pageUtils.findCentralPageIndexInfo(true)
+    },
+    inAllPagesMode(newVal) {
+      if (!newVal) {
+        this.currCardIndex = 0
+      }
     }
   },
 
@@ -208,7 +223,8 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode',
+      addPage: 'ADD_page'
     }),
     brushCursorStyles() {
       const styles = {}
@@ -238,14 +254,6 @@ export default Vue.extend({
           clientY: this.currentAbsPos.y
         })
         document.documentElement.dispatchEvent(event)
-      }
-
-      if (this.isShowGuidelineV && !RulerUtils.isDragging) {
-        this.closeGuidelineV()
-      }
-
-      if (this.isShowGuidelineH && !RulerUtils.isDragging) {
-        this.closeGuidelineH()
       }
       /**
        * The following function sets focus on the page, which will break the functionality of a text editor (e.g. composition).
@@ -282,94 +290,6 @@ export default Vue.extend({
          * @Note if the page was focused, make it bring the highest z-index to prevent from being blocking by other page's layer
          */
         return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
-      }
-    },
-    dragStartV(e: MouseEvent) {
-      RulerUtils.setIsDragging(true)
-      this.isShowGuidelineV = true
-      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      document.documentElement.addEventListener('mousemove', this.draggingV)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.dragEndV)
-    },
-    draggingV(e: MouseEvent) {
-      this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
-      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      this.renderGuidelineV(this.currentRelPos)
-    },
-    dragEndV(e: MouseEvent) {
-      RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('v').outOfPage) {
-        this.isShowGuidelineV = false
-      } else {
-        StepsUtils.record()
-      }
-      this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.draggingV)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
-        document.documentElement.removeEventListener('mouseup', this.dragEndV)
-      })
-    },
-    renderGuidelineV(pos: { x: number, y: number }) {
-      const guidelineV = this.$refs.guidelineV as HTMLElement
-      guidelineV.style.transform = `translate(${pos.x}px,0px)`
-    },
-    closeGuidelineV() {
-      if (!this.isDragging) {
-        this.isShowGuidelineV = false
-        if (this.from !== -1) {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v', this.from)
-        } else {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('v').pos, 'v')
-        }
-        this.from = -1
-      }
-    },
-    dragStartH(e: MouseEvent) {
-      RulerUtils.setIsDragging(true)
-      this.isShowGuidelineH = true
-      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      document.documentElement.addEventListener('mousemove', this.draggingH)
-      document.documentElement.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.dragEndH)
-    },
-    draggingH(e: MouseEvent) {
-      this.rulerHPos = Math.trunc(this.mapGuidelineToPage('h').pos)
-      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      this.renderGuidelineH(this.currentRelPos)
-    },
-    dragEndH(e: MouseEvent) {
-      RulerUtils.setIsDragging(false)
-      if (this.mapGuidelineToPage('h').outOfPage) {
-        this.isShowGuidelineH = false
-      } else {
-        StepsUtils.record()
-      }
-      this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.draggingH)
-        document.documentElement.removeEventListener('scroll', this.scrollUpdate)
-        document.documentElement.removeEventListener('mouseup', this.dragEndH)
-      })
-    },
-    renderGuidelineH(pos: { x: number, y: number }) {
-      const guidelineH = this.$refs.guidelineH as HTMLElement
-      guidelineH.style.transform = `translate(0px,${pos.y}px)`
-    },
-    mapGuidelineToPage(type: string): { pos: number, outOfPage: boolean } {
-      // just has two options: ['v','h']
-      const guideline = type === 'v' ? this.$refs.guidelineV as HTMLElement : this.$refs.guidelineH as HTMLElement
-      const result = RulerUtils.mapGuidelineToPage(guideline, type, this.from)
-      return result
-    },
-    closeGuidelineH() {
-      if (!this.isDragging) {
-        this.isShowGuidelineH = false
-        if (this.from !== -1) {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h', this.from)
-        } else {
-          RulerUtils.addGuidelineToPage(this.mapGuidelineToPage('h').pos, 'h')
-        }
-        this.from = -1
       }
     },
     setTranslateOfPos(event: MouseEvent, type: string) {
@@ -420,28 +340,31 @@ export default Vue.extend({
           GroupUtils.deselect()
         }
       })
+    },
+    swipeUpHandler(e: AnyTouchEvent) {
+      if (this.pageNum - 1 !== this.currCardIndex) {
+        this.currCardIndex++
+        this.setCurrActivePageIndex(this.currCardIndex)
+      } else {
+        this.addPage(pageUtils.newPage({}))
+        StepsUtils.record()
+      }
+      console.log(e)
+    },
+    swipeDownHandler(e: AnyTouchEvent) {
+      if (this.currCardIndex !== 0) {
+        this.currCardIndex--
+        this.setCurrActivePageIndex(this.currCardIndex)
+      }
+    },
+    cardStyle(index: number): { [index: string]: string | number } {
+      const cardSize = this.editorView ? this.editorView.clientHeight : 0
+      return {
+        width: '100%',
+        height: this.editorView ? `${cardSize}px` : '100%',
+        transform: this.editorView ? `translate3d(0,${index * cardSize - this.currCardIndex * cardSize}px,0)` : 'translate3d(0,0px,0)'
+      }
     }
-    // pinchHandler(event: GestureState<'pinch'>) {
-    //   const { _lastEventType: type, da } = event
-
-    //   switch (type) {
-    //     case 'touchstart': {
-    //       this.tmpScaleRatio = pageUtils.scaleRatio
-    //       this.initialDist = da[0]
-    //       break
-    //     }
-    //     case 'touchend': {
-    //       if (this.tmpScaleRatio < this.minScaleRatio) {
-    //         pageUtils.setScaleRatio(this.minScaleRatio)
-    //       }
-    //       this.tmpScaleRatio = 0
-    //       return
-    //     }
-    //   }
-
-    //   const scaleFactor = (da[0] / this.initialDist)
-    //   pageUtils.setScaleRatio(this.tmpScaleRatio * scaleFactor)
-    // }
   }
 })
 </script>
@@ -450,150 +373,34 @@ export default Vue.extend({
 $REULER_SIZE: 20px;
 
 .editor-view {
-  overflow: scroll;
+  overflow: hidden;
   position: relative;
   z-index: setZindex("editor-view");
   @include size(100%, 100%);
-  @include no-scrollbar;
 
-  &__grid {
+  &__canvas {
     position: absolute;
     min-width: 100%;
     min-height: 100%;
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr;
-    grid-template-areas: "canvas";
-    // grid-template-rows: $REULER_SIZE 1fr;
-    // grid-template-columns: $REULER_SIZE 1fr;
-    // grid-template-areas:
-    //   "corner-block hr-rulers"
-    //   "vr-rulers canvas";
-  }
-  &__canvas {
     grid-area: canvas;
     display: flex;
-    flex: 1;
-    position: relative;
     flex-direction: column;
     justify-content: center;
     transform-style: preserve-3d;
     transform: scale(1);
-    padding: 40px;
   }
 
-  &__guidelines-area {
-    position: sticky;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 100;
-    overflow: hidden;
-  }
-}
-
-.editor-background {
-  display: flex;
-  position: fixed;
-  min-width: 100%;
-  min-height: 100%;
-  background: rgba(53, 71, 90, 0.2);
-  pointer-events: none;
-}
-
-.selection-area {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border: 1px solid #03a9f4;
-  background-color: rgba(3, 169, 244, 0.08);
-}
-
-.guideline {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: auto;
-  &--v {
-    border-right: 1px solid setColor(blue-1);
-    width: 0px;
-    height: 100%;
-    cursor: url("/assets/icon/ruler/ruler-v.svg");
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 5px;
-      height: 100%;
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5px;
-      height: 100%;
-    }
-  }
-
-  &--h {
-    border-top: 1px solid setColor(blue-1);
-    width: 100%;
-    height: 0px;
-    cursor: "/assets/icon/ruler/ruler-v.svg";
-    &::before {
-      content: "";
-      position: absolute;
-      top: -5px;
-      right: 0;
-      width: 100%;
-      height: 5px;
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-    }
-  }
-
-  &__pos {
+  &__card {
     position: absolute;
-    background-color: setColor(blue-1);
-    &--h {
-      writing-mode: vertical-lr;
-      transform: rotate(180deg);
-      border-radius: 50px;
-      color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
-      top: 5px;
-      left: 0;
-    }
-    &--v {
-      top: 0px;
-      left: 5px;
-      border-radius: 50px;
-      color: setColor(white);
-      padding: 0.2rem 0.4rem;
-      font-size: 0.325rem;
-    }
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: scroll;
+    padding: 40px;
+    transition: transform 0.3s;
+    @include no-scrollbar;
   }
-}
-
-.corner-block {
-  position: sticky;
-  top: 0;
-  left: 0;
-  grid-area: corner-block;
-  width: $REULER_SIZE;
-  height: $REULER_SIZE;
-  background: #dfe1e7;
 }
 
 .dim-background {

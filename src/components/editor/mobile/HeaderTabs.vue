@@ -1,27 +1,29 @@
 <template lang="pug">
   div(class="header-bar")
     div(class="header-bar__left")
-      svg-icon(class="header-bar__feature-icon"
+      svg-icon(class="header-bar__feature-icon mr-25"
         :iconName="'chevron-left'"
         :iconColor="'white'"
-        :iconWidth="'20px'"
+        :iconWidth="'22px'"
         @click.native="backBtnAction()")
-      svg-icon(class="header-bar__feature-icon"
+      svg-icon(class="header-bar__feature-icon mr-20"
+        :class="{'click-disabled': isLocked}"
         :iconName="'undo'"
-        :iconColor="'white'"
-        :iconWidth="'20px'"
+        :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
+        :iconWidth="'22px'"
         @click.native="undo()")
       svg-icon(class="header-bar__feature-icon"
+        :class="{'click-disabled': isLocked}"
         :iconName="'redo'"
-        :iconColor="'white'"
-        :iconWidth="'20px'"
+        :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
+        :iconWidth="'22px'"
         @click.native="redo()")
     div(class="header-bar__right")
       svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
         :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
         :iconName="tab.icon"
         :iconColor="iconColor(tab)"
-        :iconWidth="'20px'"
+        :iconWidth="'22px'"
         @click.native="handleIconAction(tab.icon)")
 </template>
 <script lang="ts">
@@ -53,7 +55,8 @@ export default Vue.extend({
         { icon: 'all-pages' },
         { icon: 'download' },
         { icon: 'more' }
-      ]
+      ],
+      stepsUtils
     }
   },
   computed: {
@@ -66,11 +69,8 @@ export default Vue.extend({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
-    isInFirstStep(): boolean {
-      return stepsUtils.isInFirstStep
-    },
-    isInLastStep(): boolean {
-      return stepsUtils.isInLastStep
+    stepCount(): number {
+      return stepsUtils.steps.length
     },
     layerTabs(): Array<{ icon: string, disabled?: boolean }> {
       return [
@@ -249,11 +249,7 @@ export default Vue.extend({
   box-sizing: border-box;
 
   &__left {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: auto;
-    grid-auto-columns: auto;
-    column-gap: 16px;
+    display: flex;
   }
   &__right {
     display: grid;

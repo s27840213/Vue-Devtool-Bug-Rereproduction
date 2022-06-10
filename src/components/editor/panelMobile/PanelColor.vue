@@ -1,13 +1,13 @@
 <template lang="pug">
   div(class="panel-color scrollbar-gray-thin")
-    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" @openColorPicker="openColorPicker")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
       @final="handleChangeStop")
-    div(class="panel-color__document-colors")
+    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" @openColorPicker="openColorPicker")
+    div(v-if="showDocumentColors" class="panel-color__document-colors")
       div(v-if="hasMultiColors"
         class="panel-color__document-color"
         :style="groupColorStyles()"
@@ -249,6 +249,11 @@ export default Vue.extend({
           boxShadow: '0 0 0 2px #808080, inset 0 0 0 1px #fff'
         }
       }
+    },
+    selectColor(index: number) {
+      this.currSelectedColorIndex = index
+      colorUtils.setCurrColor(this.getDocumentColors[index])
+      this.openColorPalette()
     }
   }
 })
@@ -259,16 +264,17 @@ export default Vue.extend({
   width: 100%;
   max-height: 250px;
   overflow-y: scroll;
+  box-sizing: border-box;
 
   &__document-colors {
     width: 100%;
     margin-top: 10px;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    @media (max-width: 1260px) {
-      gap: 10px;
-    }
+    grid-auto-rows: auto;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 5px;
+    column-gap: 5px;
+    box-sizing: border-box;
   }
   &__document-color {
     width: 100%;
@@ -279,7 +285,7 @@ export default Vue.extend({
     &:hover {
       box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
     }
-    transition: box-shadow 0.2s ease-in-out;
+    // transition: box-shadow 0.2s ease-in-out;
   }
 }
 </style>
