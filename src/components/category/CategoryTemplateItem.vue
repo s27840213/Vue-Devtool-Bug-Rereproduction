@@ -8,8 +8,7 @@
         @error="handleNotFound"
         @dragstart="dragStart($event)"
         @click="addTemplate")
-      img(v-if="item.plan" class="category-template-item__pro"
-          :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
+      pro-item(v-if="item.plan")
     div(v-if="showId"
       class="category-template-item__id"
       @click="copyId") {{ item.id }}
@@ -18,6 +17,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
@@ -25,7 +25,10 @@ import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
-  components: { ImageCarousel },
+  components: {
+    ImageCarousel,
+    ProItem
+  },
   props: {
     src: String,
     item: Object,
@@ -184,11 +187,6 @@ export default Vue.extend({
     background: rgba(24, 25, 31, 0.7);
     transform: scale(0.4);
     transform-origin: bottom right;
-  }
-  &__pro {
-    position: absolute;
-    top: 4px;
-    left: 4px;
   }
 }
 </style>

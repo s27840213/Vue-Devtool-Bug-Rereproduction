@@ -12,7 +12,7 @@
           scrollable-template-preview(v-if="checkMouseEntered(template.group_id, template.group_type) && useScrollablePreview"
                                       :contentIds="template.content_ids")
           img(v-else class="template-waterfall__column__template__img" :src="template.url" loading="lazy")
-          img(v-if="template.plan === 1" class="template-waterfall__column__template__pro" :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
+          pro-item(v-if="template.plan === 1")
           div(v-if="template.group_type !== 1" class="template-waterfall__column__template__theme") {{ getThemeTitle(template.theme_id) }}
           div(v-if="template.content_ids.length > 1" class="template-waterfall__column__template__multi")
             svg-icon(iconName="multiple-file"
@@ -31,6 +31,7 @@
 import Vue from 'vue'
 import ScrollableTemplatePreview from '@/components/templates/ScrollableTemplatePreview.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import { mapGetters } from 'vuex'
 import { ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
@@ -56,7 +57,8 @@ export default Vue.extend({
   },
   components: {
     ScrollableTemplatePreview,
-    ObserverSentinel
+    ObserverSentinel,
+    ProItem
   },
   computed: {
     ...mapGetters('templates', {
@@ -123,12 +125,6 @@ export default Vue.extend({
         height: 100%;
         top: 0;
         left: 0;
-      }
-      &__pro {
-        position: absolute;
-        top: 4px;
-        left: 4px;
-        z-index: 2;
       }
       &__theme {
         position: absolute;

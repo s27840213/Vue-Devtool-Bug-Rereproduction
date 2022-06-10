@@ -53,8 +53,7 @@
             img(loading="lazy"
               :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
               :style="templateImgStyle")
-            img(v-if="item.plan === 1" class="list-content-items__template-item-pro"
-                :src="require('@/assets/img/svg/pricing/pro.svg')" loading="lazy")
+            pro-item(v-if="item.plan === 1")
 </template>
 
 <script lang="ts">
@@ -62,6 +61,7 @@ import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import i18n from '@/i18n'
 import DesignItem from '@/components/homepage/DesignItem.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import themeUtils from '@/utils/themeUtils'
 import _ from 'lodash'
 import paymentUtils from '@/utils/paymentUtils'
@@ -70,7 +70,8 @@ import { IAssetTemplate } from '@/interfaces/api'
 export default Vue.extend({
   name: 'ScrollList',
   components: {
-    DesignItem
+    DesignItem,
+    ProItem
   },
   props: {
     type: {
@@ -240,11 +241,6 @@ export default Vue.extend({
       transition: all 0.2s ease-in-out;
       box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
-    }
-    &-pro {
-      position: absolute;
-      top: 4px;
-      left: 4px;
     }
   }
 }

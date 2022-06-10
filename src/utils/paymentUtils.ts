@@ -15,6 +15,15 @@ class PaymentUtils {
     popupUtils.openPopup('payment')
   }
 
+  checkProObject(template: {plan: number}, target: string) {
+    if (store.getters['user/isAdmin']) return true
+    if (template.plan === 1 && !store.getters['payment/getIsPro']) {
+      this.openPayment(target)
+      return false
+    }
+    return true
+  }
+
   checkProTemplateAsset(assetTemplate: IAssetTemplate) {
     const template = templateCenterUtils.iAssetTemplate2Template(assetTemplate, 4)
     return this.checkProTemplate(template)

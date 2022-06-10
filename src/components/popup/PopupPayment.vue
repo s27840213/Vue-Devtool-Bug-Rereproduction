@@ -140,7 +140,7 @@ export default Vue.extend({
       return ['step2', 'switch2'].includes(this.view)
     },
     showFeature(): boolean {
-      return ['cancel1', 'brandkit', 'bgrm', 'pro-template'].includes(this.view)
+      return ['cancel1', 'brandkit', 'bgrm', 'pro-template', 'pro-object'].includes(this.view)
     },
     cancelReason(): string {
       return Number(this.reasonIndex) < this.cancel2.length - 1
@@ -165,10 +165,12 @@ export default Vue.extend({
         case 'brandkit':
           return [i18n.t('NN0583') as string, 'brandkit.jpg']
         case 'bgrm':
+        default:
           return [i18n.t('NN0652') as string, 'remover.jpg']
         case 'pro-template':
-        default:
           return [i18n.t('NN0653') as string, 'templateBG.jpg']
+        case 'pro-object':
+          return [i18n.t('NN0658') as string, 'pro-object.jpg']
       }
     },
     async changeView(name: string) {
@@ -177,6 +179,7 @@ export default Vue.extend({
         case 'brandkit':
         case 'bgrm':
         case 'pro-template':
+        case 'pro-object':
           this.title = i18n.tc('NN0507', 2) as string
           [this.description, this.img] = this.getAd(name)
           this.buttons = [{

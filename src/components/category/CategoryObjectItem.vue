@@ -11,16 +11,21 @@
       :iconName="'more_vertical'"
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
+    pro-item(v-if="item.plan")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import generalUtils from '@/utils/generalUtils'
 import DragUtils from '@/utils/dragUtils'
 import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
 import { mapMutations } from 'vuex'
+import ProItem from '@/components/payment/ProItem.vue'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
+  components: {
+    ProItem
+  },
   props: {
     src: String,
     item: Object
@@ -38,6 +43,7 @@ export default Vue.extend({
       })
     },
     addSvg() {
+      if (!paymentUtils.checkProObject(this.item, 'pro-object')) return
       assetUtils.addAsset(this.item)
     },
     showSvgInfo(evt: Event) {
