@@ -118,6 +118,16 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
   return '-?'
 }
 
+function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
+  if (trialStatus === 'not used') {
+    gtmUtils.startTrail(14)
+    fbPixelUtils.startTrail(14)
+  } else {
+    gtmUtils.subscribe(isYearlyPlan)
+    fbPixelUtils.subscribe(isYearlyPlan)
+  }
+}
+
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
   initView: '',
@@ -398,13 +408,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       email: state.billingInfo.email
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
-      if (state.trialStatus === 'not used') {
-        gtmUtils.startTrail(14)
-        fbPixelUtils.startTrail(14)
-      } else {
-        gtmUtils.subscribe(getters.getIsBundle)
-        fbPixelUtils.subscribe(getters.getIsBundle)
-      }
+      recordThePlanToGTM(state.trialStatus, getters.getIsBundle)
     }).then(() => {
       return paymentApi.updateBillingInfo({
         meta: JSON.stringify({
@@ -416,7 +420,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  async stripeAdd({ commit }) {
+  async stripeAdd({ commit, getters }) {
     commit('SET_state', { isLoading: true })
     return paymentApi.stripeAdd({
       country: state.userCountryUi,
@@ -425,6 +429,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       email: state.billingInfo.email
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
+      recordThePlanToGTM(state.trialStatus, getters.getIsBundle)
     }).then(() => {
       return paymentApi.updateBillingInfo({
         meta: JSON.stringify({
