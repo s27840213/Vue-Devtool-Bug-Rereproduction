@@ -73,6 +73,17 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    /**
+     * @Note - block the IOS navagation
+     * check the article for the detail (https://pqina.nl/blog/blocking-navigation-gestures-on-ios-13-4/)
+     */
+    (this.$el as HTMLElement).addEventListener('touchstart', (e: TouchEvent) => {
+      // is not near edge of view, exit
+      // if (e.target.pageX > 10 && e.pageX < window.innerWidth - 10) return
+
+      // prevent swipe to navigate back gesture
+      e.preventDefault()
+    }
   },
   beforeDestroy() {
     networkUtils.unregisterNetworkListener()
