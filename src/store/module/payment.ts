@@ -5,13 +5,15 @@ import store from '..'
 import i18n from '@/i18n'
 import paymentApi from '@/apis/payment'
 import generalUtils from '@/utils/generalUtils'
+import gtmUtils from '@/utils/gtmUtils'
+import fbPixelUtils from '@/utils/fbPixelUtils'
 
 interface IPaymentState {
   isLoading: boolean
   initView: string
   // Constant
   status: string
-  plans: Record<string, Record<string, Record<string, string>|string>>
+  plans: Record<string, Record<string, Record<string, string> | string>>
   stripeClientSecret: string
   prime: string
   isPro: boolean
@@ -192,7 +194,7 @@ const getDefaultState = (): IPaymentState => ({
 
 const state = getDefaultState()
 
-function isLegalGUI(GUI :string) { // Government Uniform Invoice, 統編
+function isLegalGUI(GUI: string) { // Government Uniform Invoice, 統編
   const weight = [1, 2, 1, 2, 1, 2, 4, 1]
   const divisor = 5
   if (GUI === '') return true // Special case, because GUI is option field.
@@ -222,7 +224,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       const res = response.data.data
       commit('SET_state', {
         planSelected: res[0].plan_id,
-        plans: res.reduce((acc: Record<string, Record<string, string|number>>, item: Record<string, string|number>) => ({
+        plans: res.reduce((acc: Record<string, Record<string, string | number>>, item: Record<string, string | number>) => ({
           ...acc,
           [item.plan_id]: {
             name: item.plan_id,
@@ -290,7 +292,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.billingHistory(0/* state.nextBillingHistoryIndex */).then((response) => {
       commit('SET_state', {
         nextBillingHistoryIndex: response.data.next_page,
-        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item:Record<string, string|number>) => {
+        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item: Record<string, string | number>) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
             month: 'long',
@@ -318,7 +320,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       })
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
-  checkBillingInfo({ commit }, key: keyof IPaymentState['billingInfoInvalid']):boolean {
+  checkBillingInfo({ commit }, key: keyof IPaymentState['billingInfoInvalid']): boolean {
     let value
     switch (key) {
       case 'email':
@@ -386,7 +388,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       }).catch(msg => Vue.notify({ group: 'error', text: msg }))
     })
   },
-  async tappayAdd({ commit }) {
+  async tappayAdd({ commit, getters }) {
     commit('SET_state', { isLoading: true })
     return paymentApi.tappayAdd({
       country: state.userCountryUi,
@@ -396,6 +398,13 @@ const actions: ActionTree<IPaymentState, unknown> = {
       email: state.billingInfo.email
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
+      if (state.trialStatus === 'not used') {
+        gtmUtils.startTrail(14)
+        fbPixelUtils.startTrail(14)
+      } else {
+        gtmUtils.subscribe(getters.getIsBundle)
+        fbPixelUtils.subscribe(getters.getIsBundle)
+      }
     }).then(() => {
       return paymentApi.updateBillingInfo({
         meta: JSON.stringify({

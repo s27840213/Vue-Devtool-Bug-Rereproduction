@@ -89,12 +89,12 @@ export default Vue.extend({
       paymentPaidDate: 'paymentPaidDate',
       trialStatus: 'trialStatus'
     }),
-    useTappay():boolean {
+    useTappay(): boolean {
       // When update credit card (isChange true), use countryInfo instead of countryUi.
       return this.isChange ? this.userCountryInfo === 'tw'
         : this.userCountryUi === 'tw'
     },
-    priceToday():string {
+    priceToday(): string {
       if (!this.paymentPaidDate) return '$' + this.plans[this.planSelected][this.periodUi].nextPaid
       else if (this.userCountryUi === 'tw') return '$0'
       else return '$0.00'
@@ -108,22 +108,22 @@ export default Vue.extend({
             ? i18n.t('NN0560')
             : i18n.t('NN0561')) as string
     },
-    invoiceReady():boolean { // Check if input is empty
+    invoiceReady(): boolean { // Check if input is empty
       for (const item of this.invoiceInput) {
         if (item.optional) continue
         if (!this.bi[item.key as string]) return false
       }
       return true
     },
-    payReady():boolean {
+    payReady(): boolean {
       return this.useTappay
         ? this.tappayPayReady && this.invoiceReady
         : this.stripePayReady && this.invoiceReady
     },
-    disableSubmit():boolean {
+    disableSubmit(): boolean {
       return !this.payReady || this.isLoading
     },
-    invoiceInput():ReturnType<typeof paymentData.gerneral> {
+    invoiceInput(): ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountryUi) {
         case 'tw':
           return [...paymentData.gerneral(), ...paymentData.TWonly()]
@@ -270,12 +270,14 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   height: 100%; // Let button at the same position as popup payment step1
-  &__close { // Relaive to SettingsPayment.vue .sp-field
+  &__close {
+    // Relaive to SettingsPayment.vue .sp-field
     position: absolute;
-    top: 0px; right: 0px;
+    top: 0px;
+    right: 0px;
     padding: 10px;
   }
-  >button {
+  > button {
     @include btn-LG;
     margin-top: 42px;
   }
@@ -285,17 +287,19 @@ export default Vue.extend({
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 12px;
-  >div {
+  > div {
     height: 18px;
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
     padding: 10px;
   }
-  &-card { grid-column: 1 / 3; }
+  &-card {
+    grid-column: 1 / 3;
+  }
 }
 
 .stripe {
-  >svg {
+  > svg {
     display: block;
     margin: auto;
   }
@@ -303,14 +307,17 @@ export default Vue.extend({
 
 .field-content {
   height: 100%;
-  &__info, &__info-today {
+  &__info,
+  &__info-today {
     @include body-SM;
     color: setColor(gray-1);
     display: flex;
     justify-content: space-between;
     margin: 5px 0;
   }
-  &__info-today { @include overline-LG; }
+  &__info-today {
+    @include overline-LG;
+  }
 }
 
 .field-invoice {
@@ -320,7 +327,7 @@ export default Vue.extend({
     margin-bottom: 6px;
   }
   &__input {
-    >input {
+    > input {
       @include body-SM;
       width: calc(100% - 22px);
       height: 18px;
@@ -330,7 +337,9 @@ export default Vue.extend({
       border-radius: 4px;
     }
     // move to html class?
-    >span { color: setColor(red); }
+    > span {
+      color: setColor(red);
+    }
   }
 }
 
