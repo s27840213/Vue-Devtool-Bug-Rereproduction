@@ -352,6 +352,7 @@ export default Vue.extend({
       })
     },
     swipeUpHandler(e: AnyTouchEvent) {
+      e.stopImmediatePropagation()
       if (this.pageNum - 1 !== this.currCardIndex) {
         this.currCardIndex++
         GroupUtils.deselect()
@@ -362,6 +363,7 @@ export default Vue.extend({
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
+      e.stopImmediatePropagation()
       if (this.currCardIndex !== 0) {
         this.currCardIndex--
         GroupUtils.deselect()
