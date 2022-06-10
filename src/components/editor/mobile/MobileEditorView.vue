@@ -10,7 +10,8 @@
     div(class="editor-view__canvas"
         ref="canvas"
         @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler")
+        @swipedown="swipeDownHandler"
+        :style="canvasStyle")
       div(v-for="(page,index) in pages"
           :key="`page-${index}`"
           class="editor-view__card"
@@ -59,6 +60,10 @@ export default Vue.extend({
     inAllPagesMode: {
       type: Boolean,
       required: true
+    },
+    currActivePanel: {
+      default: 'none',
+      type: String
     }
   },
   data() {
@@ -214,6 +219,11 @@ export default Vue.extend({
     },
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
+    },
+    canvasStyle(): { [index: string]: string } {
+      return {
+        paddingBottom: this.currActivePanel !== 'none' ? '40%' : '0px'
+      }
     }
   },
   methods: {
@@ -344,16 +354,17 @@ export default Vue.extend({
     swipeUpHandler(e: AnyTouchEvent) {
       if (this.pageNum - 1 !== this.currCardIndex) {
         this.currCardIndex++
+        GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
       } else {
         this.addPage(pageUtils.newPage({}))
         StepsUtils.record()
       }
-      console.log(e)
     },
     swipeDownHandler(e: AnyTouchEvent) {
       if (this.currCardIndex !== 0) {
         this.currCardIndex--
+        GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
       }
     },
@@ -388,6 +399,7 @@ $REULER_SIZE: 20px;
     justify-content: center;
     transform-style: preserve-3d;
     transform: scale(1);
+    box-sizing: border-box;
   }
 
   &__card {

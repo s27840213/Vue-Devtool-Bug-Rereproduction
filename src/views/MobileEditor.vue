@@ -7,6 +7,7 @@
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
         mobile-editor-view(v-if="!inAllPagesMode"
+          :currActivePanel="currActivePanel"
           :isConfigPanelOpen="isConfigPanelOpen"
           :inAllPagesMode="inAllPagesMode")
         div(v-else class="mobile-editor__page-preview")
