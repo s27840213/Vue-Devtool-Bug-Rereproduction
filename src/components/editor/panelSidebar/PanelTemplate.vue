@@ -88,6 +88,7 @@ import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
 import _ from 'lodash'
 import listService from '@/apis/list'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -110,21 +111,24 @@ export default Vue.extend({
   mounted() {
     const urlParams = new URLSearchParams(window.location.search)
     const groupId = urlParams.get('group_id')
-    if (!groupId) return
-    listService.getList({ type: 'group', groupId, cache: true }).then(result => {
-      const { content } = result.data.data
-      this.currentGroup = {
-        group_type: 0,
-        group_id: groupId,
-        type: 6,
-        content_ids: content[0].list,
-        id: content[0].list[0].id,
-        ver: 0
-      }
-      const query = Object.assign({}, this.$route.query)
-      delete query.group_id
-      this.$router.replace({ query })
-    })
+    if (groupId) {
+      listService.getList({ type: 'group', groupId, cache: true }).then(result => {
+        const { content } = result.data.data
+        this.currentGroup = {
+          group_type: 0,
+          group_id: groupId,
+          type: 6,
+          content_ids: content[0].list,
+          id: content[0].list[0].id,
+          ver: 0
+        }
+        const query = Object.assign({}, this.$route.query)
+        delete query.group_id
+        this.$router.replace({ query })
+      })
+    }
+
+    generalUtils.panelInit('template', this.handleSearch, this.handleCategorySearch)
   },
   computed: {
     ...mapState(
@@ -261,9 +265,9 @@ export default Vue.extend({
         this.getContent()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      this.getContent({ keyword, locale })
     },
     handleLoadMore() {
       this.getMoreContent()

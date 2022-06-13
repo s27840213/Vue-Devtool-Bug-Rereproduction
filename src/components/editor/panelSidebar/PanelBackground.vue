@@ -62,6 +62,7 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -171,6 +172,8 @@ export default Vue.extend({
 
     await this.getCategories()
     this.getContent()
+
+    generalUtils.panelInit('bg', this.handleSearch, this.handleCategorySearch)
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -228,9 +231,9 @@ export default Vue.extend({
         this.getContent()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      this.getContent({ keyword, locale })
     },
     handleLoadMore() {
       this.getMoreContent()

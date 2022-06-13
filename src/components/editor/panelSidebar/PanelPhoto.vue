@@ -25,6 +25,7 @@ import Vue from 'vue'
 import { mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
+import generalUtils from '@/utils/generalUtils'
 // import photo from '@/store/module/photo'
 
 const moduleName = 'unsplash'
@@ -47,7 +48,7 @@ export default Vue.extend({
     ])
   },
   mounted() {
-    this.handleSearch()
+    generalUtils.panelInit('photo', this.handleSearch, () => { /**/ })
   },
   activated() {
     if (this.$refs.gallery) {

@@ -40,6 +40,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -109,6 +110,7 @@ export default Vue.extend({
       this.scrollTop = (event.target as HTMLElement).scrollTop
     })
     this.getCategories()
+    generalUtils.panelInit('object', this.handleSearch, this.handleCategorySearch)
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -139,8 +141,8 @@ export default Vue.extend({
         this.getCategories()
       }
     },
-    handleCategorySearch(keyword: string) {
-      keyword ? this.getContent({ keyword }) : this.resetContent()
+    handleCategorySearch(keyword: string, locale = '') {
+      keyword ? this.getContent({ keyword, locale }) : this.resetContent()
     },
     handleLoadMore() {
       console.log('object load more')

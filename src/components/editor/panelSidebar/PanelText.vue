@@ -77,6 +77,7 @@ import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/br
 import brandkitUtils from '@/utils/brandkitUtils'
 import VueI18n from 'vue-i18n'
 import tiptapUtils from '@/utils/tiptapUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -175,6 +176,8 @@ export default Vue.extend({
     await this.getCategories()
     this.getContent()
     textUtils.loadDefaultFonts(this.extractFonts)
+
+    generalUtils.panelInit('text', this.handleSearch, this.handleCategorySearch)
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -229,9 +232,9 @@ export default Vue.extend({
         this.getContent()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      this.getContent({ keyword, locale })
     },
     handleLoadMore() {
       this.getMoreContent()

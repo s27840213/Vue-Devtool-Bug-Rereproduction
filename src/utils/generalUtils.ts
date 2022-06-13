@@ -189,6 +189,20 @@ class GeneralUtils {
   //     logData.push(params)
   //   }
   // }
+
+  panelInit(panelName:string, searchF: (s: string)=>void, categoryF: (s: string, l:string)=>void) {
+    const urlParams = new URLSearchParams(window.location.search)
+    const panel = urlParams.get('panel')
+    const category = urlParams.get('category')
+    const category_locale = urlParams.get('category_locale')
+    const search = urlParams.get('search')
+    if (panel !== panelName) return
+    if (category && category_locale) {
+      categoryF(category, category_locale)
+    } else if (search) {
+      searchF(search)
+    }
+  }
 }
 
 const generalUtils = new GeneralUtils()
