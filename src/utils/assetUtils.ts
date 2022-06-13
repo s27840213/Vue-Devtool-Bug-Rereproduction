@@ -595,7 +595,7 @@ class AssetUtils {
 
   addAssetToRecentlyUsed(asset: IAsset) {
     const {
-      id, type, width, height,
+      id, type, width, height, plan,
       content_ids: contentIds, match_cover: matchCover,
       user_id: userId, asset_id: assetId, asset_index: assetIndex_,
       src, ver, signed_url: signedUrl
@@ -613,6 +613,7 @@ class AssetUtils {
         }
         recentlyUsed.list.unshift({
           id,
+          plan,
           type,
           width,
           height,

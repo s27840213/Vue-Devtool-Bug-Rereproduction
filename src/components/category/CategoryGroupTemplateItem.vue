@@ -14,6 +14,7 @@
         :style="previewStyle"
         @error="handleNotFound")
       span(class="category-template-item__index") {{ carouselIdx + 1 }}/{{ item.content_ids.length }}
+      pro-item(v-if="item.plan")
     div(v-if="showId"
       class="category-template-item__id"
       @click.self.stop="copyId") {{ item.id }}
@@ -22,10 +23,14 @@
 <script lang="ts">
 import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import GeneralUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
-  components: { ImageCarousel },
+  components: {
+    ImageCarousel,
+    ProItem
+  },
   props: {
     src: String,
     item: Object,

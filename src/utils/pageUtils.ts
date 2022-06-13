@@ -56,6 +56,10 @@ class PageUtils {
   }
 
   newPage(pageData: Partial<IPage>) {
+    // @TODO The temporarily fetched json has some issue
+    // the scale of background will be null
+    pageData.backgroundImage && (pageData.backgroundImage.config.styles.scale = 1)
+
     const defaultPage = {
       width: 1080,
       height: 1080,
