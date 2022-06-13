@@ -170,7 +170,7 @@ export default Vue.extend({
       popupUtils.openPopup('page', { event })
     },
     pageDblClickHandler(): void {
-      if (!this.isHandleShadow) {
+      if (this.isHandleShadow) {
         return
       }
       const { srcObj, locked } = this.config.backgroundImage.config
