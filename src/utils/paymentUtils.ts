@@ -15,7 +15,7 @@ class PaymentUtils {
     popupUtils.openPopup('payment')
   }
 
-  checkProObject(template: {plan: number}, target: string) {
+  checkPro(template: {plan: number}, target: string) {
     if (store.getters['user/isAdmin']) return true
     if (template.plan === 1 && !store.getters['payment/getIsPro']) {
       this.openPayment(target)

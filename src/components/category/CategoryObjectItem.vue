@@ -35,6 +35,7 @@ export default Vue.extend({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
     }),
     dragStart(e: DragEvent) {
+      if (!paymentUtils.checkPro(this.item, 'pro-object')) return
       const type = assetUtils.getLayerType(this.item.type)
       new DragUtils().itemDragStart(e, type || '', {
         ...this.item
@@ -43,7 +44,7 @@ export default Vue.extend({
       })
     },
     addSvg() {
-      if (!paymentUtils.checkProObject(this.item, 'pro-object')) return
+      if (!paymentUtils.checkPro(this.item, 'pro-object')) return
       assetUtils.addAsset(this.item)
     },
     showSvgInfo(evt: Event) {
