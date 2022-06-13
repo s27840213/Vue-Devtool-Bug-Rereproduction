@@ -174,7 +174,7 @@ export default Vue.extend({
         default:
           return [i18n.t('NN0652') as string, 'remover.jpg']
         case 'pro-template':
-          return [i18n.t('NN0653') as string, 'pro-object.jpg']
+          return [i18n.t('NN0653') as string, 'template-cb.jpg']
         case 'pro-object':
           return [i18n.t('NN0658') as string, 'pro-object.jpg']
       }
