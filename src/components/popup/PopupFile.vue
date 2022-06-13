@@ -146,7 +146,7 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     testSubscribe() {
-      gtmUtils.subscribe(100, 30)
+      // gtmUtils.subscribe(100, 30)
     },
     testTrail() {
       gtmUtils.startTrail(14)

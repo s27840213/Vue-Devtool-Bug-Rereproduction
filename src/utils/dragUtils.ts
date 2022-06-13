@@ -181,7 +181,10 @@ class DragUtils {
     if (store.state.currDraggedPhoto.srcObj.type) {
       const { imgWidth, imgHeight } = config.styles
       const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
-      const styles = mouseUtils.clipperHandler(store.state.currDraggedPhoto as any, path, config.styles).styles
+      const styles = {
+        ...config.styles,
+        ...mouseUtils.clipperHandler(store.state.currDraggedPhoto as any, path, config.styles).styles
+      }
       Object.assign(this.imgBuff, {
         srcObj: {
           ...config.srcObj
@@ -227,15 +230,6 @@ class DragUtils {
     if (store.state.currDraggedPhoto.srcObj.type) {
       e.stopPropagation()
       stepsUtils.record()
-    }
-  }
-
-  checkIsTransparent(src: string) {
-    if (src) {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-      // canvas.setAttribute('width', )
-      // ctx.drawImage
     }
   }
 }

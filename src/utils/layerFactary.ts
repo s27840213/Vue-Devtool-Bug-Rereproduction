@@ -37,7 +37,7 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        scale: width / initWidth,
+        scale: (!Number.isNaN(width / initWidth) && (width / initWidth)) ? (width / initWidth || 1) : 1,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
@@ -468,7 +468,6 @@ class LayerFactary {
         }
         !shape.designId && console.warn('layer:', layerIndex, 'has no designId!')
       }
-
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)
