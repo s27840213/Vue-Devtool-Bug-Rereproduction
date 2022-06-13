@@ -25,7 +25,7 @@ export interface IAsset {
   id: string
   type: number
   ver: number
-  plan: number
+  plan?: number
   jsonData?: ILayer | IText | ITmp | IImage | IShape | IGroup | IMarker
   width?: number
   height?: number
