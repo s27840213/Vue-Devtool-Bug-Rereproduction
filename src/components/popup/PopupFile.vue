@@ -32,6 +32,10 @@ div(class="popup-file")
       span 匯入設計
     div(class="popup-file__item" @click="exportJSON()")
       span 匯出設計
+    //- div(class="popup-file__item" @click="testSubscribe()")
+    //-   span 測試訂閱
+    //- div(class="popup-file__item" @click="testTrail()")
+    //-   span 測試試用
   hr(class="popup-file__hr")
   div(class="popup-file__item"
       @click="onLogoutClicked()")
@@ -55,6 +59,7 @@ import shortcutHandler from '@/utils/shortcutUtils'
 import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
+import gtmUtils from '@/utils/gtmUtils'
 
 export default Vue.extend({
   components: {
@@ -139,6 +144,12 @@ export default Vue.extend({
     exportJSON() {
       fileUtils.export()
       // designUtils.newDesign()
+    },
+    testSubscribe() {
+      // gtmUtils.subscribe(100, 30)
+    },
+    testTrail() {
+      gtmUtils.startTrail(14)
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')

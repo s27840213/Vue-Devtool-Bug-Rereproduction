@@ -67,7 +67,7 @@ import imageUtils from '@/utils/imageUtils'
 import formatUtils from '@/utils/formatUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
-import eventUtils, { ImageEvent } from '@/utils/eventUtils'
+import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
@@ -296,7 +296,14 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      if (this.isProcessShadow || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+      // if (this.isProcessShadow || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        if (!this.isProcessShadow) {
+          groupUtils.deselect()
+          groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+          LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+          eventUtils.emit(PanelEvent.showPhotoShadow)
+        }
         return
       } else {
         imageUtils.setImgControlDefault(false)
@@ -474,8 +481,8 @@ export default Vue.extend({
         case 'group':
           // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           if (this.getLayerType === 'image') {
-            const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-            if (this.handleId.subLayerId !== this.config.id || !shadowEffectNeedRedraw) {
+            const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
+            if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
               this.dragUtils.onImageDragEnter(e, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             }

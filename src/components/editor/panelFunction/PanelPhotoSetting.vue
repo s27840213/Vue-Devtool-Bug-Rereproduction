@@ -8,7 +8,7 @@
           :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
           type="gray-mid"
           ref="btn"
-          :disabled="isUploadImgShadow || (btn.name !== 'shadow' && (isHandleShadow || show === 'panel-photo-shadow'))"
+          :disabled="disableBtn(btn)"
           :key="btn.name"
           @click.native="handleShow(btn.show)") {{ btn.label }}
       btn(v-if="isImage && !isFrame"
@@ -39,6 +39,7 @@ import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow
 import paymentUtils from '@/utils/paymentUtils'
 import { FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   data() {
@@ -70,7 +71,7 @@ export default Vue.extend({
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, () => {
-      this.show = 'panel-photo-shadow'
+      this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
@@ -94,14 +95,18 @@ export default Vue.extend({
       isProcessing: 'bgRemove/getIsProcessing',
       isAdmin: 'user/isAdmin',
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      isHandleShadow: 'shadow/isHandling'
     }),
     ...mapState('user', {
       isSuperUser: 'role'
     }),
-    isHandleShadow(): boolean {
-      return this.isProcessImgShadow || this.isUploadImgShadow
-    },
+    ...mapState('shadow', {
+      handleId: 'handleId'
+    }),
+    // isHandleShadow(): boolean {
+    //   return this.isProcessImgShadow || this.isUploadImgShadow
+    // },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -157,6 +162,21 @@ export default Vue.extend({
     ...mapActions({
       removeBg: 'user/removeBg'
     }),
+    disableBtn(btn: { [key: string]: string }): boolean {
+      // return isUploadImgShadow || (btn.name !== 'shadow' && (isHandleShadow || show === 'panel-photo-shadow'))
+      const currLayer = layerUtils.getCurrConfig as IImage
+      const { shadow } = currLayer.styles
+      if (shadow) {
+        const isCurrLayerHanlingShadow = [this.handleId.layerId, this.handleId.subLayerId].includes(currLayer.id)
+        const isLayerNeedRedraw = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+        if (btn.name === 'shadow' && this.isUploadImgShadow) {
+          return !isCurrLayerHanlingShadow || this.isUploadImgShadow
+        } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
+          return true
+        }
+      }
+      return false
+    },
     activeBtn(btn: { [key: string]: string }): boolean {
       if (this.show === btn.show) return true
       if (btn.name === 'crop' && this.isCropping) return true
@@ -165,9 +185,9 @@ export default Vue.extend({
     },
     handleShow(name: string) {
       const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
-      if (this.isHandleShadow) {
-        return
-      }
+      // if (this.isHandleShadow) {
+      //   return
+      // }
       switch (name) {
         case this.btns.find(b => b.name === 'shadow')?.show || '': {
           const target = (currLayer.type === LayerType.group && subLayerIdx !== -1
@@ -182,9 +202,15 @@ export default Vue.extend({
             imageUtils.setImgControlDefault()
           } else {
             let index
-            switch (layerUtils.getCurrLayer.type) {
-              case 'image':
-                layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+            const currLayer = layerUtils.getCurrLayer
+            switch (currLayer.type) {
+              case 'image': {
+                const { shadow } = (currLayer as IImage).styles
+                const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+                if (!(this.isHandleShadow && needRedrawShadow)) {
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                }
+              }
                 break
               case 'frame':
                 index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')

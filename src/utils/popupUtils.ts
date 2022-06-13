@@ -149,7 +149,9 @@ class PopupUtils {
     // await this.popupComponent.closeHandler()
     store.dispatch('popup/closePopup')
     this.currPopupType = ''
-    this.popupEl.style.transform = ''
+    if (this.popupEl) {
+      this.popupEl.style.transform = ''
+    }
   }
 }
 
