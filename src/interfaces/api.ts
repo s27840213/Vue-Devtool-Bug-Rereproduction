@@ -395,3 +395,27 @@ export interface IImageSize {
   width: number,
   height: number
 }
+
+export interface IAssetTemplate {
+  // For /list-design?type=template api raw data, not processed. ITemplate is processed.
+  id: string
+  type: number
+  ver: number
+  plan: number
+  group_id: string
+  content_ids: {
+    id: string
+    ver: number
+    width: number
+    height: number
+    themes: string[]
+  }[]
+  match_cover: {
+    id: string
+    ver: number
+    width: number
+    height: number
+    theme_id: string
+  }
+  group_type: number
+}

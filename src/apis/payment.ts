@@ -42,8 +42,8 @@ class Payment {
     })
   }
 
-  updateBillingInfo (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  updateBillingInfo (params: any): AxiosPromise {
+    return axios.request<any>({
       url: '/billing-info',
       method: 'POST',
       data: {
@@ -55,9 +55,9 @@ class Payment {
     })
   }
 
-  // Both stripe & tappay
-  init (): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  // For both stripe & tappay
+  init (): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -68,8 +68,8 @@ class Payment {
     })
   }
 
-  tappayAdd (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  tappayAdd (params: any): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -82,8 +82,8 @@ class Payment {
     })
   }
 
-  stripeAdd (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  stripeAdd (params: any): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -96,8 +96,8 @@ class Payment {
     })
   }
 
-  tappayUpdate (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  tappayUpdate (params: any): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -110,8 +110,8 @@ class Payment {
     })
   }
 
-  stripeUpdate (): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  stripeUpdate (): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -123,8 +123,8 @@ class Payment {
     })
   }
 
-  getSwitchPrice (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  getSwitchPrice (params: any): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -137,8 +137,8 @@ class Payment {
     })
   }
 
-  switch (params: any): AxiosPromise { // todo retype
-    return axios.request<any>({ // todo retype
+  switch (params: any): AxiosPromise {
+    return axios.request<any>({
       url: '/payment',
       method: 'POST',
       data: {

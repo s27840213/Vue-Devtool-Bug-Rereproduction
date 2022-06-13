@@ -1,7 +1,6 @@
 <template lang="pug">
   div(class="bill")
-    div(class="bill__title")
-      p {{$t('NN0614')}}
+    div(class="bill__title") {{$t('NN0614')}}
     template(v-if="!historys.length")
       img(:src="require('@/assets/img/svg/pricing/E-payment.svg')")
       p(class="text-H6") {{$t('NN0621')}}
@@ -14,10 +13,10 @@
         span {{his.date}}
         span {{his.description}}
         span {{his.price}}
-        div(v-if="his.success === false" class="text-red")
+        div(v-if="!his.success" class="text-red")
           span {{$t('NN0620')}}
           svg-icon(iconName="error" iconWidth="24px" iconColor="red")
-        div(v-else-if="canDownloadInvoice" class="text-blue-1" @click="pdf(idx, his)")
+        div(v-else-if="canDownloadInvoice(his)" class="text-blue-1 pointer" @click="pdf(idx, his)")
           span {{$t('NN0619')}}
           svg-icon(iconName="download" iconWidth="24px" iconColor="gray-2")
         span(v-else)
@@ -28,8 +27,8 @@
         div(class="bill-invoice__title")
           img(:src="require('@/assets/img/jpg/logo.jpg')" style="height: 32px;")
           span {{'INVOICE'}}
-        div(class="bill-invoice__invoice-number") {{`Invoice number: ${curInvoice.id}`}}
-        div(class="bill-invoice__invoice-date") {{`Invoice date: ${curInvoice.date}`}}
+        div {{`Invoice number: ${curInvoice.id}`}}
+        div {{`Invoice date: ${curInvoice.date}`}}
         div(class="bill-invoice-fromto")
           span {{'From:'}}
           span {{'To:'}}
@@ -44,9 +43,9 @@
             span {{item.date}}
             span {{item.price}}
           span
-          span {{'Total price'}}
-          span {{`$${totalPrice} USD`}}
-        div(class="bill-invoice-note")
+          span(class="caption-LG") {{'Total price'}}
+          span(class="caption-LG") {{`$${totalPrice} USD`}}
+        div(class="caption-LG mt-50")
           span {{'NOTE'}}
     spinner(v-if="isLoading")
 </template>
@@ -54,18 +53,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+// import ObserverSentinel from '@/components/ObserverSentinel.vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import html2pdf from 'html2pdf.js'
 
 export default Vue.extend({
   name: 'SettingsBill',
-  components: {
-    ObserverSentinel
-  },
-  props: {
-  },
+  // components: {
+  //   ObserverSentinel
+  // },
   data() {
     return {
       hisIndex: 0
@@ -93,10 +90,6 @@ export default Vue.extend({
         .reduce((acc: number, cur: Record<string, unknown>) => {
           return acc + (cur.price as number)
         }, 0)
-    },
-    canDownloadInvoice(): (his:Record<string, string>)=>boolean {
-      return (his: Record<string, string>) =>
-        Boolean((his.payType === 'tappay' && his.url) || his.payType === 'stripe')
     }
   },
   mounted() {
@@ -109,6 +102,9 @@ export default Vue.extend({
     ...mapMutations({
       setIsLoading: 'payment/SET_isLoading'
     }),
+    canDownloadInvoice(his: Record<string, string>): boolean {
+      return Boolean((his.payType === 'tappay' && his.url) || his.payType === 'stripe')
+    },
     async pdf(index: number, his: Record<string, string>) {
       if (his.payType === 'tappay') {
         location.href = his.url
@@ -135,10 +131,12 @@ export default Vue.extend({
 .bill {
   @include body-SM;
   padding: 60px 13% 20px 13%;
+  color: setColor(gray-1);
   &__title {
     @include body-MD;
     color: setColor(blue-1);
     text-align: left;
+    margin-bottom: 23px;
   }
   &-table {
     display: grid;
@@ -146,7 +144,6 @@ export default Vue.extend({
     >span { height: 45px; }
     >span:nth-child(4n+1) { text-align: left; }
     >span:nth-child(-n+4) { color: setColor(gray-3); }
-    >a { text-decoration: none; }
     >div >svg { display: none; }
   }
 }
@@ -164,9 +161,8 @@ export default Vue.extend({
   width: 525px;
   height: 752px;
   margin: 35px 45px;
-  text-align: left;
-  color: setColor(gray-1);
   white-space: pre;
+  text-align: left;
   &__title {
     @include text-H4;
     display: flex;
@@ -183,15 +179,12 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: 232px 180px 88px;
     text-align: center;
-    >span { margin: auto 0; }
     >span:nth-child(-n+3) {
       color: setColor(gray-3);
       background-color: setColor(gray-6);
     }
     >span:nth-child(3n+1), >span:nth-child(3n+2) { padding-right: 100px; }
-    >span:nth-last-child(-n+2) { font-weight: bold; }
   }
-  &-note { margin-top: 50px; }
 }
 
 @media screen and (max-width: 768px) {

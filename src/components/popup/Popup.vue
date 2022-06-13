@@ -53,6 +53,7 @@ export default Vue.extend({
         handler: () => {
           popupUtils.closePopup()
         },
+        middleware: null as unknown,
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
@@ -185,10 +186,17 @@ export default Vue.extend({
       ]
     }
   },
+  mounted() {
+    this.vcoConfig.middleware = this.middleware
+  },
   methods: {
     ...mapActions({
       closePopup: 'popup/closePopup'
     }),
+    middleware() { // These component controll v-click-o by themself.
+      if (['popup-payment'].includes(this.component)) return false
+      return true
+    },
     async close() {
       await (this.popupComponent as IPopupComponent).closeHandler()
       this.closePopup()

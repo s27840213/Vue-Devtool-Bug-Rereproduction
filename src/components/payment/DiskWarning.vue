@@ -1,21 +1,22 @@
 <template lang="pug">
   div(v-if="!cur.hidden" class="warning")
-    div(v-if="size === 'small' && !dismiss" class="warning-small" :style="bgcolor")
+    div(v-if="size === 'small' && !dismissed" class="warning-small" :style="bgcolor")
       svg-icon(iconName="error" iconColor="white" iconWidth="24px")
-      div(class="warning-small-title") {{cur.title}}
+      div(class="warning-small-title")
+        span(class="caption-SM") {{cur.title}}
         div(class="warning-small-title-disk-total")
           div(class="warning-small-title-disk-used" :style="diskStyle")
       i18n(:path="cur.small.desc" class="warning-small-desc" tag="div")
         template(#button)
-          span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonText}}
+          span(class="warning-small-desc__btn" @click="cur.small.func") {{cur.small.buttonLabel}}
       svg-icon(iconName="close" iconColor="white"
               iconWidth="24px" @click.native="close()")
     div(v-if="size === 'large'" class="warning-large" :style="bgcolor")
-      div(class="warning-large-title") {{cur.title}}
+      div(class="caption-LG") {{cur.title}}
       div(class="warning-large-desc") {{cur.large.desc}}
       div(class="warning-large-btn")
         btn(v-for="btn in cur.large.buttons" :type="btn.type || 'light-mid'"
-            :disabled="btn.disabled" @click.native="btn.func()") {{btn.text}}
+            :disabled="btn.disabled" @click.native="btn.func()") {{btn.label}}
 </template>
 
 <script lang="ts">
@@ -26,8 +27,6 @@ import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   name: 'DiskWarning',
-  components: {
-  },
   props: {
     size: {
       type: String,
@@ -37,7 +36,7 @@ export default Vue.extend({
   data() {
     return {
       skiped: localStorage.skipDiskWarning === '1',
-      dismiss: false
+      dismissed: false
     }
   },
   computed: {
@@ -64,21 +63,19 @@ export default Vue.extend({
             bgcolor: '#4EABE6',
             large: {
               desc: i18n.t('NN0639'),
-              buttons: [
-                {
-                  text: this.recalc,
-                  func: this.reload,
-                  disabled: this.usage.diskLoading,
-                  type: 'transparent-mid'
-                }, {
-                  text: i18n.t('NN0642'),
-                  func: this.contact
-                }
-              ]
+              buttons: [{
+                label: this.recalc,
+                func: this.reload,
+                disabled: this.usage.diskLoading,
+                type: 'transparent-mid'
+              }, {
+                label: i18n.t('NN0642'),
+                func: this.contact
+              }]
             },
             small: {
               desc: 'NN0640',
-              buttonText: i18n.t('NN0642'),
+              buttonLabel: i18n.t('NN0642'),
               func: this.contact
             }
           }
@@ -90,20 +87,18 @@ export default Vue.extend({
             bgcolor: '#FFBA49',
             large: {
               desc: i18n.t('NN0636', { button: i18n.t('NN0561') }),
-              buttons: [
-                {
-                  text: i18n.t('NN0271'),
-                  func: this.skip,
-                  type: 'transparent-mid'
-                }, {
-                  text: i18n.t('NN0561'),
-                  func: this.openPaymentPopup
-                }
-              ]
+              buttons: [{
+                label: i18n.t('NN0271'),
+                func: this.skip,
+                type: 'transparent-mid'
+              }, {
+                label: i18n.t('NN0561'),
+                func: this.openPaymentPopup
+              }]
             },
             small: {
               desc: 'NN0636',
-              buttonText: i18n.tc('NN0507', 1),
+              buttonLabel: i18n.tc('NN0507', 1),
               func: this.openPaymentPopup
             }
           },
@@ -112,21 +107,19 @@ export default Vue.extend({
             bgcolor: '#4EABE6',
             large: {
               desc: i18n.t('NN0637'),
-              buttons: [
-                {
-                  text: this.recalc,
-                  func: this.reload,
-                  disabled: this.usage.diskLoading,
-                  type: 'transparent-mid'
-                }, {
-                  text: i18n.t('NN0561'),
-                  func: this.openPaymentPopup
-                }
-              ]
+              buttons: [{
+                label: this.recalc,
+                func: this.reload,
+                disabled: this.usage.diskLoading,
+                type: 'transparent-mid'
+              }, {
+                label: i18n.t('NN0561'),
+                func: this.openPaymentPopup
+              }]
             },
             small: {
               desc: 'NN0638',
-              buttonText: i18n.tc('NN0507', 1),
+              buttonLabel: i18n.tc('NN0507', 1),
               func: this.openPaymentPopup
             }
           }
@@ -146,32 +139,23 @@ export default Vue.extend({
       return this.preset[plan][type]
     },
     bgcolor():Record<string, string> {
-      return {
-        'background-color': this.cur.bgcolor as string
-      }
+      return { 'background-color': this.cur.bgcolor as string }
     },
     diskStyle():Record<string, string> {
-      return { width: `${this._diskPercent * 121}px` }
+      return { width: `${this._diskPercent * 100}%` }
     }
   },
-  // mounted() {
-  // },
   methods: {
     ...mapActions({
       reload: 'payment/reloadDiskCapacity'
     }),
-    close() {
-      this.dismiss = true
-    },
     skip() {
-      console.log('skip')
       localStorage.setItem('skipDiskWarning', '1')
       this.skiped = true
     },
-    openPaymentPopup() {
-      paymentUtils.openPayment('step1')
-    },
-    contact() { paymentUtils.contactUs() }
+    close() { this.dismissed = true },
+    contact() { paymentUtils.contactUs() },
+    openPaymentPopup() { paymentUtils.openPayment('step1') }
   }
 })
 </script>
@@ -193,20 +177,13 @@ export default Vue.extend({
     flex-shrink: 0;
   }
   &-title {
-    @include caption-SM;
-    font-size: 11px;
-    transform: scale(1);
-    width: 121px;
+    flex-shrink: 0;
+    width: 130px;
     margin: 0 3px;
     &-disk {
       &-total, &-used { height: 10px; }
-      &-total {
-        width: 121px;
-        border: 1px solid setColor(white);
-      }
-      &-used {
-        background-color: setColor(white);
-      }
+      &-total { border: 1px solid setColor(white); }
+      &-used { background-color: setColor(white); }
     }
   }
   &-desc {
@@ -221,12 +198,10 @@ export default Vue.extend({
 .warning-large {
   padding: 24px 4.4%;
   border-radius: 8px;
-  &-title { @include caption-LG; }
   &-desc { margin: 8px 0 16px 0; }
   &-btn {
     display: flex;
-    width: fit-content;
-    margin-left: auto;
+    justify-content: flex-end;
     >button {
       margin-left: 16px;
       border-radius: 50px;
