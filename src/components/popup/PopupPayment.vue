@@ -5,7 +5,7 @@
         div(class="close pointer")
           svg-icon(iconName="close" iconWidth="36px" iconColor="gray-0"
                   @click.native="closePopup()")
-        div(class="payment" v-click-outside="closePopup")
+        div(class="payment" v-click-outside="vcoConfig")
           div(class="payment-left")
             div(class="payment-left-top")
               div(class="payment-left-top__step")
@@ -98,6 +98,12 @@ export default Vue.extend({
   },
   data() {
     return {
+      vcoConfig: {
+        handler: () => { this.$emit('close') },
+        middleware: (event: MouseEvent) => {
+          return (event.target as HTMLElement).className === 'popup-window'
+        }
+      },
       // View variable
       view: '',
       currentStep: 0,
