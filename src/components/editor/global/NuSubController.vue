@@ -356,7 +356,7 @@ export default Vue.extend({
 
       return {
         transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)` +
-        `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
+          `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         'pointer-events': 'none'
