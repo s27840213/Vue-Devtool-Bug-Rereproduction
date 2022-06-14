@@ -21,7 +21,7 @@
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
+      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -624,11 +624,11 @@ export default Vue.extend({
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: true
+      })
       switch (this.getLayerType) {
         case 'text': {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-            dragging: true
-          })
           const targetClassList = (e.target as HTMLElement).classList
           const isMoveBar = targetClassList.contains('control-point__move-bar')
           const isMover = targetClassList.contains('control-point__mover')
@@ -768,6 +768,11 @@ export default Vue.extend({
           this.isMoved = true
           // dragging to another page
           if (LayerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+            const layerNum = LayerUtils.currSelectedInfo.layers.length
+            if (layerNum > 1) {
+              GroupUtils.group()
+            }
+
             const layerTmp = generalUtils.deepCopy(LayerUtils.getCurrLayer)
 
             const { top, left } = (this.$refs.body as HTMLElement).getBoundingClientRect()
@@ -777,9 +782,11 @@ export default Vue.extend({
 
             layerTmp.styles.x = newX
             layerTmp.styles.y = newY
-
             LayerUtils.deleteSelectedLayer(false)
             LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
+            if (layerNum > 1) {
+              GroupUtils.ungroup()
+            }
           } else {
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
             StepsUtils.record()

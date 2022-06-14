@@ -3,18 +3,17 @@
     img(:src="require(`@/assets/img/svg/card/${card.issuer}.svg`)")
     span {{`**** ${card.last4}`}}
     span {{`Expires ${card.date}`}}
-    svg-icon(v-if="trash" class="pointer" iconName="trash"
+    svg-icon(v-if="canDelete" class="pointer" iconName="trash"
             iconColor="gray-2" iconWidth="20px" @click.native="openPopup()")
     div(v-if="showPopup" class="popup-window")
       div(class="card-popup" v-click-outside="closePopup")
         div(class="text-H6") {{$t('NN0622')}}
-        i18n(class="card-popup-description" path="NN0623" tag="div")
+        i18n(class="body-XS my-30" path="NN0623" tag="div")
           template(#payment-method)
-            span {{$t('NN0624')}}
+            span(class="overline-LG") {{$t('NN0624')}}
         div(class="card-popup-button")
           btn(type="gray-mid" @click.native="closePopup()") {{$t('NN0203')}}
-          btn(class="card-popup-button-delete"
-              @click.native="deleteCard()") {{$t('NN0625')}}
+          btn(type="red-mid" @click.native="deleteCard()") {{$t('NN0625')}}
 </template>
 
 <script lang="ts">
@@ -32,7 +31,7 @@ export default Vue.extend({
       type: Object,
       required: true
     },
-    trash: {
+    canDelete: {
       type: Boolean,
       default: false
     }
@@ -57,7 +56,10 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   white-space: nowrap;
-  >span, >svg { margin-left: 20px; }
+  >span, >svg {
+    margin-left: 20px;
+    flex-shrink: 0;
+  }
 }
 
 .card-popup {
@@ -69,17 +71,9 @@ export default Vue.extend({
   width: 390px; height: 215px;
   padding: 37px;
   background-color: setColor(white);
-  &-description {
-    @include body-XS;
-    margin: 30px 0;
-    >span { @include overline-LG; }
-  }
   &-button {
     display: flex;
-    &-delete {
-      background-color: setColor(red) !important;
-      margin-left: 40px;
-    }
+    button + button { margin-left: 40px; }
   }
 }
 
@@ -87,10 +81,6 @@ export default Vue.extend({
   .card-popup {
     position: absolute;
     bottom: 0px;
-    height: 262px;
-    padding: 56px 30px;
-  }
-  .card-popup {
     height: 395px;
     padding: 56px 37px 175px 37px;
   }

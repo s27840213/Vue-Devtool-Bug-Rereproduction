@@ -17,7 +17,7 @@ div(class="overflow-container"
       nu-bg-image(:image="this.config.backgroundImage"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id"
-        @click.native.left="pageClickHandler()")
+        @mousedown.native.left="pageClickHandler()")
       nu-layer(v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
@@ -200,7 +200,8 @@ export default Vue.extend({
 }
 
 .pages-loading {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background-color: setColor(gray-4);
 }
 </style>

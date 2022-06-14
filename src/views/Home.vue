@@ -238,7 +238,7 @@ export default Vue.extend({
   .home-top {
     min-height: 724px;
     width: 768px;
-    margin-top: 160px;
+    margin-top: 80px;
     &-text {
       width: 560px; // todo ? 500 560
       &__title {
@@ -267,7 +267,7 @@ export default Vue.extend({
   .home-top {
     min-height: 724.15px;
     width: 1241px;
-    margin-top: 160px;
+    margin-top: 80px;
     &-text {
       &__title {
         @include text-H1

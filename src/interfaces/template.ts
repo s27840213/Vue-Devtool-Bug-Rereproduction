@@ -16,6 +16,7 @@ export interface ITemplate {
   aspect_ratio: number,
   type: number,
   ver: number,
+  plan: number,
   content_ids: IContentTemplate[],
   group_type?: number
   group_id?: string

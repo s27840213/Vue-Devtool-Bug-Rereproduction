@@ -11,6 +11,7 @@ import fbPixelUtils from '@/utils/fbPixelUtils'
 interface IPaymentState {
   isLoading: boolean
   initView: string
+  templateImg: string
   // Constant
   status: string
   plans: Record<string, Record<string, Record<string, string> | string>>
@@ -26,7 +27,6 @@ interface IPaymentState {
   switchPrice: string
   usage: {
     bgrmRemain: number
-    bgrmTotal: number
     diskLoading: boolean
     diskUsed: number
     diskTotal: number
@@ -37,16 +37,19 @@ interface IPaymentState {
     last4: string
     date: string
   }
-  nextBillingHistoryIndex: number
+  // nextBillingHistoryIndex: number
   billingHistory: {
     date: string
     description: string
     price: number
+    success: boolean
+    payType: string
+    url: string
     id: string
     name: string
+    company: string
     address: string
     email: string
-    success: boolean
     items: [{
       description: string
       date: string
@@ -55,7 +58,6 @@ interface IPaymentState {
   }[]
   // User input
   planSelected: string
-  userPlan: string
   periodUi: string
   periodInfo: string
   userCountryUi: string
@@ -131,6 +133,7 @@ function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
 const getDefaultState = (): IPaymentState => ({
   isLoading: false,
   initView: '',
+  templateImg: '',
   // Constant
   status: 'Loading',
   plans: {
@@ -162,7 +165,6 @@ const getDefaultState = (): IPaymentState => ({
   switchPrice: '',
   usage: {
     bgrmRemain: 0,
-    bgrmTotal: 100,
     diskLoading: false,
     diskUsed: 0,
     diskTotal: 100
@@ -173,11 +175,10 @@ const getDefaultState = (): IPaymentState => ({
     last4: '',
     date: ''
   },
-  nextBillingHistoryIndex: 0,
+  // nextBillingHistoryIndex: 0,
   billingHistory: [],
   // User input
   planSelected: '',
-  userPlan: '',
   periodUi: 'yearly',
   periodInfo: 'monthly',
   userCountryUi: '',
@@ -257,7 +258,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
     commit('SET_state', { isLoading: true })
     return paymentApi.billingInfo().then((response) => {
       const data = response.data.data
-      console.log('bill info', data) // todelete
       commit('SET_state', {
         status: getStatus(data.plan_subscribe, data.plan_stop_subscribe, data.card_valid),
         isPro: data.plan_subscribe === 1,
@@ -269,7 +269,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
         userCountryInfo: data.country,
         usage: {
           bgrmRemain: data.bg_credit_current,
-          bgrmTotal: data.bg_credit,
           diskLoading: false,
           diskUsed: data.capacity_current,
           diskTotal: data.capacity
@@ -296,12 +295,12 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }).finally(() => { commit('SET_state', { isLoading: false }) })
   },
   async getBillingHistroy({ commit }) {
-    // Bruce said don't do pagination in billing history.
+    // Bruce said don't do pagination in billing history, so comment pagination code.
     // if (state.nextBillingHistoryIndex === -1) return
     commit('SET_state', { isLoading: true })
     return paymentApi.billingHistory(0/* state.nextBillingHistoryIndex */).then((response) => {
       commit('SET_state', {
-        nextBillingHistoryIndex: response.data.next_page,
+        // nextBillingHistoryIndex: response.data.next_page,
         billingHistory: /* state.billingHistory.concat( */response.data.data.map((item: Record<string, string | number>) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
@@ -386,7 +385,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
           stripeClientSecret: data.client_secret,
           paymentPaidDate: data.charge_time
         })
-      }).then(() => { // Fill in email and name if empty.
+      }).then(() => { // Auto fill in email and name if empty.
         const userEmail = state.billingInfo.email || store.getters['user/getEmail']
         const userName = state.billingInfo.name || store.getters['user/getUname']
         commit('SET_state', {
@@ -557,37 +556,22 @@ const mutations: MutationTree<IPaymentState> = {
   SET_isLoading(state: IPaymentState, isLoading) {
     state.isLoading = isLoading
   },
-  SET_plans(state: IPaymentState, plans) {
-    state.plans = plans
-  },
   SET_initView(state: IPaymentState, initView) {
     state.initView = initView
+  },
+  SET_templateImg(state: IPaymentState, templateImg) {
+    state.templateImg = templateImg
   },
   DEL_guiWhiteSpace(state: IPaymentState) {
     state.billingInfo.GUI = state.billingInfo.GUI.replace(/\s/g, '')
   },
-  // UPDATE(state: IPaymentState, data) {
-  //   state = Object.assign(state, data)
-  // },
-  // old
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime
-  },
-  SET_isPro(state: IPaymentState, isPro) {
-    state.isPro = isPro
   }
 }
 
-const getters: GetterTree<IPaymentState, any> = {
+const getters: GetterTree<IPaymentState, unknown> = {
   getField,
-  // getUserType(state) {
-  //   if (state.isPro && state.isCancelingPro) return 'canceling'
-  //   else if (state.isPro) return 'subscribing'
-  //   else return 'free'
-  // },
-  // getPlans(state) {
-  //   return state.plans
-  // },
   getDiskPercent(): number {
     return state.usage.diskUsed / state.usage.diskTotal
   },
@@ -597,34 +581,12 @@ const getters: GetterTree<IPaymentState, any> = {
   getIsBundle(state) {
     return state.periodInfo === 'yearly'
   },
-  canUploadAsset(state) {
-    return (state.usage.diskUsed / state.usage.diskTotal) <= 1
-  },
-  canBgrm(state) {
-    return state.usage.bgrmRemain > 0
+  isUiTW(state) {
+    return state.userCountryUi === 'tw'
   },
   getIsPro(state) {
     return state.isPro
-  },
-  // old
-  getPrime(state) {
-    return state.prime
-  },
-  // getPeriod(state) {
-  //   return state.isBundle ? 'yearly' : 'monthly'
-  // },
-  // getInvoice(state) {
-  //   return state.invoice
-  // },
-  getGUIvalid(state) {
-    return isLegalGUI(state.billingInfo.GUI)
-  },
-  isUiTW(state) {
-    return state.userCountryUi === 'tw'
   }
-  // isUiUS(state) {
-  //   return state.userCountryUi === 'US'
-  // }
 }
 
 export default {
