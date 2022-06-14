@@ -108,7 +108,6 @@ export default Vue.extend({
     }
   },
   mounted() {
-    console.log('mount')
     const urlParams = new URLSearchParams(window.location.search)
     const groupId = urlParams.get('group_id')
     if (groupId) {
@@ -267,7 +266,6 @@ export default Vue.extend({
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
-      console.log('handle cate')
       this.resetContent()
       this.getContent({ keyword, locale })
     },
