@@ -1,7 +1,10 @@
 import { IPage } from '@/interfaces/page'
+import router from '@/router'
 import store from '@/store'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
+import _ from 'lodash'
+
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get isSuperUser() { return (store.state as any).user.role === 0 }
@@ -208,6 +211,10 @@ class GeneralUtils {
     } else {
       normalInit()
     }
+
+    const query = _.omit(router.currentRoute.query,
+      ['panel', 'category', 'category_locale', 'search'])
+    router.replace({ query })
   }
 }
 
