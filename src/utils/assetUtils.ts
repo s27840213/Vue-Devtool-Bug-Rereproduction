@@ -323,12 +323,17 @@ class AssetUtils {
     }, page)
     const config = LayerFactary.newImage({
       styles: {
-        width: assetWidth / 2,
-        height: assetHeight / 2,
+        // width: assetWidth / 2,
+        // height: assetHeight / 2,
+        width: width,
+        height: height,
         imgWidth: width,
         imgHeight: height,
-        initWidth: srcWidth,
-        initHeight: srcHeight,
+        initWidth: width,
+        initHeight: height,
+        // initWidth: srcWidth,
+        // initHeight: srcHeight,
+        scale: 1,
         x: 200,
         y: 200
       },

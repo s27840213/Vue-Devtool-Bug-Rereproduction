@@ -1427,7 +1427,7 @@ export default Vue.extend({
           const body = this.$refs.body as HTMLElement
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
-          this.dragUtils.onImageDragEnter(e, this.config as IImage)
+          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         }
       }
     },
@@ -1436,7 +1436,7 @@ export default Vue.extend({
       body.removeEventListener('dragleave', this.dragLeave)
       body.removeEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
-        this.dragUtils.onImageDragLeave(e)
+        this.dragUtils.onImageDragLeave(e, this.pageIndex)
       }
     },
     onDrop(e: DragEvent) {
