@@ -1440,6 +1440,8 @@ export default Vue.extend({
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
+        } else {
+          Vue.notify({ group: 'copy', text: '陰影處理中，請稍等' })
         }
       }
     },

@@ -5,20 +5,20 @@
       :key="field.name")
       div(class="popup-adjust__label")
         div {{ field.label }}
-        input(class="popup-adjust__range-input input__slider--range"
-          :value="adjustTmp[field.name] || 0"
-          :max="field.max"
-          :min="field.min"
+        input(class="popup-adjust__text body-2 text-gray-2 ml-10"
+          type="text"
           :name="field.name"
           @input="handleField"
-          @mouseup="handleChangeStop"
-          type="range")
-      input(class="popup-adjust__text body-2 text-gray-2 ml-10"
-        type="text"
+          @blur="handleChangeStop"
+          :value="adjustTmp[field.name] || 0")
+      input(class="popup-adjust__range-input input__slider--range"
+        :value="adjustTmp[field.name] || 0"
+        :max="field.max"
+        :min="field.min"
         :name="field.name"
         @input="handleField"
-        @blur="handleChangeStop"
-        :value="adjustTmp[field.name] || 0")
+        @mouseup="handleChangeStop"
+        type="range")
 </template>
 
 <script lang="ts">
@@ -73,9 +73,12 @@ export default Vue.extend({
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
   &__field {
     display: flex;
+    flex-direction: column;
     flex-wrap: nowrap;
   }
   &__label {
+    display: flex;
+    justify-content: space-between;
     flex: 1;
     font-size: 14px;
     text-align: left;

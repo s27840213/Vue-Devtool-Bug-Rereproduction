@@ -296,14 +296,11 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      // if (this.isProcessShadow || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        if (!this.isProcessShadow) {
-          groupUtils.deselect()
-          groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-          LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-          eventUtils.emit(PanelEvent.showPhotoShadow)
-        }
+        groupUtils.deselect()
+        groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+        eventUtils.emit(PanelEvent.showPhotoShadow)
         return
       } else {
         imageUtils.setImgControlDefault(false)
@@ -485,6 +482,8 @@ export default Vue.extend({
             if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
+            } else {
+              Vue.notify({ group: 'copy', text: '陰影處理中，請稍等' })
             }
           }
       }
@@ -516,8 +515,8 @@ export default Vue.extend({
         switch (this.type) {
           case 'frame':
             if (this.getLayerType === 'image') {
-              this.onFrameDrop(e)
               body.removeEventListener('dragleave', this.onFrameDragLeave)
+              this.onFrameDrop(e)
             }
             return
           case 'group':
@@ -530,7 +529,6 @@ export default Vue.extend({
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
               }
               eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-              const body = this.$refs.body as HTMLElement
               body.removeEventListener('dragleave', this.onDragLeave)
             }
         }
