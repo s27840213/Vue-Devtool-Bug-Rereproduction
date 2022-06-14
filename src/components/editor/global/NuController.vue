@@ -21,7 +21,7 @@
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
-      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType)))")
+      template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
             component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
@@ -542,6 +542,10 @@ export default Vue.extend({
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'tmp') {
+          /**
+           * @Todo - find the reason why this been set to certain value istead of 0
+           * set to 0 will make the layer below the empty area of tmp layer selectable
+           */
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'text' && this.isActive) {
@@ -624,11 +628,9 @@ export default Vue.extend({
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
+
       switch (this.getLayerType) {
         case 'text': {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-            dragging: true
-          })
           const targetClassList = (e.target as HTMLElement).classList
           const isMoveBar = targetClassList.contains('control-point__move-bar')
           const isMover = targetClassList.contains('control-point__mover')
@@ -708,6 +710,9 @@ export default Vue.extend({
     },
     moving(e: MouseEvent) {
       this.isControlling = true
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: true
+      })
       if (this.isImgControl) {
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
@@ -768,6 +773,11 @@ export default Vue.extend({
           this.isMoved = true
           // dragging to another page
           if (LayerUtils.isOutOfBoundary() && this.currHoveredPageIndex !== -1 && this.currHoveredPageIndex !== this.pageIndex) {
+            const layerNum = LayerUtils.currSelectedInfo.layers.length
+            if (layerNum > 1) {
+              GroupUtils.group()
+            }
+
             const layerTmp = generalUtils.deepCopy(LayerUtils.getCurrLayer)
 
             const { top, left } = (this.$refs.body as HTMLElement).getBoundingClientRect()
@@ -777,9 +787,11 @@ export default Vue.extend({
 
             layerTmp.styles.x = newX
             layerTmp.styles.y = newY
-
             LayerUtils.deleteSelectedLayer(false)
             LayerUtils.addLayers(this.currHoveredPageIndex, [layerTmp])
+            if (layerNum > 1) {
+              GroupUtils.ungroup()
+            }
           } else {
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
             StepsUtils.record()
@@ -1427,7 +1439,7 @@ export default Vue.extend({
           const body = this.$refs.body as HTMLElement
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
-          this.dragUtils.onImageDragEnter(e, this.config as IImage)
+          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         }
       }
     },
@@ -1436,7 +1448,7 @@ export default Vue.extend({
       body.removeEventListener('dragleave', this.dragLeave)
       body.removeEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
-        this.dragUtils.onImageDragLeave(e)
+        this.dragUtils.onImageDragLeave(e, this.pageIndex)
       }
     },
     onDrop(e: DragEvent) {

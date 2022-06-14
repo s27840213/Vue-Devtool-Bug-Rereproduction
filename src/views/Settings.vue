@@ -15,8 +15,7 @@
         settings-payment(v-if="currentView === 'payment'")
         settings-bill(v-if="currentView === 'billing'")
     transition(name="slide-x-right")
-      div(v-if="showMobileMenu"
-          class="settings-mobileMenu popup-window")
+      div(v-if="showMobileMenu" class="settings-mobileMenu popup-window")
         mobile-menu(v-if="showMobileMenu" @closeMenu="closeMobileMenu()"
                     v-click-outside="closeMobileMenu")
 </template>
@@ -70,7 +69,7 @@ export default Vue.extend({
       return this.currentView === 'menu' ? { width: '100%', display: 'grid' } : {}
     },
     viewLabel(): string {
-      return _.find(paymentData.viewList(true), ['name', this.view]).label
+      return _.find(paymentData.settingsItems(true), ['name', this.view]).label
     }
   },
   created() {

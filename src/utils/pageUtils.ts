@@ -56,6 +56,10 @@ class PageUtils {
   }
 
   newPage(pageData: Partial<IPage>) {
+    // @TODO The temporarily fetched json has some issue
+    // the scale of background will be null
+    pageData.backgroundImage && (pageData.backgroundImage.config.styles.scale = 1)
+
     const defaultPage = {
       width: 1080,
       height: 1080,
@@ -70,6 +74,7 @@ class PageUtils {
           styles: {
             width: 0,
             height: 0,
+            scale: 1,
             zindex: -1,
             opacity: 100
           }
@@ -208,12 +213,13 @@ class PageUtils {
     })
   }
 
-  updateBackgroundImageSize(pageIndex: number, width: number, height: number): void {
+  updateBackgroundImageSize(pageIndex: number, width: number, height: number, scale?: number): void {
     store.commit('SET_backgroundImageSize', {
       pageIndex: pageIndex,
       imageSize: {
-        width: width,
-        height: height
+        width,
+        height,
+        scale
       }
     })
   }

@@ -357,8 +357,10 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
-    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
+    // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
+    const { pageIndex, config } = updateInfo
+    Object.assign(state.pages[pageIndex].backgroundImage.config, config)
+    state.pages[pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
@@ -372,9 +374,10 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
   },
-  SET_backgroundImageSize(state: IEditorState, updateInfo: { pageIndex: number, imageSize: { width: number, height: number } }) {
+  SET_backgroundImageSize(state: IEditorState, updateInfo: { pageIndex: number, imageSize: { width: number, height: number, scale: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgWidth = updateInfo.imageSize.width
     state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgHeight = updateInfo.imageSize.height
+    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.scale = updateInfo.imageSize.scale || 1
   },
   SET_backgroundImageMode(state: IEditorState, updateInfo: { pageIndex: number, newDisplayMode: boolean }) {
     state.pages[updateInfo.pageIndex].backgroundImage.newDisplayMode = updateInfo.newDisplayMode

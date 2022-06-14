@@ -9,7 +9,7 @@
           div(class="profile-text body-4")
             div {{showUname}}
             div(class="text-gray-3") {{showAccount}}
-        template(v-for="view in viewList")
+        template(v-for="view in settingsItems")
           hr(v-if="view.name === 'hr'")
           div(v-else class="nav-container__option"
               :class="{'selected': subPath === view.name}")
@@ -36,7 +36,7 @@ export default Vue.extend({
   data() {
     return {
       optionSelected: '',
-      viewList: paymentData.viewList()
+      settingsItems: paymentData.settingsItems()
     }
   },
   created() {

@@ -310,9 +310,9 @@ export default Vue.extend({
       }
     },
     imgWrapperstyle(): any {
+      const { height, width } = this.config.styles
       let clipPath = ''
-      if (!this.imgControl) {
-        const { height, width } = this.config.styles
+      if (!this.imgControl && !this.isBgImgControl) {
         clipPath = `path('M0,0h${width}v${height}h${-width}z`
       }
       return {
@@ -359,16 +359,9 @@ export default Vue.extend({
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
-      // const isPhotoShadowPanelOpen = this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
-      // const isCurrLayerActive = config.active
-      // const isShadowUploading = uploadId.pageId === pageUtils.getPage(pageIndex).id && (() => {
-      //   if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
-      //     const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
-      //     return primaryLayer.id === uploadId.layerId && primaryLayer.layers[subLayerIndex].id === uploadId.subLayerId
-      //   } else {
-      //     return layerUtils.getLayer(pageIndex, layerIndex).id === uploadId.layerId
-      //   }
-      // })()
+      if (typeof pageIndex === 'undefined') {
+        return false
+      }
       const isCurrShadowEffectApplied = this.currentShadowEffect !== ShadowEffectType.none
       const isHandling = handleId.pageId === pageUtils.getPage(pageIndex).id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {

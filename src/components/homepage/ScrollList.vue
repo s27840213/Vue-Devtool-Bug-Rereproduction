@@ -48,12 +48,12 @@
             :config="item")
         //- type template
         template(v-else-if="type === 'template'")
-          div(v-for="item in templateData"
-            class="list-content-items__template-item")
-            router-link(:to="templateUrl(item)" target="_blank")
-              img(loading="lazy"
-                :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
-                :style="templateImgStyle")
+          div(v-for="item in templateData" class="list-content-items__template-item"
+              @click="clickTemplate(item)")
+            img(loading="lazy"
+              :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
+              :style="templateImgStyle")
+            pro-item(v-if="item.plan === 1")
 </template>
 
 <script lang="ts">
@@ -61,13 +61,18 @@ import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import i18n from '@/i18n'
 import DesignItem from '@/components/homepage/DesignItem.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import themeUtils from '@/utils/themeUtils'
 import _ from 'lodash'
+import paymentUtils from '@/utils/paymentUtils'
+import { IAssetTemplate } from '@/interfaces/api'
+import templateCenterUtils from '@/utils/templateCenterUtils'
 
 export default Vue.extend({
   name: 'ScrollList',
   components: {
-    DesignItem
+    DesignItem,
+    ProItem
   },
   props: {
     type: {
@@ -87,7 +92,7 @@ export default Vue.extend({
       moreLink: '',
       fallbackSrc: require('@/assets/img/svg/image-preview.svg'),
       themeData: [],
-      templateData: [],
+      templateData: [] as IAssetTemplate[],
       templateTitle: {
         '1,2': i18n.t('NN0368'),
         3: i18n.t('NN0026'),
@@ -170,10 +175,15 @@ export default Vue.extend({
       const items = this.$refs.items as HTMLElement
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
     },
-    templateUrl(item: Record<string, Record<string, string>>): string {
+    templateUrl(item: IAssetTemplate): string {
       return this.theme === '7'
         ? `editor?type=product-page-template&design_id=${item.group_id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
         : `/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
+    },
+    clickTemplate(item: IAssetTemplate) {
+      const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
+      if (!paymentUtils.checkProTemplate(template)) return
+      window.open(this.templateUrl(item), '_blank')
     }
   }
 })
@@ -228,11 +238,12 @@ export default Vue.extend({
   }
   &__template-item {
     margin: 8px;
-    img:hover {
+    position: relative;
+    &:hover {
       transition: all 0.2s ease-in-out;
-      box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
       transform: translate(0, -5px);
     }
+    img:hover { box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15); }
   }
 }
 @media screen and (max-width: 768px) {

@@ -9,7 +9,7 @@
         div {{showUname}}
         div(class="text-gray-3 body-3") {{showAccount}}
     div(class="popup-account__hr")
-    template(v-for="view in viewList")
+    template(v-for="view in settingsItems")
       div(v-if="view.name === 'hr'" class="popup-account__hr")
       div(v-else class="popup-account__option" @click="closePopup")
         router-link(:to="`/settings/${view.name}`"
@@ -45,7 +45,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      viewList: paymentData.viewList()
+      settingsItems: paymentData.settingsItems()
     }
   },
   computed: {

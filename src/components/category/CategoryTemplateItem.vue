@@ -8,6 +8,7 @@
         @error="handleNotFound"
         @dragstart="dragStart($event)"
         @click="addTemplate")
+      pro-item(v-if="item.plan")
     div(v-if="showId"
       class="category-template-item__id"
       @click="copyId") {{ item.id }}
@@ -16,14 +17,18 @@
 <script lang="ts">
 import Vue from 'vue'
 import ImageCarousel from '@/components/global/ImageCarousel.vue'
+import ProItem from '@/components/payment/ProItem.vue'
 import AssetUtils from '@/utils/assetUtils'
 import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
-import page from '@/store/module/page'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
-  components: { ImageCarousel },
+  components: {
+    ImageCarousel,
+    ProItem
+  },
   props: {
     src: String,
     item: Object,
@@ -60,6 +65,8 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     dragStart(event: DragEvent) {
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
       const dataTransfer = event.dataTransfer as DataTransfer
       dataTransfer.dropEffect = 'move'
       dataTransfer.effectAllowed = 'move'
@@ -69,7 +76,8 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
-      console.log('Add template')
+      if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
+      else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
       const { match_cover: matchCover = {} } = this.item
       let { height, width } = this.item
 
@@ -88,11 +96,9 @@ export default Vue.extend({
       const isSameSize = currPage.width === width && currPage.height === height
       const cb = this.groupItem
         ? (resize?: any) => {
-          console.log('Add group template')
           AssetUtils.addGroupTemplate(this.groupItem, this.item.id, resize)
         }
         : (resize?: any) => {
-          console.log('Add normal template')
           AssetUtils.addAsset(this.item, resize)
           GeneralUtils.fbq('track', 'AddToWishlist', {
             content_ids: [this.item.id]

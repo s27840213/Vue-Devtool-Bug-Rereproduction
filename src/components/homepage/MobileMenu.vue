@@ -40,7 +40,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      navItems: constantData.headerItem(true),
+      navItems: constantData.headerItems(true),
       optionSelected: 0
     }
   },

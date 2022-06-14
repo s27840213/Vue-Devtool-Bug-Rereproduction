@@ -118,7 +118,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      navItems: constantData.headerItem(),
+      navItems: constantData.headerItems(),
       StepsUtils,
       keys: [] as string[],
       isAccountPopup: false,
