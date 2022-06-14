@@ -48,7 +48,11 @@ export default Vue.extend({
     ])
   },
   mounted() {
-    generalUtils.panelInit('photo', this.handleSearch, () => { /**/ })
+    generalUtils.panelInit('photo',
+      this.handleSearch,
+      this.handleSearch,
+      this.handleSearch
+    )
   },
   activated() {
     if (this.$refs.gallery) {

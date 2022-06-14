@@ -173,11 +173,14 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    await this.getCategories()
-    this.getContent()
-    textUtils.loadDefaultFonts(this.extractFonts)
-
-    generalUtils.panelInit('text', this.handleSearch, this.handleCategorySearch)
+    generalUtils.panelInit('text',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async () => {
+        await this.getCategories()
+        this.getContent()
+        textUtils.loadDefaultFonts(this.extractFonts)
+      })
   },
   activated() {
     const el = (this.$refs.list as Vue).$el

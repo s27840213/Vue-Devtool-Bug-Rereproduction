@@ -170,10 +170,13 @@ export default Vue.extend({
     })
     colorUtils.onStop(ColorEventType.background, this.recordChange)
 
-    await this.getCategories()
-    this.getContent()
-
-    generalUtils.panelInit('bg', this.handleSearch, this.handleCategorySearch)
+    generalUtils.panelInit('bg',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async () => {
+        await this.getCategories()
+        this.getContent()
+      })
   },
   activated() {
     const el = (this.$refs.list as Vue).$el

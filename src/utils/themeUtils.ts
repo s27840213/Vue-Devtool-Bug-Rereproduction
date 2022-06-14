@@ -4,6 +4,7 @@ import PageUtils from '@/utils/pageUtils'
 import listService from '@/apis/list'
 import i18n from '@/i18n'
 import _ from 'lodash'
+import generalUtils from './generalUtils'
 
 class ThemeUtils {
   get themes() { return store.state.themes }
@@ -20,21 +21,26 @@ class ThemeUtils {
     })
   }
 
+  checkAllThemes() { // Must be excute after get editorThemes
+    const themes = store.getters.getEditThemes
+      .map((it: Record<string, string>) => it.id)
+      .sort((a: number, b:number) => a - b)
+      .join(',')
+    store.commit('templates/SET_STATE', { theme: themes })
+  }
+
   async fetchTemplateContent() {
-    // const queryString = new URLSearchParams(window.location.search)
-    // const keyword = queryString.get('search')
-    // store.dispatch('templates/resetContent')
-    // if (keyword) {
-    //   // queryString.delete('search')
-    //   store.commit('SET_currSidebarPanelType', 0)
-    //   store.dispatch('templates/getTagContent', { keyword })
-    //   // window.history.replaceState({}, document.title, `${window.location.pathname}?${queryString.toString()}`)
-    // } else {
-    //   await store.dispatch('templates/getCategories')
-    //   store.dispatch('templates/getContent')
-    // }
-    // // await this.getCategories()
-    // // this.getContent()
+    generalUtils.panelInit('template',
+      (keyword: string) => {
+        this.checkAllThemes()
+        store.dispatch('templates/getTagContent', { keyword })
+      }, (keyword: string, locale: string) => {
+        this.checkAllThemes()
+        store.dispatch('templates/getContent', { keyword, locale })
+      }, async () => {
+        await store.dispatch('templates/getCategories')
+        store.dispatch('templates/getContent')
+      })
   }
 
   refreshTemplateState(pageIndex?: number, newDesignType?: number) {

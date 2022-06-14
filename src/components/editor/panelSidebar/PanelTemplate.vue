@@ -88,7 +88,6 @@ import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
 import _ from 'lodash'
 import listService from '@/apis/list'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -109,6 +108,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    console.log('mount')
     const urlParams = new URLSearchParams(window.location.search)
     const groupId = urlParams.get('group_id')
     if (groupId) {
@@ -128,7 +128,7 @@ export default Vue.extend({
       })
     }
 
-    generalUtils.panelInit('template', this.handleSearch, this.handleCategorySearch)
+    // panelInit for PanelTemplate at themeUtils.fetchTemplateContent
   },
   computed: {
     ...mapState(
@@ -256,6 +256,7 @@ export default Vue.extend({
       _setTemplateState: 'SET_STATE'
     }),
     async handleSearch(keyword?: string) {
+      console.log('handle search')
       this.resetContent()
       if (keyword) {
         this.getTagContent({ keyword })
@@ -266,6 +267,7 @@ export default Vue.extend({
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
+      console.log('handle cate')
       this.resetContent()
       this.getContent({ keyword, locale })
     },

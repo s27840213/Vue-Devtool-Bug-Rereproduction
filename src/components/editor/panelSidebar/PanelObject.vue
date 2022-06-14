@@ -109,8 +109,12 @@ export default Vue.extend({
     (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
       this.scrollTop = (event.target as HTMLElement).scrollTop
     })
-    this.getCategories()
-    generalUtils.panelInit('object', this.handleSearch, this.handleCategorySearch)
+
+    generalUtils.panelInit('object',
+      this.handleSearch,
+      this.handleCategorySearch,
+      this.getCategories
+    )
   },
   activated() {
     const el = (this.$refs.list as Vue).$el

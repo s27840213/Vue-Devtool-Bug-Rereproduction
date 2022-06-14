@@ -190,17 +190,23 @@ class GeneralUtils {
   //   }
   // }
 
-  panelInit(panelName:string, searchF: (s: string)=>void, categoryF: (s: string, l:string)=>void) {
+  panelInit(panelName:string,
+    searchF: (keyword: string)=>void,
+    categoryF: (keyword: string, locale:string)=>void,
+    normalInit: ()=>void) { // May move to a new file panelUtils.ts
     const urlParams = new URLSearchParams(window.location.search)
     const panel = urlParams.get('panel')
     const category = urlParams.get('category')
     const category_locale = urlParams.get('category_locale')
     const search = urlParams.get('search')
-    if (panel !== panelName) return
-    if (category && category_locale) {
+    if (panel !== panelName) {
+      normalInit()
+    } else if (category && category_locale) {
       categoryF(category, category_locale)
     } else if (search) {
       searchF(search)
+    } else {
+      normalInit()
     }
   }
 }
