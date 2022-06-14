@@ -542,6 +542,10 @@ export default Vue.extend({
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'tmp') {
+          /**
+           * @Todo - find the reason why this been set to certain value istead of 0
+           * set to 0 will make the layer below the empty area of tmp layer selectable
+           */
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'text' && this.isActive) {
