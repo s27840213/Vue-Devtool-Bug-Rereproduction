@@ -1,5 +1,7 @@
 <template lang="pug">
-  div(class="brand-kit-tab-color")
+  div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint")
+    no-items-hint(type="color")
+  div(v-else class="brand-kit-tab-color")
     div(v-if="isPalettesLoading" class="loading")
       svg-icon(iconName="loading"
               iconWidth="24px"
@@ -12,8 +14,9 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import brandkitUtils from '@/utils/brandkitUtils'
 import BrandKitColorPaletteSidebar from '@/components/brandkit/BrandKitColorPaletteSidebar.vue'
+import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
+import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
 
 export default Vue.extend({
@@ -22,7 +25,8 @@ export default Vue.extend({
     }
   },
   components: {
-    BrandKitColorPaletteSidebar
+    BrandKitColorPaletteSidebar,
+    NoItemsHint
   },
   mounted() {
     if (this.isSettingsOpen) return
@@ -73,6 +77,11 @@ export default Vue.extend({
 
 .loading {
   width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.hint {
   display: flex;
   justify-content: center;
 }
