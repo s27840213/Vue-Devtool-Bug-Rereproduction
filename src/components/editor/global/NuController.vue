@@ -624,9 +624,7 @@ export default Vue.extend({
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-        dragging: true
-      })
+
       switch (this.getLayerType) {
         case 'text': {
           const targetClassList = (e.target as HTMLElement).classList
@@ -708,6 +706,9 @@ export default Vue.extend({
     },
     moving(e: MouseEvent) {
       this.isControlling = true
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: true
+      })
       if (this.isImgControl) {
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
