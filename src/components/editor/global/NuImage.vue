@@ -312,7 +312,7 @@ export default Vue.extend({
     imgWrapperstyle(): any {
       const { height, width } = this.config.styles
       let clipPath = ''
-      if (!this.imgControl && (height * width)) {
+      if (!this.imgControl && !this.isBgImgControl) {
         clipPath = `path('M0,0h${width}v${height}h${-width}z`
       }
       return {

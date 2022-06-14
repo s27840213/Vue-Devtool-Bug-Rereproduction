@@ -356,7 +356,7 @@ export default Vue.extend({
 
       return {
         transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)` +
-        `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
+          `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         'pointer-events': 'none'
@@ -483,7 +483,7 @@ export default Vue.extend({
           if (this.getLayerType === 'image') {
             const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
             if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
-              this.dragUtils.onImageDragEnter(e, this.config as IImage)
+              this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             }
           }
@@ -502,7 +502,7 @@ export default Vue.extend({
         case 'group':
           // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           if (this.getLayerType === 'image') {
-            this.dragUtils.onImageDragLeave(e)
+            this.dragUtils.onImageDragLeave(e, this.pageIndex)
             body.removeEventListener('dragleave', this.onDragLeave)
           }
       }
@@ -674,11 +674,6 @@ export default Vue.extend({
 
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           ...this.imgBuff.styles
-        })
-
-        LayerUtils.updateLayerStyles(this.pageIndex, this.primaryLayerIndex, {
-          horizontalFlip: false,
-          verticalFlip: false
         })
       }
       const controller = this.$refs.body as HTMLElement

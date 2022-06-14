@@ -174,7 +174,7 @@ class DragUtils {
       }
     }
 
-  onImageDragEnter(e: DragEvent, config: IImage) {
+  onImageDragEnter(e: DragEvent, pageIndex: number, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj
     const previewSrc = store.state.currDraggedPhoto.previewSrc || ''
     const { layerIndex, subLayerIdx } = this.imgBuff
@@ -201,11 +201,11 @@ class DragUtils {
           }
         }
       })
-      layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj: DragSrcObj }, subLayerIdx)
-      layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: DragSrcObj }, subLayerIdx)
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       if (config.styles.shadow.isTransparent || config.styles.shadow.currentEffect === ShadowEffectType.imageMatched) {
         imageShadowUtils.updateShadowSrc({
-          pageIndex: layerUtils.pageIndex,
+          pageIndex,
           layerIndex,
           subLayerIdx
         }, { type: '', assetId: '', userId: '' })
@@ -213,13 +213,13 @@ class DragUtils {
     }
   }
 
-  onImageDragLeave(e: DragEvent) {
+  onImageDragLeave(e: DragEvent, pageIndex: number) {
     const { layerIndex, subLayerIdx, styles, srcObj, shadow } = this.imgBuff
     if (store.state.currDraggedPhoto.srcObj.type && srcObj.type) {
-      layerUtils.updateLayerProps(layerUtils.pageIndex, layerIndex, { srcObj }, subLayerIdx)
-      layerUtils.updateLayerStyles(layerUtils.pageIndex, layerIndex, styles, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       imageShadowUtils.updateShadowSrc({
-        pageIndex: layerUtils.pageIndex,
+        pageIndex,
         layerIndex,
         subLayerIdx
       }, shadow.srcObj)

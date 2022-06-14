@@ -542,6 +542,10 @@ export default Vue.extend({
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'tmp') {
+          /**
+           * @Todo - find the reason why this been set to certain value istead of 0
+           * set to 0 will make the layer below the empty area of tmp layer selectable
+           */
           return (this.layerIndex + 1) * 1000
         }
         if (this.getLayerType === 'text' && this.isActive) {
@@ -624,9 +628,7 @@ export default Vue.extend({
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
-      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-        dragging: true
-      })
+
       switch (this.getLayerType) {
         case 'text': {
           const targetClassList = (e.target as HTMLElement).classList
@@ -708,6 +710,9 @@ export default Vue.extend({
     },
     moving(e: MouseEvent) {
       this.isControlling = true
+      LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+        dragging: true
+      })
       if (this.isImgControl) {
         window.removeEventListener('mouseup', this.moveEnd)
         window.removeEventListener('mousemove', this.moving)
@@ -1434,7 +1439,7 @@ export default Vue.extend({
           const body = this.$refs.body as HTMLElement
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
-          this.dragUtils.onImageDragEnter(e, this.config as IImage)
+          this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         }
       }
     },
@@ -1443,7 +1448,7 @@ export default Vue.extend({
       body.removeEventListener('dragleave', this.dragLeave)
       body.removeEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
-        this.dragUtils.onImageDragLeave(e)
+        this.dragUtils.onImageDragLeave(e, this.pageIndex)
       }
     },
     onDrop(e: DragEvent) {

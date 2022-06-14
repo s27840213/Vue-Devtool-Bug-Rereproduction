@@ -323,12 +323,17 @@ class AssetUtils {
     }, page)
     const config = LayerFactary.newImage({
       styles: {
-        width: assetWidth / 2,
-        height: assetHeight / 2,
+        // width: assetWidth / 2,
+        // height: assetHeight / 2,
+        width: width,
+        height: height,
         imgWidth: width,
         imgHeight: height,
-        initWidth: srcWidth,
-        initHeight: srcHeight,
+        initWidth: width,
+        initHeight: height,
+        // initWidth: srcWidth,
+        // initHeight: srcHeight,
+        scale: 1,
         x: 200,
         y: 200
       },
@@ -595,7 +600,7 @@ class AssetUtils {
 
   addAssetToRecentlyUsed(asset: IAsset) {
     const {
-      id, type, width, height,
+      id, type, width, height, plan,
       content_ids: contentIds, match_cover: matchCover,
       user_id: userId, asset_id: assetId, asset_index: assetIndex_,
       src, ver, signed_url: signedUrl
@@ -613,6 +618,7 @@ class AssetUtils {
         }
         recentlyUsed.list.unshift({
           id,
+          plan,
           type,
           width,
           height,

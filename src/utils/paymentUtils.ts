@@ -3,25 +3,62 @@ import store from '@/store'
 import i18n from '@/i18n'
 import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
+import { ITemplate } from '@/interfaces/template'
+import templateCenterUtils from './templateCenterUtils'
+import { IAssetTemplate } from '@/interfaces/api'
 
 class PaymentUtils {
-  openPayment(initView: string) {
+  openPayment(initView: string, templateImg = '') {
     store.commit('brandkit/SET_isSettingsOpen', false)
     store.commit('payment/SET_initView', initView)
+    store.commit('payment/SET_templateImg', templateImg)
     popupUtils.openPopup('payment')
   }
 
-  contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
+  checkPro(template: {plan: number}, target: string) {
+    if (store.getters['user/isAdmin']) return true
+    if (template.plan === 1 && !store.getters['payment/getIsPro']) {
+      this.openPayment(target)
+      return false
+    }
+    return true
+  }
+
+  checkProGroupTemplate(group: {plan: number}, template: {id:string, ver:number}) {
+    const url = `https://template.vivipic.com/template/${template.id}/prev_4x?ver=${template.ver}`
+    return this._checkProTemplate(group.plan, url)
+  }
+
+  checkProTemplate(template: {plan: number, url: string}) {
+    if (template.url) {
+      return this._checkProTemplate(template.plan, template.url)
+    } else {
+      return this.checkProGroupTemplate(template, template as unknown as {id:string, ver:number})
+    }
+  }
+
+  _checkProTemplate(plan:number, url: string) {
+    if (store.getters['user/isAdmin']) return true
+    if (plan === 1 && !store.getters['payment/getIsPro']) {
+      this.openPayment('pro-template', url)
+      return false
+    }
+    return true
+  }
+
+  contactUsUrl() {
     switch (i18n.locale) {
       case 'tw':
-        window.open('https://blog.vivipic.com/tw/contactus/', '_blank')
-        break
+        return 'https://blog.vivipic.com/tw/contactus/'
       case 'jp':
-        window.open('https://blog.vivipic.com/jp/help/', '_blank')
-        break
+        return 'https://blog.vivipic.com/jp/help/'
       default:
-        window.open('https://blog.vivipic.com/us/contact/', '_blank')
+        return 'https://blog.vivipic.com/us/contact/'
     }
+  }
+
+  contactUs() { // This function must be excuted during click event, or it will be treated as open a popup window.
+    window.open(this.contactUsUrl(), '_blank')
   }
 
   errorHandler(msg?: string, initView = 'brandkit') {
@@ -56,14 +93,12 @@ class PaymentUtils {
           {
             msg: i18n.t('NN0642') as string,
             class: 'btn-light-mid',
-            style: { width: '160px', height: '44px', border: '1px solid #4EABE6' },
+            style: { width: '140px', height: '44px', border: '1px solid #4EABE6' },
             action: this.contactUs
           }, {
             msg: i18n.t('NN0564', { period: i18n.t('NN0515') }) as string,
-            style: { width: '230px', height: '44px' },
-            action: () => {
-              this.openPayment('switch1')
-            }
+            style: { width: '243px', height: '44px' },
+            action: () => { this.openPayment('switch1') }
           })
         modalUtils.setIsModalOpen(true)
         break
