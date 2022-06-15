@@ -32,10 +32,8 @@ class ThemeUtils {
   async fetchTemplateContent() {
     generalUtils.panelInit('template',
       (keyword: string) => {
-        this.checkAllThemes()
         store.dispatch('templates/getTagContent', { keyword })
       }, (keyword: string, locale: string) => {
-        this.checkAllThemes()
         store.dispatch('templates/getContent', { keyword, locale })
       }, async () => {
         await store.dispatch('templates/getCategories')
