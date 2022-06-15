@@ -69,6 +69,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -483,7 +484,7 @@ export default Vue.extend({
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
-              Vue.notify({ group: 'copy', text: '陰影處理中，請稍等' })
+              Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
             }
           }
       }

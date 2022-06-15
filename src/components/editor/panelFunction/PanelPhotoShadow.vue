@@ -140,9 +140,8 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     if (layerData) {
-      const { config: _config, primarylayerId } = layerData
+      const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
-      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
@@ -159,7 +158,6 @@ export default Vue.extend({
       const uploadAssetId = generalUtils.generateRandomString(6)
       this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
       stepsUtils.record()
-
       const assetId = generalUtils.generateAssetId()
       this.$store.commit('file/SET_UPLOADING_IMGS', {
         id: assetId,

@@ -597,6 +597,7 @@ export default Vue.extend({
         case ShadowEffectType.blur: {
           if (shadowBuff.canvasShadowImg.shadow && shadowBuff.canvasShadowImg.shadow.src === this.src) {
             imageShadowUtils.drawShadow(canvas, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
+              pageId: pageUtils.getPage(this.pageIndex).id,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH,
               layerInfo
@@ -606,6 +607,7 @@ export default Vue.extend({
             img.crossOrigin = 'anonymous'
             img.onload = () => {
               imageShadowUtils.drawShadow(canvas, img, this.config, {
+                pageId: pageUtils.getPage(this.pageIndex).id,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
                 layerInfo,
@@ -622,6 +624,7 @@ export default Vue.extend({
         case ShadowEffectType.imageMatched: {
           if (shadowBuff.canvasShadowImg.imageMatched && shadowBuff.canvasShadowImg.imageMatched.src === this.src) {
             imageShadowUtils.drawImageMatchedShadow(canvas, shadowBuff.canvasShadowImg.imageMatched, this.config, {
+              pageId: pageUtils.getPage(this.pageIndex).id,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH,
               layerInfo
@@ -632,6 +635,7 @@ export default Vue.extend({
             img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             img.onload = () => {
               imageShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
+                pageId: pageUtils.getPage(this.pageIndex).id,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
                 layerInfo,
@@ -645,6 +649,7 @@ export default Vue.extend({
         case ShadowEffectType.floating: {
           if (shadowBuff.canvasShadowImg.floating && shadowBuff.canvasShadowImg.floating.src === this.src) {
             imageShadowUtils.drawFloatingShadow(canvas, shadowBuff.canvasShadowImg.floating, this.config, {
+              pageId: pageUtils.getPage(this.pageIndex).id,
               layerInfo,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH
@@ -654,6 +659,7 @@ export default Vue.extend({
             img.crossOrigin = 'anonymous'
             img.onload = () => {
               imageShadowUtils.drawFloatingShadow(canvas, img, this.config, {
+                pageId: pageUtils.getPage(this.pageIndex).id,
                 layerInfo,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
