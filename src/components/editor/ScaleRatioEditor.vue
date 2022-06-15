@@ -6,6 +6,8 @@
       :style="ratioStyles()"
       :disabled="isShowPagePreview"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
+      @mousedown="setIsSettingScaleRatio(true)"
+      @mouseup="handleMouseUp"
       v-ratio-change)
     div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
         @click="openResizePopup()")
@@ -62,12 +64,17 @@ export default Vue.extend({
     ...mapMutations({
       _setScaleRatio: 'SET_pageScaleRatio',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
-      _setShowPagePanel: 'page/SET_showPagePanel'
+      _setShowPagePanel: 'page/SET_showPagePanel',
+      setIsSettingScaleRatio: 'SET_isSettingScaleRatio'
     }),
     ratioStyles() {
       return {
         '--progress': `${(this.ratioInPercent - 0.1) / 4.9 * 100}%`
       }
+    },
+    handleMouseUp() {
+      this.setIsSettingScaleRatio(false)
+      pageUtils.activeMiddlemostPage()
     },
     setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)

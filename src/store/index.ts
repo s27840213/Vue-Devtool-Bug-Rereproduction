@@ -56,6 +56,7 @@ const getDefaultState = (): IEditorState => ({
   currSidebarPanelType: SidebarPanelType.template,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
+  isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
   currHoveredPageIndex: -1,
@@ -154,6 +155,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getPageScaleRatio(state: IEditorState): number {
     return state.pageScaleRatio
+  },
+  getIsSettingScaleRatio(state: IEditorState): boolean {
+    return state.isSettingScaleRatio
   },
   getLayer(state: IEditorState) {
     return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
@@ -339,6 +343,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio
+  },
+  SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
+    state.isSettingScaleRatio = isSettingScaleRatio
   },
   SET_middlemostPageIndex(state: IEditorState, index: number) {
     state.middlemostPageIndex = index

@@ -200,7 +200,8 @@ export default Vue.extend({
       prevScrollPos: 'bgRemove/getPrevScrollPos',
       getInInGestureMode: 'getInGestureToolMode',
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      isSettingScaleRatio: 'getIsSettingScaleRatio'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -295,6 +296,7 @@ export default Vue.extend({
       this.renderSelectionArea(this.initialRelPos, this.currentRelPos)
     },
     scrollUpdate() {
+      console.log('update')
       if (this.isSelecting || RulerUtils.isDragging) {
         const event = new MouseEvent('mousemove', {
           clientX: this.currentAbsPos.x,
@@ -314,7 +316,7 @@ export default Vue.extend({
        * The following function sets focus on the page, which will break the functionality of a text editor (e.g. composition).
        * So prevent changing focus when a text editor is focused.
        */
-      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
+      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.() || this.isSettingScaleRatio)
     },
     selectEnd() {
       if (this.isSelecting) {
