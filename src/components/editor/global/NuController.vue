@@ -154,6 +154,7 @@ import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import i18n from '@/i18n'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -1440,6 +1441,8 @@ export default Vue.extend({
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
+        } else {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
         }
       }
     },

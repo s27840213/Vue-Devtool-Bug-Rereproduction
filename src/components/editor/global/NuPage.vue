@@ -293,6 +293,8 @@ export default Vue.extend({
         const subLayer = GeneralUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
         const scale = subLayer.styles.scale
         subLayer.styles.scale = 1
+        subLayer.styles.x *= layer.styles.scale
+        subLayer.styles.y *= layer.styles.scale
         const mappedLayer = GroupUtils
           .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
         mappedLayer.styles.scale = scale
