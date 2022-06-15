@@ -5,6 +5,9 @@
       clear
       :defaultKeyword="keyword"
       @search="handleSearch")
+    div(v-if="isAdmin" class="panel-objects-2html")
+      input(type="text" placeholder="項目網址" v-model="panelParams")
+      btn(@click.native="toHtml") To wp-html
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
       :list="list"
@@ -33,7 +36,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
@@ -41,6 +44,7 @@ import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
@@ -51,21 +55,21 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0
+      scrollTop: 0,
+      // For object2wphtml
+      panelParams: ''
     }
   },
   computed: {
-    ...mapState(
-      'objects',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapGetters({
+      isAdmin: 'user/isAdmin'
+    }),
+    ...mapState('objects', [
+      'categories',
+      'content',
+      'pending',
+      'keyword'
+    ]),
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }
@@ -128,17 +132,16 @@ export default Vue.extend({
     this.resetContent()
   },
   methods: {
-    ...mapActions('objects',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('objects', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getCategories',
+      'getMoreContent'
+    ]),
     handleSearch(keyword: string) {
       if (keyword) {
+        this.panelParams = `http://dev1.vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getTagContent({ keyword })
       } else {
         this.resetContent()
@@ -146,14 +149,32 @@ export default Vue.extend({
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
-      keyword ? this.getContent({ keyword, locale }) : this.resetContent()
+      if (keyword) {
+        this.panelParams = `http://dev1.vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.getContent({ keyword, locale })
+      } else {
+        this.resetContent()
+      }
     },
     handleLoadMore() {
-      console.log('object load more')
       this.getMoreContent()
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
+    },
+    toHtml() {
+      const html = constantData.object2WpHtml()
+      html.item = html.item.replace('{link}', this.panelParams)
+        .replace('{label}', 'Use this object')
+      const output = this.list.map((it) => {
+        const items = it.list.map((it: Record<string, string>) => {
+          const img = `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
+          return html.item.replace(/{img}/g, img)
+        }).join('\n')
+        return html.list.replace('{items}', items)
+      }).join('\n')
+      navigator.clipboard.writeText(output)
+      this.$notify({ group: 'copy', text: '已複製' })
     }
   }
 })
@@ -176,5 +197,13 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.panel-objects-2html {
+  > input:focus {
+    width: 1000px;
+    border: 1px solid black;
+  }
+  > button { margin: 10px auto; }
 }
 </style>
