@@ -29,6 +29,7 @@ export interface IEditorState {
   currSidebarPanelType: number,
   currFunctionPanelType: number,
   pageScaleRatio: number,
+  isSettingScaleRatio: boolean,
   middlemostPageIndex: number,
   currActivePageIndex: number,
   currHoveredPageIndex: number,
