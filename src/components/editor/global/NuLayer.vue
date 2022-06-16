@@ -33,6 +33,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import generalUtils from '@/utils/generalUtils'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   components: {
@@ -120,10 +121,11 @@ export default Vue.extend({
       let { width, height } = this.config.styles
       const { scale, scaleX, scaleY, zindex, shadow } = this.config.styles
       const { type } = this.config
-      width /= (type === LayerType.image ? 1 : scale)
-      height /= (type === LayerType.image ? 1 : scale)
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+      width /= (isImgType ? 1 : scale)
+      height /= isImgType ? 1 : scale
 
-      const transform = type === 'image' ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+      const transform = isImgType ? 'none' : `translateZ(0) scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
       // if (type === LayerType.image && shadow.currentEffect === 'shadow') {
       //   transform = `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
       // }
@@ -135,7 +137,7 @@ export default Vue.extend({
       const styles = {
         width: this.config.type === 'shape' ? '' : `${width}px`,
         height: this.config.type === 'shape' ? '' : `${height}px`,
-        transform: type === 'image' ? 'none' : `translateZ(0) scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        transform,
         'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles

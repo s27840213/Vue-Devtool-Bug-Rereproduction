@@ -15,7 +15,7 @@
         class="full-width"
         type="gray-mid"
         ref="btn"
-        :disabled="isProcessing || isHandleShadow || show === 'panel-photo-shadow'"
+        :disabled="isHandleShadow || show === 'panel-photo-shadow'"
         @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
       ref="popup"

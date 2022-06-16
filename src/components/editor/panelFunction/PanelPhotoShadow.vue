@@ -291,6 +291,8 @@ export default Vue.extend({
                 srcObj,
                 styles: shadowImgStyles
               })
+              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+              imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
             }
             newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
           }).catch((e) => console.error(e))

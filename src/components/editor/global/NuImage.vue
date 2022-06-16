@@ -6,7 +6,7 @@
       class="shadow__canvas-wrapper"
       :style="canvasWrapperStyle")
       canvas(ref="canvas")
-    div(v-if="shadowSrc"
+    div(v-if="shadowSrc && !config.isFrameImg"
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
@@ -85,6 +85,7 @@ export default Vue.extend({
     this.handleInitLoad()
   },
   mounted() {
+    console.log('mounted ')
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
     if (this.shadow.srcObj.type === 'shadow-private') {
       this.fetchShadowImg()
@@ -332,8 +333,7 @@ export default Vue.extend({
         return {}
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      const { scale } = this.config.styles
+      const { horizontalFlip, verticalFlip, scale } = this.config.styles
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
@@ -755,7 +755,7 @@ export default Vue.extend({
             .then(() => {
               imageShadowUtils.updateShadowSrc(this.layerInfo, {
                 ...(this.config as IImage).styles.shadow.srcObj,
-                // only used to make vue update the value, this userId is not meaningful
+                // only used to make Vue update the value, this userId is not meaningful
                 userId: 'ver=' + generalUtils.generateRandomString(8)
               })
             })

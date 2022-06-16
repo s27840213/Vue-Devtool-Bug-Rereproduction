@@ -364,7 +364,7 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
