@@ -172,7 +172,7 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   justify-content: center;
-  align-content: center;
+  align-items: center;
   transform-style: flat;
 }
 .shadow {
