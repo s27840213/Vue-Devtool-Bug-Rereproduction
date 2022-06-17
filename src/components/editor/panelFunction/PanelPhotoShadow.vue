@@ -101,6 +101,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import pageUtils from '@/utils/pageUtils'
 import imageUtils from '@/utils/imageUtils'
+import logUtils from '@/utils/logUtils'
 
 export default Vue.extend({
   components: {
@@ -139,10 +140,10 @@ export default Vue.extend({
   async beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
+    logUtils.setLog('phase: start upload shadow')
     if (layerData) {
-      const { config: _config, primarylayerId } = layerData
+      const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
-      const pageId = layerUtils.getPage(layerUtils.pageIndex).id
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
@@ -159,7 +160,6 @@ export default Vue.extend({
       const uploadAssetId = generalUtils.generateRandomString(6)
       this.setUploadingData({ pageId, layerId, subLayerId }, uploadAssetId)
       stepsUtils.record()
-
       const assetId = generalUtils.generateAssetId()
       this.$store.commit('file/SET_UPLOADING_IMGS', {
         id: assetId,
@@ -185,7 +185,7 @@ export default Vue.extend({
           MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
         }
       })
-
+      logUtils.setLog('phase: finish load max size img')
       const updateCanvas = document.createElement('canvas')
       // const { initWidth: width, initHeight: height, imgWidth, imgHeight } = config.styles
       const { width, height, imgWidth, imgHeight } = config.styles
@@ -229,6 +229,7 @@ export default Vue.extend({
         default:
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
+      logUtils.setLog('phase: finish drawing')
       // updateCanvas.style.width = (updateCanvas.width).toString() + 'px'
       // updateCanvas.style.height = (updateCanvas.height).toString() + 'px'
       // updateCanvas.style.position = 'absolute'
@@ -241,6 +242,7 @@ export default Vue.extend({
       const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
+      logUtils.setLog('phase: finish calculate edge')
 
       const uploadCanvas = document.createElement('canvas')
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
@@ -248,6 +250,7 @@ export default Vue.extend({
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
       ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
+      logUtils.setLog('phase: start uploading result')
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 0.5)]
       uploadUtils.uploadAsset('image', uploadImg, {
         addToPage: false,
@@ -255,6 +258,7 @@ export default Vue.extend({
         id: assetId,
         isShadow: true,
         pollingCallback: (json: IUploadAssetResponse) => {
+          logUtils.setLog('phase: finish uploading')
           imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
           imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
@@ -293,9 +297,15 @@ export default Vue.extend({
                 srcObj,
                 styles: shadowImgStyles
               })
+              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
+              imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+              logUtils.setLog('phase: finish while process')
             }
             newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
-          }).catch((e) => console.error(e))
+          }).catch((e: Error) => {
+            console.error(e)
+            logUtils.setLog('error' + e.message)
+          })
         }
       })
     } else {

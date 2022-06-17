@@ -65,6 +65,12 @@ export default Vue.extend({
           layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
           subLayerId: this.primaryLayer ? this.config.id : undefined
         })
+        const hasPrimaryLayer = typeof this.primaryLayerIndex !== 'undefined' && this.primaryLayerIndex !== -1
+        imageShadowUtils.updateShadowSrc({
+          pageIndex: this.pageIndex,
+          layerIndex: hasPrimaryLayer ? this.primaryLayerIndex : this.layerIndex,
+          subLayerIdx: hasPrimaryLayer ? this.layerIndex : undefined
+        }, { type: '', userId: '', assetId: '' })
       }
     }
   },

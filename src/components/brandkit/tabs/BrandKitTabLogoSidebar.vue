@@ -1,5 +1,7 @@
 <template lang="pug">
-  div(class="brand-kit-tab-logo")
+  div(v-if="logos.length === 0 && !isLogosLoading" class="hint")
+    no-items-hint(type="logo")
+  div(v-else class="brand-kit-tab-logo")
     recycle-scroller(:items="rows")
       template(v-slot="{ item }")
         observer-sentinel(v-if="item.sentinel"
@@ -29,11 +31,11 @@
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import GalleryUtils from '@/utils/galleryUtils'
-import { IPhoto, IPhotoItem } from '@/interfaces/api'
 
 export default Vue.extend({
   data() {
@@ -51,7 +53,8 @@ export default Vue.extend({
   },
   components: {
     ObserverSentinel,
-    GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
+    GalleryPhoto: () => import('@/components/GalleryPhoto.vue'),
+    NoItemsHint
   },
   watch: {
     logos() {
@@ -166,5 +169,10 @@ export default Vue.extend({
       width: auto;
     }
   }
+}
+
+.hint {
+  display: flex;
+  justify-content: center;
 }
 </style>

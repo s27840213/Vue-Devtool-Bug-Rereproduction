@@ -33,7 +33,7 @@
               :layerIndex="index"
               :primaryLayerIndex="layerIndex"
               :primaryLayer="config"
-              :config="getLayerType === 'frame' ? frameLayerMapper(layer) : layer"
+              :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(config) ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"
               @onSubDrop="onSubDrop"
@@ -154,6 +154,7 @@ import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import i18n from '@/i18n'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -448,6 +449,11 @@ export default Vue.extend({
         case 'frame':
           if (!FrameUtils.isImageFrame(this.config)) {
             resizers = []
+          } else {
+            const shadow = this.config.styles.shadow
+            if (shadow && shadow.srcObj.type) {
+              resizers = []
+            }
           }
       }
 
@@ -933,10 +939,11 @@ export default Vue.extend({
         case 'frame': {
           if (FrameUtils.isImageFrame(this.config)) {
             let { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
-            imgWidth *= scale
-            imgHeight *= scale
-            imgY *= scale
-            imgX *= scale
+            const _scale = scale / this.config.styles.scale
+            imgWidth *= _scale
+            imgHeight *= _scale
+            imgY *= _scale
+            imgX *= _scale
 
             LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
               initWidth: width,
@@ -950,7 +957,7 @@ export default Vue.extend({
               imgX,
               imgY
             })
-            scale = 1
+            // scale = 1
           }
           break
         }
@@ -1003,6 +1010,24 @@ export default Vue.extend({
       }
     },
     scaleEnd() {
+      // if (this.getLayerType === LayerType.frame && FrameUtils.isImageFrame(this.config)) {
+      //   const { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
+      //   const { scale, width, height } = this.config.styles
+      //   // imgWidth *= scale
+      //   // imgHeight *= scale
+      //   // imgY *= scale
+      //   // imgX *= scale
+
+      //   FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
+      //     width: width,
+      //     height: height,
+      //     imgWidth: width,
+      //     imgHeight: height,
+      //     imgX,
+      //     imgY
+      //   })
+      //   // scale = 1
+      // }
       this.isControlling = false
       StepsUtils.record()
 
@@ -1440,6 +1465,8 @@ export default Vue.extend({
           body.addEventListener('dragleave', this.dragLeave)
           body.addEventListener('drop', this.onDrop)
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
+        } else {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
         }
       }
     },
@@ -1669,6 +1696,21 @@ export default Vue.extend({
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)
+      // if (FrameUtils.isImageFrame(this.config)) {
+      //   const { x, y, width, height, scale } = config.styles
+      //   return Object.assign(config, {
+      //     styles: {
+      //       ...config.styles,
+      //       ...mathUtils.multipy(this.getLayerScale, {
+      //         x,
+      //         y,
+      //         width,
+      //         height,
+      //         scale
+      //       })
+      //     }
+      //   })
+      // }
       const { x, y, width, height, scale } = config.styles
       return Object.assign(config, {
         styles: {

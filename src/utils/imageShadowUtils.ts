@@ -21,13 +21,13 @@ export const CANVAS_SPACE = 400
 export const CANVAS_FLOATING_SCALE = 2.2
 const DRAWING_TIMEOUT = 50
 const FLOATING_SHADOW_SIZE = 100
-export interface DrawOptions {
-  canvasSize?: number,
-  timeout?: number,
+export interface DrawParams {
+  drawCanvasW: number,
+  drawCanvasH: number,
+  pageId?: string,
   layerInfo?: ILayerInfo,
+  timeout?: number,
   uploading?: boolean,
-  drawCanvasW?: number,
-  drawCanvasH?: number,
   cb?: () => void
 }
 class ImageShadowUtils {
@@ -48,9 +48,10 @@ class ImageShadowUtils {
   private _layerData = null as {
     img: HTMLImageElement,
     config: IImage,
+    pageId: string,
     /** This identifier is used to indexing the sub-layer */
     primarylayerId?: string,
-    options?: DrawOptions
+    options?: DrawParams
   } | null
 
   private dataBuff = {
@@ -68,7 +69,7 @@ class ImageShadowUtils {
     return this?.handlerId || ''
   }
 
-  private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
+  private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     const { canvasT } = this
     const ctxT = canvasT.getContext('2d')
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
@@ -76,8 +77,8 @@ class ImageShadowUtils {
       canvasT.setAttribute('height', `${canvas.height}`)
     }
     if (ctxT) {
-      this._layerData = { img, config }
-      const { layerInfo } = options || {}
+      this._layerData = { img, config, pageId: params.pageId || pageUtils.currFocusPage.id }
+      const { layerInfo } = params || {}
       if (layerInfo) {
         // TODO no need the below line
         const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
@@ -93,10 +94,10 @@ class ImageShadowUtils {
         })
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       }
-      if (options) {
+      if (params) {
         this._layerData.options = {
           ...this._layerData.options,
-          ...options
+          ...params
         }
       }
     }
@@ -105,22 +106,22 @@ class ImageShadowUtils {
     }
   }
 
-  async drawFloatingShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
+  async drawFloatingShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
-    const { timeout = DRAWING_TIMEOUT } = options
-    this.drawingInit(canvas, img, config, options)
+    const { timeout = DRAWING_TIMEOUT } = params
+    this.drawingInit(canvas, img, config, params)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
       setTimeout(() => {
-        this.floatingHandler(canvas, img, config, handlerId, options)
+        this.floatingHandler(canvas, img, config, handlerId, params)
       }, timeout)
     } else {
-      await this.floatingHandler(canvas, img, config, handlerId, options)
+      await this.floatingHandler(canvas, img, config, handlerId, params)
     }
   }
 
-  async floatingHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, options: DrawOptions = {}) {
+  async floatingHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
     const ctxMaxSize = canvasMaxSize.getContext('2d')
@@ -130,12 +131,12 @@ class ImageShadowUtils {
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
     const { styles } = config
-    const { timeout = DRAWING_TIMEOUT, cb } = options
+    const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { x, y, radius, opacity, size, thinkness } = (effects as any)[currentEffect] as IFloatingEffect
 
-    let { drawCanvasW, drawCanvasH, layerInfo } = options || {}
+    let { drawCanvasW, drawCanvasH, layerInfo } = params || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
       drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0 as number
@@ -218,22 +219,22 @@ class ImageShadowUtils {
     })
   }
 
-  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options: DrawOptions = {}) {
+  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
-    const { timeout = DRAWING_TIMEOUT } = options
-    this.drawingInit(canvas, img, config, options)
+    const { timeout = DRAWING_TIMEOUT } = params
+    this.drawingInit(canvas, img, config, params)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
       setTimeout(() => {
-        this.imageMathcedHandler(canvas, img, config, handlerId, options)
+        this.imageMathcedHandler(canvas, img, config, handlerId, params)
       }, timeout)
     } else {
-      await this.imageMathcedHandler(canvas, img, config, handlerId, options)
+      await this.imageMathcedHandler(canvas, img, config, handlerId, params)
     }
   }
 
-  async imageMathcedHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, options: DrawOptions = {}) {
+  async imageMathcedHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
     const ctxMaxSize = canvasMaxSize.getContext('2d')
@@ -243,7 +244,7 @@ class ImageShadowUtils {
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
     const { styles } = config
-    const { timeout = DRAWING_TIMEOUT, cb } = options
+    const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
@@ -253,7 +254,7 @@ class ImageShadowUtils {
     const imgY = _imgY * scaleRatio
     const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
     const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-    let { drawCanvasW, drawCanvasH, layerInfo } = options || {}
+    let { drawCanvasW, drawCanvasH, layerInfo } = params || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
       drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0 as number
@@ -332,13 +333,13 @@ class ImageShadowUtils {
     })
   }
 
-  async drawShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, options?: DrawOptions) {
-    const { timeout = DRAWING_TIMEOUT, cb } = options || {}
+  async drawShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const { timeout = DRAWING_TIMEOUT, cb } = params || {}
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) return
-    this.drawingInit(canvas, img, config, options)
+    this.drawingInit(canvas, img, config, params)
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
@@ -349,7 +350,7 @@ class ImageShadowUtils {
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
-      let { layerInfo } = options || {}
+      let { layerInfo } = params || {}
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
@@ -360,7 +361,7 @@ class ImageShadowUtils {
       const imgY = _imgY * scaleRatio
       const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
       const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-      let { drawCanvasW, drawCanvasH } = options || {}
+      let { drawCanvasW, drawCanvasH } = params || {}
       if (!drawCanvasH || !drawCanvasW) {
         drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0
         drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0

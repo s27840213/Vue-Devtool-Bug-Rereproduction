@@ -1,10 +1,13 @@
 <template lang="pug">
   div(class="scale-ratio-editor")
-    input(class="scale-ratio-editor__input"
+    input(class="scale-ratio-editor__input pointer"
       ref="scale-ratio-editor" type="range" min="0.1" max="5" step="0.01"
       v-model="ratioInPercent"
+      :style="ratioStyles()"
       :disabled="isShowPagePreview"
       @input="setScaleRatio(Math.round(ratioInPercent*100))"
+      @mousedown="setIsSettingScaleRatio(true)"
+      @mouseup="handleMouseUp"
       v-ratio-change)
     div(class="px-5 flex items-center  btn-page-resize hover-effect pointer"
         @click="openResizePopup()")
@@ -61,8 +64,18 @@ export default Vue.extend({
     ...mapMutations({
       _setScaleRatio: 'SET_pageScaleRatio',
       _setIsShowPagePreview: 'page/SET_isShowPagePreview',
-      _setShowPagePanel: 'page/SET_showPagePanel'
+      _setShowPagePanel: 'page/SET_showPagePanel',
+      setIsSettingScaleRatio: 'SET_isSettingScaleRatio'
     }),
+    ratioStyles() {
+      return {
+        '--progress': `${(this.ratioInPercent - 0.1) / 4.9 * 100}%`
+      }
+    },
+    handleMouseUp() {
+      this.setIsSettingScaleRatio(false)
+      pageUtils.activeMiddlemostPage()
+    },
     setScaleRatio(ratio: number) {
       this._setScaleRatio(ratio)
     },
@@ -107,10 +120,38 @@ export default Vue.extend({
   border-radius: 7px 7px 0 0;
   column-gap: 5px;
   &__input {
-    background: setColor(gray-6);
     width: 180px;
+    --lower-color: #{setColor(gray-1)};
+    --upper-color: #{setColor(gray-4)};
+    height: 2px;
+    display: block;
+    appearance: none;
+    outline: none;
+    background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
     &:focus {
       outline: none;
+    }
+    &::-webkit-slider-runnable-track {
+      height: 2px;
+    }
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: setColor(white);
+      border: 2px solid setColor(gray-1);
+      margin-top: -7px;
+      position: relative;
+    }
+    &::-moz-range-thumb {
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: setColor(white);
+      border: 2px solid setColor(gray-1);
+      position: relative;
     }
   }
   &__percentage {

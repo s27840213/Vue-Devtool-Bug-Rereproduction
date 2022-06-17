@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="photo-setting")
     span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
-    div(class="photo-setting__grid mb-5")
+    div(class="photo-setting__grid mb-10")
       template(v-for="btn in btns")
         btn(v-if="!btn.condition || btn.condition()"
           class="full-width"
@@ -15,7 +15,7 @@
         class="full-width"
         type="gray-mid"
         ref="btn"
-        :disabled="isProcessing || isHandleShadow || show === 'panel-photo-shadow'"
+        :disabled="isHandleShadow || show === 'panel-photo-shadow'"
         @click.native="handleShow(bgRemoveBtn.show)") {{ bgRemoveBtn.label }}
     component(:is="show || 'div'"
       ref="popup"
@@ -46,9 +46,18 @@ export default Vue.extend({
     return {
       show: '',
       btns: [
-        { name: 'crop', label: `${this.$t('NN0040')}`, show: 'crop' },
+        {
+          name: 'crop',
+          label: `${this.$t('NN0040')}`,
+          show: 'crop',
+          condition: (): boolean => layerUtils.getCurrConfig.type === LayerType.image
+        },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
-        { name: 'adjust', label: `${this.$t('NN0042')}`, show: 'popup-adjust' },
+        {
+          name: 'adjust',
+          label: `${this.$t('NN0042')}`,
+          show: 'popup-adjust'
+        },
         {
           name: 'shadow',
           label: `${this.$t('NN0429')}`,
@@ -185,9 +194,6 @@ export default Vue.extend({
     },
     handleShow(name: string) {
       const { pageIndex, layerIndex, subLayerIdx, getCurrLayer: currLayer } = layerUtils
-      // if (this.isHandleShadow) {
-      //   return
-      // }
       switch (name) {
         case this.btns.find(b => b.name === 'shadow')?.show || '': {
           const target = (currLayer.type === LayerType.group && subLayerIdx !== -1
@@ -202,13 +208,13 @@ export default Vue.extend({
             imageUtils.setImgControlDefault()
           } else {
             let index
-            const currLayer = layerUtils.getCurrLayer
+            const currLayer = layerUtils.getCurrConfig
             switch (currLayer.type) {
               case 'image': {
                 const { shadow } = (currLayer as IImage).styles
                 const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
                 if (!(this.isHandleShadow && needRedrawShadow)) {
-                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
                 }
               }
                 break

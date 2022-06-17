@@ -69,6 +69,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -296,14 +297,11 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      // if (this.isProcessShadow || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        if (!this.isProcessShadow) {
-          groupUtils.deselect()
-          groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-          LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-          eventUtils.emit(PanelEvent.showPhotoShadow)
-        }
+        groupUtils.deselect()
+        groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+        eventUtils.emit(PanelEvent.showPhotoShadow)
         return
       } else {
         imageUtils.setImgControlDefault(false)
@@ -366,7 +364,7 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
@@ -485,6 +483,8 @@ export default Vue.extend({
             if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
+            } else {
+              Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
             }
           }
       }
@@ -516,8 +516,8 @@ export default Vue.extend({
         switch (this.type) {
           case 'frame':
             if (this.getLayerType === 'image') {
-              this.onFrameDrop(e)
               body.removeEventListener('dragleave', this.onFrameDragLeave)
+              this.onFrameDrop(e)
             }
             return
           case 'group':
@@ -530,7 +530,6 @@ export default Vue.extend({
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
               }
               eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-              const body = this.$refs.body as HTMLElement
               body.removeEventListener('dragleave', this.onDragLeave)
             }
         }
