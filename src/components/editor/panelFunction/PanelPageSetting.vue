@@ -24,62 +24,8 @@
               @click="setSuggestionPanel(false)")
             svg-icon(class="page-setting__suggestion-panel__body__close"
                     iconName="close" iconWidth="19px" iconColor="white")
-          div(class="page-setting__suggestion-panel__body-row first-row")
-            span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0023')}}
-          div(class="page-setting__suggestion-panel__body-row")
-            radio-btn(class="page-setting__suggestion-panel__body__radio"
-                      :isSelected="selectedFormat === 'custom'",
-                      formatKey="custom",
-                      @select="selectFormat")
-            div(class="page-setting__suggestion-panel__body__custom")
-              property-bar(class="page-setting__suggestion-panel__body__custom__box"
-                          :class="selectedFormat === 'custom' ? 'border-blue-1' : 'border-white'")
-                input(class="body-3" type="number" min="0"
-                      :class="selectedFormat === 'custom' ? 'text-blue-1' : 'text-white'"
-                      :value="pageWidth" @input="setPageWidth" @click="selectFormat('custom')")
-                span(class="body-4"
-                    :class="selectedFormat === 'custom' ? 'text-blue-1' : 'text-white'") W
-              svg-icon(class="pointer"
-                  :iconName="isLocked ? 'lock' : 'unlock'"
-                  iconWidth="15px" :iconColor="selectedFormat === 'custom' ? 'blue-1' : 'white'"
-                  @click.native="toggleLock()")
-              property-bar(class="page-setting__suggestion-panel__body__custom__box"
-                          :class="selectedFormat === 'custom' ? 'border-blue-1' : 'border-white'")
-                input(class="body-3" type="number" min="0"
-                      :class="selectedFormat === 'custom' ? 'text-blue-1' : 'text-white'"
-                      :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
-                span(class="body-4"
-                    :class="selectedFormat === 'custom' ? 'text-blue-1' : 'text-white'") H
-          div(class="page-setting__suggestion-panel__body__hr horizontal-rule")
-          div(class="page-setting__container")
-            div(class="page-setting__suggestion-panel__body-row first-row")
-              span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0024')}}
-            div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
-              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-            div(v-for="(format, index) in recentlyUsed" class="page-setting__suggestion-panel__body-row pointer"
-                @click="selectFormat(`recent-${index}`)")
-              radio-btn(class="page-setting__suggestion-panel__body__radio"
-                        :isSelected="selectedFormat === `recent-${index}`",
-                        :formatKey="`recent-${index}`",
-                        @select="selectFormat")
-              span(class="page-setting__suggestion-panel__body__recently body-3 pointer"
-                    :class="selectedFormat === `recent-${index}` ? 'text-blue-1' : 'text-white'"
-                    @click="selectFormat(`recent-${index}`)") {{ makeFormatString(format) }}
-            div(class="mt-10")
-            div(class="page-setting__suggestion-panel__body-row first-row")
-              span(class="page-setting__suggestion-panel__body__title subtitle-2 text-white") {{$t('NN0025')}}
-            div(v-if="!isLayoutReady" class="page-setting__suggestion-panel__body-row-center")
-              svg-icon(iconName="loading" iconWidth="25px" iconHeight="10px" iconColor="white")
-            div(v-for="(format, index) in formatList" class="page-setting__suggestion-panel__body-row pointer"
-                @click="selectFormat(`preset-${index}`)")
-              radio-btn(class="page-setting__suggestion-panel__body__radio"
-                        :isSelected="selectedFormat === `preset-${index}`",
-                        :formatKey="`preset-${index}`",
-                        @select="selectFormat")
-              span(class="page-setting__suggestion-panel__body__typical-name body-4"
-                    :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.title }}
-              span(class="page-setting__suggestion-panel__body__typical-size body-4"
-                    :class="selectedFormat === `preset-${index}` ? 'text-blue-1' : 'text-white'") {{ format.description }}
+          keep-alive
+            page-size-selector(:isDarkTheme="true" @selectFormat="selectFormat" ref="pageSizeSelector")
           div(class="page-setting__suggestion-panel__body__buttons")
             div(class="page-setting__suggestion-panel__body__button text-white"
                 :class="isFormatApplicable ? 'bg-blue-1 pointer' : 'bg-gray-3'"
@@ -262,15 +208,14 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
+import PageSizeSelector from '@/components/editor/PageSizeSelector.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import layouts from '@/store/module/layouts'
 import StepsUtils from '@/utils/stepsUtils'
 import ResizeUtils from '@/utils/resizeUtils'
 import designApis from '@/apis/design-info'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { IListServiceContentData } from '@/interfaces/api'
 import { ILayout } from '@/interfaces/layout'
 import listApi from '@/apis/list'
 import { Itheme, ICoverTheme, IThemeTemplate } from '@/interfaces/theme'
@@ -279,10 +224,10 @@ import pageUtils from '@/utils/pageUtils'
 export default Vue.extend({
   components: {
     SearchBar,
-    RadioBtn
+    RadioBtn,
+    PageSizeSelector
   },
   mounted() {
-    this.fetchLayouts()
     this.pageWidth = this.currentPageWidth
     this.pageHeight = this.currentPageHeight
   },
@@ -337,6 +282,11 @@ export default Vue.extend({
     }
   },
   watch: {
+    isPanelOpen(newVal) {
+      if (!newVal) {
+        this.selectedFormat = ''
+      }
+    },
     key_id: function () {
       this.isGetTemplate = false
       this.isGetGroup = false
@@ -379,9 +329,6 @@ export default Vue.extend({
     currentPageHeight: function (newVal) {
       this.pageWidth = this.currentPageWidth
       this.pageHeight = newVal
-    },
-    isPanelOpen: function (newVal) {
-      if (!newVal) this.fetchLayouts()
     }
   },
   computed: {
@@ -454,64 +401,15 @@ export default Vue.extend({
       }
     },
     applySelectedFormat(record = true) {
-      if (!this.isFormatApplicable) return
-      const format = this.getSelectedFormat()
-      if (!format) return
-      this.resizePage(format)
-      if (this.groupType === 1) {
-        // resize電商詳情頁時 其他頁面要依width做resize
-        this.resizeOtherPages([pageUtils.currFocusPageIndex], { width: format.width })
-      }
-      listApi.addDesign(format.id, 'layout', format)
-      const index = this.recentlyUsed.findIndex((recent) => {
-        return format.id === recent.id && format.width === recent.width && format.height === recent.height
-      })
-      this.recentlyUsed.splice(index, 1)
-      this.recentlyUsed.unshift(format)
+      (this.$refs.pageSizeSelector as any).applySelectedFormat()
       this.setSuggestionPanel(false)
       if (record) {
         StepsUtils.record()
       }
     },
     copyAndApplySelectedFormat() {
-      if (!this.isFormatApplicable) return
-      const page = GeneralUtils.deepCopy(this.getPage(pageUtils.currFocusPageIndex))
-      page.designId = ''
-      this.addPageToPos({
-        newPage: page,
-        pos: pageUtils.currFocusPageIndex + 1
-      })
-      GroupUtils.deselect()
-      this.setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-      this.applySelectedFormat(false)
-      StepsUtils.record()
-      this.$nextTick(() => { pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex) })
-    },
-    resizePage(format: { width: number, height: number }) {
-      ResizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
-      this.updatePageProps({
-        pageIndex: pageUtils.currFocusPageIndex,
-        props: {
-          width: format.width,
-          height: format.height
-        }
-      })
-    },
-    resizeOtherPages(excludes: number[] = [], format: { [key: string]: number }) {
-      const { pagesLength, getPageSize } = this
-      for (let pageIndex = 0; pageIndex < pagesLength; pageIndex++) {
-        if (excludes.includes(pageIndex)) continue
-        const { width, height } = getPageSize(pageIndex)
-        const newSize = {
-          width: format.width || width * (format.height / height),
-          height: format.height || height * (format.width / width)
-        }
-        ResizeUtils.resizePage(pageIndex, this.getPage(pageIndex), newSize)
-        this.updatePageProps({
-          pageIndex,
-          props: newSize
-        })
-      }
+      (this.$refs.pageSizeSelector as any).copyAndApplySelectedFormat()
+      this.setSuggestionPanel(false)
     },
     toggleLock() {
       this.isLocked = !this.isLocked
@@ -807,34 +705,6 @@ export default Vue.extend({
         }
         return true
       }
-    },
-    fetchLayouts() {
-      this.isLayoutReady = false
-      this.formatList = []
-      this.recentlyUsed = []
-      this.getCategories().then(() => {
-        for (const category of this.categories as IListServiceContentData[]) {
-          if (category.title === `${this.$t('NN0025')}`) {
-            this.formatList = category.list.map(item => ({
-              id: item.id,
-              width: item.width ?? 0,
-              height: item.height ?? 0,
-              title: item.title ?? '',
-              description: item.description ?? ''
-            }))
-          }
-          if (category.title === `${this.$t('NN0024')}`) {
-            this.recentlyUsed = category.list.map(item => ({
-              id: item.id,
-              width: item.width ?? 0,
-              height: item.height ?? 0,
-              title: item.title ?? '',
-              description: item.description ?? ''
-            }))
-          }
-        }
-        this.isLayoutReady = true
-      })
     }
   }
 })
@@ -923,6 +793,7 @@ export default Vue.extend({
       transition: all 0.2s ease 0s;
     }
   }
+
   &__suggestion-panel {
     &__arrow {
       margin-left: auto;
@@ -1032,6 +903,7 @@ export default Vue.extend({
       }
     }
   }
+
   &__footer {
     height: 20px;
   }

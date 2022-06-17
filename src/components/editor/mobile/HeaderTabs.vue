@@ -51,7 +51,7 @@ export default Vue.extend({
   data() {
     return {
       homeTabs: [
-        { icon: 'resize', disabled: true },
+        { icon: 'resize' },
         { icon: 'all-pages' },
         { icon: 'download' },
         { icon: 'more' }
@@ -173,6 +173,10 @@ export default Vue.extend({
         }
         case 'all-pages': {
           this.$emit('showAllPages')
+          break
+        }
+        case 'resize': {
+          this.$emit('switchTab', icon)
           break
         }
         default: {

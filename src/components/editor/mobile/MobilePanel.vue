@@ -46,6 +46,7 @@ import PanelFonts from '@/components/editor/panelFunction/PanelFonts.vue'
 import PanelFontSize from '@/components/editor/panelMobile/PanelFontSize.vue'
 import PanelFontFormat from '@/components/editor/panelMobile/PanelFontFormat.vue'
 import PanelFontSpacing from '@/components/editor/panelMobile/PanelFontSpacing.vue'
+import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
@@ -90,6 +91,7 @@ export default Vue.extend({
     PanelFontSize,
     PanelFontFormat,
     PanelFontSpacing,
+    PanelResize,
     PopupDownload,
     PanelMore,
     PanelColor,
@@ -108,7 +110,7 @@ export default Vue.extend({
       inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'resize'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
@@ -136,7 +138,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && this.panelHistory.length > 0
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize')
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop'
@@ -177,6 +179,11 @@ export default Vue.extend({
             panelHistory: this.panelHistory
           })
         }
+        case 'resize': {
+          return Object.assign(defaultVal, {
+            ref: 'panelResize'
+          })
+        }
         default: {
           return defaultVal
         }
@@ -201,14 +208,14 @@ export default Vue.extend({
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0) {
+      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
         return 'back-circle'
       } else {
-        return 'check-circle'
+        return 'close-circle'
       }
     },
     rightBtnName(): string {
-      if (this.panelHistory.length > 0 || this.currActivePanel === 'crop') {
+      if (this.panelHistory.length > 0 || ['crop', 'resize'].includes(this.currActivePanel)) {
         return 'check-circle'
       } else {
         return 'close-circle'
@@ -223,22 +230,29 @@ export default Vue.extend({
     },
     rightButtonAction(): () => void {
       return () => {
-        if (this.currActivePanel === 'crop') {
-          if (imageUtils.isImgControl()) {
-            imageUtils.setImgControlDefault()
-          } else {
-            let index
-            switch (layerUtils.getCurrLayer.type) {
-              case 'image':
-                layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
-                break
-              case 'frame':
-                index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
-                if (index >= 0) {
-                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-                }
-                break
+        switch (this.currActivePanel) {
+          case 'crop': {
+            if (imageUtils.isImgControl()) {
+              imageUtils.setImgControlDefault()
+            } else {
+              let index
+              switch (layerUtils.getCurrLayer.type) {
+                case 'image':
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                  break
+                case 'frame':
+                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                  if (index >= 0) {
+                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                  }
+                  break
+              }
             }
+            break
+          }
+
+          case 'resize': {
+            (this.$refs.panelResize as any).applySelectedFormat()
           }
         }
         this.closeMobilePanel()

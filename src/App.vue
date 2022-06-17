@@ -72,18 +72,33 @@ export default Vue.extend({
     networkUtils.registerNetworkListener()
   },
   mounted() {
-    this.coordinate = this.$refs.coordinate as HTMLElement
     /**
-     * @Note - block the IOS navagation
-     * check the article for the detail (https://pqina.nl/blog/blocking-navigation-gestures-on-ios-13-4/)
+     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
+     * Remember to set passive to "false", or the preventDefault() function won't work.
+     * check the blog below to see some method to prevent this error
+     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
      */
-    (this.$el as HTMLElement).addEventListener('touchstart', (e: TouchEvent) => {
-      // is not near edge of view, exit
-      // if (e.target.pageX > 10 && e.pageX < window.innerWidth - 10) return
+    document.addEventListener('touchstart', (event: TouchEvent) => {
+      /**
+       * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
+       */
+      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 25 || (event as TouchEvent).touches[0].clientX > window.innerWidth - 25
 
-      // prevent swipe to navigate back gesture
-      // e.preventDefault()
-    })
+      if (event.touches.length > 1 || nearHrEdge) {
+        event.preventDefault()
+      }
+    }, { passive: false })
+
+    let lastTouchEnd = 0
+    document.addEventListener('touchend', (event) => {
+      const now = (new Date()).getTime()
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault()
+      }
+      lastTouchEnd = now
+    }, false)
+
+    this.coordinate = this.$refs.coordinate as HTMLElement
   },
   beforeDestroy() {
     networkUtils.unregisterNetworkListener()
@@ -165,6 +180,7 @@ export default Vue.extend({
   text-rendering: geometricPrecision;
   // block swipe navagation, only work for Chrome & FireFox
   overscroll-behavior-x: none;
+  touch-action: none;
 }
 
 // Debug used class, won't be released in production
