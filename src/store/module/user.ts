@@ -313,7 +313,6 @@ const actions: ActionTree<IUserModule, unknown> = {
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
-      dispatch('payment/getBillingInfo', {}, { root: true })
 
       // locale settings
       process.env.NODE_ENV === 'development' && console.log(data.data)
@@ -324,6 +323,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
+      dispatch('payment/getBillingInfo', {}, { root: true })
       dispatch('getAllAssets', { token: newToken })
     } else {
       console.log('login failed')
