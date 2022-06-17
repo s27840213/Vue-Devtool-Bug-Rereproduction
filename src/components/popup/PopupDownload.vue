@@ -279,7 +279,7 @@ export default Vue.extend({
         padding: '18px',
         'border-radius': '5px',
         'box-shadow': '0px 4px 13px rgba(0, 0, 0, 0.25)',
-        'background-color': 'setColor(white)'
+        'background-color': 'white'
       }
     }
   },
@@ -478,10 +478,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .popup-download {
-  // padding: 18px;
-  // border-radius: 5px;
-  // box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
-  // background-color: setColor(white);
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;

@@ -22,5 +22,5 @@ export interface IFooterTab {
   text: string,
   panelType?: string,
   disabled?: boolean,
-  props: IFooterTabProps
+  props?: IFooterTabProps
 }
