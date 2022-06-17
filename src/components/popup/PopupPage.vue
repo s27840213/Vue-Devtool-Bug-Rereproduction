@@ -161,7 +161,8 @@ export default Vue.extend({
           const ratio = img.naturalWidth / img.naturalHeight
           assetUtils.addImage(src, ratio, {
             pageIndex: layerUtils.pageIndex,
-            ...detachedBackgroundImage.config.srcObj
+            ...detachedBackgroundImage.config.srcObj,
+            styles: detachedBackgroundImage.config.styles
           })
           this._setBackgroundImage({
             pageIndex: pageUtils.currFocusPageIndex,

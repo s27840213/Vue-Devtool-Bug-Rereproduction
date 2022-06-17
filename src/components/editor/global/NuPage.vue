@@ -300,6 +300,15 @@ export default Vue.extend({
         mappedLayer.styles.scale = scale
         return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
       } else if (layer.type === 'frame') {
+        if (frameUtils.isImageFrame(layer as IFrame)) {
+          const image = GeneralUtils.deepCopy((layer as IFrame).clips[0]) as IImage
+          image.styles.x = layer.styles.x
+          image.styles.y = layer.styles.y
+          image.styles.scale = 1
+          // image.styles.imgWidth *= layer.styles.scale
+          // image.styles.imgHeight *= layer.styles.scale
+          return Object.assign(image, { forRender: true })
+        }
         const primaryLayer = this.getCurrLayer as IFrame
         const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
         const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles

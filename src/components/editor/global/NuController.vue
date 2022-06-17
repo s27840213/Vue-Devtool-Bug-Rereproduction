@@ -1458,12 +1458,12 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     dragEnter(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.addEventListener('dragleave', this.dragLeave)
+      body.addEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
         const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
         if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
-          const body = this.$refs.body as HTMLElement
-          body.addEventListener('dragleave', this.dragLeave)
-          body.addEventListener('drop', this.onDrop)
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
           Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })

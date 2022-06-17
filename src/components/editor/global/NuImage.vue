@@ -85,7 +85,6 @@ export default Vue.extend({
     this.handleInitLoad()
   },
   mounted() {
-    console.log('mounted ')
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
     if (this.shadow.srcObj.type === 'shadow-private') {
       this.fetchShadowImg()
@@ -238,12 +237,12 @@ export default Vue.extend({
       const { inheritStyle = {} } = this
       return this.showCanvas ? {
         width: `${width}px`,
-        height: `${height}px`,
-        ...inheritStyle
+        height: `${height}px`
+        // ...inheritStyle
       } : {
         // Fix the safari rendering bug, add the following code can fix it...
-        transform: 'translate(0,0)',
-        ...inheritStyle
+        transform: 'translate(0,0)'
+        // ...inheritStyle
       }
     },
     svgImageWidth(): number {
