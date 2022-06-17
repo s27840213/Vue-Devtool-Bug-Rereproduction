@@ -4,7 +4,6 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
-import authToken from '@/apis/auth-token'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -19,6 +18,7 @@ export default function (this: any) {
     theme: '',
     page: 0,
     perPage: 0,
+    nextCategory: 0,
     nextPage: 0,
     pending: false,
     host: '',
@@ -31,7 +31,8 @@ export default function (this: any) {
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
-    getCategories: async ({ commit, state }) => {
+    // For recently used.
+    getRecently: async ({ commit, state }) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, categories: [], locale })
@@ -40,14 +41,43 @@ export default function (this: any) {
           token: store.getters['user/getToken'],
           locale,
           theme,
-          listAll: 0
+          listAll: 0,
+          listCategory: 0
         })
-        commit(SET_CATEGORIES, data.data)
+        commit('SET_RECENTLY', data.data)
       } catch (error) {
         captureException(error)
       }
     },
 
+    // For mutiple categories.
+    getCategories: async ({ commit, state }) => {
+      const { theme } = state
+      const locale = localeUtils.currLocale()
+      commit(SET_STATE, { pending: true, locale })
+      try {
+        const { data } = await this.api({
+          token: '1',
+          locale,
+          theme,
+          listAll: 0,
+          listCategory: 1,
+          pageIndex: state.nextCategory,
+          cache: true
+        })
+        commit('SET_CATEGORIES', data.data)
+      } catch (error) {
+        captureException(error)
+      }
+    },
+
+    // For panel initial, get recently and categories at the same time.
+    getRecAndCate: async ({ dispatch }) => {
+      dispatch('getRecently')
+      dispatch('getCategories')
+    },
+
+    // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
       const { theme } = state
       const { keyword } = params
@@ -69,6 +99,7 @@ export default function (this: any) {
       }
     },
 
+    // Only for template center.
     getThemeContent: async ({ commit, state }, params = {}) => {
       const { keyword, theme } = params
       const locale = localeUtils.currLocale()
@@ -84,12 +115,12 @@ export default function (this: any) {
           cache: needCache
         })
         commit(SET_CONTENT, data.data)
-        console.log(data.data)
       } catch (error) {
         captureException(error)
       }
     },
 
+    // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
       const { theme } = state
       const { keyword } = params
@@ -111,7 +142,18 @@ export default function (this: any) {
       }
     },
 
-    getMoreContent: async ({ commit, getters, state }) => {
+    // For all and search/category result, it is also used by TemplateCenter.
+    getMoreContent: async ({ commit, getters, dispatch, state }) => {
+      if (state.categories.length && state.nextCategory !== -1) {
+        // Get more categories
+        dispatch('getCategories')
+        return
+      } else if (state.nextPage === 0) {
+        // Get first all
+        dispatch('getContent')
+        return
+      }
+
       const { nextParams, hasNextPage } = getters
       const { pending } = state
       if (!hasNextPage || pending) { return }
@@ -129,6 +171,7 @@ export default function (this: any) {
         categories: [],
         keyword: '',
         page: 0,
+        nextCategory: 0,
         nextPage: 0
       })
     },
@@ -147,7 +190,6 @@ export default function (this: any) {
           listAll: 1
         })
         commit(SET_STATE, { sum: data.data.sum })
-        // commit(SET_CONTENT, data.data)
       } catch (error) {
         captureException(error)
       }
@@ -165,14 +207,17 @@ export default function (this: any) {
           }
         })
     },
-    [SET_CATEGORIES] (state: IListModuleState, objects: IListServiceData) {
-      state.categories = objects.content || []
+    SET_RECENTLY (state: IListModuleState, objects: IListServiceData) {
+      state.categories = objects.content.concat(state.categories) || []
+    },
+    SET_CATEGORIES (state: IListModuleState, objects: IListServiceData) {
+      state.categories = state.categories.concat(objects.content) || []
       state.host = objects.host?.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
       state.data = objects.data
       state.preview = objects.preview
       state.preview2 = objects.preview2
       state.pending = false
-      state.nextPage = objects.next_page
+      state.nextCategory = objects.next_page as number
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const {
