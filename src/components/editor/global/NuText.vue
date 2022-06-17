@@ -211,6 +211,7 @@ export default Vue.extend({
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    line-break: anywhere;
   }
   &__observee {
     position: absolute;
