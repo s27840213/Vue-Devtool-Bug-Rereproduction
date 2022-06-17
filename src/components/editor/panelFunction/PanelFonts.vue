@@ -76,7 +76,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getCategories()
+    this.getRecently()
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
@@ -85,18 +85,15 @@ export default Vue.extend({
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
-    ...mapState(
-      'font',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'preview2',
-        'keyword'
-      ]
-    ),
+    ...mapState('font', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'preview2',
+      'keyword'
+    ]),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('brandkit', {
@@ -221,21 +218,17 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('font',
-      [
-        'resetContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent',
-        'getMoreCategory'
-      ]
-    ),
-    ...mapActions('brandkit',
-      [
-        'fetchFonts',
-        'fetchMoreFonts'
-      ]
-    ),
+    ...mapActions('font', [
+      'resetContent',
+      'getTagContent',
+      'getRecently',
+      'getMoreContent',
+      'getMoreCategory'
+    ]),
+    ...mapActions('brandkit', [
+      'fetchFonts',
+      'fetchMoreFonts'
+    ]),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
@@ -253,7 +246,7 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.resetContent()
-      keyword ? this.getTagContent({ keyword }) : this.getCategories()
+      keyword ? this.getTagContent({ keyword }) : this.getRecently()
     },
     uploadFont() {
       uploadUtils.chooseAssets('font')

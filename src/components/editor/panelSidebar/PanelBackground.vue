@@ -62,6 +62,7 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -81,17 +82,14 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(
-      'background',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapState('background', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'keyword'
+    ]),
     ...mapGetters({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultBgColors',
@@ -144,9 +142,14 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.defaultBackgroundColors
-        .concat(this.listCategories)
-        .concat(this.listResult)
+      const list = generalUtils.deepCopy(
+        this.defaultBackgroundColors
+          .concat(this.listCategories)
+          .concat(this.listResult))
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+      return list
     },
     currentPageColor(): string {
       const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
@@ -169,8 +172,7 @@ export default Vue.extend({
     })
     colorUtils.onStop(ColorEventType.background, this.recordChange)
 
-    await this.getCategories()
-    this.getContent()
+    this.getRecAndCate()
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -190,15 +192,13 @@ export default Vue.extend({
     this.resetContent()
   },
   methods: {
-    ...mapActions('background',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('background', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecAndCate',
+      'getMoreContent'
+    ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor'
     }),
@@ -224,8 +224,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        await this.getCategories()
-        this.getContent()
+        this.getRecAndCate()
       }
     },
     handleCategorySearch(keyword: string) {

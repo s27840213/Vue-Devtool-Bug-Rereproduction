@@ -31,11 +31,12 @@ export default function (this: any) {
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
-    // For recently used.
+    // For panel template, object, bg, text, only get recently used.
+    // For others, get recently used and categoryies.
     getRecently: async ({ commit, state }) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
-      commit(SET_STATE, { pending: true, categories: [], locale })
+      commit(SET_STATE, { pending: true, categories: [], locale }) // Reset categories
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],
@@ -73,8 +74,10 @@ export default function (this: any) {
 
     // For panel initial, get recently and categories at the same time.
     getRecAndCate: async ({ dispatch }) => {
-      dispatch('getRecently')
-      dispatch('getCategories')
+      await Promise.all([
+        dispatch('getRecently'),
+        dispatch('getCategories')
+      ])
     },
 
     // For all item or single category search result.
@@ -132,6 +135,7 @@ export default function (this: any) {
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           theme,
+          // TODO: Fix issue that tag search getMoreContent will not load second page.
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
           listAll: 1,
           cache: needCache
@@ -209,6 +213,8 @@ export default function (this: any) {
     },
     SET_RECENTLY (state: IListModuleState, objects: IListServiceData) {
       state.categories = objects.content.concat(state.categories) || []
+      state.pending = false
+      if (objects.next_page)state.nextPage = objects.next_page as number
     },
     SET_CATEGORIES (state: IListModuleState, objects: IListServiceData) {
       state.categories = state.categories.concat(objects.content) || []
