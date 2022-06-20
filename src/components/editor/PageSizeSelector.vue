@@ -181,11 +181,13 @@ export default Vue.extend({
       updatePageProps: 'UPDATE_pageProps',
       addPageToPos: 'ADD_pageToPos',
       setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setIsloading: 'SET_isGlobalLoading'
+      setIsloading: 'SET_isGlobalLoading',
+      updateRecentlyUsed: 'layouts/UPDATE_RECENTLY_PAGE'
     }),
     ...mapActions('layouts',
       [
-        'getCategories'
+        'getCategories',
+        'getRecently'
       ]
     ),
     getSelectedFormat(): ILayout | undefined {
@@ -246,7 +248,7 @@ export default Vue.extend({
       this.isLayoutReady = false
       this.formatList = []
       this.recentlyUsed = []
-      this.getCategories().then(() => {
+      this.getRecently().then(() => {
         for (const category of this.categories as IListServiceContentData[]) {
           if (category.title === `${this.$t('NN0025')}`) {
             this.formatList = category.list.map(item => ({
@@ -283,8 +285,10 @@ export default Vue.extend({
       const index = this.recentlyUsed.findIndex((recent) => {
         return format.id === recent.id && format.width === recent.width && format.height === recent.height
       })
-      this.recentlyUsed.splice(index, 1)
-      this.recentlyUsed.unshift(format)
+      this.updateRecentlyUsed({
+        index,
+        format
+      })
       if (record) {
         stepsUtils.record()
       }

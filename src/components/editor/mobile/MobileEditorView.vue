@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -95,6 +95,8 @@ export default Vue.extend({
     }
   },
   mounted() {
+    this.getRecently()
+
     const editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
     const canvasAt = new AnyTouch(this.$refs.canvas as HTMLElement, { preventDefault: false })
     //  销毁
@@ -236,6 +238,12 @@ export default Vue.extend({
       setInMultiSelectionMode: 'SET_inMultiSelectionMode',
       addPage: 'ADD_page'
     }),
+    ...mapActions('layouts',
+      [
+        'getCategories',
+        'getRecently'
+      ]
+    ),
     brushCursorStyles() {
       const styles = {}
       if (this.isConfigPanelOpen) Object.assign(styles, { height: 'calc(100% - 200px)' })

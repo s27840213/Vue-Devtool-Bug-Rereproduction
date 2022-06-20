@@ -4,6 +4,7 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
+import i18n from '@/i18n'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -224,6 +225,15 @@ export default function (this: any) {
       state.preview2 = objects.preview2
       state.nextCategory = objects.next_page as number
       state.pending = false
+    },
+    UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
+      const targetCategory = state.categories.find((category: any) => {
+        return category.title === `${i18n.t('NN0024')}`
+      })?.list
+      if (targetCategory) {
+        targetCategory.splice(index, 1)
+        targetCategory.unshift(format)
+      }
     },
     [SET_CONTENT](state: IListModuleState, objects: IListServiceData) {
       const {

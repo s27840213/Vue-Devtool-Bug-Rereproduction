@@ -110,7 +110,7 @@ export default Vue.extend({
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
     // window.addEventListener('keyup', this.handleKeydown)
-    this.getCategories()
+    this.getRecently()
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
@@ -251,7 +251,8 @@ export default Vue.extend({
     }),
     ...mapActions('layouts',
       [
-        'getCategories'
+        'getCategories',
+        'getRecently'
       ]
     ),
     brushCursorStyles() {
