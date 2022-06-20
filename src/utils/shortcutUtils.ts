@@ -194,6 +194,9 @@ class ShortcutUtils {
         editor.storage.nuTextStyle.pasting = true
         chainedCommands.run()
         editor.storage.nuTextStyle.pasting = false
+        Vue.nextTick(() => {
+          editor.commands.scrollIntoView()
+        })
         LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
       })
     })
