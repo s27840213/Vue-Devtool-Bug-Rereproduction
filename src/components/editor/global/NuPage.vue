@@ -301,7 +301,7 @@ export default Vue.extend({
         return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
       } else if (layer.type === 'frame') {
         if (frameUtils.isImageFrame(layer as IFrame)) {
-          const image = GeneralUtils.deepCopy((layer as IFrame).clips[0]) as IImage
+          const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
           image.styles.x = layer.styles.x
           image.styles.y = layer.styles.y
           image.styles.scale = 1
