@@ -284,7 +284,6 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
-      generalUtils.fbq('track', 'StartTrial')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()
@@ -314,7 +313,6 @@ const actions: ActionTree<IUserModule, unknown> = {
         avatar: data.data.avatar,
         viewGuide: userViewGuide
       })
-      dispatch('payment/getBillingInfo', {}, { root: true })
 
       // locale settings
       process.env.NODE_ENV === 'development' && console.log(data.data)
@@ -325,6 +323,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
+      dispatch('payment/getBillingInfo', {}, { root: true })
       dispatch('getAllAssets', { token: newToken })
     } else {
       console.log('login failed')

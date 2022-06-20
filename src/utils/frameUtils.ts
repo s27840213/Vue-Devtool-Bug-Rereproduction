@@ -9,6 +9,10 @@ import { IAdjustJsonProps } from '@/interfaces/adjust'
 import zindexUtils from './zindexUtils'
 import { ILayerInfo } from '@/store/types'
 import stepsUtils from './stepsUtils'
+import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import Vue from 'vue'
+import i18n from '@/i18n'
+import mathUtils from './mathUtils'
 class FrameUtils {
   isImageFrame(config: IFrame): boolean {
     return config.clips.length === 1 && (config.clips[0].isFrameImg as boolean)
@@ -105,11 +109,32 @@ class FrameUtils {
   updateImgToFrame() {
     const currLayer = generalUtils.deepCopy(LayerUtils.getCurrLayer) as IImage
     if (currLayer.type === 'image') {
+      let shadow
+      const _shadow = currLayer.styles.shadow
+      if (_shadow && _shadow.currentEffect !== ShadowEffectType.none) {
+        if (['', 'upload'].includes(_shadow.srcObj.type)) {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          return
+        } else {
+          shadow = generalUtils.deepCopy(_shadow) as IShadowProps
+          shadow.styles.imgHeight *= currLayer.styles.scale
+          shadow.styles.imgWidth *= currLayer.styles.scale
+          shadow.styles.imgX *= currLayer.styles.scale
+          shadow.styles.imgY *= currLayer.styles.scale
+        }
+      }
+
       const { width, height, x, y, rotate } = currLayer.styles
       const { designId } = currLayer
       const layerIndex = LayerUtils.layerIndex
       const pageIndex = LayerUtils.pageIndex
-      Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0, rotate: 0 })
+      Object.assign(currLayer.styles, {
+        x: 0,
+        y: 0,
+        zindex: 0,
+        rotate: 0,
+        shadow: layerFactary.newImage({ styles: {} }).styles.shadow
+      })
 
       const newFrame = layerFactary.newFrame({
         designId,
@@ -120,7 +145,8 @@ class FrameUtils {
           height,
           rotate,
           x,
-          y
+          y,
+          shadow
         },
         clips: [{
           ...currLayer,

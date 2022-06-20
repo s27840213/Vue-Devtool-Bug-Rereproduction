@@ -354,9 +354,20 @@ export default Vue.extend({
         //   config: image
         // })
         const { width, height, posX, posY } = imageUtils.adaptToSize(image.styles, this.getPage(pageIndex))
-        pageUtils.updateBackgroundImageSize(pageIndex, width, height)
+        const { adjust, horizontalFlip, verticalFlip } = image.styles
+        pageUtils.updateBackgroundImageStyles(pageIndex, {
+          width,
+          height,
+          adjust,
+          horizontalFlip,
+          verticalFlip,
+          imgWidth: width,
+          imgHeight: height,
+          scale: 1
+        })
         pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
         pageUtils.updateBackgroundImageMode(pageIndex, true)
+
         ShortcutUtils.del()
       })
     },

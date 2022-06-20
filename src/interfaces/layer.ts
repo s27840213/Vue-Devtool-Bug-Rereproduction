@@ -1,7 +1,7 @@
 import { SrcObj } from './gallery'
 import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
-import { IShadowProps } from './imgShadow'
+import { IShadowProps, IShadowStyles } from './imgShadow'
 import { LayerProcessType } from '@/store/types'
 
 export const jsonVer = '1.0.7'
@@ -11,7 +11,7 @@ export interface ILayerIdentifier {
   subLayerId?: string
 }
 export interface IStyle {
-  [key: string]: number | string | boolean | undefined | { [key: string]: number | string | boolean } | IShadowProps,
+  [key: string]: number | string | boolean | undefined | { [key: string]: number | string | boolean } | unknown,
   x: number,
   y: number,
   scale: number
@@ -137,6 +137,13 @@ export interface IImage extends ILayer<IImageStyle> {
   isUploading?: boolean,
   parentLayerStyles?: IStyle
 }
+
+export interface IFrameStyle extends IStyle {
+  shadow?: {
+    srcObj: SrcObj
+    styles: IShadowStyles
+  }
+}
 export interface IGroup extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }
@@ -144,7 +151,7 @@ export interface ITmp extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>
 }
 
-export interface IFrame extends ILayer<IStyle> {
+export interface IFrame extends ILayer<IFrameStyle> {
   clips: Array<IImage>
   decoration?: IShape,
   decorationTop?: IShape

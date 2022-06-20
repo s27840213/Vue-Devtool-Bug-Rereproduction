@@ -30,8 +30,7 @@ class ThemeUtils {
       store.dispatch('templates/getTagContent', { keyword })
       window.history.replaceState({}, document.title, `${window.location.pathname}?${queryString.toString()}`)
     } else {
-      await store.dispatch('templates/getCategories')
-      store.dispatch('templates/getContent')
+      store.dispatch('templates/getRecAndCate')
     }
     // await this.getCategories()
     // this.getContent()

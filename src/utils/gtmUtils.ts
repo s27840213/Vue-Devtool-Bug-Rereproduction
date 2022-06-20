@@ -1,3 +1,7 @@
+/**
+ * @Document -https://www.notion.so/vivipic/Vivipic-78df91b4ed454ae1867e01e9a6b21a87
+ */
+
 import store from '@/store'
 import Vue from 'vue'
 

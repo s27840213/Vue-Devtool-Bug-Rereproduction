@@ -9,6 +9,7 @@ export interface IListModuleState {
   keyword: string
   theme: string
   page: number
+  nextCategory: number
   nextPage: number | undefined
   perPage: number
   pending: boolean

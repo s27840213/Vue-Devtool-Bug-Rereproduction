@@ -364,7 +364,7 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
@@ -510,6 +510,12 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const body = this.$refs.body as HTMLElement
       body.removeEventListener('drop', this.onDrop)
+      e.stopPropagation()
+      if (e.dataTransfer?.getData('data') && !this.currDraggedPhoto.srcObj.type) {
+        console.log(123)
+        this.dragUtils.itemOnDrop(e, this.pageIndex)
+      }
+
       if (!this.currDraggedPhoto.srcObj.type) {
         // Propagated to NuController.vue onDrop()
       } else {
@@ -523,7 +529,6 @@ export default Vue.extend({
           case 'group':
             // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             if (this.getLayerType === 'image') {
-              e.stopPropagation()
               if (!this.isHandleShadow) {
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
