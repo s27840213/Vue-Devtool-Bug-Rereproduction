@@ -148,19 +148,19 @@ export default function (this: any) {
 
     // For all and search/category result, it is also used by TemplateCenter.
     getMoreContent: async ({ commit, getters, dispatch, state }) => {
+      const { nextParams, hasNextPage } = getters
+      const { pending } = state
+      if (!hasNextPage || pending) { return }
       if (state.categories.length && state.nextCategory !== -1) {
         // Get more categories
         dispatch('getCategories')
         return
       } else if (state.nextPage === 0) {
-        // Get first all
+        // Get first all or search/category result
         dispatch('getContent')
         return
       }
 
-      const { nextParams, hasNextPage } = getters
-      const { pending } = state
-      if (!hasNextPage || pending) { return }
       commit(SET_STATE, { pending: true })
       try {
         const { data } = await this.api(nextParams)
@@ -213,8 +213,8 @@ export default function (this: any) {
     },
     SET_RECENTLY (state: IListModuleState, objects: IListServiceData) {
       state.categories = objects.content.concat(state.categories) || []
-      state.pending = false
       if (objects.next_page)state.nextPage = objects.next_page as number
+      state.pending = false
     },
     SET_CATEGORIES (state: IListModuleState, objects: IListServiceData) {
       state.categories = state.categories.concat(objects.content) || []
@@ -222,8 +222,8 @@ export default function (this: any) {
       state.data = objects.data
       state.preview = objects.preview
       state.preview2 = objects.preview2
-      state.pending = false
       state.nextCategory = objects.next_page as number
+      state.pending = false
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const {
@@ -246,8 +246,8 @@ export default function (this: any) {
       state.data = data
       state.preview = preview
       state.preview2 = preview2
-      state.pending = false
       state.nextPage = nextPage
+      state.pending = false
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
@@ -256,8 +256,8 @@ export default function (this: any) {
         ...state.content,
         list: list.concat(newList)
       }
-      state.pending = false
       state.nextPage = objects.next_page
+      state.pending = false
     }
   }
 
