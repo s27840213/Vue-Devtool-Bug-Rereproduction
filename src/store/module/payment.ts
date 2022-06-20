@@ -124,10 +124,9 @@ function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
   if (trialStatus === 'not used') {
     gtmUtils.startTrail(14)
     fbPixelUtils.startTrail(14)
-  } else {
-    gtmUtils.subscribe(isYearlyPlan)
-    fbPixelUtils.subscribe(isYearlyPlan)
   }
+  gtmUtils.subscribe(isYearlyPlan)
+  fbPixelUtils.subscribe(isYearlyPlan)
 }
 
 const getDefaultState = (): IPaymentState => ({
