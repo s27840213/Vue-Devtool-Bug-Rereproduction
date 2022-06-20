@@ -173,7 +173,7 @@ export default Vue.extend({
         }).join('\n')
         return html.list.replace('{items}', items)
       }).join('\n')
-      navigator.clipboard.writeText(output)
+      generalUtils.copyText(output)
       this.$notify({ group: 'copy', text: '已複製' })
     }
   }
