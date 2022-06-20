@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
@@ -98,17 +98,17 @@ export default Vue.extend({
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
     }),
-    ...mapState(
-      'textStock',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapState('textStock', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'keyword'
+    ]),
+    keywordLabel():string {
+      return this.keyword.replace('tag::', '')
+    },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
@@ -172,7 +172,7 @@ export default Vue.extend({
     }
   },
   async mounted() {
-    await this.getCategories()
+    this.getRecently()
     this.getContent()
     textUtils.loadDefaultFonts(this.extractFonts)
   },
@@ -193,15 +193,13 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('textStock',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('textStock', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecently',
+      'getMoreContent'
+    ]),
     ...mapMutations({
       setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
@@ -225,7 +223,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        await this.getCategories()
+        this.getRecently()
         this.getContent()
       }
     },
