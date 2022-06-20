@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
@@ -63,6 +63,9 @@ export default Vue.extend({
       'preview',
       'keyword'
     ]),
+    keywordLabel():string {
+      return this.keyword.replace('tag::', '')
+    },
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }

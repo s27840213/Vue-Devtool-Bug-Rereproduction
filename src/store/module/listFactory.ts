@@ -126,8 +126,9 @@ export default function (this: any) {
     // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
       const { theme } = state
-      const { keyword } = params
+      let { keyword } = params
       const locale = localeUtils.currLocale()
+      keyword = keyword.includes('::') ? keyword : `tag::${keyword}`
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
@@ -184,7 +185,7 @@ export default function (this: any) {
       const { theme } = state
       const { keyword } = params
       const locale = localeUtils.currLocale()
-      commit(SET_STATE, { pending: true, keyword, locale, content: {} })
+      commit(SET_STATE, { pending: true, locale, content: {} })
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],

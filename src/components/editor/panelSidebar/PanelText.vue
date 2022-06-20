@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
@@ -106,6 +106,9 @@ export default Vue.extend({
       'preview',
       'keyword'
     ]),
+    keywordLabel():string {
+      return this.keyword.replace('tag::', '')
+    },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
