@@ -19,49 +19,136 @@ class PaymentData {
 
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
-    const tutorialPage = {
-      tw: 'https://blog.vivipic.com/tw/tutorial/',
-      us: 'https://blog.vivipic.com/us-tutorial/',
-      jp: 'https://www.facebook.com/vivipicjp'
+    function themeItem(id: number) {
+      const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
+      return {
+        label: template?.title,
+        url: `https://vivipic.com/templates?themes=${id}`
+      }
     }
-    const faqPage = {
-      tw: 'https://blog.vivipic.com/tw/faq/',
-      us: 'https://blog.vivipic.com/us-faq/',
-      jp: 'https://www.facebook.com/vivipicjp'
+    const templateType = {
+      tw: [{
+        label: '社群媒體',
+        content: [
+          ...[1, 8, 2, 3, 9, 4].map((id) => themeItem(id)), {
+            label: 'Line 圖文選單',
+            url: 'https://vivipic.com/templates?themes=14,15'
+          }
+        ]
+      }, {
+        label: '電商',
+        content: [5, 7, 6].map((id) => themeItem(id))
+      }],
+      us: [{
+        label: '社群媒體',
+        content: [1, 8, 2, 3].map((id) => themeItem(id))
+      }, {
+        label: '電商',
+        content: [6, 5].map((id) => themeItem(id))
+      }],
+      jp: [{
+        label: '社群媒體',
+        content: [1, 8, 2, 3, 4, 9].map((id) => themeItem(id))
+      }, {
+        label: '電商',
+        content: [5, 7, 6].map((id) => themeItem(id))
+      }]
+    }
+    const resource = {
+      tw: [{
+        label: '部落格',
+        url: 'https://blog.vivipic.com/tw/'
+      }, {
+        label: '學習中心',
+        content: [{
+          label: '使用教學',
+          url: 'https://blog.vivipic.com/tw/tutorial/'
+        }, {
+          label: 'FAQ',
+          url: 'https://blog.vivipic.com/tw/faq/'
+        }]
+      }, {
+        label: '設計誌',
+        content: [{
+          label: '新手入門',
+          url: 'https://blog.vivipic.com/tw/新手入門/'
+        }, {
+          label: '設計教學',
+          url: 'https://blog.vivipic.com/tw/設計教學/'
+        }, {
+          label: '數位行銷',
+          url: 'https://blog.vivipic.com/tw/數位行銷/'
+        }, {
+          label: '趨勢分享',
+          url: 'https://blog.vivipic.com/tw/趨勢分享/'
+        }]
+      }],
+      us: [{
+        label: '部落格',
+        url: 'https://blog.vivipic.com/us/'
+      }, {
+        label: '學習中心',
+        content: [{
+          label: '使用教學',
+          url: 'https://blog.vivipic.com/us/us-tutorial/'
+        }, {
+          label: 'FAQ',
+          url: 'https://blog.vivipic.com/us/us-faq/'
+        }]
+      }, {
+        label: '設計誌',
+        content: [{
+          label: '新手入門',
+          url: 'https://blog.vivipic.com/us/category/tutorial-us/'
+        }, {
+          label: '設計教學',
+          url: 'https://blog.vivipic.com/us/category/design-us/'
+        }, {
+          label: '數位行銷',
+          url: 'https://blog.vivipic.com/us/category/digital-marketing-us/'
+        }, {
+          label: '趨勢分享',
+          url: 'https://blog.vivipic.com/us/category/trend-us/'
+        }]
+      }],
+      jp: [{
+        label: '部落格',
+        url: 'https://blog.vivipic.com/tw/'
+      }, {
+        label: '學習中心',
+        content: [{
+          label: 'ECサイト向けのデザインツール。わずか4ステップで完成！',
+          url: 'https://blog.vivipic.com/jp/4step/'
+        }]
+      }, {
+        label: '設計誌',
+        url: 'https://blog.vivipic.com/jp/#'
+      }]
     }
 
     const list = [{
-      condition: true,
-      name: 'Home',
-      url: '/',
-      label: i18n.t('NN0144')
+      label: '模板類型',
+      url: '',
+      content: templateType[i18n.locale as keyof typeof templateType]
     }, {
-      condition: true,
       name: 'TemplateCenter',
       url: '/templates',
       label: i18n.t('NN0145')
     }, {
-      condition: true,
-      name: 'Toturial',
-      url: tutorialPage[i18n.locale as keyof typeof tutorialPage],
-      label: i18n.t('NN0146')
+      label: '設計指南',
+      url: '',
+      content: resource[i18n.locale as keyof typeof resource]
     }, {
-      condition: true,
-      name: 'Faq',
-      url: faqPage[i18n.locale as keyof typeof faqPage],
-      label: i18n.t('NN0147')
-    }, {
-      condition: true,
       name: 'Pricing',
       url: '/pricing',
       label: i18n.t('NN0643')
     }, {
-      condition: this.isLogin(),
+      hidden: !this.isLogin(),
       name: 'MyDesign',
       url: '/mydesign',
       label: i18n.t('NN0080')
     }, {
-      condition: this.isLogin() && brandkitUtils.isBrandkitAvailable, // todelete isBrandkitAvailable
+      hidden: !this.isLogin(),
       name: 'BrandKit',
       url: '/brandkit',
       label: i18n.t('NN0007')

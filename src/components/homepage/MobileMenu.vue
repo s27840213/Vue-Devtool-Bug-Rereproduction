@@ -1,8 +1,11 @@
 <template lang="pug">
   div(class="mobile-menu")
+    search-bar(class="mobile-menu__search"
+              :placeholder="$t('NN0037')"
+              @search="handleSearch")
     div(class="nav mobile-menu__top")
       template(v-for="item in navItems")
-        div(v-if="item.condition" class="nav__option"
+        div(v-if="!item.hidden" class="nav__option"
             :class="{'text-blue-1': currentPage === item.name}")
           a(v-if="item.url.startsWith('http')" :href="item.url"
             class="mobile-menu__link") {{item.label}}
@@ -31,16 +34,18 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
+import SearchBar from '@/components/SearchBar.vue'
 import Avatar from '@/components/Avatar.vue'
 import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
+    SearchBar,
     Avatar
   },
   data() {
     return {
-      navItems: constantData.headerItems(true),
+      // navItems: constantData.headerItems(true), // todelete
       optionSelected: 0
     }
   },
@@ -48,6 +53,9 @@ export default Vue.extend({
     ...mapGetters({
       isLogin: 'user/isLogin'
     }),
+    navItems(): any {
+      return constantData.headerItems(true)
+    },
     currentPage(): string {
       return this.$route.name || ''
     },
@@ -60,6 +68,9 @@ export default Vue.extend({
       localStorage.setItem('token', '')
       window.location.href = '/'
     },
+    handleSearch(keyword: string) { // TODO: Hide searchbar in /settings or handle search.
+      this.$emit('search', keyword)
+    },
     close() { this.$emit('closeMenu') }
   }
 })
@@ -71,11 +82,14 @@ export default Vue.extend({
   position: relative;
   left: calc(100% - 200px + 24px);
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   grid-template-columns: 1fr;
   background-color: setColor(gray-6);
-  &__top {
-    padding-top: 10vh;
+  &__search {
+    margin: 44px auto 15px auto;
+    width: 90%;
+    height: 40px;
+    background: setColor(white);;
   }
   &__bottom {
     position: absolute;
