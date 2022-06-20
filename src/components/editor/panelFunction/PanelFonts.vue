@@ -9,7 +9,7 @@
         @click.native="closeFontsPanel")
     search-bar(placeholder="Search font"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
     category-list(:list="list"
@@ -109,6 +109,9 @@ export default Vue.extend({
       getLayer: 'getLayer',
       assetFonts: 'user/getAssetFonts'
     }),
+    keywordLabel():string {
+      return this.keyword.replace('tag::', '')
+    },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
