@@ -17,7 +17,7 @@
         search-bar(class="mb-15"
           :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
           clear
-          :defaultKeyword="keyword"
+          :defaultKeyword="keywordLabel"
           @search="handleSearch")
           svg-icon(class="ml-5 pointer panel-template__advanced"
             :class="{ 'panel-template__advanced--active': theme }"
@@ -143,6 +143,9 @@ export default Vue.extend({
     ),
     ...mapState('user', ['userId', 'role', 'adminMode']),
     ...mapState(['themes']),
+    keywordLabel():string {
+      return this.keyword.replace('tag::', '')
+    },
     showTemplateId(): boolean {
       return (this.role === 0) && this.adminMode
     },

@@ -580,7 +580,6 @@ class UploadUtils {
 
     formData.append('key', `${this.loginOutput.upload_map.path}asset/design/${assetId}/config.json`)
     formData.append('Content-Disposition', 'inline')
-
     formData.append('x-amz-meta-tn', this.userId)
 
     const blob = new Blob([JSON.stringify(resultJSON)], { type: 'application/json' })
@@ -610,7 +609,6 @@ class UploadUtils {
 
   uploadTmpJSON() {
     const assetId = generalUtils.generateAssetId()
-
     const formData = new FormData()
     Object.keys(this.loginOutput.upload_map.fields).forEach(key => {
       formData.append(key, this.loginOutput.upload_map.fields[key])
@@ -1248,7 +1246,8 @@ class UploadUtils {
       case 'frame':
         return {
           ...general,
-          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } })
+          ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } }),
+          ...(Object.prototype.hasOwnProperty.call(styles, 'shadow') && { shadow: { ...styles.shadow } })
         }
       default:
         return general

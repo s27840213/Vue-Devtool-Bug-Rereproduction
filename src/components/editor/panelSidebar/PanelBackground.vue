@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
@@ -95,6 +95,9 @@ export default Vue.extend({
       defaultBgColor: 'color/getDefaultBgColors',
       getBackgroundColor: 'getBackgroundColor'
     }),
+    keywordLabel():string {
+      return this.keyword.replace('tag::', '')
+    },
     currBackgroundColor(): string {
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
     },
