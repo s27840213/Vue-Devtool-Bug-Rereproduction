@@ -110,9 +110,6 @@ export default Vue.extend({
     }),
     currLocale(): string {
       return localeUtils.currLocale()
-    },
-    customFont(): boolean {
-      return this.$route.name === 'Home' || this.$route.name === 'TemplateCenter' || this.$route.name === 'BrandKit'
     }
   },
   methods: {
@@ -133,7 +130,7 @@ export default Vue.extend({
           '-webkit-font-smoothing': 'antialiased',
           transformStyle: 'preserve-3d'
         }
-      } else if (this.customFont) {
+      } else {
         if (this.currLocale === 'tw' || this.currLocale === 'jp') {
           return { fontFamily: 'NOTO SANS TC' }
         } else {
@@ -176,7 +173,6 @@ export default Vue.extend({
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   overflow: hidden;
-  user-select: none;
   text-rendering: geometricPrecision;
   // block swipe navagation, only work for Chrome & FireFox
   overscroll-behavior-x: none;

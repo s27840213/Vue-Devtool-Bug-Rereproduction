@@ -9,7 +9,9 @@ $buttons: (
 	gray-active: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none,
-	light: setColor(white)
+	light: setColor(white),
+	transparent: transparent,
+	red: setColor(red)
 );
 
 $hoveredColor: (
@@ -20,7 +22,9 @@ $hoveredColor: (
 	gray-active: setColor(gray-6),
 	inactive: setColor(gray-4),
 	icon: none,
-	light: setColor(white)
+	light: setColor(white),
+	transparent: transparent,
+	red: #FC5757
 );
 
 $textColor: (
@@ -31,7 +35,9 @@ $textColor: (
 	gray-active: setColor(blue-1),
 	inactive: setColor(white),
 	icon: none,
-	light: setColor(blue-1)
+	light: setColor(blue-1),
+	transparent: setColor(white),
+	red: setColor(white)
 );
 
 $borderColor: (
@@ -42,7 +48,9 @@ $borderColor: (
 	gray-active: setColor(blue-1),
 	inactive: setColor(white),
 	icon: none,
-	light: setColor(blue-1)
+	light: setColor(blue-1),
+	transparent: setColor(white),
+	red: none
 );
 
 $padding: (
@@ -75,6 +83,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 6px 12px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -88,6 +97,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -101,6 +111,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -114,6 +125,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 15px 30px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -130,6 +142,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 6px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -143,6 +156,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -156,6 +170,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}
@@ -169,6 +184,7 @@ $padding: (
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 15px;
+			border-radius: 0.25rem;
 			@if map-get($borderColor, $type) != 'none'{
 				border: 2px solid map-get($borderColor, $type);
 			}

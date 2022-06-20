@@ -19,5 +19,10 @@ function loadLocaleMessages(): LocaleMessages {
 export default new VueI18n({
   locale: 'us',
   fallbackLocale: 'us',
-  messages: loadLocaleMessages()
+  messages: loadLocaleMessages(),
+  postTranslation: (str: string):string => {
+    return str
+      .replace(/<blue>/g, '<span class="text-blue-1">')
+      .replace(/<\/blue>/g, '</span>')
+  }
 })

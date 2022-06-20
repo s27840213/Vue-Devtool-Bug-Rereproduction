@@ -132,14 +132,14 @@ export default Vue.extend({
   },
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
-    this.setCurrFunctionPanel(FunctionPanelType.colorPicker)
+    this.setIsColorPanelOpened(true)
     if (this.isColorPanelHandling) {
       brandkitUtils.fetchPalettes(this.fetchPalettes)
     }
   },
   destroyed() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
-    this.setCurrFunctionPanel(FunctionPanelType.none)
+    this.setIsColorPanelOpened(false)
   },
   watch: {
     currentBrand() {
@@ -156,7 +156,8 @@ export default Vue.extend({
       currentBrand: 'brandkit/getCurrentBrand',
       selectedTab: 'brandkit/getSelectedTab',
       isPalettesLoading: 'brandkit/getIsPalettesLoading',
-      currPanel: 'getCurrSidebarPanelType'
+      currPanel: 'getCurrSidebarPanelType',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
@@ -184,7 +185,8 @@ export default Vue.extend({
     ...mapMutations({
       updateDocumentColors: 'UPDATE_documentColors',
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      setSettingsOpen: 'brandkit/SET_isSettingsOpen'
+      setSettingsOpen: 'brandkit/SET_isSettingsOpen',
+      setIsColorPanelOpened: 'SET_isColorPanelOpened'
     }),
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes'

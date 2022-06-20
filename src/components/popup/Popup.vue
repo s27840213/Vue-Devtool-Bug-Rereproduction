@@ -2,7 +2,8 @@
   div(class="popup bg-white")
     component(:is="component"
     v-click-outside="vcoConfig"
-    :updateOptions="sharedUpdateOptions")
+    :updateOptions="sharedUpdateOptions"
+    @close="close")
 </template>
 
 <script lang="ts">
@@ -20,6 +21,7 @@ import PopupGuideline from '@/components/popup/PopupGuideline.vue'
 import PopupSlider from '@/components/popup/PopupSlider.vue'
 import PopupPageScale from '@/components/popup/PopupPageScale.vue'
 import PopupSubmit from '@/components/popup/PopupSubmit.vue'
+import PopupPayment from '@/components/popup/PopupPayment.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { IPopupComponent, IPopupOptions } from '@/interfaces/popup'
 import popupUtils from '@/utils/popupUtils'
@@ -39,7 +41,8 @@ export default Vue.extend({
     PopupGuideline,
     PopupDownload,
     PopupPageScale,
-    PopupSubmit
+    PopupSubmit,
+    PopupPayment
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -50,6 +53,7 @@ export default Vue.extend({
         handler: () => {
           popupUtils.closePopup()
         },
+        middleware: null as unknown,
         events: ['dblclick', 'click', 'contextmenu']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
@@ -61,7 +65,6 @@ export default Vue.extend({
       'roleRaw',
       'adminMode']),
     ...mapGetters({
-      isPopupOpen: 'popup/isPopupOpen',
       popupComponent: 'popup/getPopupComponent',
       getPage: 'getPage',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -183,10 +186,17 @@ export default Vue.extend({
       ]
     }
   },
+  mounted() {
+    this.vcoConfig.middleware = this.middleware
+  },
   methods: {
     ...mapActions({
       closePopup: 'popup/closePopup'
     }),
+    middleware() { // These component controll v-click-o by themself.
+      if (['popup-payment'].includes(this.component)) return false
+      return true
+    },
     async close() {
       await (this.popupComponent as IPopupComponent).closeHandler()
       this.closePopup()

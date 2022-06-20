@@ -31,6 +31,17 @@
 			&::-moz-range-track {
 				background-color: setColor(gray-4);
 			}
+			&::-moz-range-thumb {
+				appearance: none;
+				width: 11px;
+				height: 11px;
+				border-radius: 50%;
+				background-color: setColor(white);
+				border: 2px solid setColor(bu);
+				transition: 0.2s;
+				margin-top: -6.5px;
+				position: relative;
+			}
 		}
 
 		&--text {

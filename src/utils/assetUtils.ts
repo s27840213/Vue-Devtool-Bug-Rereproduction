@@ -324,12 +324,17 @@ class AssetUtils {
     }, page)
     const config = LayerFactary.newImage({
       styles: {
-        width: assetWidth / 2,
-        height: assetHeight / 2,
+        // width: assetWidth / 2,
+        // height: assetHeight / 2,
+        width: width,
+        height: height,
         imgWidth: width,
         imgHeight: height,
-        initWidth: srcWidth,
-        initHeight: srcHeight,
+        initWidth: width,
+        initHeight: height,
+        // initWidth: srcWidth,
+        // initHeight: srcHeight,
+        scale: 1,
         x: 200,
         y: 200
       },
@@ -436,7 +441,7 @@ class AssetUtils {
 
   addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
@@ -468,6 +473,7 @@ class AssetUtils {
         brandId: ImageUtils.getBrandId(url, type)
       },
       styles: {
+        ...styles,
         x,
         y,
         width: photoWidth,
@@ -571,7 +577,7 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
           editorUtils.setCloseMobilePanelFlag(true)
           break
         case 6:
@@ -584,9 +590,10 @@ class AssetUtils {
           this.addText(asset.jsonData, attrs)
           editorUtils.setCloseMobilePanelFlag(true)
 
+          this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
           break
         case 8:
-          this.addFrame(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
           editorUtils.setCloseMobilePanelFlag(true)
 
           break
@@ -612,7 +619,7 @@ class AssetUtils {
 
   addAssetToRecentlyUsed(asset: IAsset) {
     const {
-      id, type, width, height,
+      id, type, width, height, plan,
       content_ids: contentIds, match_cover: matchCover,
       user_id: userId, asset_id: assetId, asset_index: assetIndex_,
       src, ver, signed_url: signedUrl
@@ -630,6 +637,7 @@ class AssetUtils {
         }
         recentlyUsed.list.unshift({
           id,
+          plan,
           type,
           width,
           height,

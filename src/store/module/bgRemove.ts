@@ -119,8 +119,7 @@ const mutations: MutationTree<IBgRemoveState> = {
         modifiedFlag: false,
         loading: false,
         step: [],
-        currStep: -1,
-        isProcessing: false
+        currStep: -1
       })
     }
     state.inBgRemoveMode = bool
@@ -170,8 +169,7 @@ const mutations: MutationTree<IBgRemoveState> = {
       preScrollPos: {
         top: -1,
         left: -1
-      },
-      isProcessing: false
+      }
     })
   },
   ADD_step(state: IBgRemoveState, dataUrl: string) {
@@ -189,8 +187,8 @@ const mutations: MutationTree<IBgRemoveState> = {
   SET_currStep(state: IBgRemoveState, step: number) {
     state.currStep = step
   },
-  SET_isProcessing(state: IBgRemoveState, bool) {
-    state.isProcessing = bool
+  SET_isProcessing(state: IBgRemoveState, type) {
+    state.isProcessing = type
   },
   SET_idInfo(state: IBgRemoveState, { pageId, layerId }) {
     Object.assign(state.idInfo, {

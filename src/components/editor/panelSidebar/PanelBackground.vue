@@ -63,9 +63,8 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
-import Tabs from '@/components/Tabs.vue'
 import generalUtils from '@/utils/generalUtils'
-
+import Tabs from '@/components/Tabs.vue'
 export default Vue.extend({
   components: {
     SearchBar,
@@ -153,11 +152,18 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.showImageTab ? this.listCategories
-        .concat(this.listResult) : this.defaultBackgroundColors
-      // return this.defaultBackgroundColors
-      //   .concat(this.listCategories)
-      //   .concat(this.listResult)
+      const list = generalUtils.deepCopy(
+        this.showImageTab ? this.listCategories
+          .concat(this.listResult) : this.defaultBackgroundColors
+      )
+      /**
+       * @NeedCodeReview with Nathan
+       */
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+
+      return list
     },
     currentPageColor(): string {
       const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
@@ -183,8 +189,7 @@ export default Vue.extend({
     })
     colorUtils.onStop(ColorEventType.background, this.recordChange)
 
-    await this.getCategories()
-    this.getContent()
+    this.getRecAndCate()
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -204,15 +209,13 @@ export default Vue.extend({
     this.resetContent()
   },
   methods: {
-    ...mapActions('background',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('background', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecAndCate',
+      'getMoreContent'
+    ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor',
       setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
@@ -243,8 +246,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        await this.getCategories()
-        this.getContent()
+        this.getRecAndCate()
       }
     },
     handleCategorySearch(keyword: string) {

@@ -29,9 +29,10 @@ interface Item {
 }
 
 class BrandKitUtils {
+  // to-delete
   get isBrandkitAvailable(): boolean {
-    return store.getters['user/isAdmin']
-    // return true // for testing private assets
+    // return store.getters['user/isAdmin']
+    return true // for testing private assets
   }
 
   createTestingDefaultBrand(): IBrand {
@@ -326,7 +327,7 @@ class BrandKitUtils {
   replaceLogo(id: string, apiLogo: IUserLogoContentData, brandId: string) {
     const logo = this.apiLogo2IBrandLogo(apiLogo)
     if (logo.width === undefined || logo.height === undefined) {
-      const url = this.getLogoUrl(logo, brandId, 'original')
+      const url = this.getLogoUrl(logo, brandId, 'tiny')
       imageUtils.getImageSize(url, 24, 24).then(size => {
         if (!size.exists) {
           this.deleteLogo(brandId, id)

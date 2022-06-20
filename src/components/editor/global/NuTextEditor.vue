@@ -70,8 +70,8 @@ export default Vue.extend({
         this.updateLayerProps({ loadFontEdited: true })
       }
     })
-    tiptapUtils.onForceUpdate((editor) => {
-      this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
+    tiptapUtils.onForceUpdate((editor, toRecord) => {
+      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
       if (!this.config?.isEdited && !generalUtils.isTouchDevice) {
@@ -143,6 +143,7 @@ export default Vue.extend({
 
 .ProseMirror.non-selectable {
   white-space: pre-wrap;
+  line-break: anywhere;
 }
 
 ::selection {

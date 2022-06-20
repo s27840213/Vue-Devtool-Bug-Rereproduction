@@ -1,6 +1,7 @@
 <template lang="pug">
   section
     div(:class="[`nav-folder-${level}`, {'bg-gray-5': folder.isCurrLocation}]"
+        :title="folder.name"
         @click="handleSelection")
       div(class="nav-folder__expand-icon-container"
           @click.stop="toggleExpansion")
@@ -17,7 +18,9 @@
       div(:class="`nav-folder-${level}__text`"
           style="pointer-events: none")
           span {{ folder.name }}
-    structure-folder(v-for="subFolder in checkExpand(realFolders)" :folder="subFolder" :level="level+1" :parents="[...parents, folder.id]")
+    structure-folder(v-for="subFolder in checkExpand(realFolders)"
+                    :folder="subFolder" :level="level+1"
+                    :parents="[...parents, folder.id]")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -30,7 +33,8 @@ export default Vue.extend({
   props: {
     folder: Object,
     parents: Array,
-    level: Number
+    level: Number,
+    isPopup: Boolean
   },
   computed: {
     path(): string[] {
@@ -98,8 +102,8 @@ $maxLevels: 5;
       height: 15px;
       display: flex;
       align-items: center;
+      max-width: 180px;
       > span {
-        font-family: 'NotoSansTC';
         text-align: left;
         color: setColor(gray-2);
         font-size: 12px;
@@ -107,6 +111,8 @@ $maxLevels: 5;
         letter-spacing: 0.03em;
         display: block;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
   }

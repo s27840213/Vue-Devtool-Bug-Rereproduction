@@ -28,6 +28,8 @@ class PopupUtils {
     noText: boolean
   }
 
+  popupEl: HTMLElement
+
   constructor() {
     this.currPopupType = ''
     this.event = new EventEmitter()
@@ -40,6 +42,7 @@ class PopupUtils {
       step: 1,
       noText: false
     }
+    this.popupEl = null as unknown as HTMLElement
   }
 
   on(type: string, callback: (value: number) => void) {
@@ -62,8 +65,7 @@ class PopupUtils {
 
   private openPopupNearTarget(target: string, pos: { x: 'left' | 'right', y: 'top' | 'bottom' }) {
     Vue.nextTick(() => {
-      const el = document.querySelector('.popup') as HTMLElement
-      const [width, height] = [el.offsetWidth, el.offsetHeight]
+      const [width, height] = [this.popupEl.offsetWidth, this.popupEl.offsetHeight]
       const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
       const { left, bottom, right, top } = document.querySelector(target)?.getBoundingClientRect() as DOMRect
       let xDiff = 0
@@ -83,14 +85,13 @@ class PopupUtils {
         }
       }
 
-      el.style.transform = `translate3d(${posX - xDiff}px, ${posY - yDiff}px,0)`
+      this.popupEl.style.transform = `translate3d(${posX - xDiff}px, ${posY - yDiff}px,0)`
     })
   }
 
   private openPopupOnMousePos(event: MouseEvent) {
     Vue.nextTick(() => {
-      const el = document.querySelector('.popup') as HTMLElement
-      const [width, height] = [el.offsetWidth, el.offsetHeight]
+      const [width, height] = [this.popupEl.offsetWidth, this.popupEl.offsetHeight]
       const [vw, vh] = [window.innerWidth || document.documentElement.clientWidth, window.innerHeight || document.documentElement.clientHeight]
       const mousePos = MouseUtils.getMouseAbsPoint(event)
       let xDiff = 0
@@ -101,11 +102,14 @@ class PopupUtils {
       if ((mousePos.y + height) > vh) {
         yDiff = (mousePos.y + height - 5) - vh
       }
-      el.style.transform = `translate3d(${mousePos.x - xDiff}px, ${mousePos.y - yDiff}px,0)`
+      this.popupEl.style.transform = `translate3d(${mousePos.x - xDiff}px, ${mousePos.y - yDiff}px,0)`
     })
   }
 
   openPopup(type: string, properties?: Partial<IPopupProps>) {
+    if (!this.popupEl) {
+      this.popupEl = document.querySelector('.popup') as HTMLElement
+    }
     const underTarget = ['order', 'align', 'flip', 'slider', 'file', 'line-template', 'download', 'page-scale']
     const targetMap: { [index: string]: string } = {
       order: '.layers-alt',
@@ -145,6 +149,9 @@ class PopupUtils {
     // await this.popupComponent.closeHandler()
     store.dispatch('popup/closePopup')
     this.currPopupType = ''
+    if (this.popupEl) {
+      this.popupEl.style.transform = ''
+    }
   }
 }
 

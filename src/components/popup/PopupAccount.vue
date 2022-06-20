@@ -9,25 +9,16 @@
         div {{showUname}}
         div(class="text-gray-3 body-3") {{showAccount}}
     div(class="popup-account__hr")
-    div(class="popup-account__option"
-      @click="closePopup")
-      router-link(to="/settings/account"
-        class="popup-account__option__link")
-        svg-icon(class="pr-10"
-          :iconName="'settings'"
-          :iconWidth="'15px'"
-          :iconColor="'gray-2'")
-        span {{$tc('NN0165', 2)}}
-    div(class="popup-account__option"
-      @click="closePopup")
-      router-link(to="/settings/security"
-        class="popup-account__option__link"
-        @click="closePopup")
-        svg-icon(class="pr-10"
-          :iconName="'lock'"
-          :iconWidth="'15px'"
-          :iconColor="'gray-2'")
-        span {{$tc('NN0166', 2)}}
+    template(v-for="view in settingsItems")
+      div(v-if="view.name === 'hr'" class="popup-account__hr")
+      div(v-else class="popup-account__option" @click="closePopup")
+        router-link(:to="`/settings/${view.name}`"
+                    class="popup-account__option__link")
+          svg-icon(:iconName="view.icon"
+                  class="pr-10"
+                  :iconWidth="'15px'"
+                  :iconColor="'gray-2'")
+          span {{view.label}}
     div(class="popup-account__hr")
     div(class="popup-account__option"
       @click="onLogoutClicked()")
@@ -43,6 +34,7 @@ import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import { mapState, mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
+import paymentData from '@/utils/constantData'
 
 export default Vue.extend({
   directives: {
@@ -53,6 +45,7 @@ export default Vue.extend({
   },
   data() {
     return {
+      settingsItems: paymentData.settingsItems()
     }
   },
   computed: {
@@ -145,6 +138,7 @@ export default Vue.extend({
       }
     }
     &__link {
+      width: 100%;
       display: flex;
       align-items: center;
       color: unset;

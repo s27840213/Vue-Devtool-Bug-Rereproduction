@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import VueRouter, { NavigationGuardNext, RawLocation, Route, RouteConfig } from 'vue-router'
+import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
 import Editor from '../views/Editor.vue'
 import SignUp from '../views/Login/SignUp.vue'
 import Login from '../views/Login/Login.vue'
@@ -15,6 +15,7 @@ import MobileImageAdjust from '../views/MobileImageAdjust.vue'
 import MobileTextTyping from '../views/MobileTextTyping.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
+import Pricing from '../views/Pricing.vue'
 import store from '@/store'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
@@ -38,7 +39,8 @@ const MOBILE_ROUTES = [
   'MobileEditor',
   'MobileTextEffect',
   'MobileImageAdjust',
-  'MobileTextTyping'
+  'MobileTextTyping',
+  'Pricing'
 ]
 
 // Ingore some normal router console error
@@ -74,13 +76,8 @@ const routes: Array<RouteConfig> = [
   {
     path: '',
     name: 'Home',
-    component: Home, // todo rename
+    component: Home,
     beforeEnter: async (to, from, next) => {
-      // const locale = from.params.locale
-      // if (locale && ['tw', 'en', 'jp'].includes(locale) && locale !== i18n.locale) {
-      //   i18n.locale = mappingUtils.mappingLocales(locale)
-      // }
-      // to.params.locale = 'en'
       try {
         next()
       } catch (error) {
@@ -223,6 +220,11 @@ const routes: Array<RouteConfig> = [
     path: 'mobile-typing',
     name: 'MobileTextTyping',
     component: MobileTextTyping
+  },
+  {
+    path: 'pricing',
+    name: 'Pricing',
+    component: Pricing
   }
 ]
 
@@ -277,7 +279,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta.title || i18n.t('SE0001')
+  document.title = to.meta?.title || i18n.t('SE0001')
 
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {

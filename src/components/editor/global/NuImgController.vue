@@ -27,6 +27,10 @@ import FrameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import generalUtils from '@/utils/generalUtils'
 import eventUtils from '@/utils/eventUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import pageUtils from '@/utils/pageUtils'
+import { IImage } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
   props: {
@@ -53,10 +57,37 @@ export default Vue.extend({
       isSnappedInVertical: false
     }
   },
+  mounted() {
+    if (this.forRender) {
+      return
+    }
+    const shadow = (this.config as IImage).styles.shadow
+    if (shadow.currentEffect !== ShadowEffectType.none) {
+      if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
+        imageShadowUtils.setProcessId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: this.primaryLayer ? this.primaryLayer.id : this.config.id,
+          subLayerId: this.primaryLayer ? this.config.id : undefined
+        })
+        const hasPrimaryLayer = typeof this.primaryLayerIndex !== 'undefined' && this.primaryLayerIndex !== -1
+        imageShadowUtils.updateShadowSrc({
+          pageIndex: this.pageIndex,
+          layerIndex: hasPrimaryLayer ? this.primaryLayerIndex : this.layerIndex,
+          subLayerIdx: hasPrimaryLayer ? this.layerIndex : undefined
+        }, { type: '', userId: '', assetId: '' })
+      }
+    }
+  },
   destroyed() {
+    const shadow = (this.config as IImage).styles.shadow
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
+      }
+    }
+    if (!this.forRender) {
+      if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
+        stepsUtils.record()
       }
     }
   },
@@ -97,7 +128,7 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       /** only the image in frame use the scale to strech */
-      return this.primaryLayer && this.primaryLayerType === 'frame' ? this.config.styles.scale : 1
+      return this.primaryLayer && this.primaryLayerType === 'frame' && !this.config.isFrameImg ? this.config.styles.scale : 1
     },
     getLayerRotate(): number {
       return this.config.styles.rotate
@@ -291,11 +322,11 @@ export default Vue.extend({
         x: Math.abs(e.clientX - this.initialPos.x),
         y: Math.abs(e.clientY - this.initialPos.y)
       }
-      if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-        this.updateLayerProps({ imgControl: false })
-        stepsUtils.record()
-        this.updateLayerProps({ imgControl: true })
-      }
+      // if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+      //   this.updateLayerProps({ imgControl: false })
+      //   stepsUtils.record()
+      //   this.updateLayerProps({ imgControl: true })
+      // }
       this.setCursorStyle('default')
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
       eventUtils.removePointerEvent('pointermove', this.moving)
@@ -429,11 +460,11 @@ export default Vue.extend({
         x: Math.abs(e.clientX - this.initialPos.x),
         y: Math.abs(e.clientY - this.initialPos.y)
       }
-      if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-        this.updateLayerProps({ imgControl: false })
-        stepsUtils.record()
-        this.updateLayerProps({ imgControl: true })
-      }
+      // if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+      //   this.updateLayerProps({ imgControl: false })
+      //   stepsUtils.record()
+      //   this.updateLayerProps({ imgControl: true })
+      // }
       this.isControlling = false
       this.setCursorStyle('default')
 

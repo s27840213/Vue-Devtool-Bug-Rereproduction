@@ -26,7 +26,7 @@ class ResizeUtils {
         const { imgWidth, imgHeight, imgX, imgY } = (layer as IImage).styles
         imageUtils.updateImgSize(pageIndex, layerIndex, imgWidth * targetScale, imgHeight * targetScale)
         imageUtils.updateImgPos(pageIndex, layerIndex, imgX * targetScale, imgY * targetScale)
-        scale = 1
+        // scale = 1
         break
       }
       case 'text':
@@ -141,10 +141,15 @@ class ResizeUtils {
 
   scaleBackground(pageIndex: number, page: IPage, scale: number) {
     pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX * scale, page.backgroundImage.posY * scale)
-    pageUtils.updateBackgroundImageSize(
-      pageIndex,
-      page.backgroundImage.config.styles.imgWidth * scale,
-      page.backgroundImage.config.styles.imgHeight * scale
+    const width = page.backgroundImage.config.styles.imgWidth * scale
+    const height = page.backgroundImage.config.styles.imgHeight * scale
+    pageUtils.updateBackgroundImageStyles(
+      pageIndex, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      }
     )
   }
 
@@ -154,10 +159,13 @@ class ResizeUtils {
       height: page.backgroundImage.config.styles.initHeight
     }, format)
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-    pageUtils.updateBackgroundImageSize(
-      pageIndex,
-      width,
-      height
+    pageUtils.updateBackgroundImageStyles(
+      pageIndex, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      }
     )
   }
 

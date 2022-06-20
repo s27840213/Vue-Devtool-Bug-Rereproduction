@@ -662,6 +662,13 @@
   "NN0655": "Current plan",
   "NN0656": "There's a problem with your account ({status}), please {contactus} .",
   "NN0657": "Selected",
+  "NN0658": "Unlock this premium object and have unlimited access to PRO objects.",
+  "NN0659": "no {items} yet",
+  "NN0660": "logos",
+  "NN0661": "color palettes",
+  "NN0662": "Click on the button",
+  "NN0663": "to upload your brand logos.",
+  "NN0664": "to create your brand colors.",
   "SKT0001": "Editing",
   "SKT0002": "Can edit",
   "SKT0003": "Switching editor...",
@@ -699,5 +706,8 @@
   "SHR0016": "Copy link",
   "SHR0017": "Edit design and invite others.",
   "SHR0018": "View designs without making edits.",
-  "SHR0019": "Remove"
+  "SHR0019": "Remove",
+  "SHR0020": "You need access",
+  "SHR0021": "The owner has changed the link access, you can ask for access, or log in to an account with access.",
+  "SHR0022": "Created with"
 }

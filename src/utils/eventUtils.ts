@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import generalUtils from './generalUtils'
 
 const computerHash = {
@@ -12,6 +13,13 @@ const mobileHash = {
   pointerdown: 'touchend'
 }
 
+export enum PanelEvent {
+  showPhotoShadow = 'showPhotoShadow'
+}
+
+export enum ImageEvent {
+  redrawCanvasShadow = 'redrawCanvasShadow'
+}
 class EventUtils {
   checkIsMultiTouch(event: MouseEvent | TouchEvent | PointerEvent) {
     switch (eventUtils.getEventType(event)) {
@@ -53,6 +61,28 @@ class EventUtils {
       const targetEvent = generalUtils.isTouchDevice() ? mobileHash[type] : computerHash[type]
 
       window.removeEventListener(targetEvent, callback)
+    }
+  }
+
+  private event: any
+  private eventHash: { [index: string]: (event: string) => void }
+  constructor() {
+    this.event = new EventEmitter()
+    this.eventHash = {}
+  }
+
+  on(type: string, callback: (type?: string) => void) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+    this.event.on(type, callback)
+    this.eventHash[type] = callback
+  }
+
+  emit(type: string) {
+    if (this.eventHash[type]) {
+      this.event.emit(type)
     }
   }
 }

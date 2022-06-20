@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="home" :style="homeStyle")
+  div(class="home")
     nu-header(v-header-border)
     div(class="home-content")
       div(class="home-top")
         div(class="home-top-text")
-          span(class="home-top-text__title" v-html="title")
+          span(class="home-top-text__title" v-html="$t('NN0464')")
           span(class="home-top-text__description") {{$t('NN0465')}}
           animation(v-for="cb in colorBlock"
             :class="`home-top-text__colorBlock ${cb.replace('.json', '')}`"
@@ -112,11 +112,6 @@ export default Vue.extend({
     ...mapState({
       isMobile: 'isMobile'
     }),
-    title(): string {
-      return (i18n.t('NN0464') as string)
-        .replace('<blue>', '<span class="text-blue-1">')
-        .replace('</blue>', '</span>')
-    },
     blocklist(): ReturnType<typeof blocklistData.data> {
       const blocklist = blocklistData.data().filter((item) => {
         return !(i18n.locale === 'us' && item.img.name === 'e-commerce.json')
@@ -133,9 +128,6 @@ export default Vue.extend({
       return i18n.locale === 'us' ? 'GRSlz37Njo0'
         : i18n.locale === 'jp' ? 'FzPHWU0O1uI'
           : i18n.locale === 'tw' ? 'BBVAwlBk_zA' : 'GRSlz37Njo0'
-    },
-    homeStyle(): Record<string, string> {
-      return i18n.locale === 'us' ? { 'font-family': 'Poppins' } : { 'font-family': 'NOTO SANS TC' }
     }
   },
   created() {
@@ -208,6 +200,7 @@ export default Vue.extend({
   }
 }
 @media screen and (max-width: 768px) {
+  .home-content { padding: 0 24px; }
   .home-top {
     min-height: 400px;
     width: 327px;
@@ -245,7 +238,7 @@ export default Vue.extend({
   .home-top {
     min-height: 724px;
     width: 768px;
-    margin-top: 160px;
+    margin-top: 80px;
     &-text {
       width: 560px; // todo ? 500 560
       &__title {
@@ -274,7 +267,7 @@ export default Vue.extend({
   .home-top {
     min-height: 724.15px;
     width: 1241px;
-    margin-top: 160px;
+    margin-top: 80px;
     &-text {
       &__title {
         @include text-H1

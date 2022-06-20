@@ -9,6 +9,7 @@ export interface IListModuleState {
   keyword: string
   theme: string
   page: number
+  nextCategory: number
   nextPage: number | undefined
   perPage: number
   pending: boolean
@@ -25,6 +26,7 @@ export interface IAsset {
   id: string
   type: number
   ver: number
+  plan?: number
   jsonData?: ILayer | IText | ITmp | IImage | IShape | IGroup | IMarker
   width?: number
   height?: number

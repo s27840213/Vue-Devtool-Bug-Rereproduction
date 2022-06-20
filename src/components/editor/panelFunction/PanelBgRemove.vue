@@ -60,6 +60,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import uploadUtils from '@/utils/uploadUtils'
+import { SidebarPanelType } from '@/store/types'
 
 export default Vue.extend({
   data() {
@@ -81,7 +82,8 @@ export default Vue.extend({
       autoRemoveResult: 'bgRemove/getAutoRemoveResult',
       isAdmin: 'user/isAdmin',
       prevPageScaleRatio: 'bgRemove/getPrevPageScaleRatio',
-      bgRemoveIdInfo: 'bgRemove/getIdInfo'
+      bgRemoveIdInfo: 'bgRemove/getIdInfo',
+      isProcessing: 'bgRemove/getIsProcessing'
     }),
     brushSize: {
       get: () => {
@@ -100,7 +102,9 @@ export default Vue.extend({
       setRestoreInitState: 'bgRemove/SET_restoreInitState',
       setClearMode: 'bgRemove/SET_clearMode',
       setShowInitImage: 'bgRemove/SET_showInitImage',
-      setLoading: 'bgRemove/SET_loading'
+      setLoading: 'bgRemove/SET_loading',
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     toggleShowInitImage(val: boolean): void {
       this.setShowInitImage(!val)
@@ -120,6 +124,7 @@ export default Vue.extend({
           trace: 1
         })
         this.setInBgRemoveMode(false)
+        this.setIsProcessing(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
         stepsUtils.record()
       } else {
@@ -137,6 +142,11 @@ export default Vue.extend({
         this.setInBgRemoveMode(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
 
+        // If the result image is still uploading, we need to prevent the bg-remove btn from being clicked.
+        // The reason is if the image is still uploading, then the image in the page is dataUrl.
+        // So we need to set isProcessing to true
+        this.setIsProcessing(true)
+        this.setCurrSidebarPanel(SidebarPanelType.file)
         uploadUtils.uploadAsset('image', [previewSrc], {
           addToPage: false,
           pollingCallback: (json: IUploadAssetResponse) => {
@@ -149,6 +159,7 @@ export default Vue.extend({
               trace: 1
             })
             this.setLoading(false)
+            this.setIsProcessing(false)
             stepsUtils.record()
           },
           id: id,
@@ -157,6 +168,7 @@ export default Vue.extend({
       }
     },
     cancel() {
+      this.setIsProcessing(false)
       this.setInBgRemoveMode(false)
       this.setPageScaleRatio(this.prevPageScaleRatio)
     }

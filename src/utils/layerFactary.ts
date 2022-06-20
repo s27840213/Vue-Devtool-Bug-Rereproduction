@@ -1,7 +1,7 @@
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import { IShape, IText, IImage, IGroup, IFrame, ITmp, IStyle, ILayer, IParagraph } from '@/interfaces/layer'
 import store from '@/store'
-import { LayerType } from '@/store/types'
+import { LayerProcessType, LayerType } from '@/store/types'
 import GeneralUtils from '@/utils/generalUtils'
 import ShapeUtils from '@/utils/shapeUtils'
 import { STANDARD_TEXT_FONT } from './assetUtils'
@@ -10,10 +10,12 @@ import localeUtils from './localeUtils'
 import textPropUtils from './textPropUtils'
 import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
+import imageShadowUtils from './imageShadowUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width, height, initWidth, initHeight, zindex, opacity } = config.styles
+    const { width = 0, height = 0, initWidth = 0, initHeight = 0, zindex = 0, opacity = 0 } = config.styles
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -27,7 +29,7 @@ class LayerFactary {
       locked: false,
       moved: false,
       imgControl: false,
-      inProcess: false,
+      inProcess: LayerProcessType.none,
       trace: config.trace ?? 0,
       isClipper: true,
       dragging: false,
@@ -35,7 +37,7 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        scale: 1,
+        scale: (!Number.isNaN(width / initWidth) && (width / initWidth)) ? (width / initWidth || 1) : 1,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
@@ -45,19 +47,41 @@ class LayerFactary {
         initHeight: height,
         imgX: 0,
         imgY: 0,
-        imgWidth: initWidth ?? width,
-        imgHeight: initHeight ?? height,
+        imgWidth: initWidth || width,
+        imgHeight: initHeight || height,
         zindex: zindex ?? -1,
         opacity: opacity || 100,
         horizontalFlip: false,
         verticalFlip: false,
         adjust: {},
-        shadow: { currentEffect: 'none', effects: {} }
+        shadow: {
+          currentEffect: 'none',
+          effects: {
+            color: '#000000',
+            ...Object.keys(ShadowEffectType)
+              .reduce((obj, effect) => {
+                return {
+                  ...obj,
+                  [effect]: {}
+                }
+              }, {})
+          },
+          srcObj: { type: '', assetId: '', userId: '' },
+          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 }
+        }
       }
     }
+    /** some old json has different config with the shadow effect */
+    if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
+      config.styles.shadow = basicConfig.styles.shadow
+    }
+
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
-    return Object.assign(basicConfig, config)
+
+    basicConfig.styles.scale = basicConfig.styles.width / basicConfig.styles.initWidth
+    const image = Object.assign(basicConfig, config)
+    return image
   }
 
   newFrame(config: IFrame): IFrame {
@@ -142,7 +166,8 @@ class LayerFactary {
         zindex: styles.zindex ?? -1,
         opacity: styles.opacity || 100,
         horizontalFlip: styles.horizontalFlip || false,
-        verticalFlip: styles.verticalFlip || false
+        verticalFlip: styles.verticalFlip || false,
+        shadow: styles.shadow
       },
       clips,
       decoration: decoration ? this.newShape((() => {
@@ -278,22 +303,9 @@ class LayerFactary {
               paragraph.styles.assetId = ''
               paragraph.styles.fontUrl = ''
             }
-            if (paragraph.styles.spanStyle) {
-              delete paragraph.styles.spanStyle
+            if ((paragraph.spans.length > 1 || paragraph.spans[0].text !== '') && paragraph.spanStyle) {
+              delete paragraph.spanStyle
             }
-          } else if (paragraph.styles.spanStyle) {
-            const spanStyles = tiptapUtils.generateSpanStyle(paragraph.styles.spanStyle as string)
-            paragraph.styles.font = spanStyles.font
-            paragraph.styles.type = spanStyles.type ?? 'public'
-            paragraph.styles.userId = spanStyles.userId ?? ''
-            paragraph.styles.assetId = spanStyles.assetId ?? ''
-            paragraph.styles.fontUrl = spanStyles.fontUrl ?? ''
-          } else {
-            paragraph.styles.font = defaultFont
-            paragraph.styles.type = 'public'
-            paragraph.styles.userId = ''
-            paragraph.styles.assetId = ''
-            paragraph.styles.fontUrl = ''
           }
         }
       )
@@ -457,7 +469,6 @@ class LayerFactary {
         }
         !shape.designId && console.warn('layer:', layerIndex, 'has no designId!')
       }
-
       init(config.layers[layerIndex])
     }
     config.layers = ZindexUtils.assignTemplateZidx(config.layers)

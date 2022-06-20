@@ -270,6 +270,7 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: auto 1fr;
+  user-select: none;
   > section:nth-child(2) {
     display: grid;
     grid-template-rows: minmax(0, 1fr);

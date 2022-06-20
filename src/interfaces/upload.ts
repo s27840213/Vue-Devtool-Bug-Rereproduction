@@ -26,15 +26,18 @@ export interface IUploadAssetResponse {
     update_time: string,
     ver: number,
     width: number
-  }
+  },
+  msg?: string
 }
 
 export interface IUploadAssetFontResponse {
-  flag: number,
+  flag: number
   data: IUserFontContentData
+  msg?: string
 }
 
 export interface IUploadAssetLogoResponse {
-  flag: number,
+  flag: number
   data: IUserLogoContentData
+  msg?: string
 }

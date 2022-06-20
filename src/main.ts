@@ -149,6 +149,7 @@ if (['production'].includes(process.env.NODE_ENV)) {
       return breadcrumb
     }
   })
+  Vue.config.devtools = false
 }
 
 new Vue({

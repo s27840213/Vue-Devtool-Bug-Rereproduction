@@ -36,9 +36,12 @@ export default Extension.create({
     } else {
       const spanStyle = this.editor.getAttributes('paragraph').spanStyle
       if (spanStyle) {
-        this.storage.spanStyle = spanStyle
+        this.storage.spanStyle = tiptapUtils.textStyles(
+          tiptapUtils.makeSpanStyle(this.editor.getAttributes('paragraph'))
+        )
       }
     }
+    // console.log(this.storage.spanStyle)
     if (textPropUtils.pageIndex >= 0 && textPropUtils.layerIndex >= 0) {
       textPropUtils.updateTextPropsState()
     }
@@ -122,15 +125,6 @@ export default Extension.create({
               if (spanStyle.color === '') return null
               return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
             },
-            renderHTML: () => ({})
-          },
-          opacity: {
-            default: 1,
-            parseHTML: element => {
-              const spanStyle = element.style
-              const opacity = parseInt(spanStyle.opacity)
-              return Number.isNaN(opacity) ? null : opacity
-            },
             renderHTML: attributes => {
               return {
                 style: tiptapUtils.textStyles(attributes)
@@ -190,15 +184,15 @@ export default Extension.create({
         types: ['paragraph'],
         attributes: {
           spanStyle: {
-            default: null,
+            default: false,
             parseHTML: element => {
-              const cssText = element.getAttribute('data-span-style')
-              return cssText
+              const spanStyle = element.getAttribute('data-span-style')
+              return spanStyle === 'true'
             },
             renderHTML: attributes => {
               if (!attributes.spanStyle) return {}
               return {
-                'data-span-style': attributes.spanStyle
+                'data-span-style': attributes.spanStyle.toString()
               }
             }
           },
@@ -250,49 +244,55 @@ export default Extension.create({
               return textAlign
             },
             renderHTML: attributes => {
+              const pAttrs = attributes.spanStyle ? attributes : tiptapUtils.makeParagraphStyle(attributes)
               return {
-                style: tiptapUtils.textStyles(attributes) + '; margin: 0;'
+                style: tiptapUtils.textStyles(pAttrs) + '; margin: 0;'
               }
             }
           },
           weight: {
             default: 'normal',
             parseHTML: element => {
-              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              if (spanStyle.fontWeight) {
-                return spanStyle.fontWeight === 'bold' ? 'bold' : 'normal'
-              }
-              const stroke = spanStyle.getPropertyValue('-webkit-text-stroke-width')
-              if (stroke === '') return null
-              return stroke.includes('+') ? 'bold' : 'normal'
+              return element.getAttribute('data-weight')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-weight': attributes.weight
+              }
+            }
           },
           decoration: {
             default: 'none',
             parseHTML: element => {
-              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              const decoration = spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line')
-              return decoration === 'underline' ? 'underline' : 'none'
+              return element.getAttribute('data-decoration')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-decoration': attributes.decoration
+              }
+            }
           },
           style: {
             default: 'normal',
             parseHTML: element => {
-              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              return spanStyle.fontStyle === 'italic' ? 'italic' : 'normal'
+              return element.getAttribute('data-style')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-style': attributes.style
+              }
+            }
           },
           color: {
             default: '#000000',
             parseHTML: element => {
-              const spanStyle = tiptapUtils.str2css(element.getAttribute('data-span-style') ?? '')
-              if (spanStyle.color === '') return null
-              return tiptapUtils.isValidHexColor(spanStyle.color) ? spanStyle.color : tiptapUtils.rgbToHex(spanStyle.color)
+              return element.getAttribute('data-color')
             },
-            renderHTML: () => ({})
+            renderHTML: attributes => {
+              return {
+                'data-color': attributes.color
+              }
+            }
           },
           type: {
             default: 'public',

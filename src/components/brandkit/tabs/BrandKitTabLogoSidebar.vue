@@ -1,5 +1,7 @@
 <template lang="pug">
-  div(class="brand-kit-tab-logo")
+  div(v-if="logos.length === 0 && !isLogosLoading" class="hint")
+    no-items-hint(type="logo")
+  div(v-else class="brand-kit-tab-logo")
     recycle-scroller(:items="rows")
       template(v-slot="{ item }")
         observer-sentinel(v-if="item.sentinel"
@@ -29,11 +31,11 @@
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import vClickOutside from 'v-click-outside'
 import { IBrand, IBrandLogo } from '@/interfaces/brandkit'
 import GalleryUtils from '@/utils/galleryUtils'
-import { IPhoto, IPhotoItem } from '@/interfaces/api'
 
 export default Vue.extend({
   data() {
@@ -43,6 +45,7 @@ export default Vue.extend({
     }
   },
   mounted() {
+    if (this.isSettingsOpen) return
     brandkitUtils.fetchLogos(this.fetchLogos)
   },
   directives: {
@@ -50,20 +53,23 @@ export default Vue.extend({
   },
   components: {
     ObserverSentinel,
-    GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
+    GalleryPhoto: () => import('@/components/GalleryPhoto.vue'),
+    NoItemsHint
   },
   watch: {
     logos() {
       this.logosUpdate()
     },
     currentBrand() {
+      if (this.isSettingsOpen) return
       brandkitUtils.fetchLogos(this.fetchLogos)
     }
   },
   computed: {
     ...mapGetters('brandkit', {
       currentBrand: 'getCurrentBrand',
-      isLogosLoading: 'getIsLogosLoading'
+      isLogosLoading: 'getIsLogosLoading',
+      isSettingsOpen: 'getIsSettingsOpen'
     }),
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
@@ -75,6 +81,7 @@ export default Vue.extend({
   methods: {
     ...mapActions('brandkit', {
       fetchLogos: 'fetchLogos',
+      fetchMoreLogos: 'fetchMoreLogos',
       refreshLogoAsset: 'refreshLogoAsset'
     }),
     checkUploading(logo: IBrandLogo) {
@@ -91,6 +98,9 @@ export default Vue.extend({
           size: (row[0].preview?.height ?? 0) + this.galleryUtils.margin,
           brandId: this.currentBrand.id
         }))
+      if (this.rows.length) {
+        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
+      }
     },
     imageStyle(preview: any) {
       return {
@@ -120,8 +130,9 @@ export default Vue.extend({
       }
     },
     handleLoadMore(item: any): void {
+      if (this.isSettingsOpen) return
       item.sentinel = false
-      this.$emit('loadMore')
+      brandkitUtils.fetchLogos(this.fetchMoreLogos, false)
     }
   }
 })
@@ -158,5 +169,10 @@ export default Vue.extend({
       width: auto;
     }
   }
+}
+
+.hint {
+  display: flex;
+  justify-content: center;
 }
 </style>

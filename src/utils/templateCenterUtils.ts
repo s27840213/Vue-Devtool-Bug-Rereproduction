@@ -1,3 +1,4 @@
+import { IAssetTemplate } from '@/interfaces/api'
 import { ITemplate } from '@/interfaces/template'
 
 class TemplateCenterUtils {
@@ -8,7 +9,6 @@ class TemplateCenterUtils {
       res.push([])
       ratios.push(0)
     }
-    console.log(templates)
     const list = templates.list ?? []
     for (const template of list) {
       const cover = template.match_cover
@@ -16,21 +16,29 @@ class TemplateCenterUtils {
       const ratio = height / width
       const index = this.lowestColumn(ratios)
       ratios[index] += ratio
-      res[index].push({
-        url: this.getPrevUrl(cover, scale),
-        id: cover.id,
-        theme_id: cover.theme_id,
-        aspect_ratio: ratio,
-        width: cover.width,
-        height: cover.height,
-        type: 6,
-        ver: cover.ver,
-        content_ids: template.content_ids,
-        group_type: template.group_type,
-        group_id: template.group_id
-      })
+      res[index].push(this.iAssetTemplate2Template(template, scale))
     }
     return res
+  }
+
+  iAssetTemplate2Template(template: IAssetTemplate, scale: number): ITemplate {
+    const cover = template.match_cover
+    const { width, height } = cover
+    const ratio = height / width
+    return {
+      url: this.getPrevUrl(cover, scale),
+      id: cover.id,
+      theme_id: cover.theme_id,
+      aspect_ratio: ratio,
+      width: cover.width,
+      height: cover.height,
+      type: 6,
+      ver: cover.ver,
+      plan: template.plan,
+      content_ids: template.content_ids,
+      group_type: template.group_type,
+      group_id: template.group_id
+    }
   }
 
   getPrevUrl(item: {id: string, ver: number}, scale = 4): string {

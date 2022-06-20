@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
@@ -13,6 +13,7 @@ import text from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
+import shadow from '@/store/module/shadow'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
@@ -34,6 +35,7 @@ import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
+import payment from '@/store/module/payment'
 
 Vue.use(Vuex)
 
@@ -55,6 +57,7 @@ const getDefaultState = (): IEditorState => ({
   mobileSidebarPanelOpen: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
+  isSettingScaleRatio: false,
   middlemostPageIndex: 0,
   currActivePageIndex: -1,
   currHoveredPageIndex: -1,
@@ -83,7 +86,7 @@ const getDefaultState = (): IEditorState => ({
     index: -1,
     type: ''
   },
-  isColorPickerOpened: false,
+  isColorPanelOpened: false,
   currSelectedResInfo: {},
   asset: {},
   textInfo: {
@@ -159,6 +162,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   getPageScaleRatio(state: IEditorState): number {
     return state.pageScaleRatio
   },
+  getIsSettingScaleRatio(state: IEditorState): boolean {
+    return state.isSettingScaleRatio
+  },
   getLayer(state: IEditorState) {
     return (pageIndex: number, layerIndex: number): IShape | IText | IImage | IGroup | IFrame | undefined => {
       const page = state.pages[pageIndex]
@@ -229,9 +235,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSelectedTypes(state: IEditorState) {
     return state.currSelectedInfo.types
-  },
-  getIsColorPickerOpened(state: IEditorState) {
-    return state.isColorPickerOpened
   },
   getCurrSelectedResInfo(state: IEditorState) {
     return state.currSelectedResInfo
@@ -353,6 +356,9 @@ const mutations: MutationTree<IEditorState> = {
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
     state.pageScaleRatio = ratio
   },
+  SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
+    state.isSettingScaleRatio = isSettingScaleRatio
+  },
   SET_middlemostPageIndex(state: IEditorState, index: number) {
     state.middlemostPageIndex = index
   },
@@ -370,8 +376,10 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj = { type: '', userId: '', assetId: '' }
   },
   SET_backgroundImage(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
-    state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
+    // state.pages[updateInfo.pageIndex].backgroundImage.config = updateInfo.config
+    const { pageIndex, config } = updateInfo
+    Object.assign(state.pages[pageIndex].backgroundImage.config, config)
+    state.pages[pageIndex].backgroundColor = '#ffffff'
   },
   SET_backgroundImageSrc(state: IEditorState, updateInfo: { pageIndex: number, srcObj: any, previewSrc: '' }) {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
@@ -385,9 +393,9 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
   },
-  SET_backgroundImageSize(state: IEditorState, updateInfo: { pageIndex: number, imageSize: { width: number, height: number } }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgWidth = updateInfo.imageSize.width
-    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgHeight = updateInfo.imageSize.height
+  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: Partial<IImageStyle> }) {
+    const { pageIndex, styles } = updateInfo
+    Object.assign(state.pages[pageIndex].backgroundImage.config.styles, styles)
   },
   SET_backgroundImageMode(state: IEditorState, updateInfo: { pageIndex: number, newDisplayMode: boolean }) {
     state.pages[updateInfo.pageIndex].backgroundImage.newDisplayMode = updateInfo.newDisplayMode
@@ -402,9 +410,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_backgroundOpacity(state: IEditorState, updateInfo: { pageIndex: number, opacity: number }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = updateInfo.opacity
-  },
-  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: any }) {
-    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.styles, updateInfo.styles)
   },
   REMOVE_background(state: IEditorState, updateInfo: { pageIndex: number }) {
     state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
@@ -421,7 +426,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean }) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string }) {
     state.currDraggedPhoto.srcObj = {
       ...state.currDraggedPhoto.srcObj,
       ...photo.srcObj
@@ -431,6 +436,7 @@ const mutations: MutationTree<IEditorState> = {
       ...photo.styles
     }
     state.currDraggedPhoto.isPreview = photo.isPreview
+    state.currDraggedPhoto.previewSrc = photo.previewSrc
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value
@@ -475,7 +481,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph | SrcObj } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
-    if (!groupLayer.layers) return
+    if (!groupLayer || !groupLayer.layers) return
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v
@@ -635,8 +641,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_currSubSelectedInfo(state: IEditorState, data: { index: number, type: string }) {
     Object.assign(state.currSubSelectedInfo, data)
   },
-  SET_isColorPickerOpened(state: IEditorState, isOpened: boolean) {
-    state.isColorPickerOpened = isOpened
+  SET_isColorPanelOpened(state: IEditorState, isOpened: boolean) {
+    state.isColorPanelOpened = isOpened
   },
   SET_currSelectedResInfo(state: IEditorState, data: { userName: string, userLink: string, vendor: string, tags: string[] }) {
     state.currSelectedResInfo = data
@@ -842,6 +848,8 @@ export default new Vuex.Store({
     brandkit,
     unsplash,
     bgRemove,
-    file
+    file,
+    payment,
+    shadow
   }
 })

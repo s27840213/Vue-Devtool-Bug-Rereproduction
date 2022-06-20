@@ -109,6 +109,7 @@ export interface IListServiceParams {
   keyword?: string
   pageIndex?: number
   listAll?: 0 | 1
+  listCategory?: 0 | 1
   fontList?: 0 | 1 | 2
   aspect?: string
   width?: number
@@ -378,4 +379,44 @@ export interface IUploadMissingDesign {
   token: string,
   type: 'svg' | 'background' | 'asset-image' | 'asset-font' | 'font',
   design_id: string
+}
+
+export interface IGetImageSize {
+  token: string,
+  type: string,
+  asset_index?: number,
+  team_id?: string,
+  asset_id?: string,
+  key_id?: string,
+  cache: boolean
+}
+export interface IImageSize {
+  flag: number,
+  msg: string,
+  width: number,
+  height: number
+}
+
+export interface IAssetTemplate {
+  // For /list-design?type=template api raw data, not processed. ITemplate is processed.
+  id: string
+  type: number
+  ver: number
+  plan: number
+  group_id: string
+  content_ids: {
+    id: string
+    ver: number
+    width: number
+    height: number
+    themes: string[]
+  }[]
+  match_cover: {
+    id: string
+    ver: number
+    width: number
+    height: number
+    theme_id: string
+  }
+  group_type: number
 }

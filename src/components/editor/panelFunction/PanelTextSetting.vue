@@ -33,14 +33,15 @@
               :style="{'background-color': isValidHexColor(props.color) ? props.color : '#000000', 'border': props.color === '#FFFFFF' ? '1px solid #EEEFF4' : ''}")
         div(class="text-setting__color__hex text-left overflow-hidden")
           button(class="text-setting__range-input-button input-color" @click="handleColorModal")
-            input(class="body-2 text-gray-2 record-selection input-color" type="text" ref="input-color"
+            input(class="body-3 text-gray-2 record-selection input-color" type="text" ref="input-color"
             :value="props.color" @change="inputColor")
             //-  v-model.lazy="props.color v-model.lazy="props.color
-        svg-icon(class="text-setting__color__copy"
-                iconName="copy"
-                iconWidth="16px"
-                iconColor="gray-4"
-                @click.native="copyColor")
+        div(class="text-setting__color__copy-wrapper")
+          svg-icon(class="text-setting__color__copy"
+                  iconName="copy"
+                  iconWidth="16px"
+                  iconColor="gray-4"
+                  @click.native="copyColor")
       div(class="action-bar action-bar--small flex-evenly")
         svg-icon(class="pointer record-selection btn-lh feature-button p-5"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
@@ -290,25 +291,8 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = LayerUtils
-
-      switch (currLayer.type) {
-        case 'text':
-          tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-          break
-        case 'tmp':
-        case 'group':
-          if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
-            TextPropUtils.applyPropsToAll('span', { color }, layerIndex, subLayerIdx)
-            if (subLayerIdx !== -1) {
-              tiptapUtils.updateHtml()
-            }
-          } else {
-            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
-          }
-      }
-      textEffectUtils.refreshColor()
-      TextPropUtils.updateTextPropsState({ color })
+      const hex = tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color)
+      tiptapUtils.spanStyleHandler('color', hex)
     },
     handleValueModal() {
       this.openValueSelector = !this.openValueSelector
@@ -320,11 +304,8 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      tiptapUtils.applySpanStyle('size', value)
-      tiptapUtils.agent(editor => {
-        LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        StepsUtils.record()
-      })
+      tiptapUtils.spanStyleHandler('size', value)
+      tiptapUtils.forceUpdate(true)
       TextPropUtils.updateTextPropsState({ fontSize: value.toString() })
       textEffectUtils.refreshSize()
     },
@@ -539,11 +520,8 @@ export default Vue.extend({
         LayerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', parseFloat(value))
-          tiptapUtils.agent(editor => {
-            LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-            StepsUtils.record()
-          })
+          tiptapUtils.spanStyleHandler('size', parseFloat(value))
+          tiptapUtils.forceUpdate(true)
           TextPropUtils.updateTextPropsState({ fontSize: value })
           textEffectUtils.refreshSize()
         })
@@ -551,36 +529,6 @@ export default Vue.extend({
     },
     setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
       TextUtils.setParagraphProp(prop, _value)
-    },
-    setOpacity(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidInt(value)) {
-        value = this.boundValue(parseInt(value), this.fieldRange.opacity.min, this.fieldRange.opacity.max)
-        if (!this.isGroup) {
-          if (this.currSelectedInfo.layers.length === 1) {
-            this.$store.commit('UPDATE_layerStyles', {
-              pageIndex: pageUtils.currFocusPageIndex,
-              layerIndex: this.currSelectedIndex,
-              styles: {
-                opacity: parseInt(value)
-              }
-            })
-          } else {
-            this.$store.commit('UPDATE_selectedLayersStyles', {
-              styles: {
-                opacity: parseInt(value)
-              }
-            })
-          }
-        } else {
-          this.$store.commit('UPDATE_groupLayerStyles', {
-            styles: {
-              opacity: parseInt(value)
-            }
-          })
-        }
-        TextPropUtils.updateTextPropsState({ opacity: parseInt(value) })
-      }
     },
     onBlur() {
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
@@ -632,14 +580,19 @@ export default Vue.extend({
       margin-top: 0px;
     }
   }
+  &__text-preview {
+    font-size: 14px;
+  }
   &__row1 {
     display: grid;
     grid-template-rows: 1fr;
     grid-template-columns: auto 1fr;
-    column-gap: 20px;
+    column-gap: 15px;
     box-sizing: border-box;
     position: relative;
     > div:nth-child(1) {
+      width: 135px;
+      box-sizing: border-box;
       > img {
         width: 100px;
       }
@@ -649,7 +602,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: 1fr;
     grid-template-columns: 3fr 2fr;
-    column-gap: 20px;
+    column-gap: 15px;
     position: relative;
   }
   &__row5 {
@@ -664,16 +617,15 @@ export default Vue.extend({
     align-items: center;
     border: 1px solid setColor(gray-4);
     border-radius: 3px;
-    width: 130px;
+    width: 135px;
     height: 50px;
-    gap: 3px;
     box-sizing: border-box;
     &__hex {
-      width: 62px;
       > button {
         padding: 0;
         > input {
           padding: 0;
+          text-align: center;
         }
       }
     }
@@ -682,6 +634,14 @@ export default Vue.extend({
       &:hover {
         color: setColor(gray-3);
       }
+    }
+    &__copy-wrapper {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 3px;
     }
   }
   &__color-picker {
@@ -727,6 +687,7 @@ export default Vue.extend({
   height: 100%;
   width: 42px;
   cursor: pointer;
+  margin-left: 9px;
   > svg {
     margin-top: 10px;
   }

@@ -8,11 +8,8 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @click.left.stop="onClickEvent($event)"
-            @drop.prevent="onDrop($event)"
             @dragenter="onDragEnter($event)"
-            @dragleave="onDragLeave($event)"
             @mouseenter="onFrameMouseEnter($event)"
-            @mouseleave="onFrameMouseLeave($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -70,6 +67,9 @@ import imageUtils from '@/utils/imageUtils'
 import formatUtils from '@/utils/formatUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
+import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -117,11 +117,15 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
+    ...mapState('shadow', ['uploadId', 'handleId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isProcessShadow: 'shadow/isProcessing',
+      isUploadImgShadow: 'shadow/isUploading',
+      isHandleShadow: 'shadow/isHandling'
     }),
     getLayerPos(): ICoordinate {
       return {
@@ -293,8 +297,17 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      this.isPrimaryActive = this.primaryLayer.active
+      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        groupUtils.deselect()
+        groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+        eventUtils.emit(PanelEvent.showPhotoShadow)
+        return
+      } else {
+        imageUtils.setImgControlDefault(false)
+      }
 
+      this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       if (this.type === 'tmp') return
@@ -341,7 +354,7 @@ export default Vue.extend({
 
       return {
         transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)` +
-        `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
+          `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
         width: `${this.config.styles.width}px`,
         height: `${this.config.styles.height}px`,
         'pointer-events': 'none'
@@ -351,7 +364,7 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
@@ -395,6 +408,10 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (this.isHandleShadow) {
+        return
+      }
+      imageUtils.setImgControlDefault(false)
       if (!this.isLocked) {
         this.setIsLayerDropdownsOpened(true)
         this.$nextTick(() => {
@@ -405,9 +422,12 @@ export default Vue.extend({
         })
       }
     },
-    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean }) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       this.isCurveText ? this.curveTextSizeRefresh(this.config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      if (payload.toRecord) {
+        StepsUtils.record()
+      }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
@@ -447,33 +467,76 @@ export default Vue.extend({
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     },
     onDragEnter(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.addEventListener('drop', this.onDrop)
       switch (this.type) {
         case 'frame':
-          this.getLayerType === 'image' && this.onFrameDragEnter(e)
+          if (this.getLayerType === 'image') {
+            this.onFrameDragEnter(e)
+            body.addEventListener('dragleave', this.onFrameDragLeave)
+          }
           return
         case 'group':
-          this.getLayerType === 'image' && this.dragUtils.onImageDragEnter(e, this.config as IImage)
+          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+          if (this.getLayerType === 'image') {
+            const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
+            if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
+              this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
+              body.addEventListener('dragleave', this.onDragLeave)
+            } else {
+              Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            }
+          }
       }
     },
     onDragLeave(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('drop', this.onDrop)
       switch (this.type) {
         case 'frame':
-          this.getLayerType === 'image' && this.onFrameDragLeave(e)
+          if (this.getLayerType === 'image') {
+            this.onFrameDragLeave(e)
+            body.removeEventListener('dragleave', this.onFrameDragLeave)
+          }
           return
         case 'group':
-          this.getLayerType === 'image' && this.dragUtils.onImageDragLeave(e)
+          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+          if (this.getLayerType === 'image') {
+            this.dragUtils.onImageDragLeave(e, this.pageIndex)
+            body.removeEventListener('dragleave', this.onDragLeave)
+          }
       }
     },
     onDrop(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener('drop', this.onDrop)
+      e.stopPropagation()
+      if (e.dataTransfer?.getData('data') && !this.currDraggedPhoto.srcObj.type) {
+        console.log(123)
+        this.dragUtils.itemOnDrop(e, this.pageIndex)
+      }
+
       if (!this.currDraggedPhoto.srcObj.type) {
         // Propagated to NuController.vue onDrop()
       } else {
         switch (this.type) {
           case 'frame':
-            this.getLayerType === 'image' && this.onFrameDrop(e)
+            if (this.getLayerType === 'image') {
+              body.removeEventListener('dragleave', this.onFrameDragLeave)
+              this.onFrameDrop(e)
+            }
             return
           case 'group':
-            this.getLayerType === 'image' && this.dragUtils.onImgDrop(e)
+            // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
+            if (this.getLayerType === 'image') {
+              if (!this.isHandleShadow) {
+                groupUtils.deselect()
+                groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+                LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+              }
+              eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+              body.removeEventListener('dragleave', this.onDragLeave)
+            }
         }
       }
     },
@@ -554,6 +617,9 @@ export default Vue.extend({
       if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto) {
         return
       }
+      if ((LayerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
+        return
+      }
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
@@ -593,6 +659,7 @@ export default Vue.extend({
           verticalFlip: currLayer.styles.verticalFlip
         })
         const controller = this.$refs.body as HTMLElement
+        controller.addEventListener('mouseleave', this.onFrameMouseLeave)
         controller.addEventListener('mouseup', this.onFrameMouseUp)
       }
     },
@@ -612,14 +679,10 @@ export default Vue.extend({
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           ...this.imgBuff.styles
         })
-
-        LayerUtils.updateLayerStyles(this.pageIndex, this.primaryLayerIndex, {
-          horizontalFlip: false,
-          verticalFlip: false
-        })
       }
       const controller = this.$refs.body as HTMLElement
       controller.removeEventListener('mouseup', this.onFrameMouseUp)
+      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
     },
     onFrameMouseUp(e: MouseEvent) {
       if (this.isDraggedPanelPhoto) return
@@ -633,6 +696,7 @@ export default Vue.extend({
       }
       const controller = this.$refs.body as HTMLElement
       controller.removeEventListener('mouseup', this.onFrameMouseUp)
+      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
     }
   }
 })

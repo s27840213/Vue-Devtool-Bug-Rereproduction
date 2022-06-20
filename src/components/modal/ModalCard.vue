@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="modal-card")
-    div(class="h-5 text-gray-1 mb-12")
+    div(class="text-H6 text-gray-2 mb-30")
       span {{modalInfo.title}}
-    div(class="modal-card__content f-h5 text-gray-1 mb-20")
+    div(class="modal-card__content body-SM text-gray-2 mb-30")
       template(v-if="!pending")
         span(v-for="text in modalInfo.content"
         @keydown.ctrl.67.exact.stop
@@ -23,7 +23,7 @@
           :style="modalInfo.cancelButton.style"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
       div(class="modal-card__close")
-        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'30px'"  @click.native="closePopup()")
+        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"  @click.native="closePopup()")
 </template>
 
 <script lang="ts">
@@ -68,28 +68,20 @@ export default Vue.extend({
   align-items: center;
   background-color: white;
   min-width: 350px;
-  padding-top: 45px;
-  padding-bottom: 35px;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding: 30px 20px;
   border-radius: 10px;
   &__close {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 30px;
-    height: 30px;
+    top: 6px;
+    right: 10px;
   }
 
   &__content {
-    width: 100%;
+    width: 396px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    // align-items: flex-start;
-    > span:nth-child(n + 1) {
-      margin-bottom: 4px;
-    }
+    text-align: left;
   }
 
   &__button {
@@ -97,9 +89,10 @@ export default Vue.extend({
     display: flex;
     justify-content: center;
     > button {
+      @include btn-LG;
       transition: background-color 0.3s;
-      border-radius: 5px;
-      max-width: 180px;
+      border-radius: 4px;
+      width: 320px;
     }
   }
 }

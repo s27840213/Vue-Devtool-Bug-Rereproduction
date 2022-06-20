@@ -27,6 +27,7 @@ export interface IUserModule {
   adminMode: boolean,
   isAuthenticated: boolean,
   account: string,
+  email: string
   upassUpdate: string,
   subscribe: number,
   userAssets: IUserAssetsData,
@@ -52,6 +53,7 @@ const getDefaultState = (): IUserModule => ({
   adminMode: true,
   isAuthenticated: false,
   account: '',
+  email: '',
   upassUpdate: '',
   subscribe: 1,
   userAssets: {
@@ -100,6 +102,12 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getAccount(state) {
     return state.account
+  },
+  getEmail(state) {
+    return state.email
+  },
+  getUname(state) {
+    return state.uname
   },
   getUpassUpdate(state) {
     return state.upassUpdate
@@ -276,7 +284,6 @@ const actions: ActionTree<IUserModule, unknown> = {
   },
   async loginSetup({ commit, dispatch }, { data }) {
     if (data.flag === 0) {
-      generalUtils.fbq('track', 'StartTrial')
       const newToken = data.data.token as string // token may be refreshed
       const uname = data.data.user_name
       const shortName = uname.substring(0, 1).toUpperCase()
@@ -300,6 +307,7 @@ const actions: ActionTree<IUserModule, unknown> = {
         role: data.data.role,
         roleRaw: data.data.roleRaw,
         account: data.data.account,
+        email: data.data.email,
         upassUpdate: data.data.upass_update,
         subscribe: data.data.subscribe,
         avatar: data.data.avatar,
@@ -315,6 +323,7 @@ const actions: ActionTree<IUserModule, unknown> = {
       }
       uploadUtils.setLoginOutput(data.data)
       commit('SET_TOKEN', newToken)
+      dispatch('payment/getBillingInfo', {}, { root: true })
       dispatch('getAllAssets', { token: newToken })
     } else {
       console.log('login failed')

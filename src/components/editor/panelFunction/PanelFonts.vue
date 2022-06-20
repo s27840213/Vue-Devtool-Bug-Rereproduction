@@ -79,7 +79,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getCategories()
+    this.getRecently()
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
@@ -88,18 +88,15 @@ export default Vue.extend({
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
-    ...mapState(
-      'font',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'preview2',
-        'keyword'
-      ]
-    ),
+    ...mapState('font', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'preview2',
+      'keyword'
+    ]),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('brandkit', {
@@ -227,42 +224,23 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('font',
-      [
-        'resetContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent',
-        'getMoreCategory'
-      ]
-    ),
-    ...mapActions('brandkit',
-      [
-        'fetchFonts',
-        'fetchMoreFonts'
-      ]
-    ),
+    ...mapActions('font', [
+      'resetContent',
+      'getTagContent',
+      'getRecently',
+      'getMoreContent',
+      'getMoreCategory'
+    ]),
+    ...mapActions('brandkit', [
+      'fetchFonts',
+      'fetchMoreFonts'
+    ]),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     closeFontsPanel() {
       this.resetContent()
       this.$emit('closeFontsPanel')
-    },
-    // TODO //
-    updateFontPreset(e: any) {
-      const target = e.target.files[0]
-      const fontName: string = target.name.split('.')[0]
-      const objectUrl = window.URL.createObjectURL(target)
-      const style = document.createElement('style')
-      style.innerHTML = `
-      @font-face {
-        font-family: ${fontName};
-        src: url(${objectUrl});
-      }
-    `
-      document.head.appendChild(style)
-      TextUtils.updateFontFace({ name: fontName, face: fontName, loaded: true })
     },
     handleLoadMore(moreType: string | undefined) {
       if (moreType === 'asset') {
@@ -274,7 +252,7 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       this.resetContent()
-      keyword ? this.getTagContent({ keyword }) : this.getCategories()
+      keyword ? this.getTagContent({ keyword }) : this.getRecently()
     },
     uploadFont() {
       uploadUtils.chooseAssets('font')

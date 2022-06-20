@@ -172,7 +172,7 @@ const actions: ActionTree<IPhotoState, unknown> = {
       })
     })
   },
-  initImages({ commit }, { imgs }: { 'imgs': [IUserImageContentData] }) {
+  initImages(context, { imgs }: { 'imgs': [IUserImageContentData] }) {
     if (state.initialized) {
       return
     }
@@ -263,13 +263,11 @@ const mutations: MutationTree<IPhotoState> = {
     state.editorViewImages[data[0].assetIndex] = data[0].urls
   },
   SET_UPLOADING_IMGS(state: IPhotoState, { id, adding, pageIndex }) {
+    const index = state.uploadingAssets.findIndex(e => e.id === id)
     if (adding) {
-      state.uploadingAssets.push({ id, pageIndex })
+      index === -1 && state.uploadingAssets.push({ id, pageIndex })
     } else {
-      const index = state.uploadingAssets.findIndex(e => e.id === id)
-      if (index !== -1) {
-        state.uploadingAssets.splice(index, 1)
-      }
+      index !== -1 && state.uploadingAssets.splice(index, 1)
     }
   }
 }

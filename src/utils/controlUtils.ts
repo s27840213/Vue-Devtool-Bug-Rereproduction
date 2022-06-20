@@ -1,6 +1,6 @@
 import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
-import { ILayer, IParagraph, IParagraphStyle, IShape, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
+import { IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'

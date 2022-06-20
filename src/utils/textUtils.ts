@@ -437,8 +437,7 @@ class TextUtils {
             : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
           decoration: spanEl.style.textDecorationLine,
           style: spanEl.style.fontStyle,
-          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color),
-          opacity: parseInt(spanEl.style.opacity)
+          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color)
         } as ISpanStyle
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
@@ -921,7 +920,8 @@ class TextUtils {
           }
         }
         paragraph.spans && Object.assign(result, { spans: this.initialParagraphsScale({ diff, scale, size }, paragraph.spans || []) })
-        paragraph.text && Object.assign(result, { text: paragraph.text })
+        typeof paragraph.text === 'string' && Object.assign(result, { text: paragraph.text })
+        typeof paragraph.spanStyle === 'string' && Object.assign(result, { spanStyle: paragraph.spanStyle })
         return result
       })
   }

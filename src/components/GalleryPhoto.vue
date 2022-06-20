@@ -37,6 +37,8 @@ import networkUtils from '@/utils/networkUtils'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import { FunctionPanelType } from '@/store/types'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -76,6 +78,7 @@ export default Vue.extend({
       getPageSize: 'getPageSize',
       getLayers: 'getLayers',
       checkedAssets: 'file/getCheckedAssets',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isAdmin: 'user/isAdmin'
     }),
     isUploading(): boolean {
@@ -119,6 +122,9 @@ export default Vue.extend({
         networkUtils.notifyNetworkError()
         return
       }
+      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        eventUtils.emit(PanelEvent.showPhotoShadow)
+      }
       if (this.isUploading) {
         e.preventDefault()
       } else {
@@ -145,27 +151,30 @@ export default Vue.extend({
           offsetY: 15
         })
 
-        const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
-        const imgPreload = new Image()
-        imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
-        const imgPreloadPre = new Image()
-        imgPreloadPre.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'pre'))
-        const imgPreloadNext = new Image()
-        imgPreloadNext.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize, 'next'))
+        const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)
+        const imgPreview = new Image()
+        imgPreview.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, previewSize))
+        imgPreview.onload = () => {
+          const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
+          const imgPreload = new Image()
+          imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
+        }
 
         this.setCurrDraggedPhoto({
           srcObj: {
             ...srcObj
           },
           styles: { width: photoWidth, height: photoHeight },
-          isPreview: this.isUploading
+          isPreview: this.isUploading,
+          previewsrc: this.previewSrc
         })
       }
     },
     dragEnd() {
       this.setCurrDraggedPhoto({
         srcObj: { type: '', assetId: '', userId: '' },
-        styles: { width: 0, height: 0 }
+        styles: { width: 0, height: 0 },
+        previewsrc: ''
       })
     },
     addImage(photo: IAssetPhoto) {
