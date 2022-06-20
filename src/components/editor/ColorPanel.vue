@@ -5,7 +5,7 @@
       ref="colorPanel")
     div(class="color-panel__header"
         :class="{'p-20': !noPadding}")
-      img(class="color-panel__btn"
+      img(v-if="showPanelBtn" class="color-panel__btn"
         :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
         @click="closePanel()")
       search-bar(:placeholder="$t('NN0093', {target: $t('NN0017')})"
@@ -91,6 +91,10 @@ export default Vue.extend({
     noPadding: {
       type: Boolean,
       default: false
+    },
+    showPanelBtn: {
+      type: Boolean,
+      default: true
     }
   },
   components: {

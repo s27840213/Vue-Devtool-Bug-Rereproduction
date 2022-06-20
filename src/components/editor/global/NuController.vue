@@ -69,7 +69,7 @@
           class="nu-controller__lock-icon"
           :style="lockIconStyles")
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
-          @click.native="MappingUtils.mappingIconAction('unlock')")
+          @click.native="MappingUtils.mappingIconAction('lock')")
     div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")

@@ -5,20 +5,26 @@
       div(class="mobile-panel__drag-bar"
         :class="{'visible-hidden': panelTitle !== ''}")
       div
-        svg-icon(class="mobile-panel__left-btn"
-          :class="{'visible-hidden': !showLeftBtn}"
-          :iconName="leftBtnName"
-          :iconColor="'white'"
-          :iconWidth="'20px'"
-          @click.native="leftButtonAction")
+        div(class="mobile-panel__btn mobile-panel__left-btn"
+            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn}")
+          svg-icon(
+            class="click-disabled"
+            :iconName="leftBtnName"
+            :iconColor="'white'"
+            :iconWidth="'20px'")
+          div(class="mobile-panel__btn-click-zone"
+            @click="leftButtonAction")
         span(class="mobile-panel__title"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
-        svg-icon(class="mobile-panel__right-btn"
-          :class="{'visible-hidden': !showRightBtn}"
-          :iconName="rightBtnName"
-          :iconColor="'white'"
-          :iconWidth="'20px'"
-          @click.native="rightButtonAction")
+        div(class="mobile-panel__btn mobile-panel__right-btn"
+            :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
+          svg-icon(
+            class="click-disabled"
+            :iconName="rightBtnName"
+            :iconColor="'white'"
+            :iconWidth="'20px'")
+          div(class="mobile-panel__btn-click-zone"
+            @click="rightButtonAction")
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
@@ -297,6 +303,20 @@ export default Vue.extend({
       justify-content: space-between;
       align-items: center;
     }
+  }
+
+  &__btn {
+    position: relative;
+  }
+
+  &__btn-click-zone {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    top: 0;
+    left: 0;
+    transform: translate(-4px, -4px);
+    border-radius: 50%;
   }
 
   &__bottom-section {

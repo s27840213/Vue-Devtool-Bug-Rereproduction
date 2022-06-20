@@ -6,7 +6,7 @@
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
       @final="handleChangeStop")
-    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" @openColorPicker="openColorPicker")
+    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" :showPanelBtn="false" @openColorPicker="openColorPicker")
     div(v-if="showDocumentColors" class="panel-color__document-colors")
       div(v-if="hasMultiColors"
         class="panel-color__document-color"

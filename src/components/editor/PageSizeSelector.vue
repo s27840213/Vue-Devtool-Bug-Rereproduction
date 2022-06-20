@@ -90,18 +90,14 @@ export default Vue.extend({
     RadioBtn
   },
   mounted() {
-    this.fetchLayouts()
     this.pageWidth = this.currentPageWidth
     this.pageHeight = this.currentPageHeight
   },
   data() {
     return {
-      formatList: [] as ILayout[],
-      recentlyUsed: [] as ILayout[],
       selectedFormat: '',
       pageWidth: '' as string | number,
       pageHeight: '' as string | number,
-      isLayoutReady: false,
       isLocked: true
     }
   },
@@ -151,6 +147,33 @@ export default Vue.extend({
     },
     isFormatApplicable(): boolean {
       return this.selectedFormat === 'custom' ? this.isCustomValid : (this.selectedFormat !== '')
+    },
+    formatList(): ILayout[] {
+      const targetCategory = this.categories.find((category: IListServiceContentData) => {
+        return category.title === `${this.$t('NN0025')}`
+      })
+      return targetCategory ? targetCategory.list.map((item: any) => ({
+        id: item.id,
+        width: item.width ?? 0,
+        height: item.height ?? 0,
+        title: item.title ?? '',
+        description: item.description ?? ''
+      })) : []
+    },
+    recentlyUsed(): ILayout[] {
+      const targetCategory = this.categories.find((category: any) => {
+        return category.title === `${this.$t('NN0024')}`
+      })
+      return targetCategory ? targetCategory.list.map((item: any) => ({
+        id: item.id,
+        width: item.width ?? 0,
+        height: item.height ?? 0,
+        title: item.title ?? '',
+        description: item.description ?? ''
+      })) : []
+    },
+    isLayoutReady(): boolean {
+      return this.formatList.length !== 0
     }
   },
   methods: {

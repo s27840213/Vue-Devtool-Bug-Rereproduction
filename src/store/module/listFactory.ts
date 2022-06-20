@@ -169,7 +169,7 @@ export default function (this: any) {
         captureException(error)
       }
     },
-    resetContent ({ commit }) {
+    resetContent({ commit }) {
       commit(SET_STATE, {
         content: {},
         categories: [],
@@ -201,7 +201,7 @@ export default function (this: any) {
   }
 
   const mutations: MutationTree<IListModuleState> = {
-    [SET_STATE] (state: IListModuleState, data: Partial<IListModuleState>) {
+    [SET_STATE](state: IListModuleState, data: Partial<IListModuleState>) {
       const newState = data || getDefaultState()
       const keys = Object.keys(newState) as Array<keyof IListModuleState>
       keys
@@ -211,12 +211,12 @@ export default function (this: any) {
           }
         })
     },
-    SET_RECENTLY (state: IListModuleState, objects: IListServiceData) {
+    SET_RECENTLY(state: IListModuleState, objects: IListServiceData) {
       state.categories = objects.content.concat(state.categories) || []
-      if (objects.next_page)state.nextPage = objects.next_page as number
+      if (objects.next_page) state.nextPage = objects.next_page as number
       state.pending = false
     },
-    SET_CATEGORIES (state: IListModuleState, objects: IListServiceData) {
+    SET_CATEGORIES(state: IListModuleState, objects: IListServiceData) {
       state.categories = state.categories.concat(objects.content) || []
       state.host = objects.host?.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
       state.data = objects.data
@@ -225,7 +225,7 @@ export default function (this: any) {
       state.nextCategory = objects.next_page as number
       state.pending = false
     },
-    [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
+    [SET_CONTENT](state: IListModuleState, objects: IListServiceData) {
       const {
         content = [],
         host = '',
@@ -249,7 +249,7 @@ export default function (this: any) {
       state.nextPage = nextPage
       state.pending = false
     },
-    [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
+    [SET_MORE_CONTENT](state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
       const newList = objects.content.flatMap(content => content.list)
       state.content = {
@@ -262,7 +262,7 @@ export default function (this: any) {
   }
 
   const getters: GetterTree<IListModuleState, any> = {
-    nextParams (state) {
+    nextParams(state) {
       const { nextPage, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
       return {
@@ -275,7 +275,7 @@ export default function (this: any) {
         cache: needCache
       }
     },
-    hasNextPage (state) {
+    hasNextPage(state) {
       return state.nextPage && state.nextPage > 0
     }
   }

@@ -54,7 +54,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -110,6 +110,7 @@ export default Vue.extend({
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
     // window.addEventListener('keyup', this.handleKeydown)
+    this.getCategories()
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
@@ -248,6 +249,11 @@ export default Vue.extend({
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInGestureMode: 'SET_inGestureMode'
     }),
+    ...mapActions('layouts',
+      [
+        'getCategories'
+      ]
+    ),
     brushCursorStyles() {
       return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
     },
