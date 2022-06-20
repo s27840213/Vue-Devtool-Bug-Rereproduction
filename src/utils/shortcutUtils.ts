@@ -191,7 +191,9 @@ class ShortcutUtils {
             chainedCommands = chainedCommands.enter()
           }
         })
+        editor.storage.nuTextStyle.pasting = true
         chainedCommands.run()
+        editor.storage.nuTextStyle.pasting = false
         LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
       })
     })
