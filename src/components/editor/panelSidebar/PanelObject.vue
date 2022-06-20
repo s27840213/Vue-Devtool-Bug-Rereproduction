@@ -40,6 +40,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -54,17 +55,14 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(
-      'objects',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapState('objects', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'keyword'
+    ]),
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }
@@ -98,7 +96,11 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.listCategories.concat(this.listResult)
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+      return list
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0003', 1) })}` : ''
@@ -108,7 +110,7 @@ export default Vue.extend({
     (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
       this.scrollTop = (event.target as HTMLElement).scrollTop
     })
-    this.getCategories()
+    this.getRecAndCate()
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -122,28 +124,26 @@ export default Vue.extend({
     this.resetContent()
   },
   methods: {
-    ...mapActions('objects',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('objects', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecAndCate',
+      'getMoreContent'
+    ]),
     handleSearch(keyword: string) {
+      this.resetContent()
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        this.resetContent()
-        this.getCategories()
+        this.getRecAndCate()
       }
     },
     handleCategorySearch(keyword: string) {
-      keyword ? this.getContent({ keyword }) : this.resetContent()
+      this.resetContent()
+      this.getContent({ keyword })
     },
     handleLoadMore() {
-      console.log('object load more')
       this.getMoreContent()
     },
     handleScrollTop(event: Event) {

@@ -397,12 +397,9 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
-    ...mapState(
-      'layouts',
-      [
-        'categories'
-      ]
-    ),
+    ...mapState('layouts', [
+      'categories'
+    ]),
     ...mapGetters({
       getPage: 'getPage',
       token: 'user/getToken',
@@ -450,11 +447,9 @@ export default Vue.extend({
       setCurrActivePageIndex: 'SET_currActivePageIndex',
       setIsloading: 'SET_isGlobalLoading'
     }),
-    ...mapActions('layouts',
-      [
-        'getCategories'
-      ]
-    ),
+    ...mapActions('layouts', [
+      'getRecently'
+    ]),
     getSelectedFormat(): ILayout | undefined {
       if (this.selectedFormat === 'custom') {
         if (!this.isCustomValid) return undefined
@@ -832,7 +827,7 @@ export default Vue.extend({
       this.isLayoutReady = false
       this.formatList = []
       this.recentlyUsed = []
-      this.getCategories().then(() => {
+      this.getRecently().then(() => {
         for (const category of this.categories as IListServiceContentData[]) {
           if (category.title === `${this.$t('NN0025')}`) {
             this.formatList = category.list.map(item => ({
