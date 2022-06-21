@@ -60,6 +60,8 @@ export default Vue.extend({
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo', disabled: true },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
+        { icon: 'removed-bg', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow' },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object', disabled: true }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,

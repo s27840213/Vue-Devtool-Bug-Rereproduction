@@ -56,6 +56,8 @@ import PanelResize from '@/components/editor/panelMobile/PanelResize.vue'
 import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
+import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
+import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 import { mapGetters } from 'vuex'
@@ -101,7 +103,9 @@ export default Vue.extend({
     PopupDownload,
     PanelMore,
     PanelColor,
-    PanelTextEffect
+    PanelAdjust,
+    PanelTextEffect,
+    PanelPhotoShadow
   },
   data() {
     return {
@@ -116,13 +120,16 @@ export default Vue.extend({
       inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'resize'].includes(this.currActivePanel)
+      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'adjust', 'photo-shadow'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
     },
     halfSize(): boolean {
       return ['fonts'].includes(this.currActivePanel)
+    },
+    maxHalfSize(): boolean {
+      return ['adjust', 'photo-shadow'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -150,11 +157,15 @@ export default Vue.extend({
       return this.currActivePanel === 'crop'
     },
     panelStyle(): { [index: string]: string } {
+      const heightStyle = {
+        ...(this.maxHalfSize && { 'max-height': '50%' }),
+        ...(!this.maxHalfSize && { height: this.halfSize ? '50%' : this.fixSize ? 'initial' : '90%' })
+      }
       return {
-        height: this.halfSize ? '50%' : this.fixSize ? 'initial' : '90%',
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-        ...(this.fixSize && { 'max-height': '80%' })
+        ...(this.fixSize && { 'max-height': '80%' }),
+        ...heightStyle
       }
     },
     dynamicBindProps(): { [index: string]: any } {

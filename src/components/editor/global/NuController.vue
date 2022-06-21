@@ -161,7 +161,10 @@ import mathUtils from '@/utils/mathUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+<<<<<<< HEAD
+=======
 import i18n from '@/i18n'
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -641,11 +644,15 @@ export default Vue.extend({
     hintStyles() {
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
+<<<<<<< HEAD
+    moveStart(event: MouseEvent | PointerEvent) {
+=======
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
 
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
       if (this.isProcessImgShadow && this.processId.id !== this.config.id) {
         return
       } else {
@@ -654,6 +661,8 @@ export default Vue.extend({
         }
         ImageUtils.setImgControlDefault(false)
       }
+<<<<<<< HEAD
+=======
 
       if (this.isTouchDevice && !this.isActive && !this.isLocked) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
@@ -662,6 +671,7 @@ export default Vue.extend({
         return
       }
 
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
       this.movingByControlPoint = false
       const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
       // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
@@ -799,7 +809,11 @@ export default Vue.extend({
         }
       }
     },
+<<<<<<< HEAD
+    movingHandler(e: MouseEvent | TouchEvent) {
+=======
     movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -824,6 +838,15 @@ export default Vue.extend({
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
+<<<<<<< HEAD
+    moveEnd(e: MouseEvent) {
+      this.setMoving(false)
+      if (this.isActive) {
+        const posDiff = {
+          x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
+          y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
+        }
+=======
     moveEnd(e: MouseEvent | TouchEvent) {
       if (!this.isDoingGestureAction && !this.isActive) {
         GroupUtils.deselect()
@@ -837,16 +860,20 @@ export default Vue.extend({
 
       this.setMoving(false)
       if (this.isActive) {
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
         // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
         //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
         //   //   GroupUtils.deselect()
         //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
         //   // }
         // }
+<<<<<<< HEAD
+=======
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
         if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })

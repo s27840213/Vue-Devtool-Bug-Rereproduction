@@ -14,7 +14,8 @@ const mobileHash = {
 }
 
 export enum PanelEvent {
-  showPhotoShadow = 'showPhotoShadow'
+  showPhotoShadow = 'showPhotoShadow',
+  showMobilePhotoShadow = 'showMobilePhotoShadow'
 }
 
 export enum ImageEvent {

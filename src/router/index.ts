@@ -220,11 +220,19 @@ const routes: Array<RouteConfig> = [
     path: 'mobile-typing',
     name: 'MobileTextTyping',
     component: MobileTextTyping
+<<<<<<< HEAD
+  }, {
+    path: 'pricing',
+    name: 'Pricing',
+    component: Pricing
+
+=======
   },
   {
     path: 'pricing',
     name: 'Pricing',
     component: Pricing
+>>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
   }
 ]
 

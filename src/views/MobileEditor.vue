@@ -47,6 +47,7 @@ import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import PagePreview from '@/components/editor/PagePreview.vue'
+import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -71,6 +72,11 @@ export default Vue.extend({
       showExtraColorPanel: false,
       ColorEventType
     }
+  },
+  mounted() {
+    eventUtils.on(PanelEvent.showMobilePhotoShadow, () => {
+      this.currActivePanel = 'photo-shadow'
+    })
   },
   computed: {
     ...mapState({
