@@ -1,3 +1,7 @@
+/**
+ * @Document -https://www.notion.so/vivipic/Vivipic-78df91b4ed454ae1867e01e9a6b21a87
+ */
+
 import store from '@/store'
 import Vue from 'vue'
 
@@ -15,15 +19,14 @@ class FbPixelUtils {
   startTrail(trailTime: number) {
     // trail time: 14 days
     this.fbq('track', 'StartTrial', {
-      value: '0.00', currency: 'USD', predicted_ltv: `${trailTime}`
+      value: '0.00', currency: 'USD', predicted_ltv: '0.00'
     })
   }
 
   subscribe(isYearlyPlany: boolean) {
     // month : 8.99 usd (269 TWD), year: 79.99 usd (2388 TWD)
     const price = isYearlyPlany ? 79.99 : 8.99
-    const subscribeTime = isYearlyPlany ? 365 : 30
-    this.fbq('track', 'Subscribe', { value: `${price}`, currency: 'USD', predicted_ltv: `${subscribeTime}` })
+    this.fbq('track', 'Subscribe', { value: `${price}`, currency: 'USD', predicted_ltv: `${price}` })
   }
 }
 

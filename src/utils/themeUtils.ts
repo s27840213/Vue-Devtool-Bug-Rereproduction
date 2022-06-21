@@ -36,8 +36,7 @@ class ThemeUtils {
       }, (keyword: string, locale: string) => {
         store.dispatch('templates/getContent', { keyword, locale })
       }, async () => {
-        await store.dispatch('templates/getCategories')
-        store.dispatch('templates/getContent')
+        store.dispatch('templates/getRecAndCate')
       })
   }
 

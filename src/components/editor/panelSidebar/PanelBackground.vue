@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
@@ -82,22 +82,22 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(
-      'background',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapState('background', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'keyword'
+    ]),
     ...mapGetters({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultBgColors',
       getBackgroundColor: 'getBackgroundColor'
     }),
+    keywordLabel():string {
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
     currBackgroundColor(): string {
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
     },
@@ -145,9 +145,14 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.defaultBackgroundColors
-        .concat(this.listCategories)
-        .concat(this.listResult)
+      const list = generalUtils.deepCopy(
+        this.defaultBackgroundColors
+          .concat(this.listCategories)
+          .concat(this.listResult))
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+      return list
     },
     currentPageColor(): string {
       const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
@@ -173,10 +178,7 @@ export default Vue.extend({
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        await this.getCategories()
-        this.getContent()
-      })
+      this.getRecAndCate)
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -196,15 +198,13 @@ export default Vue.extend({
     this.resetContent()
   },
   methods: {
-    ...mapActions('background',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('background', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecAndCate',
+      'getMoreContent'
+    ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor'
     }),
@@ -230,8 +230,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        await this.getCategories()
-        this.getContent()
+        this.getRecAndCate()
       }
     },
     handleCategorySearch(keyword: string, locale = '') {

@@ -93,12 +93,9 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState(
-      'layouts',
-      [
-        'categories'
-      ]
-    ),
+    ...mapState('layouts', [
+      'categories'
+    ]),
     isMobile(): boolean {
       return document.body.clientWidth / document.body.clientHeight < 1
     },
@@ -137,11 +134,9 @@ export default Vue.extend({
     ...mapGetters({
       isLogin: 'user/isLogin'
     }),
-    ...mapActions('layouts',
-      [
-        'getCategories'
-      ]
-    ),
+    ...mapActions('layouts', [
+      'getRecently'
+    ]),
     toggleLock() {
       if (this.isLockDisabled) {
         return
@@ -188,7 +183,7 @@ export default Vue.extend({
     fetchLayouts() {
       this.isLayoutReady = false
       this.recentlyUsed = []
-      this.getCategories().then(() => {
+      this.getRecently().then(() => {
         for (const category of this.categories as IListServiceContentData[]) {
           if (category.title === `${this.$t('NN0024')}`) {
             this.recentlyUsed = category.list.map(item => ({

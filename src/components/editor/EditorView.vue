@@ -72,6 +72,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -200,7 +201,8 @@ export default Vue.extend({
       prevScrollPos: 'bgRemove/getPrevScrollPos',
       getInInGestureMode: 'getInGestureToolMode',
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      isSettingScaleRatio: 'getIsSettingScaleRatio'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -314,13 +316,14 @@ export default Vue.extend({
        * The following function sets focus on the page, which will break the functionality of a text editor (e.g. composition).
        * So prevent changing focus when a text editor is focused.
        */
-      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.())
+      pageUtils.findCentralPageIndexInfo(tiptapUtils.editor?.view?.hasFocus?.() || this.isSettingScaleRatio)
     },
     selectEnd() {
       if (this.isSelecting) {
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           imageUtils.setImgControlDefault(false)
         }
       }

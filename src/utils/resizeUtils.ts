@@ -141,23 +141,31 @@ class ResizeUtils {
 
   scaleBackground(pageIndex: number, page: IPage, scale: number) {
     pageUtils.updateBackgroundImagePos(pageIndex, page.backgroundImage.posX * scale, page.backgroundImage.posY * scale)
-    pageUtils.updateBackgroundImageSize(
-      pageIndex,
-      page.backgroundImage.config.styles.imgWidth * scale,
-      page.backgroundImage.config.styles.imgHeight * scale
+    const width = page.backgroundImage.config.styles.imgWidth * scale
+    const height = page.backgroundImage.config.styles.imgHeight * scale
+    pageUtils.updateBackgroundImageStyles(
+      pageIndex, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      }
     )
   }
 
   centerBackground(pageIndex: number, page: IPage, format: { width: number, height: number }) {
     const { width, height, posX, posY } = imageUtils.adaptToSize({
-      width: page.backgroundImage.config.styles.initWidth,
-      height: page.backgroundImage.config.styles.initHeight
+      width: page.backgroundImage.config.styles.initWidth || page.backgroundImage.config.styles.width,
+      height: page.backgroundImage.config.styles.initHeight || page.backgroundImage.config.styles.height
     }, format)
     pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
-    pageUtils.updateBackgroundImageSize(
-      pageIndex,
-      width,
-      height
+    pageUtils.updateBackgroundImageStyles(
+      pageIndex, {
+        width,
+        height,
+        imgWidth: width,
+        imgHeight: height
+      }
     )
   }
 

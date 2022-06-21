@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { throttle } from 'lodash'
+import { throttle, some } from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -26,8 +26,12 @@ export default Vue.extend({
   },
   mounted () {
     this.intersectionObserver = new IntersectionObserver(
-      ([evt]) => evt.isIntersecting && this.handleCallback(),
-      {
+      // If element is created when it is intersecting,
+      // there will be two entries in var `entries`.
+      // So if any of entry is true, call callback.
+      (entries) => {
+        if (some(entries, ['isIntersecting', true])) this.handleCallback()
+      }, {
         root: document.querySelector(this.target),
         rootMargin: this.rootMargin
       }

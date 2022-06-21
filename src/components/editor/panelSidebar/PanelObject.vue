@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="isAdmin" class="panel-objects-2html")
       input(type="text" placeholder="項目網址" v-model="panelParams")
@@ -70,6 +70,9 @@ export default Vue.extend({
       'pending',
       'keyword'
     ]),
+    keywordLabel():string {
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }
@@ -103,7 +106,11 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.listCategories.concat(this.listResult)
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+      return list
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0003', 1) })}` : ''
@@ -117,7 +124,7 @@ export default Vue.extend({
     generalUtils.panelInit('object',
       this.handleSearch,
       this.handleCategorySearch,
-      this.getCategories
+      this.getRecAndCate
     )
   },
   activated() {
@@ -136,24 +143,23 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
-      'getCategories',
+      'getRecAndCate',
       'getMoreContent'
     ]),
     handleSearch(keyword: string) {
+      this.resetContent()
       if (keyword) {
         this.panelParams = `http://dev1.vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getTagContent({ keyword })
       } else {
-        this.resetContent()
-        this.getCategories()
+        this.getRecAndCate()
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
+      this.resetContent()
       if (keyword) {
         this.panelParams = `http://dev1.vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getContent({ keyword, locale })
-      } else {
-        this.resetContent()
       }
     },
     handleLoadMore() {

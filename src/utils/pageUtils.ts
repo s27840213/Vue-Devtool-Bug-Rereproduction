@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
@@ -213,14 +213,10 @@ class PageUtils {
     })
   }
 
-  updateBackgroundImageSize(pageIndex: number, width: number, height: number, scale?: number): void {
-    store.commit('SET_backgroundImageSize', {
+  updateBackgroundImageStyles(pageIndex: number, styles: Partial<IImageStyle>): void {
+    store.commit('SET_backgroundImageStyles', {
       pageIndex: pageIndex,
-      imageSize: {
-        width,
-        height,
-        scale
-      }
+      styles
     })
   }
 

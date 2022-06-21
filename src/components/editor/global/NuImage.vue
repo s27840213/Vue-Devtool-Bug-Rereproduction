@@ -6,7 +6,7 @@
       class="shadow__canvas-wrapper"
       :style="canvasWrapperStyle")
       canvas(ref="canvas")
-    div(v-if="shadowSrc"
+    div(v-if="shadowSrc && !config.isFrameImg"
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
@@ -70,6 +70,7 @@ import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import stepsUtils from '@/utils/stepsUtils'
 import errorHandle from '@/utils/errorHandleUtils'
 import groupUtils from '@/utils/groupUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -104,6 +105,7 @@ export default Vue.extend({
               subLayerIdx: this.subLayerIndex
             }, { isTransparent })
             isTransparent && this.redrawShadow(true)
+            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           }
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
           img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
@@ -221,7 +223,8 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-      isUploadingShadowImg: 'shadow/isUploading'
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
@@ -237,12 +240,12 @@ export default Vue.extend({
       const { inheritStyle = {} } = this
       return this.showCanvas ? {
         width: `${width}px`,
-        height: `${height}px`,
-        ...inheritStyle
+        height: `${height}px`
+        // ...inheritStyle
       } : {
         // Fix the safari rendering bug, add the following code can fix it...
-        transform: 'translate(0,0)',
-        ...inheritStyle
+        transform: 'translate(0,0)'
+        // ...inheritStyle
       }
     },
     svgImageWidth(): number {
@@ -332,8 +335,7 @@ export default Vue.extend({
         return {}
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      const { scale } = this.config.styles
+      const { horizontalFlip, verticalFlip, scale } = this.config.styles
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
@@ -597,6 +599,7 @@ export default Vue.extend({
         case ShadowEffectType.blur: {
           if (shadowBuff.canvasShadowImg.shadow && shadowBuff.canvasShadowImg.shadow.src === this.src) {
             imageShadowUtils.drawShadow(canvas, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
+              pageId: pageUtils.getPage(this.pageIndex).id,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH,
               layerInfo
@@ -606,6 +609,7 @@ export default Vue.extend({
             img.crossOrigin = 'anonymous'
             img.onload = () => {
               imageShadowUtils.drawShadow(canvas, img, this.config, {
+                pageId: pageUtils.getPage(this.pageIndex).id,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
                 layerInfo,
@@ -622,6 +626,7 @@ export default Vue.extend({
         case ShadowEffectType.imageMatched: {
           if (shadowBuff.canvasShadowImg.imageMatched && shadowBuff.canvasShadowImg.imageMatched.src === this.src) {
             imageShadowUtils.drawImageMatchedShadow(canvas, shadowBuff.canvasShadowImg.imageMatched, this.config, {
+              pageId: pageUtils.getPage(this.pageIndex).id,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH,
               layerInfo
@@ -632,6 +637,7 @@ export default Vue.extend({
             img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             img.onload = () => {
               imageShadowUtils.drawImageMatchedShadow(canvas, img, this.config, {
+                pageId: pageUtils.getPage(this.pageIndex).id,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
                 layerInfo,
@@ -645,6 +651,7 @@ export default Vue.extend({
         case ShadowEffectType.floating: {
           if (shadowBuff.canvasShadowImg.floating && shadowBuff.canvasShadowImg.floating.src === this.src) {
             imageShadowUtils.drawFloatingShadow(canvas, shadowBuff.canvasShadowImg.floating, this.config, {
+              pageId: pageUtils.getPage(this.pageIndex).id,
               layerInfo,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH
@@ -654,6 +661,7 @@ export default Vue.extend({
             img.crossOrigin = 'anonymous'
             img.onload = () => {
               imageShadowUtils.drawFloatingShadow(canvas, img, this.config, {
+                pageId: pageUtils.getPage(this.pageIndex).id,
                 layerInfo,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
@@ -749,7 +757,7 @@ export default Vue.extend({
             .then(() => {
               imageShadowUtils.updateShadowSrc(this.layerInfo, {
                 ...(this.config as IImage).styles.shadow.srcObj,
-                // only used to make vue update the value, this userId is not meaningful
+                // only used to make Vue update the value, this userId is not meaningful
                 userId: 'ver=' + generalUtils.generateRandomString(8)
               })
             })

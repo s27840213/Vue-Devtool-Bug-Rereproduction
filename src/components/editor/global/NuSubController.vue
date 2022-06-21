@@ -69,6 +69,8 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import i18n from '@/i18n'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   props: {
@@ -296,14 +298,11 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
-      // if (this.isProcessShadow || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        if (!this.isProcessShadow) {
-          groupUtils.deselect()
-          groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
-          LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-          eventUtils.emit(PanelEvent.showPhotoShadow)
-        }
+        groupUtils.deselect()
+        groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
+        LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+        eventUtils.emit(PanelEvent.showPhotoShadow)
         return
       } else {
         imageUtils.setImgControlDefault(false)
@@ -366,7 +365,7 @@ export default Vue.extend({
       const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
       return {
         transformOrigin: '0px 0px',
-        transform: `scale(${this.type === 'frame' ? scale : 1})`,
+        transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
@@ -482,9 +481,12 @@ export default Vue.extend({
           // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           if (this.getLayerType === 'image') {
             const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-            if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
+            if (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw)) {
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
+            } else {
+              Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              body.removeEventListener('drop', this.onDrop)
             }
           }
       }
@@ -510,27 +512,49 @@ export default Vue.extend({
     onDrop(e: DragEvent) {
       const body = this.$refs.body as HTMLElement
       body.removeEventListener('drop', this.onDrop)
+      e.stopPropagation()
+      if (e.dataTransfer?.getData('data') && !this.currDraggedPhoto.srcObj.type) {
+        this.dragUtils.itemOnDrop(e, this.pageIndex)
+      }
+
       if (!this.currDraggedPhoto.srcObj.type) {
         // Propagated to NuController.vue onDrop()
       } else {
         switch (this.type) {
           case 'frame':
             if (this.getLayerType === 'image') {
-              this.onFrameDrop(e)
               body.removeEventListener('dragleave', this.onFrameDragLeave)
+              this.onFrameDrop(e)
             }
             return
           case 'group':
-            // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             if (this.getLayerType === 'image') {
-              e.stopPropagation()
               if (!this.isHandleShadow) {
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+                eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+              } else {
+                // const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
+                // const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
+                // if (shadowEffectNeedRedraw) {
+                //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
+                //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
+                // }
+                const replacedImg = new Image()
+                replacedImg.crossOrigin = 'anonynous'
+                replacedImg.onload = () => {
+                  const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
+                  if (isTransparent) {
+                    const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
+                    imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
+                    imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
+                  }
+                }
+                const size = ['private', 'public', 'background', 'private-logo', 'public-logo'].includes(this.config.srcObj.type)
+                  ? 'tiny' : 100
+                replacedImg.src = imageUtils.getSrc(this.config, size)
               }
-              eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
-              const body = this.$refs.body as HTMLElement
               body.removeEventListener('dragleave', this.onDragLeave)
             }
         }
