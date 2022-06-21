@@ -169,7 +169,6 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.page.height / this.getPageScale - this.getImgHeight
       }
-
       PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
     },
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
