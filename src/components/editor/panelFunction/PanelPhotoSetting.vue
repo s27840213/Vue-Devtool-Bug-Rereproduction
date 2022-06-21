@@ -50,7 +50,11 @@ export default Vue.extend({
           name: 'crop',
           label: `${this.$t('NN0040')}`,
           show: 'crop',
-          condition: (): boolean => layerUtils.getCurrConfig.type === LayerType.image
+          condition: (): boolean => {
+            const currTargetLayer = layerUtils.getCurrConfig
+            return currTargetLayer.type === LayerType.image ||
+              (currTargetLayer.type === LayerType.frame && (currTargetLayer as IFrame).clips.length === 1)
+          }
         },
         // { name: 'preset', label: `${this.$t('NN0041')}`, show: '' },
         {

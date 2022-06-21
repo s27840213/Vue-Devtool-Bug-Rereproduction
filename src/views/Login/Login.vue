@@ -208,6 +208,7 @@ import userApis from '@/apis/user'
 import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
 import loginUtils from '@/utils/loginUtils'
+import gtmUtils from '@/utils/gtmUtils'
 
 export default Vue.extend({
   name: 'Login',
@@ -363,6 +364,7 @@ export default Vue.extend({
         if (data.flag === 0) {
           if (data.data.new_user) {
             generalUtils.fbq('track', 'CompleteRegistration')
+            gtmUtils.signUp('Facebook')
           }
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })
@@ -380,6 +382,7 @@ export default Vue.extend({
         if (data.flag === 0) {
           if (data.data.new_user) {
             generalUtils.fbq('track', 'CompleteRegistration')
+            gtmUtils.signUp('Google')
           }
           store.dispatch('user/loginSetup', { data: data })
           this.$router.push({ path: this.redirect || redirect || '/' })

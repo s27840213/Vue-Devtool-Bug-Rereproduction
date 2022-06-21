@@ -438,7 +438,7 @@ class AssetUtils {
   }
 
   addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
@@ -470,6 +470,7 @@ class AssetUtils {
         brandId: ImageUtils.getBrandId(url, type)
       },
       styles: {
+        ...styles,
         x,
         y,
         width: photoWidth,

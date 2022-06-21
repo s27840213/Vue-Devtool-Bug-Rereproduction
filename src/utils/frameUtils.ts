@@ -128,7 +128,13 @@ class FrameUtils {
       const { designId } = currLayer
       const layerIndex = LayerUtils.layerIndex
       const pageIndex = LayerUtils.pageIndex
-      Object.assign(currLayer.styles, { x: 0, y: 0, zindex: 0, rotate: 0 })
+      Object.assign(currLayer.styles, {
+        x: 0,
+        y: 0,
+        zindex: 0,
+        rotate: 0,
+        shadow: layerFactary.newImage({ styles: {} }).styles.shadow
+      })
 
       const newFrame = layerFactary.newFrame({
         designId,

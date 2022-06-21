@@ -6,10 +6,7 @@ import tiptapUtils from './tiptapUtils'
 import layerUtils from './layerUtils'
 import stepsUtils from './stepsUtils'
 import textPropUtils from './textPropUtils'
-import assetUtils from './assetUtils'
-import i18n from '@/i18n'
 import shortcutUtils from './shortcutUtils'
-import generalUtils from './generalUtils'
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -26,7 +23,8 @@ export default Extension.create({
     return {
       spanStyle: undefined,
       from: undefined,
-      to: undefined
+      to: undefined,
+      pasting: false
     }
   },
   onSelectionUpdate() {

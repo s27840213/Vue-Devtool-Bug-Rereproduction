@@ -13,7 +13,7 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
     const type = urlParams.get('type')
     const designId = urlParams.get('design_id')
     const teamId = urlParams.get('team_id')
-    const panelIndex = urlParams.get('panel_index')
+    const panel = urlParams.get('panel')
     const url = urlParams.get('url')
     const width = urlParams.get('width')
     const height = urlParams.get('height')
@@ -52,8 +52,8 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       themeUtils.refreshTemplateState()
     }
 
-    if (panelIndex && +panelIndex in SidebarPanelType) {
-      store.commit('SET_currSidebarPanelType', +panelIndex)
+    if (panel && panel in SidebarPanelType) {
+      store.commit('SET_currSidebarPanelType', SidebarPanelType[panel as any])
     }
 
     // reset (close) page preview mode

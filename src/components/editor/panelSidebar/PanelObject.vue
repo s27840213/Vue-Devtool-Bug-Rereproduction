@@ -3,8 +3,11 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
+    div(v-if="isAdmin" class="panel-objects-2html")
+      input(type="text" placeholder="項目網址" v-model="panelParams")
+      btn(@click.native="toHtml") To wp-html
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
       :list="list"
@@ -33,13 +36,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
+import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
@@ -50,21 +55,24 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0
+      scrollTop: 0,
+      // For object2wphtml
+      panelParams: ''
     }
   },
   computed: {
-    ...mapState(
-      'objects',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapGetters({
+      isAdmin: 'user/isAdmin'
+    }),
+    ...mapState('objects', [
+      'categories',
+      'content',
+      'pending',
+      'keyword'
+    ]),
+    keywordLabel():string {
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
     listCategories(): any[] {
       const { keyword, categories } = this
       if (keyword) { return [] }
@@ -98,17 +106,26 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
-      return this.listCategories.concat(this.listResult)
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+      return list
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0003', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0003', 1) })}` : ''
     }
   },
   mounted() {
     (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
       this.scrollTop = (event.target as HTMLElement).scrollTop
     })
-    this.getCategories()
+
+    generalUtils.panelInit('object',
+      this.handleSearch,
+      this.handleCategorySearch,
+      this.getRecAndCate
+    )
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -122,32 +139,50 @@ export default Vue.extend({
     this.resetContent()
   },
   methods: {
-    ...mapActions('objects',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('objects', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecAndCate',
+      'getMoreContent'
+    ]),
     handleSearch(keyword: string) {
+      this.resetContent()
       if (keyword) {
+        this.panelParams = `http://dev1.vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getTagContent({ keyword })
       } else {
-        this.resetContent()
-        this.getCategories()
+        this.getRecAndCate()
       }
     },
-    handleCategorySearch(keyword: string) {
-      keyword ? this.getContent({ keyword }) : this.resetContent()
+    handleCategorySearch(keyword: string, locale = '') {
+      this.resetContent()
+      if (keyword) {
+        this.panelParams = `http://dev1.vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecAndCate()
+      }
     },
     handleLoadMore() {
-      console.log('object load more')
       this.getMoreContent()
     },
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
+    },
+    toHtml() {
+      const html = constantData.object2WpHtml()
+      html.item = html.item.replace('{link}', this.panelParams)
+        .replace('{label}', 'Use this object')
+      const output = this.list.map((it) => {
+        const items = it.list.map((it: Record<string, string>) => {
+          const img = `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
+          return html.item.replace(/{img}/g, img)
+        }).join('\n')
+        return html.list.replace('{items}', items)
+      }).join('\n')
+      generalUtils.copyText(output)
+      this.$notify({ group: 'copy', text: '已複製' })
     }
   }
 })
@@ -170,5 +205,13 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.panel-objects-2html {
+  > input:focus {
+    width: 1000px;
+    border: 1px solid black;
+  }
+  > button { margin: 10px auto; }
 }
 </style>
