@@ -64,7 +64,7 @@ export default Vue.extend({
       'keyword'
     ]),
     keywordLabel():string {
-      return this.keyword.replace('tag::', '')
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     listCategories(): any[] {
       const { keyword, categories } = this

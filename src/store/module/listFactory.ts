@@ -277,7 +277,8 @@ export default function (this: any) {
       }
     },
     hasNextPage (state) {
-      return state.nextPage && state.nextPage > 0
+      return (state.nextPage !== undefined && state.nextPage >= 0) ||
+        state.nextCategory > 0
     }
   }
 
