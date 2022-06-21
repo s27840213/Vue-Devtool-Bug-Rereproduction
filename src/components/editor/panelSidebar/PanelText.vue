@@ -169,7 +169,7 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0005', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
     }
   },
   async mounted() {
@@ -235,7 +235,12 @@ export default Vue.extend({
     },
     handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword, locale })
+      if (keyword) {
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecently()
+        this.getContent()
+      }
     },
     handleLoadMore() {
       this.getMoreContent()

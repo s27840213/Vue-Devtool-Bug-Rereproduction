@@ -213,7 +213,7 @@ export default Vue.extend({
     },
     emptyResultMessage(): string {
       const { keyword, pending, listResult } = this
-      return !pending && !this.list.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
+      return !pending && !this.list.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
     },
     currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()
@@ -263,7 +263,6 @@ export default Vue.extend({
       _setTemplateState: 'SET_STATE'
     }),
     async handleSearch(keyword?: string) {
-      console.log('handle search')
       this.resetContent()
       if (keyword) {
         this.getTagContent({ keyword })
@@ -274,7 +273,11 @@ export default Vue.extend({
     },
     handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword, locale })
+      if (keyword) {
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecAndCate()
+      }
     },
     handleLoadMore() {
       this.getMoreContent()

@@ -55,6 +55,7 @@ import { IListServiceContentData, IListServiceContentDataItem } from '@/interfac
 import uploadUtils from '@/utils/uploadUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -217,7 +218,7 @@ export default Vue.extend({
       return this.listCategories.concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `Sorry, we couldn't find any font for "${this.keyword}".` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0353', 1) })}` : ''
     }
   },
   methods: {

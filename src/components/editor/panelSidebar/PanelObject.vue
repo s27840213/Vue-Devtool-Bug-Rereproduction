@@ -113,7 +113,7 @@ export default Vue.extend({
       return list
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0003', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0003', 1) })}` : ''
     }
   },
   mounted() {
@@ -160,6 +160,8 @@ export default Vue.extend({
       if (keyword) {
         this.panelParams = `http://dev1.vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getContent({ keyword, locale })
+      } else {
+        this.getRecAndCate()
       }
     },
     handleLoadMore() {
