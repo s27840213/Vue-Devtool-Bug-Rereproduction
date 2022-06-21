@@ -33,7 +33,7 @@ export default function (this: any) {
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
     // For others, get recently used and categoryies.
-    getRecently: async ({ commit, state }) => {
+    getRecently: async ({ commit, state }, writeBack = true) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, categories: [], locale }) // Reset categories
@@ -45,14 +45,15 @@ export default function (this: any) {
           listAll: 0,
           listCategory: 0
         })
-        commit('SET_RECENTLY', data.data)
+        if (writeBack) commit('SET_RECENTLY', data.data)
+        else return data.data
       } catch (error) {
         captureException(error)
       }
     },
 
     // For mutiple categories.
-    getCategories: async ({ commit, state }) => {
+    getCategories: async ({ commit, state }, writeBack = true) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, locale })
@@ -66,18 +67,22 @@ export default function (this: any) {
           pageIndex: state.nextCategory,
           cache: true
         })
-        commit('SET_CATEGORIES', data.data)
+        if (writeBack) commit('SET_CATEGORIES', data.data)
+        else return data.data
       } catch (error) {
         captureException(error)
       }
     },
 
     // For panel initial, get recently and categories at the same time.
-    getRecAndCate: async ({ dispatch }) => {
+    getRecAndCate: async ({ dispatch, commit }) => {
       await Promise.all([
-        dispatch('getRecently'),
-        dispatch('getCategories')
-      ])
+        dispatch('getRecently', false),
+        dispatch('getCategories', false)
+      ]).then(([recently, category]) => {
+        category.content = recently.content.concat(category.content)
+        commit('SET_CATEGORIES', category)
+      })
     },
 
     // For all item or single category search result.
@@ -277,7 +282,8 @@ export default function (this: any) {
       }
     },
     hasNextPage (state) {
-      return state.nextPage && state.nextPage > 0
+      return (state.nextPage !== undefined && state.nextPage >= 0) ||
+        state.nextCategory > 0
     }
   }
 

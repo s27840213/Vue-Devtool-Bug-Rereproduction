@@ -96,7 +96,7 @@ export default Vue.extend({
       getBackgroundColor: 'getBackgroundColor'
     }),
     keywordLabel():string {
-      return this.keyword.replace('tag::', '')
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     currBackgroundColor(): string {
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
