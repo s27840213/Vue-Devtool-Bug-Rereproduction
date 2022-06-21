@@ -6,12 +6,10 @@ import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
-import store from '@/store'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import textPropUtils from './textPropUtils'
 import textEffectUtils from './textEffectUtils'
-import generalUtils from './generalUtils'
 
 class TiptapUtils {
   event: any
@@ -37,6 +35,9 @@ class TiptapUtils {
       editorProps: {
         attributes: {
           class: 'non-selectable'
+        },
+        handleScrollToSelection: () => {
+          return this.editor?.storage.nuTextStyle.pasting
         }
       },
       editable,

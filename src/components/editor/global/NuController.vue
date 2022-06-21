@@ -361,13 +361,7 @@ export default Vue.extend({
         }
         tiptapUtils.agent(editor => {
           editor.setEditable(newVal)
-          editor.commands.blur()
         })
-        if (newVal) {
-          this.$nextTick(() => {
-            tiptapUtils.focus({ scrollIntoView: false })
-          })
-        }
       }
       StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }

@@ -55,6 +55,16 @@ class GtmUtils {
       })
     }
   }
+
+  /**
+   * @Tutorial - https://www.youtube.com/watch?v=RUzf2BavpXk
+   */
+
+  signUp(method: 'Google' | 'Facebook' | 'Vivipic') {
+    this.track('sign_up', {
+      method
+    })
+  }
 }
 
 export default new GtmUtils()
