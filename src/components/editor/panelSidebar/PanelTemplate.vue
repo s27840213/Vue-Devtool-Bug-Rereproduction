@@ -144,7 +144,7 @@ export default Vue.extend({
     ...mapState('user', ['userId', 'role', 'adminMode']),
     ...mapState(['themes']),
     keywordLabel():string {
-      return this.keyword.replace('tag::', '')
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     showTemplateId(): boolean {
       return (this.role === 0) && this.adminMode

@@ -107,7 +107,7 @@ export default Vue.extend({
       'keyword'
     ]),
     keywordLabel():string {
-      return this.keyword.replace('tag::', '')
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
