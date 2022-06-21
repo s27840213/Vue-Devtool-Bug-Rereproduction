@@ -14,6 +14,7 @@ const imgShadowMutations = {
   [UPDATE_shadowEffect](state: IEditorState, data: { layerInfo: ILayerInfo, payload: IShadowEffects }) {
     const { layerInfo, payload } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       Object.assign(((state.pages[pageIndex].layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
@@ -26,6 +27,7 @@ const imgShadowMutations = {
   [SET_shadowEffectState](state: IEditorState, data: { layerInfo: ILayerInfo, payload: { currentEffect?: string }}) {
     const { layerInfo, payload } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       Object.assign(((state.pages[pageIndex].layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
@@ -37,6 +39,7 @@ const imgShadowMutations = {
   [UPDATE_shadowProps](state: IEditorState, data: { layerInfo: ILayerInfo, payload: Partial<IShadowProps> }) {
     const { layerInfo, payload } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       const shadow = ((state.pages[pageIndex].layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
@@ -49,6 +52,7 @@ const imgShadowMutations = {
   [UPDATE_shadowStyles](state: IEditorState, data: { layerInfo: ILayerInfo, payload: IShadowStyles }) {
     const { layerInfo, payload } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       const styles = ((state.pages[pageIndex].layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)
@@ -61,6 +65,7 @@ const imgShadowMutations = {
   [SET_srcObj](state: IEditorState, data: { layerInfo: ILayerInfo, srcObj: SrcObj }) {
     const { layerInfo, srcObj } = data
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       const _srcObj = ((state.pages[pageIndex].layers[layerIndex] as IGroup)
         .layers[subLayerIdx] as IImage)

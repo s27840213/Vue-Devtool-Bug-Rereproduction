@@ -148,7 +148,7 @@ export default Vue.extend({
       const subLayerId = primarylayerId ? config.id : ''
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
       /** If the shadow effct has already got the img src, return */
-      if (config.styles.shadow.srcObj.type) {
+      if (config.type !== LayerType.image || config.styles.shadow.srcObj.type) {
         return
       }
       if (primarylayerId) {
@@ -266,6 +266,7 @@ export default Vue.extend({
             userId: json.data.team_id || '',
             assetId: this.isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
           }
+          console.log(generalUtils.deepCopy(config))
           const _width = config.styles.width / config.styles.scale
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width

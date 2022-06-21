@@ -70,6 +70,7 @@ import colorUtils from '@/utils/colorUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   props: {
@@ -480,11 +481,12 @@ export default Vue.extend({
           // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           if (this.getLayerType === 'image') {
             const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-            if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
+            if (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw)) {
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
               Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              body.removeEventListener('drop', this.onDrop)
             }
           }
       }
@@ -512,7 +514,6 @@ export default Vue.extend({
       body.removeEventListener('drop', this.onDrop)
       e.stopPropagation()
       if (e.dataTransfer?.getData('data') && !this.currDraggedPhoto.srcObj.type) {
-        console.log(123)
         this.dragUtils.itemOnDrop(e, this.pageIndex)
       }
 
@@ -527,12 +528,15 @@ export default Vue.extend({
             }
             return
           case 'group':
-            // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
             if (this.getLayerType === 'image') {
               if (!this.isHandleShadow) {
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
+              } else {
+                const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
+                imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
+                imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
               }
               eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
               body.removeEventListener('dragleave', this.onDragLeave)

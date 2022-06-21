@@ -72,6 +72,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -322,6 +323,7 @@ export default Vue.extend({
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
+          Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           imageUtils.setImgControlDefault(false)
         }
       }

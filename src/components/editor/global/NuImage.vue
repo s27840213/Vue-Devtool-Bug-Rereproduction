@@ -70,6 +70,7 @@ import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import stepsUtils from '@/utils/stepsUtils'
 import errorHandle from '@/utils/errorHandleUtils'
 import groupUtils from '@/utils/groupUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -104,6 +105,7 @@ export default Vue.extend({
               subLayerIdx: this.subLayerIndex
             }, { isTransparent })
             isTransparent && this.redrawShadow(true)
+            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           }
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
           img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
@@ -221,7 +223,8 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-      isUploadingShadowImg: 'shadow/isUploading'
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
