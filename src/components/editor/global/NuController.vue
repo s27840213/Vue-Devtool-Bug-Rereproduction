@@ -212,10 +212,6 @@ export default Vue.extend({
       movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
       isMoved: false,
-      /**
-       * @param {boolean} isFirstClick - used for the text, first click only make layer active, the second touch will make the text contenteditable
-       */
-      isFirstClick: false,
       isDoingGestureAction: false
     }
   },
@@ -350,7 +346,6 @@ export default Vue.extend({
     isActive(val) {
       if (!val) {
         this.isControlling = false
-        this.isFirstClick = false
         this.setLastSelectedLayerIndex(this.layerIndex)
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
@@ -378,13 +373,7 @@ export default Vue.extend({
         }
         tiptapUtils.agent(editor => {
           editor.setEditable(newVal)
-          editor.commands.blur()
         })
-        if (newVal) {
-          this.$nextTick(() => {
-            tiptapUtils.focus({ scrollIntoView: false })
-          })
-        }
       }
       StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
@@ -656,6 +645,8 @@ export default Vue.extend({
       }
 
       if (this.isTouchDevice && !this.isActive && !this.isLocked) {
+        const body = (this.$refs.body as HTMLElement)
+        body.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
         eventUtils.addPointerEvent('pointermove', this.moving)
@@ -713,6 +704,8 @@ export default Vue.extend({
 
           if (isMover || isMoveBar) {
             this.movingByControlPoint = true
+          } else {
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
           }
 
           break
@@ -826,12 +819,22 @@ export default Vue.extend({
     },
     moveEnd(e: MouseEvent | TouchEvent) {
       if (!this.isDoingGestureAction && !this.isActive) {
+        const body = (this.$refs.body as HTMLElement)
+        body.removeEventListener('touchstart', this.disableTouchEvent)
         GroupUtils.deselect()
         const targetIndex = this.config.styles.zindex - 1
         this.setLastSelectedLayerIndex(this.layerIndex)
         GroupUtils.select(this.pageIndex, [targetIndex])
         eventUtils.removePointerEvent('pointerup', this.moveEnd)
         eventUtils.removePointerEvent('pointermove', this.moving)
+        this.isMoved = false
+        this.isControlling = false
+        this.setCursorStyle('')
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          dragging: false
+        })
+        this.isDoingGestureAction = false
+        this.$emit('clearSnap')
         return
       }
 
@@ -879,10 +882,7 @@ export default Vue.extend({
           }
         } else {
           if (this.getLayerType === 'text') {
-            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
-              isTyping: true,
-              ...(this.isFirstClick && { contentEditable: true })
-            })
+            LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
             if (this.movingByControlPoint) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             }
@@ -890,7 +890,6 @@ export default Vue.extend({
           this.isMoved = false
         }
         this.isControlling = false
-        this.isFirstClick = true
         this.setCursorStyle('')
         eventUtils.removePointerEvent('pointerup', this.moveEnd)
         eventUtils.removePointerEvent('pointermove', this.moving)
