@@ -387,7 +387,12 @@ class LayerUtils {
 
   getLayerInfoById(pageId: string, layerId: string, subLayerId = '') {
     const pageIndex = pageUtils.getPageIndexById(pageId)
-    const layerIndex = this.getLayerIndexById(pageIndex, layerId)
+    let layerIndex = this.getLayerIndexById(pageIndex, layerId)
+    /**  If the layerIndex === -1 means the layer is grouped or deleted */
+    if (layerIndex === -1) {
+      layerIndex = pageUtils.getPage(pageIndex).layers
+        .findIndex(l => l.type === LayerType.group && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
+    }
     const subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
     return {
       pageIndex,

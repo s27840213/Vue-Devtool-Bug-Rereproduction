@@ -110,7 +110,7 @@ export default Vue.extend({
       assetFonts: 'user/getAssetFonts'
     }),
     keywordLabel():string {
-      return this.keyword.replace('tag::', '')
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable

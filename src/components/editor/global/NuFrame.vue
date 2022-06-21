@@ -3,6 +3,7 @@
       :style="styles")
     div(v-if="shadowSrc" class="shadow__wrapper" :style="shadowWrapperStyles")
       img(class="shadow__img"
+        draggable="false"
         :src="shadowSrc")
     nu-layer(v-for="(layer,index) in layers"
       :key="`layer-${index}`"
