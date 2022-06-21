@@ -72,6 +72,7 @@ const imgShadowMutations = {
         .styles.shadow.srcObj
       Object.assign(_srcObj, srcObj)
     } else {
+      console.log(pageIndex, layerIndex, subLayerIdx)
       Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.srcObj, srcObj)
     }
   }

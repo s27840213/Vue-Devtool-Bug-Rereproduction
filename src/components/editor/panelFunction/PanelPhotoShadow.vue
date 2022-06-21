@@ -143,6 +143,7 @@ export default Vue.extend({
     logUtils.setLog('phase: start upload shadow')
     if (layerData) {
       const { config: _config, primarylayerId, pageId } = layerData
+      console.log(generalUtils.deepCopy(_config))
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
@@ -301,11 +302,13 @@ export default Vue.extend({
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
               logUtils.setLog('phase: finish while process')
+              imageShadowUtils.clearLayerData()
             }
             newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
           }).catch((e: Error) => {
             console.error(e)
             logUtils.setLog('error' + e.message)
+            imageShadowUtils.clearLayerData()
           })
         }
       })
@@ -433,6 +436,7 @@ export default Vue.extend({
     setUploadingData(layerIdentifier: ILayerIdentifier, id: string) {
       const { pageId, layerId, subLayerId } = layerIdentifier
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId || '')
+      console.log(pageIndex, layerIndex, subLayerIdx)
       imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, {
         type: 'upload',
         assetId: id,
