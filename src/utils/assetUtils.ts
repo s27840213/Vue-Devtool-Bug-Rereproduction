@@ -587,15 +587,10 @@ class AssetUtils {
 
           break
         case 7:
-<<<<<<< HEAD
-          this.addText(Object.assign(asset.jsonData, { designId: item.id }), attrs)
-          editorUtils.setCloseMobilePanelFlag(true)
-=======
           this.addText(asset.jsonData, attrs)
           editorUtils.setCloseMobilePanelFlag(true)
 
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
->>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
           break
         case 8:
           this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)

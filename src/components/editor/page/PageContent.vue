@@ -32,26 +32,17 @@ div(class="overflow-container"
 
 <script lang="ts">
 import Vue from 'vue'
-<<<<<<< HEAD
 import imageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-=======
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import imageUtils from '@/utils/imageUtils'
->>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
 import { SidebarPanelType } from '@/store/types'
-<<<<<<< HEAD
-=======
-import assetUtils from '@/utils/assetUtils'
->>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -160,10 +151,7 @@ export default Vue.extend({
       } else {
         imageUtils.setImgControlDefault(false)
       }
-<<<<<<< HEAD
-=======
       this.setInMultiSelectionMode(false)
->>>>>>> 77c7530c340956e5a771675038d72fc9fba56b12
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
