@@ -163,7 +163,7 @@ export default Vue.extend({
       return backgroundImage && backgroundImage.config.locked
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0004', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0004', 1) })}` : ''
     }
   },
   async mounted() {
@@ -175,7 +175,10 @@ export default Vue.extend({
     })
     colorUtils.onStop(ColorEventType.background, this.recordChange)
 
-    this.getRecAndCate()
+    generalUtils.panelInit('bg',
+      this.handleSearch,
+      this.handleCategorySearch,
+      this.getRecAndCate)
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -230,9 +233,13 @@ export default Vue.extend({
         this.getRecAndCate()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      if (keyword) {
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecAndCate()
+      }
     },
     handleLoadMore() {
       this.getMoreContent()

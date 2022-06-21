@@ -1,7 +1,10 @@
 import { IPage } from '@/interfaces/page'
+import router from '@/router'
 import store from '@/store'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
+import _ from 'lodash'
+
 class GeneralUtils {
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get isSuperUser() { return (store.state as any).user.role === 0 }
@@ -189,6 +192,30 @@ class GeneralUtils {
   //     logData.push(params)
   //   }
   // }
+
+  panelInit(panelName:string,
+    searchF: (keyword: string)=>void,
+    categoryF: (keyword: string, locale:string)=>void,
+    normalInit: ()=>void) { // May move to a new file panelUtils.ts
+    const urlParams = new URLSearchParams(window.location.search)
+    const panel = urlParams.get('panel')
+    const category = urlParams.get('category')
+    const category_locale = urlParams.get('category_locale')
+    const search = urlParams.get('search')
+    if (panel !== panelName) {
+      normalInit()
+    } else if (category && category_locale) {
+      categoryF(category, category_locale)
+    } else if (search) {
+      searchF(search)
+    } else {
+      normalInit()
+    }
+
+    const query = _.omit(router.currentRoute.query,
+      ['panel', 'category', 'category_locale', 'search'])
+    router.replace({ query })
+  }
 }
 
 const generalUtils = new GeneralUtils()

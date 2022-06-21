@@ -89,7 +89,7 @@ export default function (this: any) {
     getContent: async ({ commit, state }, params = {}) => {
       const { theme } = state
       const { keyword } = params
-      const locale = localeUtils.currLocale()
+      const locale = params.locale || localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))

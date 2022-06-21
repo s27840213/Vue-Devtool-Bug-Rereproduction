@@ -77,6 +77,7 @@ import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/br
 import brandkitUtils from '@/utils/brandkitUtils'
 import VueI18n from 'vue-i18n'
 import tiptapUtils from '@/utils/tiptapUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -168,13 +169,18 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0005', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
     }
   },
   async mounted() {
-    this.getRecently()
-    this.getContent()
-    textUtils.loadDefaultFonts(this.extractFonts)
+    generalUtils.panelInit('text',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async () => {
+        this.getRecently()
+        this.getContent()
+        textUtils.loadDefaultFonts(this.extractFonts)
+      })
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -227,9 +233,14 @@ export default Vue.extend({
         this.getContent()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      if (keyword) {
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecently()
+        this.getContent()
+      }
     },
     handleLoadMore() {
       this.getMoreContent()
