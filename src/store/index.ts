@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
-import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame } from '@/interfaces/layer'
+import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
 import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
@@ -381,10 +381,9 @@ const mutations: MutationTree<IEditorState> = {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
   },
-  SET_backgroundImageSize(state: IEditorState, updateInfo: { pageIndex: number, imageSize: { width: number, height: number, scale: number } }) {
-    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgWidth = updateInfo.imageSize.width
-    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.imgHeight = updateInfo.imageSize.height
-    state.pages[updateInfo.pageIndex].backgroundImage.config.styles.scale = updateInfo.imageSize.scale || 1
+  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: Partial<IImageStyle> }) {
+    const { pageIndex, styles } = updateInfo
+    Object.assign(state.pages[pageIndex].backgroundImage.config.styles, styles)
   },
   SET_backgroundImageMode(state: IEditorState, updateInfo: { pageIndex: number, newDisplayMode: boolean }) {
     state.pages[updateInfo.pageIndex].backgroundImage.newDisplayMode = updateInfo.newDisplayMode
@@ -399,9 +398,6 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_backgroundOpacity(state: IEditorState, updateInfo: { pageIndex: number, opacity: number }) {
     state.pages[updateInfo.pageIndex].backgroundImage.config.styles.opacity = updateInfo.opacity
-  },
-  SET_backgroundImageStyles(state: IEditorState, updateInfo: { pageIndex: number, styles: any }) {
-    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.styles, updateInfo.styles)
   },
   REMOVE_background(state: IEditorState, updateInfo: { pageIndex: number }) {
     state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
@@ -473,7 +469,7 @@ const mutations: MutationTree<IEditorState> = {
   },
   UPDATE_subLayerProps(state: IEditorState, updateInfo: { pageIndex: number, layerIndex: number, targetIndex: number, props: { [key: string]: string | number | boolean | IParagraph | SrcObj } }) {
     const groupLayer = state.pages[updateInfo.pageIndex].layers[updateInfo.layerIndex] as IGroup
-    if (!groupLayer.layers) return
+    if (!groupLayer || !groupLayer.layers) return
     const targetLayer = groupLayer.layers[updateInfo.targetIndex]
     Object.entries(updateInfo.props).forEach(([k, v]) => {
       targetLayer[k] = v

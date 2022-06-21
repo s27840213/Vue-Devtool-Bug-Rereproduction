@@ -281,7 +281,7 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-      PageUtils.updateBackgroundImageSize(this.pageIndex, width, height)
+      PageUtils.updateBackgroundImageStyles(this.pageIndex, { width, height, imgWidth: width, imgHeight: height })
       PageUtils.updateBackgroundImagePos(this.pageIndex, imgPos.x, imgPos.y)
     },
     scaleEnd() {

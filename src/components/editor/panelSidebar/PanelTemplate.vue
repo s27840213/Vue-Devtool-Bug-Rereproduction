@@ -17,7 +17,7 @@
         search-bar(class="mb-15"
           :placeholder="$t('NN0092', {target: $tc('NN0001',1)})"
           clear
-          :defaultKeyword="keyword"
+          :defaultKeyword="keywordLabel"
           @search="handleSearch")
           svg-icon(class="ml-5 pointer panel-template__advanced"
             :class="{ 'panel-template__advanced--active': theme }"
@@ -34,7 +34,7 @@
     div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     div(v-if="showTemplateId && keyword && !pending && !emptyResultMessage"
       class="text-white text-left pb-10")
-      span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total
+      span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -88,6 +88,7 @@ import GalleryUtils from '@/utils/galleryUtils'
 import { Itheme } from '@/interfaces/theme'
 import _ from 'lodash'
 import listService from '@/apis/list'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -110,21 +111,24 @@ export default Vue.extend({
   mounted() {
     const urlParams = new URLSearchParams(window.location.search)
     const groupId = urlParams.get('group_id')
-    if (!groupId) return
-    listService.getList({ type: 'group', groupId, cache: true }).then(result => {
-      const { content } = result.data.data
-      this.currentGroup = {
-        group_type: 0,
-        group_id: groupId,
-        type: 6,
-        content_ids: content[0].list,
-        id: content[0].list[0].id,
-        ver: 0
-      }
-      const query = Object.assign({}, this.$route.query)
-      delete query.group_id
-      this.$router.replace({ query })
-    })
+    if (groupId) {
+      listService.getList({ type: 'group', groupId, cache: true }).then(result => {
+        const { content } = result.data.data
+        this.currentGroup = {
+          group_type: 0,
+          group_id: groupId,
+          type: 6,
+          content_ids: content[0].list,
+          id: content[0].list[0].id,
+          ver: 0
+        }
+        const query = Object.assign({}, this.$route.query)
+        delete query.group_id
+        this.$router.replace({ query })
+      })
+    }
+
+    // panelInit for PanelTemplate at themeUtils.fetchTemplateContent
   },
   computed: {
     ...mapState(
@@ -142,6 +146,9 @@ export default Vue.extend({
     ),
     ...mapState('user', ['userId', 'role', 'adminMode']),
     ...mapState(['themes']),
+    keywordLabel():string {
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
     showTemplateId(): boolean {
       return (this.role === 0) && this.adminMode
     },
@@ -198,11 +205,15 @@ export default Vue.extend({
       return this.content.list?.length || 0
     },
     list(): any[] {
-      return this.listCategories.concat(this.listResult)
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (this.listResult.length === 0 && list.length !== 0) {
+        list[list.length - 1].sentinel = true
+      }
+      return list
     },
     emptyResultMessage(): string {
       const { keyword, pending, listResult } = this
-      return !pending && !listResult.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
+      return !pending && !this.list.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
     },
     currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()
@@ -243,7 +254,7 @@ export default Vue.extend({
         'resetContent',
         'getContent',
         'getTagContent',
-        'getCategories',
+        'getRecAndCate',
         'getMoreContent',
         'getSum'
       ]
@@ -257,13 +268,16 @@ export default Vue.extend({
         this.getTagContent({ keyword })
         this.getSum({ keyword })
       } else {
-        await this.getCategories()
-        this.getContent()
+        this.getRecAndCate()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      if (keyword) {
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecAndCate()
+      }
     },
     handleLoadMore() {
       this.getMoreContent()

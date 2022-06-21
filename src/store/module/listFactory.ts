@@ -4,7 +4,6 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
-import authToken from '@/apis/auth-token'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -19,6 +18,7 @@ export default function (this: any) {
     theme: '',
     page: 0,
     perPage: 0,
+    nextCategory: 0,
     nextPage: 0,
     pending: false,
     host: '',
@@ -31,27 +31,65 @@ export default function (this: any) {
   })
 
   const actions: ActionTree<IListModuleState, unknown> = {
-    getCategories: async ({ commit, state }) => {
+    // For panel template, object, bg, text, only get recently used.
+    // For others, get recently used and categoryies.
+    getRecently: async ({ commit, state }, writeBack = true) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
-      commit(SET_STATE, { pending: true, categories: [], locale })
+      commit(SET_STATE, { pending: true, categories: [], locale }) // Reset categories
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],
           locale,
           theme,
-          listAll: 0
+          listAll: 0,
+          listCategory: 0
         })
-        commit(SET_CATEGORIES, data.data)
+        if (writeBack) commit('SET_RECENTLY', data.data)
+        else return data.data
       } catch (error) {
         captureException(error)
       }
     },
 
+    // For mutiple categories.
+    getCategories: async ({ commit, state }, writeBack = true) => {
+      const { theme } = state
+      const locale = localeUtils.currLocale()
+      commit(SET_STATE, { pending: true, locale })
+      try {
+        const { data } = await this.api({
+          token: '1',
+          locale,
+          theme,
+          listAll: 0,
+          listCategory: 1,
+          pageIndex: state.nextCategory,
+          cache: true
+        })
+        if (writeBack) commit('SET_CATEGORIES', data.data)
+        else return data.data
+      } catch (error) {
+        captureException(error)
+      }
+    },
+
+    // For panel initial, get recently and categories at the same time.
+    getRecAndCate: async ({ dispatch, commit }) => {
+      await Promise.all([
+        dispatch('getRecently', false),
+        dispatch('getCategories', false)
+      ]).then(([recently, category]) => {
+        category.content = recently.content.concat(category.content)
+        commit('SET_CATEGORIES', category)
+      })
+    },
+
+    // For all item or single category search result.
     getContent: async ({ commit, state }, params = {}) => {
       const { theme } = state
       const { keyword } = params
-      const locale = localeUtils.currLocale()
+      const locale = params.locale || localeUtils.currLocale()
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
@@ -69,6 +107,7 @@ export default function (this: any) {
       }
     },
 
+    // Only for template center.
     getThemeContent: async ({ commit, state }, params = {}) => {
       const { keyword, theme } = params
       const locale = localeUtils.currLocale()
@@ -84,16 +123,17 @@ export default function (this: any) {
           cache: needCache
         })
         commit(SET_CONTENT, data.data)
-        console.log(data.data)
       } catch (error) {
         captureException(error)
       }
     },
 
+    // For search result.
     getTagContent: async ({ commit, state }, params = {}) => {
       const { theme } = state
-      const { keyword } = params
+      let { keyword } = params
       const locale = localeUtils.currLocale()
+      keyword = keyword.includes('::') ? keyword : `tag::${keyword}`
       commit(SET_STATE, { pending: true, keyword, locale, content: {} })
       try {
         const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
@@ -101,6 +141,7 @@ export default function (this: any) {
           token: needCache ? '1' : store.getters['user/getToken'],
           locale,
           theme,
+          // TODO: Fix issue that tag search getMoreContent will not load second page.
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
           listAll: 1,
           cache: needCache
@@ -111,10 +152,21 @@ export default function (this: any) {
       }
     },
 
-    getMoreContent: async ({ commit, getters, state }) => {
+    // For all and search/category result, it is also used by TemplateCenter.
+    getMoreContent: async ({ commit, getters, dispatch, state }) => {
       const { nextParams, hasNextPage } = getters
       const { pending } = state
       if (!hasNextPage || pending) { return }
+      if (state.categories.length && state.nextCategory !== -1) {
+        // Get more categories
+        dispatch('getCategories')
+        return
+      } else if (state.nextPage === 0) {
+        // Get first all or search/category result
+        dispatch('getContent')
+        return
+      }
+
       commit(SET_STATE, { pending: true })
       try {
         const { data } = await this.api(nextParams)
@@ -129,6 +181,7 @@ export default function (this: any) {
         categories: [],
         keyword: '',
         page: 0,
+        nextCategory: 0,
         nextPage: 0
       })
     },
@@ -137,7 +190,7 @@ export default function (this: any) {
       const { theme } = state
       const { keyword } = params
       const locale = localeUtils.currLocale()
-      commit(SET_STATE, { pending: true, keyword, locale, content: {} })
+      commit(SET_STATE, { pending: true, locale, content: {} })
       try {
         const { data } = await this.api({
           token: store.getters['user/getToken'],
@@ -147,7 +200,6 @@ export default function (this: any) {
           listAll: 1
         })
         commit(SET_STATE, { sum: data.data.sum })
-        // commit(SET_CONTENT, data.data)
       } catch (error) {
         captureException(error)
       }
@@ -165,14 +217,19 @@ export default function (this: any) {
           }
         })
     },
-    [SET_CATEGORIES] (state: IListModuleState, objects: IListServiceData) {
-      state.categories = objects.content || []
+    SET_RECENTLY (state: IListModuleState, objects: IListServiceData) {
+      state.categories = objects.content.concat(state.categories) || []
+      if (objects.next_page)state.nextPage = objects.next_page as number
+      state.pending = false
+    },
+    SET_CATEGORIES (state: IListModuleState, objects: IListServiceData) {
+      state.categories = state.categories.concat(objects.content) || []
       state.host = objects.host?.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
       state.data = objects.data
       state.preview = objects.preview
       state.preview2 = objects.preview2
+      state.nextCategory = objects.next_page as number
       state.pending = false
-      state.nextPage = objects.next_page
     },
     [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const {
@@ -195,8 +252,8 @@ export default function (this: any) {
       state.data = data
       state.preview = preview
       state.preview2 = preview2
-      state.pending = false
       state.nextPage = nextPage
+      state.pending = false
     },
     [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
@@ -205,8 +262,8 @@ export default function (this: any) {
         ...state.content,
         list: list.concat(newList)
       }
-      state.pending = false
       state.nextPage = objects.next_page
+      state.pending = false
     }
   }
 
@@ -225,7 +282,8 @@ export default function (this: any) {
       }
     },
     hasNextPage (state) {
-      return state.nextPage && state.nextPage > 0
+      return (state.nextPage !== undefined && state.nextPage >= 0) ||
+        state.nextCategory > 0
     }
   }
 

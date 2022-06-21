@@ -12,6 +12,7 @@ import resizeUtils from './resizeUtils'
 import Vue from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
+import _ from 'lodash'
 
 interface Item {
   name: string,
@@ -584,11 +585,12 @@ class DesignUtils {
              */
             store.commit('SET_assetId', generalUtils.generateAssetId())
             // eslint-disable-next-line camelcase
-            const query: { type: string, design_id: string, team_id: string, group_id?: string} =
-              { type: 'design', design_id: uploadUtils.assetId, team_id: uploadUtils.teamId }
-            if (groupId !== '' && router.currentRoute.query.group_id) {
-              query.group_id = groupId
-            }
+            const query = _.omit(router.currentRoute.query,
+              ['width', 'height'])
+            query.type = 'design'
+            query.design_id = uploadUtils.assetId
+            query.team_id = uploadUtils.teamId
+
             router.replace({ query }).then(() => {
               uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
             })

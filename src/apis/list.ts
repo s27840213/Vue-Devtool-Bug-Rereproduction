@@ -14,6 +14,7 @@ class ListService {
       locale: params.locale || 'tw',
       page_index: params.pageIndex,
       list_all: params.listAll,
+      list_category: params.listCategory,
       keyword: params.keyword,
       font_list: params.fontList,
       theme: params.theme,

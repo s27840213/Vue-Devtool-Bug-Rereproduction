@@ -3,7 +3,7 @@
     search-bar(class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
-      :defaultKeyword="keyword"
+      :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
@@ -77,6 +77,7 @@ import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/br
 import brandkitUtils from '@/utils/brandkitUtils'
 import VueI18n from 'vue-i18n'
 import tiptapUtils from '@/utils/tiptapUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -98,17 +99,17 @@ export default Vue.extend({
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
     }),
-    ...mapState(
-      'textStock',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
+    ...mapState('textStock', [
+      'categories',
+      'content',
+      'pending',
+      'host',
+      'preview',
+      'keyword'
+    ]),
+    keywordLabel():string {
+      return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
+    },
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
@@ -168,13 +169,18 @@ export default Vue.extend({
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keyword, target: i18n.tc('NN0005', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
     }
   },
   async mounted() {
-    await this.getCategories()
-    this.getContent()
-    textUtils.loadDefaultFonts(this.extractFonts)
+    generalUtils.panelInit('text',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async () => {
+        this.getRecently()
+        this.getContent()
+        textUtils.loadDefaultFonts(this.extractFonts)
+      })
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -193,15 +199,13 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapActions('textStock',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getCategories',
-        'getMoreContent'
-      ]
-    ),
+    ...mapActions('textStock', [
+      'resetContent',
+      'getContent',
+      'getTagContent',
+      'getRecently',
+      'getMoreContent'
+    ]),
     ...mapMutations({
       setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
@@ -225,13 +229,18 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        await this.getCategories()
+        this.getRecently()
         this.getContent()
       }
     },
-    handleCategorySearch(keyword: string) {
+    handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
-      this.getContent({ keyword })
+      if (keyword) {
+        this.getContent({ keyword, locale })
+      } else {
+        this.getRecently()
+        this.getContent()
+      }
     },
     handleLoadMore() {
       this.getMoreContent()

@@ -361,13 +361,7 @@ export default Vue.extend({
         }
         tiptapUtils.agent(editor => {
           editor.setEditable(newVal)
-          editor.commands.blur()
         })
-        if (newVal) {
-          this.$nextTick(() => {
-            tiptapUtils.focus({ scrollIntoView: false })
-          })
-        }
       }
       StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
@@ -1458,15 +1452,17 @@ export default Vue.extend({
       this.setCursorStyle(el.style.cursor)
     },
     dragEnter(e: DragEvent) {
+      const body = this.$refs.body as HTMLElement
+      body.addEventListener('dragleave', this.dragLeave)
+      body.addEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
         const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
         if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
-          const body = this.$refs.body as HTMLElement
-          body.addEventListener('dragleave', this.dragLeave)
-          body.addEventListener('drop', this.onDrop)
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
           Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          body.removeEventListener('dragleave', this.dragLeave)
+          body.removeEventListener('drop', this.onDrop)
         }
       }
     },
@@ -1489,6 +1485,19 @@ export default Vue.extend({
           this.dragUtils.itemOnDrop(e, this.pageIndex)
         } else if (this.getLayerType === 'image') {
           if (this.isHandleShadow) {
+            const replacedImg = new Image()
+            replacedImg.crossOrigin = 'anonynous'
+            replacedImg.onload = () => {
+              const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
+              if (isTransparent) {
+                const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
+                imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
+                imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
+              }
+            }
+            const size = ['private', 'public', 'background', 'private-logo', 'public-logo'].includes(this.config.srcObj.type)
+              ? 'tiny' : 100
+            replacedImg.src = ImageUtils.getSrc(this.config, size)
             return
           } else {
             eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
