@@ -285,6 +285,7 @@ pipelines:
                 - yarn -v
           - step:
               name: "Start build with node module cache"
+              size: 2x
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node14.17.0-chrome88-ff89
@@ -404,6 +405,7 @@ pipelines:
                 - yarn -v
           - step:
               name: "Start build with node module cache"
+              size: 2x
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node14.17.0-chrome88-ff89
@@ -497,6 +499,7 @@ pipelines:
                 - yarn -v
           - step:
               name: "Start build with node module cache"
+              size: 2x
               caches: #set caches for node modules to speed up building
                 - node
               image: cypress/browsers:node14.17.0-chrome88-ff89
