@@ -27,6 +27,7 @@
           download-check-button(type="checkbox"
             class="mb-10"
             :label="`${$t('NN0215')}`"
+            :default-checked="selected.omitBackground === 1"
             @change="({ checked }) => handleUpdate('omitBackground', checked ? 1 : 0)")
         div(v-if="'scale' in selected"
           class="flex items-center mb-10")

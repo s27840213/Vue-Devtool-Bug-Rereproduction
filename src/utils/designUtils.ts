@@ -629,6 +629,10 @@ class DesignUtils {
     return (jsonUrl ?? '').match(/design\/(.*)\/config\.json/)?.[1] ?? ''
   }
 
+  getDesignName(): string {
+    return store.getters.getPagesName
+  }
+
   async renameDesign(name: string) {
     let assetIndex = store.getters.getAssetIndex
     if (assetIndex === -1) {
