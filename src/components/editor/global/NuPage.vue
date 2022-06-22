@@ -157,6 +157,10 @@
             nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
             div(:style="backgroundContorlClipStyles()")
               nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
+              component(v-for="(elm, idx) in getHalation"
+                :key="idx"
+                :is="elm.tag"
+                v-bind="elm.attrs")
           div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
               class="dim-background"
               :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
@@ -219,6 +223,7 @@ import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default Vue.extend({
   components: {
@@ -381,6 +386,17 @@ export default Vue.extend({
         }
       }
       return false
+    },
+    getHalation(): unknown[] {
+      const { styles: { adjust } } = this.config.backgroundImage.config as IImage
+      const { width, height } = this.config
+      const { posX, posY } = this.config.backgroundImage
+      const position = {
+        width: width / 2,
+        x: -posX + width / 2,
+        y: -posY + height / 2
+      }
+      return imageAdjustUtil.getHalation(adjust.halation, position)
     }
   },
   watch: {
