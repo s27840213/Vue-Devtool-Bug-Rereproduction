@@ -2,6 +2,7 @@ import axios from '@/apis'
 import authToken from './auth-token'
 import { IDownloadServiceParams, IDownloadServiceResponse } from '@/interfaces/download'
 import { AxiosError } from 'axios'
+import designUtils from '@/utils/designUtils'
 
 class DownloadService {
   createFile (params: IDownloadServiceParams, useDev = 0, newChrome = 0) {
@@ -19,7 +20,8 @@ class DownloadService {
       merge: params.merge,
       split_size: params.splitSize,
       new_test: useDev,
-      new_chrome: newChrome
+      new_chrome: newChrome,
+      title: designUtils.getDesignName()
     }
     return axios.request<IDownloadServiceResponse>({
       url: '/export-template',
