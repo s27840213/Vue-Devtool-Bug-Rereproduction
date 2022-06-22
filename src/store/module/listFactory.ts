@@ -53,7 +53,7 @@ export default function (this: any) {
     },
 
     // For mutiple categories.
-    getCategories: async ({ commit, state }, writeBack = true) => {
+    getCategories: async ({ commit, dispatch, state }, writeBack = true) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, locale })
@@ -69,6 +69,10 @@ export default function (this: any) {
         })
         if (writeBack) commit('SET_CATEGORIES', data.data)
         else return data.data
+        // If content empty, auto load more category
+        if (data.data.content.length === 0) {
+          dispatch('getMoreContent')
+        }
       } catch (error) {
         captureException(error)
       }
@@ -82,6 +86,9 @@ export default function (this: any) {
       ]).then(([recently, category]) => {
         category.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', category)
+        if (category.content.length === 0) {
+          dispatch('getMoreContent')
+        }
       })
     },
 
@@ -99,6 +106,7 @@ export default function (this: any) {
           keyword,
           theme,
           listAll: 1,
+          listCategory: 0,
           cache: needCache
         })
         commit(SET_CONTENT, data.data)
@@ -120,6 +128,7 @@ export default function (this: any) {
           keyword,
           theme,
           listAll: 1,
+          listCategory: 0,
           cache: needCache
         })
         commit(SET_CONTENT, data.data)
@@ -144,6 +153,7 @@ export default function (this: any) {
           // TODO: Fix issue that tag search getMoreContent will not load second page.
           keyword: keyword.includes('::') ? keyword : `tag::${keyword}`,
           listAll: 1,
+          listCategory: 0,
           cache: needCache
         })
         commit(SET_CONTENT, data.data)
@@ -157,7 +167,7 @@ export default function (this: any) {
       const { nextParams, hasNextPage } = getters
       const { pending } = state
       if (!hasNextPage || pending) { return }
-      if (state.categories.length && state.nextCategory !== -1) {
+      if (state.categories.length > 0 && state.nextCategory !== -1) {
         // Get more categories
         dispatch('getCategories')
         return
@@ -277,6 +287,7 @@ export default function (this: any) {
         keyword,
         theme,
         listAll: 1,
+        listCategory: 0,
         pageIndex: nextPage,
         cache: needCache
       }

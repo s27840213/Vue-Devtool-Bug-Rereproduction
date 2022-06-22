@@ -86,7 +86,6 @@ export default Vue.extend({
         })
     },
     handleChange(event: { value: string, checked: boolean }) {
-      !event.checked && (this.all = false)
       this.selected[event.value] = event.checked
     },
     handleSubmit() {
@@ -98,7 +97,6 @@ export default Vue.extend({
     handleRecommend() {
       const currFocusPageSize = themeUtils.getFocusPageSize()
       const themes = themeUtils.getThemesBySize(currFocusPageSize.width, currFocusPageSize.height)
-      this.all = false
       this.initSelected(themes.map(theme => `${theme.id}`))
     }
   }
