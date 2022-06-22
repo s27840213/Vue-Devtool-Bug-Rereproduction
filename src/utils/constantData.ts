@@ -28,115 +28,129 @@ class PaymentData {
     }
     const templateType = {
       tw: [{
-        label: '社群媒體',
+        label: i18n.t('NN0667'),
         content: [
           ...[1, 8, 2, 3, 9, 4].map((id) => themeItem(id)), {
-            label: 'Line 圖文選單',
+            label: 'LINE 圖文選單',
             url: 'https://vivipic.com/templates?themes=14,15'
           }
         ]
       }, {
-        label: '電商',
+        label: i18n.t('NN0668'),
         content: [5, 7, 6].map((id) => themeItem(id))
       }],
       us: [{
-        label: '社群媒體',
-        content: [1, 8, 2, 3].map((id) => themeItem(id))
+        label: i18n.t('NN0667'),
+        content: [
+          ...[1, 8, 2, 3].map((id) => themeItem(id)), {
+            label: 'Youtube Thumbnail',
+            url: 'https://blog.vivipic.com/us/youtube-thumbnail/'
+          }]
       }, {
-        label: '電商',
+        label: i18n.t('NN0668'),
         content: [6, 5].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [{
+          label: 'Invitation',
+          url: 'https://blog.vivipic.com/us/invitations/'
+        }, {
+          label: 'Polaroid Frame',
+          url: 'https://blog.vivipic.com/us/free-polaroid-frame-templates/'
+        }]
       }],
       jp: [{
-        label: '社群媒體',
+        label: i18n.t('NN0667'),
         content: [1, 8, 2, 3, 4, 9].map((id) => themeItem(id))
       }, {
-        label: '電商',
-        content: [5, 7, 6].map((id) => themeItem(id))
+        label: i18n.t('NN0668'),
+        content: [5, 6, 7].map((id) => themeItem(id))
       }]
     }
     const resource = {
       tw: [{
-        label: '部落格',
+        label: i18n.t('NN0671'),
         url: 'https://blog.vivipic.com/tw/'
       }, {
-        label: '學習中心',
+        label: i18n.t('NN0672'),
         content: [{
-          label: '使用教學',
+          label: i18n.t('NN0673'),
           url: 'https://blog.vivipic.com/tw/tutorial/'
         }, {
-          label: 'FAQ',
+          label: i18n.t('NN0147'),
           url: 'https://blog.vivipic.com/tw/faq/'
         }]
       }, {
-        label: '設計誌',
+        label: i18n.t('NN0674'),
         content: [{
-          label: '新手入門',
+          label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/tw/新手入門/'
         }, {
-          label: '設計教學',
+          label: i18n.t('NN0676'),
           url: 'https://blog.vivipic.com/tw/設計教學/'
         }, {
-          label: '數位行銷',
+          label: i18n.t('NN0677'),
           url: 'https://blog.vivipic.com/tw/數位行銷/'
         }, {
-          label: '趨勢分享',
+          label: i18n.t('NN0678'),
           url: 'https://blog.vivipic.com/tw/趨勢分享/'
         }]
       }],
       us: [{
-        label: '部落格',
+        label: i18n.t('NN0671'),
         url: 'https://blog.vivipic.com/us/'
       }, {
-        label: '學習中心',
+        label: i18n.t('NN0672'),
         content: [{
-          label: '使用教學',
+          label: i18n.t('NN0673'),
           url: 'https://blog.vivipic.com/us/us-tutorial/'
         }, {
-          label: 'FAQ',
+          label: i18n.t('NN0147'),
           url: 'https://blog.vivipic.com/us/us-faq/'
         }]
       }, {
-        label: '設計誌',
+        label: i18n.t('NN0674'),
         content: [{
-          label: '新手入門',
+          label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'
         }, {
-          label: '設計教學',
+          label: i18n.t('NN0676'),
           url: 'https://blog.vivipic.com/us/category/design-us/'
         }, {
-          label: '數位行銷',
+          label: i18n.t('NN0677'),
           url: 'https://blog.vivipic.com/us/category/digital-marketing-us/'
         }, {
-          label: '趨勢分享',
+          label: i18n.t('NN0678'),
           url: 'https://blog.vivipic.com/us/category/trend-us/'
         }]
       }],
       jp: [{
-        label: '部落格',
-        url: 'https://blog.vivipic.com/tw/'
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/jp/'
       }, {
-        label: '學習中心',
+        label: i18n.t('NN0672'),
         content: [{
-          label: 'ECサイト向けのデザインツール。わずか4ステップで完成！',
+          label: i18n.t('NN0673'),
           url: 'https://blog.vivipic.com/jp/4step/'
         }]
       }, {
-        label: '設計誌',
-        url: 'https://blog.vivipic.com/jp/#'
+        label: i18n.t('NN0674'),
+        content: [{
+          label: i18n.t('NN0677'),
+          url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
+        }]
       }]
     }
 
     const list = [{
-      label: '模板類型',
-      url: '',
+      label: i18n.t('NN0666'),
       content: templateType[i18n.locale as keyof typeof templateType]
     }, {
       name: 'TemplateCenter',
       url: '/templates',
       label: i18n.t('NN0145')
     }, {
-      label: '設計指南',
-      url: '',
+      label: i18n.t('NN0670'),
       content: resource[i18n.locale as keyof typeof resource]
     }, {
       name: 'Pricing',
