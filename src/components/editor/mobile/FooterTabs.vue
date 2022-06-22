@@ -315,6 +315,8 @@ export default Vue.extend({
           layerUtils.updateLayerProps(pageIndex, index, {
             contentEditable: true
           })
+
+          tiptapUtils.focus({ scrollIntoView: false })
           break
         }
         default: {
