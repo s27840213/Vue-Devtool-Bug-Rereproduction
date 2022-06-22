@@ -43,6 +43,12 @@ div(class="popup-file")
   div(v-if="buildNumber"
     class="popup-file__item")
     span(class="text-gray-3") Version: {{buildNumber}}
+  div(class="popup-file__item" @click="testSignup()")
+    span SignUp
+  div(class="popup-file__item" @click="testSubscribe()")
+    span Subscribe
+  div(class="popup-file__item" @click="testTrial()")
+    span StartTrial
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -60,6 +66,7 @@ import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import fbPixelUtils from '@/utils/fbPixelUtils'
 
 export default Vue.extend({
   components: {
@@ -146,10 +153,13 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     testSubscribe() {
-      // gtmUtils.subscribe(100, 30)
+      fbPixelUtils.subscribe(false)
     },
-    testTrail() {
-      gtmUtils.startTrail(14)
+    testTrial() {
+      fbPixelUtils.startTrail()
+    },
+    testSignup() {
+      fbPixelUtils.signUp()
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')
