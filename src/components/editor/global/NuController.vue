@@ -760,7 +760,7 @@ export default Vue.extend({
       }
 
       if (this.isTouchDevice && !this.isActive && !this.isLocked) {
-        if (posDiff.x > 0 && posDiff.y > 0) {
+        if (posDiff.x > 2 || posDiff.y > 2) {
           this.isDoingGestureAction = true
         }
         return
