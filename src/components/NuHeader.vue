@@ -3,21 +3,24 @@
     div(class="nu-header__container")
       div
         router-link(to="/"
-          class="nu-header__container__link"
+          class="nu-header__container-link"
           style="height: 50px;")
           svg-icon(class="pointer"
             :iconName="'logo'"
             :iconWidth="'100px'"
             style="height: 50px;")
       transition(name="fade" mode="out-in")
-        div(v-if="!noNavigation" class="body-2" key="navigation")
+        div(v-if="!noNavigation" class="body-2 full-height" key="navigation")
           template(v-for="item in navItems")
-            div(v-if="!item.hidden" class="p-5 pointer"
+            div(v-if="!item.hidden" class="nu-header__container-link"
                 :class="{'text-blue-1': currentPage === item.name}")
-              a(v-if="item.url.startsWith('http')" :href="item.url"
-                class="nu-header__container__link") {{item.label}}
-              router-link(v-else :to="item.url"
-                          class="nu-header__container__link") {{item.label}}
+              url(:url="item.url") {{item.label}}
+              svg-icon(v-if="item.content" iconName="chevron-down"
+                      iconColor="gray-1" iconWidth="16px")
+              div(v-if="item.content" class="nu-header__container-link-more")
+                div(v-for="it in item.content" class="nu-header__container-link-more-col")
+                  url(:url="it.url") {{it.label}}
+                  url(v-for="i in it.content" :url="i.url") {{i.label}}
         div(v-else class="body-2" key="no-navigation")
       div(class="body-2")
         search-bar(v-if="!noSearchbar"
@@ -72,6 +75,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import PopupAccount from '@/components/popup/PopupAccount.vue'
 import Avatar from '@/components/Avatar.vue'
 import MobileMenu from '@/components/homepage/MobileMenu.vue'
+import Url from '@/components/global/Url.vue'
 import constantData from '@/utils/constantData'
 
 export default Vue.extend({
@@ -79,7 +83,8 @@ export default Vue.extend({
     SearchBar,
     PopupAccount,
     MobileMenu,
-    Avatar
+    Avatar,
+    Url
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -206,13 +211,6 @@ export default Vue.extend({
         margin-right: 2vw;
       }
     }
-    &__link {
-      color: unset;
-      text-decoration: unset;
-      &:hover {
-        color: setColor(blue-hover)
-      }
-    }
   }
   &__container-mobile {
     position: relative;
@@ -255,6 +253,59 @@ export default Vue.extend({
     left: -24px;
   }
 }
+
+.nu-header__container-link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 5px;
+  a {
+    color: unset;
+    text-decoration: unset;
+  }
+  &:hover > a, &:hover > span, &:hover > svg, a:hover {
+    color: setColor(blue-hover)
+  }
+  &:hover > &-more {
+    visibility: visible;
+  }
+}
+
+.nu-header__container-link-more {
+  visibility: hidden;
+  display: grid;
+  grid-auto-flow: column;
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  width: 750px;
+  padding: 35px 30px 30px 30px; // ask all 30px
+  margin: 0 auto;
+  background-color: setColor(white);
+  box-shadow: 0px 10px 25px 0px rgba(0, 0, 0, 0.1);
+  &-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    > span:first-child, > a:first-child {
+      @include caption-LG;
+      &::before {
+        content: '';
+        width: 6px; height: 6px;
+        margin: 0px 10px 0px 0px;
+        display: inline-block;
+        vertical-align: middle;
+        background-color: setColor(blue-1);
+      }
+    }
+    > span + a, > a + a {
+      @include body-SM;
+      color: setColor(gray-2);;
+      margin: 10px 0 0 16px;
+    }
+  }
+}
+
 .fade {
   &-enter-active,
   &-leave-active {
