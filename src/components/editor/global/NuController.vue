@@ -759,11 +759,17 @@ export default Vue.extend({
         y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
       }
 
-      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
-        if (posDiff.x > 2 || posDiff.y > 2) {
-          this.isDoingGestureAction = true
+      if (this.isTouchDevice && !this.isLocked) {
+        if (!this.isActive) {
+          if (posDiff.x > 1 || posDiff.y > 1) {
+            this.isDoingGestureAction = true
+            return
+          }
+        } else {
+          if (posDiff.x < 1 && posDiff.y < 1) {
+            return
+          }
         }
-        return
       }
 
       this.isControlling = true
