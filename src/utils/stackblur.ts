@@ -172,25 +172,6 @@ export async function imageDataRGBA (imageData: ImageData, topX: number, topY: n
   }
 
   const DIVIDE_SIZE = 16
-  // const pexelsNum = width * height
-  // const _pexelsNum = Math.ceil(pexelsNum / DIVIDE_SIZE)
-  // let k = 0
-  // for (let j = 0; j < DIVIDE_SIZE; j++) {
-  //   await imageShadowUtils.asyncProcessing(() => {
-  //     for (let i = _pexelsNum * j; i < _pexelsNum * (j + 1) && i < pexelsNum; i += 4) {
-  //       pixels[i] = pixels[i] * pixels[i + 3] / 255
-  //       pixels[i + 1] = pixels[i + 1] * pixels[i + 3] / 255
-  //       pixels[i + 2] = pixels[i + 2] * pixels[i + 3] / 255
-  //       k = i
-  //     }
-  //   })
-  //   if (handlerId !== currHandlerId()) {
-  //     return imageData
-  //   }
-  // }
-  // console.log(k)
-
-  // for (let y = 0; y < height; y++) {
   const _height = Math.ceil(height / DIVIDE_SIZE)
   for (let i = 0; i < DIVIDE_SIZE; i++) {
     await imageShadowUtils.asyncProcessing(() => {

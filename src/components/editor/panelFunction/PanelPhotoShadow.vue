@@ -206,8 +206,8 @@ export default Vue.extend({
         ? (width / imgWidth) * MAXSIZE / drawCanvasWOri
         : (height / imgHeight) * MAXSIZE / drawCanvasHOri
 
-      const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
-      const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
+      const canvasW = Math.ceil(drawCanvasW + CANVAS_SPACE * spaceScale)
+      const canvasH = Math.ceil(drawCanvasH + CANVAS_SPACE * spaceScale)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
 
