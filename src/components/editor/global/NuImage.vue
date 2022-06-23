@@ -569,8 +569,10 @@ export default Vue.extend({
       }
     },
     handleNewShadowEffect(clearShadowSrc = true) {
+      console.log('handle new shadow')
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
+        !canvas && console.warn('the canvas is undefined')
         return
       }
       clearShadowSrc && this.clearShadowSrc()

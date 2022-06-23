@@ -123,7 +123,7 @@ function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
 function recordThePlanToGTM(trialStatus: string, isYearlyPlan: boolean) {
   if (trialStatus === 'not used') {
     gtmUtils.startTrail(14)
-    fbPixelUtils.startTrail(14)
+    fbPixelUtils.startTrail()
   }
   gtmUtils.subscribe(isYearlyPlan)
   fbPixelUtils.subscribe(isYearlyPlan)
