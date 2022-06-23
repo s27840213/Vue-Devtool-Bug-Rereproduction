@@ -95,7 +95,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      // navItems: constantData.headerItems(), // todelete
       isAccountPopup: false,
       isShowMenu: false
     }
@@ -264,7 +263,7 @@ export default Vue.extend({
     text-decoration: unset;
   }
   &:hover > a, &:hover > span, &:hover > svg, a:hover {
-    color: setColor(blue-hover)
+    color: setColor(blue-hover);
   }
   &:hover > &-more {
     visibility: visible;
@@ -300,7 +299,7 @@ export default Vue.extend({
     }
     > span + a, > a + a {
       @include body-SM;
-      color: setColor(gray-2);;
+      color: setColor(gray-2);
       margin: 10px 0 0 16px;
     }
   }

@@ -3,6 +3,7 @@ import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
 import brandkitUtils from './brandkitUtils'
 import _ from 'lodash'
+import { Itheme } from '@/interfaces/theme'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -19,25 +20,34 @@ class PaymentData {
 
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
-    function themeItem(id: number) {
-      const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
-      return {
-        label: template?.title,
-        url: `https://vivipic.com/templates?themes=${id}`
+    function themeItem(id: number | number[]) {
+      if (id instanceof Array) {
+        let templateName = _.filter(store.getters.getEditThemes, (theme: Itheme) => {
+          return id.includes(theme.id)
+        })?.[0]?.title
+        templateName = templateName?.split('(')?.[0]
+        return {
+          label: templateName,
+          url: `https://vivipic.com/templates?themes=${id.join(',')}`
+        }
+      } else {
+        const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
+        return {
+          label: template?.title,
+          url: `https://vivipic.com/templates?themes=${id}`
+        }
       }
     }
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [
-          ...[1, 8, 2, 3, 9, 4].map((id) => themeItem(id)), {
-            label: 'LINE 圖文選單',
-            url: 'https://vivipic.com/templates?themes=14,15'
-          }
-        ]
+        content: [1, 8, 2, 3, 9, 4, [14, 15]].map((id) => themeItem(id))
       }, {
         label: i18n.t('NN0668'),
         content: [5, 7, 6].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [[16, 17]].map((id) => themeItem(id))
       }],
       us: [{
         label: i18n.t('NN0667'),
