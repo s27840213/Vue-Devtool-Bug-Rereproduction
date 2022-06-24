@@ -258,6 +258,7 @@ export default Vue.extend({
   align-items: center;
   height: 100%;
   padding: 5px;
+  cursor: pointer;
   a {
     color: unset;
     text-decoration: unset;
@@ -278,7 +279,7 @@ export default Vue.extend({
   top: 100%;
   left: 0; right: 0;
   width: 750px;
-  padding: 35px 30px 30px 30px; // ask all 30px
+  padding: 30px;
   margin: 0 auto;
   background-color: setColor(white);
   box-shadow: 0px 10px 25px 0px rgba(0, 0, 0, 0.1);

@@ -1,8 +1,5 @@
 <template lang="pug">
   div(class="menu")
-    //- search-bar(class="menu__search"
-    //-           :placeholder="$t('NN0037')"
-    //-           @search="handleSearch")
     div(class="menu-top")
       template(v-for="item in navItems")
         details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
@@ -28,28 +25,34 @@
           avatar(class="mr-10"
             :textSize="14"
             :avatarSize="35")
-        div(class="menu-bottom__link" @click="close()")
-          router-link(to="/settings/menu") {{$tc('NN0649')}}
+        div(class="menu-bottom__link")
+          details
+            summary
+              span {{$tc('NN0649')}}
+              svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
+            div
+              url(v-for="item in settingsItems" :url="`/settings/${item.name}`") {{item.label}}
         div(class="menu-bottom__link"
           @click="onLogoutClicked()")
           span {{$tc('NN0167', 1)}}
 </template>
+
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
-// import SearchBar from '@/components/SearchBar.vue'
 import Avatar from '@/components/Avatar.vue'
 import Url from '@/components/global/Url.vue'
 import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
-    // SearchBar,
     Avatar,
     Url
   },
   data() {
     return {
+      settingsItems: constantData.settingsItems(false)
+        .filter((it:Record<string, string>) => { return it.name !== 'hr' }),
       optionSelected: 0
     }
   },
@@ -74,35 +77,29 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) { // TODO: Hide searchbar in /settings or handle search.
       this.$emit('search', keyword)
-    },
-    close() { this.$emit('closeMenu') }
+    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
 .menu {
-  @include size(280px, 100%); // ask width
+  @include size(280px, 100%);
   @include body-MD;
   display: grid;
-  grid-template-rows: /*auto */1fr 32%;
+  grid-template-rows: 1fr auto;
   grid-template-columns: 1fr;
   row-gap: 15px;
   position: relative;
   left: calc(100% - 280px + 24px);
   box-sizing: border-box;
-  padding: 100px 14px 0 14px;
+  padding: 50px 14px 153px 14px;
   overflow-y: auto;
   text-align: left;
   color: setColor(gray-1);
   background-color: setColor(gray-7);
-  // &__search {
-  //   margin-top: 44px;
-  //   height: 40px;
-  //   background: setColor(white);;
-  // }
   &-bottom__link {
-    margin-top: 20px;
+    margin-top: 6px;
     cursor: pointer;
   }
   a {
@@ -113,8 +110,7 @@ export default Vue.extend({
   }
 }
 
-.menu-top {
-  cursor: pointer;
+.menu-top, .menu-bottom {
   details, div {
     display: flex;
     flex-direction: column;
@@ -123,7 +119,7 @@ export default Vue.extend({
       align-items: center;
     }
   }
-  > details > div/*, details > a*/ { // Only first child pad 20px
+  details > div { // Only first child pad 20px
     padding-left: 20px;
   }
   details[open] > summary > svg { // Flip arrow icon if open

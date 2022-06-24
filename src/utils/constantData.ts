@@ -4,6 +4,7 @@ import { TranslateResult } from 'vue-i18n'
 import brandkitUtils from './brandkitUtils'
 import _ from 'lodash'
 import { Itheme } from '@/interfaces/theme'
+import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -177,6 +178,7 @@ class PaymentData {
       url: '/brandkit',
       label: i18n.t('NN0007')
     }]
+    themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it: Record<string, string>) => !['MyDesign', 'BrandKit'].includes(it.name))
     else return list
   }
