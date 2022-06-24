@@ -3,6 +3,8 @@ import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
 import brandkitUtils from './brandkitUtils'
 import _ from 'lodash'
+import { Itheme } from '@/interfaces/theme'
+import themeUtils from './themeUtils'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -19,64 +21,171 @@ class PaymentData {
 
   // For header.vue and mobileMenu.vue
   headerItems(mobile = false) {
-    const tutorialPage = {
-      tw: 'https://blog.vivipic.com/tw/tutorial/',
-      us: 'https://blog.vivipic.com/us-tutorial/',
-      jp: 'https://www.facebook.com/vivipicjp'
+    function themeItem(id: number | number[]) {
+      if (id instanceof Array) {
+        let templateName = _.filter(store.getters.getEditThemes, (theme: Itheme) => {
+          return id.includes(theme.id)
+        })?.[0]?.title
+        templateName = templateName?.split('(')?.[0]
+        return {
+          label: templateName,
+          url: `https://vivipic.com/templates?themes=${id.join(',')}`
+        }
+      } else {
+        const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
+        return {
+          label: template?.title,
+          url: `https://vivipic.com/templates?themes=${id}`
+        }
+      }
     }
-    const faqPage = {
-      tw: 'https://blog.vivipic.com/tw/faq/',
-      us: 'https://blog.vivipic.com/us-faq/',
-      jp: 'https://www.facebook.com/vivipicjp'
+    const templateType = {
+      tw: [{
+        label: i18n.t('NN0667'),
+        content: [1, 8, 2, 3, 9, 4, [14, 15]].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0668'),
+        content: [5, 6, 7].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [[16, 17]].map((id) => themeItem(id))
+      }],
+      us: [{
+        label: i18n.t('NN0667'),
+        content: [
+          ...[1, 8, 2, 3].map((id) => themeItem(id)), {
+            label: 'Youtube Thumbnail',
+            url: 'https://blog.vivipic.com/us/youtube-thumbnail/'
+          }]
+      }, {
+        label: i18n.t('NN0668'),
+        content: [5, 6].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [{
+          label: 'Invitation',
+          url: 'https://blog.vivipic.com/us/invitations/'
+        }, {
+          label: 'Polaroid Frame',
+          url: 'https://blog.vivipic.com/us/free-polaroid-frame-templates/'
+        }]
+      }],
+      jp: [{
+        label: i18n.t('NN0667'),
+        content: [1, 8, 2, 3, 4, 9].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0668'),
+        content: [5, 6, 7].map((id) => themeItem(id))
+      }]
+    }
+    const resource = {
+      tw: [{
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/tw/'
+      }, {
+        label: i18n.t('NN0672'),
+        content: [{
+          label: i18n.t('NN0673'),
+          url: 'https://blog.vivipic.com/tw/tutorial/'
+        }, {
+          label: i18n.t('NN0147'),
+          url: 'https://blog.vivipic.com/tw/faq/'
+        }]
+      }, {
+        label: i18n.t('NN0674'),
+        content: [{
+          label: i18n.t('NN0675'),
+          url: 'https://blog.vivipic.com/tw/新手入門/'
+        }, {
+          label: i18n.t('NN0676'),
+          url: 'https://blog.vivipic.com/tw/設計教學/'
+        }, {
+          label: i18n.t('NN0677'),
+          url: 'https://blog.vivipic.com/tw/數位行銷/'
+        }, {
+          label: i18n.t('NN0678'),
+          url: 'https://blog.vivipic.com/tw/趨勢分享/'
+        }]
+      }],
+      us: [{
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/us/'
+      }, {
+        label: i18n.t('NN0672'),
+        content: [{
+          label: i18n.t('NN0673'),
+          url: 'https://blog.vivipic.com/us/us-tutorial/'
+        }, {
+          label: i18n.t('NN0147'),
+          url: 'https://blog.vivipic.com/us/us-faq/'
+        }]
+      }, {
+        label: i18n.t('NN0674'),
+        content: [{
+          label: i18n.t('NN0675'),
+          url: 'https://blog.vivipic.com/us/category/tutorial-us/'
+        }, {
+          label: i18n.t('NN0676'),
+          url: 'https://blog.vivipic.com/us/category/design-us/'
+        }, {
+          label: i18n.t('NN0677'),
+          url: 'https://blog.vivipic.com/us/category/digital-marketing-us/'
+        }, {
+          label: i18n.t('NN0678'),
+          url: 'https://blog.vivipic.com/us/category/trend-us/'
+        }]
+      }],
+      jp: [{
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/jp/'
+      }, {
+        label: i18n.t('NN0672'),
+        content: [{
+          label: i18n.t('NN0673'),
+          url: 'https://blog.vivipic.com/jp/4step/'
+        }]
+      }, {
+        label: i18n.t('NN0674'),
+        content: [{
+          label: i18n.t('NN0677'),
+          url: 'https://blog.vivipic.com/jp/category/digital-marketing-jp/'
+        }]
+      }]
     }
 
     const list = [{
-      condition: true,
-      name: 'Home',
-      url: '/',
-      label: i18n.t('NN0144')
+      label: i18n.t('NN0666'),
+      content: templateType[i18n.locale as keyof typeof templateType]
     }, {
-      condition: true,
       name: 'TemplateCenter',
       url: '/templates',
       label: i18n.t('NN0145')
     }, {
-      condition: true,
-      name: 'Toturial',
-      url: tutorialPage[i18n.locale as keyof typeof tutorialPage],
-      label: i18n.t('NN0146')
+      label: i18n.t('NN0670'),
+      content: resource[i18n.locale as keyof typeof resource]
     }, {
-      condition: true,
-      name: 'Faq',
-      url: faqPage[i18n.locale as keyof typeof faqPage],
-      label: i18n.t('NN0147')
-    }, {
-      condition: true,
       name: 'Pricing',
       url: '/pricing',
       label: i18n.t('NN0643')
     }, {
-      condition: this.isLogin(),
+      hidden: !this.isLogin(),
       name: 'MyDesign',
       url: '/mydesign',
       label: i18n.t('NN0080')
     }, {
-      condition: this.isLogin() && brandkitUtils.isBrandkitAvailable, // todelete isBrandkitAvailable
+      hidden: !this.isLogin(),
       name: 'BrandKit',
       url: '/brandkit',
       label: i18n.t('NN0007')
     }]
+    themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it: Record<string, string>) => !['MyDesign', 'BrandKit'].includes(it.name))
     else return list
   }
 
   // For Settings
-  settingsItems(all = false) {
+  settingsItems() {
     const list = [{
-      name: 'menu',
-      label: i18n.tc('NN0649'),
-      hidden: true
-    }, {
       name: 'account',
       label: i18n.tc('NN0165', 1),
       icon: 'settings'
@@ -95,8 +204,7 @@ class PaymentData {
       label: i18n.t('NN0614'),
       icon: 'invoice'
     }]
-    if (all) return list
-    else return _.filter(list, (it: Record<string, string>) => !it.hidden)
+    return list
   }
 
   // For PanelObject toHtml

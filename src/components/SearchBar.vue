@@ -10,12 +10,12 @@
     svg-icon(v-if="clear && keyword"
       class="pointer mr-5"
       iconName="close"
-      iconColor="gray-3"
+      :iconColor="color.close || 'gray-3'"
       iconWidth="20px"
       @click.native="onClear")
     svg-icon(class="pointer"
       iconName="search"
-      iconColor="gray-3"
+      :iconColor="color.search || 'gray-3'"
       iconWidth="20px"
       @click.native="onSearch")
     slot
@@ -43,6 +43,15 @@ export default Vue.extend({
     fontFamily: {
       type: String,
       default: ''
+    },
+    color: {
+      type: Object,
+      default: () => {
+        return {
+          close: 'gray-3',
+          search: 'gray-3'
+        }
+      }
     }
   },
   data() {
