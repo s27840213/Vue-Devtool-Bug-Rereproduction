@@ -47,14 +47,26 @@
             class="nu-header__account"
             @close="() => (isAccountPopup = false)")
     div(class="nu-header__container-mobile")
-      div(class="flex-center pl-15")
+      div(class="flex-center")
         svg-icon(class="pointer"
           :iconName="'logo'"
-          :iconWidth="'90px'"
+          :iconWidth="'143px'"
           style="height: 45px;"
           @click.native="goToPage('Home')")
-      div(class="pr-15")
-        svg-icon(:iconName="'menu'"
+      div
+        template(v-if="!noSearchbar")
+          svg-icon(v-if="!isShowSearchPage"
+            :iconName="'search'"
+            :iconColor="'gray-3'"
+            :iconWidth="'25px'"
+            @click.native="() => { isShowSearchPage = true }")
+          svg-icon(v-else
+            :iconName="'close'"
+            :iconColor="'gray-3'"
+            :iconWidth="'25px'"
+            @click.native="closeSearchPage")
+        svg-icon(v-if="!isShowSearchPage"
+          :iconName="'menu'"
           :iconWidth="'25px'"
           :iconColor="'gray-1'"
           @click.native="openMenu")
@@ -62,10 +74,17 @@
     transition(name="slide-x-right")
       div(v-if="isShowMenu"
           class="nu-header__menu popup-window")
-        //- todo check if @search need
         mobile-menu(@closeMenu="() => { isShowMenu = false }"
-          v-click-outside="() => { isShowMenu = false }"
-          @search="handleSearch")
+          v-click-outside="() => { isShowMenu = false }")
+    div(v-if="isShowSearchPage"
+      class="nu-header__search-mobile")
+      search-bar(class="search"
+        :placeholder="$t('NN0092', {target: $t('NN0145')})"
+        @search="handleSearch")
+      //- div(class="pt-20 nu-header__search-mobile__title") {{$t('NN0227')}}:
+      //- div(class="pt-10 nu-header__search-mobile__options")
+      //-   span(v-for="key in keys"
+      //-     @click="handleSearch(key)") {{key}}
 </template>
 
 <script lang="ts">
@@ -97,7 +116,8 @@ export default Vue.extend({
   data() {
     return {
       isAccountPopup: false,
-      isShowMenu: false
+      isShowMenu: false,
+      isShowSearchPage: false
     }
   },
   computed: {
@@ -133,6 +153,7 @@ export default Vue.extend({
     },
     handleSearch(keyword: string) {
       if (!keyword) return
+      this.isShowSearchPage = false
       if (this.currentPage === 'TemplateCenter') {
         this.$emit('search', keyword)
       }
@@ -140,6 +161,9 @@ export default Vue.extend({
     },
     openMenu() {
       this.isShowMenu = true
+    },
+    closeSearchPage() {
+      this.isShowSearchPage = false
     }
   }
 })
@@ -218,16 +242,15 @@ export default Vue.extend({
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
+    padding: 16px 24px;
     width: 100%;
     height: 100%;
+    svg + svg {
+      margin-left: 20px;
+    }
     @media screen and (min-width: 769px) {
       display: none;
-    }
-    :nth-child(2) {
-      width: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
   }
   &__search {
@@ -306,6 +329,39 @@ export default Vue.extend({
       margin: 10px 0 0 16px;
     }
   }
+}
+
+.nu-header__search-mobile {
+  position: absolute;
+  box-sizing: border-box;
+  height: calc(100vh - #{$header-height});
+  background-color: white;
+  padding: 20px;
+  .search {
+    border: 1px solid setColor(gray-4);
+    background-color: white;
+  }
+  // &__title {
+  //   font-weight: normal;
+  //   font-size: 14px;
+  //   text-align: left;
+  //   color: setColor(gray-2);
+  // }
+  // &__options {
+  //   display: flex;
+  //   flex-wrap: wrap;
+  //   justify-content: flex-start;
+  //   color: setColor(gray-2);
+  //   > span {
+  //     font-size: 14px;
+  //     background-color: white;
+  //     border: 1px solid #e0e0e0;
+  //     box-sizing: border-box;
+  //     border-radius: 100px;
+  //     padding: 5px 10px;
+  //     margin: 6px 5px;
+  //   }
+  // }
 }
 
 .fade {

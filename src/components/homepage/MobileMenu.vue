@@ -31,7 +31,8 @@
               span {{$tc('NN0649')}}
               svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
             div
-              url(v-for="item in settingsItems" :url="`/settings/${item.name}`") {{item.label}}
+              url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
+                  :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
         div(class="menu-bottom__link"
           @click="onLogoutClicked()")
           span {{$tc('NN0167', 1)}}
@@ -74,9 +75,6 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    },
-    handleSearch(keyword: string) { // TODO: Hide searchbar in /settings or handle search.
-      this.$emit('search', keyword)
     }
   }
 })
@@ -124,6 +122,9 @@ export default Vue.extend({
   }
   details[open] > summary > svg { // Flip arrow icon if open
     transform: scaleY(-1);
+  }
+  summary:focus, summary:focus > svg { // Set color when user click summary
+    color: setColor(blue-hover);
   }
   summary::-webkit-details-marker { // Romove detail arrow in safari
     display: none;
