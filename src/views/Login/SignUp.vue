@@ -155,6 +155,7 @@ import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
 import loginUtils from '@/utils/loginUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import fbPixelUtils from '@/utils/fbPixelUtils'
 
 export default Vue.extend({
   name: 'SignUp',
@@ -315,7 +316,7 @@ export default Vue.extend({
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
           if (data.data.new_user) {
-            generalUtils.fbq('track', 'CompleteRegistration')
+            fbPixelUtils.fbq('track', 'CompleteRegistration')
             gtmUtils.signUp('Facebook')
           }
           store.dispatch('user/loginSetup', { data: data })
@@ -333,7 +334,7 @@ export default Vue.extend({
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
           if (data.data.new_user) {
-            generalUtils.fbq('track', 'CompleteRegistration')
+            fbPixelUtils.fbq('track', 'CompleteRegistration')
             gtmUtils.signUp('Google')
           }
           store.dispatch('user/loginSetup', { data: data })
@@ -445,7 +446,7 @@ export default Vue.extend({
       }
       const data = await store.dispatch('user/verifyVcode', parameter)
       if (data.flag === 0) {
-        generalUtils.fbq('track', 'CompleteRegistration')
+        fbPixelUtils.fbq('track', 'CompleteRegistration')
         gtmUtils.signUp('Vivipic')
         await store.dispatch('user/login', { token: data.token })
         this.$router.push({ path: this.redirect || '/' })

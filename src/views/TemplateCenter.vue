@@ -83,8 +83,10 @@
                         @clickWaterfall="handleClickWaterfall")
     nu-footer(class="non-mobile-show")
     transition(name="fade-scale")
-      div(v-if="snapToTop" class="template-center__to-top pointer non-mobile-show" @click="scrollToTop")
-        img(:src="require('@/assets/img/svg/to_top.svg')")
+      div(v-if="snapToTop"
+          class="template-center__to-top pointer non-mobile-show"
+          @click="scrollToTop")
+        svg-icon(iconName="to-top" iconWidth="40px" iconColor="white")
     transition(name="fade-scale-center")
       div(v-if="modal === 'pages'" class="template-center__multi"
           v-click-outside="() => { modal = '' }")
@@ -791,6 +793,10 @@ body {
     position: fixed;
     right: 76px;
     bottom: 84px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(196, 196, 196, 0.8);
   }
   &__multi {
     position: fixed;

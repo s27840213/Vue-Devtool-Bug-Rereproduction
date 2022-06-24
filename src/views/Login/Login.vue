@@ -209,6 +209,7 @@ import localeUtils from '@/utils/localeUtils'
 import generalUtils from '@/utils/generalUtils'
 import loginUtils from '@/utils/loginUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import fbPixelUtils from '@/utils/fbPixelUtils'
 
 export default Vue.extend({
   name: 'Login',
@@ -363,7 +364,7 @@ export default Vue.extend({
         const { data } = await userApis.fbLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
           if (data.data.new_user) {
-            generalUtils.fbq('track', 'CompleteRegistration')
+            fbPixelUtils.fbq('track', 'CompleteRegistration')
             gtmUtils.signUp('Facebook')
           }
           store.dispatch('user/loginSetup', { data: data })
@@ -381,7 +382,7 @@ export default Vue.extend({
         const { data } = await userApis.googleLogin(code, redirectUri, this.currLocale)
         if (data.flag === 0) {
           if (data.data.new_user) {
-            generalUtils.fbq('track', 'CompleteRegistration')
+            fbPixelUtils.fbq('track', 'CompleteRegistration')
             gtmUtils.signUp('Google')
           }
           store.dispatch('user/loginSetup', { data: data })

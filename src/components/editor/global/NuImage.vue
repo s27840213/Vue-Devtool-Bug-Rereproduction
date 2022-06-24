@@ -267,8 +267,8 @@ export default Vue.extend({
       }
       const position = {
         width: width / 2,
-        x: Math.abs(imgX) + width / 2,
-        y: Math.abs(imgY) + height / 2
+        x: width / 2,
+        y: height / 2
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
@@ -569,8 +569,10 @@ export default Vue.extend({
       }
     },
     handleNewShadowEffect(clearShadowSrc = true) {
+      console.log('handle new shadow')
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
+        !canvas && console.warn('the canvas is undefined')
         return
       }
       clearShadowSrc && this.clearShadowSrc()

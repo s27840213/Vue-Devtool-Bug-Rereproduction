@@ -420,3 +420,15 @@ export interface IAssetTemplate {
   }
   group_type: number
 }
+
+export interface IFbTrackingData {
+  event_name: string,
+  event_id: string,
+  url: string,
+  email: string,
+  first_name?: string,
+  last_name?: string,
+  phone?: string,
+  custom_data?: string,
+  subscription_id?: string
+}
