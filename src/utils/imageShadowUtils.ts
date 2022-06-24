@@ -10,7 +10,7 @@ import layerUtils from './layerUtils'
 import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
-import { imageDataRGBA } from './stackblur'
+import { imageDataAChannel, imageDataRGBA } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
@@ -59,6 +59,7 @@ const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs:
   for (let i = 0; i < marks[type].length - 1; i++) {
     performance.measure('FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1], marks[type][i], marks[type][i + 1])
   }
+  performance.measure('FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1], marks[type][0], marks[type][marks[type].length - 1])
   const measures = performance.getEntriesByType('measure')
   measures.forEach(measureItem => {
     const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
@@ -229,7 +230,7 @@ class ImageShadowUtils {
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
-      const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
+      const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
 
       if (this.handlerId === handlerId) {
         this.dataBuff.effect = ShadowEffectType.floating
@@ -501,7 +502,7 @@ class ImageShadowUtils {
         ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-        const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+        const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
         const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting * (layerWidth / _imgWidth) : 0
         const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting * (layerHeight / _imgHeight) : 0
@@ -620,58 +621,6 @@ class ImageShadowUtils {
         ...effects,
         ...attrs
       })
-    }
-  }
-
-  /** Only used for blur and floating effects */
-  convertShadowEffect(config: IImage): { [key: string]: string | number } {
-    const { shadow, scale } = config.styles
-    const { color = '#000000' } = shadow.effects
-    const effect = shadow.currentEffect !== ShadowEffectType.none
-      ? shadow.effects[shadow.currentEffect] : {}
-
-    switch (shadow.currentEffect) {
-      case ShadowEffectType.imageMatched: {
-        const { radius, distance, angle, size, opacity } = effect as ShadowEffects
-        const x = distance * mathUtils.cos(angle)
-        const y = distance * mathUtils.sin(angle)
-        return {
-          backgroundImage: `url(${imageUtils.getSrc(config)})`,
-          backgroundColor: `rgba(255, 255, 255, ${1 - opacity / 100})`,
-          backgroundBlendMode: 'overlay',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          zIndex: -1,
-          width: `${size}%`,
-          height: `${size}%`,
-          bottom: `${-y}%`,
-          left: `${x - (size - 100) / 2}%`,
-          filter: `blur(${radius * scale}px)`
-        }
-      }
-      case ShadowEffectType.floating: {
-        const { radius, spread, opacity, x, y, size } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity', 'size']) as ShadowEffects
-        return {
-          width: `${size}%`,
-          left: `${x * fieldRange.floating.x.weighting + (100 - size) / 2}%`,
-          bottom: `${-y * fieldRange.floating.y.weighting}%`,
-          zIndex: -1,
-          boxShadow:
-          // `0px ${HALO_Y_OFFSET * scale}px ` +
-          `${(radius + 30) * fieldRange.floating.radius.weighting}px ` +
-          `${spread}px ` +
-          `${color + this.convertToAlpha(opacity)}`
-        }
-      }
-      case ShadowEffectType.none:
-      case ShadowEffectType.blur:
-      case ShadowEffectType.shadow:
-      case ShadowEffectType.frame:
-        return {}
-      default:
-        return generalUtils.assertUnreachable(shadow.currentEffect)
     }
   }
 

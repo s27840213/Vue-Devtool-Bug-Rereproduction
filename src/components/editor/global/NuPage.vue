@@ -273,6 +273,19 @@ export default Vue.extend({
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
   },
+  watch: {
+    guidelines: {
+      handler() {
+        this.getClosestSnaplines()
+      },
+      deep: true
+    },
+    isOutOfBound(val) {
+      if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
+        GroupUtils.deselect()
+      }
+    }
+  },
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
@@ -287,7 +300,8 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline'
+      lockGuideline: 'getLockGuideline',
+      currFunctionPanelType: 'getCurrFunctionPanelType'
     }),
     getCurrLayer(): ILayer {
       return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
@@ -397,14 +411,6 @@ export default Vue.extend({
         y: -posY + height / 2
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
-    }
-  },
-  watch: {
-    guidelines: {
-      handler() {
-        this.getClosestSnaplines()
-      },
-      deep: true
     }
   },
   methods: {

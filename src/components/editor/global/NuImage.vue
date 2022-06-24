@@ -10,8 +10,7 @@
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
-        :style="flipStyles"
-        :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+        :class="{'nu-image__picture': true }"
         draggable="false"
         :src="shadowSrc"
         @error="onError()"
@@ -84,12 +83,10 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
+    this.handleShadowInit()
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
-    if (this.shadow.srcObj.type === 'shadow-private') {
-      this.fetchShadowImg()
-    }
     eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
         if (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent) {
@@ -105,7 +102,6 @@ export default Vue.extend({
               subLayerIdx: this.subLayerIndex
             }, { isTransparent })
             isTransparent && this.redrawShadow(true)
-            // Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
           }
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
           img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
@@ -194,14 +190,7 @@ export default Vue.extend({
       }
     },
     'shadow.srcObj'(val) {
-      if (val.type === 'upload' && val.assetId) {
-        const uploadData = (this.uploadShadowImgs as Array<IUploadShadowImg>)
-          .find((data: IUploadShadowImg) => data.id === val.assetId)
-        if (uploadData) {
-          imageShadowUtils.updateShadowSrc(this.layerInfo, uploadData.srcObj)
-          imageShadowUtils.updateShadowStyles(this.layerInfo, uploadData.styles)
-        }
-      }
+      this.handleUploadShadowImg()
     },
     uploadShadowImgs: {
       handler(val: Array<IUploadShadowImg>) {
@@ -301,15 +290,12 @@ export default Vue.extend({
       if (this.forRender) {
         return {}
       }
-      const { horizontalFlip, verticalFlip, scale } = this.config.styles
+      const { scale } = this.config.styles
       const { width, height } = this.shadowBuff.canvasSize
-      const scaleX = horizontalFlip ? -scale : scale
-      const scaleY = verticalFlip ? -scale : scale
-
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${scaleX}, ${scaleY})`
+        transform: `scale(${scale})`
       }
     },
     imgWrapperstyle(): any {
@@ -335,12 +321,12 @@ export default Vue.extend({
         return {}
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
-      const { horizontalFlip, verticalFlip, scale } = this.config.styles
+      const { scale } = this.config.styles
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
         // transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px)`
-        transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px) scale(${scale})`
+        transform: `translate(${imgX * scale}px, ${imgY * scale}px) scale(${scale})`
       }
     },
     getImgDimension(): number {
@@ -568,6 +554,36 @@ export default Vue.extend({
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
     },
+    handleShadowInit() {
+      const { shadow } = this
+      switch (shadow.srcObj.type) {
+        case 'shadow-private':
+          this.fetchShadowImg()
+          break
+        // case 'upload':
+        //   if (shadow.srcObj.assetId) {
+        //     this.handleUploadShadowImg()
+        //   } else {
+        //     imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+        //   }
+        //   break
+        // case '':
+        //   imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+      }
+      if (this.shadow.srcObj.type === 'shadow-private') {
+      }
+    },
+    handleUploadShadowImg() {
+      const { srcObj } = this.shadow
+      if (srcObj.type === 'upload' && srcObj.assetId) {
+        const uploadData = (this.uploadShadowImgs as Array<IUploadShadowImg>)
+          .find((data: IUploadShadowImg) => data.id === srcObj.assetId)
+        if (uploadData) {
+          imageShadowUtils.updateShadowSrc(this.layerInfo, uploadData.srcObj)
+          imageShadowUtils.updateShadowStyles(this.layerInfo, uploadData.styles)
+        }
+      }
+    },
     handleNewShadowEffect(clearShadowSrc = true) {
       console.log('handle new shadow')
       const { canvas, layerInfo, shadowBuff } = this
@@ -595,6 +611,9 @@ export default Vue.extend({
       canvas.setAttribute('height', `${canvasH}`)
 
       const { currentEffect } = this.shadow
+      if (currentEffect !== ShadowEffectType.none) {
+        imageShadowUtils.setIsProcess(layerInfo, true)
+      }
       switch (currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
