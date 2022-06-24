@@ -334,6 +334,7 @@ export default Vue.extend({
 .nu-header__search-mobile {
   position: absolute;
   box-sizing: border-box;
+  width: 100%;
   height: calc(100vh - #{$header-height});
   background-color: white;
   padding: 20px;

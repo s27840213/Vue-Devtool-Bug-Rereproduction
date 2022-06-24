@@ -45,7 +45,7 @@ class PaymentData {
         content: [1, 8, 2, 3, 9, 4, [14, 15]].map((id) => themeItem(id))
       }, {
         label: i18n.t('NN0668'),
-        content: [5, 7, 6].map((id) => themeItem(id))
+        content: [5, 6, 7].map((id) => themeItem(id))
       }, {
         label: i18n.t('NN0669'),
         content: [[16, 17]].map((id) => themeItem(id))
@@ -59,7 +59,7 @@ class PaymentData {
           }]
       }, {
         label: i18n.t('NN0668'),
-        content: [6, 5].map((id) => themeItem(id))
+        content: [5, 6].map((id) => themeItem(id))
       }, {
         label: i18n.t('NN0669'),
         content: [{
