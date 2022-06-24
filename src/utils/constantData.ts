@@ -184,12 +184,8 @@ class PaymentData {
   }
 
   // For Settings
-  settingsItems(all = false) {
+  settingsItems() {
     const list = [{
-      name: 'menu',
-      label: i18n.tc('NN0649'),
-      hidden: true
-    }, {
       name: 'account',
       label: i18n.tc('NN0165', 1),
       icon: 'settings'
@@ -208,8 +204,7 @@ class PaymentData {
       label: i18n.t('NN0614'),
       icon: 'invoice'
     }]
-    if (all) return list
-    else return _.filter(list, (it: Record<string, string>) => !it.hidden)
+    return list
   }
 
   // For Pricing.vue

@@ -26,6 +26,7 @@
         search-bar(v-if="!noSearchbar"
           class="nu-header__search"
           :placeholder="$t('NN0037')"
+          :color="{ search: 'gray-1', close: 'gray-1' }"
           @search="handleSearch")
         div(v-if="!isLogin"
           class="nu-header__btn-login py-5 px-30 text-bold pointer text-blue-1"
@@ -131,6 +132,7 @@ export default Vue.extend({
       // ----------------------
     },
     handleSearch(keyword: string) {
+      if (!keyword) return
       if (this.currentPage === 'TemplateCenter') {
         this.$emit('search', keyword)
       }

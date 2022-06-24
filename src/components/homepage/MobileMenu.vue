@@ -51,8 +51,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      settingsItems: constantData.settingsItems(false)
-        .filter((it:Record<string, string>) => { return it.name !== 'hr' }),
+      settingsItems: constantData.settingsItems()
+        .filter((it: {name: string}) => { return it.name !== 'hr' }),
       optionSelected: 0
     }
   },
