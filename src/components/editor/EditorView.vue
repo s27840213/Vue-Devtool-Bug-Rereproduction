@@ -73,6 +73,7 @@ import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -166,14 +167,7 @@ export default Vue.extend({
           this.clearBgRemoveState()
         })
       } else {
-        const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
-        const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
-        const oldScrollWidth = editor.scrollWidth
-        const oldScrollHeight = editor.scrollHeight
-        this.$nextTick(() => {
-          editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
-          editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
-        })
+        generalUtils.scaleFromCenter(editor)
       }
     },
     screenHeight() {

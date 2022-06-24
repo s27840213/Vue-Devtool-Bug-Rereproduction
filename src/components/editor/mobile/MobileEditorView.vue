@@ -16,7 +16,8 @@
           :key="`page-${index}`"
           class="editor-view__card"
           :style="cardStyle(index)"
-          @mousedown.left.self="outerClick($event)")
+          @mousedown.left.self="outerClick($event)"
+          ref="card")
         nu-page(
           :ref="`page-${index}`"
           :pageIndex="index"
@@ -155,15 +156,8 @@ export default Vue.extend({
   },
   watch: {
     pageScaleRatio() {
-      const editor = this.$refs.editorView as HTMLElement
-      const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
-      const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
-      const oldScrollWidth = editor.scrollWidth
-      const oldScrollHeight = editor.scrollHeight
-      this.$nextTick(() => {
-        editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
-        editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
-      })
+      const card = (this.$refs.card as HTMLElement[])[this.currCardIndex]
+      generalUtils.scaleFromCenter(card)
     },
     screenHeight() {
       pageUtils.findCentralPageIndexInfo(true)
@@ -417,7 +411,10 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    justify-content: center;
+    margin: 0 auto;
+    // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
+
+    // justify-content: center;
     overflow: scroll;
     padding: 40px;
     transition: transform 0.3s;

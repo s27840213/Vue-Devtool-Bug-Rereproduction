@@ -1,5 +1,6 @@
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import Vue from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 class GeneralUtils {
@@ -27,6 +28,17 @@ class GeneralUtils {
     return conditions.filter((condition: boolean) => {
       return condition === true
     }).length === 1
+  }
+
+  scaleFromCenter(el: HTMLElement) {
+    const scrollCenterX = (2 * el.scrollLeft + el.clientWidth)
+    const scrollCenterY = (2 * el.scrollTop + el.clientHeight)
+    const oldScrollWidth = el.scrollWidth
+    const oldScrollHeight = el.scrollHeight
+    Vue.nextTick(() => {
+      el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
+      el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
+    })
   }
 
   generateAssetId() {
