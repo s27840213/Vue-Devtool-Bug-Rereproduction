@@ -558,6 +558,7 @@ export default Vue.extend({
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
       page.designId = ''
+      page.id = GeneralUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })
