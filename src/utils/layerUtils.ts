@@ -152,7 +152,7 @@ class LayerUtils {
         }
       })
     })
-    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
   }
 
   deleteSubLayer(pageIndex: number, primaryIndex: number, subIndex: number) {
