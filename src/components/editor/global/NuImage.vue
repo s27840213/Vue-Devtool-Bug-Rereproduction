@@ -5,7 +5,7 @@
     div(v-if="showCanvas"
       class="shadow__canvas-wrapper"
       :style="canvasWrapperStyle")
-      canvas(ref="canvas")
+      canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
     div(v-if="shadowSrc && !config.isFrameImg"
       class="shadow__picture"
       :style="imgShadowStyles")
@@ -189,7 +189,7 @@ export default Vue.extend({
         }
       }
     },
-    'shadow.srcObj'(val) {
+    'shadow.srcObj'() {
       this.handleUploadShadowImg()
     },
     uploadShadowImgs: {
@@ -213,7 +213,8 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
-      isHandling: 'shadow/isHandling'
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
@@ -450,16 +451,6 @@ export default Vue.extend({
         case 'logo-private':
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([srcObj.assetId]) })
           break
-        case 'public':
-        case 'background': {
-          fetch(this.src)
-            .then(res => {
-              if (res.status === 404) {
-                errorHandle.addMissingDesign(srcObj.type === 'public' ? 'asset-image' : 'background', srcObj.assetId)
-              }
-            })
-          break
-        }
       }
 
       if (updater !== undefined) {
@@ -560,15 +551,15 @@ export default Vue.extend({
         case 'shadow-private':
           this.fetchShadowImg()
           break
-        // case 'upload':
-        //   if (shadow.srcObj.assetId) {
-        //     this.handleUploadShadowImg()
-        //   } else {
-        //     imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
-        //   }
-        //   break
-        // case '':
-        //   imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+        case 'upload':
+          if (shadow.srcObj.assetId) {
+            this.handleUploadShadowImg()
+          } else {
+            // imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+          }
+          break
+        case '':
+          imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
       }
       if (this.shadow.srcObj.type === 'shadow-private') {
       }
@@ -585,7 +576,6 @@ export default Vue.extend({
       }
     },
     handleNewShadowEffect(clearShadowSrc = true) {
-      console.log('handle new shadow')
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
         !canvas && console.warn('the canvas is undefined')
@@ -610,6 +600,16 @@ export default Vue.extend({
       canvas.setAttribute('width', `${canvasW}`)
       canvas.setAttribute('height', `${canvasH}`)
 
+      let canvasList = [canvas]
+      if (this.isShowPagePanel) {
+        const { pageIndex, layerIndex, subLayerIndex } = this
+        canvasList = [
+          ...document
+            .querySelectorAll(`.shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`)
+        ] as HTMLCanvasElement[]
+      }
+      console.log(this.isShowPagePanel, canvasList)
+
       const { currentEffect } = this.shadow
       if (currentEffect !== ShadowEffectType.none) {
         imageShadowUtils.setIsProcess(layerInfo, true)
@@ -619,7 +619,7 @@ export default Vue.extend({
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
           if (shadowBuff.canvasShadowImg.shadow && shadowBuff.canvasShadowImg.shadow.src === this.src) {
-            imageShadowUtils.drawShadow(canvas, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
+            imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
               pageId: pageUtils.getPage(this.pageIndex).id,
               drawCanvasW: shadowBuff.drawCanvasW,
               drawCanvasH: shadowBuff.drawCanvasH,
@@ -629,7 +629,7 @@ export default Vue.extend({
             const img = new Image()
             img.crossOrigin = 'anonymous'
             img.onload = () => {
-              imageShadowUtils.drawShadow(canvas, img, this.config, {
+              imageShadowUtils.drawShadow(canvasList, img, this.config, {
                 pageId: pageUtils.getPage(this.pageIndex).id,
                 drawCanvasW: shadowBuff.drawCanvasW,
                 drawCanvasH: shadowBuff.drawCanvasH,
@@ -708,6 +708,16 @@ export default Vue.extend({
         return
       }
 
+      let canvasList = [canvas]
+      if (this.isShowPagePanel) {
+        const { pageIndex, layerIndex, subLayerIndex } = this
+        canvasList = [
+          ...document
+            .querySelectorAll(`.shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`)
+        ] as HTMLCanvasElement[]
+      }
+      console.log(this.isShowPagePanel, canvasList)
+
       window.requestAnimationFrame(() => {
         this.UPDATE_shadowEffect({
           layerInfo,
@@ -721,7 +731,7 @@ export default Vue.extend({
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
             if (shadowBuff.canvasShadowImg.shadow as HTMLImageElement) {
-              imageShadowUtils.drawShadow(canvas, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
+              imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH

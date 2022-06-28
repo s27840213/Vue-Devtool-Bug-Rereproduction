@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="page-preview-page"
     :style="styles2()"
-    :class="{'full-height': type === 'full'}")
+    :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
     div(class="page-preview-page-content pointer"
       :style="styles()"
       @click="clickPage()"

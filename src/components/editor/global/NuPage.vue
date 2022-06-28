@@ -224,6 +224,7 @@ import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -301,7 +302,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       lockGuideline: 'getLockGuideline',
-      currFunctionPanelType: 'getCurrFunctionPanelType'
+      currFunctionPanelType: 'getCurrFunctionPanelType',
+      isProcessingShadow: 'shadow/isProcessing'
     }),
     getCurrLayer(): ILayer {
       return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
@@ -555,6 +557,11 @@ export default Vue.extend({
       StepsUtils.record()
     },
     duplicatePage() {
+      console.log(this.isProcessingShadow)
+      if (this.isProcessingShadow) {
+        Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+        return
+      }
       GroupUtils.deselect()
       const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
       page.designId = ''

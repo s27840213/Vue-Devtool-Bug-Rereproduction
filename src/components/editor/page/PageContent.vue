@@ -60,6 +60,10 @@ export default Vue.extend({
     pageIndex: {
       type: Number,
       required: true
+    },
+    isPagePreview: {
+      type: Boolean,
+      required: false
     }
   },
   data() {

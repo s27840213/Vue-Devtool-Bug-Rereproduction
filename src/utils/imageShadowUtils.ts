@@ -54,7 +54,6 @@ const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs:
   // if (isProduction) return
   logs.forEach(log => {
     logUtils.setLog(log)
-    console.log(log)
   })
   for (let i = 0; i < marks[type].length - 1; i++) {
     performance.measure('FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1], marks[type][i], marks[type][i + 1])
@@ -64,7 +63,6 @@ const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs:
   measures.forEach(measureItem => {
     const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
     logUtils.setLog(log)
-    console.log(log)
   })
   performance.clearMeasures()
 }
@@ -389,7 +387,8 @@ class ImageShadowUtils {
     })
   }
 
-  async drawShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params || {}
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
     const { effects, currentEffect } = shadow
@@ -412,10 +411,45 @@ class ImageShadowUtils {
         layerInfo = this.layerData?.options?.layerInfo
       }
 
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
       const imgX = _imgX * scaleRatio
       const imgY = _imgY * scaleRatio
+      // const edgeCanvas = document.createElement('canvas')
+      // const edgeCtx = edgeCanvas.getContext('2d') as CanvasRenderingContext2D
+      // edgeCtx.drawImage(img, 0, 0)
+      // const { top, left, right, bottom } = await this.getImgEdgeWidth(edgeCanvas)
+      // console.log(top, left, right, bottom, edgeCanvas.width, edgeCanvas.height)
+      // const drawImgWidth = edgeCanvas.width - left - right
+      // const drawImgHeight = edgeCanvas.height - top - bottom
+      // const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      // let drawImgWidth = 0
+      // let drawImgHeight = 0
+      // await new Promise<void>((resolve) => {
+      //   fetch('https://template.vivipic.com/admin/cFQDScGkAZG6ED2Qx6Im/asset/image/220310122116720bVHVgAc5/larg?origin=true&ver=303120221747')
+      //     .then((response) => response.text())
+      //     .then((data) => {
+      //       svg.innerHTML = data
+      //       document.body.appendChild(svg)
+      //       const { width, height } = svg.getBBox()
+      //       console.log(width, height)
+      //       drawImgWidth = width
+      //       drawImgHeight = height
+      //       const outerHTML = data
+      //       const blob = new Blob([outerHTML], { type: 'image/svg+xml;charset=utf-8' })
+      //       const URL = window.URL || window.webkitURL || window
+      //       const blobURL = URL.createObjectURL(blob)
+      //       console.log(blobURL)
+      //       const blobImg = new Image()
+      //       blobImg.onload = () => {
+      //         document.body.appendChild(blobImg)
+      //         console.log(blobImg)
+      //         resolve()
+      //       }
+      //       blobImg.src = blobURL
+      //     })
+      // })
+      // console.log(svg)
+
       const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
       const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
       let { drawCanvasW, drawCanvasH } = params || {}
@@ -488,7 +522,17 @@ class ImageShadowUtils {
         if (res) {
           MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
         }
+        await new Promise<void>((resolve) => {
+          const img = new Image()
+          img.onload = () => {
+            // MAXSIZE = Math.min(Math.max(img.naturalHeight, img.naturalWidth), 1600)
+            MAXSIZE = Math.min(Math.max(img.height, img.width), 1600)
+            resolve()
+          }
+          img.src = imageUtils.getSrc(config.srcObj, 'larg')
+        })
       }
+      // console.log('MAXSIZE', MAXSIZE)
 
       const mappingScale = _imgWidth > _imgHeight
         ? (layerWidth / _imgWidth) * MAXSIZE / drawCanvasW
@@ -497,6 +541,8 @@ class ImageShadowUtils {
 
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${Math.ceil(canvas.width * mappingScale)}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${Math.ceil(canvas.height * mappingScale)}`)
+      // console.log('canvasMaxSize', canvasMaxSize.width, canvasMaxSize.height)
+      // console.log('canvas', canvas.width, canvas.height)
 
       if (this.handlerId === handlerId) {
         ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
@@ -523,8 +569,11 @@ class ImageShadowUtils {
           ctxT.globalAlpha = 1
           ctxT.globalCompositeOperation = 'source-over'
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(canvasT, 0, 0)
+          canvas_s.forEach(c => {
+            const ctx = c.getContext('2d') as CanvasRenderingContext2D
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.drawImage(canvasT, 0, 0)
+          })
           if (layerInfo) {
             timeout && this.setIsProcess(layerInfo, false)
           }
