@@ -24,6 +24,7 @@ import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import heic2any from 'heic2any'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -145,6 +146,9 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
+
+    console.log('choose asset')
+
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -159,6 +163,7 @@ class UploadUtils {
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
         const files = (<HTMLInputElement>evt.target).files
+        console.log(files)
         const params: { brandId?: string } = {}
         if (type === 'logo') {
           params.brandId = store.getters['brandkit/getCurrentBrandId']
@@ -274,11 +279,14 @@ class UploadUtils {
     brandId?: string
     isShadow?: boolean
   } = {}) {
+    console.log('upload asset')
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
+      console.log('handle file')
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
       const formData = new FormData()
@@ -307,10 +315,13 @@ class UploadUtils {
       }
 
       const assetHandler = (src: string) => {
+        console.log('asset handler')
+        console.log(src)
         if (type === 'image') {
           const img = new Image()
           img.src = src
           img.onload = (evt) => {
+            console.log('image onload ')
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
