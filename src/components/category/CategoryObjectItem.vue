@@ -1,12 +1,12 @@
 <template lang="pug">
-  div(class="category-object-item")
-    img(class="pointer category-object-item__img"
+  div(class="category-object-item"
+      @click="addSvg"
+      @dragstart="dragStart($event)")
+    img(class="category-object-item__img"
       draggable="true"
-      :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`"
-      @dragstart="dragStart($event)"
-      @click="addSvg")
+      :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
     svg-icon(v-if="item.info || (item.tags && item.tags.length > 0)"
-      class="pointer category-object-item__more"
+      class="category-object-item__more"
       @click.native="showSvgInfo"
       :iconName="'more_vertical'"
       :iconColor="'gray-2'"
@@ -73,6 +73,7 @@ export default Vue.extend({
 .category-object-item {
   $this: &;
   position: relative;
+  cursor: pointer;
   &__img {
     width: 100%;
     height: 100%;

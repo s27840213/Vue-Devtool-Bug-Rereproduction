@@ -258,6 +258,8 @@ class UploadUtils {
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
+                    store.commit('file/DEL_PREVIEW', { assetId })
+                    LayerUtils.deleteLayerByAsset(assetId)
                     paymentUtils.errorHandler(json.msg)
                   }
                 })
@@ -388,6 +390,8 @@ class UploadUtils {
                           }
                         }
                       } else {
+                        store.commit('file/DEL_PREVIEW', { assetId })
+                        LayerUtils.deleteLayerByAsset(assetId)
                         paymentUtils.errorHandler(json.msg)
                       }
                     })

@@ -141,9 +141,12 @@ export default Vue.extend({
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
+    if (!layerData) {
+      console.error('can not get the layerData for uploading')
+      logUtils.setLog('Error: can not get the layerData for uploading')
+    }
     if (layerData) {
       const { config: _config, primarylayerId, pageId } = layerData
-      console.log(generalUtils.deepCopy(_config))
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
@@ -188,7 +191,6 @@ export default Vue.extend({
       })
       logUtils.setLog('phase: finish load max size img')
       const updateCanvas = document.createElement('canvas')
-      // const { initWidth: width, initHeight: height, imgWidth, imgHeight } = config.styles
       const { width, height, imgWidth, imgHeight } = config.styles
       const drawCanvasW = width / imgWidth * img.naturalWidth
       const drawCanvasH = height / imgHeight * img.naturalHeight
@@ -215,7 +217,7 @@ export default Vue.extend({
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         }
         case ShadowEffectType.imageMatched:
@@ -231,15 +233,6 @@ export default Vue.extend({
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
       logUtils.setLog('phase: finish drawing')
-      // updateCanvas.style.width = (updateCanvas.width).toString() + 'px'
-      // updateCanvas.style.height = (updateCanvas.height).toString() + 'px'
-      // updateCanvas.style.position = 'absolute'
-      // updateCanvas.style.zIndex = '1000'
-      // updateCanvas.style.top = '0'
-
-      // document.body.append(updateCanvas)
-      // setTimeout(() => document.body.removeChild(updateCanvas), 15000)
-
       const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
@@ -267,7 +260,6 @@ export default Vue.extend({
             userId: json.data.team_id || '',
             assetId: this.isAdmin ? json.data.id || json.data.asset_index : json.data.asset_index
           }
-          console.log(generalUtils.deepCopy(config))
           const _width = config.styles.width / config.styles.scale
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
@@ -301,8 +293,18 @@ export default Vue.extend({
               })
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-              logUtils.setLog('phase: finish while process')
+              logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
+              src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))}
+              pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
+              pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
               imageShadowUtils.clearLayerData()
+            }
+            newImg.onerror = () => {
+              console.error('can not load the uploaded image shadow')
+              logUtils.setLog('error' + 'can not load the uploaded image shadow')
+              const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+              imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
+              imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
             }
             newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
           }).catch((e: Error) => {
@@ -436,7 +438,6 @@ export default Vue.extend({
     setUploadingData(layerIdentifier: ILayerIdentifier, id: string) {
       const { pageId, layerId, subLayerId } = layerIdentifier
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId || '')
-      console.log(pageIndex, layerIndex, subLayerIdx)
       imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, {
         type: 'upload',
         assetId: id,

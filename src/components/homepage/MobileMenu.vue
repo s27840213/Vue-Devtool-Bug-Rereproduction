@@ -1,46 +1,59 @@
 <template lang="pug">
-  div(class="mobile-menu")
-    div(class="nav mobile-menu__top")
+  div(class="menu")
+    div(class="menu-top")
       template(v-for="item in navItems")
-        div(v-if="item.condition" class="nav__option"
-            :class="{'text-blue-1': currentPage === item.name}")
-          a(v-if="item.url.startsWith('http')" :href="item.url"
-            class="mobile-menu__link") {{item.label}}
-          router-link(v-else :to="item.url"
-                      class="mobile-menu__link") {{item.label}}
-    div(class="nav mobile-menu__bottom")
+        details(v-if="!item.hidden" :class="{'text-blue-1': currentPage === item.name}")
+          summary
+            url(:url="item.url") {{item.label}}
+            svg-icon(v-if="item.content" iconName="chevron-down"
+                    iconColor="gray-1" iconWidth="16px")
+          div(v-if="item.content")
+            details(v-for="it in item.content")
+              summary
+                url(:url="it.url") {{it.label}}
+                svg-icon(v-if="it.content" iconName="chevron-down"
+                  iconColor="gray-1" iconWidth="16px")
+              url(v-for="i in it.content" :url="i.url") {{i.label}}
+    div(class="menu-bottom")
       template(v-if="!isLogin")
-        div(class="nav__option")
-          router-link(:to="{ path: '/login', query: { redirect: currPath }}"
-            class="mobile-menu__link") {{$tc('NN0168', 1)}}
-        div(class="nav__option")
-          router-link(:to="{ path: '/signup', query: { redirect: currPath }}"
-            class="mobile-menu__link") {{$tc('NN0169', 1)}}
+        div(class="menu-bottom__link")
+          router-link(:to="{ path: '/login', query: { redirect: currPath }}") {{$tc('NN0168', 1)}}
+        div(class="menu-bottom__link")
+          router-link(:to="{ path: '/signup', query: { redirect: currPath }}") {{$tc('NN0169', 1)}}
       template(v-else)
-        div(class="mobile-menu__bottom__profile")
+        div(class="menu-bottom__profile")
           avatar(class="mr-10"
             :textSize="14"
             :avatarSize="35")
-        div(class="nav__option" @click="close()")
-          router-link(to="/settings/menu"
-            class="mobile-menu__link") {{$tc('NN0649')}}
-        div(class="nav__option"
+        div(class="menu-bottom__link")
+          details
+            summary
+              span {{$tc('NN0649')}}
+              svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
+            div
+              url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
+                  :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
+        div(class="menu-bottom__link"
           @click="onLogoutClicked()")
           span {{$tc('NN0167', 1)}}
 </template>
+
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import Avatar from '@/components/Avatar.vue'
+import Url from '@/components/global/Url.vue'
 import constantData from '@/utils/constantData'
 
 export default Vue.extend({
   components: {
-    Avatar
+    Avatar,
+    Url
   },
   data() {
     return {
-      navItems: constantData.headerItems(true),
+      settingsItems: constantData.settingsItems()
+        .filter((it: {name: string}) => { return it.name !== 'hr' }),
       optionSelected: 0
     }
   },
@@ -48,6 +61,9 @@ export default Vue.extend({
     ...mapGetters({
       isLogin: 'user/isLogin'
     }),
+    navItems(): any {
+      return constantData.headerItems(true)
+    },
     currentPage(): string {
       return this.$route.name || ''
     },
@@ -59,69 +75,62 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    },
-    close() { this.$emit('closeMenu') }
+    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.mobile-menu {
-  @include size(200px, 100%);
-  position: relative;
-  left: calc(100% - 200px + 24px);
+.menu {
+  @include size(280px, 100%);
+  @include body-MD;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr auto;
   grid-template-columns: 1fr;
-  background-color: setColor(gray-6);
-  &__top {
-    padding-top: 10vh;
+  row-gap: 15px;
+  position: relative;
+  left: calc(100% - 280px + 24px);
+  box-sizing: border-box;
+  padding: 50px 14px 153px 14px;
+  overflow-y: auto;
+  text-align: left;
+  color: setColor(gray-1);
+  background-color: setColor(gray-7);
+  &-bottom__link {
+    margin-top: 6px;
+    cursor: pointer;
   }
-  &__bottom {
-    position: absolute;
-    top: 68%;
-    &__profile {
-      display: flex;
-      align-items: center;
-      padding-left: 10px;
-      padding-right: 10px;
-      padding-bottom: 10px;
-      .profile-img {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 32px;
-        height: 32px;
-        font-weight: 700;
-        background: #61aac2;
-        border-radius: 50%;
-      }
-    }
-  }
-  &__link {
+  a {
+    display: block;
+    width: 100%;
     color: unset;
     text-decoration: unset;
-    width: 100%;
-    text-align: left;
   }
 }
-.nav {
-  @include size(100%, 100%);
-  display: flex;
-  flex-direction: column;
-  overflow: scroll;
-  @include no-scrollbar;
-  &__option {
+
+.menu-top, .menu-bottom {
+  details, div {
     display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 22px;
-    font-weight: 400;
-    margin: 7px 0 7px 15px;
-    > button {
-      padding: 0;
+    flex-direction: column;
+    summary {
+      display: flex;
+      align-items: center;
     }
+  }
+  details > div { // Only first child pad 20px
+    padding-left: 20px;
+  }
+  details[open] > summary > svg { // Flip arrow icon if open
+    transform: scaleY(-1);
+  }
+  summary:focus, summary:focus > svg { // Set color when user click summary
+    color: setColor(blue-hover);
+  }
+  summary::-webkit-details-marker { // Romove detail arrow in safari
+    display: none;
+  }
+  span, a {
+    padding: 7px 0;
   }
 }
 </style>

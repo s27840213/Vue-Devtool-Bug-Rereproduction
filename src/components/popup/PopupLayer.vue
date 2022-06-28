@@ -367,7 +367,6 @@ export default Vue.extend({
         })
         pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
         pageUtils.updateBackgroundImageMode(pageIndex, true)
-
         ShortcutUtils.del()
       })
     },

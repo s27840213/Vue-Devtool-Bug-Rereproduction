@@ -2,20 +2,19 @@ import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph, IImage
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
-import FocusUtils from './focusUtils'
 import { ISpecLayerData, LayerType } from '@/store/types'
 import { IPage } from '@/interfaces/page'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
 import mouseUtils from './mouseUtils'
-import { ICurrSelectedInfo, ICurrSubSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 import stepsUtils from './stepsUtils'
 import Vue from 'vue'
 import { SrcObj } from '@/interfaces/gallery'
 import { ITiptapSelection } from '@/interfaces/text'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
-import generalUtils from './generalUtils'
+import uploadUtils from './uploadUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -142,6 +141,18 @@ class LayerUtils {
       pageIndex: this.pageIndex,
       layerIndex: index
     })
+  }
+
+  deleteLayerByAsset(assetId: string) {
+    const pages = store.getters.getPages
+    pages.forEach((page: IPage, pageIndex: number) => {
+      page.layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame, layerIndex: number) => {
+        if (layer.srcObj && (layer as IImage).srcObj.assetId === assetId) {
+          store.commit('DELETE_layer', { pageIndex, layerIndex })
+        }
+      })
+    })
+    uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_DB)
   }
 
   deleteSubLayer(pageIndex: number, primaryIndex: number, subIndex: number) {
