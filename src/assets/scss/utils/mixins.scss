@@ -12,6 +12,11 @@
         @content;
     }
 }
+@mixin firefoxOnly { // Only for Firefox
+  @-moz-document url-prefix(){
+    @content;
+  }
+}
 @mixin no-scrollbar {
     &::-webkit-scrollbar {
         display: none !important;
@@ -19,7 +24,7 @@
     -ms-overflow-style: none !important; /* IE and Edge */
     scrollbar-width: none !important; /* Firefox */
 }
-@mixin hide-scrollbar{
+@mixin hide-scrollbar($padding-right: 11px){
     // Disable x scrollbar and let y scrollbar appear only when hovering it
     // If element height <= parent height, y scrollbar will never appear.
     overflow-y: auto; // Firefox will use this
@@ -42,9 +47,10 @@
       &::-webkit-scrollbar-thumb {
         visibility: visible;
       }
-      scrollbar-width: thin; // Only for Firefox
-      @-moz-document url-prefix(){ // Only for Firefox
-        padding-right: 0px;
+      scrollbar-width: thin; // CSS rule only for Firefox
+      @include firefoxOnly {
+        padding-right: #{$padding-right - 11px};
+        overflow-y: scroll;
       }
     }
 }
