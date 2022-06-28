@@ -644,7 +644,7 @@ class ImageShadowUtils {
     this._layerData = null
   }
 
-  setEffect (effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
+  setEffect(effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
     let { pageIndex, layerIndex, subLayerIdx } = layerUtils
     if (_pageIndex !== -1) {
       pageIndex = _pageIndex

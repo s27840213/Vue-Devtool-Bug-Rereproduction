@@ -131,7 +131,7 @@ export default new class ImageShadowPanelUtils {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         }
         case ShadowEffectType.imageMatched:

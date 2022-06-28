@@ -15,7 +15,6 @@
         :iconColor="(!inBgRemoveMode && !isInLastStep) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
         @click.native="redo"
         v-hint="$t('NN0120')")
-      span(class='text-white') {{`${isInFirstStep} / ${isInLastStep}`}}
       download-btn
       btn(:hasIcon="true"
         :iconName="'menu'"
