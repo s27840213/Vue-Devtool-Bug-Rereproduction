@@ -57,7 +57,9 @@ export default Vue.extend({
       this.$emit('update', this.adjustTmp)
     },
     handleChangeStop() {
-      stepsUtils.record()
+      if (this.$route.name !== 'MobileImageAdjust') {
+        stepsUtils.record()
+      }
     }
   }
 })

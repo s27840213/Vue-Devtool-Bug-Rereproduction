@@ -64,10 +64,14 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   width: calc(100% - 100px);
+  height: 100%;
   grid-template-columns: repeat(auto-fill, 30px 150px) 30px;
   grid-row-gap: 60px;
-  padding-top: 75px;
-  margin-bottom: 50px;
+  padding: 60px;
+  margin-bottom: 60px;
+
+  @media screen and (max-width: 768px) {
+  }
 
   &-page-last {
     display: flex;

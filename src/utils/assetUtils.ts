@@ -20,6 +20,7 @@ import GroupUtils from './groupUtils'
 import resizeUtils from './resizeUtils'
 import { IPage } from '@/interfaces/page'
 import gtmUtils from './gtmUtils'
+import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
@@ -430,7 +431,8 @@ class AssetUtils {
         }
 
         TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: true }))])
+        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
+        editorUtils.setCloseMobilePanelFlag(true)
       })
       .catch(() => {
         console.log('Cannot find the file')
@@ -438,6 +440,7 @@ class AssetUtils {
   }
 
   addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
+    store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
@@ -493,7 +496,7 @@ class AssetUtils {
     const { content_ids: contents = [], type, group_id: groupId, group_type: groupType } = item
     const currGroupType = store.getters.getGroupType
     store.commit('SET_groupId', groupId)
-
+    store.commit('SET_mobileSidebarPanelOpen', false)
     // groupType: -1 normal/0 group/1 detail
     // if detail, no updates; if not, do not update to detail
     // -> update when {old, new} !== detail
@@ -554,6 +557,7 @@ class AssetUtils {
 
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
+      store.commit('SET_mobileSidebarPanelOpen', false)
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 1:
@@ -568,26 +572,40 @@ class AssetUtils {
               }
             }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
           )
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 7:
-          this.addText(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          this.addText(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
+          this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
           break
         case 8:
-          this.addFrame(Object.assign(asset.jsonData, { designId: item.id }), attrs)
+          this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 10:
           this.addLine(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         case 11:
           this.addBasicShape(asset.jsonData, attrs)
+          editorUtils.setCloseMobilePanelFlag(true)
+
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
@@ -634,7 +652,7 @@ class AssetUtils {
         })
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
-      const params = {} as {[key: string]: any}
+      const params = {} as { [key: string]: any }
       if (typeCategory === 'font') {
         params.is_asset = (src === 'private' || src === 'admin') ? 1 : 0
       }

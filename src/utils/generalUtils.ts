@@ -1,6 +1,7 @@
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
+import Vue from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import _ from 'lodash'
@@ -30,6 +31,17 @@ class GeneralUtils {
     return conditions.filter((condition: boolean) => {
       return condition === true
     }).length === 1
+  }
+
+  scaleFromCenter(el: HTMLElement) {
+    const scrollCenterX = (2 * el.scrollLeft + el.clientWidth)
+    const scrollCenterY = (2 * el.scrollTop + el.clientHeight)
+    const oldScrollWidth = el.scrollWidth
+    const oldScrollHeight = el.scrollHeight
+    Vue.nextTick(() => {
+      el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
+      el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
+    })
   }
 
   generateAssetId() {
@@ -99,6 +111,12 @@ class GeneralUtils {
     return value.match(/^#[0-9A-F]{6}$/)
   }
 
+  boundValue(value: number, min: number, max: number): string {
+    if (value < min) return min.toString()
+    else if (value > max) return max.toString()
+    return value.toString()
+  }
+
   copyText(text: string) {
     if (navigator.clipboard && window.isSecureContext) {
       return navigator.clipboard.writeText(text)
@@ -150,8 +168,25 @@ class GeneralUtils {
     a.click()
   }
 
-  isMobile(): boolean {
+  isTouchDevice(): boolean {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
+  }
+
+  getEventType(e: MouseEvent | TouchEvent) {
+    switch (e.type) {
+      case 'touchstart':
+      case 'touchmove':
+      case 'touchend': {
+        return 'touch'
+        break
+      }
+      case 'mousedown':
+      case 'mousemove':
+      case 'mouseup': {
+        return 'mouse'
+        break
+      }
+    }
   }
 
   assertUnreachable(_: never): never {
@@ -187,7 +222,7 @@ class GeneralUtils {
   //     console.log(data)
   //   } else {
   //     store.commit('SET_LOG' {
-  //       params += 'time'
+  //       params += 'time'e
   //     })
   //     logData.push(params)
   //   }

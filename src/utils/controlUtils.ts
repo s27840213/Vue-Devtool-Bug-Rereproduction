@@ -2,6 +2,7 @@ import store from '@/store'
 import { ICoordinate } from '@/interfaces/frame'
 import { IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
+import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'
 class Controller {
   getLength(vect: ICoordinate): number {
@@ -26,13 +27,15 @@ class Controller {
 
   getControlPoints = (resizerShort: number, resizerLong: number) => {
     const scaleRatio = store.getters.getPageScaleRatio
+    const isMobile = generalUtils.isTouchDevice()
+    const scalerSize = isMobile ? 12 : 8
     return {
       scalers: [
         {
           cursor: 0,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             left: '0',
             top: '0',
             transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
@@ -42,8 +45,8 @@ class Controller {
         {
           cursor: 2,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
             right: '0',
             top: '0',
@@ -53,8 +56,8 @@ class Controller {
         {
           cursor: 4,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio})`,
             right: '0',
             bottom: '0',
@@ -64,8 +67,8 @@ class Controller {
         {
           cursor: 6,
           styles: {
-            width: '8px',
-            height: '8px',
+            width: `${scalerSize}px`,
+            height: `${scalerSize}px`,
             transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
             left: '0',
             bottom: '0',
@@ -75,16 +78,16 @@ class Controller {
       ],
       lineEnds: [
         {
-          width: '8px',
-          height: '8px',
+          width: `${scalerSize}px`,
+          height: `${scalerSize}px`,
           left: '0',
           top: '50%',
           transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
           borderRadius: '50%'
         },
         {
-          width: '8px',
-          height: '8px',
+          width: `${scalerSize}px`,
+          height: `${scalerSize}px`,
           transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
           right: '0',
           top: '50%',

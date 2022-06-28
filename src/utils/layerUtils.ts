@@ -15,6 +15,8 @@ import { ITiptapSelection } from '@/interfaces/text'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import uploadUtils from './uploadUtils'
+import frameUtils from './frameUtils'
+import generalUtils from './generalUtils'
 
 class LayerUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -30,6 +32,21 @@ class LayerUtils {
 
   get getLayers(): (pageIndex: number) => Array<IImage | IText | IShape | IGroup | IFrame> {
     return store.getters.getLayers
+  }
+
+  get getCurrOpacity(): number {
+    const currLayer = this.getCurrLayer
+    const { subLayerIdx } = this
+    switch (currLayer.type) {
+      case 'tmp':
+        return Math.max(...(this.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
+      case 'group':
+        return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
+      case 'frame':
+        return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
+      default:
+        return this.currSelectedInfo.layers[0].styles.opacity
+    }
   }
 
   get subLayerIdx(): number {
@@ -437,6 +454,40 @@ class LayerUtils {
     const objectArea = polygon1.area()
     const intersectArea = mathUtils.getIntersectArea(polygon1, polygon2)
     return intersectArea / objectArea
+  }
+
+  updateLayerOpacity(value: number) {
+    if (value > 100) {
+      value = 100
+    }
+    const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = this
+    if (subLayerIdx === -1) {
+      if (this.currSelectedInfo.layers.length === 1) {
+        this.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
+          opacity: value
+        }
+        )
+      } else {
+        store.commit('UPDATE_selectedLayersStyles', {
+          styles: {
+            opacity: value
+          }
+        })
+      }
+    } else {
+      if (subLayerIdx !== -1) {
+        currLayer.type === 'group' && this.updateSubLayerStyles(this.pageIndex, layerIndex, subLayerIdx, {
+          opacity: value
+        })
+        currLayer.type === 'frame' && frameUtils.updateFrameLayerStyles(this.pageIndex, layerIndex, subLayerIdx, {
+          opacity: value
+        })
+      } else {
+        this.updateLayerStyles(this.currSelectedInfo.pageIndex, this.currSelectedInfo.index, {
+          opacity: value
+        })
+      }
+    }
   }
 }
 
