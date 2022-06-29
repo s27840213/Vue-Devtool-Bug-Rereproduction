@@ -70,6 +70,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import errorHandle from '@/utils/errorHandleUtils'
 import groupUtils from '@/utils/groupUtils'
 import i18n from '@/i18n'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
 export default Vue.extend({
   props: {
@@ -781,8 +782,18 @@ export default Vue.extend({
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true }, this.subLayerIndex)
       }
       this.$nextTick(() => {
-        this.handleNewShadowEffect()
-        openPanel && eventUtils.emit(PanelEvent.showPhotoShadow)
+        if (generalUtils.isTouchDevice()) {
+          const primarylayerId = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id
+          const layerData = {
+            primarylayerId,
+            config: this.config,
+            layerInfo: this.layerInfo
+          }
+          imageShadowPanelUtils.handleShadowUpload(layerData)
+        } else {
+          this.handleNewShadowEffect()
+          openPanel && eventUtils.emit(PanelEvent.showPhotoShadow)
+        }
       })
     },
     fetchShadowImg() {

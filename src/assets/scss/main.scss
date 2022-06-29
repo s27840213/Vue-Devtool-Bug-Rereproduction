@@ -4,6 +4,7 @@
 // @import "@/assets/scss/components/tmpFonts";
 @import '~vue-virtual-scroller/dist/vue-virtual-scroller.css';
 @import '~floating-vue/dist/style.css';
+
 html,
 body {
     font-family: 'NOTO SANS TC', sans-serif;
@@ -11,13 +12,16 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    touch-action: none;
 }
+
 [contenteditable] {
     -webkit-user-select: text;
     user-select: text;
 }
+
 input[type=number] {
-    -moz-appearance:textfield;
+    -moz-appearance: textfield;
 }
 input, button, select {
     font-family: inherit;

@@ -132,10 +132,14 @@ class MappingUtils {
         break
       }
       case 'unlock': {
-        const currSelecteInfo = store.getters.getCurrSelectedInfo
-        const currSelectedIndex = store.getters.getCurrSelectedIndex
-        const isLocked = store.getters.getLayer(currSelecteInfo.pageIndex, currSelecteInfo.index).locked
-        layerUtils.updateLayerProps(currSelecteInfo.pageIndex, currSelectedIndex, { locked: !isLocked })
+        const { index, pageIndex } = layerUtils.currSelectedInfo
+        layerUtils.updateLayerProps(pageIndex, index, { locked: true })
+        stepsUtils.record()
+        break
+      }
+      case 'lock': {
+        const { index, pageIndex } = layerUtils.currSelectedInfo
+        layerUtils.updateLayerProps(pageIndex, index, { locked: false })
         stepsUtils.record()
         break
       }

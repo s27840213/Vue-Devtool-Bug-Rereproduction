@@ -6,10 +6,10 @@ import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
 import photos from '@/store/photos'
-import user, { IUserModule } from '@/store/module/user'
+import user from '@/store/module/user'
 import color from '@/store/module/color'
 import bgRemove from '@/store/module/bgRemove'
-import text, { ITextState } from '@/store/text'
+import text from '@/store/text'
 import objects from '@/store/module/objects'
 import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
@@ -54,6 +54,7 @@ const getDefaultState = (): IEditorState => ({
   },
   name: '',
   currSidebarPanelType: SidebarPanelType.template,
+  mobileSidebarPanelOpen: false,
   currFunctionPanelType: FunctionPanelType.none,
   pageScaleRatio: 100,
   isSettingScaleRatio: false,
@@ -102,7 +103,9 @@ const getDefaultState = (): IEditorState => ({
   inGestureToolMode: false,
   isMobile: false,
   isLargeDesktop: false,
-  isGlobalLoading: false
+  closeMobilePanelFlag: false,
+  isGlobalLoading: false,
+  inMultiSelectionMode: false
 })
 
 const state = getDefaultState()
@@ -149,6 +152,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getCurrSidebarPanelType(state: IEditorState): number {
     return state.currSidebarPanelType
+  },
+  getMobileSidebarPanelOpen(state: IEditorState): boolean {
+    return state.mobileSidebarPanelOpen
   },
   getCurrFunctionPanelType(state: IEditorState): number {
     return state.currFunctionPanelType
@@ -264,6 +270,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsGlobalLoading(state: IEditorState) {
     return state.isGlobalLoading
+  },
+  getInMultiSelectionMode(state: IEditorState) {
+    return state.inMultiSelectionMode
   }
 }
 
@@ -337,6 +346,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_currSidebarPanelType(state: IEditorState, type: SidebarPanelType) {
     state.currSidebarPanelType = type
+  },
+  SET_mobileSidebarPanelOpen(state: IEditorState, value: boolean) {
+    state.mobileSidebarPanelOpen = value
   },
   SET_currFunctionPanelType(state: IEditorState, type: FunctionPanelType) {
     state.currFunctionPanelType = type
@@ -792,8 +804,14 @@ const mutations: MutationTree<IEditorState> = {
   SET_inGestureMode(state: IEditorState, bool: boolean) {
     state.inGestureToolMode = bool
   },
+  SET_closeMobilePanelFlag(state: IEditorState, bool: boolean) {
+    state.closeMobilePanelFlag = bool
+  },
   SET_isGlobalLoading(state: IEditorState, bool: boolean) {
     state.isGlobalLoading = bool
+  },
+  SET_inMultiSelectionMode(state: IEditorState, bool: boolean) {
+    state.inMultiSelectionMode = bool
   },
   ...imgShadowMutations
 }

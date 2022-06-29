@@ -9,6 +9,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { IGroup, IText, ITmp } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -73,7 +74,7 @@ export default Vue.extend({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
-      if (!this.config?.isEdited) {
+      if (!this.config?.isEdited && !generalUtils.isTouchDevice()) {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
         editor.commands.focus()
       }
@@ -130,7 +131,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-.non-selectable[contenteditable=false] {
+.non-selectable[contenteditable="false"] {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;

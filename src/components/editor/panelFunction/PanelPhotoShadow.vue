@@ -76,12 +76,6 @@
             @click="handleColorModal")
         div(class="photo-effect-setting__reset")
           button(@click="reset()") {{ 'Reset' }}
-          //- @toggleColorPanel="toggleColorPanel")
-          //- color-picker(v-if="openColorPicker"
-          //-   class="photo-effect-setting__color-picker"
-          //-   v-click-outside="handleColorModal"
-          //-   :currentColor="currentStyle.shadow.color"
-          //-   @update="handleColorUpdate")
 </template>
 
 <script lang="ts">
@@ -89,19 +83,13 @@ import Vue from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ColorPanel from '@/components/editor/ColorPanel.vue'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType, FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
-import stepsUtils from '@/utils/stepsUtils'
-import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
+import { ColorEventType, FunctionPanelType } from '@/store/types'
+import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import generalUtils from '@/utils/generalUtils'
-import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
-import uploadUtils from '@/utils/uploadUtils'
-import { IUploadAssetResponse } from '@/interfaces/upload'
-import pageUtils from '@/utils/pageUtils'
-import imageUtils from '@/utils/imageUtils'
-import logUtils from '@/utils/logUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
 export default Vue.extend({
   components: {
@@ -115,28 +103,10 @@ export default Vue.extend({
     }
   },
   mounted() {
-    colorUtils.on(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
-    this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoShadow)
-    const target = layerUtils.getCurrConfig as IImage
-    if (target && target.type === LayerType.image) {
-      if (typeof layerUtils.subLayerIdx !== 'undefined' && layerUtils.subLayerIdx !== -1) {
-        imageShadowUtils.setHandleId({
-          pageId: pageUtils.currFocusPage.id,
-          layerId: layerUtils.getCurrLayer.id || '',
-          subLayerId: target.id || ''
-        })
-      } else {
-        imageShadowUtils.setHandleId({
-          pageId: pageUtils.currFocusPage.id,
-          layerId: target.id || '',
-          subLayerId: ''
-        })
-      }
-    } else {
-      console.error('The layer should be image layer')
-    }
+    imageShadowPanelUtils.mount()
     setTimeout(() => this.focusOnPanel())
   },
+<<<<<<< HEAD
   async beforeDestroy() {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = imageShadowUtils.layerData
@@ -317,6 +287,10 @@ export default Vue.extend({
     } else {
       imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     }
+=======
+  beforeDestroy() {
+    imageShadowPanelUtils.handleShadowUpload()
+>>>>>>> ea4a4d49c5e3d04a7baa4e7afd7c2db4e93b1304
   },
   destroyed() {
     this.$nextTick(() => {
@@ -380,18 +354,8 @@ export default Vue.extend({
       this.focusOnPanel()
     },
     handleEffectUpdate(event: Event): void {
-      const { currentEffect, fieldRange } = this
       const { name, value } = event.target as HTMLInputElement
-      const { max, min } = (fieldRange as any)[this.currentEffect][name]
-      if (currentEffect !== ShadowEffectType.none) {
-        const oldEffect = generalUtils
-          .deepCopy((layerUtils.getCurrConfig as IImage).styles.shadow.effects[currentEffect]) as IShadowProps
-        imageShadowUtils.setEffect(currentEffect, {
-          [currentEffect]:
-            Object.assign(oldEffect, { [name]: +value > max ? max : (+value < min ? min : +value) })
-        })
-      }
-      this.focusOnPanel()
+      imageShadowPanelUtils.handleEffectUpdate(name, value)
     },
     handleColorUpdate(color: string): void {
       const { currentEffect } = this
@@ -401,29 +365,7 @@ export default Vue.extend({
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
     reset(effect: ShadowEffectType = ShadowEffectType.none, pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
-      if (effect === ShadowEffectType.none) {
-        if (subLayerIdx === -1) {
-          effect = pageIndex !== -1 && layerIndex !== -1
-            ? (layerUtils.getLayer(pageIndex, layerIndex) as IImage).styles.shadow.currentEffect
-            : this.currentEffect
-        } else if (pageIndex !== -1 && layerIndex !== -1) {
-          effect = ((layerUtils.getLayer(pageIndex, layerIndex) as IGroup)
-            .layers[subLayerIdx] as IImage)
-            .styles.shadow.currentEffect
-        }
-      }
-      if (effect !== ShadowEffectType.none) {
-        const defaultProps = imageShadowUtils.getDefaultEffect(effect)[effect]
-        imageShadowUtils.setEffect(effect, {
-          [effect]: defaultProps,
-          color: '#000000'
-        }, pageIndex, layerIndex, subLayerIdx)
-      }
-    },
-    resetAllShadowProps(pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
-      Object.keys(ShadowEffectType)
-        .forEach(k => this.reset(k as ShadowEffectType, pageIndex, layerIndex, subLayerIdx))
-      imageShadowUtils.setEffect(ShadowEffectType.none, {}, pageIndex, layerIndex, subLayerIdx)
+      imageShadowPanelUtils.reset(...arguments)
     },
     setIsUploading(pageId: string, layerId: string, subLayerId: string, isUploading: boolean) {
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)

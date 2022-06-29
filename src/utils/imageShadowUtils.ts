@@ -125,13 +125,17 @@ class ImageShadowUtils {
       this._layerData = { img, config, pageId: params.pageId || pageUtils.currFocusPage.id }
       const { layerInfo } = params || {}
       if (layerInfo) {
-        // TODO no need the below line
         const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
         this._layerData.primarylayerId = primarylayerId
         this.setProcessId({
           pageId: pageUtils.currFocusPage.id,
           layerId: primarylayerId || config.id || '',
-          subLayerId: primarylayerId ? config.id || '' : ''
+          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+        })
+        this.setHandleId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: primarylayerId || config.id || '',
+          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
         })
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
         this.updateEffectProps(layerInfo, {
@@ -652,10 +656,14 @@ class ImageShadowUtils {
     this._layerData = null
   }
 
-  setEffect (effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
+  setEffect(effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
     let { pageIndex, layerIndex, subLayerIdx } = layerUtils
-    _pageIndex !== -1 && (pageIndex = _pageIndex)
-    _layerIndex !== -1 && (layerIndex = _layerIndex)
+    if (_pageIndex !== -1) {
+      pageIndex = _pageIndex
+    }
+    if (_layerIndex !== -1) {
+      layerIndex = _layerIndex
+    }
     if (_pageIndex !== -1 && _layerIndex !== -1 && _subLayerIdx !== -1) {
       subLayerIdx = _subLayerIdx
     }

@@ -10,11 +10,11 @@ import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
 
 class Controller {
   shapes = {} as { [key: string]: any }
-  constructor () {
+  constructor() {
     this.shapes = this.getDefaultShapes()
   }
 
-  getDefaultShapes () {
+  getDefaultShapes() {
     return {
       none: {},
       curve: {
@@ -24,15 +24,15 @@ class Controller {
     }
   }
 
-  getSpecSubTextLayer (index: number): IText {
+  getSpecSubTextLayer(index: number): IText {
     return TextEffectUtils.getSpecSubTextLayer(index)
   }
 
-  getRadiusByBend (bend: number) {
+  getRadiusByBend(bend: number) {
     return bend === 0 ? 10000 : 1000 / Math.pow(Math.abs(bend), 0.6)
   }
 
-  getTextShapeStyles (layer: IText, shape: string, attrs?: any) {
+  getTextShapeStyles(layer: IText, shape: string, attrs?: any) {
     const {
       textShape: styleTextShape,
       width,
@@ -69,18 +69,18 @@ class Controller {
     return { styles, props }
   }
 
-  cast2number (value: string | number): number {
+  cast2number(value: string | number): number {
     if (typeof value === 'string') {
       return parseInt(value, 10)
     }
     return value
   }
 
-  isCurvedText (styles: any): boolean {
+  isCurvedText(styles: any): boolean {
     return styles.textShape?.name === 'curve'
   }
 
-  setTextShape (shape: string, attrs?: any): void {
+  setTextShape(shape: string, attrs?: any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
@@ -126,7 +126,7 @@ class Controller {
     }
   }
 
-  convertTextShape (textWidth: number[], bend: number): string[] {
+  convertTextShape(textWidth: number[], bend: number): string[] {
     if (textWidth.length === 0) return []
     const angleOffset = bend >= 0 ? 90 : 270
     const ratioFix = bend >= 0 ? 1 : -1
@@ -269,7 +269,7 @@ class Controller {
     return { areaWidth, areaHeight, minHeight }
   }
 
-  getCurveTextPropsByHW(config: IText, curveTextHW: {areaWidth: number, areaHeight: number, minHeight: number}, bend?: number): { width: number, height: number, x: number, y: number } {
+  getCurveTextPropsByHW(config: IText, curveTextHW: { areaWidth: number, areaHeight: number, minHeight: number }, bend?: number): { width: number, height: number, x: number, y: number } {
     const { areaWidth, areaHeight, minHeight } = curveTextHW
     bend = bend ?? +((config.styles as any).textShape?.bend ?? 0)
     const { top } = this.getAnchors(config, minHeight)

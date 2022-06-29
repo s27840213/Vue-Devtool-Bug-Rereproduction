@@ -4,12 +4,12 @@
     div(class="nu-controller__body"
         ref="body"
         :style="styles()"
-        @mousedown.left.stop="moveStart")
+        @pointerdown.stop="moveStart")
       div(v-for="(scaler, index)  in controlPoints.scalers"
           class="controller-point"
           :key="index"
           :style="Object.assign(scaler.styles, cursorStyles(index, getPageRotate))"
-          @mousedown.stop="scaleStart")
+          @pointerdown.stop="scaleStart")
     div(class="nu-controller"
         :style="controllerStyles()")
 </template>

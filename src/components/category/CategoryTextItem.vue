@@ -10,7 +10,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -20,17 +19,12 @@ export default Vue.extend({
     src: String,
     item: Object
   },
-  data () {
+  data() {
     return {
       fallbackSrc: ''
     }
   },
   components: {},
-  computed: {
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio'
-    })
-  },
   methods: {
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted

@@ -321,7 +321,6 @@ class ShortcutUtils {
   }
 
   async redo() {
-    console.log(StepsUtils.isInLastStep)
     if (!StepsUtils.isInLastStep) {
       await StepsUtils.redo()
       Vue.nextTick(() => {

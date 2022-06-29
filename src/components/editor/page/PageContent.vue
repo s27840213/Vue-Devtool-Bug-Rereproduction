@@ -33,22 +33,16 @@ div(class="overflow-container"
 <script lang="ts">
 import Vue from 'vue'
 import imageUtils from '@/utils/imageUtils'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
-import mouseUtils from '@/utils/mouseUtils'
 import popupUtils from '@/utils/popupUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
-import assetUtils from '@/utils/assetUtils'
+import { SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
-import layerUtils from '@/utils/layerUtils'
-import generalUtils from '@/utils/generalUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -104,7 +98,8 @@ export default Vue.extend({
       setCurrSidebarPanel: 'SET_currSidebarPanelType',
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page'
+      _deletePage: 'DELETE_page',
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
     }),
     ...mapActions({
       updatePageImages: 'file/updatePageImages',
@@ -156,9 +151,11 @@ export default Vue.extend({
     pageClickHandler(): void {
       if (!this.isHandleShadow) {
         groupUtils.deselect()
+        this.setInMultiSelectionMode(false)
       } else {
         imageUtils.setImgControlDefault(false)
       }
+      this.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {

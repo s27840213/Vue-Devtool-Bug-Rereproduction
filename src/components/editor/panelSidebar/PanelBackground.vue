@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="panel-bg")
-    search-bar(class="mb-15"
+    tabs(:tabs="['圖片','顏色']" @switchTab="switchTab")
+    search-bar(v-if="showImageTab" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -15,7 +16,7 @@
             iconColor="white"
             iconWidth="20px")
       template(v-slot:default-background-colors)
-        div
+        div(ref="colorBlock")
           div(class="text-left py-5 text-white") {{$t('NN0017')}}
           div(class="panel-bg__colors")
             div(class="panel-bg__color"
@@ -63,14 +64,15 @@ import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-
+import Tabs from '@/components/Tabs.vue'
 export default Vue.extend({
   components: {
     SearchBar,
     ColorPicker,
     CategoryList,
     CategoryListRows,
-    CategoryBackgroundItem
+    CategoryBackgroundItem,
+    Tabs
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -78,24 +80,31 @@ export default Vue.extend({
   data() {
     return {
       openColorPicker: false,
-      scrollTop: 0
+      scrollTop: 0,
+      currActiveTabIndex: 0
     }
   },
   computed: {
-    ...mapState('background', [
-      'categories',
-      'content',
-      'pending',
-      'host',
-      'preview',
-      'keyword'
-    ]),
+    ...mapState(
+      'background',
+      [
+        'categories',
+        'content',
+        'pending',
+        'host',
+        'preview',
+        'keyword'
+      ]
+    ),
+    ...mapState({
+      isMobile: 'isMobile'
+    }),
     ...mapGetters({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultBgColors',
       getBackgroundColor: 'getBackgroundColor'
     }),
-    keywordLabel():string {
+    keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     currBackgroundColor(): string {
@@ -108,7 +117,8 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
-        size: 150
+        // size: (this.$refs.colorBlock as HTMLElement).style.height
+        size: generalUtils.isTouchDevice() ? 180 : 150
       }]
     },
     listCategories(): any[] {
@@ -146,12 +156,16 @@ export default Vue.extend({
     },
     list(): any[] {
       const list = generalUtils.deepCopy(
-        this.defaultBackgroundColors
-          .concat(this.listCategories)
-          .concat(this.listResult))
+        this.showImageTab ? this.listCategories
+          .concat(this.listResult) : this.defaultBackgroundColors
+      )
+      /**
+       * @NeedCodeReview with Nathan
+       */
       if (this.listResult.length === 0 && list.length !== 0) {
         list[list.length - 1].sentinel = true
       }
+
       return list
     },
     currentPageColor(): string {
@@ -164,6 +178,9 @@ export default Vue.extend({
     },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0004', 1) })}` : ''
+    },
+    showImageTab(): boolean {
+      return this.currActiveTabIndex === 0
     }
   },
   async mounted() {
@@ -206,7 +223,8 @@ export default Vue.extend({
       'getMoreContent'
     ]),
     ...mapMutations({
-      _setBgColor: 'SET_backgroundColor'
+      _setBgColor: 'SET_backgroundColor',
+      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
     }),
     colorStyles(color: string) {
       return {
@@ -224,6 +242,10 @@ export default Vue.extend({
         pageIndex: pageUtils.currFocusPageIndex,
         color: color
       })
+
+      if (generalUtils.isTouchDevice()) {
+        this.setCloseMobilePanelFlag(true)
+      }
     },
     async handleSearch(keyword: string) {
       this.resetContent()
@@ -245,6 +267,10 @@ export default Vue.extend({
       this.getMoreContent()
     },
     handleColorModal(color: string) {
+      if (generalUtils.isTouchDevice()) {
+        this.$emit('openExtraColorModal')
+        return
+      }
       colorUtils.setCurrEvent(ColorEventType.background)
       colorUtils.setCurrColor(color)
       this.$emit('toggleColorPanel', true)
@@ -254,6 +280,9 @@ export default Vue.extend({
     },
     recordChange() {
       this.$nextTick(() => stepsUtils.record())
+    },
+    switchTab(tabIndex: number) {
+      this.currActiveTabIndex = tabIndex
     }
   }
 })
