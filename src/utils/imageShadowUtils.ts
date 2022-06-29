@@ -788,11 +788,11 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          distance: 60,
-          angle: 45,
-          radius: 70,
-          spread: 15,
-          opacity: 70
+          distance: 50,
+          angle: 20,
+          radius: 50,
+          spread: 0,
+          opacity: 40
         }
         break
       case ShadowEffectType.floating: {
@@ -800,7 +800,7 @@ class ImageShadowUtils {
           x: 0,
           y: 0,
           radius: 60,
-          size: 70,
+          size: 60,
           thinkness: 50,
           opacity: 65
         }
@@ -809,8 +809,8 @@ class ImageShadowUtils {
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
           radius: 50,
-          spread: 15,
-          opacity: 55
+          spread: 10,
+          opacity: 40
         }
         break
       case ShadowEffectType.frame:
@@ -822,11 +822,11 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.imageMatched:
         (effect as IImageMatchedEffect) = {
-          distance: 35,
-          angle: 45,
-          radius: 60,
+          distance: 40,
+          angle: 40,
+          radius: 50,
           size: 100,
-          opacity: 55
+          opacity: 60
         }
         break
       case ShadowEffectType.none:
@@ -976,7 +976,7 @@ export const fieldRange = {
     thinkness: { max: 100, min: 0 },
     size: { max: 200, min: 50 },
     x: { max: 100, min: -100, weighting: 0.5 },
-    y: { max: 100, min: -100, weighting: 0.5 }
+    y: { max: 100, min: -150, weighting: 0.5 }
   }
 } as any
 
