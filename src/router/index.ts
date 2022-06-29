@@ -9,6 +9,10 @@ import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
+import MobileEditor from '../views/MobileEditor.vue'
+import MobileTextEffect from '../views/MobileTextEffect.vue'
+import MobileImageAdjust from '../views/MobileImageAdjust.vue'
+import MobileTextTyping from '../views/MobileTextTyping.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import Pricing from '../views/Pricing.vue'
@@ -19,7 +23,9 @@ import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import assetUtils from '@/utils/assetUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import appJson from '@/assets/json/app.json'
 import generalUtils from '@/utils/generalUtils'
+
 Vue.use(VueRouter)
 
 const MOBILE_ROUTES = [
@@ -30,6 +36,10 @@ const MOBILE_ROUTES = [
   'Login',
   'MobileWarning',
   'Preview',
+  'MobileEditor',
+  'MobileTextEffect',
+  'MobileImageAdjust',
+  'MobileTextTyping',
   'Pricing'
 ]
 
@@ -79,6 +89,13 @@ const routes: Array<RouteConfig> = [
     path: 'editor',
     name: 'Editor',
     component: Editor,
+    beforeEnter: editorRouteHandler
+  },
+  {
+    path: 'mobile-editor',
+    name: 'MobileEditor',
+    component: MobileEditor,
+    // eslint-disable-next-line space-before-function-paren
     beforeEnter: editorRouteHandler
   },
   {
@@ -190,6 +207,21 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
+    path: 'mobile-text',
+    name: 'MobileTextEffect',
+    component: MobileTextEffect
+  },
+  {
+    path: 'mobile-image',
+    name: 'MobileImageAdjust',
+    component: MobileImageAdjust
+  },
+  {
+    path: 'mobile-typing',
+    name: 'MobileTextTyping',
+    component: MobileTextTyping
+  },
+  {
     path: 'pricing',
     name: 'Pricing',
     component: Pricing
@@ -270,8 +302,13 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (store.getters['user/getImgSizeMap'].length === 0 && (window as any).__PRERENDER_INJECTED === undefined) {
+    /**
+     * @MobileDebug - comment the following two line, and use const json = appJSON, or the request will be blocked by CORS
+     */
     const response = await fetch(`https://template.vivipic.com/static/app.json?ver=${generalUtils.generateRandomString(6)}`)
     const json = await response.json()
+
+    // const json = appJson
 
     process.env.NODE_ENV === 'development' && console.log('static json loaded: ', json)
 

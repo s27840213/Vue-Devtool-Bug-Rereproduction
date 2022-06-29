@@ -22,6 +22,7 @@ import Vue, { PropType } from 'vue'
 import GalleryUtils from '@/utils/galleryUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -53,11 +54,12 @@ export default Vue.extend({
     }
   },
   data() {
+    console.log(generalUtils.isTouchDevice())
     return {
       nextIndex: 0,
       rows: [] as any[],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(300, 95, 5)
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 20 : 300, 95, 5)
     }
   },
   watch: {
@@ -119,7 +121,8 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-#recycle {// For overwrite vue-recycle setting
+#recycle {
+  // For overwrite vue-recycle setting
   overflow-y: overlay;
 }
 
@@ -131,8 +134,9 @@ export default Vue.extend({
     box-sizing: border-box;
     margin-right: -10px; // Push scrollbar to outside
     padding-right: 10px;
-    @media not all and (min-resolution:.001dpcm){ // For safari only
-      @supports (-webkit-appearance:none) {
+    @media not all and (min-resolution: 0.001dpcm) {
+      // For safari only
+      @supports (-webkit-appearance: none) {
         padding-right: 0;
       }
     }

@@ -7,7 +7,7 @@ import {
 } from '@/interfaces/api'
 
 class ListService {
-  getList (params: IListServiceParams) {
+  getList(params: IListServiceParams) {
     const searchParams = {
       token: params.token || '1',
       type: params.type,
@@ -32,33 +32,34 @@ class ListService {
     })
   }
 
-  getSvg (params: IListServiceParams) {
+  getSvg(params: IListServiceParams) {
     params.type = 'svg'
     return this.getList(params)
   }
 
-  getTemplate (params: IListServiceParams) {
+  getTemplate(params: IListServiceParams) {
     params.type = 'template'
     return this.getList(params)
   }
 
-  getText (params: IListServiceParams) {
+  getText(params: IListServiceParams) {
     params.type = 'text'
     return this.getList(params)
   }
 
-  getBackground (params: IListServiceParams) {
+  getBackground(params: IListServiceParams) {
     params.type = 'background'
     return this.getList(params)
   }
 
-  getFont (params: IListServiceParams) {
+  getFont(params: IListServiceParams) {
     params.type = 'font'
     params.fontList = 2
     return this.getList(params)
   }
 
-  addDesign (id: string, type: string, params: IListServiceParams = {}) {
+  addDesign(id: string, type: string, params: IListServiceParams = {}) {
+    console.log('add design')
     const data = {
       token: authToken().token,
       type,
@@ -73,14 +74,14 @@ class ListService {
     })
   }
 
-  getMarker (params: IListServiceParams) {
+  getMarker(params: IListServiceParams) {
     params.type = 'marker'
     params.token = '1'
     params.cache = true
     return this.getList(params)
   }
 
-  getLayout (params: IListServiceParams) {
+  getLayout(params: IListServiceParams) {
     params.type = 'layout'
     // layout has recently-used list, cannot be cached.
     // params.token = '1'
@@ -88,7 +89,7 @@ class ListService {
     return this.getList(params)
   }
 
-  getTheme (params: IListServiceParams) {
+  getTheme(params: IListServiceParams) {
     params.type = 'theme'
     params.locale = localeUtils.currLocale()
     params.token = '1'
@@ -97,7 +98,7 @@ class ListService {
     return this.getList(params)
   }
 
-  getHashtag (params: IListServiceParams) {
+  getHashtag(params: IListServiceParams) {
     params.type = 'hashtag'
     params.token = '1'
     params.cache = true

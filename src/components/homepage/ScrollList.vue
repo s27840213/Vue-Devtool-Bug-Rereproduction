@@ -239,6 +239,7 @@ export default Vue.extend({
   &__template-item {
     margin: 8px;
     position: relative;
+    cursor: pointer;
     &:hover {
       transition: all 0.2s ease-in-out;
       transform: translate(0, -5px);

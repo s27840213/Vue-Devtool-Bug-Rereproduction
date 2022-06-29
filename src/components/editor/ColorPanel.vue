@@ -3,13 +3,15 @@
       :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
       v-click-outside="vcoConfig"
       ref="colorPanel")
-    div(class="color-panel__header p-20")
-      img(class="color-panel__btn"
+    div(class="color-panel__header"
+        :class="{'p-20': !noPadding}")
+      img(v-if="showPanelBtn" class="color-panel__btn"
         :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
         @click="closePanel()")
       search-bar(:placeholder="$t('NN0093', {target: $t('NN0017')})"
       class="mb-10")
-    div(class="color-panel__scroll p-20")
+    div(class="color-panel__scroll"
+        :class="{'p-20': !noPadding}")
       div(class="color-panel__colors mb-10"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left mb-5")
@@ -74,6 +76,7 @@ import mouseUtils from '@/utils/mouseUtils'
 import { FunctionPanelType, LayerType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -82,6 +85,14 @@ export default Vue.extend({
       default: false
     },
     alignLeft: {
+      type: Boolean,
+      default: true
+    },
+    noPadding: {
+      type: Boolean,
+      default: false
+    },
+    showPanelBtn: {
       type: Boolean,
       default: true
     }
@@ -222,6 +233,10 @@ export default Vue.extend({
       this.$emit('toggleColorPanel', false)
     },
     openColorPanel(event: MouseEvent) {
+      if (generalUtils.isTouchDevice()) {
+        this.$emit('openColorPicker')
+        return
+      }
       colorUtils.setIsColorPickerOpen(true)
       Vue.nextTick(() => {
         const colorPanel = this.$refs.colorPanel as HTMLElement
