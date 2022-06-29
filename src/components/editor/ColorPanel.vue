@@ -296,6 +296,9 @@ export default Vue.extend({
   filter: drop-shadow(0px -1px 5px setColor(white, 0.2));
   &__scroll {
     @include hide-scrollbar($padding-right: 14px);
+    &:hover{
+      overflow-x: scroll;
+    }
     box-sizing: border-box;
     height: 100%;
     padding: 20px 14px;

@@ -111,12 +111,10 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .trash-design-view {
+  @include hide-scrollbar-white($padding-right: 65px);
+  box-sizing: border-box;
+  padding: 0 65px 0 55px;
   text-align: left;
-  @include hide-scrollbar-white;
-  > div {
-    margin-left: 55px;
-    margin-right: 65px;
-  }
   &__title {
     margin-top: 94px;
     display: flex;

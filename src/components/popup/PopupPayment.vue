@@ -296,6 +296,17 @@ export default Vue.extend({
   }
   .wrapper2 {
     @include hide-scrollbar;
+    &:hover{
+      scrollbar-color: setColor(gray-4) setColor(sidebar-panel); // Only for firefox
+      &::-webkit-scrollbar {
+        background-color: setColor(sidebar-panel);
+        width: 10px;
+      }
+    }
+    &::-webkit-scrollbar {
+      width: 0;
+    }
+    box-sizing: border-box;
     width: min(792px, 90vw);
     height: min(770px, min(80vw, 90vh));
   }

@@ -375,12 +375,10 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .folder-design-view {
+  @include hide-scrollbar-white($padding-right: 65px);
+  box-sizing: border-box;
+  padding: 0 65px 0 55px;
   text-align: left;
-  @include hide-scrollbar-white;
-  > div {
-    margin-left: 55px;
-    margin-right: 65px;
-  }
   &__folder-name {
     margin-top: 94px;
     width: calc(80vw - 360px);

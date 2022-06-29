@@ -90,8 +90,7 @@ export default Vue.extend({
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
-    margin-right: -10px;
-    padding-right: 10px;
+    @include push-scrollbar10;
     @include hide-scrollbar;
   }
 }
