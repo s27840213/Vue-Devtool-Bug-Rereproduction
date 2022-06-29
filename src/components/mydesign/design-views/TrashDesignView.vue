@@ -170,7 +170,6 @@ export default Vue.extend({
 .horizontal-rule {
   height: 1px;
   background-color: setColor(gray-4);
-  width: calc(100% - 120px);
   margin-top: 21px;
   margin-bottom: 58px;
 }
