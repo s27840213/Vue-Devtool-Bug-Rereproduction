@@ -9,11 +9,11 @@ class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
   effects = {} as { [key: string]: any }
-  constructor () {
+  constructor() {
     this.effects = this.getDefaultEffects()
   }
 
-  getDefaultEffects () {
+  getDefaultEffects() {
     return {
       none: {},
       shadow: {
@@ -44,7 +44,7 @@ class Controller {
     }
   }
 
-  getCurrentLayer (): IText {
+  getCurrentLayer(): IText {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const subLayerIndex = LayerUtils.subLayerIdx
     const currLayer = store.getters.getLayer(pageIndex, layerIndex)
@@ -63,13 +63,13 @@ class Controller {
     return currLayer || {}
   }
 
-  getSpecSubTextLayer (index: number): IText {
+  getSpecSubTextLayer(index: number): IText {
     const currLayer = LayerUtils.getCurrLayer
     const multiLayers = currLayer && currLayer.layers as any[]
     return multiLayers && multiLayers[index]
   }
 
-  getLayerFontSize (paragraphs: IParagraph[]): number {
+  getLayerFontSize(paragraphs: IParagraph[]): number {
     let maxFontSize = 0
     for (let idx = 0; idx < paragraphs.length; idx++) {
       const spanFontSizeList = paragraphs[idx].spans.map(span => span.styles.size || 0)
@@ -78,7 +78,7 @@ class Controller {
     return maxFontSize
   }
 
-  getLayerMainColor (paragraphs: IParagraph[]): string {
+  getLayerMainColor(paragraphs: IParagraph[]): string {
     const colors = {} as { [key: string]: number }
     if (!paragraphs) return '#000000'
     for (const idx in paragraphs) {
@@ -95,7 +95,7 @@ class Controller {
       .reduce((prev, curr) => colors[prev] > colors[curr] ? prev : curr, '#000000')
   }
 
-  convertColor2rgba (colorStr: string, alpha?: number) {
+  convertColor2rgba(colorStr: string, alpha?: number) {
     if (colorStr.startsWith('#')) {
       return this.convertHex2rgba(colorStr, alpha)
     }
@@ -106,13 +106,13 @@ class Controller {
     return this.convertHex2rgba('#000000', 0.6)
   }
 
-  convertHex2rgba (hex: string, alpha?: number) {
+  convertHex2rgba(hex: string, alpha?: number) {
     const hexList = hex.match(/\w\w/g) || ['0', '0', '0']
     const opacity = typeof alpha === 'number' ? alpha : 1
     return `rgba(${hexList.map(x => parseInt(x, 16)).join(',')}, ${opacity})`
   }
 
-  convertTextEffect (effect: any) {
+  convertTextEffect(effect: any) {
     const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor, ver } = effect || {}
     const unit = this.shadowScale * fontSize
     let strokeWidth = this.strokeScale * fontSize
@@ -178,7 +178,7 @@ class Controller {
     }
   }
 
-  updateTextEffect (pageIndex: number, layerIndex: number, attrs = {}) {
+  updateTextEffect(pageIndex: number, layerIndex: number, attrs = {}) {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
     for (const idx in layers) {
@@ -208,7 +208,7 @@ class Controller {
     }
   }
 
-  setTextEffect (effect: string, attrs = {} as any): void {
+  setTextEffect(effect: string, attrs = {} as any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
@@ -240,7 +240,6 @@ class Controller {
         })
       }
     }
-    console.log((LayerUtils.getCurrConfig).styles)
   }
 
   refreshColor() {

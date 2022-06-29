@@ -375,15 +375,12 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .folder-design-view {
+  @include hide-scrollbar-white($padding-right: 65px);
+  box-sizing: border-box;
+  padding: 0 65px 0 55px;
   text-align: left;
-  @include hide-scrollbar-white;
-  > div {
-    margin-left: 55px;
-    margin-right: 65px;
-  }
   &__folder-name {
     margin-top: 94px;
-    width: calc(80vw - 360px);
     > span {
       position: relative;
       width: 100%;
@@ -485,7 +482,6 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: calc(100% - 120px);
   }
   &__path {
     display: flex;
@@ -691,7 +687,6 @@ export default Vue.extend({
     align-items: center;
     justify-content: center;
     gap: 35px;
-    width: calc(100% - 120px);
     height: calc(100% - 270px);
     &__text {
       display: block;
@@ -722,7 +717,6 @@ export default Vue.extend({
 .horizontal-rule {
   height: 1px;
   background-color: setColor(gray-4);
-  width: calc(100% - 120px);
   margin-top: 24px;
   margin-bottom: 38px;
 }

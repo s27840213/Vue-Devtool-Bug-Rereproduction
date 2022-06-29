@@ -25,6 +25,15 @@ class FileUtils {
     downloadAnchorNode.click()
   }
 
+  exportFile(obj: any) {
+    const dataStr = 'data:text/jsoncharset=utf-8,' + encodeURIComponent(JSON.stringify(obj))
+    const downloadAnchorNode = document.createElement('a')
+    const exportName = 'file'
+    downloadAnchorNode.setAttribute('href', dataStr)
+    downloadAnchorNode.setAttribute('download', exportName + '.json')
+    downloadAnchorNode.click()
+  }
+
   importFont(callback: (this: HTMLInputElement, ev: Event) => any) {
     const inputNode = document.createElement('input')
     inputNode.setAttribute('type', 'file')

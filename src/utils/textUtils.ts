@@ -12,11 +12,28 @@ import pageUtils from './pageUtils'
 import textShapeUtils from './textShapeUtils'
 import mathUtils from './mathUtils'
 import router from '@/router'
+import _ from 'lodash'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return (store.state as any).text.props }
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
+
+  fieldRange: {
+    fontSize: { min: number, max: number }
+    lineHeight: { min: number, max: number }
+    fontSpacing: { min: number, max: number }
+    opacity: { min: number, max: number }
+  }
+
+  constructor() {
+    this.fieldRange = {
+      fontSize: { min: 6, max: 800 },
+      lineHeight: { min: 0.5, max: 2.5 },
+      fontSpacing: { min: -200, max: 800 },
+      opacity: { min: 0, max: 100 }
+    }
+  }
 
   isArrowKey(e: KeyboardEvent): boolean {
     return e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
@@ -1063,6 +1080,32 @@ class TextUtils {
     return {
       widthLimit,
       otherDimension: autoDimension
+    }
+  }
+
+  setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
+    if (GeneralUtils.isValidFloat(_value.toString())) {
+      let value = parseFloat(GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
+      switch (prop) {
+        case 'lineHeight':
+          value = _.toNumber((value).toFixed(2))
+          break
+        case 'fontSpacing':
+          value = value / 1000
+      }
+      const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
+      window.requestAnimationFrame(() => {
+        if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
+          (currLayer as IGroup | ITmp).layers
+            .forEach((l, idx) => {
+              l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
+              l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
+            })
+        } else {
+          tiptapUtils.applyParagraphStyle(prop, value, false)
+          TextPropUtils.updateTextPropsState({ [prop]: value })
+        }
+      })
     }
   }
 }

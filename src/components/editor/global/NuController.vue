@@ -17,10 +17,11 @@
         @dragover.prevent
         @click.right.stop="onRightClick"
         @contextmenu.prevent
-        @mousedown.left="moveStart"
+        @pointerdown="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
         @dblclick="onDblClick")
+      //- template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice")
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
@@ -68,7 +69,7 @@
           class="nu-controller__lock-icon"
           :style="lockIconStyles")
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
-          @click.native="MappingUtils.mappingIconAction('unlock')")
+          @click.native="MappingUtils.mappingIconAction('lock')")
     div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
@@ -77,21 +78,24 @@
             :key="index"
             :marker-index="index"
             :style="Object.assign(end, {'cursor': 'pointer'})"
-            @mousedown.left.stop="lineEndMoveStart")
+            @pointerdown.stop="lineEndMoveStart"
+            @touchstart="disableTouchEvent")
         div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
             :style="Object.assign(scaler.styles, cursorStyles(scaler.cursor, getLayerRotate))"
-            @mousedown.left.stop="scaleStart")
+            @pointerdown.prevent.stop="scaleStart"
+            @touchstart="disableTouchEvent")
         div(v-for="(resizer, index) in resizer(controlPoints)"
-            @mousedown.left.stop="resizeStart($event)")
+            @pointerdown.prevent.stop="resizeStart"
+            @touchstart="disableTouchEvent")
           div(class="control-point__resize-bar"
               :key="index"
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate))")
         div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
-            @mousedown.left.stop="moveStart($event)")
+            @pointerdown="moveStart")
           div(class="control-point__resize-bar control-point__move-bar"
               :key="index"
               :style="resizerBarStyles(resizer.styles)")
@@ -102,11 +106,12 @@
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
             :style='lineControlPointStyles()'
-            @mousedown.native.left.stop="lineRotateStart")
+            @pointerdown.native.stop="lineRotateStart"
+            @touchstart.native="lineRotateStart")
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
-            @mousedown.left.stop="moveStart")
+            @pointerdown="moveStart")
         template(v-else)
           div(class="control-point__controller-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
@@ -114,12 +119,14 @@
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
               :style='controlPointStyles()'
-              @mousedown.native.left.stop="rotateStart")
+              @pointerdown.native.stop="rotateStart"
+              @touchstart.native="disableTouchEvent")
             img(class="control-point__mover"
               v-if="config.type !== 'text' || !contentEditable"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
-              @mousedown.left.stop="moveStart")
+              @pointerdown="moveStart"
+              @touchstart="disableTouchEvent")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -204,7 +211,8 @@ export default Vue.extend({
       hasChangeTextContent: false,
       movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
-      isMoved: false
+      isMoved: false,
+      isDoingGestureAction: false
     }
   },
   mounted() {
@@ -214,8 +222,8 @@ export default Vue.extend({
     }
   },
   beforeDestroy() {
-    window.removeEventListener('mouseup', this.moveEnd)
-    window.removeEventListener('mousemove', this.moving)
+    eventUtils.removePointerEvent('pointerup', this.moveEnd)
+    eventUtils.removePointerEvent('pointermove', this.moving)
     // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
@@ -229,6 +237,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
+      inMultiSelectionMode: 'getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
@@ -325,6 +334,9 @@ export default Vue.extend({
     },
     textHtml(): any {
       return tiptapUtils.toJSON(this.config.paragraphs)
+    },
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   watch: {
@@ -370,8 +382,8 @@ export default Vue.extend({
     /**
      * While image is setted to frame, these event-listener should be removed
      */
-    window.removeEventListener('mouseup', this.moveEnd)
-    window.removeEventListener('mousemove', this.moving)
+    eventUtils.removePointerEvent('pointerup', this.moveEnd)
+    eventUtils.removePointerEvent('pointermove', this.moving)
     this.isControlling = false
     this.setCursorStyle('')
     this.setMoving(false)
@@ -381,7 +393,8 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -526,7 +539,7 @@ export default Vue.extend({
       }
     },
     toggleHighlighter(pageIndex: number, layerIndex: number, shown: boolean) {
-      if (this.isLine) return
+      if (this.isLine || this.isTouchDevice) return
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
@@ -562,6 +575,12 @@ export default Vue.extend({
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
+        /**
+         * @Note - set touchAction to none because pointer event will be canceled by touch action
+         * So, if we want to control the layer, we need to set it to none.
+         * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
+         */
+        touchAction: this.isActive ? 'none' : 'initial',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
@@ -611,7 +630,19 @@ export default Vue.extend({
     hintStyles() {
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
-    moveStart(e: MouseEvent) {
+    moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+      const eventType = eventUtils.getEventType(event)
+      if (eventType === 'pointer') {
+        const pointerEvent = event as PointerEvent
+        if (pointerEvent.button !== 0) return
+      } else if (eventType === 'mouse') {
+        const mouseEvent = event as MouseEvent
+        if (mouseEvent.button !== 0) return
+      }
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
+
       if (this.isProcessImgShadow && this.processId.id !== this.config.id) {
         return
       } else {
@@ -620,10 +651,21 @@ export default Vue.extend({
         }
         ImageUtils.setImgControlDefault(false)
       }
+
+      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
+        const body = (this.$refs.body as HTMLElement)
+        body.addEventListener('touchstart', this.disableTouchEvent)
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        eventUtils.addPointerEvent('pointerup', this.moveEnd)
+        eventUtils.addPointerEvent('pointermove', this.moving)
+        return
+      }
+
       this.movingByControlPoint = false
-      const inSelectionMode = generalUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
       if (!this.isLocked) {
-        e.stopPropagation()
+        event.stopPropagation()
       }
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
@@ -631,9 +673,14 @@ export default Vue.extend({
 
       switch (this.getLayerType) {
         case 'text': {
-          const targetClassList = (e.target as HTMLElement).classList
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+            dragging: true
+          })
+          const targetClassList = (event.target as HTMLElement).classList
           const isMoveBar = targetClassList.contains('control-point__move-bar')
           const isMover = targetClassList.contains('control-point__mover')
+
+          // if the text layer is already active and contentEditable
           if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
           } else if (!this.isActive) {
@@ -650,19 +697,25 @@ export default Vue.extend({
             }
             if (!this.config.locked) {
               this.isControlling = true
-              this.initialPos = MouseUtils.getMouseAbsPoint(e)
-              window.addEventListener('mouseup', this.moveEnd)
-              window.addEventListener('mousemove', this.moving)
-              // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+              this.initialPos = MouseUtils.getMouseAbsPoint(event)
+              eventUtils.addPointerEvent('pointerup', this.moveEnd)
+              eventUtils.addPointerEvent('pointermove', this.moving)
             }
             return
           }
+
+          /**
+           * @NeedCodeReview - with Steve or TingAn
+           * The cotentEditable updated timing will be move to the moveEnd instead of moveStart
+           * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
+           */
 
           if (isMover || isMoveBar) {
             this.movingByControlPoint = true
           } else {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
           }
+
           break
         }
         case 'group':
@@ -671,11 +724,11 @@ export default Vue.extend({
             return
           }
       }
+
       if (!this.config.locked && !inSelectionMode) {
-        this.initialPos = MouseUtils.getMouseAbsPoint(e)
-        window.addEventListener('mouseup', this.moveEnd)
-        window.addEventListener('mousemove', this.moving)
-        // window.addEventListener('scroll', this.scrollUpdate, { capture: true })
+        this.initialPos = MouseUtils.getMouseAbsPoint(event)
+        eventUtils.addPointerEvent('pointerup', this.moveEnd)
+        eventUtils.addPointerEvent('pointermove', this.moving)
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
@@ -708,19 +761,38 @@ export default Vue.extend({
         }
       }
     },
-    moving(e: MouseEvent) {
+    moving(e: MouseEvent | TouchEvent | PointerEvent) {
+      const posDiff = {
+        x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
+        y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+      }
+
+      if (this.isTouchDevice && !this.isLocked) {
+        if (!this.isActive) {
+          if (posDiff.x > 1 || posDiff.y > 1) {
+            this.isDoingGestureAction = true
+            return
+          }
+        } else {
+          if (posDiff.x < 1 && posDiff.y < 1) {
+            return
+          }
+        }
+      }
+
       this.isControlling = true
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: true
       })
       if (this.isImgControl) {
-        window.removeEventListener('mouseup', this.moveEnd)
-        window.removeEventListener('mousemove', this.moving)
-        // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
+        eventUtils.removePointerEvent('pointermove', this.moving)
         return
       }
       if (this.isActive) {
-        e.preventDefault()
+        if (generalUtils.getEventType(e) !== 'touch') {
+          e.preventDefault()
+        }
         this.setCursorStyle('move')
         window.requestAnimationFrame(() => {
           this.movingHandler(e)
@@ -734,7 +806,7 @@ export default Vue.extend({
         }
       }
     },
-    movingHandler(e: MouseEvent) {
+    movingHandler(e: MouseEvent | TouchEvent | PointerEvent) {
       if (!this.config.moved) {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { moved: true })
       }
@@ -759,9 +831,35 @@ export default Vue.extend({
     imgHandler(offset: ICoordinate) {
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
-    moveEnd(e: MouseEvent) {
+    moveEnd(e: MouseEvent | TouchEvent) {
+      if (!this.isDoingGestureAction && !this.isActive) {
+        const body = (this.$refs.body as HTMLElement)
+        body.removeEventListener('touchstart', this.disableTouchEvent)
+        GroupUtils.deselect()
+        const targetIndex = this.config.styles.zindex - 1
+        this.setLastSelectedLayerIndex(this.layerIndex)
+        GroupUtils.select(this.pageIndex, [targetIndex])
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
+        eventUtils.removePointerEvent('pointermove', this.moving)
+        this.isMoved = false
+        this.isControlling = false
+        this.setCursorStyle('')
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          dragging: false
+        })
+        this.isDoingGestureAction = false
+        this.$emit('clearSnap')
+        return
+      }
+
       this.setMoving(false)
       if (this.isActive) {
+        // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked) {
+        //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
+        //   //   GroupUtils.deselect()
+        //   //   this.toggleHighlighter(this.pageIndex, this.layerIndex, false)
+        //   // }
+        // }
         const posDiff = {
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
@@ -792,8 +890,8 @@ export default Vue.extend({
             if (layerNum > 1) {
               GroupUtils.ungroup()
             }
-          } else {
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
+          } else {
             StepsUtils.record()
           }
         } else {
@@ -807,17 +905,21 @@ export default Vue.extend({
         }
         this.isControlling = false
         this.setCursorStyle('')
-        window.removeEventListener('mouseup', this.moveEnd)
-        window.removeEventListener('mousemove', this.moving)
-        // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
+        eventUtils.removePointerEvent('pointermove', this.moving)
       }
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
         dragging: false
       })
 
+      this.isDoingGestureAction = false
       this.$emit('clearSnap')
     },
-    scaleStart(event: MouseEvent) {
+    scaleStart(event: MouseEvent | TouchEvent | PointerEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
+
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.isControlling = true
 
@@ -844,13 +946,15 @@ export default Vue.extend({
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
       this.currCursorStyling(event)
-      document.documentElement.addEventListener('mousemove', this.scaling, false)
-      document.documentElement.addEventListener('mouseup', this.scaleEnd, false)
-      document.documentElement.addEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.addEventListener('keydown', this.handleScaleOffset)
+      eventUtils.addPointerEvent('pointermove', this.scaling)
+      eventUtils.addPointerEvent('pointerup', this.scaleEnd)
+      window.addEventListener('keyup', this.handleScaleOffset)
+      window.addEventListener('keydown', this.handleScaleOffset)
     },
-    scaling(event: MouseEvent) {
-      event.preventDefault()
+    scaling(event: MouseEvent | TouchEvent) {
+      if (generalUtils.getEventType(event) !== 'touch') {
+        event.preventDefault()
+      }
       const altPressed = generalUtils.exact([event.altKey])
 
       if (!this.config.moved) {
@@ -1026,10 +1130,10 @@ export default Vue.extend({
       StepsUtils.record()
 
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.scaling, false)
-      document.documentElement.removeEventListener('mouseup', this.scaleEnd, false)
-      document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
+      eventUtils.removePointerEvent('pointermove', this.scaling)
+      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
+      window.removeEventListener('keyup', this.handleScaleOffset)
+      window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
@@ -1055,8 +1159,8 @@ export default Vue.extend({
       this.initReferencePoint = ControlUtils.getAbsPointByQuadrant(this.config.point, this.config.styles, this.config.size[0], quadrantByMarkerIndex)
 
       this.currCursorStyling(event)
-      document.documentElement.addEventListener('mousemove', this.lineEndMoving, false)
-      document.documentElement.addEventListener('mouseup', this.lineEndMoveEnd, false)
+      eventUtils.addPointerEvent('pointermove', this.lineEndMoving)
+      eventUtils.addPointerEvent('pointerup', this.lineEndMoveEnd)
     },
     lineEndMoving(event: MouseEvent) {
       event.preventDefault()
@@ -1091,12 +1195,16 @@ export default Vue.extend({
       StepsUtils.record()
 
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.lineEndMoving, false)
-      document.documentElement.removeEventListener('mouseup', this.lineEndMoveEnd, false)
+      eventUtils.removePointerEvent('pointermove', this.lineEndMoving)
+      eventUtils.removePointerEvent('pointerup', this.lineEndMoveEnd)
       this.$emit('setFocus')
       this.$emit('clearSnap')
     },
     resizeStart(event: MouseEvent) {
+      if (eventUtils.checkIsMultiTouch(event)) {
+        return
+      }
+
       this.isControlling = true
       const body = this.$refs.body as HTMLElement
       body.classList.remove('hover')
@@ -1121,10 +1229,10 @@ export default Vue.extend({
       this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
         this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
 
-      document.documentElement.addEventListener('mousemove', this.resizing)
-      document.documentElement.addEventListener('mouseup', this.resizeEnd)
-      document.documentElement.addEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.addEventListener('keydown', this.handleScaleOffset)
+      eventUtils.addPointerEvent('pointermove', this.resizing)
+      eventUtils.addPointerEvent('pointerup', this.resizeEnd)
+      window.addEventListener('keyup', this.handleScaleOffset)
+      window.addEventListener('keydown', this.handleScaleOffset)
       switch (this.getLayerType) {
         case 'shape':
           if (this.config.category === 'B') {
@@ -1167,7 +1275,7 @@ export default Vue.extend({
           ImageUtils.isHorizon = ControlUtils.dirHandler(clientP, rect)
       }
     },
-    resizing(event: MouseEvent) {
+    resizing(event: MouseEvent | TouchEvent) {
       event.preventDefault()
       const altPressed = generalUtils.exact([event.altKey])
 
@@ -1288,13 +1396,13 @@ export default Vue.extend({
       // const body = this.$refs.body as HTMLElement
       // body.classList.add('hover')
       this.setCursorStyle('')
-      document.documentElement.removeEventListener('mousemove', this.resizing)
-      document.documentElement.removeEventListener('mouseup', this.resizeEnd)
-      document.documentElement.removeEventListener('keyup', this.handleScaleOffset)
-      document.documentElement.removeEventListener('keydown', this.handleScaleOffset)
+      eventUtils.removePointerEvent('pointermove', this.resizing)
+      eventUtils.removePointerEvent('pointerup', this.resizeEnd)
+      window.removeEventListener('keyup', this.handleScaleOffset)
+      window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
     },
-    rotateStart(event: MouseEvent) {
+    rotateStart(event: MouseEvent | PointerEvent) {
       this.setCursorStyle('move')
       this.isRotating = true
       this.isControlling = true
@@ -1314,8 +1422,8 @@ export default Vue.extend({
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
-      window.addEventListener('mousemove', this.rotating)
-      window.addEventListener('mouseup', this.rotateEnd)
+      eventUtils.addPointerEvent('pointermove', this.rotating)
+      eventUtils.addPointerEvent('pointerup', this.rotateEnd)
     },
     rotating(event: MouseEvent) {
       if (!this.config.moved) {
@@ -1354,8 +1462,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('')
-      window.removeEventListener('mousemove', this.rotating)
-      window.removeEventListener('mouseup', this.rotateEnd)
+      eventUtils.removePointerEvent('pointermove', this.rotating)
+      eventUtils.removePointerEvent('pointerup', this.rotateEnd)
       this.$emit('setFocus')
     },
     lineRotateStart(event: MouseEvent) {
@@ -1379,8 +1487,8 @@ export default Vue.extend({
       this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
-      window.addEventListener('mousemove', this.lineRotating)
-      window.addEventListener('mouseup', this.lineRotateEnd)
+      eventUtils.addPointerEvent('pointermove', this.lineRotating)
+      eventUtils.addPointerEvent('pointerup', this.lineRotateEnd)
     },
     lineRotating(event: MouseEvent) {
       if (!this.config.moved) {
@@ -1422,8 +1530,8 @@ export default Vue.extend({
       this.isControlling = false
       StepsUtils.record()
       this.setCursorStyle('')
-      window.removeEventListener('mousemove', this.lineRotating)
-      window.removeEventListener('mouseup', this.lineRotateEnd)
+      eventUtils.removePointerEvent('pointermove', this.lineRotating)
+      eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
     cursorStyles(index: number, rotateAngle: number) {
@@ -1447,7 +1555,7 @@ export default Vue.extend({
         document.body.style.cursor = cursor
       }
     },
-    currCursorStyling(e: MouseEvent) {
+    currCursorStyling(e: MouseEvent | TouchEvent | PointerEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
     },
@@ -1625,6 +1733,11 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (this.isTouchDevice) {
+        // in touch device, right click will be triggered by long click
+        // this.setInMultiSelectionMode(true)
+        return
+      }
       /**
        * If current-selected-layer is exact this layer, record the sub-active-layer.
        * After deselecting, set it to active
@@ -1743,7 +1856,13 @@ export default Vue.extend({
           // custome emit event will not contain the keypress information, so we need to manually append it
           altKey: e.altKey
         })
-        document.documentElement.dispatchEvent(event)
+        window.dispatchEvent(event)
+      }
+    },
+    disableTouchEvent(e: TouchEvent) {
+      if (this.isTouchDevice) {
+        e.preventDefault()
+        e.stopPropagation()
       }
     }
     // scrollUpdate() {
@@ -1814,6 +1933,7 @@ export default Vue.extend({
       cursor: pointer;
     }
     pointer-events: "none";
+    touch-action: none;
   }
 
   &__lock-icon {

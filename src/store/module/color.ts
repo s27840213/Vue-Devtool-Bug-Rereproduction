@@ -1,3 +1,5 @@
+import list from '@/apis/list'
+import _ from 'lodash'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import store from '..'
 import { IEditorState } from '../types'
@@ -6,7 +8,8 @@ interface IColorState {
   defaultColors: Array<string>,
   brandColors: Array<string>,
   defaultBgColors: Array<string>,
-  documentColors: Array<string>
+  documentColors: Array<string>,
+  recentlyColors: Array<string>
 }
 
 const getDefaultState = (): IColorState => ({
@@ -62,7 +65,8 @@ const getDefaultState = (): IColorState => ({
     '#BB6BD9',
     '#4F4F4F',
     '#828282',
-    '#F2F2F2']
+    '#F2F2F2'],
+  recentlyColors: []
 })
 
 const state = getDefaultState()
@@ -82,16 +86,37 @@ const getters: GetterTree<IColorState, IEditorState> = {
       return state.documentColors
     }
     return rootState.pages[store.getters.getCurrFocusPageIndex].documentColors
+  },
+  getRecentlyColors(state): Array<string> {
+    return state.recentlyColors
   }
 }
 
 const mutations: MutationTree<IColorState> = {
   SET_defaultColor(state, updateInfo: { index: number, color: string }) {
     state.defaultColors[updateInfo.index] = updateInfo.color
+  },
+  SET_recentlyColors(state, colors) {
+    state.recentlyColors = colors
   }
 }
 
 const actions: ActionTree<IColorState, unknown> = {
+  async initRecentlyColors({ commit }) {
+    if (state.recentlyColors.length) return
+
+    let recently = (await list.getRecentlyUsedColor()).data.data.content as unknown as string[]
+    recently = recently.map((color: string) => `#${color}`)
+    commit('SET_recentlyColors', recently)
+  },
+  addRecentlyColors({ commit }, color: string) {
+    list.addRecentlyUsedColor(color.replace('#', ''))
+
+    let recently = state.recentlyColors
+    recently = _.without(recently, color)
+    recently = [color].concat(recently)
+    commit('SET_recentlyColors', recently)
+  }
 }
 
 export default {

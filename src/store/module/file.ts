@@ -233,6 +233,11 @@ const mutations: MutationTree<IPhotoState> = {
     }
     state.myfileImages.unshift(previewImage)
   },
+  DEL_PREVIEW(state: IPhotoState, { assetId }) {
+    state.myfileImages = state.myfileImages.filter((it: IAssetPhoto) => {
+      return it.assetIndex !== assetId
+    })
+  },
   UPDATE_PROGRESS(state: IPhotoState, { assetId, progress }) {
     const targetIndex = state.myfileImages.findIndex((img: IAssetPhoto) => {
       return img.id === assetId

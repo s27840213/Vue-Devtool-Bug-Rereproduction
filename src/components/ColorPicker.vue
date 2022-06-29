@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="color-picker" ref="colorPicker")
+  div(class="color-picker" ref="colorPicker"
+      :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
     chrome-picker(
       class="color-picker__picker"
       :value="convertedHex"
@@ -7,7 +8,10 @@
       @paste="onPaste"
       @mouseup.native="onmouseup"
       :disableFields="true"
-      :disableAlpha="true")
+      :disableAlpha="true"
+      :isMobile="isMobile"
+      :fullWidth="isMobile"
+      :aspectRatio="aspectRatio")
     div(class="px-10" :class="[{'pb-20': showColorSlip}]")
       div(class="color-picker__hex")
         svg-icon(class="pointer"
@@ -70,6 +74,14 @@ export default Vue.extend({
     showColorSlip: {
       type: Boolean,
       default: false
+    },
+    isMobile: {
+      type: Boolean,
+      default: false
+    },
+    aspectRatio: {
+      type: Number,
+      default: 56.25
     }
   },
   components: {
@@ -175,7 +187,7 @@ export default Vue.extend({
 
       const eyeDropper = new (window as any).EyeDropper()
       if (eyeDropper !== undefined) {
-        eyeDropper.open().then((result: {sRGBHex: string}) => {
+        eyeDropper.open().then((result: { sRGBHex: string }) => {
           this.color = result.sRGBHex
         })
       }
@@ -188,9 +200,7 @@ export default Vue.extend({
 .color-picker {
   display: flex;
   flex-direction: column;
-  width: 225px;
   height: fit-content;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: white;
   &:focus {
     outline: none;

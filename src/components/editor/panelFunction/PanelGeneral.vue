@@ -26,8 +26,8 @@
       )
       svg-icon(class="pointer feature-button p-5"
         :class="{ active: isLocked }"
-        :iconName="isLocked ? 'lock' : 'unlock'" :iconWidth="'20px'" :iconColor="'gray-2'"
-        @click.native="iconAction('unlock')"
+        :iconName="isLocked ? 'unlock' : 'lock'" :iconWidth="'20px'" :iconColor="'gray-2'"
+        @click.native="iconAction(isLocked ? 'lock' : 'unlock')"
         v-hint="isLocked ? `${$t('NN0033')}` : `${$t('NN0213')}`"
       )
       svg-icon(class="feature-button p-5"
@@ -55,12 +55,11 @@ import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import { mapGetters } from 'vuex'
-import LayerUtils from '@/utils/layerUtils'
+import layerUtils from '@/utils/layerUtils'
 import popupUtils from '@/utils/popupUtils'
-import { IFrame, IGroup, ILayer, ITmp } from '@/interfaces/layer'
+import { IFrame, IGroup } from '@/interfaces/layer'
 import { PopupSliderEventType } from '@/store/types'
 import formatUtils from '@/utils/formatUtils'
-import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   data() {
@@ -79,12 +78,12 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return LayerUtils.getTmpLayer().locked
+      return layerUtils.getTmpLayer().locked
     },
     isCopyFormatDisabled(): boolean {
       if (this.layerNum === 1) { // not tmp
         const types = this.currSelectedInfo.types
-        const currLayer = LayerUtils.getCurrLayer
+        const currLayer = layerUtils.getCurrLayer
         if (types.has('group')) {
           if (this.subActiveLayerIndex !== -1) {
             if (['text', 'image'].includes(this.subActiveLayerType)) {
@@ -127,40 +126,29 @@ export default Vue.extend({
       return this.currSubSelectedInfo.type
     },
     subActiveLayerIndex(): number {
-      return LayerUtils.subLayerIdx
+      return layerUtils.subLayerIdx
     },
     subActiveLayer(): any {
       if (this.subActiveLayerIndex !== -1) {
-        return (LayerUtils.getCurrLayer as IGroup).layers[this.subActiveLayerIndex]
+        return (layerUtils.getCurrLayer as IGroup).layers[this.subActiveLayerIndex]
       }
       return undefined
     },
     subActiveLayerType(): string {
-      const currLayer = LayerUtils.getCurrLayer
+      const currLayer = layerUtils.getCurrLayer
       if (currLayer.type === 'group' && this.subActiveLayerIndex !== -1) {
         return (currLayer as IGroup).layers[this.subActiveLayerIndex].type
       }
       return ''
     },
     primaryLayerIndex(): number {
-      if (LayerUtils.getCurrLayer.type === 'group') {
-        return LayerUtils.layerIndex
+      if (layerUtils.getCurrLayer.type === 'group') {
+        return layerUtils.layerIndex
       }
       return -1
     },
     opacity(): number {
-      const currLayer = LayerUtils.getCurrLayer
-      const { subLayerIdx } = LayerUtils
-      switch (currLayer.type) {
-        case 'tmp':
-          return Math.max(...(LayerUtils.getCurrLayer as IGroup | ITmp).layers.map((layer: ILayer) => layer.styles.opacity))
-        case 'group':
-          return subLayerIdx !== -1 ? (currLayer as IGroup).layers[subLayerIdx].styles.opacity : currLayer.styles.opacity
-        case 'frame':
-          return subLayerIdx !== -1 ? (currLayer as IFrame).clips[subLayerIdx].styles.opacity : currLayer.styles.opacity
-        default:
-          return this.currSelectedInfo.layers[0].styles.opacity
-      }
+      return layerUtils.getCurrOpacity
     },
     isTextEditable(): boolean {
       return this.layerNum === 1 && this.currSelectedInfo.layers[0].type === 'text' && this.currSelectedInfo.layers[0].contentEditable
@@ -184,7 +172,7 @@ export default Vue.extend({
       return MappingUtils.mappingIconSet(type)
     },
     iconAction(icon: string) {
-      if (this.isLocked && icon !== 'unlock') return
+      if (this.isLocked && icon !== 'lock') return
       MappingUtils.mappingIconAction(icon)
     },
     openOrderPopup() {
@@ -209,44 +197,7 @@ export default Vue.extend({
       })
     },
     setOpacity(value: number): void {
-      if (value > 100) {
-        value = 100
-      }
-      const { getCurrLayer: currLayer, subLayerIdx, layerIndex } = LayerUtils
-      if (subLayerIdx === -1) {
-        if (this.currSelectedInfo.layers.length === 1) {
-          this.$store.commit('UPDATE_layerStyles', {
-            pageIndex: this.currSelectedInfo.pageIndex,
-            layerIndex: this.currSelectedInfo.index,
-            styles: {
-              opacity: value
-            }
-          })
-        } else {
-          this.$store.commit('UPDATE_selectedLayersStyles', {
-            styles: {
-              opacity: value
-            }
-          })
-        }
-      } else {
-        if (subLayerIdx !== -1) {
-          currLayer.type === 'group' && LayerUtils.updateSubLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIdx, {
-            opacity: value
-          })
-          currLayer.type === 'frame' && frameUtils.updateFrameLayerStyles(LayerUtils.pageIndex, layerIndex, subLayerIdx, {
-            opacity: value
-          })
-        } else {
-          this.$store.commit('UPDATE_layerStyles', {
-            pageIndex: this.currSelectedInfo.pageIndex,
-            layerIndex: this.currSelectedInfo.index,
-            styles: {
-              opacity: value
-            }
-          })
-        }
-      }
+      layerUtils.updateLayerOpacity(value)
     },
     handleCopyFormat() {
       if (this.isCopyFormatDisabled) return

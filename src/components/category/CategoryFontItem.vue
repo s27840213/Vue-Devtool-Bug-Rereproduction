@@ -34,6 +34,7 @@ import layerUtils from '@/utils/layerUtils'
 import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -269,7 +270,7 @@ export default Vue.extend({
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(layerUtils.layerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           tiptapUtils.updateHtml(newConfig.paragraphs)
-          tiptapUtils.focus()
+          !generalUtils.isTouchDevice() && tiptapUtils.focus()
         }
 
         AssetUtils.addAssetToRecentlyUsed({
