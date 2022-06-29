@@ -474,7 +474,6 @@ class ImageShadowUtils {
                 const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
                 img.src = svgUrl
                 document.body.appendChild(img)
-                console.log(img)
               }
               resolve()
             })
