@@ -221,10 +221,10 @@ export default Vue.extend({
           break
         }
         case ShadowEffectType.imageMatched:
-          await imageShadowUtils.drawImageMatchedShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         case ShadowEffectType.floating: {
-          await imageShadowUtils.drawFloatingShadow(updateCanvas, img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         }
         case ShadowEffectType.none:

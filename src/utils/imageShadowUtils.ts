@@ -151,7 +151,8 @@ class ImageShadowUtils {
     }
   }
 
-  async drawFloatingShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawFloatingShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
     this.drawingInit(canvas, img, config, params)
@@ -159,14 +160,15 @@ class ImageShadowUtils {
     this.handlerId = handlerId
     if (timeout) {
       setTimeout(() => {
-        this.floatingHandler(canvas, img, config, handlerId, params)
+        this.floatingHandler(canvas_s, img, config, handlerId, params)
       }, timeout)
     } else {
-      await this.floatingHandler(canvas, img, config, handlerId, params)
+      await this.floatingHandler(canvas_s, img, config, handlerId, params)
     }
   }
 
-  async floatingHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  async floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     setMark('floating', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
@@ -255,9 +257,11 @@ class ImageShadowUtils {
         ctxT.globalAlpha = 1
         ctxT.globalCompositeOperation = 'source-over'
 
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(canvasT, 0, 0)
+        canvas_s.forEach(c => {
+          const ctx = c.getContext('2d') as CanvasRenderingContext2D
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(canvasT, 0, 0)
+        })
         if (layerInfo) {
           this.setIsProcess(layerInfo, false)
         }
@@ -269,7 +273,8 @@ class ImageShadowUtils {
     logMark('floating', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
   }
 
-  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
     this.drawingInit(canvas, img, config, params)
@@ -277,14 +282,15 @@ class ImageShadowUtils {
     this.handlerId = handlerId
     if (timeout) {
       setTimeout(() => {
-        this.imageMathcedHandler(canvas, img, config, handlerId, params)
+        this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
       }, timeout)
     } else {
-      await this.imageMathcedHandler(canvas, img, config, handlerId, params)
+      await this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
     }
   }
 
-  async imageMathcedHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
@@ -301,10 +307,10 @@ class ImageShadowUtils {
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
 
     const scaleRatio = img.naturalWidth / _imgWidth
-    const imgX = _imgX * scaleRatio
-    const imgY = _imgY * scaleRatio
-    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+    let imgX = _imgX * scaleRatio
+    let imgY = _imgY * scaleRatio
+    let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+    let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
     let { drawCanvasW, drawCanvasH, layerInfo } = params || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
@@ -314,6 +320,32 @@ class ImageShadowUtils {
     drawCanvasH *= size * 0.01
     const blurImgX = (canvas.width - drawCanvasW) * 0.5
     const blurImgY = (canvas.height - drawCanvasH) * 0.5
+
+    /** If the img is svg+xml convert it to png */
+    if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      await new Promise<void>((resolve) => {
+        fetch(img.src)
+          .then((response) => {
+            if (response.headers.get('Content-Type') === 'image/svg+xml') {
+              const pngCanvas = document.createElement('canvas')
+              const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+              drawImgWidth *= pngScaleRation
+              drawImgHeight *= pngScaleRation
+              imgX *= pngScaleRation
+              imgY *= pngScaleRation
+              pngCanvas.setAttribute('width', (img.naturalWidth * pngScaleRation).toString())
+              pngCanvas.setAttribute('height', (img.naturalHeight * pngScaleRation).toString())
+              const pngCtx = pngCanvas.getContext('2d') as CanvasRenderingContext2D
+              pngCtx.drawImage(img, 0, 0)
+              const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
+              img.src = svgUrl
+              document.body.appendChild(img)
+              console.log(img)
+            }
+            resolve()
+          })
+      })
+    }
 
     const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}${imgX}${imgY}${_imgHeight}${_imgWidth}${img.src}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier
@@ -373,9 +405,11 @@ class ImageShadowUtils {
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalAlpha = 1
 
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(canvasT, 0, 0)
+        canvas_s.forEach(c => {
+          const ctx = c.getContext('2d') as CanvasRenderingContext2D
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(canvasT, 0, 0)
+        })
         if (layerInfo) {
           this.setIsProcess(layerInfo, false)
         }
@@ -412,46 +446,37 @@ class ImageShadowUtils {
       }
 
       const scaleRatio = img.naturalWidth / _imgWidth
-      const imgX = _imgX * scaleRatio
-      const imgY = _imgY * scaleRatio
-      // const edgeCanvas = document.createElement('canvas')
-      // const edgeCtx = edgeCanvas.getContext('2d') as CanvasRenderingContext2D
-      // edgeCtx.drawImage(img, 0, 0)
-      // const { top, left, right, bottom } = await this.getImgEdgeWidth(edgeCanvas)
-      // console.log(top, left, right, bottom, edgeCanvas.width, edgeCanvas.height)
-      // const drawImgWidth = edgeCanvas.width - left - right
-      // const drawImgHeight = edgeCanvas.height - top - bottom
-      // const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-      // let drawImgWidth = 0
-      // let drawImgHeight = 0
-      // await new Promise<void>((resolve) => {
-      //   fetch('https://template.vivipic.com/admin/cFQDScGkAZG6ED2Qx6Im/asset/image/220310122116720bVHVgAc5/larg?origin=true&ver=303120221747')
-      //     .then((response) => response.text())
-      //     .then((data) => {
-      //       svg.innerHTML = data
-      //       document.body.appendChild(svg)
-      //       const { width, height } = svg.getBBox()
-      //       console.log(width, height)
-      //       drawImgWidth = width
-      //       drawImgHeight = height
-      //       const outerHTML = data
-      //       const blob = new Blob([outerHTML], { type: 'image/svg+xml;charset=utf-8' })
-      //       const URL = window.URL || window.webkitURL || window
-      //       const blobURL = URL.createObjectURL(blob)
-      //       console.log(blobURL)
-      //       const blobImg = new Image()
-      //       blobImg.onload = () => {
-      //         document.body.appendChild(blobImg)
-      //         console.log(blobImg)
-      //         resolve()
-      //       }
-      //       blobImg.src = blobURL
-      //     })
-      // })
-      // console.log(svg)
+      let imgX = _imgX * scaleRatio
+      let imgY = _imgY * scaleRatio
+      let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+      let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
 
-      const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-      const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+      /** If the img is svg+xml convert it to png */
+      if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+        await new Promise<void>((resolve) => {
+          fetch(img.src)
+            .then((response) => {
+              if (response.headers.get('Content-Type') === 'image/svg+xml') {
+                const pngCanvas = document.createElement('canvas')
+                const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+                drawImgWidth *= pngScaleRation
+                drawImgHeight *= pngScaleRation
+                imgX *= pngScaleRation
+                imgY *= pngScaleRation
+                pngCanvas.setAttribute('width', (img.naturalWidth * pngScaleRation).toString())
+                pngCanvas.setAttribute('height', (img.naturalHeight * pngScaleRation).toString())
+                const pngCtx = pngCanvas.getContext('2d') as CanvasRenderingContext2D
+                pngCtx.drawImage(img, 0, 0)
+                const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
+                img.src = svgUrl
+                document.body.appendChild(img)
+                console.log(img)
+              }
+              resolve()
+            })
+        })
+      }
+
       let { drawCanvasW, drawCanvasH } = params || {}
       if (!drawCanvasH || !drawCanvasW) {
         drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0
@@ -522,18 +547,7 @@ class ImageShadowUtils {
         if (res) {
           MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
         }
-        await new Promise<void>((resolve) => {
-          const img = new Image()
-          img.onload = () => {
-            // MAXSIZE = Math.min(Math.max(img.naturalHeight, img.naturalWidth), 1600)
-            MAXSIZE = Math.min(Math.max(img.height, img.width), 1600)
-            resolve()
-          }
-          img.src = imageUtils.getSrc(config.srcObj, 'larg')
-        })
       }
-      // console.log('MAXSIZE', MAXSIZE)
-
       const mappingScale = _imgWidth > _imgHeight
         ? (layerWidth / _imgWidth) * MAXSIZE / drawCanvasW
         : (layerHeight / _imgHeight) * MAXSIZE / drawCanvasH
@@ -541,8 +555,6 @@ class ImageShadowUtils {
 
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${Math.ceil(canvas.width * mappingScale)}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${Math.ceil(canvas.height * mappingScale)}`)
-      // console.log('canvasMaxSize', canvasMaxSize.width, canvasMaxSize.height)
-      // console.log('canvas', canvas.width, canvas.height)
 
       if (this.handlerId === handlerId) {
         ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
