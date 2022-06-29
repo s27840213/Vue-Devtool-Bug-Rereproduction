@@ -27,6 +27,7 @@ export interface IEditorState {
     path: string
   },
   currSidebarPanelType: number,
+  mobileSidebarPanelOpen: boolean,
   currFunctionPanelType: number,
   pageScaleRatio: number,
   isSettingScaleRatio: boolean,
@@ -68,9 +69,11 @@ export interface IEditorState {
   themes: Itheme[],
   hasCopiedFormat: boolean,
   inGestureToolMode: boolean,
-  isMobile: boolean,
+  isMobile: boolean
   isLargeDesktop: boolean,
-  isGlobalLoading: boolean
+  closeMobilePanelFlag: boolean,
+  isGlobalLoading: boolean,
+  inMultiSelectionMode: boolean
 }
 
 export enum SidebarPanelType {

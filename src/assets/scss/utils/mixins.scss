@@ -1,18 +1,18 @@
-@mixin size($w,$h:$w) {
-	width: $w;
-	height: $h;
+@mixin size($w, $h:$w) {
+  width: $w;
+  height: $h;
 }
 
-@mixin flexCenter(){
+@mixin flexCenter() {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
 @mixin layout-mobile {
-    @media screen and (max-aspect-ratio: 1/1) {
-        @content;
-    }
+  @media screen and (max-aspect-ratio: 1/1) {
+    @content;
+  }
 }
 
 @mixin firefoxOnly { // Only for Firefox, https://stackoverflow.com/a/32455002
@@ -31,10 +31,12 @@
 
 @mixin no-scrollbar {
   &::-webkit-scrollbar {
-      display: none !important;
+    display: none !important;
   }
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
+  /* IE and Edge */
+  -ms-overflow-style: none !important;
+  /* Firefox */
+  scrollbar-width: none !important;
 }
 
 // For layout which 
@@ -66,7 +68,7 @@
 }
 
 $thumb-color: #D9DBE1; // gray-4
-@mixin hide-scrollbar($padding-right: 11px){
+@mixin hide-scrollbar($padding-right: 11px) {
   // Disable x scrollbar and let y scrollbar appear only when hovering it
   // If element height <= parent height, y scrollbar will never appear.
   overflow-y: auto; // Firefox will use this
@@ -106,6 +108,7 @@ $thumb-color: #D9DBE1; // gray-4
 }
 
 @import "@/assets/scss/utils/variables.scss";
+
 @mixin popup-window {
   position: fixed;
   top: 0;
@@ -118,4 +121,7 @@ $thumb-color: #D9DBE1; // gray-4
   background-color: #000000a1;
   z-index: setZindex('popup');
 }
-.popup-window { @include popup-window; }
+
+.popup-window {
+  @include popup-window;
+}

@@ -63,6 +63,7 @@ class GroupUtils {
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
+  get inMultiSelecitonMode() { return store.getters.getInMultiSelectionMode }
 
   calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set<string> {
     const typeSet = new Set<string>()
@@ -244,6 +245,7 @@ class GroupUtils {
 
   deselect() {
     const tmpPageIndex = this.currSelectedInfo.pageIndex
+
     if (this.currSelectedInfo.index !== -1) {
       const currSelectedLayers = store.getters.getCurrSelectedLayers
       if (currSelectedLayers.length === 1) {

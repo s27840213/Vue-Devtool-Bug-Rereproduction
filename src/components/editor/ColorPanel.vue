@@ -3,10 +3,10 @@
       :class="[whiteTheme ? 'bg-white': 'bg-gray-1-5']"
       v-click-outside="vcoConfig"
       ref="colorPanel")
-    img(class="color-panel__btn"
+    img(v-if="showPanelBtn" class="color-panel__btn"
       :src="require(`@/assets/img/svg/btn-pack-hr${whiteTheme ? '-white': ''}.svg`)"
       @click="closePanel()")
-    div(class="color-panel__scroll")
+    div(class="color-panel__scroll" :style="noPadding ? {padding:0} : {}")
       //- Recently colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -87,6 +87,7 @@ import mouseUtils from '@/utils/mouseUtils'
 import { LayerType, SidebarPanelType } from '@/store/types'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -95,6 +96,14 @@ export default Vue.extend({
       default: false
     },
     alignLeft: {
+      type: Boolean,
+      default: true
+    },
+    noPadding: {
+      type: Boolean,
+      default: false
+    },
+    showPanelBtn: {
       type: Boolean,
       default: true
     }
@@ -247,6 +256,10 @@ export default Vue.extend({
       this.$emit('toggleColorPanel', false)
     },
     openColorPanel(event: MouseEvent) {
+      if (generalUtils.isTouchDevice()) {
+        this.$emit('openColorPicker')
+        return
+      }
       colorUtils.setIsColorPickerOpen(true)
       Vue.nextTick(() => {
         const colorPanel = this.$refs.colorPanel as HTMLElement
