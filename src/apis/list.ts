@@ -32,6 +32,7 @@ class ListService {
     })
   }
 
+  // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'
     return this.getList(params)
@@ -58,22 +59,6 @@ class ListService {
     return this.getList(params)
   }
 
-  addDesign(id: string, type: string, params: IListServiceParams = {}) {
-    console.log('add design')
-    const data = {
-      token: authToken().token,
-      type,
-      design_id: id,
-      ...params
-    }
-    if (!data.token) return new Promise(resolve => resolve({ flag: 1 }))
-    return axios.request<IListServiceResponse>({
-      url: '/add-design',
-      method: 'POST',
-      data
-    })
-  }
-
   getMarker(params: IListServiceParams) {
     params.type = 'marker'
     params.token = '1'
@@ -89,6 +74,29 @@ class ListService {
     return this.getList(params)
   }
 
+  getHashtag(params: IListServiceParams) {
+    params.type = 'hashtag'
+    params.token = '1'
+    params.cache = true
+    return this.getList(params)
+  }
+
+  // For other usage
+  addDesign(id: string, type: string, params: IListServiceParams = {}) {
+    const data = {
+      token: authToken().token,
+      type,
+      design_id: id,
+      ...params
+    }
+    if (!data.token) return new Promise(resolve => resolve({ flag: 1 }))
+    return axios.request<IListServiceResponse>({
+      url: '/add-design',
+      method: 'POST',
+      data
+    })
+  }
+
   getTheme(params: IListServiceParams) {
     params.type = 'theme'
     params.locale = localeUtils.currLocale()
@@ -98,11 +106,24 @@ class ListService {
     return this.getList(params)
   }
 
-  getHashtag(params: IListServiceParams) {
-    params.type = 'hashtag'
-    params.token = '1'
-    params.cache = true
-    return this.getList(params)
+  getRecentlyUsedColor() {
+    return this.getList({
+      token: authToken().token || '',
+      locale: localeUtils.currLocale(),
+      type: 'color'
+    })
+  }
+
+  addRecentlyUsedColor(color: string) {
+    return axios.request<IListServiceResponse>({
+      url: '/add-design',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        type: 'color',
+        design_id: color
+      }
+    })
   }
 }
 

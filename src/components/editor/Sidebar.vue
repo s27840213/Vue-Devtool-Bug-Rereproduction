@@ -128,11 +128,13 @@ export default Vue.extend({
 
 .nav {
   @include size(100%, 100%);
+  @include push-scrollbar10;
+  @include hide-scrollbar;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  @include hide-scrollbar;
+  box-sizing: border-box;
 }
 .nav-container {
   display: grid;

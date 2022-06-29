@@ -184,8 +184,11 @@ export default Vue.extend({
 .brand-kit {
   @include size(100%, 100%);
   &__scroll {
-    height: calc(100vh - #{$header-height});
+    @include push-scrollbar10;
     @include hide-scrollbar-white;
+    box-sizing: border-box;
+    width: 100%;
+    height: calc(100vh - #{$header-height});
   }
   &__main {
     min-height: calc(100vh - #{$header-height});
