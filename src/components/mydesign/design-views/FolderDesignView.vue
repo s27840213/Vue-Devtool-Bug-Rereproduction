@@ -381,6 +381,7 @@ export default Vue.extend({
   text-align: left;
   &__folder-name {
     margin-top: 94px;
+    width: calc(0.8 * (100vw - 360px)); // To prevent file name overflow the screen.
     > span {
       position: relative;
       width: 100%;

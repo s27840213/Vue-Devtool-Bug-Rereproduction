@@ -333,7 +333,7 @@ export default Vue.extend({
   &__btn {
     position: absolute;
     top: 0;
-    transform: translate3d(-50%, -70%, 0);
+    transform: translate3d(-50%, -100%, 0);
   }
   &__colors {
     > div:nth-child(1) {

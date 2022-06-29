@@ -3,6 +3,7 @@ import {
   IPhotoServiceParams,
   IPhotoServiceResponse
 } from '@/interfaces/api'
+import store from '@/store'
 
 class PhotoService {
   getList (params: IPhotoServiceParams) {
@@ -13,6 +14,7 @@ class PhotoService {
       page_index: params.pageIndex,
       keyword: params.keyword,
       cache: true,
+      ver: store.getters['user/getVerApi'],
       platform: window.location.host
     }
     return axios.request<IPhotoServiceResponse>({
