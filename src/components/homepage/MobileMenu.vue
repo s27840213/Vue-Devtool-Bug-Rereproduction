@@ -30,7 +30,7 @@
             summary
               span {{$tc('NN0649')}}
               svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
-            div
+            div(@click="close()")
               url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
                   :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
         div(class="menu-bottom__link"
@@ -65,7 +65,9 @@ export default Vue.extend({
       return constantData.headerItems(true)
     },
     currentPage(): string {
-      return this.$route.name || ''
+      return this.$route.name === 'Settings'
+        ? this.$route.params.view
+        : this.$route.name || ''
     },
     currPath(): string {
       return this.$route.path || '/'
@@ -75,7 +77,8 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    }
+    },
+    close() { this.$emit('closeMenu') }
   }
 })
 </script>
@@ -103,7 +106,6 @@ export default Vue.extend({
   a {
     display: block;
     width: 100%;
-    color: unset;
     text-decoration: unset;
   }
 }
