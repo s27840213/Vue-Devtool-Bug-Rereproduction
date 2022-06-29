@@ -217,6 +217,40 @@ class GeneralUtils {
     params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }
 
+  async getFileImageTypeByByte(file: File): Promise<string> {
+    return new Promise<string>((resolve) => {
+      const fileReader = new FileReader()
+      fileReader.onloadend = function fileReaderLoaded(e): void {
+        let type = ''
+        const arr = (new Uint8Array(e.target!.result as ArrayBuffer)).subarray(0, 4)
+        let header = ''
+        for (let i = 0; i < arr.length; i += 1) {
+          header += arr[i].toString(16)
+        }
+        switch (header) {
+          case '89504e47':
+            type = 'png'
+            break
+          case '47494638':
+            type = 'gif'
+            break
+          case 'ffd8ffe0':
+          case 'ffd8ffe1':
+          case 'ffd8ffe2':
+          case 'ffd8ffe3':
+          case 'ffd8ffe8':
+            type = 'jpeg'
+            break
+          default:
+            type = 'unknown'
+            break
+        }
+        resolve(type)
+      }
+      fileReader.readAsArrayBuffer(file)
+    })
+  }
+
   // log(params: string, data: any = '') {
   //   if (data) {
   //     console.log(data)
@@ -228,10 +262,10 @@ class GeneralUtils {
   //   }
   // }
 
-  panelInit(panelName:string,
-    searchF: (keyword: string)=>void,
-    categoryF: (keyword: string, locale:string)=>void,
-    normalInit: ()=>void) { // May move to a new file panelUtils.ts
+  panelInit(panelName: string,
+    searchF: (keyword: string) => void,
+    categoryF: (keyword: string, locale: string) => void,
+    normalInit: () => void) { // May move to a new file panelUtils.ts
     const urlParams = new URLSearchParams(window.location.search)
     const panel = urlParams.get('panel')
     const category = urlParams.get('category')
