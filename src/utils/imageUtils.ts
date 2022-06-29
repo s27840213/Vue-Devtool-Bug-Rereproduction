@@ -39,7 +39,7 @@ class ImageUtils {
     return typeof srcObj.assetId !== 'undefined' && typeof srcObj.userId !== 'undefined' && typeof srcObj.type !== 'undefined'
   }
 
-  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number): string {
+  getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
     let { type, userId, assetId, brandId } = {} as SrcObj
     let ratio = 1
@@ -63,12 +63,22 @@ class ImageUtils {
     }
 
     switch (type) {
-      case 'public':
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}?origin=true` + FORCE_UPDATE_VER
+      case 'public': {
+        const query = forBgRemove ? `?${FORCE_UPDATE_VER.substring(1)}` : `?origin=true${FORCE_UPDATE_VER}`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query}`
+      }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
-        return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
+        const query = forBgRemove ? `${FORCE_UPDATE_VER}` : `&origin=true${FORCE_UPDATE_VER}`
+
+        return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
       }
+      // case 'public':
+      //   return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}?origin=true` + FORCE_UPDATE_VER
+      // case 'private': {
+      //   const editorImg = store.getters['file/getEditorViewImages']
+      //   return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
+      // }
       case 'logo-public':
         return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true` + FORCE_UPDATE_VER
       case 'logo-private': {
