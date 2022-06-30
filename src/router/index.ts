@@ -314,6 +314,7 @@ router.beforeEach(async (to, from, next) => {
 
     store.commit('user/SET_STATE', {
       verUni: json.ver_uni,
+      verApi: json.ver_api,
       imgSizeMap: json.image_size_map
     })
     let defaultFontsJson = json.default_font as Array<{ id: string, ver: number }>

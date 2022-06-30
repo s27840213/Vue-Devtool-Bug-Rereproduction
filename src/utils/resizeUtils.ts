@@ -41,10 +41,10 @@ class ResizeUtils {
         layer = targetLayer as IFrame
         if (frameUtils.isImageFrame(layer)) {
           let { imgWidth, imgHeight, imgX, imgY } = layer.clips[0].styles
-          imgWidth *= scale
-          imgHeight *= scale
-          imgY *= scale
-          imgX *= scale
+          imgWidth *= targetScale
+          imgHeight *= targetScale
+          imgY *= targetScale
+          imgX *= targetScale
 
           layerUtils.updateLayerStyles(pageIndex, layerIndex, {
             initWidth: width,

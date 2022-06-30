@@ -208,7 +208,8 @@ export default function (this: any) {
           locale,
           theme,
           keyword: (keyword.includes('::') ? keyword : `tag::${keyword}`).concat(';;sum::1'),
-          listAll: 1
+          listAll: 1,
+          listCategory: 0
         })
         commit(SET_STATE, { sum: data.data.sum })
       } catch (error) {
