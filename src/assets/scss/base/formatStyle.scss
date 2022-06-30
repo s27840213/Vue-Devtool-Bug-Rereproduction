@@ -1,22 +1,22 @@
-@mixin header(){
-	font-style: normal;
+@mixin header() {
+  font-style: normal;
   font-weight: 700;
   line-height: 140%;
 }
 
-@mixin body(){
-	font-style: normal;
+@mixin body() {
+  font-style: normal;
   font-weight: normal;
   line-height: 180%;
 }
 
-@mixin caption(){
+@mixin caption() {
   font-style: normal;
   font-weight: 600;
   line-height: 180%;
 }
 
-@mixin btn(){
+@mixin btn() {
   font-style: normal;
   font-weight: 500;
   line-height: 24px;
@@ -62,12 +62,29 @@
 }
 
 .text {
-  &-H1 { @include text-H1 }
-  &-H2 { @include text-H2 }
-  &-H3 { @include text-H3 }
-  &-H4 { @include text-H4 }
-  &-H5 { @include text-H5 }
-  &-H6 { @include text-H6 }
+  &-H1 {
+    @include text-H1
+  }
+
+  &-H2 {
+    @include text-H2
+  }
+
+  &-H3 {
+    @include text-H3
+  }
+
+  &-H4 {
+    @include text-H4
+  }
+
+  &-H5 {
+    @include text-H5
+  }
+
+  &-H6 {
+    @include text-H6
+  }
 }
 
 @mixin body-XL {
@@ -84,7 +101,7 @@
   @include body();
   font-size: 16px;
 }
-  
+
 @mixin body-SM {
   @include body();
   font-size: 14px;
@@ -102,12 +119,29 @@
 }
 
 .body {
-  &-XL { @include body-XL; }
-  &-LG { @include body-LG; }
-  &-MD { @include body-MD }
-  &-SM { @include body-SM }
-  &-XS { @include body-XS }
-  &-XXS { @include body-XXS }
+  &-XL {
+    @include body-XL;
+  }
+
+  &-LG {
+    @include body-LG;
+  }
+
+  &-MD {
+    @include body-MD
+  }
+
+  &-SM {
+    @include body-SM
+  }
+
+  &-XS {
+    @include body-XS
+  }
+
+  &-XXS {
+    @include body-XXS
+  }
 }
 
 @mixin caption-LG {
@@ -127,9 +161,17 @@
 }
 
 .caption {
-  &-LG { @include caption-LG }
-  &-MD { @include caption-MD }
-  &-SM { @include caption-SM }
+  &-LG {
+    @include caption-LG
+  }
+
+  &-MD {
+    @include caption-MD
+  }
+
+  &-SM {
+    @include caption-SM
+  }
 }
 
 @mixin btn-LG {
@@ -143,8 +185,13 @@
 }
 
 .btn {
-  &-LG{ @include btn-LG; }
-  &-SM{ @include btn-SM; }
+  &-LG {
+    @include btn-LG;
+  }
+
+  &-SM {
+    @include btn-SM;
+  }
 }
 
 @mixin overline-LG {
@@ -158,8 +205,13 @@
 }
 
 .overline {
-  &-LG { @include overline-LG; }
-  &-SM { @include overline-SM; }
+  &-LG {
+    @include overline-LG;
+  }
+
+  &-SM {
+    @include overline-SM;
+  }
 }
 
 @mixin primary-btn {

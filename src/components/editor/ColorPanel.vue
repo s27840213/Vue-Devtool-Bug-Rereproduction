@@ -298,7 +298,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .color-panel {
   @include body-MD;
   position: relative;

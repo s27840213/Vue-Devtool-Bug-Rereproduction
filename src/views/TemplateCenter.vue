@@ -579,7 +579,7 @@ body {
 }
 </style>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .template-center {
   @include size(100%, 100%);
   @include push-scrollbar10;

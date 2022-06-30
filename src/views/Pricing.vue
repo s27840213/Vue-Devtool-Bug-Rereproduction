@@ -119,7 +119,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .pricing {
   height: 100%;
 }
@@ -291,7 +291,8 @@ export default Vue.extend({
         flex-shrink: 0;
       }
     }
-    summary::-webkit-details-marker { // Romove detail arrow in safari
+    summary::-webkit-details-marker {
+      // Romove detail arrow in safari
       display: none;
     }
   }

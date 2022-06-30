@@ -32,7 +32,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .no-items-hint {
   margin-top: 12px;
   display: flex;

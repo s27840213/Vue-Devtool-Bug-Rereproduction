@@ -65,7 +65,7 @@ export default Vue.extend({
     rwdModifier() {
       return this.isLargeDesktop ? 1 : 0.7
     },
-    locale():string {
+    locale(): string {
       return i18n.locale
     },
     dir(): string {
@@ -82,7 +82,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .block {
   display: flex;
   justify-content: space-around;
@@ -101,7 +101,7 @@ export default Vue.extend({
   &__coming_soon {
     padding: 4px;
     color: white;
-    background: #FFBA49;
+    background: #ffba49;
     border-radius: 4px;
   }
   &__title {

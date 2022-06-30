@@ -190,7 +190,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .popup-brand-settings {
   &__window {
     // @include size(900px, 800px);

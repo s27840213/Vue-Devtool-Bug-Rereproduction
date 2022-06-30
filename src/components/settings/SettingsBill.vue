@@ -76,7 +76,7 @@ export default Vue.extend({
     curInvoice(): Record<string, string | Array<Record<string, string>>> {
       return this.historys[this.hisIndex]
     },
-    customerAddr():string {
+    customerAddr(): string {
       return [
         this.curInvoice.name,
         this.curInvoice.company,
@@ -85,7 +85,7 @@ export default Vue.extend({
       ].filter((item) => item !== '')
         .join('\n')
     },
-    totalPrice():number {
+    totalPrice(): number {
       return (this.curInvoice.items as Array<Record<string, string>>)
         .reduce((acc: number, cur: Record<string, unknown>) => {
           return acc + (cur.price as number)
@@ -127,7 +127,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .bill {
   @include body-SM;
   padding: 60px 13% 20px 13%;
@@ -141,15 +141,24 @@ export default Vue.extend({
   &-table {
     display: grid;
     grid-template-columns: 5fr 5fr 5fr 3fr;
-    >span { height: 45px; }
-    >span:nth-child(4n+1) { text-align: left; }
-    >span:nth-child(-n+4) { color: setColor(gray-3); }
-    >div >svg { display: none; }
+    > span {
+      height: 45px;
+    }
+    > span:nth-child(4n + 1) {
+      text-align: left;
+    }
+    > span:nth-child(-n + 4) {
+      color: setColor(gray-3);
+    }
+    > div > svg {
+      display: none;
+    }
   }
 }
 
 // Comment this class rule to show invoice on screen.
-.bill-invoice-wrapper { // Pdf print nothing if target element use fixed.
+.bill-invoice-wrapper {
+  // Pdf print nothing if target element use fixed.
   position: fixed;
   bottom: 100%;
 }
@@ -179,19 +188,28 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: 232px 180px 88px;
     text-align: center;
-    >span:nth-child(-n+3) {
+    > span:nth-child(-n + 3) {
       color: setColor(gray-3);
       background-color: setColor(gray-6);
     }
-    >span:nth-child(3n+1), >span:nth-child(3n+2) { padding-right: 100px; }
+    > span:nth-child(3n + 1),
+    > span:nth-child(3n + 2) {
+      padding-right: 100px;
+    }
   }
 }
 
 @media screen and (max-width: 768px) {
-  .bill { padding: 24px 6.4% }
-  .bill-table >div {
-    >span { display: none; }
-    >svg { display: inline; }
+  .bill {
+    padding: 24px 6.4%;
+  }
+  .bill-table > div {
+    > span {
+      display: none;
+    }
+    > svg {
+      display: inline;
+    }
   }
 }
 </style>

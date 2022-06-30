@@ -173,7 +173,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .brand-kit-tab-text {
   display: flex;
   gap: 145px;

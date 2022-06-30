@@ -184,7 +184,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .brand-selector {
   display: flex;
   gap: 12px;
@@ -267,13 +267,15 @@ export default Vue.extend({
     &:hover {
       background: setColor(blue-4);
     }
-    &.editor-theme > svg, &.panel-theme > svg {
+    &.editor-theme > svg,
+    &.panel-theme > svg {
       color: white;
     }
     &.brandkit-theme > svg {
       color: setColor(bu);
     }
-    &.editor-theme:hover > svg, &.panel-theme:hover > svg {
+    &.editor-theme:hover > svg,
+    &.panel-theme:hover > svg {
       color: setColor(gray-3);
     }
     & > svg {
@@ -286,7 +288,7 @@ export default Vue.extend({
     position: absolute;
     top: calc(100% + 12px);
     left: 0;
-    border: 1px solid #D9DBE1;
+    border: 1px solid #d9dbe1;
     box-sizing: border-box;
     box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.25);
     border-radius: 4px;

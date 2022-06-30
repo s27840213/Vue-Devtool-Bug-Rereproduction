@@ -69,7 +69,7 @@ export default Vue.extend({
         heading: `${this.$t('NN0408')}`,
         subheading: `${this.$t('NN0409')}`,
         body: `${this.$t('NN0410')}`
-      } as {[key: string]: string},
+      } as { [key: string]: string },
       isConfigOpen: false,
       isFontsPanelOpen: false,
       isValueSelectorOpen: false,
@@ -96,7 +96,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    'textStyle.fontId': function() {
+    'textStyle.fontId': function () {
       this.getFontPrev()
     }
   },
@@ -245,10 +245,10 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .brand-kit-text-setting {
   &__inner {
-    background: #F3F6FA;
+    background: #f3f6fa;
     border-radius: 4px;
     padding: 8px 0px;
     --base-stroke: 0px;

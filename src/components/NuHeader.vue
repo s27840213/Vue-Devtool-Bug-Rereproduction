@@ -169,7 +169,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .nu-header {
   height: $header-height;
   background-size: cover;
@@ -256,7 +256,7 @@ export default Vue.extend({
   &__search {
     width: 180px;
     height: 28px;
-    background-color: setColor(gray-6);;
+    background-color: setColor(gray-6);
     border-radius: 4px;
     @media screen and (max-width: 1300px) {
       width: 120px;
@@ -288,7 +288,10 @@ export default Vue.extend({
     color: unset;
     text-decoration: unset;
   }
-  &:hover > a, &:hover > span, &:hover > svg, a:hover {
+  &:hover > a,
+  &:hover > span,
+  &:hover > svg,
+  a:hover {
     color: setColor(blue-hover);
   }
   &:hover > &-more {
@@ -302,7 +305,8 @@ export default Vue.extend({
   grid-auto-flow: column;
   position: absolute;
   top: 100%;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   width: 750px;
   padding: 30px;
   margin: 0 auto;
@@ -312,18 +316,21 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    > span:first-child, > a:first-child {
+    > span:first-child,
+    > a:first-child {
       @include caption-LG;
       &::before {
-        content: '';
-        width: 6px; height: 6px;
+        content: "";
+        width: 6px;
+        height: 6px;
         margin: 0px 10px 0px 0px;
         display: inline-block;
         vertical-align: middle;
         background-color: setColor(blue-1);
       }
     }
-    > span + a, > a + a {
+    > span + a,
+    > a + a {
       @include body-SM;
       color: setColor(gray-2);
       margin: 10px 0 0 16px;
@@ -376,14 +383,16 @@ export default Vue.extend({
   }
 }
 .slide-x-right {
-  &-enter-active, &-leave-active {
+  &-enter-active,
+  &-leave-active {
     transition: 0.5s;
   }
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     opacity: 0;
   }
 }
 .navbar-shadow {
-  border-bottom: 1px solid #EEEFF4;
+  border-bottom: 1px solid #eeeff4;
 }
 </style>

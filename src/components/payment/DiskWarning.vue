@@ -53,7 +53,7 @@ export default Vue.extend({
     recalc(): string {
       return (this.usage.diskLoading ? i18n.t('NN0454') : i18n.t('NN0641')) as string
     },
-    preset():Record<string, Record<string, Record<string, unknown>>> {
+    preset(): Record<string, Record<string, Record<string, unknown>>> {
       return {
         pro: {
           0: { hidden: true },
@@ -126,22 +126,22 @@ export default Vue.extend({
         }
       }
     },
-    type():string {
+    type(): string {
       return this._diskPercent > 1
         ? '100'
         : this._diskPercent >= 0.8
           ? '80'
           : '0'
     },
-    cur():Record<string, unknown> {
+    cur(): Record<string, unknown> {
       const plan = this.isPro ? 'pro' : 'free'
       const type = this.skiped && !this.isPro && this.type === '80' && this.size === 'large' ? '0' : this.type
       return this.preset[plan][type]
     },
-    bgcolor():Record<string, string> {
+    bgcolor(): Record<string, string> {
       return { 'background-color': this.cur.bgcolor as string }
     },
-    diskStyle():Record<string, string> {
+    diskStyle(): Record<string, string> {
       return { width: `${this._diskPercent * 100}%` }
     }
   },
@@ -160,7 +160,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .warning {
   @include body-SM;
   text-align: left;
@@ -172,7 +172,7 @@ export default Vue.extend({
   align-items: center;
   padding: 5px 0 5px 4px;
   border-radius: 4px;
-  >svg {
+  > svg {
     margin: 8px;
     flex-shrink: 0;
   }
@@ -181,9 +181,16 @@ export default Vue.extend({
     width: 130px;
     margin: 0 3px;
     &-disk {
-      &-total, &-used { height: 10px; }
-      &-total { border: 1px solid setColor(white); }
-      &-used { background-color: setColor(white); }
+      &-total,
+      &-used {
+        height: 10px;
+      }
+      &-total {
+        border: 1px solid setColor(white);
+      }
+      &-used {
+        background-color: setColor(white);
+      }
     }
   }
   &-desc {
@@ -198,14 +205,16 @@ export default Vue.extend({
 .warning-large {
   padding: 24px 4.4%;
   border-radius: 8px;
-  &-desc { margin: 8px 0 16px 0; }
+  &-desc {
+    margin: 8px 0 16px 0;
+  }
   &-btn {
     display: flex;
     justify-content: flex-end;
-    >button {
+    > button {
       margin-left: 16px;
       border-radius: 50px;
-      border: 1px solid setColor(white);;
+      border: 1px solid setColor(white);
     }
   }
 }

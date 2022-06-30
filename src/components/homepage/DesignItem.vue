@@ -103,7 +103,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .design-item {
   display: flex;
   flex-direction: column;

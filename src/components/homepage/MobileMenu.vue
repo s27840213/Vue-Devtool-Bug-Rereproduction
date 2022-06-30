@@ -53,7 +53,7 @@ export default Vue.extend({
   data() {
     return {
       settingsItems: constantData.settingsItems()
-        .filter((it: {name: string}) => { return it.name !== 'hr' }),
+        .filter((it: { name: string }) => { return it.name !== 'hr' }),
       optionSelected: 0
     }
   },
@@ -83,7 +83,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .menu {
   @include size(280px, 100%);
   @include body-MD;
@@ -110,8 +110,10 @@ export default Vue.extend({
   }
 }
 
-.menu-top, .menu-bottom {
-  details, div {
+.menu-top,
+.menu-bottom {
+  details,
+  div {
     display: flex;
     flex-direction: column;
     summary {
@@ -119,19 +121,25 @@ export default Vue.extend({
       align-items: center;
     }
   }
-  details > div { // Only first child pad 20px
+  details > div {
+    // Only first child pad 20px
     padding-left: 20px;
   }
-  details[open] > summary > svg { // Flip arrow icon if open
+  details[open] > summary > svg {
+    // Flip arrow icon if open
     transform: scaleY(-1);
   }
-  summary:focus, summary:focus > svg { // Set color when user click summary
+  summary:focus,
+  summary:focus > svg {
+    // Set color when user click summary
     color: setColor(blue-hover);
   }
-  summary::-webkit-details-marker { // Romove detail arrow in safari
+  summary::-webkit-details-marker {
+    // Romove detail arrow in safari
     display: none;
   }
-  span, a {
+  span,
+  a {
     padding: 7px 0;
   }
 }

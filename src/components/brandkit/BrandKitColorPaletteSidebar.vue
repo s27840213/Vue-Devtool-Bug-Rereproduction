@@ -107,7 +107,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .brand-kit-color-palette {
   &__name {
     display: flex;

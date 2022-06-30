@@ -180,7 +180,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
 .brand-kit {
   @include size(100%, 100%);
   &__scroll {
