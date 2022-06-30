@@ -722,7 +722,7 @@ const mutations: MutationTree<IEditorState> = {
         return layer.type === 'image' && (layer as IImage).srcObj.assetId === assetId && layer.previewSrc
       }).forEach((layer) => {
         Vue.delete(layer, 'previewSrc')
-        Object.assign(layer.srcObj, {
+        Object.assign((layer as IImage).srcObj, {
           type,
           userId,
           assetId: uploadUtils.isAdmin ? assetId : assetIndex

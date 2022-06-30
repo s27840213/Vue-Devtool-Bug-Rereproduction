@@ -631,6 +631,14 @@ export default Vue.extend({
       return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+      const eventType = eventUtils.getEventType(event)
+      if (eventType === 'pointer') {
+        const pointerEvent = event as PointerEvent
+        if (pointerEvent.button !== 0) return
+      } else if (eventType === 'mouse') {
+        const mouseEvent = event as MouseEvent
+        if (mouseEvent.button !== 0) return
+      }
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
