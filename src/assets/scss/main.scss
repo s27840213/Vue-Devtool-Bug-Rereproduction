@@ -1,5 +1,4 @@
 @import "@/assets/scss/base/_all.scss";
-@import "@/assets/scss/utils/_all.scss";
 @import "@/assets/scss/components/_all.scss";
 // @import "@/assets/scss/components/tmpFonts";
 @import '~vue-virtual-scroller/dist/vue-virtual-scroller.css';
@@ -23,6 +22,9 @@ body {
 input[type=number] {
     -moz-appearance: textfield;
 }
-input, button, select {
+
+input,
+button,
+select {
     font-family: inherit;
 }

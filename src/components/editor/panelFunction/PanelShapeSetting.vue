@@ -30,7 +30,7 @@
           template(class="pointer" v-slot:g1i1)
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
-      div(class="vertical-rule")
+      div(class="vertical-rule bg-gray-4")
       div(class="shape-setting__line-action-wrapper pointer feature-button"
           @click="handleValueModal('start-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
@@ -851,7 +851,6 @@ export default Vue.extend({
   }
 }
 .vertical-rule {
-  @extend .bg-gray-4;
   width: 1px;
   height: 20px;
   display: inline-block;
