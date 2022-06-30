@@ -12,7 +12,7 @@
       :isMobile="isMobile"
       :fullWidth="isMobile"
       :aspectRatio="aspectRatio")
-    div(class="px-10" :class="[{'pb-20': showColorSlip}]")
+    div(class="px-10")
       div(class="color-picker__hex")
         svg-icon(class="pointer"
           iconName="eye-dropper"
@@ -30,35 +30,6 @@
             v-model="color"
             @change="handleColorInputChange"
             maxlength="7")
-      template(v-if="showColorSlip")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Brand Kit
-          div
-            div(v-for="color in brandColors"
-              class="pointer"
-              :style="colorStyles(color)")
-            svg-icon(class="pointer"
-              :iconName="'plus'"
-              :iconColor="'gray-2'"
-              :iconWidth="'18px'"
-              @click.native="addNewBrandColor(color)")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Document color
-          div
-            div(v-for="color in documentColors"
-              class="pointer"
-              :style="colorStyles(color)"
-              @click="setColor(color)")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Default color
-          div
-            div(v-for="color in defaultColors"
-              class="pointer"
-              :style="colorStyles(color)"
-              @click="setColor(color)")
 </template>
 
 <script lang="ts">
@@ -71,10 +42,6 @@ import i18n from '@/i18n'
 export default Vue.extend({
   props: {
     currentColor: String,
-    showColorSlip: {
-      type: Boolean,
-      default: false
-    },
     isMobile: {
       type: Boolean,
       default: false
@@ -89,8 +56,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      color: this.currentColor || '#194d33',
-      brandColors: ['#2D9CDB']
+      color: this.currentColor || '#194d33'
     }
   },
   mounted() {
@@ -162,15 +128,6 @@ export default Vue.extend({
       return {
         backgroundColor: color
       }
-    },
-    addNewBrandColor(color: string) {
-      if (!this.brandColors.includes(color)) {
-        this.brandColors.push(color)
-      }
-    },
-    setColor(color: string) {
-      this.color = color
-      this.$emit('update', color)
     },
     onmouseup() {
       this.$emit('final', this.convertedHex)
