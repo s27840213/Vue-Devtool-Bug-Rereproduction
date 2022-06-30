@@ -84,7 +84,7 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    this.handleShadowInit()
+    !this.config.styles.isFrameImg && this.handleShadowInit()
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
@@ -564,7 +564,7 @@ export default Vue.extend({
           if (shadow.srcObj.assetId) {
             this.handleUploadShadowImg()
           } else {
-            // imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+            imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
           }
           break
         case '':

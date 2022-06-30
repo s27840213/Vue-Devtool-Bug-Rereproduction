@@ -576,9 +576,7 @@ export default Vue.extend({
               imgX: clip.styles.imgX,
               imgY: clip.styles.imgY,
               imgWidth: clip.styles.imgWidth,
-              imgHeight: clip.styles.imgHeight,
-              horizontalFlip: clip.styles.horizontalFlip,
-              verticalFlip: clip.styles.verticalFlip
+              imgHeight: clip.styles.imgHeight
             }
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
@@ -591,9 +589,7 @@ export default Vue.extend({
             imgWidth,
             imgHeight,
             imgX,
-            imgY,
-            horizontalFlip: false,
-            verticalFlip: false
+            imgY
           })
         }
       }
@@ -655,9 +651,9 @@ export default Vue.extend({
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
             imgWidth: clip.styles.imgWidth,
-            imgHeight: clip.styles.imgHeight,
-            horizontalFlip: clip.styles.horizontalFlip,
-            verticalFlip: clip.styles.verticalFlip
+            imgHeight: clip.styles.imgHeight
+            // horizontalFlip: clip.styles.horizontalFlip,
+            // verticalFlip: clip.styles.verticalFlip
           }
         })
 
@@ -674,9 +670,9 @@ export default Vue.extend({
           imgWidth,
           imgHeight,
           imgX,
-          imgY,
-          horizontalFlip: currLayer.styles.horizontalFlip,
-          verticalFlip: currLayer.styles.verticalFlip
+          imgY
+          // horizontalFlip: currLayer.styles.horizontalFlip,
+          // verticalFlip: currLayer.styles.verticalFlip
         })
         const controller = this.$refs.body as HTMLElement
         controller.addEventListener('mouseleave', this.onFrameMouseLeave)
