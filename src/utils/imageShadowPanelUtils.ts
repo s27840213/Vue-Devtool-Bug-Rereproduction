@@ -201,8 +201,8 @@ export default new class ImageShadowPanelUtils {
               const shadowImgStyles = {
                 imgWidth: newWidth,
                 imgHeight: newHeight,
-                imgX: newWidth * 0.5 - (_width * leftShadowThickness + _width * 0.5),
-                imgY: newHeight * 0.5 - (_height * topShadowThickness + _height * 0.5)
+                imgX: newWidth * 0.5 - _width * (leftShadowThickness + 0.5),
+                imgY: newHeight * 0.5 - _height * (topShadowThickness + 0.5)
               }
               /** update the upload img in shadow module */
               imageShadowUtils.addUploadImg({

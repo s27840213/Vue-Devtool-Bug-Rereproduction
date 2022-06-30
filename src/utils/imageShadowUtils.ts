@@ -215,7 +215,8 @@ class ImageShadowUtils {
 
     const canvasMaxW = canvas.width * mappingScale
     const ellipseX = canvasMaxW * 0.5
-    const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
+    const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
+    // const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
     const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.floating &&
       this.dataBuff.radius === radius && this.dataBuff.size === size &&
@@ -225,12 +226,16 @@ class ImageShadowUtils {
       this.setIsProcess(layerInfo, true)
     }
 
+    const offsetX = x * drawCanvasW * mappingScale * 0.0025
+    const offsetY = y * drawCanvasH * mappingScale * 0.0025
+
     setMark('floating', 1)
-    if ((this.handlerId === handlerId && !hasBuffRecorded) || !timeout) {
+    if ((this.handlerId === handlerId) || !timeout) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
       const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
-      ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
+      ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
+      // ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
@@ -251,7 +256,11 @@ class ImageShadowUtils {
     setMark('floating', 2)
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5 * layerWidth / _imgWidth, y * 2 * layerWidth / _imgWidth)
+        // const offsetX = x * drawCanvasW * mappingScale * 0.0025 * fieldRange.floating.x.weighting
+        // const offsetY = (y - 10) * drawCanvasH * mappingScale * 0.0025 * fieldRange.floating.y.weighting
+        // console.log(canvasMaxSize.height, offsetX, offsetY)
+        // ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
+        ctxMaxSize.putImageData(this.dataBuff.data, 0, 0)
 
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalCompositeOperation = 'source-in'
@@ -375,8 +384,8 @@ class ImageShadowUtils {
       }
     }
     const mappingScale = _imgWidth > _imgHeight
-      ? (layerWidth / _imgWidth) * MAXSIZE / (drawCanvasW as number)
-      : (layerHeight / _imgHeight) * MAXSIZE / (drawCanvasH as number)
+      ? MAXSIZE / drawCanvasW
+      : MAXSIZE / drawCanvasH
     const attrFactor = MAXSIZE / 1600
 
     setMark('imageMatched', 1)
@@ -400,8 +409,8 @@ class ImageShadowUtils {
     setMark('imageMatched', 2)
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * attrFactor * fieldRange.imageMatched.distance.weighting * (layerWidth / _imgWidth) : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * attrFactor * fieldRange.imageMatched.distance.weighting * (layerHeight / _imgHeight) : 0
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * attrFactor * fieldRange.imageMatched.distance.weighting : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * attrFactor * fieldRange.imageMatched.distance.weighting : 0
         ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
 
         ctxT.clearRect(0, 0, canvas.width, canvas.height)
@@ -552,8 +561,8 @@ class ImageShadowUtils {
         }
       }
       const mappingScale = _imgWidth > _imgHeight
-        ? (layerWidth / _imgWidth) * MAXSIZE / drawCanvasW
-        : (layerHeight / _imgHeight) * MAXSIZE / drawCanvasH
+        ? MAXSIZE / drawCanvasW
+        : MAXSIZE / drawCanvasH
       const arrtFactor = MAXSIZE / 1600
 
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${Math.ceil(canvas.width * mappingScale)}`)
@@ -565,8 +574,8 @@ class ImageShadowUtils {
         const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
         const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting * (layerWidth / _imgWidth) : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting * (layerHeight / _imgHeight) : 0
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
         ctxMaxSize.putImageData(bluredData, offsetX, offsetY)
       } else {
         return
@@ -972,11 +981,11 @@ export const fieldRange = {
   },
   floating: {
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    radius: { max: 100, min: 0, weighting: 4 },
+    radius: { max: 100, min: 0, weighting: 3 },
     thinkness: { max: 100, min: 0 },
     size: { max: 200, min: 50 },
-    x: { max: 100, min: -100, weighting: 0.5 },
-    y: { max: 100, min: -150, weighting: 0.5 }
+    x: { max: 100, min: -100, weighting: 1 },
+    y: { max: 75, min: -100, weighting: 1 }
   }
 } as any
 
