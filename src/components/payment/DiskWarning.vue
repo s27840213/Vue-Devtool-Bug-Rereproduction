@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="!cur.hidden" class="warning")
+  div(v-if="showWarning" class="warning")
     div(v-if="size === 'small' && !dismissed" class="warning-small" :style="bgcolor")
       svg-icon(iconName="error" iconColor="white" iconWidth="24px")
       div(class="warning-small-title")
@@ -45,8 +45,12 @@ export default Vue.extend({
       usage: 'usage'
     }),
     ...mapGetters({
-      _diskPercent: 'payment/getDiskPercent'
+      _diskPercent: 'payment/getDiskPercent',
+      isAdmin: 'user/isAdmin'
     }),
+    showWarning(): boolean {
+      return !this.cur.hidden && !this.isAdmin
+    },
     diskPercent(): string {
       return (this._diskPercent * 100).toFixed(0)
     },
