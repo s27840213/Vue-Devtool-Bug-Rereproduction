@@ -160,14 +160,18 @@ class LayerUtils {
     })
   }
 
-  deleteLayerByAsset(assetId: string) {
+  deleteLayerByAssetId(assetId: string) {
     const pages = store.getters.getPages
     pages.forEach((page: IPage, pageIndex: number) => {
-      page.layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame, layerIndex: number) => {
+      for (let i = page.layers.length - 1; i >= 0; i--) {
+        const layer = page.layers[i]
         if (layer.srcObj && (layer as IImage).srcObj.assetId === assetId) {
-          store.commit('DELETE_layer', { pageIndex, layerIndex })
+          store.commit('DELETE_layer', {
+            pageIndex,
+            layerIndex: i
+          })
         }
-      })
+      }
     })
     uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
   }
