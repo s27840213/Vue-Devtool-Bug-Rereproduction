@@ -12,7 +12,7 @@
       :isMobile="isMobile"
       :fullWidth="isMobile"
       :aspectRatio="aspectRatio")
-    div(class="px-10" :class="[{'pb-20': showColorSlip}]")
+    div(class="px-10")
       div(class="color-picker__hex")
         svg-icon(class="pointer"
           iconName="eye-dropper"
@@ -28,37 +28,7 @@
             type="text"
             spellcheck="false"
             v-model="color"
-            @change="handleColorInputChange"
             maxlength="7")
-      template(v-if="showColorSlip")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Brand Kit
-          div
-            div(v-for="color in brandColors"
-              class="pointer"
-              :style="colorStyles(color)")
-            svg-icon(class="pointer"
-              :iconName="'plus'"
-              :iconColor="'gray-2'"
-              :iconWidth="'18px'"
-              @click.native="addNewBrandColor(color)")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Document color
-          div
-            div(v-for="color in documentColors"
-              class="pointer"
-              :style="colorStyles(color)"
-              @click="setColor(color)")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Default color
-          div
-            div(v-for="color in defaultColors"
-              class="pointer"
-              :style="colorStyles(color)"
-              @click="setColor(color)")
 </template>
 
 <script lang="ts">
@@ -71,10 +41,6 @@ import i18n from '@/i18n'
 export default Vue.extend({
   props: {
     currentColor: String,
-    showColorSlip: {
-      type: Boolean,
-      default: false
-    },
     isMobile: {
       type: Boolean,
       default: false
@@ -90,7 +56,7 @@ export default Vue.extend({
   data() {
     return {
       color: this.currentColor || '#194d33',
-      brandColors: ['#2D9CDB']
+      finalizeTimer: -1
     }
   },
   mounted() {
@@ -105,27 +71,9 @@ export default Vue.extend({
       defaultColors: 'color/getDefaultColors'
     }),
     convertedHex(): string {
-      let hex = this.color.slice(1).split('')
-      let result = ''
-      const len = hex.length
-      switch (len) {
-        case 0:
-          result = '000000'
-          break
-        case 1:
-        case 2:
-        case 3:
-          hex = hex.map((val: string) => val + val)
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        case 4:
-        case 5:
-        case 6:
-          result = this.paddingRight(hex.join(''), 6)
-          break
-      }
-      this.$emit('update', `#${result}`)
-      return `#${result}`
+      const formatedColor = this.convertHex(this.color)
+      this.$emit('update', formatedColor)
+      return formatedColor
     }
   },
   watch: {
@@ -138,6 +86,7 @@ export default Vue.extend({
       if (this.color.length === 0) {
         this.color = '#'
       }
+      this.delayedFinalize(this.convertHex(this.color))
     }
   },
   methods: {
@@ -163,21 +112,8 @@ export default Vue.extend({
         backgroundColor: color
       }
     },
-    addNewBrandColor(color: string) {
-      if (!this.brandColors.includes(color)) {
-        this.brandColors.push(color)
-      }
-    },
-    setColor(color: string) {
-      this.color = color
-      this.$emit('update', color)
-    },
     onmouseup() {
-      this.$emit('final', this.convertedHex)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
-    },
-    handleColorInputChange() {
-      this.$emit('final', this.convertedHex)
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
@@ -191,6 +127,34 @@ export default Vue.extend({
           this.color = result.sRGBHex
         })
       }
+    },
+    convertHex(color: string) {
+      let hex = color.slice(1).split('')
+      let result = ''
+      const len = hex.length
+      switch (len) {
+        case 0:
+          result = '000000'
+          break
+        case 1:
+        case 2:
+        case 3:
+          hex = hex.map((val: string) => val + val)
+          result = this.paddingRight(hex.join(''), 6)
+          break
+        case 4:
+        case 5:
+        case 6:
+          result = this.paddingRight(hex.join(''), 6)
+          break
+      }
+      return `#${result}`
+    },
+    delayedFinalize(formatedColor: string) {
+      clearTimeout(this.finalizeTimer)
+      this.finalizeTimer = setTimeout(() => {
+        this.$emit('final', formatedColor)
+      }, 500)
     }
   }
 })
