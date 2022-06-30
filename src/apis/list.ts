@@ -5,6 +5,7 @@ import {
   IListServiceParams,
   IListServiceResponse
 } from '@/interfaces/api'
+import store from '@/store'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -21,6 +22,7 @@ class ListService {
       group_id: params.groupId,
       cache: params.cache,
       platform: params.cache ? window.location.host : null,
+      ver: params.cache ? store.getters['user/getVerApi'] : null,
       // [2022.01.19] uncached: font, layout
       all_theme: params.all_theme
     }

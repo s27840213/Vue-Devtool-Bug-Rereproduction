@@ -256,7 +256,7 @@ class UploadUtils {
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
                     store.commit('file/DEL_PREVIEW', { assetId })
-                    LayerUtils.deleteLayerByAsset(assetId)
+                    LayerUtils.deleteLayerByAssetId(assetId)
                     paymentUtils.errorHandler(json.msg)
                   }
                 })
@@ -382,7 +382,7 @@ class UploadUtils {
                         }
                       } else {
                         store.commit('file/DEL_PREVIEW', { assetId })
-                        LayerUtils.deleteLayerByAsset(assetId)
+                        LayerUtils.deleteLayerByAssetId(assetId)
                         paymentUtils.errorHandler(json.msg)
                       }
                     })
