@@ -5,6 +5,7 @@ import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
+import imageShadowPanelUtils from './imageShadowPanelUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import logUtils from './logUtils'
@@ -457,52 +458,45 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-
       const scaleRatio = img.naturalWidth / _imgWidth
-      let imgX = _imgX * scaleRatio
-      let imgY = _imgY * scaleRatio
-      let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-      let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+      // let imgX = _imgX * scaleRatio
+      // let imgY = _imgY * scaleRatio
+      // let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+      // let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+      const imgX = _imgX * scaleRatio
+      const imgY = _imgY * scaleRatio
+      const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+      const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
 
       /** If the img is svg+xml convert it to png */
-      if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
-        await new Promise<void>((resolve) => {
-          fetch(img.src)
-            .then(async (response) => {
-              if (response.headers.get('Content-Type') === 'image/svg+xml') {
-                // const data = await response.text()
-                // const container = document.createElement('div')
-                // container.innerHTML = data
-                // const svg = container.getElementsByTagName('svg')[0]
-                // if (svg) {
-                //   svg.setAttribute('width', img.naturalWidth.toString() + 'px')
-                //   svg.setAttribute('height', img.naturalHeight.toString() + 'px')
-                //   document.body.appendChild(container)
-                //   const blob = new Blob([container.innerHTML], { type:'image/svg+xml;charset=utf-8' })
-                //   const URL = window.URL || window.webkitURL || window
-                //   const blobURL = URL.createObjectURL(blob)
-                // }
-
-                const pngCanvas = document.createElement('canvas')
-                const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
-                drawImgWidth *= pngScaleRation
-                drawImgHeight *= pngScaleRation
-                imgX *= pngScaleRation
-                imgY *= pngScaleRation
-                pngCanvas.setAttribute('width', (img.naturalWidth * pngScaleRation).toString())
-                pngCanvas.setAttribute('height', (img.naturalHeight * pngScaleRation).toString())
-                const pngCtx = pngCanvas.getContext('2d') as CanvasRenderingContext2D
-                pngCtx.drawImage(img, 0, 0)
-                const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
-                img.src = svgUrl
-                // console.log(img.naturalHeight)
-                // console.log(img.naturalWidth)
-                document.body.appendChild(img)
-              }
-              resolve()
-            })
-        })
-      }
+      // if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      //   await new Promise<void>((resolve) => {
+      //     fetch(img.src)
+      //       .then(async (response) => {
+      //         if (response.headers.get('Content-Type') === 'image/svg+xml') {
+      //           const data = await response.text()
+      //           const container = document.createElement('div')
+      //           container.innerHTML = data
+      //           const svg = container.getElementsByTagName('svg')[0]
+      //           if (svg) {
+      //             const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+      //             drawImgWidth *= pngScaleRation
+      //             drawImgHeight *= pngScaleRation
+      //             imgX *= pngScaleRation
+      //             imgY *= pngScaleRation
+      //             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
+      //             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
+      //             document.body.appendChild(container)
+      //             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })
+      //             const URL = window.URL || window.webkitURL || window
+      //             const blobURL = URL.createObjectURL(blob)
+      //             img.src = blobURL
+      //           }
+      //         }
+      //         resolve()
+      //       })
+      //   })
+      // }
 
       let { drawCanvasW, drawCanvasH } = params || {}
       if (!drawCanvasH || !drawCanvasW) {

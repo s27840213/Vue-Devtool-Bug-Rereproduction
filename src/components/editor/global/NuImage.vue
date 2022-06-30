@@ -637,14 +637,29 @@ export default Vue.extend({
             const img = new Image()
             img.crossOrigin = 'anonymous'
             img.onload = () => {
-              imageShadowUtils.drawShadow(canvasList, img, this.config, {
-                pageId: pageUtils.getPage(this.pageIndex).id,
-                drawCanvasW: shadowBuff.drawCanvasW,
-                drawCanvasH: shadowBuff.drawCanvasH,
-                layerInfo,
-                cb: this.clearShadowSrc
-              })
-              this.shadowBuff.canvasShadowImg.shadow = img
+              imageShadowPanelUtils.isSVG(img, this.config)
+                .then(async (isSVG) => {
+                  return await new Promise<void>((resolve) => {
+                    if (isSVG) {
+                      imageShadowPanelUtils.svgImageSizeFormatter(img, () => {
+                        /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
+                        img.onload = () => resolve()
+                      })
+                    } else {
+                      resolve()
+                    }
+                  })
+                })
+                .finally(() => {
+                  imageShadowUtils.drawShadow(canvasList, img, this.config, {
+                    pageId: pageUtils.getPage(this.pageIndex).id,
+                    drawCanvasW: shadowBuff.drawCanvasW,
+                    drawCanvasH: shadowBuff.drawCanvasH,
+                    layerInfo,
+                    cb: this.clearShadowSrc
+                  })
+                  this.shadowBuff.canvasShadowImg.shadow = img
+                })
             }
             img.src = ImageUtils.getSrc(this.config,
               ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE) +

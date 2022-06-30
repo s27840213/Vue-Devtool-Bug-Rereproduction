@@ -102,11 +102,22 @@ export default new class ImageShadowPanelUtils {
       img.src = imageUtils.getSrc(config, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600)
       img.src += `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve) => {
-        img.onload = () => {
-          MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
-          resolve()
+        img.onload = async () => {
+          const isSVG = await this.isSVG(img, config)
+          if (isSVG) {
+            await this.svgImageSizeFormatter(img, () => {
+              img.onload = () => {
+                MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+                resolve()
+              }
+            })
+          } else {
+            MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+            resolve()
+          }
         }
       })
+
       logUtils.setLog('phase: finish load max size img')
       const updateCanvas = document.createElement('canvas')
       // const { initWidth: width, initHeight: height, imgWidth, imgHeight } = config.styles
@@ -237,6 +248,41 @@ export default new class ImageShadowPanelUtils {
     } else {
       imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     }
+  }
+
+  async isSVG(img: HTMLImageElement, config: IImage) {
+    if (img.src.includes('https') && ['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      const res = await new Promise<Response>((resolve) => resolve(fetch(img.src, { method: 'HEAD' })))
+      return await res.headers.get('Content-Type') === 'image/svg+xml'
+    } else return false
+  }
+
+  async svgImageSizeFormatter(img: HTMLImageElement, cb?: () => void) {
+    return new Promise<void>((resolve) => {
+      fetch(img.src)
+        .then(async (response) => {
+          const data = await response.text()
+          const container = document.createElement('div')
+          container.innerHTML = data
+          const svg = container.getElementsByTagName('svg')[0]
+          if (svg) {
+            const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+            // drawImgWidth *= pngScaleRation
+            // drawImgHeight *= pngScaleRation
+            // imgX *= pngScaleRation
+            // imgY *= pngScaleRation
+            svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
+            svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
+            document.body.appendChild(container)
+            const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })
+            const URL = window.URL || window.webkitURL || window
+            const blobURL = URL.createObjectURL(blob)
+            img.src = blobURL
+            cb && cb()
+          }
+          resolve()
+        })
+    })
   }
 
   handleEffectUpdate(name: string, value: string): void {
