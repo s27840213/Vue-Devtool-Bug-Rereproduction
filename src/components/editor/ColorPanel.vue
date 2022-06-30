@@ -15,7 +15,7 @@
             svg-icon(v-if="showAllRecently" iconName="chevron-left"
                   iconWidth="24px" iconColor="white"
                   class="mr-5" @click.native="lessRecently()")
-            span {{$t('NN0024')}}
+            span {{$t('NN0679')}}
           span(v-if="!showAllRecently" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
         div
           div(class="color-panel__add-color pointer"
@@ -229,15 +229,17 @@ export default Vue.extend({
         colorUtils.event.emit(colorUtils.currEvent, color)
         colorUtils.setCurrColor(color)
       })
+      this.lastPickColor = color
     },
     handleChangeStop(color: string) {
       window.requestAnimationFrame(() => {
         colorUtils.event.emit(colorUtils.currStopEvent, color)
       })
-      this.lastPickColor = color
     },
     closeColorModal(): void {
-      this.addRecentlyColors(this.lastPickColor)
+      if (this.isColorPickerOpen && this.lastPickColor !== '') {
+        this.addRecentlyColors(this.lastPickColor)
+      }
       colorUtils.setIsColorPickerOpen(false)
     },
     clickOutside(): void {
