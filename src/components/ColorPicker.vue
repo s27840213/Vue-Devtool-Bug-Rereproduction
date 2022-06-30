@@ -28,7 +28,6 @@
             type="text"
             spellcheck="false"
             v-model="color"
-            @change="handleColorInputChange"
             maxlength="7")
 </template>
 
@@ -56,7 +55,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      color: this.currentColor || '#194d33'
+      color: this.currentColor || '#194d33',
+      finalizeTimer: -1
     }
   },
   mounted() {
@@ -71,27 +71,9 @@ export default Vue.extend({
       defaultColors: 'color/getDefaultColors'
     }),
     convertedHex(): string {
-      let hex = this.color.slice(1).split('')
-      let result = ''
-      const len = hex.length
-      switch (len) {
-        case 0:
-          result = '000000'
-          break
-        case 1:
-        case 2:
-        case 3:
-          hex = hex.map((val: string) => val + val)
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        case 4:
-        case 5:
-        case 6:
-          result = this.paddingRight(hex.join(''), 6)
-          break
-      }
-      this.$emit('update', `#${result}`)
-      return `#${result}`
+      const formatedColor = this.convertHex(this.color)
+      this.$emit('update', formatedColor)
+      return formatedColor
     }
   },
   watch: {
@@ -104,6 +86,7 @@ export default Vue.extend({
       if (this.color.length === 0) {
         this.color = '#'
       }
+      this.delayedFinalize(this.convertHex(this.color))
     }
   },
   methods: {
@@ -130,11 +113,7 @@ export default Vue.extend({
       }
     },
     onmouseup() {
-      this.$emit('final', this.convertedHex)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
-    },
-    handleColorInputChange() {
-      this.$emit('final', this.convertedHex)
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
@@ -148,6 +127,34 @@ export default Vue.extend({
           this.color = result.sRGBHex
         })
       }
+    },
+    convertHex(color: string) {
+      let hex = color.slice(1).split('')
+      let result = ''
+      const len = hex.length
+      switch (len) {
+        case 0:
+          result = '000000'
+          break
+        case 1:
+        case 2:
+        case 3:
+          hex = hex.map((val: string) => val + val)
+          result = this.paddingRight(hex.join(''), 6)
+          break
+        case 4:
+        case 5:
+        case 6:
+          result = this.paddingRight(hex.join(''), 6)
+          break
+      }
+      return `#${result}`
+    },
+    delayedFinalize(formatedColor: string) {
+      clearTimeout(this.finalizeTimer)
+      this.finalizeTimer = setTimeout(() => {
+        this.$emit('final', formatedColor)
+      }, 500)
     }
   }
 })
