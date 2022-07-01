@@ -113,7 +113,7 @@ export default Vue.extend({
     mainStyles(): any {
       const { image, color } = this
       return {
-        // opacity: image.config.styles.opacity / 100,
+        opacity: image.config.styles.opacity / 100,
         backgroundColor: color
       }
     },

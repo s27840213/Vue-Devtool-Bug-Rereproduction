@@ -84,7 +84,9 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    !this.config.isFrameImg && this.handleShadowInit()
+    if (!this.config.isFrameImg && !this.isBgImgControl) {
+      this.handleShadowInit()
+    }
   },
   mounted() {
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
