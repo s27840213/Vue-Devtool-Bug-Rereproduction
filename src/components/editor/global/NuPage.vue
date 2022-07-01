@@ -2,7 +2,7 @@
   div(class="nu-page"
       :style="pageMarginStyles"
       ref="page")
-    div(v-if="!isDetailPage"
+    div(v-if="!isDetailPage && !isMobile"
       class="page-title text-left pb-10"
       :style="{'width': `${config.width * (scaleRatio/100)}px`, 'transform': `translate3d(0, -100%, ${isAnyLayerActive ? 0 : 1}px)`}")
       //- span(class="pr-10") 第 {{pageIndex+1}} 頁
@@ -209,7 +209,6 @@ import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
 import SnapUtils from '@/utils/snapUtils'
-import GeneralUtils from '@/utils/generalUtils'
 import { ISnapline } from '@/interfaces/snap'
 import ImageUtils from '@/utils/imageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -224,6 +223,8 @@ import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -256,7 +257,7 @@ export default Vue.extend({
         v: [] as Array<number>,
         h: [] as Array<number>
       },
-      GeneralUtils,
+      generalUtils,
       pageUtils
     }
   },
@@ -273,6 +274,19 @@ export default Vue.extend({
       this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
     })
   },
+  watch: {
+    guidelines: {
+      handler() {
+        this.getClosestSnaplines()
+      },
+      deep: true
+    },
+    isOutOfBound(val) {
+      if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
+        GroupUtils.deselect()
+      }
+    }
+  },
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
@@ -287,15 +301,17 @@ export default Vue.extend({
       getLayer: 'getLayer',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      lockGuideline: 'getLockGuideline'
+      lockGuideline: 'getLockGuideline',
+      currFunctionPanelType: 'getCurrFunctionPanelType',
+      isProcessingShadow: 'shadow/isProcessing'
     }),
     getCurrLayer(): ILayer {
-      return GeneralUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
+      return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },
     getCurrSubSelectedLayerShown(): IImage | undefined {
       const layer = this.getCurrLayer
       if (layer.type === 'group') {
-        const subLayer = GeneralUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
+        const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
         const scale = subLayer.styles.scale
         subLayer.styles.scale = 1
         subLayer.styles.x *= layer.styles.scale
@@ -306,7 +322,7 @@ export default Vue.extend({
         return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
       } else if (layer.type === 'frame') {
         if (frameUtils.isImageFrame(layer as IFrame)) {
-          const image = GeneralUtils.deepCopy((layer as IFrame).clips[0]) as IImage
+          const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
           image.styles.x = layer.styles.x
           image.styles.y = layer.styles.y
           image.styles.scale = 1
@@ -315,7 +331,7 @@ export default Vue.extend({
           return Object.assign(image, { forRender: true })
         }
         const primaryLayer = this.getCurrLayer as IFrame
-        const image = GeneralUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
+        const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
         const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
         if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
           const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
@@ -397,14 +413,9 @@ export default Vue.extend({
         y: -posY + height / 2
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
-    }
-  },
-  watch: {
-    guidelines: {
-      handler() {
-        this.getClosestSnaplines()
-      },
-      deep: true
+    },
+    isMobile(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   methods: {
@@ -549,9 +560,15 @@ export default Vue.extend({
       StepsUtils.record()
     },
     duplicatePage() {
+      console.log(this.isProcessingShadow)
+      if (this.isProcessingShadow) {
+        Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+        return
+      }
       GroupUtils.deselect()
-      const page = GeneralUtils.deepCopy(this.getPage(this.pageIndex))
+      const page = generalUtils.deepCopy(this.getPage(this.pageIndex))
       page.designId = ''
+      page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)
       this.setCurrActivePageIndex(this.pageIndex + 1)
       this.$nextTick(() => { pageUtils.scrollIntoPage(this.pageIndex + 1) })

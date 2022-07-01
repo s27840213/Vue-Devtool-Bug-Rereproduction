@@ -33,6 +33,7 @@ export interface IUserModule {
   userAssets: IUserAssetsData,
   downloadUrl: string
   verUni: string,
+  verApi: string,
   imgSizeMap: Array<{ [key: string]: string | number }>,
   avatar: {
     prev: string,
@@ -76,6 +77,7 @@ const getDefaultState = (): IUserModule => ({
   },
   downloadUrl: '',
   verUni: '',
+  verApi: '',
   imgSizeMap: [],
   avatar: {
     prev: '',
@@ -141,6 +143,9 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getVerUni(state) {
     return state.verUni
+  },
+  getVerApi(state) {
+    return state.verApi
   },
   isAdmin(state) {
     return state.role === 0

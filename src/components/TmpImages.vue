@@ -27,6 +27,7 @@ import { mapGetters, mapState } from 'vuex'
 import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -46,7 +47,7 @@ export default Vue.extend({
     return {
       rows: [],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(300, 95, 5)
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 95, 5)
     }
   },
   watch: {
@@ -90,8 +91,7 @@ export default Vue.extend({
     line-height: 0;
     text-align: left;
     box-sizing: border-box;
-    margin-right: -10px;
-    padding-right: 10px;
+    @include push-scrollbar10;
     @include hide-scrollbar;
   }
 }

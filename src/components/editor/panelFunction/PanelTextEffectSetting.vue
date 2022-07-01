@@ -9,7 +9,7 @@
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
-          iconColor="gray-2"
+          iconColor="white"
           v-hint="hintMap[`shadow-${icon}`]"
         )
       div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
@@ -52,7 +52,7 @@
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
           iconWidth="60px"
-          iconColor="gray-2"
+          iconColor="white"
           v-hint="hintMap[`shadow-${icon}`]"
         )
       div(v-if="shadowOption.slice(3).includes(currentEffect)"
@@ -96,7 +96,7 @@
           class="text-effect-setting__option pointer"
           :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
           iconWidth="60px"
-          iconColor="gray-2"
+          iconColor="white"
           v-hint="hintMap[`shape-${icon}`]"
         )
       div(class="w-full text-effect-setting__form")
@@ -132,7 +132,6 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import layerUtils from '@/utils/layerUtils'
 
 export default Vue.extend({
   components: {

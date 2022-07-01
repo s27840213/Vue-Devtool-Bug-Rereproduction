@@ -3,14 +3,16 @@
     span(class="photo-setting__title text-blue-1 subtitle-1") {{$t('NN0039')}}
     div(class="photo-setting__grid mb-10")
       template(v-for="btn in btns")
-        btn(v-if="!btn.condition || btn.condition()"
-          class="full-width"
-          :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
-          type="gray-mid"
-          ref="btn"
-          :disabled="disableBtn(btn)"
-          :key="btn.name"
-          @click.native="handleShow(btn.show)") {{ btn.label }}
+        div(v-hint="disableBtn(btn) ? btn.hint : ''")
+          btn(v-if="!btn.condition || btn.condition()"
+            class="full-width"
+            :class="[activeBtn(btn) ? 'active' : '', isSuperUser !== 0]"
+            type="gray-mid"
+            ref="btn"
+            :disabled="disableBtn(btn)"
+            :key="btn.name"
+            @click.native="handleShow(btn.show)") {{ btn.label }}
+            //- v-hint="(btn.hint && btn.hint.condition()) ? btn.hint.content : ''"
       btn(v-if="isImage && !isFrame"
         class="full-width"
         type="gray-mid"
@@ -66,6 +68,7 @@ export default Vue.extend({
           name: 'shadow',
           label: `${this.$t('NN0429')}`,
           show: 'panel-photo-shadow',
+          hint: this.$t('NN0500'),
           condition: (): boolean => {
             if (!this.$store.getters['user/isAdmin']) {
               return false
@@ -176,7 +179,6 @@ export default Vue.extend({
       removeBg: 'user/removeBg'
     }),
     disableBtn(btn: { [key: string]: string }): boolean {
-      // return isUploadImgShadow || (btn.name !== 'shadow' && (isHandleShadow || show === 'panel-photo-shadow'))
       const currLayer = layerUtils.getCurrConfig as IImage
       const { shadow } = currLayer.styles
       if (shadow) {

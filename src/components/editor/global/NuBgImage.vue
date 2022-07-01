@@ -42,7 +42,7 @@ export default Vue.extend({
   watch: {
     srcObj: {
       deep: true,
-      handler: function() {
+      handler: function () {
         if (this.isColorBackground) {
           this.src = ''
         } else {
@@ -168,16 +168,6 @@ export default Vue.extend({
         case 'logo-private':
           updater = async () => await this.updateLogos({ assetSet: new Set<string>([this.image.config.srcObj.assetId]) })
           break
-        case 'public':
-        case 'background': {
-          fetch(this.src)
-            .then(res => {
-              if (res.status === 404) {
-                errorHandle.addMissingDesign(srcObj.type === 'public' ? 'asset-image' : 'background', srcObj.assetId)
-              }
-            })
-          break
-        }
       }
 
       if (updater !== undefined) {
@@ -244,5 +234,4 @@ export default Vue.extend({
 .body {
   transition: opacity 1s;
 }
-
 </style>

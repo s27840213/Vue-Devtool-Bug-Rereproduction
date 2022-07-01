@@ -12,6 +12,13 @@ function resolve (dir) {
 
 module.exports = {
     chainWebpack: (config) => {
+        config.module
+            .rule('mjs')
+            .test(/\.mjs$/)
+            .type('javascript/auto')
+            .include.add(/node_modules/)
+            .end()
+
         // 先刪除預設的svg配置，否則svg-sprite-loader會失效
         config.module.rules.delete('svg')
         // 新增 svg-sprite-loader 設定

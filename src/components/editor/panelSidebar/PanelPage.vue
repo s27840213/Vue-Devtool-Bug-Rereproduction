@@ -67,10 +67,10 @@ export default Vue.extend({
   }
 
   &-items {
+    @include hide-scrollbar($padding-right: 20px);
     margin-right: -10px;
     box-sizing: border-box;
     padding: 0 20px 20px 20px;
-    @include hide-scrollbar;
   }
   &__plus {
     z-index: 2;

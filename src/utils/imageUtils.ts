@@ -477,7 +477,7 @@ class ImageUtils {
     const isAdmin = store.getters['user/isAdmin']
     const teamId = image.team_id ?? store.getters['user/getTeamId']
     const userId = store.getters['user/getTeamId']
-    console.log(image)
+
     return {
       width: image.width,
       height: image.height,

@@ -24,6 +24,7 @@ import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import heic2any from 'heic2any'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -145,6 +146,7 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
+
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -253,6 +255,8 @@ class UploadUtils {
                     // , the screenshot image in the page will get some problem
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
+                    store.commit('file/DEL_PREVIEW', { assetId })
+                    LayerUtils.deleteLayerByAssetId(assetId)
                     paymentUtils.errorHandler(json.msg)
                   }
                 })
@@ -277,6 +281,7 @@ class UploadUtils {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
@@ -359,7 +364,6 @@ class UploadUtils {
                     clearInterval(interval)
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
-                      console.log(generalUtils.deepCopy(json))
                       if (json.flag === 0) {
                         console.log('Successfully upload the file')
                         if (type === 'image') {
@@ -377,6 +381,8 @@ class UploadUtils {
                           }
                         }
                       } else {
+                        store.commit('file/DEL_PREVIEW', { assetId })
+                        LayerUtils.deleteLayerByAssetId(assetId)
                         paymentUtils.errorHandler(json.msg)
                       }
                     })
@@ -658,7 +664,6 @@ class UploadUtils {
   }
 
   uploadLayer(type: string, id?: string) {
-    console.log('upload layer')
     const targetBucket = type === 'shape' ? 'svg' : type
     const designId = id ?? generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo

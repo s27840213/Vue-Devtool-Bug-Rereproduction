@@ -1,62 +1,114 @@
-@mixin size($w,$h:$w) {
-	width: $w;
-	height: $h;
-}
-@mixin flexCenter(){
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-@mixin layout-mobile {
-    @media screen and (max-aspect-ratio: 1/1) {
-        @content;
-    }
-}
-@mixin no-scrollbar {
-    &::-webkit-scrollbar {
-        display: none !important;
-    }
-    -ms-overflow-style: none !important; /* IE and Edge */
-    scrollbar-width: none !important; /* Firefox */
-}
-@mixin hide-scrollbar{
-    // Disable x scrollbar and let y scrollbar appear only when hovering it
-    // If element height <= parent height, y scrollbar will never appear.
-    overflow-y: auto; // Firefox will use this
-    overflow-y: overlay; // Only for Webkit
-    overflow-x: hidden;
-    scrollbar-width: none; // Only for Firefox
-    
-    &::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-      background-color: unset;
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      visibility: hidden;
-      background-color: #d9dbe1;
-      border: 3px solid #2c2f43;
-    }
-    &:hover {
-      &::-webkit-scrollbar-thumb {
-        visibility: visible;
-      }
-      scrollbar-width: thin; // Only for Firefox
-      @-moz-document url-prefix(){ // Only for Firefox
-        padding-right: 0px;
-      }
-    }
+@mixin size($w, $h:$w) {
+  width: $w;
+  height: $h;
 }
 
-@mixin hide-scrollbar-white {
-  @include hide-scrollbar;
+@mixin flexCenter() {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin layout-mobile {
+  @media screen and (max-aspect-ratio: 1/1) {
+    @content;
+  }
+}
+
+@mixin firefoxOnly { // Only for Firefox, https://stackoverflow.com/a/32455002
+  @supports (-moz-appearance:none) {
+    @content;
+  }
+}
+
+@mixin safariOnly { // Only for Safari, https://stackoverflow.com/a/25975282
+  @media not all and (min-resolution:.001dpcm) {
+    @supports (-webkit-appearance:none) {
+      @content;
+    }
+  }
+}
+
+@mixin no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none !important;
+  }
+  /* IE and Edge */
+  -ms-overflow-style: none !important;
+  /* Firefox */
+  scrollbar-width: none !important;
+}
+
+// For layout which 
+//   1. Need push scroll bar to outside. Ex: Categorylist
+//   2. Don't have padding-right originally.
+// Usage: use push-scrollbar10 first, then hide-scrollbar
+//
+// Ex1 (without padding-right):
+// @include push-scrollbar10;
+// @include hide-scrollbar;
+// padding-right: 0;
+//
+// Ex2 (with padding-right):
+// @include hide-scrollbar($padding-right: 20px);
+// padding-right: 20px;
+@mixin push-scrollbar10 {
+  margin-right: -10px;
+  padding-right: 10px;
+  box-sizing: border-box;
+  &:not(:hover), &:hover {
+    @include firefoxOnly {
+      margin-right: -11px;
+      padding-right: 11px;
+    }
+  }
+  @include safariOnly {
+    padding-right: 0;
+  }
+}
+
+$thumb-color: #D9DBE1; // gray-4
+@mixin hide-scrollbar($padding-right: 11px) {
+  // Disable x scrollbar and let y scrollbar appear only when hovering it
+  // If element height <= parent height, y scrollbar will never appear.
+  overflow-y: auto; // Firefox will use this
+  overflow-y: overlay; // Only for Webkit
+  overflow-x: hidden;
+  scrollbar-width: none; // Only for Firefox
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background-color: unset;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    visibility: hidden;
+    background-color: $thumb-color;
+    border: 3px solid setColor(sidebar-panel);
+  }
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      visibility: visible;
+    }
+    @include firefoxOnly {
+      overflow-y: scroll;
+      padding-right: #{$padding-right - 11px};
+      scrollbar-width: thin;
+      scrollbar-color: $thumb-color transparent;
+    }
+  }
+}
+
+@mixin hide-scrollbar-white($padding-right: 11px) {
+  @include hide-scrollbar($padding-right);
   &::-webkit-scrollbar-thumb {
     border: 3px solid white;
   }
 }
 
 @import "@/assets/scss/utils/variables.scss";
+
 @mixin popup-window {
   position: fixed;
   top: 0;
@@ -69,4 +121,7 @@
   background-color: #000000a1;
   z-index: setZindex('popup');
 }
-.popup-window { @include popup-window; }
+
+.popup-window {
+  @include popup-window;
+}

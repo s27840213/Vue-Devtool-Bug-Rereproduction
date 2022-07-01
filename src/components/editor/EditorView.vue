@@ -2,7 +2,7 @@
   div(class="editor-view scrollbar-gray"
       :class="isBackgroundImageControl ? 'dim-background' : 'bg-gray-5'"
       :style="brushCursorStyles()"
-      @mousedown.left="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
+      @pointerdown="!inBgRemoveMode ? !getInInGestureMode ? selectStart($event) : dragEditorViewStart($event) : null"
       @wheel="handleWheel"
       @scroll.passive="!inBgRemoveMode ? scrollUpdate() : null"
       @mousewheel="handleWheel"
@@ -54,7 +54,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import MouseUtils from '@/utils/mouseUtils'
 import GroupUtils from '@/utils/groupUtils'
 import StepsUtils from '@/utils/stepsUtils'
@@ -71,8 +71,10 @@ import EditorHeader from '@/components/editor/EditorHeader.vue'
 import tiptapUtils from '@/utils/tiptapUtils'
 import formatUtils from '@/utils/formatUtils'
 import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
+import eventUtils from '@/utils/eventUtils'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -110,6 +112,7 @@ export default Vue.extend({
   mounted() {
     // window.addEventListener('keydown', this.handleKeydown)
     // window.addEventListener('keyup', this.handleKeydown)
+    this.getRecently()
 
     StepsUtils.record()
     this.editorView = this.$refs.editorView as HTMLElement
@@ -165,14 +168,7 @@ export default Vue.extend({
           this.clearBgRemoveState()
         })
       } else {
-        const scrollCenterX = (2 * editor.scrollLeft + editor.clientWidth)
-        const scrollCenterY = (2 * editor.scrollTop + editor.clientHeight)
-        const oldScrollWidth = editor.scrollWidth
-        const oldScrollHeight = editor.scrollHeight
-        this.$nextTick(() => {
-          editor.scrollLeft = Math.round((scrollCenterX * editor.scrollWidth / oldScrollWidth - editor.clientWidth) / 2)
-          editor.scrollTop = Math.round((scrollCenterY * editor.scrollHeight / oldScrollHeight - editor.clientHeight) / 2)
-        })
+        generalUtils.scaleFromCenter(editor)
       }
     },
     screenHeight() {
@@ -248,6 +244,12 @@ export default Vue.extend({
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState',
       setInGestureMode: 'SET_inGestureMode'
     }),
+    ...mapActions('layouts',
+      [
+        'getCategories',
+        'getRecently'
+      ]
+    ),
     brushCursorStyles() {
       return this.hasCopiedFormat ? { cursor: `url(${require('@/assets/img/svg/brush-paste-resized.svg')}) 2 2, pointer` } : {}
     },
@@ -275,9 +277,9 @@ export default Vue.extend({
       }
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.$refs.canvas as HTMLElement)
-      window.addEventListener('mousemove', this.selecting)
+      eventUtils.addPointerEvent('pointermove', this.selecting)
+      eventUtils.addPointerEvent('pointerup', this.selectEnd)
       window.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      window.addEventListener('mouseup', this.selectEnd)
     },
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
@@ -331,9 +333,9 @@ export default Vue.extend({
        * Use nextTick to trigger the following function after DOM updating
        */
       this.$nextTick(() => {
-        window.removeEventListener('mousemove', this.selecting)
+        eventUtils.removePointerEvent('pointermove', this.selecting)
         window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
-        window.removeEventListener('mouseup', this.selectEnd)
+        eventUtils.removePointerEvent('pointerup', this.selectEnd)
         if (this.isSelecting) {
           this.isSelecting = false
           const selectionArea = this.$refs.selectionArea as HTMLElement

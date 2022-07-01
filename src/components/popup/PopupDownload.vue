@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="popup-download text-left"
+    :style="containerStyles"
     v-click-outside="handleClose")
     div(v-if="polling" class="popup-download__form popup-download__form--polling")
       div(class="body-3 text-gray-3") {{ name || `${$t('NN0079')}` }}
@@ -171,7 +172,11 @@ export default Vue.extend({
   },
   props: {
     useExternelJSON: Boolean,
-    pageIndex: Number
+    pageIndex: Number,
+    hideContainer: {
+      default: false,
+      type: Boolean
+    }
   },
   data() {
     const {
@@ -268,6 +273,15 @@ export default Vue.extend({
     selectedDevLabel(): string {
       const { selectedDev, devs } = this
       return devs.find(option => option.value === selectedDev)?.label ?? ''
+    },
+    containerStyles(): { [index: string]: string } {
+      return this.hideContainer ? {
+      } : {
+        padding: '18px',
+        'border-radius': '5px',
+        'box-shadow': '0px 4px 13px rgba(0, 0, 0, 0.25)',
+        'background-color': 'white'
+      }
     }
   },
   mounted() {
@@ -309,7 +323,7 @@ export default Vue.extend({
         })
     },
     handleClose() {
-      if (!this.polling) {
+      if (!this.polling && !this.hideContainer) {
         this.$emit('close')
       }
     },
@@ -465,14 +479,10 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .popup-download {
-  padding: 18px;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
   box-sizing: border-box;
-  border-radius: 5px;
-  box-shadow: 0px 4px 13px rgba(0, 0, 0, 0.25);
-  background-color: setColor(white);
   &__form {
     min-height: 340px;
     transition: 0.3s;

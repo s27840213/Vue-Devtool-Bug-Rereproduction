@@ -4,6 +4,7 @@ import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
+import i18n from '@/i18n'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -185,7 +186,7 @@ export default function (this: any) {
         captureException(error)
       }
     },
-    resetContent ({ commit }) {
+    resetContent({ commit }) {
       commit(SET_STATE, {
         content: {},
         categories: [],
@@ -207,7 +208,8 @@ export default function (this: any) {
           locale,
           theme,
           keyword: (keyword.includes('::') ? keyword : `tag::${keyword}`).concat(';;sum::1'),
-          listAll: 1
+          listAll: 1,
+          listCategory: 0
         })
         commit(SET_STATE, { sum: data.data.sum })
       } catch (error) {
@@ -217,7 +219,7 @@ export default function (this: any) {
   }
 
   const mutations: MutationTree<IListModuleState> = {
-    [SET_STATE] (state: IListModuleState, data: Partial<IListModuleState>) {
+    [SET_STATE](state: IListModuleState, data: Partial<IListModuleState>) {
       const newState = data || getDefaultState()
       const keys = Object.keys(newState) as Array<keyof IListModuleState>
       keys
@@ -227,12 +229,12 @@ export default function (this: any) {
           }
         })
     },
-    SET_RECENTLY (state: IListModuleState, objects: IListServiceData) {
+    SET_RECENTLY(state: IListModuleState, objects: IListServiceData) {
       state.categories = objects.content.concat(state.categories) || []
-      if (objects.next_page)state.nextPage = objects.next_page as number
+      if (objects.next_page) state.nextPage = objects.next_page as number
       state.pending = false
     },
-    SET_CATEGORIES (state: IListModuleState, objects: IListServiceData) {
+    SET_CATEGORIES(state: IListModuleState, objects: IListServiceData) {
       state.categories = state.categories.concat(objects.content) || []
       state.host = objects.host?.endsWith('/') ? objects.host.slice(0, -1) : (objects.host || '')
       state.data = objects.data
@@ -241,7 +243,16 @@ export default function (this: any) {
       state.nextCategory = objects.next_page as number
       state.pending = false
     },
-    [SET_CONTENT] (state: IListModuleState, objects: IListServiceData) {
+    UPDATE_RECENTLY_PAGE(state: IListModuleState, { index, format }) {
+      const targetCategory = state.categories.find((category: any) => {
+        return category.title === `${i18n.t('NN0024')}`
+      })?.list
+      if (targetCategory) {
+        targetCategory.splice(index, 1)
+        targetCategory.unshift(format)
+      }
+    },
+    [SET_CONTENT](state: IListModuleState, objects: IListServiceData) {
       const {
         content = [],
         host = '',
@@ -265,7 +276,7 @@ export default function (this: any) {
       state.nextPage = nextPage
       state.pending = false
     },
-    [SET_MORE_CONTENT] (state: IListModuleState, objects: IListServiceData) {
+    [SET_MORE_CONTENT](state: IListModuleState, objects: IListServiceData) {
       const { list = [] } = state.content
       const newList = objects.content.flatMap(content => content.list)
       state.content = {
@@ -278,7 +289,7 @@ export default function (this: any) {
   }
 
   const getters: GetterTree<IListModuleState, any> = {
-    nextParams (state) {
+    nextParams(state) {
       const { nextPage, keyword, theme, locale } = state
       const needCache = !store.getters['user/isLogin'] || (store.getters['user/isLogin'] && (!keyword || keyword.includes('group::0')))
       return {
@@ -292,7 +303,7 @@ export default function (this: any) {
         cache: needCache
       }
     },
-    hasNextPage (state) {
+    hasNextPage(state) {
       return (state.nextPage !== undefined && state.nextPage >= 0) ||
         state.nextCategory > 0
     }

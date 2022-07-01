@@ -5,11 +5,13 @@ import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
+import imageShadowPanelUtils from './imageShadowPanelUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
+import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
-import { imageDataRGBA } from './stackblur'
+import { imageDataAChannel, imageDataRGBA } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
@@ -21,6 +23,50 @@ export const CANVAS_SPACE = 400
 export const CANVAS_FLOATING_SCALE = 2.2
 const DRAWING_TIMEOUT = 50
 const FLOATING_SHADOW_SIZE = 100
+
+/** These attrs are used to indicate the performance of each shadow effect */
+const isProduction = process.env.NODE_ENV === 'production'
+const marks = {
+  shadow: [
+    'starting',
+    'before handle spread',
+    'after handle spread; before handle blur',
+    'after handle blur; before handle overlay, opacity...',
+    'finishing'
+  ],
+  imageMatched: [
+    'starting',
+    'before handle blur',
+    'after handle blur; before handle offset/overlay',
+    'finishing'
+  ],
+  floating: [
+    'starting',
+    'before handle geometry and blur',
+    'after handle geometry and blur; before handle distance/overlay',
+    'finishing'
+  ]
+}
+const setMark = function (type: 'shadow' | 'imageMatched' | 'floating', i: number) {
+  // if (isProduction) return
+  performance.mark(marks[type][i])
+}
+const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs: string[]) {
+  // if (isProduction) return
+  logs.forEach(log => {
+    logUtils.setLog(log)
+  })
+  for (let i = 0; i < marks[type].length - 1; i++) {
+    performance.measure('FROM: ' + marks[type][i] + '\nTO:   ' + marks[type][i + 1], marks[type][i], marks[type][i + 1])
+  }
+  performance.measure('FROM: ' + marks[type][0] + '\nTO:   ' + marks[type][marks[type].length - 1], marks[type][0], marks[type][marks[type].length - 1])
+  const measures = performance.getEntriesByType('measure')
+  measures.forEach(measureItem => {
+    const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
+    logUtils.setLog(log)
+  })
+  performance.clearMeasures()
+}
 export interface DrawParams {
   drawCanvasW: number,
   drawCanvasH: number,
@@ -80,13 +126,17 @@ class ImageShadowUtils {
       this._layerData = { img, config, pageId: params.pageId || pageUtils.currFocusPage.id }
       const { layerInfo } = params || {}
       if (layerInfo) {
-        // TODO no need the below line
         const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
         this._layerData.primarylayerId = primarylayerId
         this.setProcessId({
           pageId: pageUtils.currFocusPage.id,
           layerId: primarylayerId || config.id || '',
-          subLayerId: primarylayerId ? config.id || '' : ''
+          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+        })
+        this.setHandleId({
+          pageId: pageUtils.currFocusPage.id,
+          layerId: primarylayerId || config.id || '',
+          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
         })
         ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
         this.updateEffectProps(layerInfo, {
@@ -106,7 +156,8 @@ class ImageShadowUtils {
     }
   }
 
-  async drawFloatingShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawFloatingShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
     this.drawingInit(canvas, img, config, params)
@@ -114,14 +165,16 @@ class ImageShadowUtils {
     this.handlerId = handlerId
     if (timeout) {
       setTimeout(() => {
-        this.floatingHandler(canvas, img, config, handlerId, params)
+        this.floatingHandler(canvas_s, img, config, handlerId, params)
       }, timeout)
     } else {
-      await this.floatingHandler(canvas, img, config, handlerId, params)
+      await this.floatingHandler(canvas_s, img, config, handlerId, params)
     }
   }
 
-  async floatingHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  async floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
+    setMark('floating', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
     const ctxMaxSize = canvasMaxSize.getContext('2d')
@@ -163,7 +216,8 @@ class ImageShadowUtils {
 
     const canvasMaxW = canvas.width * mappingScale
     const ellipseX = canvasMaxW * 0.5
-    const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
+    const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
+    // const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
     const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.floating &&
       this.dataBuff.radius === radius && this.dataBuff.size === size &&
@@ -173,15 +227,20 @@ class ImageShadowUtils {
       this.setIsProcess(layerInfo, true)
     }
 
-    if ((this.handlerId === handlerId && !hasBuffRecorded) || !timeout) {
+    const offsetX = x * drawCanvasW * mappingScale * 0.0025
+    const offsetY = y * drawCanvasH * mappingScale * 0.0025
+
+    setMark('floating', 1)
+    if ((this.handlerId === handlerId) || !timeout) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
       const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
-      ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
+      ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
+      // ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
-      const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
+      const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
 
       if (this.handlerId === handlerId) {
         this.dataBuff.effect = ShadowEffectType.floating
@@ -195,9 +254,14 @@ class ImageShadowUtils {
       }
     }
 
+    setMark('floating', 2)
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        ctxMaxSize.putImageData(this.dataBuff.data, x * 1.5 * layerWidth / _imgWidth, y * 2 * layerWidth / _imgWidth)
+        // const offsetX = x * drawCanvasW * mappingScale * 0.0025 * fieldRange.floating.x.weighting
+        // const offsetY = (y - 10) * drawCanvasH * mappingScale * 0.0025 * fieldRange.floating.y.weighting
+        // console.log(canvasMaxSize.height, offsetX, offsetY)
+        // ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
+        ctxMaxSize.putImageData(this.dataBuff.data, 0, 0)
 
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalCompositeOperation = 'source-in'
@@ -207,9 +271,11 @@ class ImageShadowUtils {
         ctxT.globalAlpha = 1
         ctxT.globalCompositeOperation = 'source-over'
 
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(canvasT, 0, 0)
+        canvas_s.forEach(c => {
+          const ctx = c.getContext('2d') as CanvasRenderingContext2D
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(canvasT, 0, 0)
+        })
         if (layerInfo) {
           this.setIsProcess(layerInfo, false)
         }
@@ -217,9 +283,12 @@ class ImageShadowUtils {
         cb && cb()
       }
     })
+    setMark('floating', 3)
+    logMark('floating', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
   }
 
-  async drawImageMatchedShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
     this.drawingInit(canvas, img, config, params)
@@ -227,14 +296,16 @@ class ImageShadowUtils {
     this.handlerId = handlerId
     if (timeout) {
       setTimeout(() => {
-        this.imageMathcedHandler(canvas, img, config, handlerId, params)
+        this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
       }, timeout)
     } else {
-      await this.imageMathcedHandler(canvas, img, config, handlerId, params)
+      await this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
     }
   }
 
-  async imageMathcedHandler(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
+    setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
     const ctxMaxSize = canvasMaxSize.getContext('2d')
@@ -250,10 +321,10 @@ class ImageShadowUtils {
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
 
     const scaleRatio = img.naturalWidth / _imgWidth
-    const imgX = _imgX * scaleRatio
-    const imgY = _imgY * scaleRatio
-    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+    let imgX = _imgX * scaleRatio
+    let imgY = _imgY * scaleRatio
+    let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+    let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
     let { drawCanvasW, drawCanvasH, layerInfo } = params || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
@@ -263,6 +334,32 @@ class ImageShadowUtils {
     drawCanvasH *= size * 0.01
     const blurImgX = (canvas.width - drawCanvasW) * 0.5
     const blurImgY = (canvas.height - drawCanvasH) * 0.5
+
+    /** If the img is svg+xml convert it to png */
+    if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      await new Promise<void>((resolve) => {
+        fetch(img.src)
+          .then((response) => {
+            if (response.headers.get('Content-Type') === 'image/svg+xml') {
+              const pngCanvas = document.createElement('canvas')
+              const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+              drawImgWidth *= pngScaleRation
+              drawImgHeight *= pngScaleRation
+              imgX *= pngScaleRation
+              imgY *= pngScaleRation
+              pngCanvas.setAttribute('width', (img.naturalWidth * pngScaleRation).toString())
+              pngCanvas.setAttribute('height', (img.naturalHeight * pngScaleRation).toString())
+              const pngCtx = pngCanvas.getContext('2d') as CanvasRenderingContext2D
+              pngCtx.drawImage(img, 0, 0)
+              const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
+              img.src = svgUrl
+              document.body.appendChild(img)
+              console.log(img)
+            }
+            resolve()
+          })
+      })
+    }
 
     const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}${imgX}${imgY}${_imgHeight}${_imgWidth}${img.src}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier
@@ -288,10 +385,11 @@ class ImageShadowUtils {
       }
     }
     const mappingScale = _imgWidth > _imgHeight
-      ? (layerWidth / _imgWidth) * MAXSIZE / (drawCanvasW as number)
-      : (layerHeight / _imgHeight) * MAXSIZE / (drawCanvasH as number)
+      ? MAXSIZE / drawCanvasW
+      : MAXSIZE / drawCanvasH
     const attrFactor = MAXSIZE / 1600
 
+    setMark('imageMatched', 1)
     if ((this.handlerId === handlerId && !hasBuffRecorded) || !timeout) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
@@ -309,11 +407,11 @@ class ImageShadowUtils {
         return
       }
     }
-
+    setMark('imageMatched', 2)
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * attrFactor * fieldRange.imageMatched.distance.weighting * (layerWidth / _imgWidth) : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * attrFactor * fieldRange.imageMatched.distance.weighting * (layerHeight / _imgHeight) : 0
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * attrFactor * fieldRange.imageMatched.distance.weighting : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * attrFactor * fieldRange.imageMatched.distance.weighting : 0
         ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
 
         ctxT.clearRect(0, 0, canvas.width, canvas.height)
@@ -321,19 +419,24 @@ class ImageShadowUtils {
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
         ctxT.globalAlpha = 1
 
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(canvasT, 0, 0)
+        canvas_s.forEach(c => {
+          const ctx = c.getContext('2d') as CanvasRenderingContext2D
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(canvasT, 0, 0)
+        })
         if (layerInfo) {
           this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         cb && cb()
+        setMark('imageMatched', 3)
+        logMark('imageMatched', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
       }
     })
   }
 
-  async drawShadow(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  async drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params || {}
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
     const { effects, currentEffect } = shadow
@@ -343,6 +446,7 @@ class ImageShadowUtils {
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
+      setMark('shadow', 0)
       const { canvasT, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
       const ctxMaxSize = canvasMaxSize.getContext('2d')
@@ -354,13 +458,46 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       const scaleRatio = img.naturalWidth / _imgWidth
+      // let imgX = _imgX * scaleRatio
+      // let imgY = _imgY * scaleRatio
+      // let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+      // let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
       const imgX = _imgX * scaleRatio
       const imgY = _imgY * scaleRatio
       const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
       const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+
+      /** If the img is svg+xml convert it to png */
+      // if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      //   await new Promise<void>((resolve) => {
+      //     fetch(img.src)
+      //       .then(async (response) => {
+      //         if (response.headers.get('Content-Type') === 'image/svg+xml') {
+      //           const data = await response.text()
+      //           const container = document.createElement('div')
+      //           container.innerHTML = data
+      //           const svg = container.getElementsByTagName('svg')[0]
+      //           if (svg) {
+      //             const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+      //             drawImgWidth *= pngScaleRation
+      //             drawImgHeight *= pngScaleRation
+      //             imgX *= pngScaleRation
+      //             imgY *= pngScaleRation
+      //             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
+      //             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
+      //             document.body.appendChild(container)
+      //             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })
+      //             const URL = window.URL || window.webkitURL || window
+      //             const blobURL = URL.createObjectURL(blob)
+      //             img.src = blobURL
+      //           }
+      //         }
+      //         resolve()
+      //       })
+      //   })
+      // }
+
       let { drawCanvasW, drawCanvasH } = params || {}
       if (!drawCanvasH || !drawCanvasW) {
         drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0
@@ -390,6 +527,7 @@ class ImageShadowUtils {
         canvasT.setAttribute('height', `${canvas.height}`)
       }
 
+      setMark('shadow', 1)
       let alphaVal = 1
       /** Calculating the spread */
       if (!hasBuffRecorded || !timeout) {
@@ -423,7 +561,7 @@ class ImageShadowUtils {
       } else {
         ctxT.putImageData(this.dataBuff.data, 0, 0)
       }
-
+      setMark('shadow', 2)
       let MAXSIZE = 1600
       if (['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type)) {
         const res = await imageUtils.getImgSize(config.srcObj)
@@ -431,27 +569,27 @@ class ImageShadowUtils {
           MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
         }
       }
-
       const mappingScale = _imgWidth > _imgHeight
-        ? (layerWidth / _imgWidth) * MAXSIZE / (drawCanvasW as number)
-        : (layerHeight / _imgHeight) * MAXSIZE / (drawCanvasH as number)
+        ? MAXSIZE / drawCanvasW
+        : MAXSIZE / drawCanvasH
       const arrtFactor = MAXSIZE / 1600
 
-      canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
-      canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
+      canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${Math.ceil(canvas.width * mappingScale)}`)
+      canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${Math.ceil(canvas.height * mappingScale)}`)
 
       if (this.handlerId === handlerId) {
         ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-        const bluredData = await imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+        const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting * (layerWidth / _imgWidth) : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting * (layerHeight / _imgHeight) : 0
+        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
+        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
         ctxMaxSize.putImageData(bluredData, offsetX, offsetY)
       } else {
         return
       }
+      setMark('shadow', 3)
 
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
@@ -464,8 +602,11 @@ class ImageShadowUtils {
           ctxT.globalAlpha = 1
           ctxT.globalCompositeOperation = 'source-over'
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-          ctx.drawImage(canvasT, 0, 0)
+          canvas_s.forEach(c => {
+            const ctx = c.getContext('2d') as CanvasRenderingContext2D
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.drawImage(canvasT, 0, 0)
+          })
           if (layerInfo) {
             timeout && this.setIsProcess(layerInfo, false)
           }
@@ -473,6 +614,8 @@ class ImageShadowUtils {
           cb && cb()
         }
       })
+      setMark('shadow', 4)
+      logMark('shadow', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
     }
     this.handlerId = handlerId
     if (timeout) {
@@ -530,10 +673,14 @@ class ImageShadowUtils {
     this._layerData = null
   }
 
-  setEffect (effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
+  setEffect(effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
     let { pageIndex, layerIndex, subLayerIdx } = layerUtils
-    _pageIndex !== -1 && (pageIndex = _pageIndex)
-    _layerIndex !== -1 && (layerIndex = _layerIndex)
+    if (_pageIndex !== -1) {
+      pageIndex = _pageIndex
+    }
+    if (_layerIndex !== -1) {
+      layerIndex = _layerIndex
+    }
     if (_pageIndex !== -1 && _layerIndex !== -1 && _subLayerIdx !== -1) {
       subLayerIdx = _subLayerIdx
     }
@@ -560,58 +707,6 @@ class ImageShadowUtils {
         ...effects,
         ...attrs
       })
-    }
-  }
-
-  /** Only used for blur and floating effects */
-  convertShadowEffect(config: IImage): { [key: string]: string | number } {
-    const { shadow, scale } = config.styles
-    const { color = '#000000' } = shadow.effects
-    const effect = shadow.currentEffect !== ShadowEffectType.none
-      ? shadow.effects[shadow.currentEffect] : {}
-
-    switch (shadow.currentEffect) {
-      case ShadowEffectType.imageMatched: {
-        const { radius, distance, angle, size, opacity } = effect as ShadowEffects
-        const x = distance * mathUtils.cos(angle)
-        const y = distance * mathUtils.sin(angle)
-        return {
-          backgroundImage: `url(${imageUtils.getSrc(config)})`,
-          backgroundColor: `rgba(255, 255, 255, ${1 - opacity / 100})`,
-          backgroundBlendMode: 'overlay',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          zIndex: -1,
-          width: `${size}%`,
-          height: `${size}%`,
-          bottom: `${-y}%`,
-          left: `${x - (size - 100) / 2}%`,
-          filter: `blur(${radius * scale}px)`
-        }
-      }
-      case ShadowEffectType.floating: {
-        const { radius, spread, opacity, x, y, size } = mathUtils
-          .multipy(scale, effect as ShadowEffects, ['opacity', 'size']) as ShadowEffects
-        return {
-          width: `${size}%`,
-          left: `${x * fieldRange.floating.x.weighting + (100 - size) / 2}%`,
-          bottom: `${-y * fieldRange.floating.y.weighting}%`,
-          zIndex: -1,
-          boxShadow:
-          // `0px ${HALO_Y_OFFSET * scale}px ` +
-          `${(radius + 30) * fieldRange.floating.radius.weighting}px ` +
-          `${spread}px ` +
-          `${color + this.convertToAlpha(opacity)}`
-        }
-      }
-      case ShadowEffectType.none:
-      case ShadowEffectType.blur:
-      case ShadowEffectType.shadow:
-      case ShadowEffectType.frame:
-        return {}
-      default:
-        return generalUtils.assertUnreachable(shadow.currentEffect)
     }
   }
 
@@ -711,11 +806,11 @@ class ImageShadowUtils {
     switch (effectName) {
       case ShadowEffectType.shadow:
         (effect as IShadowEffect) = {
-          distance: 60,
-          angle: 45,
-          radius: 70,
-          spread: 15,
-          opacity: 70
+          distance: 50,
+          angle: 20,
+          radius: 50,
+          spread: 0,
+          opacity: 40
         }
         break
       case ShadowEffectType.floating: {
@@ -723,7 +818,7 @@ class ImageShadowUtils {
           x: 0,
           y: 0,
           radius: 60,
-          size: 70,
+          size: 60,
           thinkness: 50,
           opacity: 65
         }
@@ -732,8 +827,8 @@ class ImageShadowUtils {
       case ShadowEffectType.blur:
         (effect as IBlurEffect) = {
           radius: 50,
-          spread: 15,
-          opacity: 55
+          spread: 10,
+          opacity: 40
         }
         break
       case ShadowEffectType.frame:
@@ -745,11 +840,11 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.imageMatched:
         (effect as IImageMatchedEffect) = {
-          distance: 35,
-          angle: 45,
-          radius: 60,
+          distance: 40,
+          angle: 40,
+          radius: 50,
           size: 100,
-          opacity: 55
+          opacity: 60
         }
         break
       case ShadowEffectType.none:
@@ -895,11 +990,11 @@ export const fieldRange = {
   },
   floating: {
     opacity: { max: 100, min: 0, weighting: 0.01 },
-    radius: { max: 100, min: 0, weighting: 4 },
+    radius: { max: 100, min: 0, weighting: 3 },
     thinkness: { max: 100, min: 0 },
     size: { max: 200, min: 50 },
-    x: { max: 100, min: -100, weighting: 0.5 },
-    y: { max: 100, min: -100, weighting: 0.5 }
+    x: { max: 100, min: -100, weighting: 1 },
+    y: { max: 75, min: -100, weighting: 1 }
   }
 } as any
 

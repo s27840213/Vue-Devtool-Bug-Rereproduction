@@ -108,8 +108,7 @@ export default Vue.extend({
     grid-template-columns: 145px 145px;
     row-gap: 10px;
     column-gap: 10px;
-    margin-right: -10px;
-    padding-right: 10px;
+    @include push-scrollbar10;
     @include hide-scrollbar;
   }
   &__close {

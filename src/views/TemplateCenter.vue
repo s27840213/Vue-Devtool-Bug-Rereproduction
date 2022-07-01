@@ -83,8 +83,10 @@
                         @clickWaterfall="handleClickWaterfall")
     nu-footer(class="non-mobile-show")
     transition(name="fade-scale")
-      div(v-if="snapToTop" class="template-center__to-top pointer non-mobile-show" @click="scrollToTop")
-        img(:src="require('@/assets/img/svg/to_top.svg')")
+      div(v-if="snapToTop"
+          class="template-center__to-top pointer non-mobile-show"
+          @click="scrollToTop")
+        svg-icon(iconName="to-top" iconWidth="40px" iconColor="white")
     transition(name="fade-scale-center")
       div(v-if="modal === 'pages'" class="template-center__multi"
           v-click-outside="() => { modal = '' }")
@@ -301,9 +303,7 @@ export default Vue.extend({
       this.composeKeyword()
     })
     themeUtils.checkThemeState().then(() => {
-      this.themes = themeUtils.themes.filter(theme => {
-        return theme.mainHidden === 0
-      })
+      this.themes = themeUtils.themes
     })
 
     generalUtils.fbq('track', 'ViewContent', {
@@ -582,8 +582,9 @@ body {
 <style lang="scss" scoped>
 .template-center {
   @include size(100%, 100%);
-  min-height: 100%;
+  @include push-scrollbar10;
   @include hide-scrollbar-white;
+  min-height: 100%;
   @media screen and (max-width: 540px) {
     overflow-x: hidden;
     position: relative;
@@ -791,6 +792,10 @@ body {
     position: fixed;
     right: 76px;
     bottom: 84px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(196, 196, 196, 0.8);
   }
   &__multi {
     position: fixed;
