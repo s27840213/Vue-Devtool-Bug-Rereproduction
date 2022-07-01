@@ -13,11 +13,13 @@ import textShapeUtils from './textShapeUtils'
 import mathUtils from './mathUtils'
 import router from '@/router'
 import _ from 'lodash'
+import cssConverter from './cssConverter'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return (store.state as any).text.props }
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
+  get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
   fieldRange: {
     fontSize: { min: number, max: number }
@@ -1107,6 +1109,27 @@ class TextUtils {
         }
       })
     }
+  }
+
+  async untilFontLoaded(paragraphs: IParagraph[]): Promise<any> {
+    return Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
+  }
+
+  async untilFontLoadedForP(paragraph: IParagraph): Promise<any> {
+    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).split(',')
+    const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
+    return Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
+  }
+
+  async untilFontLoadedForChar(char: string, fontList: string[]): Promise<void> {
+    for (const font of fontList) {
+      const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
+      if (fontFileList.length !== 0) return
+    }
+  }
+
+  setIsFontLoading(isFontLoading: boolean) {
+    store.commit('text/SET_isFontLoading', isFontLoading)
   }
 }
 
