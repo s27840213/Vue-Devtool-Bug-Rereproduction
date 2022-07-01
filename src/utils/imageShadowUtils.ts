@@ -903,6 +903,10 @@ class ImageShadowUtils {
     })
   }
 
+  setShadowSrcState(layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj) {
+    store.commit('SET_srcState', { layerInfo, effect, effects, srcObj })
+  }
+
   setUploadId(id: ILayerIdentifier) {
     store.commit('shadow/SET_UPLOAD_ID', id)
   }

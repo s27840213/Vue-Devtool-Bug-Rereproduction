@@ -1,4 +1,4 @@
-import { IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ColorEventType, FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange } from './imageShadowUtils'
@@ -12,6 +12,7 @@ import imageUtils from './imageUtils'
 import uploadUtils from './uploadUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import logUtils from './logUtils'
+import shadow from '@/store/module/shadow'
 
 export default new class ImageShadowPanelUtils {
   private get fieldRange() {
@@ -54,6 +55,24 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
+  checkIfSameEffect(config: IImage) {
+    if (config.type !== LayerType.image) return false
+
+    const shadow = config.styles.shadow
+    if (!shadow.srcState) {
+      return false
+    } else {
+      const currentEffect = shadow.currentEffect
+      return currentEffect !== ShadowEffectType.none &&
+        shadow.currentEffect === shadow.srcState.effect &&
+        shadow.effects.color === shadow.srcState.effects.color &&
+        Object.entries(shadow.effects[currentEffect] as IShadowEffect | IBlurEffect | IFloatingEffect | IImageMatchedEffect)
+          .every(([k, v]) => {
+            return (shadow.srcState as any).effects[currentEffect][k] === v
+          })
+    }
+  }
+
   async handleShadowUpload(_layerData?: any) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = _layerData ?? imageShadowUtils.layerData
@@ -69,7 +88,19 @@ export default new class ImageShadowPanelUtils {
       const subLayerId = primarylayerId ? config.id : ''
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
       /** If the shadow effct has already got the img src, return */
+
       if (config.type !== LayerType.image || config.styles.shadow.srcObj.type) {
+        return
+      }
+      if (this.checkIfSameEffect(config) && config.styles.shadow.srcState) {
+        const { srcObj } = config.styles.shadow.srcState
+        const layerInfo = {
+          pageIndex: _pageIndex,
+          layerIndex: _layerIndex,
+          subLayerIdx: _subLayerIdx
+        }
+        imageShadowUtils.updateShadowSrc(layerInfo, srcObj)
+        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
         return
       }
       if (primarylayerId) {
@@ -224,15 +255,20 @@ export default new class ImageShadowPanelUtils {
               })
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
+              const shadow = config.styles.shadow
+              imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, shadow.currentEffect, shadow.effects, srcObj)
+
               logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
               src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))}
               pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
               pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
+
               imageShadowUtils.clearLayerData()
             }
             newImg.onerror = () => {
               console.error('can not load the uploaded image shadow')
               logUtils.setLog('error' + 'can not load the uploaded image shadow')
+
               const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
               imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)

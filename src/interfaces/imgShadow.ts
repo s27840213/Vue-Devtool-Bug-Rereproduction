@@ -67,5 +67,10 @@ export interface IShadowProps {
   effects: IShadowEffects,
   srcObj: SrcObj,
   styles: IShadowStyles,
-  isTransparent?: boolean
+  isTransparent?: boolean,
+  srcState?: {
+    effect: ShadowEffectType,
+    effects: IShadowEffects,
+    srcObj: SrcObj
+  }
 }
