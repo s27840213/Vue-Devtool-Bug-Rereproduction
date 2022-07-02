@@ -226,7 +226,6 @@ export default new class ImageShadowPanelUtils {
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
-
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })

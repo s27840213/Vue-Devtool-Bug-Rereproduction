@@ -1108,24 +1108,6 @@ export default Vue.extend({
       }
     },
     scaleEnd() {
-      // if (this.getLayerType === LayerType.frame && FrameUtils.isImageFrame(this.config)) {
-      //   const { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
-      //   const { scale, width, height } = this.config.styles
-      //   // imgWidth *= scale
-      //   // imgHeight *= scale
-      //   // imgY *= scale
-      //   // imgX *= scale
-
-      //   FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
-      //     width: width,
-      //     height: height,
-      //     imgWidth: width,
-      //     imgHeight: height,
-      //     imgX,
-      //     imgY
-      //   })
-      //   // scale = 1
-      // }
       this.isControlling = false
       StepsUtils.record()
 

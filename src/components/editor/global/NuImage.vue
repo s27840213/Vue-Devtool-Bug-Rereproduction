@@ -84,7 +84,7 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    if (!this.config.isFrameImg && !this.isBgImgControl) {
+    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender) {
       this.handleShadowInit()
     }
   },
@@ -196,7 +196,7 @@ export default Vue.extend({
     },
     'shadow.srcObj': {
       handler: function (val) {
-        if (!this.config.isFrameImg && val.type === '') {
+        if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow.currentEffect)
         }
         // this.handleUploadShadowImg()

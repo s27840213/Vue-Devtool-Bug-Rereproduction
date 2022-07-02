@@ -636,10 +636,8 @@ class ImageShadowUtils {
   }
 
   isTransparentBg(target: HTMLCanvasElement | HTMLImageElement): boolean {
-    let canvas = this.canvasT
-    if (target instanceof HTMLCanvasElement) {
-      canvas = this.canvasT
-    } else {
+    const canvas = document.createElement('canvas')
+    if (target instanceof HTMLImageElement) {
       const { naturalWidth, naturalHeight } = target as HTMLImageElement
       canvas.setAttribute('width', naturalWidth.toString())
       canvas.setAttribute('height', naturalHeight.toString())
