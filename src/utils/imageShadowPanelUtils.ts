@@ -77,10 +77,6 @@ export default new class ImageShadowPanelUtils {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = _layerData ?? imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
-    if (!layerData) {
-      console.error('can not get the layerData for uploading')
-      logUtils.setLog('Error: can not get the layerData for uploading')
-    }
     if (layerData) {
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage

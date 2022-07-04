@@ -594,7 +594,6 @@ export default Vue.extend({
       }
       clearShadowSrc && this.clearShadowSrc()
       imageShadowUtils.clearLayerData()
-      // const { initWidth: width, initHeight: height } = this.config.styles
       const { width, height } = this.config.styles
       const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
       const _canvasW = (width + CANVAS_SPACE * spaceScale)
@@ -682,14 +681,29 @@ export default Vue.extend({
             img.crossOrigin = 'anonymous'
             img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             img.onload = () => {
-              imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, {
-                pageId: pageUtils.getPage(this.pageIndex).id,
-                drawCanvasW: shadowBuff.drawCanvasW,
-                drawCanvasH: shadowBuff.drawCanvasH,
-                layerInfo,
-                cb: this.clearShadowSrc
-              })
-              this.shadowBuff.canvasShadowImg.imageMatched = img
+              imageShadowPanelUtils.isSVG(img, this.config)
+                .then(async (isSVG) => {
+                  return await new Promise<void>((resolve) => {
+                    if (isSVG) {
+                      imageShadowPanelUtils.svgImageSizeFormatter(img, () => {
+                        /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
+                        img.onload = () => resolve()
+                      })
+                    } else {
+                      resolve()
+                    }
+                  })
+                })
+                .finally(() => {
+                  imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, {
+                    pageId: pageUtils.getPage(this.pageIndex).id,
+                    drawCanvasW: shadowBuff.drawCanvasW,
+                    drawCanvasH: shadowBuff.drawCanvasH,
+                    layerInfo,
+                    cb: this.clearShadowSrc
+                  })
+                  this.shadowBuff.canvasShadowImg.imageMatched = img
+                })
             }
           }
           break

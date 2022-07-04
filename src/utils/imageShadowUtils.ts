@@ -138,7 +138,7 @@ class ImageShadowUtils {
           layerId: primarylayerId || config.id || '',
           subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
         })
-        ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
+        ctxT.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvasT.width, canvasT.height)
         this.updateEffectProps(layerInfo, {
           isTransparent: this.isTransparentBg(canvasT)
         })
@@ -600,13 +600,16 @@ class ImageShadowUtils {
   }
 
   isTransparentBg(target: HTMLCanvasElement | HTMLImageElement): boolean {
-    const canvas = document.createElement('canvas')
+    let canvas
     if (target instanceof HTMLImageElement) {
+      canvas = document.createElement('canvas')
       const { naturalWidth, naturalHeight } = target as HTMLImageElement
       canvas.setAttribute('width', naturalWidth.toString())
       canvas.setAttribute('height', naturalHeight.toString())
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       ctx.drawImage(target, 0, 0, naturalWidth, naturalHeight)
+    } else {
+      canvas = target
     }
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const { width, height } = canvas
@@ -656,11 +659,24 @@ class ImageShadowUtils {
       const { effects } = shadow
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
 
-      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-        initWidth: width,
-        initHeight: height,
-        scale: 1
-      }, subLayerIdx)
+      if (layer.styles.scale !== 1) {
+        let { imgWidth, imgHeight, imgX, imgY } = layer.styles.shadow.styles
+        imgWidth *= layer.styles.scale
+        imgHeight *= layer.styles.scale
+        imgX *= layer.styles.scale
+        imgY *= layer.styles.scale
+        this.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, {
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+          initWidth: width,
+          initHeight: height,
+          scale: 1
+        }, subLayerIdx)
+      }
 
       if (layer.styles.shadow.currentEffect !== effect) {
         this.updateEffectState(layerInfo, effect)
