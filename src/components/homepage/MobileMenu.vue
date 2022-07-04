@@ -83,7 +83,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .menu {
   @include size(280px, 100%);
   @include body-MD;

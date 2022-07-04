@@ -172,7 +172,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .brand-kit-tab-logo-loading {
   display: flex;
   justify-content: center;

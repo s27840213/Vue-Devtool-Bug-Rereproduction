@@ -1,5 +1,8 @@
+@use '@/assets/scss/utils' as *;
+
 .v-popper--theme-hint {
 	color: setColor(white);
+
 	.v-popper__inner {
 		background-color: setColor(gray-2);
 		font-size: 12px;

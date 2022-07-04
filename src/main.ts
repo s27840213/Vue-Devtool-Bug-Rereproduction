@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import '@/globalComponents'
-import '@/assets/scss/main.scss'
 import VueRecyclerviewNew from 'vue-recyclerview'
 import App from './App.vue'
 import router from './router'

@@ -1,3 +1,5 @@
+@use '@/assets/scss/utils/functions.scss' as *;
+
 @mixin header() {
   font-style: normal;
   font-weight: 700;

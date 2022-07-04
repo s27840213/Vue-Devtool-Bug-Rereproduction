@@ -184,7 +184,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .brand-selector {
   display: flex;
   gap: 12px;

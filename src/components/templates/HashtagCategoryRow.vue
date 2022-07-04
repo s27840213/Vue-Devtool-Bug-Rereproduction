@@ -63,7 +63,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .hashtag-row {
   display: flex;
   gap: 7px;

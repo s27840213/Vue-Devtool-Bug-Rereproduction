@@ -245,7 +245,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .brand-kit-text-setting {
   &__inner {
     background: #f3f6fa;

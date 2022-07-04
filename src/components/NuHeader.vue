@@ -169,7 +169,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .nu-header {
   height: $header-height;
   background-size: cover;

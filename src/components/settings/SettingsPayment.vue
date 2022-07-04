@@ -216,7 +216,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .sp {
   @include body-MD;
   padding: 60px 13% 20px 13%;

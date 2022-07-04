@@ -166,7 +166,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss" scoped src="@/assets/scss/base/formatStyle.scss">
+<style lang="scss" scoped>
 .brand-kit-color-palette {
   border: 1px solid setColor(gray-3);
   box-sizing: border-box;

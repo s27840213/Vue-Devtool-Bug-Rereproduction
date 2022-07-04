@@ -168,7 +168,7 @@ module.exports = {
     css: {
         loaderOptions: {
             scss: {
-                prependData: '@import "~@/assets/scss/utils/_all.scss";'
+                prependData: '@use "~@/assets/scss/utils" as *;'
             }
         }
     },

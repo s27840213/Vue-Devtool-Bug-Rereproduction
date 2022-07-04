@@ -1,3 +1,5 @@
+@use '@/assets/scss/utils' as *;
+
 .input {
 	&__slider {
 		&--range {
@@ -31,6 +33,7 @@
 			&::-moz-range-track {
 				background-color: setColor(gray-4);
 			}
+
 			&::-moz-range-thumb {
 				appearance: none;
 				width: 11px;
