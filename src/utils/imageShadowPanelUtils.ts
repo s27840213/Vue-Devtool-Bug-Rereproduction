@@ -308,7 +308,6 @@ export default new class ImageShadowPanelUtils {
             // imgY *= pngScaleRation
             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
-            document.body.appendChild(container)
             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })
             const URL = window.URL || window.webkitURL || window
             const blobURL = URL.createObjectURL(blob)
