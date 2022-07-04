@@ -52,7 +52,6 @@ export default Vue.extend({
     return {
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
-      isLoading: true,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
@@ -84,14 +83,9 @@ export default Vue.extend({
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
-      // console.log('resize')
+      console.log('resize')
 
-      let widthLimit
-      if (this.isLoading) {
-        widthLimit = TextUtils.autoResize(config, this.initSize)
-      } else {
-        widthLimit = config.widthLimit
-      }
+      const widthLimit = config.widthLimit
       const textHW = TextUtils.getTextHW(config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
         let x = config.styles.x
@@ -144,7 +138,6 @@ export default Vue.extend({
   watch: {
     'config.paragraphs': {
       handler() {
-        this.isLoading = false
         if (this.resizeObserver) {
           this.resizeObserver.disconnect()
           this.observeAllSpans()

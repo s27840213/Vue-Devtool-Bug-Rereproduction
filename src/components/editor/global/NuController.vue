@@ -273,8 +273,7 @@ export default Vue.extend({
       return this.config.type === 'shape' && this.config.category === 'D'
     },
     isCurveText(): boolean {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
+      return this.checkIfCurve(this.config)
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -1626,15 +1625,25 @@ export default Vue.extend({
       const { e } = attrs as { e: DragEvent }
       e && this.onDrop(e)
     },
+    checkIfCurve(config: IText): boolean {
+      const { textShape } = config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    calcSize(config: IText, composing: boolean) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing)
+    },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
       config.paragraphs = payload.paragraphs
-      this.isCurveText ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, !!tiptapUtils.editor?.view?.composing)
+      this.calcSize(config, !!tiptapUtils.editor?.view?.composing)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       if (payload.toRecord) {
-        StepsUtils.record()
+        TextUtils.waitFontLoadingAndRecord(this.config.paragraphs)
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
+        // if composing starts from empty line, isSetContentRequired will be true in the first typing.
+        // However, setContent will break the composing, so skip setContent when composing.
+        // setContent will be done when 'composeend' (in NuTextEditor.vue)
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
             editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
@@ -1642,11 +1651,14 @@ export default Vue.extend({
         })
       }
     },
-    handleTextCompositionEnd() {
+    handleTextCompositionEnd(toRecord: boolean) {
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
         this.textSizeRefresh(this.config, false)
+      }
+      if (toRecord) {
+        TextUtils.waitFontLoadingAndRecord(this.config.paragraphs)
       }
     },
     textSizeRefresh(text: IText, composing: boolean) {

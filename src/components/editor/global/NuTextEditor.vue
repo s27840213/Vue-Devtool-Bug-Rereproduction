@@ -57,13 +57,12 @@ export default Vue.extend({
     tiptapUtils.init(this.initText, contentEditable)
     this.editor = tiptapUtils.editor
     tiptapUtils.on('update', ({ editor }) => {
-      this.$emit('update', tiptapUtils.toIParagraph(editor.getJSON()))
+      let toRecord = false
       const newText = tiptapUtils.getText(editor)
       if (!editor.view.composing && (tiptapUtils.prevText !== newText)) {
-        this.$nextTick(() => {
-          stepsUtils.record()
-        })
+        toRecord = true
       }
+      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
       tiptapUtils.prevText = newText
       this.updateLayerProps({ isEdited: true })
       if (Object.prototype.hasOwnProperty.call(this.config, 'loadFontEdited')) {
@@ -81,21 +80,22 @@ export default Vue.extend({
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
         editorDiv.addEventListener('compositionend', () => {
-          this.$emit('compositionend')
-          this.$nextTick(() => {
-            const pages = stepsUtils.getPrevPages()
-            let currLayerInPrevStep = pages[this.pageIndex].layers[this.layerIndex]
-            if (currLayerInPrevStep.type === 'group') {
-              currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[this.subLayerIndex] as IText
-            } else {
-              currLayerInPrevStep = currLayerInPrevStep as IText
-            }
-            if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
-              stepsUtils.record()
-            }
-            tiptapUtils.agent(editor => {
-              editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
-            })
+          let toRecord = false
+          const pages = stepsUtils.getPrevPages()
+          let currLayerInPrevStep = pages[this.pageIndex].layers[this.layerIndex]
+          if (currLayerInPrevStep.type === 'group') {
+            currLayerInPrevStep = (currLayerInPrevStep as IGroup).layers[this.subLayerIndex] as IText
+          } else {
+            currLayerInPrevStep = currLayerInPrevStep as IText
+          }
+          if (tiptapUtils.toText(currLayerInPrevStep) !== tiptapUtils.getText(editor)) { // record only when the updated text has not been recorded yet
+            toRecord = true
+          }
+          this.$emit('compositionend', toRecord)
+          tiptapUtils.agent(editor => {
+            // setContent will be skipped while composing even when isSetContentRequired is true in NuController/NuSubController.
+            // So do it here. (the JSON created by toJSON(.) is probably different from editor.getJSON(.))
+            editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(editor.getJSON()).paragraphs)).selectPrevious().run()
           })
         })
       }

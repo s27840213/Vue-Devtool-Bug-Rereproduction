@@ -14,6 +14,7 @@ import mathUtils from './mathUtils'
 import router from '@/router'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
+import stepsUtils from './stepsUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -21,6 +22,7 @@ class TextUtils {
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
+  toRecordId: string
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -29,6 +31,7 @@ class TextUtils {
   }
 
   constructor() {
+    this.toRecordId = ''
     this.fieldRange = {
       fontSize: { min: 6, max: 800 },
       lineHeight: { min: 0.5, max: 2.5 },
@@ -1130,6 +1133,22 @@ class TextUtils {
 
   setIsFontLoading(isFontLoading: boolean) {
     store.commit('text/SET_isFontLoading', isFontLoading)
+  }
+
+  waitFontLoadingAndRecord(paragraphs: IParagraph[], callback: (() => void) | undefined = undefined) {
+    const recordId = GeneralUtils.generateRandomString(12)
+    this.toRecordId = recordId
+    this.setIsFontLoading(true)
+    this.untilFontLoaded(paragraphs).then(() => {
+      if (callback) {
+        callback()
+      }
+      if (this.toRecordId === recordId) {
+        console.log('record')
+        stepsUtils.record()
+        this.setIsFontLoading(false)
+      }
+    })
   }
 }
 
