@@ -761,6 +761,45 @@ class TextUtils {
     }
   }
 
+  updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    const targetLayer = LayerUtils.getLayer(pageIndex, layerIndex)
+    if (subLayerIndex === -1) { // single text layer
+      const config = targetLayer as IText
+      if (textShapeUtils.isCurvedText(config.styles)) {
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
+      } else {
+        const widthLimit = config.widthLimit
+        const textHW = this.getTextHW(config, widthLimit)
+        let x = config.styles.x
+        let y = config.styles.y
+        if (config.widthLimit === -1) {
+          if (config.styles.writingMode.includes('vertical')) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        }
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        LayerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
+      }
+    } else { // sub text layer in a group
+      const group = targetLayer as IGroup
+      const config = group.layers[subLayerIndex] as IText
+      if (textShapeUtils.isCurvedText(config.styles)) {
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
+        this.updateGroupLayerSize(pageIndex, layerIndex)
+        this.fixGroupCoordinates(pageIndex, layerIndex)
+      } else {
+        const widthLimit = config.widthLimit
+        const textHW = this.getTextHW(config, widthLimit)
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { widthLimit })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
+      }
+    }
+  }
+
   fixGroupXCoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER

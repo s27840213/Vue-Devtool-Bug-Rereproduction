@@ -83,7 +83,7 @@ export default Vue.extend({
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
-      console.log('resize')
+      // console.log('resize')
 
       const widthLimit = config.widthLimit
       const textHW = TextUtils.getTextHW(config, widthLimit)
