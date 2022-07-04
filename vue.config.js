@@ -122,6 +122,10 @@ module.exports = {
             .plugin('speed-measure-webpack-plugin')
             .use(SpeedMeasurePlugin)
             .end()
+        // .use(SpeedMeasurePlugin, [{
+        //     outputFormat: 'humanVerbose',
+        //     loaderTopFiles: 5
+        // }])
     },
 
     configureWebpack: {
