@@ -234,6 +234,7 @@ class GeneralUtils {
           case '47494638':
             type = 'gif'
             break
+          case 'ffd8ffdb':
           case 'ffd8ffe0':
           case 'ffd8ffe1':
           case 'ffd8ffe2':

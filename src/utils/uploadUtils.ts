@@ -239,9 +239,6 @@ class UploadUtils {
                 clearInterval(interval)
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
-                  /**
-                   * @todo check the reason why the backend will return flag 1
-                   * */
                   if (json.flag === 0) {
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
@@ -311,18 +308,20 @@ class UploadUtils {
         formData.append('file', file)
       }
 
-      const assetHandler = (src: string) => {
+      const assetHandler = (src: string, imgType?: string) => {
+        console.log(imgType)
         if (type === 'image') {
           const img = new Image()
           img.src = src
-          img.onload = (evt) => {
+          const isUnknown = imgType === 'unknown'
+          const imgCallBack = (src: string) => {
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
               pageIndex: pageUtils.currFocusPageIndex
             })
             if (addToPage) {
-              assetUtils.addImage(img.src, img.width / img.height, {
+              assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
@@ -333,7 +332,9 @@ class UploadUtils {
             let increaseInterval = undefined as any
             if (!isShadow) {
               store.commit('file/ADD_PREVIEW', {
-                imageFile: img,
+                width: isUnknown ? 250 : img.width,
+                height: isUnknown ? 250 : img.height,
+                src,
                 assetId: assetId
               })
               xhr.upload.onprogress = (event) => {
@@ -365,7 +366,6 @@ class UploadUtils {
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
                       if (json.flag === 0) {
-                        console.log('Successfully upload the file')
                         if (type === 'image') {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
@@ -390,6 +390,13 @@ class UploadUtils {
                 })
               }, 2000)
             }
+          }
+          if (!isUnknown) {
+            img.onload = (evt) => {
+              imgCallBack(img.src)
+            }
+          } else {
+            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
           }
         } else if (type === 'font') {
           const tempId = brandkitUtils.createTempFont(assetId)
@@ -487,10 +494,12 @@ class UploadUtils {
       }
 
       if (isFile) {
-        reader.onload = (evt) => {
-          assetHandler(evt.target?.result as string)
-        }
-        reader.readAsDataURL(files[i] as File)
+        generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
+          reader.onload = (evt) => {
+            assetHandler(evt.target?.result as string, imgType)
+          }
+          reader.readAsDataURL(files[i] as File)
+        })
       } else {
         assetHandler(files[i] as string)
       }
