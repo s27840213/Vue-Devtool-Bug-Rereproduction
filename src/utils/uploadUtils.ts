@@ -1254,6 +1254,12 @@ class UploadUtils {
           ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } }),
           ...(Object.prototype.hasOwnProperty.call(styles, 'shadow') && { shadow: { ...styles.shadow } })
         }
+      case 'shape': {
+        return {
+          ...general,
+          blendMode: styles.blendMode
+        }
+      }
       default:
         return general
     }

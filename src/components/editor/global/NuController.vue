@@ -642,8 +642,7 @@ export default Vue.extend({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-
-      if (this.isProcessImgShadow && this.processId.id !== this.config.id) {
+      if (this.isProcessImgShadow) {
         return
       } else {
         if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
