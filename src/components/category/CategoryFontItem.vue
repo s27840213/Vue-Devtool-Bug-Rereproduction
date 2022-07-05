@@ -240,14 +240,14 @@ export default Vue.extend({
           })
           // StepsUtils.record()
           if (subLayerIdx === -1) { // no sub layer is selected
-            TextUtils.waitGroupFontLoadingAndRecord(layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup, () => {
-              const { pageIndex, layerIndex } = layerUtils.getLayerInfoById(pageId, id as string)
-              if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
-              const group = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
-              group.layers.forEach((l, index) => {
-                if (l.type !== 'text') return
-                TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, index)
-              })
+            const group = layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup
+            const subIds = group.layers.filter(l => l.type === 'text').map(l => l.id)
+            TextUtils.waitGroupFontLoadingAndRecord(group, () => {
+              for (const subId of subIds) {
+                const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subId)
+                if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+                TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+              }
             })
           } else {
             TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
