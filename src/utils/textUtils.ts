@@ -1179,14 +1179,38 @@ class TextUtils {
     this.toRecordId = recordId
     this.setIsFontLoading(true)
     this.untilFontLoaded(paragraphs).then(() => {
-      if (callback) {
-        callback()
-      }
-      if (this.toRecordId === recordId) {
-        console.log('record')
-        stepsUtils.record()
-        this.setIsFontLoading(false)
-      }
+      setTimeout(() => {
+        if (callback) {
+          callback()
+        }
+        if (this.toRecordId === recordId) {
+          console.log('record')
+          stepsUtils.record()
+          this.setIsFontLoading(false)
+        }
+      }, 500) // after the fonts are all downloaded, the browser needs a little time to render them on screen
+    })
+  }
+
+  waitGroupFontLoadingAndRecord(group: IGroup, callback: (() => void) | undefined = undefined) {
+    const recordId = GeneralUtils.generateRandomString(12)
+    this.toRecordId = recordId
+    this.setIsFontLoading(true)
+    Promise.all(
+      group.layers
+        .filter(l => l.type === 'text')
+        .map(l => this.untilFontLoaded((l as IText).paragraphs))
+    ).then(() => {
+      setTimeout(() => {
+        if (callback) {
+          callback()
+        }
+        if (this.toRecordId === recordId) {
+          console.log('record')
+          stepsUtils.record()
+          this.setIsFontLoading(false)
+        }
+      }, 500) // after the fonts are all downloaded, the browser needs a little time to render them on screen
     })
   }
 }
