@@ -207,7 +207,8 @@ export default Vue.extend({
       &:hover {
         background-color: setColor(blue-4);
         border: 1px solid setColor(blue-4);
-        & > span.primary, & > span.secondary {
+        & > span.primary,
+        & > span.secondary {
           color: setColor(blue-4);
         }
         & > .hover {
@@ -227,7 +228,8 @@ export default Vue.extend({
       height: 100%;
       width: auto;
     }
-    &:not(.add):hover, &.hovered {
+    &:not(.add):hover,
+    &.hovered {
       background-color: rgba(setColor(gray-4), 0.5);
       border: 1px solid setColor(gray-4);
       & > img {

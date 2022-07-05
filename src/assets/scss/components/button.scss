@@ -1,5 +1,6 @@
-@import '@/assets/scss/base/typography.scss';
-@import '@/assets/scss/utils/mixins.scss';
+@use '@/assets/scss/base/typography.scss' as *;
+@use '@/assets/scss/utils' as *;
+
 
 $buttons: (
 	primary: setColor(blue-1),
@@ -75,8 +76,11 @@ $padding: (
 */
 
 
-@each $type, $color in $buttons {
-	.btn-#{"" + $type}{ // "" -> prevent node warning 
+@each $type,
+$color in $buttons {
+	.btn-#{"" + $type} {
+
+		// "" -> prevent node warning 
 		&-sm {
 			@include label-sm();
 			@include flexCenter();
@@ -84,58 +88,71 @@ $padding: (
 			color: map-get($textColor, $type);
 			padding: 6px 12px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
-		&-mid{
+
+		&-mid {
 			@include label-mid();
 			@include flexCenter();
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
-		&-mid-body{
+
+		&-mid-body {
 			@include body-2();
 			@include flexCenter();
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px 20px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
-		&-lg{
+
+		&-lg {
 			@include label-lg();
 			@include flexCenter();
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 15px 30px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
 	}
 
-	.btn-squared-#{"" + $type}{ // "" -> prevent node warning 
+	.btn-squared-#{"" + $type} {
+
+		// "" -> prevent node warning 
 		&-sm {
 			@include label-sm();
 			@include flexCenter();
@@ -143,57 +160,70 @@ $padding: (
 			color: map-get($textColor, $type);
 			padding: 6px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
-		&-mid{
+
+		&-mid {
 			@include label-mid();
 			@include flexCenter();
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
-		&-mid-body{
+
+		&-mid-body {
 			@include body-2();
 			@include flexCenter();
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 10px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
-		&-lg{
+
+		&-lg {
 			@include label-lg();
 			@include flexCenter();
 			background-color: $color;
 			color: map-get($textColor, $type);
 			padding: 15px;
 			border-radius: 0.25rem;
-			@if map-get($borderColor, $type) != 'none'{
+
+			@if map-get($borderColor, $type) !='none' {
 				border: 2px solid map-get($borderColor, $type);
 			}
+
 			&:hover {
 				background-color: map-get($hoveredColor, $type);
 			}
 		}
 	}
-};
+}
+
+;
 
 
 .btn-text {

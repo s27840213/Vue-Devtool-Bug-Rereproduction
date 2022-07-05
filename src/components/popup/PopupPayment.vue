@@ -110,7 +110,7 @@ export default Vue.extend({
       totalStep: 0,
       title: '',
       description: '',
-      buttons: [{}] as {type?: string, disabled?: ()=>boolean, label: string, func: ()=>void}[],
+      buttons: [{}] as { type?: string, disabled?: () => boolean, label: string, func: () => void }[],
       img: 'remover.jpg',
       // View constant
       periodInput: paymentData.periodOptions(),
@@ -136,8 +136,8 @@ export default Vue.extend({
       planSelected: 'planSelected',
       trialStatus: 'trialStatus'
     }),
-    locale():string { return i18n.locale },
-    userPeriod():string {
+    locale(): string { return i18n.locale },
+    userPeriod(): string {
       return ['switch1', 'switch2'].includes(this.view)
         ? (this.isBundle ? 'monthly' : 'yearly')
         : this.periodUi
@@ -267,7 +267,7 @@ export default Vue.extend({
       if (this.view === 'step2') this.changeView('step1')
       else if (this.view === 'switch2') this.changeView('switch1')
     },
-    curPlan(period: string):string {
+    curPlan(period: string): string {
       return this.view === 'switch1' && period !== this.userPeriod ? `(${i18n.t('NN0655')})` : ''
     },
     selectCancelReason(index: string) {
@@ -288,15 +288,17 @@ export default Vue.extend({
   position: relative;
   .close {
     position: absolute;
-    top: -18px; right: -18px;
-    width: 36px; height: 36px;
+    top: -18px;
+    right: -18px;
+    width: 36px;
+    height: 36px;
     background-color: setColor(white);
     border-radius: 100px;
     z-index: 1;
   }
   .wrapper2 {
     @include hide-scrollbar;
-    &:hover{
+    &:hover {
       scrollbar-color: setColor(gray-4) setColor(sidebar-panel); // Only for firefox
       &::-webkit-scrollbar {
         background-color: setColor(sidebar-panel);
@@ -319,7 +321,8 @@ export default Vue.extend({
   height: min(770px, 80vw);
   background-color: white;
   text-align: left;
-  &-left, &-right {
+  &-left,
+  &-right {
     box-sizing: border-box;
     width: 50%;
   }
@@ -330,7 +333,11 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   padding: 95px 30px 118px 30px;
-  &-top, &-content, &-button { width: 100%; }
+  &-top,
+  &-content,
+  &-button {
+    width: 100%;
+  }
   &-top {
     position: relative;
     margin-bottom: 24px;
@@ -340,29 +347,35 @@ export default Vue.extend({
       align-items: center;
       position: absolute;
       top: -40px;
-      >svg { margin-right: 15px; }
+      > svg {
+        margin-right: 15px;
+      }
     }
   }
   &-content {
     height: 100%;
     input {
-      &:focus { border-color: setColor(blue-1); }
+      &:focus {
+        border-color: setColor(blue-1);
+      }
     }
   }
   &-button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    >button {
+    > button {
       @include btn-LG;
       width: 100%;
       border-radius: 4px;
       margin-top: 2px;
     }
-    >button:nth-child(1) { margin-top: 30px; }
-    >button:nth-child(2) {
+    > button:nth-child(1) {
+      margin-top: 30px;
+    }
+    > button:nth-child(2) {
       border: none;
-      &.btn-inactive-lg{
+      &.btn-inactive-lg {
         background-color: white;
         color: setColor(gray-3);
       }
@@ -378,7 +391,9 @@ export default Vue.extend({
   border: 1px solid setColor(gray-3);
   border-radius: 4px;
   cursor: pointer;
-  +div { margin-top: 25px }
+  + div {
+    margin-top: 25px;
+  }
   &-price {
     display: flex;
     flex-direction: column;
@@ -393,7 +408,9 @@ export default Vue.extend({
     @include overline-SM;
     white-space: nowrap;
   }
-  &:not([isSelected]) &__off { color: setColor(red-1); }
+  &:not([isSelected]) &__off {
+    color: setColor(red-1);
+  }
   &[isSelected] {
     background-color: setColor(blue-1);
     border: 1px solid setColor(blue-1);
@@ -411,7 +428,8 @@ export default Vue.extend({
 .payment-left-content-cancel {
   display: flex;
   margin-bottom: 10px;
-  >svg, >div {
+  > svg,
+  > div {
     flex-shrink: 0;
     margin-right: 15px;
   }
@@ -431,7 +449,9 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   padding: 40px 25px;
-  &-bg { position: absolute; }
+  &-bg {
+    position: absolute;
+  }
   &-temp {
     max-width: 100%;
     max-height: 100%;
@@ -444,7 +464,8 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   position: absolute;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background-color: white;
   &-content {
     @include body-SM;
@@ -456,7 +477,9 @@ export default Vue.extend({
     color: setColor(gray-2);
     width: 560px;
     height: 310px;
-    >button { @include btn-LG; }
+    > button {
+      @include btn-LG;
+    }
   }
 }
 
@@ -464,24 +487,36 @@ export default Vue.extend({
   .wrapper1 {
     position: absolute;
     bottom: 0;
-    width: 100%; height: calc(100% - #{$header-height});
-    .wrapper2  { width: 100%; height: 100%; }
-    .payment  {
+    width: 100%;
+    height: calc(100% - #{$header-height});
+    .wrapper2 {
+      width: 100%;
+      height: 100%;
+    }
+    .payment {
       width: 100%;
       height: fit-content;
       min-height: 100%;
     }
     .close {
-      right: 0px; top: 0px;
-      width: 40px; height: 40px;
-      >svg { transform: scale(0.667); }
+      right: 0px;
+      top: 0px;
+      width: 40px;
+      height: 40px;
+      > svg {
+        transform: scale(0.667);
+      }
     }
   }
   .payment-left {
     width: 100%;
     padding: 105px 7.467% 175px 7.467%;
   }
-  .payment-right { display: none; }
-  .payment-finish span { padding: 0 7.467%;}
+  .payment-right {
+    display: none;
+  }
+  .payment-finish span {
+    padding: 0 7.467%;
+  }
 }
 </style>

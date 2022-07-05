@@ -862,12 +862,6 @@ export default Vue.extend({
             line-height: 16px;
             background-color: transparent;
           }
-          &.border-blue-1 {
-            @extend .border-blue-1;
-          }
-          &.border-white {
-            @extend .border-white;
-          }
         }
       }
       &__hr {
@@ -930,13 +924,7 @@ export default Vue.extend({
     }
   }
 }
-.horizontal-rule {
-  @extend .bg-gray-4;
-  height: 1px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0;
-}
+
 .template-information {
   &__content {
     display: grid;
