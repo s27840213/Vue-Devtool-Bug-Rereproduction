@@ -133,8 +133,8 @@ export default Vue.extend({
     },
     adjustImgStyles(): { [key: string]: string | number } {
       return Object.assign(generalUtils.deepCopy(this.image.config.styles), {
-        width: this.getPageSize(layerUtils.pageIndex).width,
-        height: this.getPageSize(layerUtils.pageIndex).height,
+        width: this.getPageSize(this.pageIndex).width,
+        height: this.getPageSize(this.pageIndex).height,
         imgX: this.image.posX,
         imgY: this.image.posY
       })
