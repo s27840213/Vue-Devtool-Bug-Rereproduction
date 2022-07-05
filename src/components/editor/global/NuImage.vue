@@ -199,7 +199,7 @@ export default Vue.extend({
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow.currentEffect)
         }
-        // this.handleUploadShadowImg()
+        this.handleUploadShadowImg()
       },
       deep: true
     },

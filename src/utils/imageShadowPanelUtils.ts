@@ -69,7 +69,11 @@ export default new class ImageShadowPanelUtils {
         Object.entries(shadow.effects[currentEffect] as IShadowEffect | IBlurEffect | IFloatingEffect | IImageMatchedEffect)
           .every(([k, v]) => {
             return (shadow.srcState as any).effects[currentEffect][k] === v
-          })
+          }) &&
+        (!shadow.isTransparent || (shadow.srcState.layerState && Object.entries(shadow.srcState.layerState)
+          .every(([k, v]) => {
+            return (config.styles as any)[k] === v
+          })))
     }
   }
 
@@ -251,7 +255,13 @@ export default new class ImageShadowPanelUtils {
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
               const shadow = config.styles.shadow
-              imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, shadow.currentEffect, shadow.effects, srcObj)
+              const layerState = shadow.isTransparent ? {
+                imgWidth: config.styles.imgWidth,
+                imgHeight: config.styles.imgHeight,
+                imgX: config.styles.imgX,
+                imgY: config.styles.imgY
+              } : undefined
+              imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, shadow.currentEffect, shadow.effects, srcObj, layerState)
 
               logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
               src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))}

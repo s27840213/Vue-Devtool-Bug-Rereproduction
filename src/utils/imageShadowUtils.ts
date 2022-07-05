@@ -1,6 +1,6 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
-import { IGroup, IImage, ILayerIdentifier } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
@@ -881,8 +881,8 @@ class ImageShadowUtils {
     })
   }
 
-  setShadowSrcState(layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj) {
-    store.commit('SET_srcState', { layerInfo, effect, effects, srcObj })
+  setShadowSrcState(layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj, layerState?: Partial<IImageStyle>) {
+    store.commit('SET_srcState', { layerInfo, effect, effects, srcObj, layerState })
   }
 
   setUploadId(id: ILayerIdentifier) {
