@@ -4,6 +4,8 @@ const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 
 function resolve (dir) {
@@ -41,6 +43,26 @@ module.exports = {
             .end()
             .use('file-loader')
             .loader('file-loader')
+
+        // config.module
+        //     .rule('babel-loader')
+        //     .test(/\.js$/)
+        //     .exclude.add(/(node_modules)/)
+        //     .include.add(/(js)/)
+        //     .end()
+        //     .use('babel-loader')
+        //     .loader('babel-loader')
+        //     .options({
+        //         cacheDirectory: true,
+        //         presets: [
+        //             [
+        //                 'es2015',
+        //                 {
+        //                     loose: true
+        //                 }
+        //             ]
+        //         ]
+        //     })
 
         if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
             config.plugin('sentry')
@@ -85,6 +107,48 @@ module.exports = {
                     })
                 }])
         }
+
+        // if (process.env.NODE_ENV === 'production') {
+        if (process.env.npm_config_report) {
+            config
+                .plugin('webpack-bundle-analyzer')
+                .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+                .end()
+            config.plugins.delete('prefetch')
+        }
+        // }
+
+        config
+            .plugin('speed-measure-webpack-plugin')
+            .use(SpeedMeasurePlugin)
+            .end()
+        // .use(SpeedMeasurePlugin, [{
+        //     outputFormat: 'humanVerbose',
+        //     loaderTopFiles: 5
+        // }])
+    },
+
+    configureWebpack: {
+        // 优化
+        optimization: {
+            minimizer: [
+                new UglifyJsPlugin({
+                    uglifyOptions: {
+                        output: { // 删除注释
+                            comments: false
+                        },
+                        // 生产环境自动删除console
+                        compress: {
+                            drop_debugger: true, // 清除 debugger 语句
+                            drop_console: true, // 清除console语句
+                            pure_funcs: ['console.log']
+                        }
+                    },
+                    sourceMap: false,
+                    parallel: true
+                })
+            ]
+        }
     },
 
     // configureWebpack: {
@@ -108,7 +172,7 @@ module.exports = {
     css: {
         loaderOptions: {
             scss: {
-                prependData: '@import "~@/assets/scss/main.scss";'
+                prependData: '@use "~@/assets/scss/utils" as *;'
             }
         }
     },

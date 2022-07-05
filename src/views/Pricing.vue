@@ -291,7 +291,8 @@ export default Vue.extend({
         flex-shrink: 0;
       }
     }
-    summary::-webkit-details-marker { // Romove detail arrow in safari
+    summary::-webkit-details-marker {
+      // Romove detail arrow in safari
       display: none;
     }
   }

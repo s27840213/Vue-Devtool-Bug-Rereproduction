@@ -125,7 +125,7 @@ export default Vue.extend({
   directives: {
     clickOutside: vClickOutside.directive
   },
-  data () {
+  data() {
     return {
       currentPage: 'vcode',
       vcode: '' as string,
@@ -397,29 +397,6 @@ export default Vue.extend({
         display: flex;
         align-items: center;
         justify-content: center;
-      }
-    }
-    &__custom {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      grid-template-rows: auto;
-      column-gap: 5px;
-      align-items: center;
-      width: 85%;
-      &__box {
-        height: 26px;
-        box-sizing: border-box;
-        padding: 5px 5px;
-        & input {
-          line-height: 16px;
-          background-color: transparent;
-        }
-        &.border-blue-1 {
-          @extend .border-blue-1;
-        }
-        &.border-white {
-          @extend .border-white;
-        }
       }
     }
     &__hr {

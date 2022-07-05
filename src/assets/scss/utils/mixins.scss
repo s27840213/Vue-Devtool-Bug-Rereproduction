@@ -1,4 +1,7 @@
-@mixin size($w, $h:$w) {
+@use '@/assets/scss/utils/variables.scss' as *;
+@use '@/assets/scss/utils/functions.scss' as *;
+
+@mixin size($w, $h: $w) {
   width: $w;
   height: $h;
 }
@@ -15,13 +18,17 @@
   }
 }
 
-@mixin firefoxOnly { // Only for Firefox, https://stackoverflow.com/a/32455002
+@mixin firefoxOnly {
+
+  // Only for Firefox, https://stackoverflow.com/a/32455002
   @supports (-moz-appearance:none) {
     @content;
   }
 }
 
-@mixin safariOnly { // Only for Safari, https://stackoverflow.com/a/25975282
+@mixin safariOnly {
+
+  // Only for Safari, https://stackoverflow.com/a/25975282
   @media not all and (min-resolution:.001dpcm) {
     @supports (-webkit-appearance:none) {
       @content;
@@ -33,6 +40,7 @@
   &::-webkit-scrollbar {
     display: none !important;
   }
+
   /* IE and Edge */
   -ms-overflow-style: none !important;
   /* Firefox */
@@ -56,18 +64,22 @@
   margin-right: -10px;
   padding-right: 10px;
   box-sizing: border-box;
-  &:not(:hover), &:hover {
+
+  &:not(:hover),
+  &:hover {
     @include firefoxOnly {
       margin-right: -11px;
       padding-right: 11px;
     }
   }
+
   @include safariOnly {
     padding-right: 0;
   }
 }
 
 $thumb-color: #D9DBE1; // gray-4
+
 @mixin hide-scrollbar($padding-right: 11px) {
   // Disable x scrollbar and let y scrollbar appear only when hovering it
   // If element height <= parent height, y scrollbar will never appear.
@@ -81,16 +93,19 @@ $thumb-color: #D9DBE1; // gray-4
     height: 10px;
     background-color: unset;
   }
+
   &::-webkit-scrollbar-thumb {
     border-radius: 5px;
     visibility: hidden;
     background-color: $thumb-color;
     border: 3px solid setColor(sidebar-panel);
   }
+
   &:hover {
     &::-webkit-scrollbar-thumb {
       visibility: visible;
     }
+
     @include firefoxOnly {
       overflow-y: scroll;
       padding-right: #{$padding-right - 11px};
@@ -102,12 +117,11 @@ $thumb-color: #D9DBE1; // gray-4
 
 @mixin hide-scrollbar-white($padding-right: 11px) {
   @include hide-scrollbar($padding-right);
+
   &::-webkit-scrollbar-thumb {
     border: 3px solid white;
   }
 }
-
-@import "@/assets/scss/utils/variables.scss";
 
 @mixin popup-window {
   position: fixed;
