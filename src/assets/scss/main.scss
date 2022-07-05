@@ -1,9 +1,11 @@
-@import "@/assets/scss/base/_all.scss";
-@import "@/assets/scss/utils/_all.scss";
-@import "@/assets/scss/components/_all.scss";
+@forward "@/assets/scss/base";
+@forward "@/assets/scss/components";
 // @import "@/assets/scss/components/tmpFonts";
 @import '~vue-virtual-scroller/dist/vue-virtual-scroller.css';
 @import '~floating-vue/dist/style.css';
+
+
+// css import rule- https://ithelp.ithome.com.tw/m/articles/10260013
 html,
 body {
     font-family: 'NOTO SANS TC', sans-serif;
@@ -11,14 +13,20 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    touch-action: none;
 }
+
 [contenteditable] {
     -webkit-user-select: text;
     user-select: text;
 }
+
 input[type=number] {
-    -moz-appearance:textfield;
+    -moz-appearance: textfield;
 }
-input, button, select {
+
+input,
+button,
+select {
     font-family: inherit;
 }

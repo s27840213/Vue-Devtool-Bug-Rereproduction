@@ -256,7 +256,7 @@ export default Vue.extend({
           const { imgWidth, imgHeight } = targetLayer.styles
           const aspect = imgWidth >= imgHeight ? 0 : 1
           const isThirdPartyImage = type === 'unsplash' || type === 'pexels'
-          const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg')
+          const initSrc = imageUtils.getSrc((this.currSelectedInfo as ICurrSelectedInfo).layers[0] as IImage, 'larg', undefined, true)
           this.removeBg({ srcObj: targetLayer.srcObj, ...(isThirdPartyImage && { aspect }) }).then((data) => {
             if (data.flag === 0) {
               uploadUtils.polling(data.url, (json: any) => {

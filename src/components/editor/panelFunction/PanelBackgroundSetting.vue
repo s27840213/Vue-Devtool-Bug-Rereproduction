@@ -188,7 +188,8 @@ export default Vue.extend({
     handleChangeBgOpacity(opacity: number) {
       this.setBgOpacity({
         pageIndex: pageUtils.currFocusPageIndex,
-        opacity: `${opacity}`
+        // opacity: `${opacity}`
+        opacity
       })
     },
     handleControlBgImage() {

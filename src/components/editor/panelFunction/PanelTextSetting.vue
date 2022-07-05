@@ -228,7 +228,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    'props.font': function() {
+    'props.font': function () {
       this.getFontPrev()
     }
   },
@@ -527,48 +527,8 @@ export default Vue.extend({
         })
       }
     },
-    setSpacing(value: number) {
-      if (this.isValidFloat(value.toString())) {
-        value = parseFloat(this.boundValue(value, this.fieldRange.fontSpacing.min, this.fieldRange.fontSpacing.max))
-        window.requestAnimationFrame(() => {
-          tiptapUtils.applyParagraphStyle('fontSpacing', value / 1000, false)
-          TextPropUtils.updateTextPropsState({ fontSpacing: value / 1000 })
-        })
-      }
-    },
-    setHeight(value: number, isInput?: boolean) {
-      if (this.isValidFloat(value.toString())) {
-        value = parseFloat(this.boundValue(value, this.fieldRange.lineHeight.min, this.fieldRange.lineHeight.max))
-        window.requestAnimationFrame(() => {
-          tiptapUtils.applyParagraphStyle('lineHeight', toNumber((value).toFixed(2)), false)
-          TextPropUtils.updateTextPropsState({ lineHeight: toNumber((value).toFixed(2)) })
-        })
-      }
-    },
     setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
-      if (this.isValidFloat(_value.toString())) {
-        let value = parseFloat(this.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
-        switch (prop) {
-          case 'lineHeight':
-            value = toNumber((value).toFixed(2))
-            break
-          case 'fontSpacing':
-            value = value / 1000
-        }
-        const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
-        window.requestAnimationFrame(() => {
-          if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
-            (currLayer as IGroup | ITmp).layers
-              .forEach((l, idx) => {
-                l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
-                l.type === 'text' && TextUtils.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
-              })
-          } else {
-            tiptapUtils.applyParagraphStyle(prop, value, false)
-            TextPropUtils.updateTextPropsState({ [prop]: value })
-          }
-        })
-      }
+      TextUtils.setParagraphProp(prop, _value)
     },
     onBlur() {
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())

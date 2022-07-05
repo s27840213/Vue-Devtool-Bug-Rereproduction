@@ -30,7 +30,7 @@
           template(class="pointer" v-slot:g1i1)
             svg-icon(iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text") {{$t('NN0085')}}
-      div(class="vertical-rule")
+      div(class="vertical-rule bg-gray-4")
       div(class="shape-setting__line-action-wrapper pointer feature-button"
           @click="handleValueModal('start-marker')")
         marker-icon(iconWidth="25px" iconColor="#474A57" iconHeight="10px"
@@ -137,11 +137,11 @@
             div(:style="`font-size: ${$i18n.locale === 'us' ? '12px': ''}`") {{$t('NN0086')}}
     //- Shape color setting
     div(class="shape-setting__colors")
-      div(v-if="inGrouped"
+      div(v-if="hasMultiColors"
         class="shape-setting__color"
         :style="groupColorStyles()"
         @click="selectColor(0)")
-      div(v-else v-for="(color, index) in getColors"
+      div(v-else v-for="(color, index) in getDocumentColors"
         class="shape-setting__color"
         :style="colorStyles(color, index)"
         @click="selectColor(index)")
@@ -283,7 +283,7 @@ export default Vue.extend({
       this.$nextTick(() => stepsUtils.record())
     })
     colorUtils.setCurrEvent(ColorEventType.shape)
-    colorUtils.setCurrColor(this.getColors[this.currSelectedColorIndex])
+    colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
     this.fetchMarkers().then(async () => {
       const markerList = (this.categories[0] as IListServiceContentData).list
       this.markerIds = ['none', ...markerList.map(marker => (marker.id))]
@@ -344,55 +344,11 @@ export default Vue.extend({
     currLayer(): ILayer {
       return this.getLayer(pageUtils.currFocusPageIndex, this.currSelectedIndex) as ILayer
     },
-    inGrouped(): boolean {
-      const currLayer = LayerUtils.getCurrLayer
-      let oneColorObjNum = 0
-      if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-        for (const layer of (currLayer as IGroup).layers) {
-          if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-            oneColorObjNum++
-          }
-        }
-        return oneColorObjNum >= 2 && !(currLayer as IGroup).layers
-          .some(l => l.type === 'shape' && l.active)
-      }
-      return false
+    hasMultiColors(): boolean {
+      return shapeUtils.hasMultiColors
     },
-    getColors(): string[] {
-      const layer = LayerUtils.getCurrLayer
-      switch (layer.type) {
-        case 'shape':
-          return (layer as IShape).color || []
-        case 'tmp':
-        case 'group': {
-          const { subLayerIdx } = LayerUtils
-          if (subLayerIdx === -1) {
-            if (!this.inGrouped) {
-              const layers = (layer as IGroup).layers
-                .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
-              return (layers.length ? layers[0].color : []) as string[]
-            } else return []
-          } else {
-            const subLayer = (layer as IGroup).layers[subLayerIdx]
-            if (subLayer.type === LayerType.frame) {
-              const { decoration, decorationTop } = subLayer as unknown as IFrame
-              return [...(decoration?.color || []), ...(decorationTop?.color || [])]
-            }
-            if (subLayer.type === LayerType.shape) {
-              const colors = (subLayer as IShape).color
-              return colors
-            }
-            return []
-          }
-        }
-        case 'frame': {
-          const { decoration, decorationTop } = LayerUtils.getCurrLayer as IFrame
-          return [...(decoration?.color || []), ...(decorationTop?.color || [])]
-        }
-        default:
-          console.error('Wrong with the right-side-panel color')
-          return []
-      }
+    getDocumentColors(): string[] {
+      return shapeUtils.getDocumentColors
     },
     isLine(): boolean {
       return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
@@ -428,7 +384,7 @@ export default Vue.extend({
       }
       this.imgRandQuery = GeneralUtils.generateRandomString(5)
     },
-    getColors: function () {
+    getDocumentColors: function () {
       const currLayer = LayerUtils.getCurrLayer
       if (currLayer.type === 'tmp' || currLayer.type === 'group') {
         if ((currLayer as IGroup).layers
@@ -493,7 +449,7 @@ export default Vue.extend({
     },
     selectColor(index: number) {
       this.currSelectedColorIndex = index
-      colorUtils.setCurrColor(this.getColors[index])
+      colorUtils.setCurrColor(this.getDocumentColors[index])
       this.$emit('toggleColorPanel', true)
     },
     openLineSliderPopup() {
@@ -517,7 +473,7 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer
       switch (currLayer.type) {
         case 'shape': {
-          const color = [...this.getColors]
+          const color = [...this.getDocumentColors]
           color[this.currSelectedColorIndex] = newColor
           LayerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
           break
@@ -537,7 +493,7 @@ export default Vue.extend({
               this.handleFrameColorUpdate(newColor)
             }
             if (subLayerType === 'shape') {
-              const color = [...this.getColors]
+              const color = [...this.getDocumentColors]
               color[this.currSelectedColorIndex] = newColor
               LayerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
             }
@@ -895,7 +851,6 @@ export default Vue.extend({
   }
 }
 .vertical-rule {
-  @extend .bg-gray-4;
   width: 1px;
   height: 20px;
   display: inline-block;

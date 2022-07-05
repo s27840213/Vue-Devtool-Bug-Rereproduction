@@ -48,8 +48,7 @@ export default Vue.extend({
     overflow-y: overlay;
   }
   .category-list {
-    margin-right: -10px; // Push scrollbar to outside
-    padding-right: 10px;
+    @include push-scrollbar10;
     @include hide-scrollbar;
     &__header {
       line-height: 26px;

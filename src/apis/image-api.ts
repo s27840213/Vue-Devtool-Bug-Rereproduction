@@ -3,6 +3,7 @@ import axios from '@/apis'
 import authToken from './auth-token'
 import { AxiosPromise } from 'axios'
 import { IGetImageSize } from '@/interfaces/api'
+import store from '@/store'
 
 export default new class {
   getImgSize(params: IGetImageSize): AxiosPromise {
@@ -17,7 +18,8 @@ export default new class {
         team_id,
         asset_id,
         key_id,
-        cache
+        cache,
+        ver: cache ? store.getters['user/getVerApi'] : null
       }
     })
   }

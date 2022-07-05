@@ -87,7 +87,7 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IFrame, IImage, IShape } from '@/interfaces/layer'
+import { IImage } from '@/interfaces/layer'
 import uploadUtils from '@/utils/uploadUtils'
 import groupUtils from '@/utils/groupUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -367,7 +367,6 @@ export default Vue.extend({
         })
         pageUtils.updateBackgroundImagePos(pageIndex, posX, posY)
         pageUtils.updateBackgroundImageMode(pageIndex, true)
-
         ShortcutUtils.del()
       })
     },

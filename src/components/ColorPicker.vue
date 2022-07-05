@@ -1,5 +1,6 @@
 <template lang="pug">
-  div(class="color-picker" ref="colorPicker")
+  div(class="color-picker" ref="colorPicker"
+      :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
     chrome-picker(
       class="color-picker__picker"
       :value="convertedHex"
@@ -7,8 +8,11 @@
       @paste="onPaste"
       @mouseup.native="onmouseup"
       :disableFields="true"
-      :disableAlpha="true")
-    div(class="px-10" :class="[{'pb-20': showColorSlip}]")
+      :disableAlpha="true"
+      :isMobile="isMobile"
+      :fullWidth="isMobile"
+      :aspectRatio="aspectRatio")
+    div(class="px-10")
       div(class="color-picker__hex")
         svg-icon(class="pointer"
           iconName="eye-dropper"
@@ -24,37 +28,7 @@
             type="text"
             spellcheck="false"
             v-model="color"
-            @change="handleColorInputChange"
             maxlength="7")
-      template(v-if="showColorSlip")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Brand Kit
-          div
-            div(v-for="color in brandColors"
-              class="pointer"
-              :style="colorStyles(color)")
-            svg-icon(class="pointer"
-              :iconName="'plus'"
-              :iconColor="'gray-2'"
-              :iconWidth="'18px'"
-              @click.native="addNewBrandColor(color)")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Document color
-          div
-            div(v-for="color in documentColors"
-              class="pointer"
-              :style="colorStyles(color)"
-              @click="setColor(color)")
-        div(class="color-picker__colors")
-          div(class="text-left")
-            span(class="body-1") Default color
-          div
-            div(v-for="color in defaultColors"
-              class="pointer"
-              :style="colorStyles(color)"
-              @click="setColor(color)")
 </template>
 
 <script lang="ts">
@@ -67,9 +41,13 @@ import i18n from '@/i18n'
 export default Vue.extend({
   props: {
     currentColor: String,
-    showColorSlip: {
+    isMobile: {
       type: Boolean,
       default: false
+    },
+    aspectRatio: {
+      type: Number,
+      default: 56.25
     }
   },
   components: {
@@ -78,7 +56,7 @@ export default Vue.extend({
   data() {
     return {
       color: this.currentColor || '#194d33',
-      brandColors: ['#2D9CDB']
+      finalizeTimer: -1
     }
   },
   mounted() {
@@ -93,27 +71,9 @@ export default Vue.extend({
       defaultColors: 'color/getDefaultColors'
     }),
     convertedHex(): string {
-      let hex = this.color.slice(1).split('')
-      let result = ''
-      const len = hex.length
-      switch (len) {
-        case 0:
-          result = '000000'
-          break
-        case 1:
-        case 2:
-        case 3:
-          hex = hex.map((val: string) => val + val)
-          result = this.paddingRight(hex.join(''), 6)
-          break
-        case 4:
-        case 5:
-        case 6:
-          result = this.paddingRight(hex.join(''), 6)
-          break
-      }
-      this.$emit('update', `#${result}`)
-      return `#${result}`
+      const formatedColor = this.convertHex(this.color)
+      this.$emit('update', formatedColor)
+      return formatedColor
     }
   },
   watch: {
@@ -126,6 +86,7 @@ export default Vue.extend({
       if (this.color.length === 0) {
         this.color = '#'
       }
+      this.delayedFinalize(this.convertHex(this.color))
     }
   },
   methods: {
@@ -151,21 +112,8 @@ export default Vue.extend({
         backgroundColor: color
       }
     },
-    addNewBrandColor(color: string) {
-      if (!this.brandColors.includes(color)) {
-        this.brandColors.push(color)
-      }
-    },
-    setColor(color: string) {
-      this.color = color
-      this.$emit('update', color)
-    },
     onmouseup() {
-      this.$emit('final', this.convertedHex)
       this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: this.color })
-    },
-    handleColorInputChange() {
-      this.$emit('final', this.convertedHex)
     },
     eyeDropper() {
       if (!(window as any).EyeDropper) {
@@ -175,10 +123,38 @@ export default Vue.extend({
 
       const eyeDropper = new (window as any).EyeDropper()
       if (eyeDropper !== undefined) {
-        eyeDropper.open().then((result: {sRGBHex: string}) => {
+        eyeDropper.open().then((result: { sRGBHex: string }) => {
           this.color = result.sRGBHex
         })
       }
+    },
+    convertHex(color: string) {
+      let hex = color.slice(1).split('')
+      let result = ''
+      const len = hex.length
+      switch (len) {
+        case 0:
+          result = '000000'
+          break
+        case 1:
+        case 2:
+        case 3:
+          hex = hex.map((val: string) => val + val)
+          result = this.paddingRight(hex.join(''), 6)
+          break
+        case 4:
+        case 5:
+        case 6:
+          result = this.paddingRight(hex.join(''), 6)
+          break
+      }
+      return `#${result}`
+    },
+    delayedFinalize(formatedColor: string) {
+      clearTimeout(this.finalizeTimer)
+      this.finalizeTimer = setTimeout(() => {
+        this.$emit('final', formatedColor)
+      }, 500)
     }
   }
 })
@@ -188,9 +164,7 @@ export default Vue.extend({
 .color-picker {
   display: flex;
   flex-direction: column;
-  width: 225px;
   height: fit-content;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: white;
   &:focus {
     outline: none;

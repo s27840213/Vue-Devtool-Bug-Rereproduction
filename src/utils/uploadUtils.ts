@@ -24,6 +24,7 @@ import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import heic2any from 'heic2any'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -145,6 +146,7 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
+
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -237,9 +239,6 @@ class UploadUtils {
                 clearInterval(interval)
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
-                  /**
-                   * @todo check the reason why the backend will return flag 1
-                   * */
                   if (json.flag === 0) {
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
@@ -254,7 +253,7 @@ class UploadUtils {
                     this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
                   } else if (json.flag === 1) {
                     store.commit('file/DEL_PREVIEW', { assetId })
-                    LayerUtils.deleteLayerByAsset(assetId)
+                    LayerUtils.deleteLayerByAssetId(assetId)
                     paymentUtils.errorHandler(json.msg)
                   }
                 })
@@ -279,6 +278,7 @@ class UploadUtils {
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
@@ -308,18 +308,20 @@ class UploadUtils {
         formData.append('file', file)
       }
 
-      const assetHandler = (src: string) => {
+      const assetHandler = (src: string, imgType?: string) => {
+        console.log(imgType)
         if (type === 'image') {
           const img = new Image()
           img.src = src
-          img.onload = (evt) => {
+          const isUnknown = imgType === 'unknown'
+          const imgCallBack = (src: string) => {
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
               pageIndex: pageUtils.currFocusPageIndex
             })
             if (addToPage) {
-              assetUtils.addImage(img.src, img.width / img.height, {
+              assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
@@ -330,7 +332,9 @@ class UploadUtils {
             let increaseInterval = undefined as any
             if (!isShadow) {
               store.commit('file/ADD_PREVIEW', {
-                imageFile: img,
+                width: isUnknown ? 250 : img.width,
+                height: isUnknown ? 250 : img.height,
+                src,
                 assetId: assetId
               })
               xhr.upload.onprogress = (event) => {
@@ -361,9 +365,7 @@ class UploadUtils {
                     clearInterval(interval)
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
-                      console.log(generalUtils.deepCopy(json))
                       if (json.flag === 0) {
-                        console.log('Successfully upload the file')
                         if (type === 'image') {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
@@ -380,7 +382,7 @@ class UploadUtils {
                         }
                       } else {
                         store.commit('file/DEL_PREVIEW', { assetId })
-                        LayerUtils.deleteLayerByAsset(assetId)
+                        LayerUtils.deleteLayerByAssetId(assetId)
                         paymentUtils.errorHandler(json.msg)
                       }
                     })
@@ -388,6 +390,13 @@ class UploadUtils {
                 })
               }, 2000)
             }
+          }
+          if (!isUnknown) {
+            img.onload = (evt) => {
+              imgCallBack(img.src)
+            }
+          } else {
+            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
           }
         } else if (type === 'font') {
           const tempId = brandkitUtils.createTempFont(assetId)
@@ -485,10 +494,12 @@ class UploadUtils {
       }
 
       if (isFile) {
-        reader.onload = (evt) => {
-          assetHandler(evt.target?.result as string)
-        }
-        reader.readAsDataURL(files[i] as File)
+        generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
+          reader.onload = (evt) => {
+            assetHandler(evt.target?.result as string, imgType)
+          }
+          reader.readAsDataURL(files[i] as File)
+        })
       } else {
         assetHandler(files[i] as string)
       }
@@ -662,7 +673,6 @@ class UploadUtils {
   }
 
   uploadLayer(type: string, id?: string) {
-    console.log('upload layer')
     const targetBucket = type === 'shape' ? 'svg' : type
     const designId = id ?? generalUtils.generateRandomString(20)
     const currSelectedInfo = store.getters.getCurrSelectedInfo

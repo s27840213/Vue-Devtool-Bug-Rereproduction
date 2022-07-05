@@ -30,7 +30,7 @@
             summary
               span {{$tc('NN0649')}}
               svg-icon(iconName="chevron-down" iconColor="gray-1" iconWidth="16px")
-            div
+            div(@click="close()")
               url(v-for="item in settingsItems" :url="`/settings/${item.name}`"
                   :class="{'text-blue-1': currentPage === item.name}") {{item.label}}
         div(class="menu-bottom__link"
@@ -53,7 +53,7 @@ export default Vue.extend({
   data() {
     return {
       settingsItems: constantData.settingsItems()
-        .filter((it: {name: string}) => { return it.name !== 'hr' }),
+        .filter((it: { name: string }) => { return it.name !== 'hr' }),
       optionSelected: 0
     }
   },
@@ -65,7 +65,9 @@ export default Vue.extend({
       return constantData.headerItems(true)
     },
     currentPage(): string {
-      return this.$route.name || ''
+      return this.$route.name === 'Settings'
+        ? this.$route.params.view
+        : this.$route.name || ''
     },
     currPath(): string {
       return this.$route.path || '/'
@@ -75,7 +77,8 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
-    }
+    },
+    close() { this.$emit('closeMenu') }
   }
 })
 </script>
@@ -103,13 +106,14 @@ export default Vue.extend({
   a {
     display: block;
     width: 100%;
-    color: unset;
     text-decoration: unset;
   }
 }
 
-.menu-top, .menu-bottom {
-  details, div {
+.menu-top,
+.menu-bottom {
+  details,
+  div {
     display: flex;
     flex-direction: column;
     summary {
@@ -117,19 +121,25 @@ export default Vue.extend({
       align-items: center;
     }
   }
-  details > div { // Only first child pad 20px
+  details > div {
+    // Only first child pad 20px
     padding-left: 20px;
   }
-  details[open] > summary > svg { // Flip arrow icon if open
+  details[open] > summary > svg {
+    // Flip arrow icon if open
     transform: scaleY(-1);
   }
-  summary:focus, summary:focus > svg { // Set color when user click summary
+  summary:focus,
+  summary:focus > svg {
+    // Set color when user click summary
     color: setColor(blue-hover);
   }
-  summary::-webkit-details-marker { // Romove detail arrow in safari
+  summary::-webkit-details-marker {
+    // Romove detail arrow in safari
     display: none;
   }
-  span, a {
+  span,
+  a {
     padding: 7px 0;
   }
 }

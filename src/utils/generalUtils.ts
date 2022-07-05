@@ -1,6 +1,7 @@
 import { IPage } from '@/interfaces/page'
 import router from '@/router'
 import store from '@/store'
+import Vue from 'vue'
 import modalUtils from './modalUtils'
 import pageUtils from './pageUtils'
 import _ from 'lodash'
@@ -30,6 +31,17 @@ class GeneralUtils {
     return conditions.filter((condition: boolean) => {
       return condition === true
     }).length === 1
+  }
+
+  scaleFromCenter(el: HTMLElement) {
+    const scrollCenterX = (2 * el.scrollLeft + el.clientWidth)
+    const scrollCenterY = (2 * el.scrollTop + el.clientHeight)
+    const oldScrollWidth = el.scrollWidth
+    const oldScrollHeight = el.scrollHeight
+    Vue.nextTick(() => {
+      el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
+      el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
+    })
   }
 
   generateAssetId() {
@@ -99,6 +111,12 @@ class GeneralUtils {
     return value.match(/^#[0-9A-F]{6}$/)
   }
 
+  boundValue(value: number, min: number, max: number): string {
+    if (value < min) return min.toString()
+    else if (value > max) return max.toString()
+    return value.toString()
+  }
+
   copyText(text: string) {
     if (navigator.clipboard && window.isSecureContext) {
       return navigator.clipboard.writeText(text)
@@ -150,8 +168,25 @@ class GeneralUtils {
     a.click()
   }
 
-  isMobile(): boolean {
+  isTouchDevice(): boolean {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
+  }
+
+  getEventType(e: MouseEvent | TouchEvent) {
+    switch (e.type) {
+      case 'touchstart':
+      case 'touchmove':
+      case 'touchend': {
+        return 'touch'
+        break
+      }
+      case 'mousedown':
+      case 'mousemove':
+      case 'mouseup': {
+        return 'mouse'
+        break
+      }
+    }
   }
 
   assertUnreachable(_: never): never {
@@ -182,21 +217,56 @@ class GeneralUtils {
     params ? (window as any).fbq(type, action, params) : (window as any).fbq(type, action)
   }
 
+  async getFileImageTypeByByte(file: File): Promise<string> {
+    return new Promise<string>((resolve) => {
+      const fileReader = new FileReader()
+      fileReader.onloadend = function fileReaderLoaded(e): void {
+        let type = ''
+        const arr = (new Uint8Array(e.target!.result as ArrayBuffer)).subarray(0, 4)
+        let header = ''
+        for (let i = 0; i < arr.length; i += 1) {
+          header += arr[i].toString(16)
+        }
+        switch (header) {
+          case '89504e47':
+            type = 'png'
+            break
+          case '47494638':
+            type = 'gif'
+            break
+          case 'ffd8ffdb':
+          case 'ffd8ffe0':
+          case 'ffd8ffe1':
+          case 'ffd8ffe2':
+          case 'ffd8ffe3':
+          case 'ffd8ffe8':
+            type = 'jpeg'
+            break
+          default:
+            type = 'unknown'
+            break
+        }
+        resolve(type)
+      }
+      fileReader.readAsArrayBuffer(file)
+    })
+  }
+
   // log(params: string, data: any = '') {
   //   if (data) {
   //     console.log(data)
   //   } else {
   //     store.commit('SET_LOG' {
-  //       params += 'time'
+  //       params += 'time'e
   //     })
   //     logData.push(params)
   //   }
   // }
 
-  panelInit(panelName:string,
-    searchF: (keyword: string)=>void,
-    categoryF: (keyword: string, locale:string)=>void,
-    normalInit: ()=>void) { // May move to a new file panelUtils.ts
+  panelInit(panelName: string,
+    searchF: (keyword: string) => void,
+    categoryF: (keyword: string, locale: string) => void,
+    normalInit: () => void) { // May move to a new file panelUtils.ts
     const urlParams = new URLSearchParams(window.location.search)
     const panel = urlParams.get('panel')
     const category = urlParams.get('category')

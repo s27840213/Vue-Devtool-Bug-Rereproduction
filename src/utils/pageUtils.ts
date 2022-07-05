@@ -319,13 +319,17 @@ class PageUtils {
     }
   }
 
+  setScaleRatio(val: number) {
+    store.commit('SET_pageScaleRatio', val)
+  }
+
   fitPage() {
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
     const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.currFocusPageSize.width
     const targetHeight = this.inBgRemoveMode ? this.autoRemoveResult.height : this.currFocusPageSize.height
     const resizeRatio = Math.min(editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)), editorViewBox.clientHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
 
-    if ((store.state as any).user.userId === 'backendRendering') {
+    if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
       store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))

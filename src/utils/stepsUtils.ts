@@ -345,6 +345,7 @@ class StepsUtils {
   }
 
   updateHead(pageIndex: number, layerIndex: number, props: any) {
+    if (this.currStep < 0) return
     const pages = this.steps[this.currStep].pages
     const layer = pages[pageIndex]?.layers?.[layerIndex]
     if (!layer) return

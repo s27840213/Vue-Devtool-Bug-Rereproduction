@@ -303,9 +303,7 @@ export default Vue.extend({
       this.composeKeyword()
     })
     themeUtils.checkThemeState().then(() => {
-      this.themes = themeUtils.themes.filter(theme => {
-        return theme.mainHidden === 0
-      })
+      this.themes = themeUtils.themes
     })
 
     generalUtils.fbq('track', 'ViewContent', {
@@ -584,8 +582,9 @@ body {
 <style lang="scss" scoped>
 .template-center {
   @include size(100%, 100%);
-  min-height: 100%;
+  @include push-scrollbar10;
   @include hide-scrollbar-white;
+  min-height: 100%;
   @media screen and (max-width: 540px) {
     overflow-x: hidden;
     position: relative;

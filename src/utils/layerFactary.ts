@@ -136,7 +136,6 @@ class LayerFactary {
         isFrameImg: true
       }))
     }
-
     if (clips.some(img => img.styles.rotate !== 0)) {
       const img = clips.find(img => img.styles.rotate !== 0) as IImage
       styles.rotate = img.styles.rotate
