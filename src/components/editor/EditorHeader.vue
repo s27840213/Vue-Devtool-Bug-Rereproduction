@@ -50,7 +50,7 @@ export default Vue.extend({
     }
   },
   created() {
-    networkUtils.onNetworkChange((online) => {
+    networkUtils.onNetworkChange('EditorHeader', (online) => {
       this.online = online
       if (!this.online) {
         networkUtils.notifyNetworkError()
@@ -63,7 +63,7 @@ export default Vue.extend({
     this.online = navigator.onLine
   },
   beforeDestroy() {
-    networkUtils.offNetworkCahnge()
+    networkUtils.offNetworkChange('EditorHeader')
     uploadUtils.offDesignUploadStatus()
   },
   computed: {

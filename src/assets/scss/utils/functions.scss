@@ -1,3 +1,4 @@
+@use '@/assets/scss/utils/variables.scss' as *;
 
 @function setColor($color, $opacity: 1) {
   @return rgba(map-get($colors, $color), $opacity);
@@ -10,4 +11,3 @@
 @function setLinearGradient($gradient) {
   @return map-get($linear-gradient, $gradient)
 }
-

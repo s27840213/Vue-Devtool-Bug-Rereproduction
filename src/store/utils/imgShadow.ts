@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { SrcObj } from '@/interfaces/gallery'
-import { IShadowEffects, IShadowProps, IShadowStyles } from '@/interfaces/imgShadow'
-import { IGroup, IImage } from '@/interfaces/layer'
+import { IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
+import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { IEditorState, ILayerInfo } from '../types'
 
 const UPDATE_shadowEffect = 'UPDATE_shadowEffect' as const
@@ -9,6 +9,7 @@ const UPDATE_shadowProps = 'UPDATE_shadowProps' as const
 const UPDATE_shadowStyles = 'UPDATE_shadowStyles' as const
 const SET_shadowEffectState = 'SET_shadowEffectState' as const
 const SET_srcObj = 'SET_srcObj' as const
+const SET_srcState = 'SET_srcState' as const
 
 const imgShadowMutations = {
   [UPDATE_shadowEffect](state: IEditorState, data: { layerInfo: ILayerInfo, payload: IShadowEffects }) {
@@ -73,6 +74,23 @@ const imgShadowMutations = {
       Object.assign(_srcObj, srcObj)
     } else {
       Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.srcObj, srcObj)
+    }
+  },
+  [SET_srcState](state: IEditorState, data: { layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj, layerState?: Partial<IImageStyle> }) {
+    const { layerInfo: { pageIndex, layerIndex, subLayerIdx }, effect, effects, srcObj, layerState } = data
+    if (pageIndex === -1 || layerIndex === -1) return
+
+    let target
+    if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
+      target = (state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage
+    } else {
+      target = state.pages[pageIndex].layers[layerIndex] as IImage
+    }
+
+    if (target.styles.shadow.srcState) {
+      Object.assign(target.styles.shadow.srcState, { effect, effects, srcObj, layerState })
+    } else {
+      target.styles.shadow.srcState = { effect, effects, srcObj, layerState }
     }
   }
 }

@@ -77,6 +77,7 @@ class Payment {
         locale: i18n.locale,
         action: 'add_card',
         type: 'tappay',
+        campaign: localStorage.getItem('campaign') || undefined,
         ...params // country, plan_id, is_bundle, prime
       }
     })
@@ -91,6 +92,7 @@ class Payment {
         locale: i18n.locale,
         action: 'add_card',
         type: 'stripe',
+        campaign: localStorage.getItem('campaign') || undefined,
         ...params // country, plan_id, is_bundle,
       }
     })

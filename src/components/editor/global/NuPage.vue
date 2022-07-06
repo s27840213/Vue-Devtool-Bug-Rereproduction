@@ -225,6 +225,7 @@ import cssConverter from '@/utils/cssConverter'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   components: {
@@ -284,11 +285,23 @@ export default Vue.extend({
     isOutOfBound(val) {
       if (val && this.currFunctionPanelType === FunctionPanelType.photoShadow && layerUtils.pageIndex === this.pageIndex) {
         GroupUtils.deselect()
+        const { pageId, layerId, subLayerId } = this.handleId
+        if (pageId === this.config.id) {
+          const layer = (this.config.layers.find(l => l.id === layerId) as IGroup)
+          const target = (layer.type === LayerType.group ? (layer as IGroup).layers.find(l => l.id === subLayerId) : layer) as IImage
+          if (target) {
+            const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+            console.log(target.styles.shadow.srcObj)
+            imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
+            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+          }
+        }
       }
     }
   },
   computed: {
     ...mapState(['isMoving', 'currDraggedPhoto']),
+    ...mapState('shadow', ['handleId']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -332,8 +345,10 @@ export default Vue.extend({
         }
         const primaryLayer = this.getCurrLayer as IFrame
         const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-        const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
+        image.styles.x *= primaryLayer.styles.scale
+        image.styles.y *= primaryLayer.styles.scale
         if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
+          const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
           const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
           const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0

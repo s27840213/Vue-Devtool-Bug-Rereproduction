@@ -63,7 +63,6 @@ import i18n from '@/i18n'
 import DesignItem from '@/components/homepage/DesignItem.vue'
 import ProItem from '@/components/payment/ProItem.vue'
 import themeUtils from '@/utils/themeUtils'
-import _ from 'lodash'
 import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
 import templateCenterUtils from '@/utils/templateCenterUtils'
@@ -121,7 +120,7 @@ export default Vue.extend({
     switch (this.type) {
       case 'theme':
         themeUtils.checkThemeState().then(() => {
-          this.themeData = _.filter(themeUtils.themes, ['mainHidden', 0])
+          this.themeData = themeUtils.themesMainHidden
           this.isLoading = false
         })
         this.title = i18n.t('NN0154') as string

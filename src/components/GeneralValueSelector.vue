@@ -7,9 +7,9 @@
             class="feature-button"
             :class="{ active: values.includes(i) }"
             :style="{'min-width': `${itemMinWidth}px`}")
-            div(class="general-value-selector__value" @click="setValue(index, i)" :style="{'height': `${buttonHeight}px`}")
+            div(class="general-value-selector__value flex-evenly" @click="setValue(index, i)" :style="{'height': `${buttonHeight}px`}")
               slot(:name="'g' + index + 'i' + index2") {{ 'g' + index + 'i' + index2 }}
-          div(class="horizontal-rule" v-if="notLastSubArray(index)" :style="{'width': `${itemMinWidth * 2 / 3}px`}")
+          div(class="horizontal-rule bg-gray-4" v-if="notLastSubArray(index)" :style="{'width': `${itemMinWidth * 2 / 3}px`}")
 
 </template>
 
@@ -65,7 +65,7 @@ export default Vue.extend({
         list-style: none;
         text-align: center;
         min-width: 40px;
-        transition: background-color .1s linear;
+        transition: background-color 0.1s linear;
         > div {
           padding: 0 6px;
           box-sizing: border-box;
@@ -73,7 +73,6 @@ export default Vue.extend({
           height: 20px;
           display: flex;
           align-items: center;
-          @extend .flex-evenly;
         }
         &:hover {
           background-color: map-get($colors, blue-4);
@@ -92,7 +91,6 @@ export default Vue.extend({
   }
 }
 .horizontal-rule {
-  @extend .bg-gray-4;
   height: 1px;
   margin: auto;
   margin-top: 0;

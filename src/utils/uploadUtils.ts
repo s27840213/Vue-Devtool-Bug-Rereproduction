@@ -25,6 +25,7 @@ import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import heic2any from 'heic2any'
+import networkUtils from './networkUtils'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -230,6 +231,7 @@ class UploadUtils {
           }
         }
         xhr.send(formData)
+        xhr.onerror = networkUtils.notifyNetworkError
         xhr.onload = () => {
           // polling the JSON file of uploaded image
           const interval = setInterval(() => {
@@ -239,9 +241,6 @@ class UploadUtils {
                 clearInterval(interval)
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
-                  /**
-                   * @todo check the reason why the backend will return flag 1
-                   * */
                   if (json.flag === 0) {
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
@@ -311,18 +310,20 @@ class UploadUtils {
         formData.append('file', file)
       }
 
-      const assetHandler = (src: string) => {
+      const assetHandler = (src: string, imgType?: string) => {
+        console.log(imgType)
         if (type === 'image') {
           const img = new Image()
           img.src = src
-          img.onload = (evt) => {
+          const isUnknown = imgType === 'unknown'
+          const imgCallBack = (src: string) => {
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
               pageIndex: pageUtils.currFocusPageIndex
             })
             if (addToPage) {
-              assetUtils.addImage(img.src, img.width / img.height, {
+              assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
@@ -333,7 +334,9 @@ class UploadUtils {
             let increaseInterval = undefined as any
             if (!isShadow) {
               store.commit('file/ADD_PREVIEW', {
-                imageFile: img,
+                width: isUnknown ? 250 : img.width,
+                height: isUnknown ? 250 : img.height,
+                src,
                 assetId: assetId
               })
               xhr.upload.onprogress = (event) => {
@@ -355,6 +358,7 @@ class UploadUtils {
               }
             }
             xhr.send(formData)
+            xhr.onerror = networkUtils.notifyNetworkError
             xhr.onload = () => {
               // polling the JSON file of uploaded image
               const interval = setInterval(() => {
@@ -365,7 +369,6 @@ class UploadUtils {
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
                       if (json.flag === 0) {
-                        console.log('Successfully upload the file')
                         if (type === 'image') {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
@@ -391,10 +394,18 @@ class UploadUtils {
               }, 2000)
             }
           }
+          if (!isUnknown) {
+            img.onload = (evt) => {
+              imgCallBack(img.src)
+            }
+          } else {
+            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
+          }
         } else if (type === 'font') {
           const tempId = brandkitUtils.createTempFont(assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
+          xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
@@ -425,6 +436,7 @@ class UploadUtils {
           modalUtils.setIsModalOpen(true)
           modalUtils.setIsPending(true)
           modalUtils.setModalInfo(`${i18n.t('NN0136')}`, [], '')
+          xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
@@ -459,6 +471,7 @@ class UploadUtils {
           const tempId = brandkitUtils.createTempLogo(brandId, assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
+          xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
             const interval = setInterval(() => {
@@ -487,10 +500,12 @@ class UploadUtils {
       }
 
       if (isFile) {
-        reader.onload = (evt) => {
-          assetHandler(evt.target?.result as string)
-        }
-        reader.readAsDataURL(files[i] as File)
+        generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
+          reader.onload = (evt) => {
+            assetHandler(evt.target?.result as string, imgType)
+          }
+          reader.readAsDataURL(files[i] as File)
+        })
       } else {
         assetHandler(files[i] as string)
       }
@@ -515,6 +530,7 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_log_map.url, true)
     xhr.send(formData)
+    xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       // console.log(xhr)
     }
@@ -636,6 +652,7 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_map.url, true)
     xhr.send(formData)
+    xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = function () {
       console.log(this)
     }
@@ -697,7 +714,7 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
-
+    xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
@@ -769,6 +786,7 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
+    xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       const currSelectedInfo = store.getters.getCurrSelectedInfo
       const pageJSON = generalUtils.deepCopy(store.getters.getPage(currSelectedInfo.pageIndex)) as IPage
@@ -897,6 +915,7 @@ class UploadUtils {
     modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
     modalUtils.setModalInfo('上傳中', [], '')
+    xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
@@ -952,6 +971,7 @@ class UploadUtils {
     modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
     modalUtils.setModalInfo('更新模板中', [], '')
+    xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       modalUtils.setIsPending(false)
       const status = xhr.status
@@ -1254,6 +1274,12 @@ class UploadUtils {
           ...(Object.prototype.hasOwnProperty.call(styles, 'adjust') && { adjust: { ...styles.adjust } }),
           ...(Object.prototype.hasOwnProperty.call(styles, 'shadow') && { shadow: { ...styles.shadow } })
         }
+      case 'shape': {
+        return {
+          ...general,
+          blendMode: styles.blendMode
+        }
+      }
       default:
         return general
     }
