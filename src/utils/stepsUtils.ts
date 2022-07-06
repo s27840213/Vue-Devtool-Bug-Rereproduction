@@ -249,7 +249,7 @@ class StepsUtils {
   }
 
   async undo() {
-    if (this.steps.length === 0 || this.currStep === 0) {
+    if (this.steps.length === 0 || this.currStep === 0 || textUtils.isFontLoading) {
       return
     }
     if (this.isPopupOpen) {
@@ -303,7 +303,7 @@ class StepsUtils {
   }
 
   async redo() {
-    if (this.currStep === this.steps.length - 1) {
+    if (this.currStep === this.steps.length - 1 || textUtils.isFontLoading) {
       return
     }
     if (this.isPopupOpen) {
