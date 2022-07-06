@@ -15,6 +15,7 @@ div(class="overflow-container"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
       nu-bg-image(:image="this.config.backgroundImage"
+        :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id"
         @mousedown.native.left="pageClickHandler()")

@@ -28,7 +28,7 @@ export default Vue.extend({
         heading: `${this.$t('NN0408')}`,
         subheading: `${this.$t('NN0409')}`,
         body: `${this.$t('NN0410')}`
-      } as {[key: string]: string}
+      } as { [key: string]: string }
     }
   },
   created() {
@@ -71,8 +71,8 @@ export default Vue.extend({
       const textStyle = this.getTextStyle(type)
       return textStyle.size
     },
-    getSpanStyles(type: string): {[key: string]: string | number} {
-      let styles = {} as {[key: string]: string | number}
+    getSpanStyles(type: string): { [key: string]: string | number } {
+      let styles = {} as { [key: string]: string | number }
       const textStyle = this.getTextStyle(type)
       styles = {
         weight: textStyle.bold ? 'bold' : 'normal',

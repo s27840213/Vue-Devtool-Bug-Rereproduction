@@ -157,7 +157,7 @@ export default Vue.extend({
   overflow-x: hidden;
   height: calc(100% - #{$header-height});
 }
-.home-top{
+.home-top {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -178,39 +178,45 @@ export default Vue.extend({
       z-index: -1;
     }
   }
-  &__buttom{
+  &__buttom {
     margin-top: 25px;
     width: 216px;
     height: 44px;
-    box-shadow: 0px 9px 13px 0px #7190CC40;
+    box-shadow: 0px 9px 13px 0px #7190cc40;
     text-decoration: none;
     color: setColor(white);
   }
   .vector_lightblue2 {
-    width: 85px; height: 87px;
+    width: 85px;
+    height: 87px;
   }
   .vector_pink1 {
-    width: 139px; height: 118px;
+    width: 139px;
+    height: 118px;
   }
   .oval_pink4 {
-    width: 70px; height: 70px;
+    width: 70px;
+    height: 70px;
   }
   .oval_yellow1 {
-    width: 45px; height: 46px;
+    width: 45px;
+    height: 46px;
   }
 }
 @media screen and (max-width: 768px) {
-  .home-content { padding: 0 24px; }
+  .home-content {
+    padding: 0 24px;
+  }
   .home-top {
     min-height: 400px;
     width: 327px;
     margin-top: 20px;
     &-text {
       &__title {
-        @include text-H3
+        @include text-H3;
       }
       &__description {
-        @include body-MD
+        @include body-MD;
       }
     }
     &__yt {
@@ -218,12 +224,15 @@ export default Vue.extend({
       height: 180px;
     }
     .vector_lightblue2 {
-      top: 42px; left: 14px;
+      top: 42px;
+      left: 14px;
     }
     .vector_pink1 {
-      top: -12px; left: 299px;
+      top: -12px;
+      left: 299px;
     }
-    .oval_pink4, .oval_yellow1 {
+    .oval_pink4,
+    .oval_yellow1 {
       display: none;
     }
     &__buttom {
@@ -242,10 +251,10 @@ export default Vue.extend({
     &-text {
       width: 560px; // todo ? 500 560
       &__title {
-        @include text-H2
+        @include text-H2;
       }
       &__description {
-        @include body-LG
+        @include body-LG;
       }
     }
     &__yt {
@@ -253,12 +262,15 @@ export default Vue.extend({
       height: 405px;
     }
     .vector_lightblue2 {
-      top: 9px; left: 67px;
+      top: 9px;
+      left: 67px;
     }
     .vector_pink1 {
-      top: -8px; left: 581px;
+      top: -8px;
+      left: 581px;
     }
-    .oval_pink4, .oval_yellow1 {
+    .oval_pink4,
+    .oval_yellow1 {
       display: none;
     }
   }
@@ -270,10 +282,10 @@ export default Vue.extend({
     margin-top: 80px;
     &-text {
       &__title {
-        @include text-H1
+        @include text-H1;
       }
       &__description {
-        @include body-LG
+        @include body-LG;
       }
     }
     &__yt {
@@ -281,16 +293,20 @@ export default Vue.extend({
       height: 449.9px;
     }
     .vector_lightblue2 {
-      top: 50px; left: 146px;
+      top: 50px;
+      left: 146px;
     }
     .vector_pink1 {
-      top: 11px; left: 964px;
+      top: 11px;
+      left: 964px;
     }
     .oval_pink4 {
-      top: 327px; left: 17px;
+      top: 327px;
+      left: 17px;
     }
     .oval_yellow1 {
-      top: 259px; left: 1158px;
+      top: 259px;
+      left: 1158px;
     }
   }
 }

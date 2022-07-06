@@ -119,7 +119,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    ...mapState('shadow', ['uploadId', 'handleId']),
+    ...mapState('shadow', ['processId', 'handleId', 'uploadId']),
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -298,6 +298,9 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
+      if (this.isProcessShadow) {
+        return
+      }
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
         groupUtils.deselect()
         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])

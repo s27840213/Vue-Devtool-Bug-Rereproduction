@@ -1,10 +1,11 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IBlurEffect, IFloatingEffect, IFrameEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
-import { IGroup, IImage, ILayerIdentifier } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import generalUtils from './generalUtils'
+import imageShadowPanelUtils from './imageShadowPanelUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import logUtils from './logUtils'
@@ -137,7 +138,7 @@ class ImageShadowUtils {
           layerId: primarylayerId || config.id || '',
           subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
         })
-        ctxT.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvasT.width, canvasT.height)
+        ctxT.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvasT.width, canvasT.height)
         this.updateEffectProps(layerInfo, {
           isTransparent: this.isTransparentBg(canvasT)
         })
@@ -352,8 +353,6 @@ class ImageShadowUtils {
               pngCtx.drawImage(img, 0, 0)
               const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
               img.src = svgUrl
-              document.body.appendChild(img)
-              console.log(img)
             }
             resolve()
           })
@@ -457,52 +456,11 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-
       const scaleRatio = img.naturalWidth / _imgWidth
-      let imgX = _imgX * scaleRatio
-      let imgY = _imgY * scaleRatio
-      let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-      let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
-
-      /** If the img is svg+xml convert it to png */
-      if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
-        await new Promise<void>((resolve) => {
-          fetch(img.src)
-            .then(async (response) => {
-              if (response.headers.get('Content-Type') === 'image/svg+xml') {
-                // const data = await response.text()
-                // const container = document.createElement('div')
-                // container.innerHTML = data
-                // const svg = container.getElementsByTagName('svg')[0]
-                // if (svg) {
-                //   svg.setAttribute('width', img.naturalWidth.toString() + 'px')
-                //   svg.setAttribute('height', img.naturalHeight.toString() + 'px')
-                //   document.body.appendChild(container)
-                //   const blob = new Blob([container.innerHTML], { type:'image/svg+xml;charset=utf-8' })
-                //   const URL = window.URL || window.webkitURL || window
-                //   const blobURL = URL.createObjectURL(blob)
-                // }
-
-                const pngCanvas = document.createElement('canvas')
-                const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
-                drawImgWidth *= pngScaleRation
-                drawImgHeight *= pngScaleRation
-                imgX *= pngScaleRation
-                imgY *= pngScaleRation
-                pngCanvas.setAttribute('width', (img.naturalWidth * pngScaleRation).toString())
-                pngCanvas.setAttribute('height', (img.naturalHeight * pngScaleRation).toString())
-                const pngCtx = pngCanvas.getContext('2d') as CanvasRenderingContext2D
-                pngCtx.drawImage(img, 0, 0)
-                const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
-                img.src = svgUrl
-                // console.log(img.naturalHeight)
-                // console.log(img.naturalWidth)
-                document.body.appendChild(img)
-              }
-              resolve()
-            })
-        })
-      }
+      const imgX = _imgX * scaleRatio
+      const imgY = _imgY * scaleRatio
+      const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+      const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
 
       let { drawCanvasW, drawCanvasH } = params || {}
       if (!drawCanvasH || !drawCanvasW) {
@@ -642,15 +600,16 @@ class ImageShadowUtils {
   }
 
   isTransparentBg(target: HTMLCanvasElement | HTMLImageElement): boolean {
-    let canvas = this.canvasT
-    if (target instanceof HTMLCanvasElement) {
-      canvas = this.canvasT
-    } else {
+    let canvas
+    if (target instanceof HTMLImageElement) {
+      canvas = document.createElement('canvas')
       const { naturalWidth, naturalHeight } = target as HTMLImageElement
       canvas.setAttribute('width', naturalWidth.toString())
       canvas.setAttribute('height', naturalHeight.toString())
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       ctx.drawImage(target, 0, 0, naturalWidth, naturalHeight)
+    } else {
+      canvas = target
     }
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const { width, height } = canvas
@@ -700,11 +659,24 @@ class ImageShadowUtils {
       const { effects } = shadow
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
 
-      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-        initWidth: width,
-        initHeight: height,
-        scale: 1
-      }, subLayerIdx)
+      if (layer.styles.scale !== 1) {
+        let { imgWidth, imgHeight, imgX, imgY } = layer.styles.shadow.styles
+        imgWidth *= layer.styles.scale
+        imgHeight *= layer.styles.scale
+        imgX *= layer.styles.scale
+        imgY *= layer.styles.scale
+        this.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, {
+          imgWidth,
+          imgHeight,
+          imgX,
+          imgY
+        })
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+          initWidth: width,
+          initHeight: height,
+          scale: 1
+        }, subLayerIdx)
+      }
 
       if (layer.styles.shadow.currentEffect !== effect) {
         this.updateEffectState(layerInfo, effect)
@@ -907,6 +879,10 @@ class ImageShadowUtils {
       layerInfo,
       srcObj
     })
+  }
+
+  setShadowSrcState(layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj, layerState?: Partial<IImageStyle>) {
+    store.commit('SET_srcState', { layerInfo, effect, effects, srcObj, layerState })
   }
 
   setUploadId(id: ILayerIdentifier) {

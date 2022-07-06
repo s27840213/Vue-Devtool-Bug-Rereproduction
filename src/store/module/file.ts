@@ -210,25 +210,25 @@ const mutations: MutationTree<IPhotoState> = {
   CLEAR_CHECKED_ASSETS(state: IPhotoState) {
     state.checkedAssets = []
   },
-  ADD_PREVIEW(state: IPhotoState, { imageFile, assetId }) {
+  ADD_PREVIEW(state: IPhotoState, { width, height, src, assetId }) {
     const previewImage = {
-      width: imageFile.width,
-      height: imageFile.height,
+      width: width,
+      height: height,
       id: assetId,
       assetIndex: assetId,
       progress: 0,
       preview: {
-        width: imageFile.width,
-        height: imageFile.height
+        width: width,
+        height: height
       },
       urls: {
-        prev: imageFile.src,
-        full: imageFile.src,
-        larg: imageFile.src,
-        original: imageFile.src,
-        midd: imageFile.src,
-        smal: imageFile.src,
-        tiny: imageFile.src
+        prev: src,
+        full: src,
+        larg: src,
+        original: src,
+        midd: src,
+        smal: src,
+        tiny: src
       }
     }
     state.myfileImages.unshift(previewImage)

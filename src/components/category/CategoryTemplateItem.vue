@@ -84,7 +84,7 @@ export default Vue.extend({
       // in some cases (single page group template), there is no item.width/item.height (unknown reason), then we get them by match_cover
       if (width === undefined) {
         width = this.item.match_cover.width
-        height = this.item.match_cover.width
+        height = this.item.match_cover.height
       }
       /*
       const theme = themeUtils
