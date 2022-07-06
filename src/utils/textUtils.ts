@@ -1153,6 +1153,21 @@ class TextUtils {
     }
   }
 
+  async untilFontLoadedForPage(page: IPage): Promise<any> {
+    const textLayers: IText[] = []
+    for (const layer of page.layers) {
+      if (layer.type === 'text') {
+        textLayers.push(layer as IText)
+      }
+      if (['tmp', 'group'].includes(layer.type)) {
+        // Theoretically, there shouldn't be any tmp layers, because the page should be from S3.
+        // But still put tmp here just in case.
+        textLayers.push(...((layer as IGroup).layers.filter(l => l.type === 'text') as IText[]))
+      }
+    }
+    return Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs)))
+  }
+
   async untilFontLoaded(paragraphs: IParagraph[]): Promise<any> {
     return Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
   }
