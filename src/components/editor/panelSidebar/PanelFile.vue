@@ -59,14 +59,14 @@ export default Vue.extend({
     }
   },
   created() {
-    networkUtils.onNetworkChange((online) => {
+    networkUtils.onNetworkChange('PanelFile', (online) => {
       this.online = online
     })
 
     this.online = navigator.onLine
   },
   beforeDestroy() {
-    networkUtils.offNetworkCahnge()
+    networkUtils.offNetworkChange('PanelFile')
   },
   computed: {
     ...mapState('file', [

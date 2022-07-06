@@ -281,6 +281,13 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta?.title || i18n.t('SE0001')
 
+  // Store campaign param to local storage.
+  const urlParams = new URLSearchParams(window.location.search)
+  const campaign = urlParams.get('campaign')
+  if (campaign) {
+    localStorage.setItem('campaign', campaign)
+  }
+
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {
     if (!store.getters['user/isLogin']) {
