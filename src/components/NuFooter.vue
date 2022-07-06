@@ -158,7 +158,7 @@ export default Vue.extend({
       isLogin: 'isLogin'
     }),
     themeList(): Itheme[] {
-      return themeUtils.themes
+      return themeUtils.themesMainHidden
     },
     currLocale(): string {
       return this.$i18n.locale
