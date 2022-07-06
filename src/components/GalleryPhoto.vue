@@ -63,11 +63,14 @@ export default Vue.extend({
     }
   },
   created() {
-    networkUtils.onNetworkChange((online) => {
+    networkUtils.onNetworkChange(this.photo.id, (online) => {
       this.online = online
     })
 
     this.online = navigator.onLine
+  },
+  beforeDestroy() {
+    networkUtils.offNetworkChange(this.photo.id)
   },
   computed: {
     ...mapState({

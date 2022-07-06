@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-layer" :style="styles()" ref="body"
+  div(class="nu-layer" :style="styles" ref="body"
       @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
@@ -61,6 +61,38 @@ export default Vue.extend({
     }
   },
   computed: {
+    styles(): any {
+      const styles = Object.assign(
+        CssConveter.convertDefaultStyle(this.config.styles),
+        {
+          // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+          'pointer-events': 'none'
+        }
+      )
+      switch (this.config.type) {
+        case LayerType.text: {
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
+          Object.assign(
+            styles,
+            textEffectStyles,
+            {
+              background: 'rgba(0, 0, 255, 0)',
+              willChange: 'text-shadow',
+              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+            }
+          )
+          break
+        }
+        case LayerType.shape: {
+          console.log(this.config.styles.blendMode, this.subLayerIndex)
+          Object.assign(
+            styles,
+            { 'mix-blend-mode': this.config.styles.blendMode }
+          )
+        }
+      }
+      return styles
+    },
     getLayerPos(): { x: number, y: number } {
       return {
         x: this.config.styles.x,
@@ -93,31 +125,31 @@ export default Vue.extend({
     }
   },
   methods: {
-    styles() {
-      const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles),
-        {
-          // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
-          'pointer-events': 'none'
-        }
-      )
-      switch (this.config.type) {
-        case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
-          Object.assign(
-            styles,
-            textEffectStyles,
-            {
-              background: 'rgba(0, 0, 255, 0)',
-              willChange: 'text-shadow',
-              '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-            }
-          )
-          break
-        }
-      }
-      return styles
-    },
+    // styles() {
+    //   const styles = Object.assign(
+    //     CssConveter.convertDefaultStyle(this.config.styles),
+    //     {
+    //       // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+    //       'pointer-events': 'none'
+    //     }
+    //   )
+    //   switch (this.config.type) {
+    //     case LayerType.text: {
+    //       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
+    //       Object.assign(
+    //         styles,
+    //         textEffectStyles,
+    //         {
+    //           background: 'rgba(0, 0, 255, 0)',
+    //           willChange: 'text-shadow',
+    //           '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+    //         }
+    //       )
+    //       break
+    //     }
+    //   }
+    //   return styles
+    // },
     scaleStyles() {
       let { width, height } = this.config.styles
       const { scale, scaleX, scaleY, zindex, shadow } = this.config.styles

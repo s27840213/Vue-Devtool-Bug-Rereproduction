@@ -85,7 +85,7 @@ class LayerFactary {
   }
 
   newFrame(config: IFrame): IFrame {
-    const { designId, clips, decoration, decorationTop, styles, locked } = GeneralUtils.deepCopy(config) as IFrame
+    const { designId, clips, decoration, decorationTop, styles, locked, blendLayers: _blendLayers } = GeneralUtils.deepCopy(config) as IFrame
     let { width, height, initWidth, initHeight } = styles
     initWidth = initWidth || width
     initHeight = initHeight || height
@@ -141,6 +141,16 @@ class LayerFactary {
       styles.rotate = img.styles.rotate
       img.styles.rotate = 0
     }
+    const blendLayers = (_blendLayers as Array<unknown>)
+      .map((l: any) => {
+        l.styles = {}
+        l.styles.width = width / styles.scale
+        l.styles.height = height / styles.scale
+        l.styles.initWidth = width / styles.scale
+        l.styles.initHeight = height / styles.scale
+        l.vSize = [l.styles.width, l.styles.height]
+        return this.newShape(l)
+      })
 
     const frame = {
       type: 'frame',
@@ -169,6 +179,7 @@ class LayerFactary {
         shadow: styles.shadow
       },
       clips,
+      blendLayers,
       decoration: decoration ? this.newShape((() => {
         decoration.vSize = [initWidth, initHeight]
         decoration.styles = {
@@ -390,7 +401,7 @@ class LayerFactary {
   }
 
   newShape(config: any): IShape {
-    const { styles } = GeneralUtils.deepCopy(config)
+    const { styles = {} } = GeneralUtils.deepCopy(config)
     const basicConfig = {
       type: 'shape',
       id: GeneralUtils.generateRandomString(8),
@@ -420,18 +431,20 @@ class LayerFactary {
         scaleX: styles.scaleX ?? 1,
         scaleY: styles.scaleY ?? 1,
         rotate: styles.rotate ?? 0,
-        width: styles.width,
-        height: styles.height,
-        initWidth: styles.initWidth,
-        initHeight: styles.initHeight,
+        width: styles.width || 0,
+        height: styles.height || 0,
+        initWidth: styles.initWidth || 0,
+        initHeight: styles.initHeight || 0,
         zindex: -1,
         opacity: styles.opacity ?? 100,
         horizontalFlip: styles.horizontalFlip || false,
-        verticalFlip: styles.verticalFlip || false
+        verticalFlip: styles.verticalFlip || false,
+        blendMode: config.blendMode || ''
       }
     }
     delete config.styles
     delete config.id
+    delete config.blendMode
     return Object.assign(basicConfig, config)
   }
 

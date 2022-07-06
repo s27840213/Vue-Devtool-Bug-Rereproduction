@@ -16,17 +16,17 @@ class NetworkUtils {
     this.onLine = false
   }
 
-  onNetworkChange(callback: (online: boolean) => void) {
-    if (this.eventHash.networkChange) {
-      this.offNetworkCahnge()
-      delete this.eventHash.networkChange
+  onNetworkChange(name: string, callback: (online: boolean) => void) {
+    if (this.eventHash[name]) {
+      this.offNetworkChange(name)
+      delete this.eventHash[name]
     }
     this.event.on('networkChange', callback)
-    this.eventHash.networkChange = callback
+    this.eventHash[name] = callback
   }
 
-  offNetworkCahnge() {
-    this.event.off('networkChange', this.eventHash.networkChange)
+  offNetworkChange(name: string) {
+    this.event.off('networkChange', this.eventHash[name])
   }
 
   registerNetworkListener() {

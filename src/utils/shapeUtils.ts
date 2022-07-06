@@ -17,7 +17,7 @@ class ShapeUtils {
 
     if (currLayer.type === 'tmp' || currLayer.type === 'group') {
       for (const layer of (currLayer as IGroup).layers) {
-        if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+        if (layer.type === 'shape' && (layer as IShape).color && (layer as IShape).color.length === 1) {
           oneColorObjNum++
         }
       }

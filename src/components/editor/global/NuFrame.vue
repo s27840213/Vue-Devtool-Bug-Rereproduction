@@ -128,6 +128,10 @@ export default Vue.extend({
       if (config.decorationTop && config.decorationTop.svg) {
         layers = layers.concat(config.decorationTop)
       }
+
+      if (config.blendLayers) {
+        layers = layers.concat(config.blendLayers)
+      }
       return layers
     },
     styles() {
