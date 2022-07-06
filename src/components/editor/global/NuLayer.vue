@@ -84,7 +84,6 @@ export default Vue.extend({
           break
         }
         case LayerType.shape: {
-          console.log(this.config.styles.blendMode, this.subLayerIndex)
           Object.assign(
             styles,
             { 'mix-blend-mode': this.config.styles.blendMode }

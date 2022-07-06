@@ -141,7 +141,7 @@ class LayerFactary {
       styles.rotate = img.styles.rotate
       img.styles.rotate = 0
     }
-    const blendLayers = (_blendLayers as Array<unknown>)
+    const blendLayers = _blendLayers ? (_blendLayers as Array<unknown>)
       .map((l: any) => {
         l.styles = {}
         l.styles.width = width / styles.scale
@@ -150,7 +150,7 @@ class LayerFactary {
         l.styles.initHeight = height / styles.scale
         l.vSize = [l.styles.width, l.styles.height]
         return this.newShape(l)
-      })
+      }) : undefined
 
     const frame = {
       type: 'frame',
