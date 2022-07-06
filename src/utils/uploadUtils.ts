@@ -1028,6 +1028,8 @@ class UploadUtils {
       delete page.documentColors
       page.documentColors = documentColors
     }
+
+    page.isAutoResizeNeeded = false
     return page
   }
 
@@ -1136,6 +1138,7 @@ class UploadUtils {
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
+                pageUtils.setAutoResizeNeededForPages(json.pages, true)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
                 store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)

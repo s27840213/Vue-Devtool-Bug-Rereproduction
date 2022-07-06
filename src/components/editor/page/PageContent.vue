@@ -81,6 +81,7 @@ export default Vue.extend({
     if (this.setLayersDone) {
       this.loadLayerImg()
     }
+    console.log(this.config.isAutoResizeNeeded)
   },
   watch: {
     setLayersDone(newVal: boolean) {
@@ -89,6 +90,9 @@ export default Vue.extend({
       if (newVal) {
         this.loadLayerImg()
       }
+    },
+    'config.isAutoResizeNeeded'(newVal) {
+      console.log(newVal)
     }
   },
   methods: {

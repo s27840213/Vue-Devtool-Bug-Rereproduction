@@ -167,6 +167,7 @@ export default Vue.extend({
           v: [],
           h: []
         },
+        isAutoResizeNeeded: true,
         appVer_origin: '2022-03-14T07:32:21.887Z',
         jsonVer_origin: '1.0.7',
         appVer: '2022-03-14T08:16:39.426Z',
