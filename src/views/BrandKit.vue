@@ -27,7 +27,8 @@
           span {{ $t(hintText) }}
         div(class="upload-small")
             span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
-      div(v-if="isMessageShowing" class="delete-confirm")
+      div(v-if="isMessageShowing" class="delete-confirm"
+          v-click-outside="handleClearDeletion")
         div(class="delete-confirm__title")
           span {{ $t('NN0433') }}
         div(class="delete-confirm__description")
@@ -58,6 +59,7 @@ import NuFooter from '@/components/NuFooter.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
+import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
@@ -75,6 +77,9 @@ export default Vue.extend({
   mounted() {
     brandkitUtils.fetchBrands(this.fetchBrands)
     brandkitUtils.fetchFonts(this.fetchFonts)
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {

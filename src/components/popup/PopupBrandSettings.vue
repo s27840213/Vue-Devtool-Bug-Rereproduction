@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="popup-brand-settings")
     div(class="dim-background under")
-    div(class="popup-brand-settings__window")
+    div(class="popup-brand-settings__window"
+        v-click-outside="handleCloseSettings")
       div(class="popup-brand-settings__wrapper relative")
         div(class="brand-kit relative"
           @dragover.prevent.stop="handleDragEnter"
@@ -28,7 +29,8 @@
                 span {{ $t(hintText) }}
               div(class="upload-small")
                   span {{ `・${$t('NN0414', { element: $t(elementType) })}： ${fileTypesString}` }}
-            div(v-if="isMessageShowing" class="delete-confirm")
+            div(v-if="isMessageShowing" class="delete-confirm"
+                v-click-outside="handleClearDeletion")
               div(class="delete-confirm__title")
                 span {{ $t('NN0433') }}
               div(class="delete-confirm__description")
@@ -48,10 +50,6 @@
                 div(class="delete-confirm__buttons__confirm pointer"
                   @click="handleConfirmDeletion")
                   span {{ $t('NN0437') }}
-        div(v-if="!isOverlayed"
-          class="popup-brand-settings__close pointer"
-          @click="handleCloseSettings")
-          svg-icon(iconName="close" iconColor="gray-1" iconWidth="36px")
 </template>
 
 <script lang="ts">
@@ -61,6 +59,7 @@ import NuFooter from '@/components/NuFooter.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import BrandKitTab from '@/components/brandkit/BrandKitTab.vue'
 import BrandKitAddBtn from '@/components/brandkit/BrandKitAddBtn.vue'
+import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { IBrand, IBrandColorPalette, IBrandFont, IBrandLogo, IDeletingItem } from '@/interfaces/brandkit'
@@ -78,6 +77,9 @@ export default Vue.extend({
   mounted() {
     // brandkitUtils.fetchBrands(this.fetchBrands)
     brandkitUtils.fetchFonts(this.fetchFonts)
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   data() {
     return {
@@ -207,19 +209,6 @@ export default Vue.extend({
   }
   &__wrapper {
     @include size(100%, 100%);
-  }
-  &__close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translate(50%, -50%);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 }
 .brand-kit {

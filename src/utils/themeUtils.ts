@@ -8,6 +8,7 @@ import generalUtils from './generalUtils'
 
 class ThemeUtils {
   get themes() { return store.state.themes }
+  get themesMainHidden() { return _.filter(store.state.themes, ['mainHidden', 0]) }
   get groupType() { return store.state.groupType }
   get getPageSize() { return store.getters.getPageSize }
 

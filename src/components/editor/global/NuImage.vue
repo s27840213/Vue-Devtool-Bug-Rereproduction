@@ -637,6 +637,14 @@ export default Vue.extend({
           } else {
             const img = new Image()
             img.crossOrigin = 'anonymous'
+            const id = {
+              pageId: pageUtils.getPage(this.pageIndex).id,
+              layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
+                ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
+              subLayerId: this.config.id
+            }
+            imageShadowUtils.setHandleId(id)
+            imageShadowUtils.setProcessId(id)
             img.onload = () => {
               imageShadowPanelUtils.isSVG(img, this.config)
                 .then(async (isSVG) => {
@@ -680,6 +688,14 @@ export default Vue.extend({
             const img = new Image()
             img.crossOrigin = 'anonymous'
             img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            const id = {
+              pageId: pageUtils.getPage(this.pageIndex).id,
+              layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
+                ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
+              subLayerId: this.config.id
+            }
+            imageShadowUtils.setHandleId(id)
+            imageShadowUtils.setProcessId(id)
             img.onload = () => {
               imageShadowPanelUtils.isSVG(img, this.config)
                 .then(async (isSVG) => {
