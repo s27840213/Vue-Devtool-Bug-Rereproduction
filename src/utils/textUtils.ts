@@ -995,7 +995,8 @@ class TextUtils {
     }
   }
 
-  loadAllFonts(config: IText, times: number) {
+  // loadAllFonts(config: IText, times: number) {
+  loadAllFonts(config: IText) {
     /*
       Gary: 因為預設字型檔案較大，剛進入畫面時的下載過程可能會佔用網路頻寬，
       造成後續api呼叫及圖片載入等等被卡住而有畫面延遲。
@@ -1004,16 +1005,18 @@ class TextUtils {
     */
 
     // 僅剛進入editor需要判斷
-    if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
-      if (!((store.state as any).templates.categories.length > 0) && times < 5) {
-        setTimeout(() => {
-          this.loadAllFonts(config, times + 1)
-        }, 3000)
-        return
-      }
-      // 第一次載入的等待結束，firstLoad -> true
-      store.commit('text/SET_firstLoad', true)
-    }
+    // if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
+    //   if (!((store.state as any).templates.categories.length > 0) && times < 5) {
+    //     setTimeout(() => {
+    //       this.loadAllFonts(config, times + 1)
+    //     }, 3000)
+    //     return
+    //   }
+    //   // 第一次載入的等待結束，firstLoad -> true
+    //   store.commit('text/SET_firstLoad', true)
+    // }
+
+    // Disable the above mechanism, since the font file is now divided into sub files and thus not large anymore.
 
     // const promises: Array<Promise<void>> = []
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
@@ -1174,6 +1177,10 @@ class TextUtils {
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<any> {
     const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).split(',')
+    const valid = await store.dispatch('text/checkFontLoaded', fontList[0]) // wait until the css file of user set font is loaded
+    if (!valid) {
+      throw new Error(`Font ${fontList[0]} not added by 'addFont' before timeout`)
+    }
     const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
     return Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
@@ -1194,16 +1201,14 @@ class TextUtils {
     this.toRecordId = recordId
     this.setIsFontLoading(true)
     this.untilFontLoaded(paragraphs).then(() => {
-      setTimeout(() => {
-        if (callback) {
-          callback()
-        }
-        if (this.toRecordId === recordId) {
-          console.log('record')
-          stepsUtils.record()
-          this.setIsFontLoading(false)
-        }
-      }, 500) // after the fonts are all downloaded, the browser needs a little time to render them on screen
+      if (callback) {
+        callback()
+      }
+      if (this.toRecordId === recordId) {
+        // console.log('record')
+        stepsUtils.record()
+        this.setIsFontLoading(false)
+      }
     })
   }
 
@@ -1216,16 +1221,14 @@ class TextUtils {
         .filter(l => l.type === 'text')
         .map(l => this.untilFontLoaded((l as IText).paragraphs))
     ).then(() => {
-      setTimeout(() => {
-        if (callback) {
-          callback()
-        }
-        if (this.toRecordId === recordId) {
-          console.log('record')
-          stepsUtils.record()
-          this.setIsFontLoading(false)
-        }
-      }, 500) // after the fonts are all downloaded, the browser needs a little time to render them on screen
+      if (callback) {
+        callback()
+      }
+      if (this.toRecordId === recordId) {
+        // console.log('record')
+        stepsUtils.record()
+        this.setIsFontLoading(false)
+      }
     })
   }
 }

@@ -61,7 +61,8 @@ export default Vue.extend({
     }
   },
   created() {
-    TextUtils.loadAllFonts(this.config, 1)
+    // TextUtils.loadAllFonts(this.config, 1)
+    TextUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true

@@ -175,9 +175,20 @@ const actions: ActionTree<ITextState, unknown> = {
           link.href = cssUrl
           link.rel = 'stylesheet'
           document.head.appendChild(link)
+          return new Promise<void>(resolve => {
+            const checkLoaded = setInterval(() => {
+              if (Array.from(document.styleSheets).find(s => s.href === cssUrl)) {
+                clearInterval(checkLoaded)
+                commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+                state.pending = ''
+                resolve()
+              }
+            }, 100)
+          })
+        } else {
+          commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+          state.pending = ''
         }
-        commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
-        state.pending = ''
         // await new Promise(resolve => setTimeout(resolve, 10000))
         // return new Promise<void>(resolve => {
         //   newFont.load()
@@ -199,6 +210,24 @@ const actions: ActionTree<ITextState, unknown> = {
         })
       }
     }
+  },
+  async checkFontLoaded({ state }, face: string): Promise<boolean> {
+    return Promise.race([
+      new Promise<boolean>(resolve => {
+        const checkLoaded = setInterval(() => {
+          const font = state.fontStore.find(font => font.face === face)
+          if (font?.loaded) {
+            clearInterval(checkLoaded)
+            resolve(true)
+          }
+        }, 100)
+      }),
+      new Promise<boolean>(resolve => {
+        setTimeout(() => {
+          resolve(false)
+        }, 60000)
+      })
+    ])
   }
 }
 
