@@ -3,7 +3,9 @@
       :style="panelStyle")
     div(class="mobile-panel__top-section")
       div(class="mobile-panel__drag-bar"
-        :class="{'visible-hidden': panelTitle !== ''}")
+        :class="{'visible-hidden': panelTitle !== ''}"
+        @pointerdown="dragPanelStart"
+        @touchstart="disableTouchEvent")
       div
         div(class="mobile-panel__btn mobile-panel__left-btn"
             :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn}")
@@ -66,6 +68,9 @@ import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
 import { IFrame } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
+import eventUtils from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   props: {
@@ -109,7 +114,9 @@ export default Vue.extend({
   },
   data() {
     return {
-      panelHistory: [] as Array<string>
+      panelHistory: [] as Array<string>,
+      panelHeight: 0,
+      lastPointerY: 0
     }
   },
   computed: {
@@ -158,13 +165,12 @@ export default Vue.extend({
     },
     panelStyle(): { [index: string]: string } {
       const heightStyle = {
-        ...(this.maxHalfSize && { 'max-height': '50%' }),
-        ...(!this.maxHalfSize && { height: this.halfSize ? '50%' : this.fixSize ? 'initial' : '90%' })
+        maxHeight: this.fixSize ? '80%' : this.maxHalfSize ? '50%' : '90%',
+        height: this.fixSize ? 'initial' : this.panelHeight + 'px'
       }
       return {
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-        ...(this.fixSize && { 'max-height': '80%' }),
         ...heightStyle
       }
     },
@@ -276,10 +282,36 @@ export default Vue.extend({
       }
     }
   },
+  mounted() {
+    this.panelHeight = this.maxHeightPx()
+  },
   methods: {
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
+    },
+    maxHeightPx() {
+      return (this.$el.parentElement as HTMLElement).clientHeight * (this.halfSize ? 0.5 : 0.9)
+    },
+    dragPanelStart(event: MouseEvent | PointerEvent) {
+      this.lastPointerY = event.clientY
+      eventUtils.addPointerEvent('pointermove', this.dragingPanel)
+      eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
+    },
+    dragingPanel(event: MouseEvent | PointerEvent) {
+      this.panelHeight -= event.clientY - this.lastPointerY
+      this.lastPointerY = event.clientY
+    },
+    dragPanelEnd() {
+      this.panelHeight = _.clamp(this.panelHeight, 30, this.maxHeightPx())
+      eventUtils.removePointerEvent('pointermove', this.dragingPanel)
+      eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
+    },
+    disableTouchEvent(e: TouchEvent) {
+      if (generalUtils.isTouchDevice()) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
     }
   }
 })
@@ -342,9 +374,11 @@ export default Vue.extend({
   }
 
   &__drag-bar {
+    position: absolute;
+    top: 2px;
     height: 3px;
     width: 24px;
-    // margin: 6px auto 32px auto;
+    margin: 10px 20px;
     border-radius: 5px;
     background-color: setColor(gray-4);
   }
