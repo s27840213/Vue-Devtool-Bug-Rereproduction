@@ -117,8 +117,7 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
-        // size: (this.$refs.colorBlock as HTMLElement).style.height
-        size: generalUtils.isTouchDevice() ? 180 : 150
+        size: generalUtils.isTouchDevice() ? screen.width / 2 : 157
       }]
     },
     listCategories(): any[] {
