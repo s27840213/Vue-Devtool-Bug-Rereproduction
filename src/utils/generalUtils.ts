@@ -172,6 +172,13 @@ class GeneralUtils {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
   }
 
+  getListRowItemSize(): number {
+    return !this.isTouchDevice() ? 145
+      : screen.width >= 600
+        ? (screen.width - 50) / 3
+        : (screen.width - 40) / 2
+  }
+
   getEventType(e: MouseEvent | TouchEvent) {
     switch (e.type) {
       case 'touchstart':

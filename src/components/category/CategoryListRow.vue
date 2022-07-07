@@ -15,6 +15,7 @@
 </template>
 
 <script lang="ts">
+import generalUtils from '@/utils/generalUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -37,13 +38,15 @@ export default Vue.extend({
       const { scrollLeft } = this.items
       const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
       const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
-      this.items.scrollLeft = scrollLeft + (itemWidth + gridGap) * 2
+      const amountInRow = (generalUtils.isTouchDevice() && screen.width >= 600) ? 3 : 2
+      this.items.scrollLeft = scrollLeft + (itemWidth + gridGap) * amountInRow
     },
     handlePrev() {
       const { scrollLeft } = this.items
       const itemWidth = parseInt(window.getComputedStyle(this.items.children[0]).width) || 145
       const gridGap = parseInt(window.getComputedStyle(this.items).getPropertyValue('column-gap')) || 10
-      this.items.scrollLeft = scrollLeft - (itemWidth + gridGap) * 2
+      const amountInRow = (generalUtils.isTouchDevice() && screen.width >= 600) ? 3 : 2
+      this.items.scrollLeft = scrollLeft - (itemWidth + gridGap) * amountInRow
     },
     handleScroll(event: Event) {
       const { scrollLeft } = event.target as HTMLElement

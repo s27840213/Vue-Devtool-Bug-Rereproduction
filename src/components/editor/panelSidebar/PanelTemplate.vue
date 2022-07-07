@@ -153,7 +153,7 @@ export default Vue.extend({
       return (this.role === 0) && this.adminMode
     },
     itemHeight(): number {
-      return this.showTemplateId ? 179 : 155
+      return generalUtils.getListRowItemSize() + (this.showTemplateId ? 34 : 10)
     },
     listCategories(): any[] {
       const { keyword, categories, itemHeight } = this
