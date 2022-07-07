@@ -620,6 +620,11 @@ class UploadUtils {
           })
         }
       })
+      .catch(async (error) => {
+        // Error: 403: Forbidden
+        console.error(error)
+        await store.dispatch('user/login', { token: this.token })
+      })
   }
 
   uploadTmpJSON() {
