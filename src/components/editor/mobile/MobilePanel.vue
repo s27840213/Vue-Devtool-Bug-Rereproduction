@@ -303,9 +303,15 @@ export default Vue.extend({
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
-      this.panelHeight = _.clamp(this.panelHeight, 30, this.maxHeightPx())
+      const maxHeightPx = this.maxHeightPx()
+      this.panelHeight = this.panelHeight >= maxHeightPx * 0.75
+        ? maxHeightPx
+        : this.panelHeight < maxHeightPx * 0.25
+          ? 0
+          : maxHeightPx * 0.5
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
+      if (this.panelHeight === 0) this.closeMobilePanel()
     },
     disableTouchEvent(e: TouchEvent) {
       if (generalUtils.isTouchDevice()) {
