@@ -90,6 +90,7 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     z-index: 1;
+    transform: translateZ(1px); // Fix ios safari z-index issue. https://stackoverflow.com/a/19572572
     cursor: pointer;
     // background-color: setColor(gray-4);
     &--left {
