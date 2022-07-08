@@ -63,7 +63,9 @@
     }
   }
   @include safariOnly {
-    padding-right: 0;
+    @supports not (-webkit-touch-callout: none) { // Only for not safari mobile, https://stackoverflow.com/a/47818418
+      padding-right: 0;
+    }
   }
 }
 
