@@ -193,7 +193,9 @@ class DragUtils {
           imgX: config.styles.imgX,
           imgY: config.styles.imgY,
           imgWidth: config.styles.imgWidth,
-          imgHeight: config.styles.imgHeight
+          imgHeight: config.styles.imgHeight,
+          initWidth: config.styles.initWidth,
+          initHeight: config.styles.initHeight
         },
         shadow: {
           srcObj: {
