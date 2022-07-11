@@ -252,7 +252,7 @@ class UploadUtils {
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
-                    this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
+                    this.uploadDesign()
                   } else if (json.flag === 1) {
                     store.commit('file/DEL_PREVIEW', { assetId })
                     LayerUtils.deleteLayerByAssetId(assetId)
