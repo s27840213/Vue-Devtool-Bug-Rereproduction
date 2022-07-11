@@ -67,7 +67,6 @@ import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import fbPixelUtils from '@/utils/fbPixelUtils'
 
 export default Vue.extend({
   components: {
@@ -154,13 +153,14 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     testSubscribe() {
-      fbPixelUtils.subscribe(false)
+      // fbPixelUtils.subscribe(false)
     },
     testTrial() {
-      fbPixelUtils.startTrail()
+      // fbPixelUtils.startTrail()
     },
     testSignup() {
-      fbPixelUtils.signUp()
+      gtmUtils.signUp('Vivipic')
+      // fbPixelUtils.signUp()
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')
