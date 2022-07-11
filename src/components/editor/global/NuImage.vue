@@ -477,6 +477,9 @@ export default Vue.extend({
               const { status, statusText } = res
               this.logImgError(error, 'fetch result: ' + status + statusText)
             })
+            .catch((e) => {
+              this.logImgError(error, 'fetch result: ' + e)
+            })
         }
       }
     },
@@ -521,6 +524,9 @@ export default Vue.extend({
               const { status, statusText } = res
               this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
             })
+            .catch((e) => {
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+            })
         }
         img.src = src
       })
@@ -554,6 +560,9 @@ export default Vue.extend({
               const { status, statusText } = res
               this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
             })
+            .catch((e) => {
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+            })
         }
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
       })
@@ -581,6 +590,9 @@ export default Vue.extend({
             .then(res => {
               const { status, statusText } = res
               this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + status + statusText)
+            })
+            .catch((e) => {
+              this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + e)
             })
         }
         preImg.onload = () => {
