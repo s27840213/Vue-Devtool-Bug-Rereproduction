@@ -125,10 +125,13 @@ export default Vue.extend({
 }
 
 .pricing-content {
+  @include push-scrollbar10;
+  @include hide-scrollbar-white;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden scroll;
+  box-sizing: border-box;
+  width: 100%;
   height: calc(100% - #{$header-height});
 }
 
