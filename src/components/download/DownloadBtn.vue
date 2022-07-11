@@ -59,7 +59,6 @@ export default Vue.extend({
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(this.$t('NN0323') as string, [], '')
       }
-      console.log(this.show)
     }
   }
 })

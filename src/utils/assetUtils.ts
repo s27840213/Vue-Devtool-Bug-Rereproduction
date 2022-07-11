@@ -584,7 +584,6 @@ class AssetUtils {
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           editorUtils.setCloseMobilePanelFlag(true)
-
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)

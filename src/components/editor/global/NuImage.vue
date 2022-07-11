@@ -71,6 +71,8 @@ import errorHandle from '@/utils/errorHandleUtils'
 import groupUtils from '@/utils/groupUtils'
 import i18n from '@/i18n'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import logUtils from '@/utils/logUtils'
+import { AxiosError } from 'axios'
 
 export default Vue.extend({
   props: {
@@ -470,6 +472,8 @@ export default Vue.extend({
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
+          const e = error as Error | AxiosError
+          logUtils.setLog(`${e.name} + ':' + ${e.message}\nerror url: ${this.src}`)
         }
       }
     },

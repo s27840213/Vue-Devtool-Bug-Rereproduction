@@ -33,7 +33,7 @@ export default Vue.extend({
       imgWidth: 10,
       imgHeight: 10,
       previewCheckReady: false,
-      previewPlaceholder: require('@/assets/img/svg/image-preview-large.svg')
+      previewPlaceholder: require('@/assets/img/svg/loading-large.svg')
     }
   },
   directives: {
@@ -43,7 +43,7 @@ export default Vue.extend({
     this.checkImageSize()
   },
   watch: {
-    config: {
+    'config.asset_index': {
       handler: function () {
         this.$nextTick(() => {
           this.checkImageSize()
@@ -86,17 +86,41 @@ export default Vue.extend({
       designUtils.setDesign(this.config)
     },
     checkImageSize() {
-      if (this.config.thumbnail !== '') {
-        this.previewCheckReady = true
-        return
-      }
       this.previewCheckReady = false
-      imageUtils.getImageSize(this.configPreview, 150, 150, false).then((size) => {
+      if (this.config.polling) {
+        this.previewCheckReady = true
+        this.config.thumbnail = this.previewPlaceholder
+        this.pollingStep()
+      } else {
+        imageUtils.getImageSize(this.configPreview, 150, 150, false).then((size) => {
+          const { width, height, exists } = size
+          this.imgWidth = width
+          this.imgHeight = height
+          this.previewCheckReady = true
+          this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+        })
+      }
+    },
+    pollingStep(step = 0) {
+      const timeout = step > 14 ? 2000 : 1000
+      imageUtils.getImageSize(
+        designUtils.getDesignPreview(
+          this.config.id, 2,
+          undefined,
+          this.config.signedUrl
+        ),
+        this.imgWidth, this.imgHeight, false
+      ).then((size) => {
         const { width, height, exists } = size
         this.imgWidth = width
         this.imgHeight = height
-        this.previewCheckReady = true
-        this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
+        if (exists) {
+          this.config.thumbnail = this.configPreview
+        } else if (step < 35) {
+          setTimeout(() => {
+            this.pollingStep(step + 1)
+          }, timeout)
+        }
       })
     }
   }
