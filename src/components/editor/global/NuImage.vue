@@ -472,22 +472,25 @@ export default Vue.extend({
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
-          const { pageIndex, layerIndex, subLayerIndex } = this
-          const { srcObj: { type, assetId, userId } } = this.config as IImage
-          const e = error as Error | AxiosError
-          const log = `
-            pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIndex}
-            srcObj: { type: ${type}, assetId: ${assetId}, userId: ${userId} }
-            Error src: ${this.src}
-            Error log: ${e.name} + ':' + ${e.message}
-            `
-          logUtils.setLog(log)
-          console.warn(log)
+          this.logImgError(error)
         }
       }
     },
     onLoad() {
       this.isOnError = false
+    },
+    logImgError(error: unknown, ...infos: Array<string>) {
+      const { pageIndex, layerIndex, subLayerIndex } = this
+      const { srcObj: { type, assetId, userId } } = this.config as IImage
+      const e = error as Error | AxiosError
+      let log =
+        `pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIndex}\n` +
+        `srcObj: { type: ${type}, assetId: ${assetId}, userId: ${userId} }\n` +
+        `Error config src: ${this.src}\n` +
+        `Error log: ${e.name} + ':' + ${e.message}`
+      infos.forEach(info => { log += `\n${info}` })
+      logUtils.setLog(log)
+      console.warn(log)
     },
     async perviewAsLoading() {
       if (this.uploadingImagePreviewSrc) {
@@ -508,8 +511,9 @@ export default Vue.extend({
           }
           resolve()
         }
-        img.onerror = () => {
+        img.onerror = (error) => {
           reject(new Error(`cannot load the current image, src: ${this.src}`))
+          this.logImgError(error, 'img src:', img.src)
         }
         img.src = src
       })
@@ -536,7 +540,10 @@ export default Vue.extend({
       return new Promise<void>((resolve, reject) => {
         const img = new Image()
         img.onload = () => resolve()
-        img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+        img.onerror = (error) => {
+          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+          this.logImgError(error, 'img src:', img.src)
+        }
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
       })
     },
@@ -545,7 +552,7 @@ export default Vue.extend({
       if (this.userId !== 'backendRendering') {
         await this.perviewAsLoading()
         const preImg = new Image()
-        preImg.onerror = () => {
+        preImg.onerror = (error) => {
           if (type === 'pexels') {
             const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
             switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
@@ -559,6 +566,7 @@ export default Vue.extend({
                 layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
             }
           }
+          this.logImgError(error, 'img src:', preImg.src)
         }
         preImg.onload = () => {
           const nextImg = new Image()
