@@ -52,7 +52,7 @@
               @click="clickTemplate(item)")
             img(loading="lazy"
               :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
-              :style="templateImgStyle")
+              :style="templateImgStyle(item.match_cover)")
             pro-item(v-if="item.plan === 1")
 </template>
 
@@ -109,11 +109,6 @@ export default Vue.extend({
     }),
     listContentSytle(): Record<string, string> {
       return { width: this.type === 'theme' ? 'fit-content' : '80vw' }
-    },
-    templateImgStyle(): Record<string, string> {
-      return ['3', '7'].includes(this.theme)
-        ? { 'max-width': '160px' }
-        : { 'max-height': '160px' }
     }
   },
   created() {
@@ -183,6 +178,15 @@ export default Vue.extend({
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')
+    },
+    templateImgStyle(match_cover: Record<string, number>): Record<string, string> {
+      const height = this.theme === '3' ? 284
+        : this.theme === '7' ? 320
+          : 160
+      return {
+        height: `${height}px`,
+        width: `${match_cover.width / match_cover.height * height}px`
+      }
     }
   }
 })
