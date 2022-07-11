@@ -1,71 +1,67 @@
 <template lang="pug">
-  div(class="popup-window")
-    div(class="wrapper1" )
-      div(class="wrapper2")
-        div(class="close pointer")
-          svg-icon(iconName="close" iconWidth="36px" iconColor="gray-0"
-                  @click.native="closePopup()")
-        div(class="payment" v-click-outside="vcoConfig")
-          div(class="payment-left")
-            div(class="payment-left-top")
-              div(class="payment-left-top__step")
-                svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
-                        iconColor="gray1" @click.native="preStep()")
-                span(v-if="totalStep") {{$t('NN0544')}} {{currentStep}} of {{totalStep}}
-              div(class="text-H4" v-html="title")
-              div(v-if="description" class="mt-15") {{description}}
-            //- switch(view)
-            div(class="payment-left-content")
-              //- case step1 or switch1
-              template(v-if="['step1', 'switch1'].includes(view)")
-                div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
-                    class="payment-left-content-period" @click="setPeriod(p.value)")
-                  svg-icon(iconWidth="20px"
-                          :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
-                          :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
-                  div(class="payment-left-content-period-price")
-                    span(class="payment-left-content-period-price__label") {{p.label}} {{curPlan(p.value)}}
-                    span(class="text-H6") {{`$${plans[planSelected][p.value].now}`}}
-                      span(class="body-XS") {{`${$t('NN0516')}${p.value==='yearly' ? $t('NN0548') : ''}`}}
-                  span(v-if="p.value==='yearly'"
-                      class="payment-left-content-period__off") {{$t('NN0549')}}
-              //- case step2
-              PaymentField(v-if="view === 'step2'" @next="changeView('finish')")
-              //- case switch2
-              template(v-if="view === 'switch2'")
-                card-info(:card="card")
-                div(class="payment-left-content-switch2")
-                  span(v-if="switchPaidDate") {{$t('NN0552', {date: switchPaidDate})}}
-                  span(v-else) {{$t('NN0553')}}
-                  span {{`$${switchPrice}`}}
-              //- case cancel1 or brandkit or bgrm or proTemplate
-              template(v-if="showFeature")
-                div(v-for="can in cancel1" class="payment-left-content-cancel")
-                  svg-icon(iconName="pro" iconWidth="24px")
-                  span {{can}}
-              //- case cancel2
-              template(v-if="view === 'cancel2'")
-                div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
-                  radio-btn(:isSelected="reasonIndex === idx"
-                            :formatKey="String(idx)" circleColor="gray-4"
-                            @select="selectCancelReason(idx)")
-                  span {{can}}
-                input(class="payment-left-content-cancel__other"
-                      v-model="otherReason" :placeholder="$t('NN0584')")
-            div(class="payment-left-button")
-              btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
-                  :disabled="button.disabled ? button.disabled() : false"
-                  @click.native="button.func()") {{button.label}}
-          div(class="payment-right")
-            img(class="payment-right-bg" loading="lazy"
-                :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
-            img(v-if="view === 'pro-template'"
-                class="payment-right-temp"  :src="templateImg")
-          div(v-if="view === 'finish'" class="payment-finish")
-            div(class="payment-finish-content")
-              animation(path="/lottie/pro.json")
-              span {{$t('NN0562')}}
-              btn(type="primary-mid" @click.native="closePopup()") {{$t('NN0563')}}
+div(class="popup-window")
+  div(class="wrapper")
+    div(class="payment" v-click-outside="vcoConfig")
+      div(class="payment-left")
+        div(class="payment-left-top")
+          div(class="payment-left-top__step")
+            svg-icon(v-if="showPreStep" iconName="left-arrow" iconWidth="24px"
+                    iconColor="gray1" @click.native="preStep()")
+            span(v-if="totalStep") {{$t('NN0544')}} {{currentStep}} of {{totalStep}}
+          div(class="text-H4" v-html="title")
+          div(v-if="description" class="mt-15") {{description}}
+        //- switch(view)
+        div(class="payment-left-content")
+          //- case step1 or switch1
+          template(v-if="['step1', 'switch1'].includes(view)")
+            div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
+                class="payment-left-content-period" @click="setPeriod(p.value)")
+              svg-icon(iconWidth="20px"
+                      :iconName="p.value === userPeriod ? 'radio-checked' : 'radio'"
+                      :iconColor="p.value === userPeriod ? 'white' : 'gray-4'")
+              div(class="payment-left-content-period-price")
+                span(class="payment-left-content-period-price__label") {{p.label}} {{curPlan(p.value)}}
+                span(class="text-H6") {{`$${plans[planSelected][p.value].now}`}}
+                  span(class="body-XS") {{`${$t('NN0516')}${p.value==='yearly' ? $t('NN0548') : ''}`}}
+              span(v-if="p.value==='yearly'"
+                  class="payment-left-content-period__off") {{$t('NN0549')}}
+          //- case step2
+          PaymentField(v-if="view === 'step2'" @next="changeView('finish')")
+          //- case switch2
+          template(v-if="view === 'switch2'")
+            card-info(:card="card")
+            div(class="payment-left-content-switch2")
+              span(v-if="switchPaidDate") {{$t('NN0552', {date: switchPaidDate})}}
+              span(v-else) {{$t('NN0553')}}
+              span {{`$${switchPrice}`}}
+          //- case cancel1 or brandkit or bgrm or proTemplate
+          template(v-if="showFeature")
+            div(v-for="can in cancel1" class="payment-left-content-cancel")
+              svg-icon(iconName="pro" iconWidth="24px")
+              span {{can}}
+          //- case cancel2
+          template(v-if="view === 'cancel2'")
+            div(v-for="can, idx in cancel2" class="payment-left-content-cancel")
+              radio-btn(:isSelected="reasonIndex === idx"
+                        :formatKey="String(idx)" circleColor="gray-4"
+                        @select="selectCancelReason(idx)")
+              span {{can}}
+            input(class="payment-left-content-cancel__other"
+                  v-model="otherReason" :placeholder="$t('NN0584')")
+        div(class="payment-left-button")
+          btn(v-for="button in buttons" :type="button.type || 'primary-lg'"
+              :disabled="button.disabled ? button.disabled() : false"
+              @click.native="button.func()") {{button.label}}
+      div(class="payment-right")
+        img(class="payment-right-bg" loading="lazy"
+            :src="require(`@/assets/img/jpg/pricing/${locale}/${img}`)")
+        img(v-if="view === 'pro-template'"
+            class="payment-right-temp"  :src="templateImg")
+      div(v-if="view === 'finish'" class="payment-finish")
+        div(class="payment-finish-content")
+          animation(path="/lottie/pro.json")
+          span {{$t('NN0562')}}
+          btn(type="primary-mid" @click.native="closePopup()") {{$t('NN0563')}}
 </template>
 
 <script lang="ts">
@@ -284,34 +280,21 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.wrapper1 {
-  position: relative;
-  .close {
-    position: absolute;
-    top: -18px;
-    right: -18px;
-    width: 36px;
-    height: 36px;
-    background-color: setColor(white);
-    border-radius: 100px;
-    z-index: 1;
-  }
-  .wrapper2 {
-    @include hide-scrollbar;
-    &:hover {
-      scrollbar-color: setColor(gray-4) setColor(sidebar-panel); // Only for firefox
-      &::-webkit-scrollbar {
-        background-color: setColor(sidebar-panel);
-        width: 10px;
-      }
-    }
+.wrapper {
+  @include hide-scrollbar;
+  &:hover {
+    scrollbar-color: setColor(gray-4) setColor(sidebar-panel); // Only for firefox
     &::-webkit-scrollbar {
-      width: 0;
+      background-color: setColor(sidebar-panel);
+      width: 10px;
     }
-    box-sizing: border-box;
-    width: min(792px, 90vw);
-    height: min(770px, min(80vw, 90vh));
   }
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+  box-sizing: border-box;
+  width: min(792px, 90vw);
+  height: min(770px, min(80vw, 90vh));
 }
 
 .payment {
@@ -497,15 +480,6 @@ export default Vue.extend({
       width: 100%;
       height: fit-content;
       min-height: 100%;
-    }
-    .close {
-      right: 0px;
-      top: 0px;
-      width: 40px;
-      height: 40px;
-      > svg {
-        transform: scale(0.667);
-      }
     }
   }
   .payment-left {
