@@ -21,11 +21,12 @@
               svg-icon(iconName="item-check" iconWidth="20px")
               span {{$t(item)}}
         div(class="pricing-plan-right")
-          slide-toggle(class="body-XS" :options="periods"
-                      v-model="periodUi" bgColor="#F4F5F7")
+          div(class="relative")
+            slide-toggle(class="body-XS" :options="periods"
+                        v-model="periodUi" bgColor="#F4F5F7")
+            img(class="pricing-plan-right__off"
+                :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
           div(class="pricing-plan-right-price")
-            img(class="pricing-plan-right-price-off"
-              :src="require(`@/assets/img/svg/pricing/${off}.svg`)")
             span(class="pricing-plan-right-price__del") {{`$${plans[planSelected][periodUi].original}${$t('NN0516')}`}}
             br
             span(class="pricing-plan-right-price__dollar") {{'$ '}}
@@ -125,14 +126,14 @@ export default Vue.extend({
 }
 
 .pricing-content {
-  @include push-scrollbar10;
-  @include hide-scrollbar-white;
+  @include hide-scrollbar-white(5.34%);
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
   width: 100%;
   height: calc(100% - #{$header-height});
+  padding: 20px 5.34%;
 }
 
 .pricing-top {
@@ -159,7 +160,7 @@ export default Vue.extend({
 
 .pricing-plan-left {
   display: grid;
-  grid-template-rows: 1fr 44px 1fr;
+  grid-template-rows: 1fr auto 1fr;
   box-sizing: border-box;
   width: 68%;
   padding: 64px 24px 64px 60px;
@@ -184,8 +185,8 @@ export default Vue.extend({
   &-bottom {
     @include body-MD;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: flex-end;
+    grid-template-columns: 1fr 1fr; // ask for auto auto
+    margin-top: 10px;
     color: setColor(gray-2);
     > div {
       display: flex;
@@ -206,15 +207,15 @@ export default Vue.extend({
   width: 32%;
   padding: 72px 32px;
   background-color: setColor(blue-1);
+  &__off {
+      position: absolute;
+      top: -20px;
+      right: -70px;
+    }
   &-price {
     @include body-MD;
     position: relative;
     color: white;
-    &-off {
-      position: absolute;
-      top: -55px;
-      right: -80px;
-    }
     &__del {
       position: absolute;
       left: 0;
@@ -304,27 +305,27 @@ export default Vue.extend({
   }
 }
 
-@media screen and (max-width: 768px) {
-  .pricing-top__cb {
-    display: none;
-  }
-  .pricing-content {
-    padding: 20px 5.34%;
-  }
+@media screen and (max-width: 1440px) { // For 0~1440px
   .pricing-plan,
   .pricing-compare,
   .pricing-faq {
     width: 100%;
   }
+  .pricing-currency {
+    margin-left: auto;
+  }
+}
+
+@media screen and (max-width: 834px) {
+  .pricing-top__cb {
+    display: none;
+  }
   .pricing-plan {
     flex-direction: column;
     height: fit-content;
-    &-left,
-    &-right {
-      width: 100%;
-    }
     &-left {
       display: block;
+      width: 100%;
       padding: 18px;
       &-bottom {
         grid-template-columns: auto;
@@ -334,15 +335,33 @@ export default Vue.extend({
       }
     }
     &-right {
+      width: 100%;
       height: 282px;
       padding: 30px 20px;
     }
   }
-  .pricing-currency {
-    margin-left: auto;
-  }
   .pricing-compare {
     grid-template-columns: 1.2fr 1fr 1fr;
+  }
+}
+@media screen and (max-width: 1024px) and (min-width: 834.02px) {
+  .pricing-plan-left {
+    width: 58%;
+    padding: 39px 12px 39px 44px;
+    &-bottom {
+      grid-template-columns: auto;
+      > div + div {
+        margin-top: 10px;
+      }
+    }
+  }
+  .pricing-plan-right {
+    width: 42%; // ask for %
+  }
+}
+@media screen and (max-width: 1440px) and (min-width: 1024.02px) {
+  .pricing-plan-left {
+    padding: 64px 12px 64px 44px;
   }
 }
 </style>

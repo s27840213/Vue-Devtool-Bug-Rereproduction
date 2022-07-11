@@ -2,7 +2,7 @@
 div(class="popup-window")
   div(class="wrapper")
     div(class="payment" v-click-outside="vcoConfig")
-      svg-icon(class="payment__close" iconName="close" iconWidth="36px"
+      svg-icon(class="payment__close" iconName="close" iconWidth="32px"
               iconColor="gray-0" @click.native="closePopup()")
       div(class="payment-left")
         div(class="payment-left-top")
