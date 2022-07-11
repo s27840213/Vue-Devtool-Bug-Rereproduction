@@ -2,6 +2,8 @@
 div(class="popup-window")
   div(class="wrapper")
     div(class="payment" v-click-outside="vcoConfig")
+      svg-icon(class="payment__close" iconName="close" iconWidth="36px"
+              iconColor="gray-0" @click.native="closePopup()")
       div(class="payment-left")
         div(class="payment-left-top")
           div(class="payment-left-top__step")
@@ -309,6 +311,9 @@ export default Vue.extend({
     box-sizing: border-box;
     width: 50%;
   }
+  &__close {
+    display: none;
+  }
 }
 
 .payment-left {
@@ -467,19 +472,20 @@ export default Vue.extend({
 }
 
 @media screen and (max-width: 768px) {
-  .wrapper1 {
+  .wrapper {
     position: absolute;
     bottom: 0;
     width: 100%;
     height: calc(100% - #{$header-height});
-    .wrapper2 {
-      width: 100%;
-      height: 100%;
-    }
-    .payment {
-      width: 100%;
-      height: fit-content;
-      min-height: 100%;
+  }
+  .payment {
+    width: 100%;
+    height: fit-content;
+    min-height: 100%;
+    &__close {
+      display: block;
+      position: absolute;
+      right: 0px;
     }
   }
   .payment-left {
