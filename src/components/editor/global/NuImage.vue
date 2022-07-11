@@ -71,6 +71,8 @@ import errorHandle from '@/utils/errorHandleUtils'
 import groupUtils from '@/utils/groupUtils'
 import i18n from '@/i18n'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import { AxiosError } from 'axios'
+import logUtils from '@/utils/logUtils'
 
 export default Vue.extend({
   props: {
@@ -470,6 +472,17 @@ export default Vue.extend({
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
+          const { pageIndex, layerIndex, subLayerIndex } = this
+          const { srcObj: { type, assetId, userId } } = this.config as IImage
+          const e = error as Error | AxiosError
+          const log = `
+            pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIndex}
+            srcObj: { type: ${type}, assetId: ${assetId}, userId: ${userId} }
+            Error src: ${this.src}
+            Error log: ${e.name} + ':' + ${e.message}
+            `
+          logUtils.setLog(log)
+          console.warn(log)
         }
       }
     },
