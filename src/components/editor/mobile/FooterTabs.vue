@@ -49,7 +49,7 @@ export default Vue.extend({
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
-        { icon: 'shape', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
@@ -79,13 +79,7 @@ export default Vue.extend({
           }
         },
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
-        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' },
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
-        { icon: 'ungroup', text: `${this.$t('NN0212')}`, panelType: 'background', disabled: true }
+        { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,
       objectTabs: [
@@ -98,11 +92,7 @@ export default Vue.extend({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true }
       ] as Array<IFooterTab>,
       pageTabs: [
         mainMenu,

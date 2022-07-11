@@ -71,6 +71,7 @@ import frameUtils from '@/utils/frameUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import _ from 'lodash'
+import { ColorEventType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -81,6 +82,10 @@ export default Vue.extend({
     currColorEvent: {
       default: 'text',
       type: String
+    },
+    isExtraPanel: {
+      default: false,
+      type: Boolean
     }
   },
   directives: {
@@ -116,7 +121,8 @@ export default Vue.extend({
     return {
       panelHistory: [] as Array<string>,
       panelHeight: 0,
-      lastPointerY: 0
+      lastPointerY: 0,
+      showColorPanel: false
     }
   },
   computed: {
@@ -127,10 +133,11 @@ export default Vue.extend({
       inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     whiteTheme(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'adjust', 'photo-shadow'].includes(this.currActivePanel)
+      const whiteThemePanel = ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'adjust', 'photo-shadow']
+      return this.showColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
+      return this.showColorPanel || ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
     },
     halfSize(): boolean {
       return ['fonts'].includes(this.currActivePanel)
@@ -158,7 +165,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize')
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop'
@@ -175,6 +182,14 @@ export default Vue.extend({
       }
     },
     dynamicBindProps(): { [index: string]: any } {
+      if (this.showColorPanel) {
+        return {
+          is: 'panel-color',
+          currEvent: ColorEventType.background,
+          panelHistory: this.panelHistory
+        }
+      }
+
       const defaultVal = {
         is: `panel-${this.currActivePanel}`
       }
@@ -223,7 +238,15 @@ export default Vue.extend({
           }
         }
         case 'background': {
-          return this.$listeners
+          // bind listener to let the parent access the grandchild's event
+          // return this.$listeners
+
+          return {
+            openExtraColorModal: () => {
+              this.showColorPanel = true
+              this.panelHistory.push('color-picker')
+            }
+          }
         }
         default: {
           return {}
@@ -245,6 +268,11 @@ export default Vue.extend({
       }
     },
     leftButtonAction(): () => void {
+      if (this.showColorPanel) {
+        return () => {
+          this.showColorPanel = false
+        }
+      }
       if (this.panelHistory.length > 0) {
         return () => { this.panelHistory.pop() }
       } else {

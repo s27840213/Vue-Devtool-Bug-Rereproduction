@@ -18,7 +18,7 @@
           :currColorEvent="currColorEvent"
           @openExtraColorModal="openExtraColorModal"
           @switchTab="switchTab")
-      //- mobile-panel(v-if="showExtraColorPanel"
+      //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
       //-   :currActivePanel="'color'"
       //-   :currColorEvent="ColorEventType.background"
       //-   :isExtraPanel="true"
@@ -186,7 +186,6 @@ export default Vue.extend({
       this.inAllPagesMode = !this.inAllPagesMode
     },
     openExtraColorModal() {
-      console.log('hihi')
       this.showExtraColorPanel = !this.showExtraColorPanel
     }
   }

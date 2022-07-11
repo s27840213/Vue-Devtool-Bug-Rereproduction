@@ -59,7 +59,7 @@ export default Vue.extend({
     ColorPicker,
     ColorPanel
   },
-  mounted() {
+  created() {
     colorUtils.setCurrEvent(this.currEvent)
     switch (this.currEvent) {
       case ColorEventType.text: {
@@ -68,6 +68,10 @@ export default Vue.extend({
       }
       case ColorEventType.shape: {
         colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
+        break
+      }
+      case ColorEventType.background: {
+        colorUtils.setCurrColor(colorUtils.currPageBackgroundColor)
         break
       }
       default: {
@@ -128,61 +132,70 @@ export default Vue.extend({
       })
     },
     handleColorUpdate(newColor: string) {
-      if (this.currEvent === ColorEventType.text) {
-        if (newColor === this.props.color) return
-        const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
+      switch (this.currEvent) {
+        case ColorEventType.text: {
+          if (newColor === this.props.color) return
+          const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
 
-        switch (currLayer.type) {
-          case 'text':
-            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
-            break
-          case 'tmp':
-          case 'group':
-            if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
-              textPropUtils.applyPropsToAll('span', { newColor }, layerIndex, subLayerIdx)
-              if (subLayerIdx !== -1) {
-                tiptapUtils.updateHtml()
-              }
-            } else {
+          switch (currLayer.type) {
+            case 'text':
               tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
-            }
-        }
-        textEffectUtils.refreshColor()
-        stepsUtils.record()
-        textPropUtils.updateTextPropsState({ newColor })
-      } else if (this.currEvent === ColorEventType.shape) {
-        const currLayer = layerUtils.getCurrLayer
-        switch (currLayer.type) {
-          case 'shape': {
-            const color = [...this.getDocumentColors]
-            color[this.currSelectedColorIndex] = newColor
-            layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
-            break
+              break
+            case 'tmp':
+            case 'group':
+              if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
+                textPropUtils.applyPropsToAll('span', { newColor }, layerIndex, subLayerIdx)
+                if (subLayerIdx !== -1) {
+                  tiptapUtils.updateHtml()
+                }
+              } else {
+                tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
+              }
           }
-          case 'tmp':
-          case 'group': {
-            const { subLayerIdx } = layerUtils
-            if (subLayerIdx === -1) {
-              for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-                if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+          textEffectUtils.refreshColor()
+          stepsUtils.record()
+          textPropUtils.updateTextPropsState({ newColor })
+          break
+        }
+        case ColorEventType.shape: {
+          const currLayer = layerUtils.getCurrLayer
+          switch (currLayer.type) {
+            case 'shape': {
+              const color = [...this.getDocumentColors]
+              color[this.currSelectedColorIndex] = newColor
+              layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+              break
+            }
+            case 'tmp':
+            case 'group': {
+              const { subLayerIdx } = layerUtils
+              if (subLayerIdx === -1) {
+                for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
+                  if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+                    layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                  }
+                }
+              } else {
+                const subLayerType = layerUtils.getCurrConfig.type
+                if (subLayerType === 'frame') {
+                  this.handleFrameColorUpdate(newColor)
+                }
+                if (subLayerType === 'shape') {
+                  const color = [...this.getDocumentColors]
+                  color[this.currSelectedColorIndex] = newColor
+                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { newColor })
                 }
               }
-            } else {
-              const subLayerType = layerUtils.getCurrConfig.type
-              if (subLayerType === 'frame') {
-                this.handleFrameColorUpdate(newColor)
-              }
-              if (subLayerType === 'shape') {
-                const color = [...this.getDocumentColors]
-                color[this.currSelectedColorIndex] = newColor
-                layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { newColor })
-              }
+              break
             }
-            break
+            case 'frame':
+              this.handleFrameColorUpdate(newColor)
           }
-          case 'frame':
-            this.handleFrameColorUpdate(newColor)
+          break
+        }
+
+        case ColorEventType.background: {
+          colorUtils.setCurrPageBackgroundColor(newColor)
         }
       }
     },
