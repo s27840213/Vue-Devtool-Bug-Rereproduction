@@ -5,14 +5,14 @@
       svg-icon(:class="{'pointer': !isInFirstStep}"
         :iconName="'undo'"
         :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInFirstStep) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
+        :iconColor="(!inBgRemoveMode && !isInFirstStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveFirstStep) ? 'gray-2' : 'gray-4'"
         @click.native="undo"
         v-hint="$t('NN0119')"
       )
       svg-icon(:class="{'pointer': !isInLastStep}"
         :iconName="'redo'"
         :iconWidth="'20px'"
-        :iconColor="(!inBgRemoveMode && !isInLastStep) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
+        :iconColor="(!inBgRemoveMode && !isInLastStep && !isFontLoading) || (inBgRemoveMode && !InBgRemoveLastStep) ? 'gray-2' : 'gray-4'"
         @click.native="redo"
         v-hint="$t('NN0120')")
       download-btn
@@ -90,7 +90,8 @@ export default Vue.extend({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      isFontLoading: 'text/getIsFontLoading'
     }),
     functionPanelStyles(): { [index: string]: string } {
       return this.isShowPagePreview ? {

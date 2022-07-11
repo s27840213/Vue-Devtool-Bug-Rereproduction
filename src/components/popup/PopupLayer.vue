@@ -5,7 +5,8 @@
     template(v-for="option in [...updateOptions, ...layerOptions]")
       template(v-if="option.condition")
         div(class="popup-layer__item"
-            @click="option.action($event)")
+            :class="{disabled: isFontLoading}"
+            @click="!isFontLoading && option.action($event)")
           svg-icon(
             class="pointer"
             :iconName="option.icon"
@@ -138,7 +139,8 @@ export default Vue.extend({
       isLogin: 'user/isLogin',
       token: 'user/getToken',
       _layerNum: 'getLayersNum',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      isFontLoading: 'text/getIsFontLoading'
     }),
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true
@@ -393,6 +395,10 @@ export default Vue.extend({
     transition: background-color 0.1s ease-in;
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
+    &.disabled {
+      color: setColor(gray-3);
+      cursor: not-allowed;
+    }
     &:hover {
       background-color: setColor(blue-3, 0.5);
     }

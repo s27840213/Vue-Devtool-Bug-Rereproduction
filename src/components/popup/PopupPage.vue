@@ -4,7 +4,8 @@
     template(v-for="option in updateOptions")
       template(v-if="option.condition")
         div(class="popup-page__item"
-            @click="option.action")
+            :class="{disabled: isFontLoading}"
+            @click="!isFontLoading && option.action()")
           svg-icon(
             class="pointer"
             :iconName="option.icon"
@@ -79,7 +80,8 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       getBackgroundImage: 'getBackgroundImage',
       isLogin: 'user/isLogin',
-      groupId: 'getGroupId'
+      groupId: 'getGroupId',
+      isFontLoading: 'text/getIsFontLoading'
     }),
     hasDesignId(): boolean {
       return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
@@ -199,6 +201,10 @@ export default Vue.extend({
     transition: background-color 0.1s ease-in;
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
+    &.disabled {
+      color: setColor(gray-3);
+      cursor: not-allowed;
+    }
     &:hover {
       background-color: setColor(blue-3, 0.5);
     }

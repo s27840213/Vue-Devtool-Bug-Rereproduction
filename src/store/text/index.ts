@@ -36,7 +36,8 @@ export interface ITextState {
     subLayerIndex?: number
   },
   paragraphs: Array<IParagraph>,
-  firstLoad: boolean
+  firstLoad: boolean,
+  isFontLoading: boolean
 }
 
 const getDefaultState = (): ITextState => ({
@@ -76,7 +77,8 @@ const getDefaultState = (): ITextState => ({
   fontStore: [],
   defaultFonts: [],
   paragraphs: [],
-  firstLoad: false
+  firstLoad: false,
+  isFontLoading: false
 })
 const state = getDefaultState()
 
@@ -90,6 +92,9 @@ const getters: GetterTree<ITextState, unknown> = {
   },
   paragraphs(state): Array<IParagraph> {
     return state.paragraphs
+  },
+  getIsFontLoading(state): boolean {
+    return state.isFontLoading
   }
 }
 
@@ -150,6 +155,9 @@ const mutations: MutationTree<ITextState> = {
   },
   SET_firstLoad(state: ITextState, firstLoad: boolean) {
     state.firstLoad = firstLoad
+  },
+  SET_isFontLoading(state: ITextState, isFontLoading: boolean) {
+    state.isFontLoading = isFontLoading
   }
 }
 
@@ -167,9 +175,20 @@ const actions: ActionTree<ITextState, unknown> = {
           link.href = cssUrl
           link.rel = 'stylesheet'
           document.head.appendChild(link)
+          return new Promise<void>(resolve => {
+            const checkLoaded = setInterval(() => {
+              if (Array.from(document.styleSheets).find(s => s.href === cssUrl)) {
+                clearInterval(checkLoaded)
+                commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+                state.pending = ''
+                resolve()
+              }
+            }, 100)
+          })
+        } else {
+          commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
+          state.pending = ''
         }
-        commit(UPDATE_FONTFACE, { name: face, face, loaded: true })
-        state.pending = ''
         // await new Promise(resolve => setTimeout(resolve, 10000))
         // return new Promise<void>(resolve => {
         //   newFont.load()
@@ -191,6 +210,24 @@ const actions: ActionTree<ITextState, unknown> = {
         })
       }
     }
+  },
+  async checkFontLoaded({ state }, face: string): Promise<boolean> {
+    return Promise.race([
+      new Promise<boolean>(resolve => {
+        const checkLoaded = setInterval(() => {
+          const font = state.fontStore.find(font => font.face === face)
+          if (font?.loaded) {
+            clearInterval(checkLoaded)
+            resolve(true)
+          }
+        }, 100)
+      }),
+      new Promise<boolean>(resolve => {
+        setTimeout(() => {
+          resolve(false)
+        }, 60000)
+      })
+    ])
   }
 }
 

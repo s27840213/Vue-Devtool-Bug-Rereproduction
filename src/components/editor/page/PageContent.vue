@@ -44,6 +44,7 @@ import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -82,6 +83,9 @@ export default Vue.extend({
     if (this.setLayersDone) {
       this.loadLayerImg()
     }
+    if (this.config.isAutoResizeNeeded) {
+      this.handleFontLoading()
+    }
   },
   watch: {
     setLayersDone(newVal: boolean) {
@@ -89,6 +93,11 @@ export default Vue.extend({
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
         this.loadLayerImg()
+      }
+    },
+    'config.isAutoResizeNeeded'(newVal) {
+      if (newVal) {
+        this.handleFontLoading()
       }
     }
   },
@@ -100,7 +109,8 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
+      setInMultiSelectionMode: 'SET_inMultiSelectionMode',
+      updatePageProps: 'UPDATE_pageProps'
     }),
     ...mapActions({
       updatePageImages: 'file/updatePageImages',
@@ -182,6 +192,14 @@ export default Vue.extend({
       if ((srcObj?.assetId ?? '') !== '' && locked) {
         this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
+    },
+    handleFontLoading() {
+      textUtils.untilFontLoadedForPage(this.config).then(() => {
+        this.updatePageProps({
+          pageIndex: this.pageIndex,
+          props: { isAutoResizeNeeded: false }
+        })
+      })
     }
   }
 })
