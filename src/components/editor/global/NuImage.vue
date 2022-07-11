@@ -472,7 +472,11 @@ export default Vue.extend({
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
-          this.logImgError(error)
+          fetch(this.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'fetch result: ' + status + statusText)
+            })
         }
       }
     },
@@ -486,11 +490,10 @@ export default Vue.extend({
       let log =
         `pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIndex}\n` +
         `srcObj: { type: ${type}, assetId: ${assetId}, userId: ${userId} }\n` +
-        `Error config src: ${this.src}\n` +
-        `Error log: ${e.name} + ':' + ${e.message}`
+        `Error config src: ${this.src}`
       infos.forEach(info => { log += `\n${info}` })
-      logUtils.setLog(log)
       console.warn(log)
+      logUtils.setLog(log)
     },
     async perviewAsLoading() {
       if (this.uploadingImagePreviewSrc) {
@@ -513,7 +516,11 @@ export default Vue.extend({
         }
         img.onerror = (error) => {
           reject(new Error(`cannot load the current image, src: ${this.src}`))
-          this.logImgError(error, 'img src:', img.src)
+          fetch(img.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+            })
         }
         img.src = src
       })
@@ -542,7 +549,11 @@ export default Vue.extend({
         img.onload = () => resolve()
         img.onerror = (error) => {
           reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          this.logImgError(error, 'img src:', img.src)
+          fetch(img.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+            })
         }
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
       })
@@ -566,7 +577,11 @@ export default Vue.extend({
                 layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
             }
           }
-          this.logImgError(error, 'img src:', preImg.src)
+          fetch(preImg.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + status + statusText)
+            })
         }
         preImg.onload = () => {
           const nextImg = new Image()
