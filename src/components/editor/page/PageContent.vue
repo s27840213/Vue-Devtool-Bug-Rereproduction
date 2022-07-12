@@ -150,12 +150,14 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(): void {
-      if (!this.isHandleShadow) {
-        groupUtils.deselect()
-        this.setInMultiSelectionMode(false)
-      } else {
-        imageUtils.setImgControlDefault(false)
-      }
+      // if (!this.isHandleShadow) {
+      //   groupUtils.deselect()
+      // } else {
+      //   imageUtils.setImgControlDefault(false)
+      // }
+      console.log(imageUtils.isImgControl())
+      groupUtils.deselect()
+      imageUtils.setImgControlDefault(false)
       this.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()

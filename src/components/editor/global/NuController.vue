@@ -642,14 +642,14 @@ export default Vue.extend({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      if (this.isProcessImgShadow) {
-        return
-      } else {
-        if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
-          eventUtils.emit(PanelEvent.showPhotoShadow)
-        }
-        ImageUtils.setImgControlDefault(false)
+      // if (this.isProcessImgShadow) {
+      //   return
+      // } else {
+      if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
+        eventUtils.emit(PanelEvent.showPhotoShadow)
       }
+      ImageUtils.setImgControlDefault(false)
+      // }
 
       if (this.isTouchDevice && !this.isActive && !this.isLocked) {
         const body = (this.$refs.body as HTMLElement)

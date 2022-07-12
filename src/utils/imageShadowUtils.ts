@@ -92,7 +92,6 @@ class ImageShadowUtils {
   private handlerId = ''
 
   private _layerData = null as {
-    img: HTMLImageElement,
     config: IImage,
     pageId: string,
     /** This identifier is used to indexing the sub-layer */
@@ -110,12 +109,21 @@ class ImageShadowUtils {
     data: {} as ImageData
   }
 
+  private _inUploadProcess = false
+
   get layerData() { return this._layerData }
+  get inUploadProcess() { return this._inUploadProcess }
+
+  setUploadProcess(val: boolean) {
+    this._inUploadProcess = val
+  }
+
   getHandlerId(): string {
     return this?.handlerId || ''
   }
 
-  private drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+  drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
+    this.clearLayerData()
     const { canvasT } = this
     const ctxT = canvasT.getContext('2d')
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
@@ -123,7 +131,7 @@ class ImageShadowUtils {
       canvasT.setAttribute('height', `${canvas.height}`)
     }
     if (ctxT) {
-      this._layerData = { img, config, pageId: params.pageId || pageUtils.currFocusPage.id }
+      this._layerData = { config, pageId: params.pageId || pageUtils.currFocusPage.id }
       const { layerInfo } = params || {}
       if (layerInfo) {
         const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
@@ -138,11 +146,11 @@ class ImageShadowUtils {
           layerId: primarylayerId || config.id || '',
           subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
         })
-        ctxT.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvasT.width, canvasT.height)
-        this.updateEffectProps(layerInfo, {
-          isTransparent: this.isTransparentBg(canvasT)
-        })
-        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+        // ctxT.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvasT.width, canvasT.height)
+        // this.updateEffectProps(layerInfo, {
+        //   isTransparent: this.isTransparentBg(canvasT)
+        // })
+        // ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       }
       if (params) {
         this._layerData.options = {
@@ -160,7 +168,7 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
-    this.drawingInit(canvas, img, config, params)
+    // this.drawingInit(canvas, img, config, params)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
@@ -277,7 +285,7 @@ class ImageShadowUtils {
           ctx.drawImage(canvasT, 0, 0)
         })
         if (layerInfo) {
-          this.setIsProcess(layerInfo, false)
+          timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         cb && cb()
@@ -291,7 +299,7 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
-    this.drawingInit(canvas, img, config, params)
+    // this.drawingInit(canvas, img, config, params)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
@@ -304,6 +312,7 @@ class ImageShadowUtils {
   }
 
   async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    console.log('start drawing imageMatched:', params.timeout)
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
@@ -321,10 +330,10 @@ class ImageShadowUtils {
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
 
     const scaleRatio = img.naturalWidth / _imgWidth
-    let imgX = _imgX * scaleRatio
-    let imgY = _imgY * scaleRatio
-    let drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
-    let drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
+    const imgX = _imgX * scaleRatio
+    const imgY = _imgY * scaleRatio
+    const drawImgWidth = layerWidth / _imgWidth * img.naturalWidth
+    const drawImgHeight = layerHeight / _imgHeight * img.naturalHeight
     let { drawCanvasW, drawCanvasH, layerInfo } = params || {}
     if (!drawCanvasH || !drawCanvasW) {
       drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0 as number
@@ -334,30 +343,6 @@ class ImageShadowUtils {
     drawCanvasH *= size * 0.01
     const blurImgX = (canvas.width - drawCanvasW) * 0.5
     const blurImgY = (canvas.height - drawCanvasH) * 0.5
-
-    /** If the img is svg+xml convert it to png */
-    if (['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
-      await new Promise<void>((resolve) => {
-        fetch(img.src)
-          .then((response) => {
-            if (response.headers.get('Content-Type') === 'image/svg+xml') {
-              const pngCanvas = document.createElement('canvas')
-              const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
-              drawImgWidth *= pngScaleRation
-              drawImgHeight *= pngScaleRation
-              imgX *= pngScaleRation
-              imgY *= pngScaleRation
-              pngCanvas.setAttribute('width', (img.naturalWidth * pngScaleRation).toString())
-              pngCanvas.setAttribute('height', (img.naturalHeight * pngScaleRation).toString())
-              const pngCtx = pngCanvas.getContext('2d') as CanvasRenderingContext2D
-              pngCtx.drawImage(img, 0, 0)
-              const svgUrl = pngCanvas.toDataURL('image/png;base64', 1)
-              img.src = svgUrl
-            }
-            resolve()
-          })
-      })
-    }
 
     const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}${imgX}${imgY}${_imgHeight}${_imgWidth}${img.src}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.imageMatched && this.dataBuff.radius === radius && this.dataBuff.size === size && this.dataBuff.layerIdentifier === layerIdentifier
@@ -423,7 +408,7 @@ class ImageShadowUtils {
           ctx.drawImage(canvasT, 0, 0)
         })
         if (layerInfo) {
-          this.setIsProcess(layerInfo, false)
+          timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         cb && cb()
@@ -440,7 +425,7 @@ class ImageShadowUtils {
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) return
-    this.drawingInit(canvas, img, config, params)
+    // this.drawingInit(canvas, img, config, params)
 
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {

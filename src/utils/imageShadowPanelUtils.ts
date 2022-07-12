@@ -70,10 +70,21 @@ export default new class ImageShadowPanelUtils {
           .every(([k, v]) => {
             return (shadow.srcState as any).effects[currentEffect][k] === v
           }) &&
-        (!shadow.isTransparent || (shadow.srcState.layerState && Object.entries(shadow.srcState.layerState)
-          .every(([k, v]) => {
-            return (config.styles as any)[k] === v
-          })))
+        (!shadow.isTransparent ||
+          (
+            shadow.srcState.layerState && Object.entries(shadow.srcState.layerState)
+              .every(([k, v]) => {
+                return (config.styles as any)[k] === v
+              })
+          )
+        ) &&
+        (shadow.currentEffect !== ShadowEffectType.imageMatched ||
+          (
+            shadow.srcState.srcObj.type === config.srcObj.type &&
+            shadow.srcState.srcObj.userId === config.srcObj.userId &&
+            shadow.srcState.srcObj.assetId === config.srcObj.assetId
+          )
+        )
     }
   }
 
@@ -81,7 +92,9 @@ export default new class ImageShadowPanelUtils {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = _layerData ?? imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
+    console.log(layerData)
     if (layerData) {
+      imageShadowUtils.setUploadProcess(true)
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
@@ -89,7 +102,7 @@ export default new class ImageShadowPanelUtils {
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
       /** If the shadow effct has already got the img src, return */
 
-      if (config.type !== LayerType.image || config.styles.shadow.srcObj.type) {
+      if (config.type !== LayerType.image) {
         return
       }
       if (this.checkIfSameEffect(config) && config.styles.shadow.srcState) {
@@ -151,7 +164,6 @@ export default new class ImageShadowPanelUtils {
 
       logUtils.setLog('phase: finish load max size img')
       const updateCanvas = document.createElement('canvas')
-      // const { initWidth: width, initHeight: height, imgWidth, imgHeight } = config.styles
       const { width, height, imgWidth, imgHeight } = config.styles
       const drawCanvasW = width / imgWidth * img.naturalWidth
       const drawCanvasH = height / imgHeight * img.naturalHeight
@@ -173,7 +185,8 @@ export default new class ImageShadowPanelUtils {
       const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
-
+      console.log(updateCanvas.width, updateCanvas.height)
+      console.log(drawCanvasW, drawCanvasH)
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
@@ -226,6 +239,8 @@ export default new class ImageShadowPanelUtils {
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
+          console.log(updateCanvas.width, right, left)
+          console.log(newWidth, newHeight)
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
@@ -267,8 +282,6 @@ export default new class ImageShadowPanelUtils {
               src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))}
               pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
               pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
-
-              imageShadowUtils.clearLayerData()
             }
             newImg.onerror = () => {
               console.error('can not load the uploaded image shadow')
@@ -282,7 +295,9 @@ export default new class ImageShadowPanelUtils {
           }).catch((e: Error) => {
             console.error(e)
             logUtils.setLog('error' + e.message)
+          }).finally(() => {
             imageShadowUtils.clearLayerData()
+            imageShadowUtils.setUploadProcess(false)
           })
         }
       })

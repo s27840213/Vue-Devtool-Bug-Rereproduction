@@ -306,10 +306,9 @@ export default Vue.extend({
         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
         LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
         eventUtils.emit(PanelEvent.showPhotoShadow)
-        return
-      } else {
-        imageUtils.setImgControlDefault(false)
+        // return
       }
+      imageUtils.setImgControlDefault(false)
 
       this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
