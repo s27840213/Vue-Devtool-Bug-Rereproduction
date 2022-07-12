@@ -38,7 +38,8 @@
                 @keydown.native.meta.90.exact.stop.self
                 @keydown.native.ctrl.shift.90.exact.stop.self
                 @keydown.native.meta.shift.90.exact.stop.self
-                @update="handleTextChange")
+                @update="handleTextChange"
+                @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -168,8 +169,7 @@ export default Vue.extend({
       return this.config.contentEditable
     },
     isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
+      return this.checkIfCurve(this.config)
     },
     primaryScale(): number {
       return this.primaryLayer.styles.scale
@@ -425,18 +425,43 @@ export default Vue.extend({
         })
       }
     },
+    waitFontLoadingAndRecord() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.primaryLayer.id
+      const subLayerId = this.config.id
+      TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
+        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+        if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+        TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+      })
+    },
+    checkIfCurve(config: IText): boolean {
+      const { textShape } = config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    calcSize(config: IText) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+    },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.isCurveText ? this.curveTextSizeRefresh(this.config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      this.calcSize(this.config)
       if (payload.toRecord) {
-        StepsUtils.record()
+        this.waitFontLoadingAndRecord()
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
+        // if composing starts from empty line, isSetContentRequired will be true in the first typing.
+        // However, setContent will break the composing, so skip setContent when composing.
+        // setContent will be done when 'composeend' (in NuTextEditor.vue)
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
             editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
           })
         })
+      }
+    },
+    handleTextCompositionEnd(toRecord: boolean) {
+      if (toRecord) {
+        this.waitFontLoadingAndRecord()
       }
     },
     curveTextSizeRefresh(text: IText) {

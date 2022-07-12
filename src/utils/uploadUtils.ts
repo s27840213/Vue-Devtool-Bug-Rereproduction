@@ -252,7 +252,7 @@ class UploadUtils {
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
-                    this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
+                    this.uploadDesign()
                   } else if (json.flag === 1) {
                     store.commit('file/DEL_PREVIEW', { assetId })
                     LayerUtils.deleteLayerByAssetId(assetId)
@@ -1052,6 +1052,8 @@ class UploadUtils {
       delete page.documentColors
       page.documentColors = documentColors
     }
+
+    page.isAutoResizeNeeded = false
     return page
   }
 
@@ -1160,12 +1162,12 @@ class UploadUtils {
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
+                pageUtils.setAutoResizeNeededForPages(json.pages, true)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
+                stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.
                 store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
-                //
-                stepsUtils.reset()
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {

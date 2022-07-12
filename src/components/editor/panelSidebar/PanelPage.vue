@@ -8,7 +8,7 @@
         style="padding: 5px 0;"
         @click.native="addPage(middlemostPageIndex+1)") {{$t('NN0139')}}
     div(class="panel-page-items")
-      template(v-for="(page, idx) in getPages")
+      template(v-for="(page, idx) in pages")
         div(class="panel-page__plus")
           panel-page-plus(:index="idx" last=false
             :class="{'pt-10': idx === 0}")
@@ -24,6 +24,8 @@ import { mapGetters, mapMutations } from 'vuex'
 import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PanelPagePlus from '@/components/editor/pagePreview/PanelPagePlus.vue'
 import pageUtils from '@/utils/pageUtils'
+import generalUtils from '@/utils/generalUtils'
+import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   components: {
@@ -36,7 +38,12 @@ export default Vue.extend({
       middlemostPageIndex: 'getMiddlemostPageIndex'
     }),
     getPageCount(): number {
-      return this.getPages.length
+      return this.pages.length
+    },
+    pages(): IPage[] {
+      const pages = generalUtils.deepCopy(this.getPages)
+      pageUtils.setAutoResizeNeededForPages(pages, false)
+      return pages
     }
   },
   methods: {
