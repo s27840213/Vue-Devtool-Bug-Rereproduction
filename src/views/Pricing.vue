@@ -185,7 +185,7 @@ export default Vue.extend({
   &-bottom {
     @include body-MD;
     display: grid;
-    grid-template-columns: 1fr 1fr; // ask for auto auto
+    grid-template-columns: auto auto;
     margin-top: 10px;
     color: setColor(gray-2);
     > div {
@@ -259,12 +259,12 @@ export default Vue.extend({
   }
   > div:nth-child(-n + 3) {
     padding: 8px 0;
-    word-break: keep-all; // H6?
+    word-break: keep-all;
   }
   > div:nth-child(2),
   > div:nth-child(3) {
     text-align: center;
-  } // H6?
+  }
   > div:nth-child(3n) {
     background-color: setColor(blue-4);
   }
@@ -356,7 +356,7 @@ export default Vue.extend({
     }
   }
   .pricing-plan-right {
-    width: 42%; // ask for %
+    width: 42%;
   }
 }
 @media screen and (max-width: 1440px) and (min-width: 1024.02px) {

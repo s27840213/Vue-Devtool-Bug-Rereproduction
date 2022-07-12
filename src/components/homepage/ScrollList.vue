@@ -170,9 +170,16 @@ export default Vue.extend({
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
     },
     templateUrl(item: IAssetTemplate): string {
-      return this.theme === '7'
-        ? `editor?type=product-page-template&design_id=${item.group_id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
-        : `/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
+      return this.$router.resolve({
+        name: 'Editor',
+        query: {
+          type: this.theme === '7' ? 'product-page-template' : 'new-design-template',
+          design_id: this.theme === '7' ? item.group_id : item.match_cover.id,
+          themeId: item.content_ids[0].themes.join(','),
+          width: String(item.match_cover.width),
+          height: String(item.match_cover.height)
+        }
+      }).href
     },
     clickTemplate(item: IAssetTemplate) {
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
