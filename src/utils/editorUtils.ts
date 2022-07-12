@@ -7,6 +7,12 @@ class EditorUtils {
       store.commit('SET_closeMobilePanelFlag', bool)
     }
   }
+
+  setMobileAllPageMode(bool: boolean): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('SET_mobileAllPageMode', bool)
+    }
+  }
 }
 
 const editorUtils = new EditorUtils()

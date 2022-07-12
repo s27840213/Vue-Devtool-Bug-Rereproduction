@@ -48,6 +48,7 @@ import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -68,7 +69,6 @@ export default Vue.extend({
       isSaving: false,
       currActivePanel: 'none',
       currColorEvent: '',
-      inAllPagesMode: false,
       showExtraColorPanel: false,
       ColorEventType
     }
@@ -80,7 +80,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState({
-      closeMobilePanelFlag: 'closeMobilePanelFlag'
+      closeMobilePanelFlag: 'closeMobilePanelFlag',
+      inAllPagesMode: 'mobileAllPageMode'
     }),
     ...mapState('user', [
       'role',
@@ -183,7 +184,7 @@ export default Vue.extend({
       }
     },
     showAllPages() {
-      this.inAllPagesMode = !this.inAllPagesMode
+      editorUtils.setMobileAllPageMode(!this.inAllPagesMode)
     },
     openExtraColorModal() {
       this.showExtraColorPanel = !this.showExtraColorPanel

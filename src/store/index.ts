@@ -104,6 +104,7 @@ const getDefaultState = (): IEditorState => ({
   isMobile: false,
   isLargeDesktop: false,
   closeMobilePanelFlag: false,
+  mobileAllPageMode: false,
   isGlobalLoading: false,
   inMultiSelectionMode: false
 })
@@ -806,6 +807,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_closeMobilePanelFlag(state: IEditorState, bool: boolean) {
     state.closeMobilePanelFlag = bool
+  },
+  SET_mobileAllPageMode(state: IEditorState, bool: boolean) {
+    state.mobileAllPageMode = bool
   },
   SET_isGlobalLoading(state: IEditorState, bool: boolean) {
     state.isGlobalLoading = bool
