@@ -227,7 +227,12 @@ export default Vue.extend({
       if (['a', 'h', 'l', 't'].includes(this.currLocation)) {
         this.$router.push({ name: 'Home' })
       } else {
-        // TODO: go to parent folder or folder list (if current folder is top-level)
+        if (this.path.length === 2) {
+          this.setCurrLocation('l')
+        } else {
+          const selectedParents = this.path.slice(0, this.path.length - 1)
+          this.setCurrLocation(`f:${selectedParents.join('/')}`)
+        }
       }
     },
     handleGoTo(tab: string) {
