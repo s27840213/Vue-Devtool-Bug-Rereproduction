@@ -205,7 +205,7 @@ export default Vue.extend({
           }, {
             icon: 'sequence',
             action: () => {
-              console.log('show sorting')
+              this.bottomMenu = 'sort-menu'
             }
           }]
       }
