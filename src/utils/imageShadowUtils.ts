@@ -860,6 +860,7 @@ class ImageShadowUtils {
   }
 
   updateShadowSrc(layerInfo: ILayerInfo, srcObj: SrcObj) {
+    console.warn('update src')
     store.commit('SET_srcObj', {
       layerInfo,
       srcObj
@@ -878,7 +879,10 @@ class ImageShadowUtils {
     store.commit('shadow/SET_PROCESS_ID', id)
   }
 
-  setHandleId(id: ILayerIdentifier) {
+  setHandleId(id?: ILayerIdentifier) {
+    if (!id) {
+      id = { pageId: '', layerId: '', subLayerId: '' }
+    }
     store.commit('shadow/SET_HANDLE_ID', id)
   }
 

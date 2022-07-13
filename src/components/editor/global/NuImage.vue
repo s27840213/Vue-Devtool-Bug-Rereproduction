@@ -56,7 +56,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IGroup, IImage } from '@/interfaces/layer'
+import { IGroup, IImage, ILayerIdentifier } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
@@ -110,24 +110,29 @@ export default Vue.extend({
     this.src = this.uploadingImagePreviewSrc === undefined ? this.src : this.uploadingImagePreviewSrc
     eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
-        if (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent) {
-          // this.redrawShadow(true)
+        const isFloatingEffect = this.currentShadowEffect === ShadowEffectType.floating
+        if (!isFloatingEffect && (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent)) {
           this.redrawShadow()
         } else {
           const img = new Image()
           img.crossOrigin = 'anonymous'
           img.onload = () => {
             const isTransparent = imageShadowUtils.isTransparentBg(img)
+            imageShadowUtils.setHandleId()
             imageShadowUtils.updateEffectProps({
               pageIndex: this.pageIndex,
               layerIndex: this.layerIndex,
               subLayerIdx: this.subLayerIndex
             }, { isTransparent })
-            isTransparent && this.redrawShadow()
-            // isTransparent && this.redrawShadow(true)
+            if (!isFloatingEffect) {
+              isTransparent && this.redrawShadow()
+            }
           }
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
-          img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+          img.src = ImageUtils.getSrc(this.config, imgSize)
+          if (!isFloatingEffect) {
+            imageShadowUtils.setHandleId(this.id)
+          }
         }
       } else {
         stepsUtils.record()
@@ -138,6 +143,7 @@ export default Vue.extend({
     if (this.config.inProcess) {
       this.setIsProcessing(LayerProcessType.none)
     }
+    eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
   },
   data() {
     return {
@@ -465,6 +471,14 @@ export default Vue.extend({
         return ''
       }
       return ImageUtils.getSrc(this.shadow.srcObj, ImageUtils.getSrcSize(this.shadow.srcObj.type, this.getImgDimension))
+    },
+    id(): ILayerIdentifier {
+      return {
+        pageId: pageUtils.getPage(this.pageIndex).id,
+        layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
+          ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
+        subLayerId: this.config.id
+      }
     }
   },
   methods: {
@@ -645,12 +659,7 @@ export default Vue.extend({
 
       const { currentEffect } = this.shadow
       if (currentEffect !== ShadowEffectType.none) {
-        const id = {
-          pageId: pageUtils.getPage(this.pageIndex).id,
-          layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
-            ? layerUtils.getLayer(this.pageIndex, this.layerIndex).id : this.config.id,
-          subLayerId: this.config.id
-        }
+        const { id } = this
         imageShadowUtils.setHandleId(id)
         imageShadowUtils.setProcessId(id)
         imageShadowUtils.setIsProcess(layerInfo, true)
@@ -731,7 +740,6 @@ export default Vue.extend({
                 })
                 .finally(() => {
                   if (!imageShadowUtils.inUploadProcess) {
-                    console.log('draw image mathch')
                     imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
                     this.shadowBuff.canvasShadowImg.imageMatched = img
                   }
@@ -864,7 +872,6 @@ export default Vue.extend({
           imageShadowPanelUtils.handleShadowUpload(layerData)
         } else {
           this.handleNewShadowEffect()
-          console.log('openPanel', openPanel)
           if (openPanel) {
             eventUtils.emit(PanelEvent.showPhotoShadow)
           } else {

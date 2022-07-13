@@ -73,10 +73,7 @@ class EventUtils {
   }
 
   on(type: string, callback: (type?: string) => void) {
-    if (this.eventHash[type]) {
-      this.event.off(type, this.eventHash[type])
-      delete this.eventHash[type]
-    }
+    this.off(type)
     this.event.on(type, callback)
     this.eventHash[type] = callback
   }
@@ -84,6 +81,13 @@ class EventUtils {
   emit(type: string) {
     if (this.eventHash[type]) {
       this.event.emit(type)
+    }
+  }
+
+  off(type: string) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
     }
   }
 }

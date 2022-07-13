@@ -102,7 +102,7 @@ export default Vue.extend({
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-      dragUtils: new DragUtils(this.primaryLayerIndex, this.layerIndex),
+      dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false
     }
   },
