@@ -971,10 +971,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   padding: 0 12px;
   &__buttons {
     margin-top: 8px;
-    // width: 137px;
-    > div {
-      // width: 63.39px;
-    }
   }
 }
 
@@ -1005,10 +1001,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   &__buttons {
     margin-top: 17px;
     margin-bottom: 37px;
-    // width: 183px;
-    > div {
-      // width: 84.67px;
-    }
   }
 }
 
@@ -1022,23 +1014,9 @@ $messageTypes: delete-all, delete-folder, delete-forever;
   padding: 0 12px;
   &__buttons {
     margin-top: 14px;
-    // width: 201px;
     height: 30px;
     > div {
-      // width: 93px;
       height: 30px;
-    }
-  }
-  &__cancel {
-    > span {
-      // letter-spacing: 1.21em;
-      // text-indent: 1.21em;
-    }
-  }
-  &__confirm {
-    > span {
-      // letter-spacing: 0.305em;
-      // text-indent: 0.305em;
     }
   }
 }
