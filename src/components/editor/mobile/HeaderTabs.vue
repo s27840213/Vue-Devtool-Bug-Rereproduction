@@ -5,26 +5,26 @@
         :iconName="'chevron-left'"
         :iconColor="'white'"
         :iconWidth="'22px'"
-        @click.native="backBtnAction()")
+        @pointerdown.native="backBtnAction()")
       svg-icon(class="header-bar__feature-icon mr-20"
         :class="{'click-disabled': isLocked}"
         :iconName="'undo'"
         :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
         :iconWidth="'22px'"
-        @click.native="undo()")
+        @pointerdown.native="undo()")
       svg-icon(class="header-bar__feature-icon"
         :class="{'click-disabled': isLocked}"
         :iconName="'redo'"
         :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
         :iconWidth="'22px'"
-        @click.native="redo()")
+        @pointerdown.native="redo()")
     div(class="header-bar__right")
       svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
         :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
         :iconName="tab.icon"
         :iconColor="iconColor(tab)"
         :iconWidth="'22px'"
-        @click.native="handleIconAction(tab.icon)")
+        @pointerdown.native="handleIconAction(tab.icon)")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'

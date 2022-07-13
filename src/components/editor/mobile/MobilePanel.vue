@@ -6,6 +6,7 @@
         :class="{'visible-hidden': panelTitle !== ''}"
         @pointerdown="dragPanelStart"
         @touchstart="disableTouchEvent")
+          div
       div
         div(class="mobile-panel__btn mobile-panel__left-btn"
             :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn}")
@@ -410,11 +411,13 @@ export default Vue.extend({
   &__drag-bar {
     position: absolute;
     top: 2px;
-    height: 3px;
-    width: 24px;
-    margin: 10px 20px;
+    padding: 10px 20px;
     border-radius: 5px;
-    background-color: setColor(gray-4);
+    > div {
+      background-color: setColor(gray-4);
+      height: 3px;
+      width: 24px;
+    }
   }
 }
 </style>
