@@ -71,7 +71,6 @@ import { IFrame } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
-import _ from 'lodash'
 import { ColorEventType } from '@/store/types'
 
 export default Vue.extend({

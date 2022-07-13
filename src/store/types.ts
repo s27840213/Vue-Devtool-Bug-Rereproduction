@@ -72,6 +72,7 @@ export interface IEditorState {
   isMobile: boolean
   isLargeDesktop: boolean,
   closeMobilePanelFlag: boolean,
+  mobileAllPageMode: boolean
   isGlobalLoading: boolean,
   inMultiSelectionMode: boolean
 }

@@ -551,6 +551,8 @@ class AssetUtils {
           }
           store.commit('SET_currActivePageIndex', targetIndex)
           stepsUtils.record()
+
+          editorUtils.setCloseMobilePanelFlag(true) // Close MobilePanel.
         })
       })
   }

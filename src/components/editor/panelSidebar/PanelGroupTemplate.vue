@@ -13,7 +13,7 @@
         iconWidth="30px"
         iconColor="white"
         @click.native="handleDeleteGroupTemplate")
-    div(class="panel-group-template__list")
+    div(class="panel-group-template__list" :style="listStyle")
       category-template-item(v-for="(item, idx) in contents"
         class="panel-group-template__item"
         :showId="showId"
@@ -29,6 +29,8 @@ import CategoryTemplateItem from '@/components/category/CategoryTemplateItem.vue
 import assetUtils from '@/utils/assetUtils'
 import modalUtils from '@/utils/modalUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: { CategoryTemplateItem },
@@ -54,12 +56,20 @@ export default Vue.extend({
     },
     isDetailPage(): boolean {
       return this.groupItem.group_type === 1
+    },
+    listStyle(): Record<string, string> {
+      return generalUtils.isTouchDevice() ? {
+        gridTemplateColumns: `repeat(${screen.width >= 600 ? 3 : 2}, 1fr)`
+      } : {}
     }
   },
   methods: {
     handleApplyGroupTemplate() {
       if (!paymentUtils.checkProGroupTemplate(this.groupItem, this.groupItem.content_ids[0])) return
       assetUtils.addGroupTemplate(this.groupItem)
+        .then(() => {
+          editorUtils.setMobileAllPageMode(true)
+        })
     },
     handleDeleteGroupTemplate() {
       if (!this.isAdmin) return
