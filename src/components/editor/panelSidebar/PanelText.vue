@@ -302,6 +302,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   &__brand-header {
     margin-top: 10px;
     margin-bottom: 13px;

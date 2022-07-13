@@ -335,6 +335,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   &__item {
     text-align: center;
     vertical-align: middle;

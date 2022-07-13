@@ -192,6 +192,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   &__item {
     width: 80px;
     height: 80px;
