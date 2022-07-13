@@ -6,7 +6,7 @@
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
       @final="handleChangeStop")
-    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" :showPanelBtn="false" @openColorPicker="openColorPicker")
+    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" :showPanelBtn="false" @openColorPicker="openColorPicker" @openColorMore="openColorMore")
     div(v-if="showDocumentColors" class="panel-color__document-colors")
       div(v-if="hasMultiColors"
         class="panel-color__document-color"
@@ -30,7 +30,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
-import ColorPanel from '@/components/editor/ColorPanel.vue'
+import ColorPanel from '@/components/editor/ColorSlips.vue'
 import { ColorEventType, LayerType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -110,7 +110,7 @@ export default Vue.extend({
       return this.inInitialState && this.currEvent === ColorEventType.shape
     },
     showPalette(): boolean {
-      return this.lastHistory === 'color-palette' || (this.inInitialState && !this.showDocumentColors)
+      return ['color-palette', 'color-more'].includes(this.lastHistory) || (this.inInitialState && !this.showDocumentColors)
     },
     hasMultiColors(): boolean {
       return shapeUtils.hasMultiColors
@@ -226,6 +226,9 @@ export default Vue.extend({
     },
     recordChange() {
       stepsUtils.record()
+    },
+    openColorMore() {
+      this.$emit('pushHistory', 'color-more')
     },
     openColorPicker() {
       this.$emit('pushHistory', 'color-picker')

@@ -12,8 +12,8 @@
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left mb-5")
           div(class="flex-center")
-            svg-icon(v-if="showAllRecently" iconName="chevron-left"
-                  iconWidth="24px" iconColor="white"
+            svg-icon(v-if="showAllRecently && !isTouchDevice" iconName="chevron-left"
+                  iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                   class="mr-5" @click.native="lessRecently()")
             span {{$t('NN0679')}}
           span(v-if="!showAllRecently" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
@@ -193,6 +193,9 @@ export default Vue.extend({
       return this.showAllRecently
         ? this.allRecentlyColors
         : this.allRecentlyColors.slice(0, 20)
+    },
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   methods: {
@@ -297,7 +300,10 @@ export default Vue.extend({
       })
     },
     lessRecently() { this.showAllRecently = false },
-    moreRecently() { this.showAllRecently = true }
+    moreRecently() {
+      this.$emit('openColorMore')
+      this.showAllRecently = true
+    }
   }
 })
 </script>
@@ -367,6 +373,8 @@ export default Vue.extend({
     width: 100%;
     padding-top: 100%;
     border-radius: 2px;
+    border: 1px solid setColor(gray-4, 0.3);
+    box-sizing: border-box;
     box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
     cursor: pointer;
   }

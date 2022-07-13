@@ -12,9 +12,10 @@
       :isMobile="isMobile"
       :fullWidth="isMobile"
       :aspectRatio="aspectRatio")
-    div(class="px-10")
+    div(:class="{'px-10': !isTouchDevice}")
       div(class="color-picker__hex")
-        svg-icon(class="pointer"
+        svg-icon(v-if="!isTouchDevice"
+          class="pointer"
           iconName="eye-dropper"
           :iconWidth="'20px'"
           :iconColor="'gray-2'"
@@ -37,6 +38,7 @@ import { mapGetters, mapMutations } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import { Chrome } from 'vue-color'
 import i18n from '@/i18n'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -62,8 +64,10 @@ export default Vue.extend({
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
     const input = this.$refs.input as HTMLInputElement
-    root.focus()
-    input.select()
+    if (!generalUtils.isTouchDevice) {
+      root.focus()
+      input.select()
+    }
   },
   computed: {
     ...mapGetters({
@@ -155,6 +159,9 @@ export default Vue.extend({
       this.finalizeTimer = setTimeout(() => {
         this.$emit('final', formatedColor)
       }, 500)
+    },
+    isTouchDevice() {
+      return generalUtils.isTouchDevice()
     }
   }
 })

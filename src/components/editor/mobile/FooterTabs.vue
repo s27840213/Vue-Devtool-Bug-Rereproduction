@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="footer-tabs" ref="tabs")
-    div(class="footer-tabs__container" :style="containerStyles")
+    div(class="footer-tabs__container" :style="containerStyles"  ref="container")
       template(v-for="(tab, index) in tabs")
         div(v-if="!tab.disabled"
             class="footer-tabs__item"
@@ -27,6 +27,7 @@ import { IFooterTab } from '@/interfaces/editor'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import shapeUtils from '@/utils/shapeUtils'
 
 export default Vue.extend({
   components: {
@@ -45,6 +46,7 @@ export default Vue.extend({
     const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
 
     return {
+      mainMenu,
       isFontsPanelOpened: false,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
@@ -54,16 +56,6 @@ export default Vue.extend({
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
         { panelType: 'brand', text: `${this.$t('NN0007')}`, disabled: true }
-      ] as Array<IFooterTab>,
-      photoTabs: [
-        mainMenu,
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo', disabled: true },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
-        { icon: 'removed-bg', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'object', disabled: true }
-        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ] as Array<IFooterTab>,
       fontTabs: [
         mainMenu,
@@ -81,18 +73,6 @@ export default Vue.extend({
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
-      ] as Array<IFooterTab>,
-      objectTabs: [
-        mainMenu,
-        {
-          icon: 'color',
-          text: `${this.$t('NN0495')}`,
-          panelType: 'color',
-          props: {
-            currColorEvent: ColorEventType.shape
-          }
-        },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true }
       ] as Array<IFooterTab>,
       pageTabs: [
         mainMenu,
@@ -114,6 +94,32 @@ export default Vue.extend({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep'
     }),
+    photoTabs(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo', disabled: true },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', disabled: this.isFrameImage }
+        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+      ]
+    },
+    objectTabs(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          disabled: shapeUtils.getDocumentColors.length === 0,
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true }
+      ]
+    },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
@@ -226,9 +232,12 @@ export default Vue.extend({
         this.$emit('switchTab', 'none')
       }
     },
-    tabs() {
-      const tabs = this.$refs.tabs as HTMLElement
-      tabs.scrollTo(0, 0)
+    tabs: {
+      handler() {
+        const container = this.$refs.container as HTMLElement
+        container.scrollTo(0, 0)
+      },
+      deep: true
     },
     contentEditable(newVal) {
       if (newVal) {

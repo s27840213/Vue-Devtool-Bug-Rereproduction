@@ -586,7 +586,9 @@ class AssetUtils {
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
-          this.addTemplate(asset.jsonData, attrs)
+          this.addTemplate(asset.jsonData, attrs).then(() => {
+            pageUtils.fitPage()
+          })
           editorUtils.setCloseMobilePanelFlag(true)
           break
         case 7:

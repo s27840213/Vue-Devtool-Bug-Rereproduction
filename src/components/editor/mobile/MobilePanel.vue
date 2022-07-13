@@ -30,8 +30,9 @@
             @click="rightButtonAction")
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
+        //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
         component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
-          class="border-box"
+          class="border-box p-2"
           v-bind="dynamicBindProps"
           v-on="dynamicBindMethod"
           @close="closeMobilePanel")
@@ -41,7 +42,7 @@ import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorPanel.vue'
+import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -133,13 +134,13 @@ export default Vue.extend({
       inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     whiteTheme(): boolean {
-      const whiteThemePanel = ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'adjust', 'photo-shadow']
+      const whiteThemePanel = ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'adjust', 'photo-shadow', 'resize']
       return this.showColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return this.showColorPanel || ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
     },
-    halfSize(): boolean {
+    halfSizeInInitState(): boolean {
       return ['fonts'].includes(this.currActivePanel)
     },
     maxHalfSize(): boolean {
@@ -311,15 +312,18 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.panelHeight = this.maxHeightPx()
+    this.panelHeight = this.initHeightPx()
   },
   methods: {
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
     },
+    initHeightPx() {
+      return (this.$el.parentElement as HTMLElement).clientHeight * (this.halfSizeInInitState ? 0.5 : 0.9)
+    },
     maxHeightPx() {
-      return (this.$el.parentElement as HTMLElement).clientHeight * (this.halfSize ? 0.5 : 0.9)
+      return (this.$el.parentElement as HTMLElement).clientHeight * 0.9
     },
     dragPanelStart(event: MouseEvent | PointerEvent) {
       this.lastPointerY = event.clientY

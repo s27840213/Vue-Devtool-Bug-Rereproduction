@@ -1180,6 +1180,8 @@ class UploadUtils {
                 store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
+
+                pageUtils.fitPage()
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {

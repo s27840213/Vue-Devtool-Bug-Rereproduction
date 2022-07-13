@@ -431,6 +431,9 @@ export default Vue.extend({
     },
     isMobile(): boolean {
       return generalUtils.isTouchDevice()
+    },
+    selectedLayerCount(): number {
+      return this.currSelectedInfo.layers.length
     }
   },
   methods: {
@@ -455,7 +458,8 @@ export default Vue.extend({
         backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
         width: `${this.config.width}px`,
-        height: `${this.config.height}px`
+        height: `${this.config.height}px`,
+        overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
       }
     },
     wrapperStyles() {
@@ -781,8 +785,8 @@ export default Vue.extend({
   position: absolute;
   top: 0px;
   left: 0px;
-  // this css property will prevent the page-control div from blocking all the event of page-content
   transform-style: preserve-3d;
+  // this css property will prevent the page-control div from blocking all the event of page-content
   pointer-events: none;
   :focus {
     outline: none;
