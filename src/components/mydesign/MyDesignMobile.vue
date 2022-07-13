@@ -14,6 +14,18 @@
                     :iconWidth="renderedWidth(button)"
                     :iconHeight="renderedHeight(button)")
     div(class="my-design-mobile__content")
+      component(v-if="currLocation !== ''"
+                :is="mydesignView"
+                class="design-view"
+                @deleteItem="handleDeleteItem"
+                @clearSelection="handleClearSelection"
+                @recoverItem="handleRecoverItem"
+                @deleteFolder="handleDeleteFolder"
+                @moveItem="handleMoveItem"
+                @deleteForever="handleDeleteForever"
+                @deleteFolderForever="handleDeleteFolderForever"
+                @moveDesignToFolder="handleMoveDesignToFolder"
+                @downloadDesign="handleDownloadDesign")
     div(class="my-design-mobile__tab-bar")
       div(v-for="tabButton in tabButtons"
           class="my-design-mobile__tab-button pointer"
@@ -36,6 +48,11 @@
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import BottomMenu from '@/components/mydesign/BottomMenu.vue'
+import MobileAllDesignView from '@/components/mydesign/design-views/MobileAllDesignView.vue'
+import MobileFavoriteDesignView from '@/components/mydesign/design-views/MobileFavoriteDesignView.vue'
+import MobileListDesignView from '@/components/mydesign/design-views/MobileListDesignView.vue'
+import MobileFolderDesignView from '@/components/mydesign/design-views/MobileFolderDesignView.vue'
+import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTrashDesignView.vue'
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
@@ -112,7 +129,12 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   components: {
-    BottomMenu
+    BottomMenu,
+    MobileAllDesignView,
+    MobileFavoriteDesignView,
+    MobileListDesignView,
+    MobileFolderDesignView,
+    MobileTrashDesignView
   },
   props: {
     view: String
@@ -209,6 +231,22 @@ export default Vue.extend({
             }
           }]
       }
+    },
+    mydesignView(): string {
+      switch (this.currLocation[0]) {
+        case 'a':
+          return 'mobile-all-design-view'
+        case 'h':
+          return 'mobile-favorite-design-view'
+        case 't':
+          return 'mobile-trash-design-view'
+        case 'l':
+          return 'mobile-list-design-view'
+        case 'f':
+          return 'mobile-folder-design-view'
+        default:
+          return 'mobile-all-design-view'
+      }
     }
   },
   methods: {
@@ -244,6 +282,30 @@ export default Vue.extend({
         this.clearSelection()
       })
     },
+    handleDeleteItem() {
+      console.log('TODO')
+    },
+    handleRecoverItem() {
+      console.log('TODO')
+    },
+    handleDeleteFolder() {
+      console.log('TODO')
+    },
+    handleMoveItem() {
+      console.log('TODO')
+    },
+    handleDeleteForever() {
+      console.log('TODO')
+    },
+    handleDeleteFolderForever() {
+      console.log('TODO')
+    },
+    handleMoveDesignToFolder() {
+      console.log('TODO')
+    },
+    handleDownloadDesign() {
+      console.log('TODO')
+    },
     renderedWidth(button: IMenuButton) {
       return button.width ?? '24px'
     },
@@ -255,12 +317,14 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+$nav-bar-height: 44px;
+$tab-bar-height: 56px;
+$total-bar-height: $nav-bar-height + $tab-bar-height;
+
 .my-design-mobile {
   @include size(100vw, 100vh);
-  display: flex;
-  flex-direction: column;
   &__nav-bar {
-    height: 44px;
+    height: $nav-bar-height;
     background: #FFFFFF;
     box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
     display: flex;
@@ -307,10 +371,10 @@ export default Vue.extend({
     }
   }
   &__content {
-    flex-grow: 1;
+    height: calc(100vh - #{$total-bar-height});
   }
   &__tab-bar {
-    height: 56px;
+    height: $tab-bar-height;
     background: #FFFFFF;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     display: flex;
@@ -335,6 +399,14 @@ export default Vue.extend({
       }
     }
   }
+}
+
+.design-view {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  @include no-scrollbar;
 }
 
 .dim-background {
