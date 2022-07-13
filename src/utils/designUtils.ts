@@ -132,10 +132,10 @@ class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
     template[0] = this.newFolder(this.ROOT, 'SYSTEM', true, true)
-    // template[0].subFolders = [
-    //   this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
-    //   this.newFolder('日本行銷', 'Daniel', true)
-    // ]
+    template[0].subFolders = [
+      this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
+      this.newFolder('日本行銷', 'Daniel', true)
+    ]
     // for (let i = 0; i < 15; i++) {
     //   const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
     //   template[0].subFolders[0].designs.push({
@@ -151,6 +151,10 @@ class DesignUtils {
     //   })
     // }
     return template
+  }
+
+  initializeFolders(): IFolder[] {
+    return [this.newFolder(this.ROOT, 'SYSTEM', true, true)]
   }
 
   makePath(selectInfo: string): string[] {
@@ -240,6 +244,7 @@ class DesignUtils {
   }
 
   search(folders: IFolder[], path: string[]): IFolder | undefined {
+    if (path.length === 0) return undefined
     const parents = path.slice(0, path.length - 1)
     const id = path[path.length - 1]
 

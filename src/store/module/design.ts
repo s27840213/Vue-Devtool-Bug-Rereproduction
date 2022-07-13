@@ -911,6 +911,9 @@ const mutations: MutationTree<IDesignState> = {
       case 't':
         targetPath = '/mydesign/trash'
         break
+      case 'l':
+        targetPath = '/mydesign/list'
+        break
       default:
         targetPath = `/mydesign/${designUtils.makePath(currLocation).slice(1).join('&')}`
     }
