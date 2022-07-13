@@ -485,7 +485,8 @@ export default Vue.extend({
     &__close {
       display: block;
       position: absolute;
-      right: 0px;
+      top: 16px;
+      right: 16px;
     }
   }
   .payment-left {
