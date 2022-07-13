@@ -44,11 +44,13 @@
                     iconWidth="20px"
                     iconColor="gray-4")
           span(class="mobile-design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
-    div(class="mobile-design-item__name")
+    div(class="mobile-design-item__name"
+        @click.prevent.stop)
       div(class="mobile-design-item__name__container")
         span(:title="config.name") {{ config.name }}
-    div(class="mobile-design-item__size")
-      span {{ `${config.width}x${config.height}` }}
+    div(class="mobile-design-item__size"
+        @click.prevent.stop)
+      span {{ `${config.width} x ${config.height}` }}
 </template>
 
 <script lang="ts">
@@ -122,14 +124,9 @@ export default Vue.extend({
     imageStyles() {
       return { width: `${this.renderedWidth}px`, height: `${this.renderedHeight}px` }
     },
-    handleClick(e: MouseEvent) {
+    handleClick() {
       if (this.isAnySelected) {
-        if (e.shiftKey) {
-          this.$emit('metaSelect')
-          return
-        }
         this.$emit(this.isSelected ? 'deselect' : 'select')
-        return
       }
       if (this.unenterable) return
       designUtils.setDesign(this.config)
