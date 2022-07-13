@@ -217,6 +217,7 @@ export default Vue.extend({
   &__righticon {
     position: absolute;
     cursor: pointer;
+    z-index: 1;
   }
   &__lefticon {
     left: -30px;
@@ -268,20 +269,11 @@ export default Vue.extend({
       height: 84px;
     }
   }
-}
-@media screen and (max-width: 1440px) and (min-width: 768.02px) {
-  .list-content-items__theme-item {
-    &-new {
-      width: 90px;
-      height: 90px;
-    }
-    &-preset {
-      width: 140px;
-      height: 120px;
-    }
+  .list-content__lefticon, .list-content__righticon {
+    display: none;
   }
 }
-@media screen and (min-width: 1440.02px) {
+@media screen and (min-width: 768.02px) {
   .list-content-items__theme-item {
     &-new {
       width: 90px;
