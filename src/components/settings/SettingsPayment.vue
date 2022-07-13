@@ -139,7 +139,7 @@ export default Vue.extend({
     canUpdateCard(): boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
     contactUsUrl(): string { return paymentUtils.contactUsUrl() },
     diskPercent(): Record<string, string> {
-      return { width: `${this._diskPercent * 100}%` }
+      return { width: `${Math.min(1, this._diskPercent) * 100}%` }
     },
     billingInfoInput(): ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountryInfo) {

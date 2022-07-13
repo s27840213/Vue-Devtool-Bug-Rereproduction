@@ -26,6 +26,7 @@ import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import heic2any from 'heic2any'
 import networkUtils from './networkUtils'
+import _ from 'lodash'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -1110,6 +1111,17 @@ class UploadUtils {
             })
           })
           .then(() => {
+            // Reference from designUtils.newDesignWithTemplae
+            store.commit('SET_assetId', generalUtils.generateAssetId())
+            const query = _.omit(router.currentRoute.query,
+              ['width', 'height'])
+            query.type = 'design'
+            query.design_id = uploadUtils.assetId
+            query.team_id = uploadUtils.teamId
+
+            router.replace({ query }).then(() => {
+              uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+            })
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
             this.isGettingDesign = false
