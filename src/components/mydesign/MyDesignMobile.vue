@@ -17,6 +17,7 @@
     div(class="my-design-mobile__tab-bar")
       div(v-for="tabButton in tabButtons"
           class="my-design-mobile__tab-button pointer"
+          :class="{active: tabButton.condition(currLocation)}"
           @click="handleGoTo(tabButton.tab)")
         svg-icon(:iconName="tabButton.icon"
                   iconColor="gray-2"
@@ -49,7 +50,8 @@ interface IMenuButton {
 interface ITabButton {
   icon: string,
   tab: string,
-  text: string
+  text: string,
+  condition: (currLocation: string) => boolean
 }
 
 export default Vue.extend({
@@ -74,22 +76,34 @@ export default Vue.extend({
         {
           icon: 'all',
           text: `${this.$t('NN0187')}`,
-          tab: 'a'
+          tab: 'a',
+          condition: (currLocation: string) => {
+            return currLocation === 'a'
+          }
         },
         {
           icon: 'heart',
           text: `${this.$t('NN0188')}`,
-          tab: 'h'
+          tab: 'h',
+          condition: (currLocation: string) => {
+            return currLocation === 'h'
+          }
         },
         {
           icon: 'folder',
           text: `${this.$tc('NN0253', 2)}`,
-          tab: 'l'
+          tab: 'l',
+          condition: (currLocation: string) => {
+            return currLocation === 'l' || currLocation.startsWith('f')
+          }
         },
         {
           icon: 'trash',
           text: `${this.$t('NN0189')}`,
-          tab: 't'
+          tab: 't',
+          condition: (currLocation: string) => {
+            return currLocation === 't'
+          }
         }
       ] as ITabButton[]
     }
@@ -305,6 +319,11 @@ export default Vue.extend({
       font-size: 10px;
       line-height: 20px;
       color: setColor(gray-2);
+    }
+    &.active {
+      & > svg, & > div {
+        color: setColor(blue-1);
+      }
     }
   }
 }
