@@ -554,7 +554,9 @@ class AssetUtils {
           store.commit('SET_currActivePageIndex', targetIndex)
           stepsUtils.record()
 
-          editorUtils.setCloseMobilePanelFlag(true) // Close MobilePanel.
+          // Close MobilePanel and fit in
+          editorUtils.setCloseMobilePanelFlag(true)
+          pageUtils.fitPage()
         })
       })
   }
@@ -590,6 +592,7 @@ class AssetUtils {
             pageUtils.fitPage()
           })
           editorUtils.setCloseMobilePanelFlag(true)
+          pageUtils.fitPage()
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
