@@ -151,10 +151,13 @@ export default Vue.extend({
   height: 100%;
 }
 .home-content {
+  @include push-scrollbar10;
+  @include hide-scrollbar-white;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
+  box-sizing: border-box;
+  width: 100%;
   height: calc(100% - #{$header-height});
 }
 .home-top {

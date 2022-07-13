@@ -108,7 +108,7 @@ $thumb-color: #D9DBE1; // gray-4
 
     @include firefoxOnly {
       overflow-y: scroll;
-      padding-right: #{$padding-right - 11px};
+      padding-right: calc(#{$padding-right} - 11px);
       scrollbar-width: thin;
       scrollbar-color: $thumb-color transparent;
     }

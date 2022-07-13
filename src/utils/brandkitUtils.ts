@@ -492,7 +492,7 @@ class BrandKitUtils {
     ]
   }
 
-  extractFontsFromStyle(textStyle: IBrandTextStyle): { type: string, face: string, url: string, userId: string, assetId: string, ver: number } {
+  extractFontsFromStyle(textStyle: IBrandTextStyle): { type: string, face: string, url: string, userId: string, assetId: string, ver: string } {
     return {
       type: textStyle.fontType,
       face: textStyle.fontId,
