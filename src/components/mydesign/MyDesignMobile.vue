@@ -4,7 +4,7 @@
       div(class="my-design-mobile__nav-bar__prev pointer"
           @click="handlePrevPage")
         svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
-      div(class="my-design-mobile__nav-bar__title") {{ title }}
+      div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
       div(class="my-design-mobile__nav-bar__menu")
         div(v-for="button in menuButtons"
             class="my-design-mobile__nav-bar__menu-button pointer"
@@ -277,6 +277,10 @@ export default Vue.extend({
       font-size: 16px;
       line-height: 140%;
       color: setColor(gray-1);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 40vw;
+      white-space: nowrap;
     }
     &__menu {
       position: absolute;
