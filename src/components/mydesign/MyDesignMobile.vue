@@ -15,11 +15,26 @@
                     :iconHeight="renderedHeight(button)")
     div(class="my-design-mobile__content")
     div(class="my-design-mobile__tab-bar")
+      div(v-for="tabButton in tabButtons"
+          class="my-design-mobile__tab-button pointer"
+          @click="handleGoTo(tabButton.tab)")
+        svg-icon(:iconName="tabButton.icon"
+                  iconColor="gray-2"
+                  iconWidth="24px")
+        div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
+    div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background")
+    transition(name="slide-full")
+      bottom-menu(v-if="bottomMenu !== ''"
+                  class="bottom-menu"
+                  :bottomMenu="bottomMenu"
+                  v-click-outside="() => { bottomMenu = '' }"
+                  @close="bottomMenu = ''")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import BottomMenu from '@/components/mydesign/BottomMenu.vue'
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
@@ -29,6 +44,12 @@ interface IMenuButton {
   width?: string,
   height?: string,
   action: () => void
+}
+
+interface ITabButton {
+  icon: string,
+  tab: string,
+  text: string
 }
 
 export default Vue.extend({
@@ -45,13 +66,39 @@ export default Vue.extend({
       pathedFolderBuffer: undefined as IPathedFolder | undefined,
       designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
+      bottomMenu: '',
       isMoveToFolderPanelOpen: false,
       isMovingSingleToFolder: false,
-      errorMessageTimer: -1
+      errorMessageTimer: -1,
+      tabButtons: [
+        {
+          icon: 'all',
+          text: `${this.$t('NN0187')}`,
+          tab: 'a'
+        },
+        {
+          icon: 'heart',
+          text: `${this.$t('NN0188')}`,
+          tab: 'h'
+        },
+        {
+          icon: 'folder',
+          text: `${this.$tc('NN0253', 2)}`,
+          tab: 'l'
+        },
+        {
+          icon: 'trash',
+          text: `${this.$t('NN0189')}`,
+          tab: 't'
+        }
+      ] as ITabButton[]
     }
   },
   directives: {
     clickOutside: vClickOutside.directive
+  },
+  components: {
+    BottomMenu
   },
   props: {
     view: String
@@ -88,7 +135,7 @@ export default Vue.extend({
     }
   },
   watch: {
-    currLocation(newVal) {
+    currLocation() {
       this.handleClearSelection()
     }
   },
@@ -129,11 +176,24 @@ export default Vue.extend({
         case 'h':
           return []
         case 't':
-          return []
-        case 'l':
-          return []
+          return [{
+            icon: 'info-mobile',
+            action: () => {
+              this.bottomMenu = 'trash-info'
+            }
+          }]
         default:
-          return []
+          return [{
+            icon: 'folder_plus',
+            action: () => {
+              console.log('add folder')
+            }
+          }, {
+            icon: 'sequence',
+            action: () => {
+              console.log('show sorting')
+            }
+          }]
       }
     }
   },
@@ -155,6 +215,9 @@ export default Vue.extend({
       } else {
         // TODO: go to parent folder or folder list (if current folder is top-level)
       }
+    },
+    handleGoTo(tab: string) {
+      this.setCurrLocation(tab)
     },
     handleClearSelection() {
       this.isMoveToFolderPanelOpen = false
@@ -203,6 +266,21 @@ export default Vue.extend({
     }
     &__menu {
       position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      &-button {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
   }
   &__content {
@@ -216,5 +294,40 @@ export default Vue.extend({
     align-items: center;
     justify-content: space-evenly;
   }
+  &__tab-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    &__text {
+      font-weight: 400;
+      font-size: 10px;
+      line-height: 20px;
+      color: setColor(gray-2);
+    }
+  }
+}
+
+.dim-background {
+  @include size(100%, 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(24, 25, 31, 0.7);
+  z-index: 1000;
+}
+
+.slide-full-enter-active,
+.slide-full-leave-active {
+  transition: 0.2s;
+}
+
+.slide-full-enter,
+.slide-full-leave-to {
+  transform: translateY(100%);
 }
 </style>
