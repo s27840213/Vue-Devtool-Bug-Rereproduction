@@ -139,6 +139,8 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss">
+@use "~@/assets/scss/main.scss";
+
 #app {
   @include size(100%, 100%);
   position: relative;

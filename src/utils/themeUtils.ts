@@ -8,6 +8,7 @@ import generalUtils from './generalUtils'
 
 class ThemeUtils {
   get themes() { return store.state.themes }
+  get themesMainHidden() { return _.filter(store.state.themes, ['mainHidden', 0]) }
   get groupType() { return store.state.groupType }
   get getPageSize() { return store.getters.getPageSize }
 
@@ -64,9 +65,16 @@ class ThemeUtils {
   }
 
   setPageThemes(pageIndex?: number, themes?: Itheme[], newDesignType?: number) {
-    const pageSize = this.getFocusPageSize(pageIndex)
-    const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
-    this.setTemplateThemes(pageThemes)
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('themeId')) {
+      store.commit('templates/SET_STATE', {
+        theme: urlParams.get('themeId')
+      })
+    } else {
+      const pageSize = this.getFocusPageSize(pageIndex)
+      const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
+      this.setTemplateThemes(pageThemes)
+    }
   }
 
   getThemesBySize(width: number, height: number, newDesignType?: number) {

@@ -7,7 +7,7 @@
       @search="handleSearch")
     div(v-if="isAdmin" class="panel-objects-2html")
       input(type="text" placeholder="項目網址" v-model="panelParams")
-      btn(@click.native="toHtml") To wp-html
+      btn(@click.native="downloadAll") Download all
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
       :list="list"
@@ -149,7 +149,7 @@ export default Vue.extend({
     handleSearch(keyword: string) {
       this.resetContent()
       if (keyword) {
-        this.panelParams = `http://dev1.vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.panelParams = `http://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getTagContent({ keyword })
       } else {
         this.getRecAndCate()
@@ -158,7 +158,7 @@ export default Vue.extend({
     handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
       if (keyword) {
-        this.panelParams = `http://dev1.vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
+        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getContent({ keyword, locale })
       } else {
         this.getRecAndCate()
@@ -170,19 +170,15 @@ export default Vue.extend({
     handleScrollTop(event: Event) {
       this.scrollTop = (event.target as HTMLElement).scrollTop
     },
-    toHtml() {
-      const html = constantData.object2WpHtml()
-      html.item = html.item.replace('{link}', this.panelParams)
-        .replace('{label}', 'Use this object')
-      const output = this.list.map((it) => {
-        const items = it.list.map((it: Record<string, string>) => {
-          const img = `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
-          return html.item.replace(/{img}/g, img)
+    downloadAll() {
+      generalUtils.copyText(this.panelParams)
+      this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
+      const links = this.list.map((it) => {
+        return it.list.map((it: Record<string, string>) => {
+          return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
         }).join('\n')
-        return html.list.replace('{items}', items)
       }).join('\n')
-      generalUtils.copyText(output)
-      this.$notify({ group: 'copy', text: '已複製' })
+      generalUtils.downloadTextFile(`${this.keywordLabel}.txt`, links)
     }
   }
 })

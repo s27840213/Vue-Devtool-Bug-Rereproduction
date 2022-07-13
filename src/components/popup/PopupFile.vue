@@ -10,7 +10,7 @@ div(class="popup-file")
         :avatarSize="35")
       div(class="profile-text text-body-2")
         div {{showUname}}
-  div(class="popup-file__item" @click="save()")
+  div(class="popup-file__item" :class="{disabled: isFontLoading}" @click="save()")
     span {{$t('NN0009')}}
   div(class="popup-file__item" @click="newDesign()")
     span {{$t('NN0072')}}
@@ -67,7 +67,6 @@ import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
-import fbPixelUtils from '@/utils/fbPixelUtils'
 
 export default Vue.extend({
   components: {
@@ -84,10 +83,9 @@ export default Vue.extend({
     ]),
     ...mapGetters({
       isLogin: 'user/isLogin',
-      isAdmin: 'user/isAdmin'
-    }),
-    ...mapGetters('user', {
-      account: 'getAccount'
+      isAdmin: 'user/isAdmin',
+      account: 'user/getAccount',
+      isFontLoading: 'text/getIsFontLoading'
     }),
     pageSize(): { w: number, h: number } {
       return {
@@ -154,13 +152,14 @@ export default Vue.extend({
       // designUtils.newDesign()
     },
     testSubscribe() {
-      fbPixelUtils.subscribe(false)
+      // fbPixelUtils.subscribe(false)
     },
     testTrial() {
-      fbPixelUtils.startTrail()
+      // fbPixelUtils.startTrail()
     },
     testSignup() {
-      fbPixelUtils.signUp()
+      gtmUtils.signUp('Vivipic')
+      // fbPixelUtils.signUp()
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')
@@ -217,10 +216,13 @@ export default Vue.extend({
     padding: 0.35rem;
     border-radius: 0.25rem;
     position: relative;
+    &.disabled {
+      color: setColor(gray-4);
+    }
     > span {
       font-size: 0.75rem;
     }
-    &:not(:last-child) {
+    &:not(:last-child):not(.disabled) {
       &:hover {
         background-color: setColor(blue-3, 0.5);
       }

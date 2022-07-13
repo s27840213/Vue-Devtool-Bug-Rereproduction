@@ -273,8 +273,7 @@ export default Vue.extend({
       return this.config.type === 'shape' && this.config.category === 'D'
     },
     isCurveText(): boolean {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
+      return this.checkIfCurve(this.config)
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -642,15 +641,14 @@ export default Vue.extend({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-
-      if (this.isProcessImgShadow && this.processId.id !== this.config.id) {
-        return
-      } else {
-        if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
-          eventUtils.emit(PanelEvent.showPhotoShadow)
-        }
-        ImageUtils.setImgControlDefault(false)
+      // if (this.isProcessImgShadow) {
+      //   return
+      // } else {
+      if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
+        eventUtils.emit(PanelEvent.showPhotoShadow)
       }
+      ImageUtils.setImgControlDefault(false)
+      // }
 
       if (this.isTouchDevice && !this.isActive && !this.isLocked) {
         const body = (this.$refs.body as HTMLElement)
@@ -1108,24 +1106,6 @@ export default Vue.extend({
       }
     },
     scaleEnd() {
-      // if (this.getLayerType === LayerType.frame && FrameUtils.isImageFrame(this.config)) {
-      //   const { imgWidth, imgHeight, imgX, imgY } = (this.config as IFrame).clips[0].styles
-      //   const { scale, width, height } = this.config.styles
-      //   // imgWidth *= scale
-      //   // imgHeight *= scale
-      //   // imgY *= scale
-      //   // imgX *= scale
-
-      //   FrameUtils.updateFrameLayerStyles(this.pageIndex, this.layerIndex, 0, {
-      //     width: width,
-      //     height: height,
-      //     imgWidth: width,
-      //     imgHeight: height,
-      //     imgX,
-      //     imgY
-      //   })
-      //   // scale = 1
-      // }
       this.isControlling = false
       StepsUtils.record()
 
@@ -1626,15 +1606,34 @@ export default Vue.extend({
       const { e } = attrs as { e: DragEvent }
       e && this.onDrop(e)
     },
+    waitFontLoadingAndRecord() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.config.id
+      TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
+        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId)
+        if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+        TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+      })
+    },
+    checkIfCurve(config: IText): boolean {
+      const { textShape } = config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    calcSize(config: IText, composing: boolean) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing)
+    },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
       config.paragraphs = payload.paragraphs
-      this.isCurveText ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, !!tiptapUtils.editor?.view?.composing)
+      this.calcSize(config, !!tiptapUtils.editor?.view?.composing)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       if (payload.toRecord) {
-        StepsUtils.record()
+        this.waitFontLoadingAndRecord()
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
+        // if composing starts from empty line, isSetContentRequired will be true in the first typing.
+        // However, setContent will break the composing, so skip setContent when composing.
+        // setContent will be done when 'composeend' (in NuTextEditor.vue)
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
             editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
@@ -1642,11 +1641,14 @@ export default Vue.extend({
         })
       }
     },
-    handleTextCompositionEnd() {
+    handleTextCompositionEnd(toRecord: boolean) {
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
         this.textSizeRefresh(this.config, false)
+      }
+      if (toRecord) {
+        this.waitFontLoadingAndRecord()
       }
     },
     textSizeRefresh(text: IText, composing: boolean) {

@@ -10,9 +10,6 @@ import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import MobileEditor from '../views/MobileEditor.vue'
-import MobileTextEffect from '../views/MobileTextEffect.vue'
-import MobileImageAdjust from '../views/MobileImageAdjust.vue'
-import MobileTextTyping from '../views/MobileTextTyping.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import Pricing from '../views/Pricing.vue'
@@ -207,21 +204,6 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
-    path: 'mobile-text',
-    name: 'MobileTextEffect',
-    component: MobileTextEffect
-  },
-  {
-    path: 'mobile-image',
-    name: 'MobileImageAdjust',
-    component: MobileImageAdjust
-  },
-  {
-    path: 'mobile-typing',
-    name: 'MobileTextTyping',
-    component: MobileTextTyping
-  },
-  {
     path: 'pricing',
     name: 'Pricing',
     component: Pricing
@@ -280,6 +262,13 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta?.title || i18n.t('SE0001')
+
+  // Store campaign param to local storage.
+  const urlParams = new URLSearchParams(window.location.search)
+  const campaign = urlParams.get('campaign')
+  if (campaign) {
+    localStorage.setItem('campaign', campaign)
+  }
 
   // Force login in these page
   if (['Settings', 'MyDesign', 'BrandKit', 'Editor'].includes(to.name as string)) {

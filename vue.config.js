@@ -4,6 +4,8 @@ const webpack = require('webpack')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const PrerenderSPAPlugin = require('prerender-spa-plugin')
 const Renderer = PrerenderSPAPlugin.PuppeteerRenderer
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 const { argv } = require('yargs')
 
 function resolve (dir) {
@@ -12,6 +14,13 @@ function resolve (dir) {
 
 module.exports = {
     chainWebpack: (config) => {
+        // To prevent safari use cached app.js, https://github.com/vuejs/vue-cli/issues/1132#issuecomment-409916879
+        if (process.env.NODE_ENV === 'development') {
+            config
+                .output
+                .filename('[name].[hash].js')
+                .end()
+        }
         config.module
             .rule('mjs')
             .test(/\.mjs$/)
@@ -42,6 +51,26 @@ module.exports = {
             .use('file-loader')
             .loader('file-loader')
 
+        // config.module
+        //     .rule('babel-loader')
+        //     .test(/\.js$/)
+        //     .exclude.add(/(node_modules)/)
+        //     .include.add(/(js)/)
+        //     .end()
+        //     .use('babel-loader')
+        //     .loader('babel-loader')
+        //     .options({
+        //         cacheDirectory: true,
+        //         presets: [
+        //             [
+        //                 'es2015',
+        //                 {
+        //                     loose: true
+        //                 }
+        //             ]
+        //         ]
+        //     })
+
         if (process.env.CI && ['production', 'staging'].includes(process.env.NODE_ENV)) {
             config.plugin('sentry')
                 .use(SentryWebpackPlugin, [{
@@ -55,8 +84,8 @@ module.exports = {
         }
         if (process.env.BITBUCKET_BUILD_NUMBER) {
             config.plugin('define').tap(args => {
-                let name = 'process.env'
-                args[0][name]['VUE_APP_BUILD_NUMBER'] = process.env.BITBUCKET_BUILD_NUMBER || ''
+                const name = 'process.env'
+                args[0][name].VUE_APP_BUILD_NUMBER = process.env.BITBUCKET_BUILD_NUMBER || ''
                 return args
             })
         }
@@ -85,6 +114,48 @@ module.exports = {
                     })
                 }])
         }
+
+        // if (process.env.NODE_ENV === 'production') {
+        if (process.env.npm_config_report) {
+            config
+                .plugin('webpack-bundle-analyzer')
+                .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
+                .end()
+            config.plugins.delete('prefetch')
+        }
+        // }
+
+        config
+            .plugin('speed-measure-webpack-plugin')
+            .use(SpeedMeasurePlugin)
+            .end()
+        // .use(SpeedMeasurePlugin, [{
+        //     outputFormat: 'humanVerbose',
+        //     loaderTopFiles: 5
+        // }])
+    },
+
+    configureWebpack: {
+        // 优化
+        optimization: {
+            minimizer: [
+                new UglifyJsPlugin({
+                    uglifyOptions: {
+                        output: { // 删除注释
+                            comments: false
+                        },
+                        // 生产环境自动删除console
+                        compress: {
+                            drop_debugger: true, // 清除 debugger 语句
+                            drop_console: true, // 清除console语句
+                            pure_funcs: ['console.log']
+                        }
+                    },
+                    sourceMap: false,
+                    parallel: true
+                })
+            ]
+        }
     },
 
     // configureWebpack: {
@@ -108,7 +179,7 @@ module.exports = {
     css: {
         loaderOptions: {
             scss: {
-                prependData: '@import "~@/assets/scss/main.scss";'
+                prependData: '@use "~@/assets/scss/utils" as *;'
             }
         }
     },

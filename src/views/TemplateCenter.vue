@@ -395,7 +395,8 @@ export default Vue.extend({
           name: 'Editor',
           query: {
             type: 'product-page-template',
-            design_id: template.group_id
+            design_id: template.group_id,
+            themeId: template.content_ids[0].themes.join(',')
           }
         })
         window.open(route.href, '_blank')
@@ -419,6 +420,7 @@ export default Vue.extend({
           query: {
             type: 'new-design-template',
             design_id: template.id,
+            themeId: template.content_ids[0].themes.join(','),
             width: format.width,
             height: format.height
           }

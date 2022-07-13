@@ -96,7 +96,8 @@ export default {
       account,
       vcode,
       token,
-      type
+      type,
+      campaign: localStorage.getItem('campaign') || undefined
     }
   }),
   updateUser: (token: string, account: string, upass: string, uname: string, locale: string, subscribe: number): AxiosPromise => axios('/update-user', {
@@ -115,7 +116,8 @@ export default {
     data: {
       code,
       redirect_uri,
-      locale
+      locale,
+      campaign: localStorage.getItem('campaign') || undefined
     }
   }),
   googleLogin: (code: string, redirect_uri: string, locale: string): AxiosPromise => axios('/google-login', {
@@ -123,7 +125,8 @@ export default {
     data: {
       code,
       redirect_uri,
-      locale
+      locale,
+      campaign: localStorage.getItem('campaign') || undefined
     }
   }),
   updateUserViewGuide: (token: string, view_guide: number): AxiosPromise => axios('/update-user', {

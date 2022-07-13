@@ -241,6 +241,7 @@ class GeneralUtils {
           case '47494638':
             type = 'gif'
             break
+          case 'ffd8ffdb':
           case 'ffd8ffe0':
           case 'ffd8ffe1':
           case 'ffd8ffe2':
@@ -291,6 +292,19 @@ class GeneralUtils {
     const query = _.omit(router.currentRoute.query,
       ['panel', 'category', 'category_locale', 'search'])
     router.replace({ query })
+  }
+
+  downloadTextFile(filename: string, content: string) {
+    const element = document.createElement('a')
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content))
+    element.setAttribute('download', filename)
+
+    element.style.display = 'none'
+    document.body.appendChild(element)
+
+    element.click()
+
+    document.body.removeChild(element)
   }
 }
 

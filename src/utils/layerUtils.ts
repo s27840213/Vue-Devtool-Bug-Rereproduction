@@ -419,13 +419,27 @@ class LayerUtils {
 
   getLayerInfoById(pageId: string, layerId: string, subLayerId = '') {
     const pageIndex = pageUtils.getPageIndexById(pageId)
-    let layerIndex = this.getLayerIndexById(pageIndex, layerId)
+    let layerIndex
+    let subLayerIdx
+    if (subLayerId) {
+      // If the layer was in a group, search for it as primaryLayer first,
+      // since it may be ungrouped and becomes primaryLayer.
+      layerIndex = this.getLayerIndexById(pageIndex, subLayerId)
+      if (layerIndex === -1) {
+        // If no primaryLayer has the subLayerId, it may be still in the same group.
+        layerIndex = this.getLayerIndexById(pageIndex, layerId)
+      }
+    } else {
+      layerIndex = this.getLayerIndexById(pageIndex, layerId)
+    }
     /**  If the layerIndex === -1 means the layer is grouped or deleted */
     if (layerIndex === -1) {
       layerIndex = pageUtils.getPage(pageIndex).layers
         .findIndex(l => l.type === LayerType.group && (l as IGroup).layers.find(subLayer => subLayer.id === layerId))
+      subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, layerId)
+    } else {
+      subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
     }
-    const subLayerIdx = this.getSubLayerIndexById(pageIndex, layerIndex, subLayerId)
     return {
       pageIndex,
       layerIndex,

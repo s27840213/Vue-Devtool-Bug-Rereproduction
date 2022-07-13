@@ -214,18 +214,29 @@ export default Vue.extend({
             imageUtils.setImgControlDefault()
           } else {
             let index
-            const currLayer = layerUtils.getCurrConfig
+            const currLayer = layerUtils.getCurrLayer
             switch (currLayer.type) {
-              case 'image': {
+              case LayerType.group: {
+                const target = (currLayer as IGroup).layers.find(l => l.type === LayerType.image && l.active)
+                if (target && target.type === LayerType.image) {
+                  const { shadow } = (target as IImage).styles
+                  const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+                  if (!(this.isHandleShadow && needRedrawShadow)) {
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                  }
+                }
+                break
+              }
+              case LayerType.image: {
                 const { shadow } = (currLayer as IImage).styles
                 const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
                 if (!(this.isHandleShadow && needRedrawShadow)) {
-                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
                 }
-              }
                 break
-              case 'frame':
-                index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+              }
+              case LayerType.frame:
+                index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === LayerType.image && l.active), 0)
                 if (index >= 0) {
                   frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
                 }

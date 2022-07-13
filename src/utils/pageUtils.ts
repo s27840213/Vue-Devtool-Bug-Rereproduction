@@ -91,7 +91,8 @@ class PageUtils {
       guidelines: {
         v: [],
         h: []
-      }
+      },
+      isAutoResizeNeeded: false
     }
     return Object.assign(defaultPage, layerFactary.newTemplate(pageData))
   }
@@ -393,6 +394,16 @@ class PageUtils {
 
   hasDesignId(pageIndex: number) {
     return this.getPage(pageIndex).designId !== ''
+  }
+
+  setAutoResizeNeededForPages(pages: IPage[], isAutoResizeNeeded: boolean) {
+    for (const page of pages) {
+      this.setAutoResizeNeededForPage(page, isAutoResizeNeeded)
+    }
+  }
+
+  setAutoResizeNeededForPage(page: IPage, isAutoResizeNeeded: boolean) {
+    page.isAutoResizeNeeded = isAutoResizeNeeded
   }
 }
 

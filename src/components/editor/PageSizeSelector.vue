@@ -28,7 +28,7 @@
                 :value="pageHeight" @input="setPageHeight" @click="selectFormat('custom')")
           span(class="body-4"
               :class="this.selectedFormat === 'custom' ? 'text-blue-1' : defaultTextColor") H
-    div(class="page-size-selector__body__hr horizontal-rule")
+    div(class="page-size-selector__body__hr horizontal-rule bg-gray-4")
     div(class="page-size-selector__container")
         div(class="page-size-selector__body-row first-row")
           span(class="page-size-selector__body__title subtitle-2"
@@ -394,12 +394,12 @@ export default Vue.extend({
           background-color: transparent;
           font-family: NotoSansTC;
         }
-        &.border-blue-1 {
-          @extend .border-blue-1;
-        }
-        &.border-white {
-          @extend .border-white;
-        }
+        // &.border-blue-1 {
+        //   @extend .border-blue-1;
+        // }
+        // &.border-white {
+        //   @extend .border-white;
+        // }
       }
     }
     &__hr {
@@ -467,7 +467,6 @@ export default Vue.extend({
   }
 }
 .horizontal-rule {
-  @extend .bg-gray-4;
   height: 1px;
   margin-left: auto;
   margin-right: auto;

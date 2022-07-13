@@ -124,24 +124,24 @@ export default Vue.extend({
       myPaidDate: 'myPaidDate',
       myPrice: 'myPrice'
     }),
-    isProIcon():boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
-    proIconColor():string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
-    isFail():boolean { return this.status === 'Fail' },
+    isProIcon(): boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
+    proIconColor(): string { return this.status === 'Fail' ? 'gray-3' : 'blue-1' },
+    isFail(): boolean { return this.status === 'Fail' },
     isErrorStatus(): boolean { return ['-1', '-2', '-3', '-4', 'Transient'].includes(this.status) },
-    showDueDay():boolean { return ['Deleted', 'Canceled'].includes(this.status) },
-    showPlan():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
-    showUsage():boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
-    showBillingInfo():boolean { return ['Fail', 'Leave', 'Abort', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
-    canAdd():boolean { return this.status === 'Initial' },
-    canResume():boolean { return ['Abort', 'Deleted', 'Canceled'].includes(this.status) },
-    canSwitch():boolean { return this.status === 'Subscribed' },
-    canCancel():boolean { return ['Fail', 'Subscribed'].includes(this.status) },
-    canUpdateCard():boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
-    contactUsUrl():string { return paymentUtils.contactUsUrl() },
-    diskPercent():Record<string, string> {
-      return { width: `${this._diskPercent * 100}%` }
+    showDueDay(): boolean { return ['Deleted', 'Canceled'].includes(this.status) },
+    showPlan(): boolean { return ['Fail', 'Subscribed'].includes(this.status) },
+    showUsage(): boolean { return ['Fail', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
+    showBillingInfo(): boolean { return ['Fail', 'Leave', 'Abort', 'Subscribed', 'Deleted', 'Canceled'].includes(this.status) },
+    canAdd(): boolean { return this.status === 'Initial' },
+    canResume(): boolean { return ['Abort', 'Deleted', 'Canceled'].includes(this.status) },
+    canSwitch(): boolean { return this.status === 'Subscribed' },
+    canCancel(): boolean { return ['Fail', 'Subscribed'].includes(this.status) },
+    canUpdateCard(): boolean { return ['Fail', 'Subscribed', 'Canceled'].includes(this.status) },
+    contactUsUrl(): string { return paymentUtils.contactUsUrl() },
+    diskPercent(): Record<string, string> {
+      return { width: `${Math.min(1, this._diskPercent) * 100}%` }
     },
-    billingInfoInput():ReturnType<typeof paymentData.gerneral> {
+    billingInfoInput(): ReturnType<typeof paymentData.gerneral> {
       switch (this.userCountryInfo) {
         case 'tw':
           return [...paymentData.gerneral(), ...paymentData.TWonly()]
@@ -151,7 +151,7 @@ export default Vue.extend({
           return [...paymentData.country(), ...paymentData.gerneral(), ...paymentData.others()]
       }
     },
-    billingInfoCheck():boolean { // Check if input is empty
+    billingInfoCheck(): boolean { // Check if input is empty
       for (const item of this.billingInfoInput) {
         if (item.optional) continue
         switch (item.key) {
@@ -221,31 +221,56 @@ export default Vue.extend({
   @include body-MD;
   padding: 60px 13% 20px 13%;
   text-align: left;
-  &-plan, &-usage, &-card, &-info, >hr { margin-bottom: 30px; }
-  &-plan, &-usage, &-info {
+  &-plan,
+  &-usage,
+  &-card,
+  &-info,
+  > hr {
+    margin-bottom: 30px;
+  }
+  &-plan,
+  &-usage,
+  &-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
-  &-plan, &-info { @include body-SM; }
-  &-plan, &-usage {
-    >span, >button, >svg { margin: 1px 0; }
+  &-plan,
+  &-info {
+    @include body-SM;
+  }
+  &-plan,
+  &-usage {
+    > span,
+    > button,
+    > svg {
+      margin: 1px 0;
+    }
   }
   &-error {
     @include body-XS;
-    >a { text-transform: lowercase; }
+    > a {
+      text-transform: lowercase;
+    }
   }
-  >hr { border: 0.5px solid setColor(gray-4); }
+  > hr {
+    border: 0.5px solid setColor(gray-4);
+  }
 }
 
 .sp-plan {
-  >button { @include btn-LG; }
+  > button {
+    @include btn-LG;
+  }
 }
 
 .sp-usage-disk {
   display: flex;
   align-items: center;
-  &-total, &-used { height: 10px; }
+  &-total,
+  &-used {
+    height: 10px;
+  }
   &-total {
     margin-right: 5px;
     width: 200px;
@@ -264,8 +289,14 @@ export default Vue.extend({
 
 .sp-info {
   max-width: 350px;
-  label, input, select { margin-top: 10px; }
-  label { color: setColor(gray-3); }
+  label,
+  input,
+  select {
+    margin-top: 10px;
+  }
+  label {
+    color: setColor(gray-3);
+  }
   input {
     box-sizing: border-box;
     height: 40px;
@@ -273,15 +304,21 @@ export default Vue.extend({
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
     color: setColor(gray-2);
-    &:focus { border-color: setColor(blue-1); }
-    &[invalid=true] { border-color: red; }
+    &:focus {
+      border-color: setColor(blue-1);
+    }
+    &[invalid="true"] {
+      border-color: red;
+    }
   }
   &__half {
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 10px;
   }
-  >button { margin: 20px 0 0 auto; }
+  > button {
+    margin: 20px 0 0 auto;
+  }
 }
 
 .sp-field {
@@ -293,10 +330,14 @@ export default Vue.extend({
   text-align: center;
 }
 
-div.sp-rocket { z-index: 23; }
+div.sp-rocket {
+  z-index: 23;
+}
 
 @media screen and (max-width: 768px) {
-  .sp { padding: 24px 6.4% }
+  .sp {
+    padding: 24px 6.4%;
+  }
   .sp-field {
     padding: 65px 7.466% 175px 7.466%;
     bottom: 0px;

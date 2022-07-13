@@ -279,12 +279,6 @@ export default Vue.extend({
           line-height: 16px;
           background-color: transparent;
         }
-        &.border-blue-1 {
-          @extend .border-blue-1;
-        }
-        &.border-white {
-          @extend .border-white;
-        }
       }
     }
     &__hr {

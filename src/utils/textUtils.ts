@@ -13,12 +13,16 @@ import textShapeUtils from './textShapeUtils'
 import mathUtils from './mathUtils'
 import router from '@/router'
 import _ from 'lodash'
+import cssConverter from './cssConverter'
+import stepsUtils from './stepsUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
   get getCurrTextProps() { return (store.state as any).text.props }
   get getCurrSel(): { start: ISelection, end: ISelection } { return (store.state as any).text.sel }
+  get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
+  toRecordId: string
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -27,6 +31,7 @@ class TextUtils {
   }
 
   constructor() {
+    this.toRecordId = ''
     this.fieldRange = {
       fontSize: { min: 6, max: 800 },
       lineHeight: { min: 0.5, max: 2.5 },
@@ -756,6 +761,45 @@ class TextUtils {
     }
   }
 
+  updateTextLayerSizeByShape(pageIndex: number, layerIndex: number, subLayerIndex: number) {
+    const targetLayer = LayerUtils.getLayer(pageIndex, layerIndex)
+    if (subLayerIndex === -1) { // single text layer
+      const config = targetLayer as IText
+      if (textShapeUtils.isCurvedText(config.styles)) {
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, textShapeUtils.getCurveTextProps(config))
+      } else {
+        const widthLimit = config.widthLimit
+        const textHW = this.getTextHW(config, widthLimit)
+        let x = config.styles.x
+        let y = config.styles.y
+        if (config.widthLimit === -1) {
+          if (config.styles.writingMode.includes('vertical')) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        }
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        LayerUtils.updateLayerProps(pageIndex, layerIndex, { widthLimit })
+      }
+    } else { // sub text layer in a group
+      const group = targetLayer as IGroup
+      const config = group.layers[subLayerIndex] as IText
+      if (textShapeUtils.isCurvedText(config.styles)) {
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, textShapeUtils.getCurveTextProps(config))
+        this.updateGroupLayerSize(pageIndex, layerIndex)
+        this.fixGroupCoordinates(pageIndex, layerIndex)
+      } else {
+        const widthLimit = config.widthLimit
+        const textHW = this.getTextHW(config, widthLimit)
+        LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerProps(pageIndex, layerIndex, subLayerIndex, { widthLimit })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(pageIndex, layerIndex, { width, height })
+      }
+    }
+  }
+
   fixGroupXCoordinates(pageIndex: number, layerIndex: number) {
     const group = LayerUtils.getLayer(pageIndex, layerIndex) as IGroup
     let minX = Number.MAX_SAFE_INTEGER
@@ -942,7 +986,7 @@ class TextUtils {
     }
   }
 
-  loadDefaultFonts(extraFonts: { type: string, face: string, url: string, userId: string, assetId: string, ver: number }[] = []) {
+  loadDefaultFonts(extraFonts: { type: string, face: string, url: string, userId: string, assetId: string, ver: string }[] = []) {
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
       store.dispatch('text/addFont', defaultFont).catch(e => console.error(e))
     }
@@ -951,7 +995,8 @@ class TextUtils {
     }
   }
 
-  loadAllFonts(config: IText, times: number) {
+  // loadAllFonts(config: IText, times: number) {
+  loadAllFonts(config: IText) {
     /*
       Gary: 因為預設字型檔案較大，剛進入畫面時的下載過程可能會佔用網路頻寬，
       造成後續api呼叫及圖片載入等等被卡住而有畫面延遲。
@@ -960,16 +1005,18 @@ class TextUtils {
     */
 
     // 僅剛進入editor需要判斷
-    if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
-      if (!((store.state as any).templates.categories.length > 0) && times < 5) {
-        setTimeout(() => {
-          this.loadAllFonts(config, times + 1)
-        }, 3000)
-        return
-      }
-      // 第一次載入的等待結束，firstLoad -> true
-      store.commit('text/SET_firstLoad', true)
-    }
+    // if (!(store.state as any).text.firstLoad && window.location.pathname === '/editor') {
+    //   if (!((store.state as any).templates.categories.length > 0) && times < 5) {
+    //     setTimeout(() => {
+    //       this.loadAllFonts(config, times + 1)
+    //     }, 3000)
+    //     return
+    //   }
+    //   // 第一次載入的等待結束，firstLoad -> true
+    //   store.commit('text/SET_firstLoad', true)
+    // }
+
+    // Disable the above mechanism, since the font file is now divided into sub files and thus not large anymore.
 
     // const promises: Array<Promise<void>> = []
     for (const defaultFont of store.getters['text/getDefaultFontsList']) {
@@ -1107,6 +1154,82 @@ class TextUtils {
         }
       })
     }
+  }
+
+  async untilFontLoadedForPage(page: IPage): Promise<any> {
+    const textLayers: IText[] = []
+    for (const layer of page.layers) {
+      if (layer.type === 'text') {
+        textLayers.push(layer as IText)
+      }
+      if (['tmp', 'group'].includes(layer.type)) {
+        // Theoretically, there shouldn't be any tmp layers, because the page should be from S3.
+        // But still put tmp here just in case.
+        textLayers.push(...((layer as IGroup).layers.filter(l => l.type === 'text') as IText[]))
+      }
+    }
+    return Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs)))
+  }
+
+  async untilFontLoaded(paragraphs: IParagraph[]): Promise<any> {
+    return Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
+  }
+
+  async untilFontLoadedForP(paragraph: IParagraph): Promise<any> {
+    const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).split(',')
+    const valid = await store.dispatch('text/checkFontLoaded', fontList[0]) // wait until the css file of user set font is loaded
+    if (!valid) {
+      throw new Error(`Font ${fontList[0]} not added by 'addFont' before timeout`)
+    }
+    const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
+    return Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
+  }
+
+  async untilFontLoadedForChar(char: string, fontList: string[]): Promise<void> {
+    for (const font of fontList) {
+      const fontFileList = await window.document.fonts.load(`14px ${font}`, char)
+      if (fontFileList.length !== 0) return
+    }
+  }
+
+  setIsFontLoading(isFontLoading: boolean) {
+    store.commit('text/SET_isFontLoading', isFontLoading)
+  }
+
+  waitFontLoadingAndRecord(paragraphs: IParagraph[], callback: (() => void) | undefined = undefined) {
+    const recordId = GeneralUtils.generateRandomString(12)
+    this.toRecordId = recordId
+    this.setIsFontLoading(true)
+    this.untilFontLoaded(paragraphs).then(() => {
+      if (callback) {
+        callback()
+      }
+      if (this.toRecordId === recordId) {
+        // console.log('record')
+        stepsUtils.record()
+        this.setIsFontLoading(false)
+      }
+    })
+  }
+
+  waitGroupFontLoadingAndRecord(group: IGroup, callback: (() => void) | undefined = undefined) {
+    const recordId = GeneralUtils.generateRandomString(12)
+    this.toRecordId = recordId
+    this.setIsFontLoading(true)
+    Promise.all(
+      group.layers
+        .filter(l => l.type === 'text')
+        .map(l => this.untilFontLoaded((l as IText).paragraphs))
+    ).then(() => {
+      if (callback) {
+        callback()
+      }
+      if (this.toRecordId === recordId) {
+        // console.log('record')
+        stepsUtils.record()
+        this.setIsFontLoading(false)
+      }
+    })
   }
 }
 

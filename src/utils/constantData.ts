@@ -29,13 +29,13 @@ class PaymentData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `https://vivipic.com/templates?themes=${id.join(',')}`
+          url: `/templates?themes=${id.join(',')}`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `https://vivipic.com/templates?themes=${id}`
+          url: `/templates?themes=${id}`
         }
       }
     }
@@ -205,38 +205,6 @@ class PaymentData {
       icon: 'invoice'
     }]
     return list
-  }
-
-  // For PanelObject toHtml
-  object2WpHtml() {
-    return {
-      list: `
-<section class="elementor-section elementor-inner-section elementor-element elementor-element-925711e elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="925711e" data-element_type="section">
-  <div class="elementor-container elementor-column-gap-default">
-    {items}
-  </div>
-</section>`,
-      item: `
-<div class="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-7fbfe0b" data-id="7fbfe0b" data-element_type="column">
-  <div class="elementor-widget-wrap elementor-element-populated">
-    <div class="elementor-element elementor-element-dec3a7f elementor-widget elementor-widget-html" data-id="dec3a7f" data-element_type="widget" data-widget_type="html.default">
-      <div class="elementor-widget-container">
-        <div class="eael-gallery-grid-item">
-          <img src="{img}" data-lazy-src="{img}" alt="">
-          <div class="gallery-item-caption-wrap caption-style-hoverer eael-fade-in">
-            <div class="gallery-item-hoverer-bg"></div>
-            <div class="gallery-item-caption-over">
-              <pre style="text-align: center;">
-                <a href="{link}" target="_blank" rel="noopener">{label}</a>
-              </pre>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>`
-    }
   }
 
   // For Pricing.vue

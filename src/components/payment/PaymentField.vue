@@ -180,7 +180,7 @@ export default Vue.extend({
         this.stripePayReady = event.complete
       })
     },
-    async checkInvoiceInput():Promise<boolean> {
+    async checkInvoiceInput(): Promise<boolean> {
       for (const item of this.invoiceInput) { // Check invoice input validity
         if (item.error && await this.checkBillingInfo(item.key)) return false
       }
@@ -262,7 +262,9 @@ export default Vue.extend({
     border-radius: 4px;
     padding: 10px;
   }
-  #card-number { grid-column: 1 / 3; }
+  #card-number {
+    grid-column: 1 / 3;
+  }
 }
 
 .field-card-stripe {
@@ -288,8 +290,12 @@ export default Vue.extend({
     padding: 10px;
     border: 1px solid setColor(gray-4);
     border-radius: 4px;
-    &:focus { border-color: setColor(blue-1); }
-    &[invalid=true] { border-color: red; }
+    &:focus {
+      border-color: setColor(blue-1);
+    }
+    &[invalid="true"] {
+      border-color: red;
+    }
   }
 }
 
