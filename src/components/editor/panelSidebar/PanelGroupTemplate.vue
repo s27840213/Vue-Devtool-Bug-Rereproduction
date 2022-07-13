@@ -59,7 +59,7 @@ export default Vue.extend({
     },
     listStyle(): Record<string, string> {
       return generalUtils.isTouchDevice() ? {
-        gridTemplateColumns: `repeat(${screen.width >= 600 ? 3 : 2}, 1fr)`
+        gridTemplateColumns: `repeat(${window.innerWidth >= 600 ? 3 : 2}, 1fr)`
       } : {}
     }
   },

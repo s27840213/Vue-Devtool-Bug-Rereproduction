@@ -53,7 +53,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 75, 5),
       online: true,
       scrollTop: 0
     }
@@ -76,9 +75,6 @@ export default Vue.extend({
     ...mapGetters({
       checkedAssets: 'file/getCheckedAssets'
     }),
-    margin(): number {
-      return this.galleryUtils.margin
-    },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
     }

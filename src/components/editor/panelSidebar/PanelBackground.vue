@@ -117,7 +117,7 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
-        size: generalUtils.isTouchDevice() ? screen.width / 2 : 157
+        size: generalUtils.isTouchDevice() ? window.innerWidth / 2 : 157
       }]
     },
     listCategories(): any[] {
