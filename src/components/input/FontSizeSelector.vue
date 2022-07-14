@@ -190,6 +190,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .font-size-selector {
+  user-select: none;
   &__range-input-button {
     width: fit-content;
   }
