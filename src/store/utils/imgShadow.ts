@@ -76,8 +76,8 @@ const imgShadowMutations = {
       Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow.srcObj, srcObj)
     }
   },
-  [SET_srcState](state: IEditorState, data: { layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj, layerState?: Partial<IImageStyle> }) {
-    const { layerInfo: { pageIndex, layerIndex, subLayerIdx }, effect, effects, srcObj, layerState } = data
+  [SET_srcState](state: IEditorState, data: { layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, layerSrcObj: SrcObj, shadowSrcObj: SrcObj, layerState: Partial<IImageStyle> }) {
+    const { layerInfo: { pageIndex, layerIndex, subLayerIdx }, effect, effects, layerSrcObj, shadowSrcObj, layerState } = data
     if (pageIndex === -1 || layerIndex === -1) return
 
     let target
@@ -88,9 +88,9 @@ const imgShadowMutations = {
     }
 
     if (target.styles.shadow.srcState) {
-      Object.assign(target.styles.shadow.srcState, { effect, effects, srcObj, layerState })
+      Object.assign(target.styles.shadow.srcState, { effect, effects, layerSrcObj, shadowSrcObj, layerState })
     } else {
-      target.styles.shadow.srcState = { effect, effects, srcObj, layerState }
+      target.styles.shadow.srcState = { effect, effects, layerSrcObj, shadowSrcObj, layerState }
     }
   }
 }

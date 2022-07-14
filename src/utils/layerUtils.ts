@@ -418,7 +418,7 @@ class LayerUtils {
   }
 
   getLayerInfoById(pageId: string, layerId: string, subLayerId = '') {
-    const pageIndex = pageUtils.getPageIndexById(pageId)
+    const pageIndex = pageId ? pageUtils.getPageIndexById(pageId) : this.pageIndex
     let layerIndex
     let subLayerIdx
     if (subLayerId) {
