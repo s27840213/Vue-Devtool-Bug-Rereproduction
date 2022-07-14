@@ -91,7 +91,6 @@ export default Vue.extend({
       scrollHeight: 0,
       tmpScaleRatio: 0,
       initialDist: 0,
-      minScaleRatio: 0,
       currCardIndex: 0,
       mounted: false
     }
@@ -180,7 +179,7 @@ export default Vue.extend({
     currCardIndex(newVal) {
       setTimeout(() => {
         pageUtils.fitPage()
-        this.minScaleRatio = pageUtils.scaleRatio
+        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
       }, 200)
     }
   },
@@ -237,6 +236,9 @@ export default Vue.extend({
       return {
         paddingBottom: this.currActivePanel !== 'none' ? '40%' : '0px'
       }
+    },
+    minScaleRatio(): number {
+      return pageUtils.mobileMinScaleRatio
     }
   },
   methods: {

@@ -289,6 +289,11 @@ export default Vue.extend({
         index,
         format
       })
+
+      if (generalUtils.isTouchDevice()) {
+        pageUtils.fitPage()
+        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+      }
       if (record) {
         stepsUtils.record()
       }
