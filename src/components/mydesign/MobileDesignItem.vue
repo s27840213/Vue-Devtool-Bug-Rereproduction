@@ -25,8 +25,11 @@
                     iconWidth="10px"
                     iconHeight="8px"
                     iconColor="white")
+          div(v-if="!isSelected && isAnySelected"
+            class="mobile-design-item__checkbox"
+            @click.stop="emitSelect")
           div(class="mobile-design-item__more"
-            @click.stop="toggleMenu()")
+            @click.stop="openMenu()")
             svg-icon(iconName="more_vertical"
                     iconWidth="24px"
                     iconColor="gray-2")
@@ -118,12 +121,18 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations('design', {
+      clearSelection: 'UPDATE_clearSelection',
+      setBottomMenu: 'SET_bottomMenu',
+      setMobileDesignBuffer: 'SET_mobileDesignBuffer'
+    }),
     imageStyles() {
       return { width: `${this.renderedWidth}px`, height: `${this.renderedHeight}px` }
     },
     handleClick() {
       if (this.isAnySelected) {
         this.$emit(this.isSelected ? 'deselect' : 'select')
+        return
       }
       if (this.unenterable) return
       designUtils.setDesign(this.config)
@@ -131,8 +140,10 @@ export default Vue.extend({
     handleCarouselIdx(idx: number) {
       this.carouselIdx = idx
     },
-    toggleMenu() {
-      // use mutation and vuex to open menu and pass design info
+    openMenu() {
+      this.clearSelection()
+      this.setMobileDesignBuffer(this.config)
+      this.setBottomMenu('design-menu')
     },
     emitSelect() {
       this.$emit('select')
@@ -278,6 +289,18 @@ export default Vue.extend({
     transform-origin: right bottom;
     transform: scale(0.8);
     color: setColor(gray-2);
+  }
+  &__checkbox {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    left: 10px;
+    top: 12px;
+    border: 1px solid #969bab;
+    box-sizing: border-box;
+    cursor: pointer;
   }
   &__checkbox-checked {
     position: absolute;

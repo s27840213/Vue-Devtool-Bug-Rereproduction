@@ -196,6 +196,31 @@ class DesignUtils {
     // }
   }
 
+  makeMobileNormalMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'copy',
+        text: `${i18n.t('NN0251')}`
+      },
+      {
+        icon: 'folder',
+        text: `${i18n.t('NN0206')}`
+      },
+      {
+        icon: 'heart',
+        text: `${i18n.t('NN0205')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
+      }
+    ]
+  }
+
   makeFavoriteMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
     return [
       {
@@ -299,10 +324,12 @@ class DesignUtils {
     return bFullPath.startsWith(aFullPath)
   }
 
-  dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
+  dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'copy': {
-        store.dispatch('design/copyDesign', design)
+        store.dispatch('design/copyDesign', design).then(() => {
+          eventEmitter()
+        })
         break
       }
       case 'trash': {
@@ -350,6 +377,11 @@ class DesignUtils {
           event: 'downloadDesign',
           payload: design
         })
+        break
+      }
+      case 'confirm-circle': {
+        store.commit('design/UPDATE_addToSelection', design)
+        eventEmitter()
         break
       }
     }

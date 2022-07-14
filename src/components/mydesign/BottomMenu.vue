@@ -6,22 +6,51 @@
       div(class="bottom-menu__close pointer"
           @click="handleCloseMenu")
         svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-      div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
-      div(v-if="bottomMenu === 'sort-menu'" class="sort-menu")
-        div(v-for="sortMenuItem in sortMenuItems"
-            class="sort-menu__item pointer"
-            :class="{selected: checkSortSelected(sortMenuItem.payload)}"
-            @click="handleSortByClick(sortMenuItem.payload)")
-          div(class="sort-menu__item-icon")
-            svg-icon(:iconName="sortMenuItem.icon"
-                    iconWidth="24px"
-                    iconColor="gray-2"
-                    :style="sortMenuItem.style")
-          div(class="sort-menu__item-text")
-            span {{ sortMenuItem.text }}
+      template(v-if="isAnySelected")
+        div(class="multi-menu")
+          div(class="multi-menu__title")
+            i18n(path="NN0254" tag="span")
+              template(#selectedNum) {{selectedNum}}
+          div(class="menu__hr")
+          div(class="multi-menu__actions")
+            div(v-for="multiMenuItem in multiMenuItems"
+                class="multi-menu__action"
+                @click="multiMenuItem.action")
+              svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
+      template(v-else)
+        div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
+        div(v-if="bottomMenu === 'sort-menu'" class="sort-menu menu")
+          div(v-for="sortMenuItem in sortMenuItems"
+              class="menu__item pointer"
+              :class="{selected: checkSortSelected(sortMenuItem.payload)}"
+              @click="handleSortByClick(sortMenuItem.payload)")
+            div(class="menu__item-icon")
+              svg-icon(:iconName="sortMenuItem.icon"
+                      iconWidth="24px"
+                      iconColor="gray-2"
+                      :style="sortMenuItem.style")
+            div(class="menu__item-text")
+              span {{ sortMenuItem.text }}
+        div(v-if="bottomMenu === 'design-menu'" class="design-menu menu")
+          div(class="menu__editable-name")
+            div(class="menu__editable-name__text") {{ designBuffer.name }}
+            div(class="menu__editable-name__icon")
+              svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
+          div(class="menu__description") {{ `${designBuffer.width} x ${designBuffer.height}` }}
+          div(class="menu__hr")
+          div(v-for="designMenuItem in designMenuItems"
+              class="menu__item"
+              @click="handleDesignMenuAction(designMenuItem.icon)")
+            div(class="menu__item-icon")
+              svg-icon(:iconName="designMenuItem.icon"
+                      :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
+                      iconColor="gray-2")
+            div(class="menu__item-text")
+              span {{ designMenuItem.text }}
 </template>
 
 <script lang="ts">
+import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions, mapMutations } from 'vuex'
 
@@ -61,12 +90,18 @@ export default Vue.extend({
     }
   },
   props: {
-    bottomMenu: String
+    bottomMenu: String,
+    selectedNum: Number,
+    isAnySelected: Boolean
+  },
+  destroyed() {
+    this.clearBuffers()
   },
   watch: {
   },
   computed: {
     ...mapGetters('design', {
+      currLocation: 'getCurrLocation',
       selectedDesigns: 'getSelectedDesigns',
       allDesigns: 'getAllDesigns',
       allFolders: 'getAllFolders',
@@ -74,8 +109,39 @@ export default Vue.extend({
       sortByDescending: 'getSortByDescending',
       isDesignsLoading: 'getIsDesignsLoading',
       isFoldersLoading: 'getIsFoldersLoading',
-      itemCount: 'getItemCount'
+      itemCount: 'getItemCount',
+      designBuffer: 'getMobileDesignBuffer'
     }),
+    designMenuItems(): any[] {
+      switch (this.currLocation) {
+        case 'a':
+          return designUtils.makeMobileNormalMenuItems()
+        default:
+          return []
+      }
+    },
+    multiMenuItems(): any[] {
+      const res = []
+      if (['a'].includes(this.currLocation)) {
+        res.push({
+          icon: 'heart',
+          action: () => { console.log('toggleAllFavorite') }
+        })
+      }
+      if (['a'].includes(this.currLocation)) {
+        res.push({
+          icon: 'folder',
+          action: () => { console.log('moveAllToFolder') }
+        })
+      }
+      if (['a'].includes(this.currLocation)) {
+        res.push({
+          icon: 'trash',
+          action: () => { console.log('moveAllToTrash') }
+        })
+      }
+      return res
+    },
     isPrevButtonNeeded(): boolean {
       return PREV_BUTTON_MENUS.includes(this.bottomMenu)
     }
@@ -83,18 +149,32 @@ export default Vue.extend({
   methods: {
     ...mapMutations('design', {
       setSortByField: 'SET_sortByField',
-      setSortByDescending: 'SET_sortByDescending'
+      setSortByDescending: 'SET_sortByDescending',
+      clearBuffers: 'UPDATE_clearBuffers'
     }),
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
     handleCloseMenu() {
-      this.$emit('close')
+      if (this.isAnySelected) {
+        this.$emit('clear')
+      } else {
+        this.$emit('close')
+      }
     },
     handleSortByClick(payload: [string, boolean]) {
       this.setSortByField(payload[0])
       this.setSortByDescending(payload[1])
       this.$emit('refresh')
+    },
+    handleDesignMenuAction(icon: string) {
+      // if (this.useDelete && icon === 'trash') icon = 'delete'
+      designUtils.dispatchDesignMenuAction(icon, this.designBuffer, (extraEvent) => {
+        if (extraEvent) {
+          this.$emit('menuAction', extraEvent)
+        }
+        this.$emit('close')
+      })
     }
   }
 })
@@ -155,17 +235,44 @@ export default Vue.extend({
   justify-content: center;
 }
 
-.sort-menu {
-  padding-top: 44px;
+.menu {
   padding-bottom: 8px;
   display: flex;
   flex-direction: column;
+  &__editable-name {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+    margin-left: 22.5px;
+    &__text {
+      @include text-H6;
+      color: setColor(gray-2);
+    }
+    &__icon {
+      @include size(18px);
+    }
+  }
+  &__description {
+    margin-top: 8px;
+    margin-left: 24px;
+    text-align: left;
+    font-size: 12px;
+    line-height: 20px;
+    color: setColor(gray-3);
+  }
+  &__hr {
+    margin: 16px auto;
+    width: calc(100% - 32px);
+    height: 1px;
+    background: setColor(gray-4);
+  }
   &__item {
     height: 40px;
     display: flex;
     align-items: center;
     gap: 16px;
-    &.selected {
+    &.selected, &:active {
       background: setColor(blue-4);
     }
     &-icon {
@@ -188,6 +295,37 @@ export default Vue.extend({
         white-space: nowrap;
       }
     }
+  }
+}
+
+.sort-menu {
+  padding-top: 44px;
+}
+
+.design-menu {
+  padding-top: 24px;
+}
+
+.multi-menu {
+  padding-top: 24px;
+  padding-bottom: 16px;
+  &__title {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 140%;
+    color: setColor(gray-2);
+  }
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 64px;
+  }
+  &__action {
+    @include size(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

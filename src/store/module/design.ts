@@ -1195,6 +1195,10 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_clearSelection(state: IDesignState) {
     state.selectedDesigns = {}
     state.selectedFolders = {}
+  },
+  UPDATE_clearBuffers(state: IDesignState) {
+    state.mobileDesignBuffer = undefined
+    state.mobileFolderBuffer = undefined
   }
 }
 

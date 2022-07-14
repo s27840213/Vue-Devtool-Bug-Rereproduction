@@ -37,11 +37,14 @@
         div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
     div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background")
     transition(name="slide-full")
-      bottom-menu(v-if="bottomMenu !== ''"
+      bottom-menu(v-if="bottomMenu !== '' || isAnySelected"
                   class="bottom-menu"
                   :bottomMenu="bottomMenu"
+                  :selectedNum="selectedNum"
+                  :isAnySelected="isAnySelected"
                   v-click-outside="() => { setBottomMenu('') }"
-                  @close="setBottomMenu('')")
+                  @close="setBottomMenu('')"
+                  @clear="handleClearSelection")
 </template>
 
 <script lang="ts">
@@ -185,6 +188,12 @@ export default Vue.extend({
       isErrorShowing: 'getIsErrorShowing',
       bottomMenu: 'getBottomMenu'
     }),
+    selectedNum(): number {
+      return Object.keys(this.selectedDesigns).length
+    },
+    isAnySelected(): boolean {
+      return this.selectedNum > 0
+    },
     path(): string[] {
       return this.currLocation.startsWith('f:') ? designUtils.makePath(this.currLocation) : []
     },
@@ -276,6 +285,13 @@ export default Vue.extend({
     },
     handleGoTo(tab: string) {
       this.setCurrLocation(tab)
+    },
+    handleCloseMenu() {
+      if (this.isAnySelected) {
+        this.handleClearSelection()
+      } else {
+        this.setBottomMenu('')
+      }
     },
     handleClearSelection() {
       this.isMoveToFolderPanelOpen = false
