@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-group-template py-20 px-10 flex flex-column")
+  div(class="panel-group-template py-20 px-10 flex flex-column" :style="panelStyle")
     div(class="mb-30 relative")
       svg-icon(class="panel-group-template__close pointer"
         iconName="chevron-left"
@@ -56,6 +56,11 @@ export default Vue.extend({
     },
     isDetailPage(): boolean {
       return this.groupItem.group_type === 1
+    },
+    panelStyle(): Record<string, string> {
+      return generalUtils.isTouchDevice() ? {
+        padding: '20px 15px'
+      } : {}
     },
     listStyle(): Record<string, string> {
       return generalUtils.isTouchDevice() ? {
