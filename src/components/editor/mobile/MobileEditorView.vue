@@ -121,10 +121,11 @@ export default Vue.extend({
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
 
+    pageUtils.fitPage()
     this.tmpScaleRatio = pageUtils.scaleRatio
 
     if (generalUtils.isTouchDevice()) {
-      this.minScaleRatio = pageUtils.scaleRatio
+      pageUtils.mobileMinScaleRatio = this.tmpScaleRatio
     }
 
     this.$nextTick(() => {

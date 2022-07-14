@@ -590,6 +590,7 @@ class AssetUtils {
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs).then(() => {
             pageUtils.fitPage()
+            pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
           })
           editorUtils.setCloseMobilePanelFlag(true)
           pageUtils.fitPage()

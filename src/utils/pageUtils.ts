@@ -49,10 +49,12 @@ class PageUtils {
 
   topBound: number
   bottomBound: number
+  mobileMinScaleRatio: number
 
   constructor() {
     this.topBound = -1
     this.bottomBound = Number.MAX_SAFE_INTEGER
+    this.mobileMinScaleRatio = 0
   }
 
   newPage(pageData: Partial<IPage>) {
