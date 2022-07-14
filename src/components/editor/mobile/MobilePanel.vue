@@ -403,7 +403,7 @@ export default Vue.extend({
   &__bottom-section {
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow-y: scroll;
     @include no-scrollbar;
   }
 

@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-color scrollbar-gray-thin")
+  div(class="panel-color px-5")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
