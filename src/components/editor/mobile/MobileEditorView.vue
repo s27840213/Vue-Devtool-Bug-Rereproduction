@@ -176,6 +176,12 @@ export default Vue.extend({
       if (!newVal) {
         this.currCardIndex = 0
       }
+    },
+    currCardIndex(newVal) {
+      setTimeout(() => {
+        pageUtils.fitPage()
+        this.minScaleRatio = pageUtils.scaleRatio
+      }, 200)
     }
   },
 
@@ -197,7 +203,8 @@ export default Vue.extend({
       lockGuideline: 'getLockGuideline',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      currFocusPageIndex: 'getCurrFocusPageIndex'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
