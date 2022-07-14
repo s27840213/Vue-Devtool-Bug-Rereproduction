@@ -40,8 +40,8 @@
       bottom-menu(v-if="bottomMenu !== ''"
                   class="bottom-menu"
                   :bottomMenu="bottomMenu"
-                  v-click-outside="() => { bottomMenu = '' }"
-                  @close="bottomMenu = ''")
+                  v-click-outside="() => { setBottomMenu('') }"
+                  @close="setBottomMenu('')")
 </template>
 
 <script lang="ts">
@@ -85,7 +85,6 @@ export default Vue.extend({
       pathedFolderBuffer: undefined as IPathedFolder | undefined,
       designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
-      bottomMenu: '',
       isMoveToFolderPanelOpen: false,
       isMovingSingleToFolder: false,
       errorMessageTimer: -1,
@@ -183,7 +182,8 @@ export default Vue.extend({
       copiedFolders: 'getCopiedFolders',
       selectedDesigns: 'getSelectedDesigns',
       selectedFolders: 'getSelectedFolders',
-      isErrorShowing: 'getIsErrorShowing'
+      isErrorShowing: 'getIsErrorShowing',
+      bottomMenu: 'getBottomMenu'
     }),
     path(): string[] {
       return this.currLocation.startsWith('f:') ? designUtils.makePath(this.currLocation) : []
@@ -215,7 +215,7 @@ export default Vue.extend({
           return [{
             icon: 'info-mobile',
             action: () => {
-              this.bottomMenu = 'trash-info'
+              this.setBottomMenu('trash-info')
             }
           }]
         default:
@@ -227,7 +227,7 @@ export default Vue.extend({
           }, {
             icon: 'sequence',
             action: () => {
-              this.bottomMenu = 'sort-menu'
+              this.setBottomMenu('sort-menu')
             }
           }]
       }
@@ -259,7 +259,8 @@ export default Vue.extend({
       setCurrLocation: 'SET_currLocation',
       setFolders: 'SET_folders',
       snapshotFolders: 'UPDATE_snapshotFolders',
-      setIsErrorShowing: 'SET_isErrorShowing'
+      setIsErrorShowing: 'SET_isErrorShowing',
+      setBottomMenu: 'SET_bottomMenu'
     }),
     handlePrevPage() {
       if (['a', 'h', 'l', 't'].includes(this.currLocation)) {

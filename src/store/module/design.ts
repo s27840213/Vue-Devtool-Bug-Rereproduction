@@ -5,7 +5,7 @@ import designApis from '@/apis/design'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 import Vue from 'vue'
 import router from '@/router'
-import { IAssetDesignParams, IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
+import { IUserDesignContentData, IUserFolderContentData } from '@/interfaces/api'
 
 interface IDesignState {
   currLocation: string,
@@ -26,7 +26,10 @@ interface IDesignState {
   designsPageIndex: number,
   isErrorShowing: boolean,
   folderDesignCount: number,
-  folderFolderCount: number
+  folderFolderCount: number,
+  bottomMenu: string,
+  mobileDesignBuffer: IDesign | undefined,
+  mobileFolderBuffer: IPathedFolder | undefined
 }
 
 const getDefaultState = (): IDesignState => ({
@@ -48,7 +51,10 @@ const getDefaultState = (): IDesignState => ({
   designsPageIndex: 0,
   isErrorShowing: false,
   folderDesignCount: 0,
-  folderFolderCount: 0
+  folderFolderCount: 0,
+  bottomMenu: '',
+  mobileDesignBuffer: undefined,
+  mobileFolderBuffer: undefined
 })
 
 const state = getDefaultState()
@@ -106,6 +112,15 @@ const getters: GetterTree<IDesignState, unknown> = {
   },
   getItemCount(state: IDesignState): number {
     return state.folderDesignCount + state.folderFolderCount
+  },
+  getBottomMenu(state: IDesignState): string {
+    return state.bottomMenu
+  },
+  getMobileDesignBuffer(state: IDesignState): IDesign | undefined {
+    return state.mobileDesignBuffer
+  },
+  getMobileFolderBuffer(state: IDesignState): IPathedFolder | undefined {
+    return state.mobileFolderBuffer
   }
 }
 
@@ -985,6 +1000,15 @@ const mutations: MutationTree<IDesignState> = {
   SET_itemCount(state: IDesignState, updateInfo: { designCount: number, folderCount: number }) {
     state.folderDesignCount = updateInfo.designCount
     state.folderFolderCount = updateInfo.folderCount
+  },
+  SET_bottomMenu(state: IDesignState, bottomMenu: string) {
+    state.bottomMenu = bottomMenu
+  },
+  SET_mobileDesignBuffer(state: IDesignState, mobileDesignBuffer: IDesign | undefined) {
+    state.mobileDesignBuffer = mobileDesignBuffer
+  },
+  SET_mobileFolderBuffer(state: IDesignState, mobileFolderBuffer: IPathedFolder | undefined) {
+    state.mobileFolderBuffer = mobileFolderBuffer
   },
   UPDATE_folders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     let pathNodes
