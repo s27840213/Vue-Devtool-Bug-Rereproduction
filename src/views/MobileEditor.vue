@@ -209,6 +209,10 @@ export default Vue.extend({
           }
         }
       }
+
+      if (this.currActivePanel !== 'none' && this.inAllPagesMode) {
+        editorUtils.setMobileAllPageMode(false)
+      }
     },
     showAllPages() {
       editorUtils.setMobileAllPageMode(!this.inAllPagesMode)
