@@ -92,7 +92,8 @@ export default Vue.extend({
       tmpScaleRatio: 0,
       initialDist: 0,
       currCardIndex: 0,
-      mounted: false
+      mounted: false,
+      cardSize: 0
     }
   },
   mounted() {
@@ -119,6 +120,8 @@ export default Vue.extend({
     this.editorView = this.$refs.editorView as HTMLElement
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
+
+    this.cardSize = this.editorView ? this.editorView.clientHeight : 0
 
     pageUtils.fitPage()
     this.tmpScaleRatio = pageUtils.scaleRatio
@@ -171,16 +174,8 @@ export default Vue.extend({
     screenHeight() {
       pageUtils.findCentralPageIndexInfo(true)
     },
-    inAllPagesMode(newVal) {
-      if (!newVal) {
-        this.currCardIndex = 0
-      }
-    },
-    currCardIndex(newVal) {
-      setTimeout(() => {
-        pageUtils.fitPage()
-        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
-      }, 200)
+    currFocusPageIndex(newVal) {
+      this.currCardIndex = newVal
     }
   },
 
@@ -188,6 +183,9 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState({
+      mobileAllPageMode: 'mobileAllPageMode'
+    }),
     ...mapGetters({
       groupId: 'getGroupId',
       pages: 'getPages',
@@ -375,28 +373,33 @@ export default Vue.extend({
     swipeUpHandler(e: AnyTouchEvent) {
       e.stopImmediatePropagation()
       if (this.pageNum - 1 !== this.currCardIndex) {
+        pageUtils.fitPage()
+        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         this.currCardIndex++
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
       } else {
         this.addPage(pageUtils.newPage({}))
+        pageUtils.fitPage()
+        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         StepsUtils.record()
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
       e.stopImmediatePropagation()
       if (this.currCardIndex !== 0) {
+        pageUtils.fitPage()
+        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         this.currCardIndex--
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
       }
     },
     cardStyle(index: number): { [index: string]: string | number } {
-      const cardSize = this.editorView ? this.editorView.clientHeight : 0
       return {
         width: '100%',
-        height: this.editorView ? `${cardSize}px` : '100%',
-        transform: this.editorView ? `translate3d(0,${index * cardSize - this.currCardIndex * cardSize}px,0)` : 'translate3d(0,0px,0)',
+        height: this.editorView ? `${this.cardSize}px` : '100%',
+        transform: this.editorView ? `translate3d(0,${index * this.cardSize - this.currCardIndex * this.cardSize}px,0)` : 'translate3d(0,0px,0)',
         transition: this.mounted ? 'transform 0.3s' : 'none'
       }
     }

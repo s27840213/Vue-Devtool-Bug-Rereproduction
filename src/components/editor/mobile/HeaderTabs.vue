@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="header-bar" @touchstart.stop)
+  div(class="header-bar" @pointerdown.stop)
     div(class="header-bar__left")
       svg-icon(class="header-bar__feature-icon mr-25"
         :iconName="'chevron-left'"
@@ -251,6 +251,7 @@ export default Vue.extend({
   justify-content: space-between;
   padding: 0px 16px;
   box-sizing: border-box;
+  z-index: setZindex("editor-header");
 
   &__left {
     display: flex;

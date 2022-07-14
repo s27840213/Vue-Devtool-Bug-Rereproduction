@@ -23,6 +23,7 @@ import GalleryUtils from '@/utils/galleryUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
+import { mapState } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -49,6 +50,7 @@ export default Vue.extend({
     GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
   },
   computed: {
+    ...mapState('file', ['regenerateGalleryFlag']),
     margin(): number {
       return this.galleryUtils.margin
     }
@@ -62,7 +64,14 @@ export default Vue.extend({
     }
   },
   watch: {
-    myfile() { // For panel file
+    // For panel file
+    regenerateGalleryFlag(newVal: boolean) {
+      if (newVal) {
+        this.myfileUpdate()
+        this.galleryUtils.setRegenerateGalleryFlag(false)
+      }
+    },
+    myfile() {
       this.myfileUpdate()
     },
     images(newImages: Array<IPhotoItem[]>) { // For panel unsplash and pexel

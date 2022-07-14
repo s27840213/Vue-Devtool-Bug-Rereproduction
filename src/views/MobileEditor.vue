@@ -6,12 +6,13 @@
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
-        mobile-editor-view(v-if="!inAllPagesMode"
-          :currActivePanel="currActivePanel"
-          :isConfigPanelOpen="isConfigPanelOpen"
-          :inAllPagesMode="inAllPagesMode")
-        div(v-else class="mobile-editor__page-preview")
-          all-pages
+        keep-alive
+          mobile-editor-view(v-if="!inAllPagesMode"
+            :currActivePanel="currActivePanel"
+            :isConfigPanelOpen="isConfigPanelOpen"
+            :inAllPagesMode="inAllPagesMode")
+          div(v-else class="mobile-editor__page-preview")
+            all-pages
       transition(name="panel-up")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
@@ -224,7 +225,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   height: 100%;
   display: grid;
-  grid-template-rows: minmax(auto, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   grid-template-columns: 1fr;
 
   &__top {
@@ -232,7 +233,7 @@ export default Vue.extend({
     width: 100%;
     position: relative;
     display: grid;
-    grid-template-rows: auto minmax(auto, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
     grid-template-columns: 1fr;
   }
   &__bottom {
@@ -244,6 +245,7 @@ export default Vue.extend({
     height: 100%;
     width: 100%;
     overflow: scroll;
+    z-index: setZindex("editor-view");
   }
 
   &__page-preview {

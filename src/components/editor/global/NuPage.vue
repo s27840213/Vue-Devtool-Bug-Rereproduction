@@ -579,7 +579,6 @@ export default Vue.extend({
       StepsUtils.record()
     },
     duplicatePage() {
-      console.log(this.isProcessingShadow)
       if (this.isProcessingShadow) {
         Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
         return

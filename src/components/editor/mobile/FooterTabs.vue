@@ -73,14 +73,6 @@ export default Vue.extend({
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
-      ] as Array<IFooterTab>,
-      pageTabs: [
-        mainMenu,
-        { icon: 'add-page', text: `${this.$t('NN0139')}` },
-        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
-        // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
-        { icon: 'trash', text: `${this.$t('NN0141')}` }
-        // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ] as Array<IFooterTab>
     }
   },
@@ -118,6 +110,16 @@ export default Vue.extend({
           }
         },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true }
+      ]
+    },
+    pageTabs(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        { icon: 'add-page', text: `${this.$t('NN0139')}` },
+        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
+        // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
+        { icon: 'trash', text: `${this.$t('NN0141')}`, disabled: pageUtils.getPages.length <= 1 }
+        // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
     genearlLayerTabs(): Array<IFooterTab> {
@@ -287,15 +289,17 @@ export default Vue.extend({
         case 'add-page': {
           const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
           pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
+          this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()
           break
         }
         case 'duplicate-page': {
-          const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
-          pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
-          groupUtils.deselect()
-          this._setCurrActivePageIndex(pageUtils.currActivePageIndex + 1)
-          stepsUtils.record()
+          const { currFocusPageIndex } = pageUtils
+          const page = generalUtils.deepCopy(pageUtils.getPage(currFocusPageIndex))
+          page.designId = ''
+          page.id = generalUtils.generateRandomString(8)
+          pageUtils.addPageToPos(page, currFocusPageIndex + 1)
+          this._setCurrActivePageIndex(currFocusPageIndex + 1)
           break
         }
         case 'trash': {

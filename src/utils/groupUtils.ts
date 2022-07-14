@@ -244,6 +244,8 @@ class GroupUtils {
   }
 
   deselect() {
+    console.log('hi')
+    console.trace()
     const tmpPageIndex = this.currSelectedInfo.pageIndex
 
     if (this.currSelectedInfo.index !== -1) {

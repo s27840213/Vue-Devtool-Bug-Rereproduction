@@ -243,6 +243,7 @@ class UploadUtils {
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
                   if (json.flag === 0) {
+                    console.log(json)
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
@@ -369,13 +370,14 @@ class UploadUtils {
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
                       if (json.flag === 0) {
+                        const { width, height, asset_index } = json.data
                         if (type === 'image') {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
                               assetId: assetId,
                               progress: 100
                             })
-                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, type: this.isAdmin ? 'public' : 'private', ...(isUnknown && { width, height }) })
                           }
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
@@ -499,10 +501,8 @@ class UploadUtils {
         }
       }
       if (isFile) {
-        console.log('is file')
         generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
           reader.onload = (evt) => {
-            console.log(imgType)
             assetHandler(evt.target?.result as string, imgType)
           }
           reader.readAsDataURL(files[i] as File)
