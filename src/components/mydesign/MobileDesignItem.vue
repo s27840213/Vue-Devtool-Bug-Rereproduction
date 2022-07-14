@@ -67,9 +67,6 @@ export default Vue.extend({
   },
   props: {
     config: Object,
-    menuItemNum: Number,
-    favorable: Boolean,
-    undraggable: Boolean,
     unenterable: Boolean,
     isAnySelected: Boolean,
     isSelected: Boolean,

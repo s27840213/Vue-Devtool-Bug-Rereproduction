@@ -15,30 +15,12 @@
                   :key="design.asset_index"
                   :index="index"
                   :config="design"
-                  :favorable="!limitFunctions"
-                  :undraggable="limitFunctions"
-                  :nameIneditable="limitFunctions"
                   :unenterable="limitFunctions"
                   :isSelected="checkSelected(design.asset_index.toString())"
                   :isAnySelected="isAnySelected"
                   :isMultiSelected="isMultiSelected"
-                  :menuItemNum="menuItemSlots.length"
-                  @like="toggleFavorite(design)"
                   @select="selectDesign(design)"
-                  @deselect="deselectDesign(design)"
-                  @metaSelect="metaSelectDesign(index)")
-        template(v-for="menuItemSlot in menuItemSlots" v-slot:[menuItemSlot.name])
-          div(class="design-menu-item" @click="handleDesignMenuAction(menuItemSlot.icon, design)")
-            div(class="design-menu-item__icon")
-              svg-icon(:iconName="menuItemSlot.icon"
-                      iconWidth="10px"
-                      iconColor="gray-2")
-            div(class="design-menu-item__text")
-              span {{ menuItemSlot.text }}
-            div(v-if="menuItemSlot.extendable" class="design-menu-item__right")
-              svg-icon(iconName="chevron-right"
-                      iconWidth="10px"
-                      iconColor="gray-2")
+                  @deselect="deselectDesign(design)")
     div(v-if="isExpanded && isDesignsLoading" class="mobile-design-gallery__loading")
       svg-icon(iconName="loading"
                 iconWidth="32px"
@@ -66,11 +48,9 @@ export default Vue.extend({
     }
   },
   props: {
-    menuItems: Array,
     allDesigns: Array,
     selectedNum: Number,
     limitFunctions: Boolean,
-    useDelete: Boolean,
     noHeader: Boolean
   },
   computed: {
@@ -80,9 +60,6 @@ export default Vue.extend({
       isDesignsLoading: 'getIsDesignsLoading',
       designsPageIndex: 'getDesignsPageIndex'
     }),
-    menuItemSlots(): {name: string, icon: string, text: string}[] {
-      return (this.menuItems as {icon: string, text: string, extendable?: boolean}[]).map((menuItem, index) => ({ name: `i${index}`, ...menuItem }))
-    },
     isAnySelected(): boolean {
       return this.selectedNum > 0
     },
@@ -107,35 +84,14 @@ export default Vue.extend({
     toggleExpansion() {
       this.isExpanded = !this.isExpanded
     },
-    handleDesignMenuAction(icon: string, design: IDesign) {
-      if (this.useDelete && icon === 'trash') icon = 'delete'
-      designUtils.dispatchDesignMenuAction(icon, design, (extraEvent) => {
-        if (extraEvent) {
-          this.$emit('menuAction', extraEvent)
-        }
-      })
-    },
     handleLoadMore() {
       this.$emit('loadMore')
-    },
-    toggleFavorite(design: IDesign) {
-      if (design.favorite) {
-        designUtils.removeFromFavorite(design)
-      } else {
-        designUtils.addToFavorite(design)
-      }
     },
     selectDesign(design: IDesign) {
       this.addToSelection(design)
     },
     deselectDesign(design: IDesign) {
       this.removeFromSelection(design)
-    },
-    metaSelectDesign(index: number) {
-      this.metaSelect({
-        designs: this.allDesigns,
-        index
-      })
     }
   }
 })
