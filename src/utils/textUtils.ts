@@ -1132,13 +1132,15 @@ class TextUtils {
 
   setParagraphProp(prop: 'lineHeight' | 'fontSpacing', _value: number) {
     if (GeneralUtils.isValidFloat(_value.toString())) {
-      let value = parseFloat(GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
+      _value = parseFloat(GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
+
+      let value: number
       switch (prop) {
         case 'lineHeight':
-          value = _.toNumber((value).toFixed(2))
+          value = _.toNumber((_value).toFixed(2))
           break
         case 'fontSpacing':
-          value = value / 1000
+          value = _value / 1000
       }
       const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
       window.requestAnimationFrame(() => {
@@ -1150,7 +1152,7 @@ class TextUtils {
             })
         } else {
           tiptapUtils.applyParagraphStyle(prop, value, false)
-          TextPropUtils.updateTextPropsState({ [prop]: value })
+          TextPropUtils.updateTextPropsState({ [prop]: _value })
         }
       })
     }

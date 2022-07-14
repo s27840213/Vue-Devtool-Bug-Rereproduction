@@ -185,7 +185,7 @@ export default Vue.extend({
       MappingUtils,
       FrameUtils,
       ShortcutUtils,
-      dragUtils: new DragUtils(this.layerIndex),
+      dragUtils: new DragUtils(this.config.id),
       controlPoints: ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isLineEndMoving: false,
@@ -645,7 +645,7 @@ export default Vue.extend({
       //   return
       // } else {
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
-        eventUtils.emit(PanelEvent.showPhotoShadow)
+        eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
       ImageUtils.setImgControlDefault(false)
       // }

@@ -26,6 +26,7 @@ import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import heic2any from 'heic2any'
 import networkUtils from './networkUtils'
+import _ from 'lodash'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -322,8 +323,7 @@ class UploadUtils {
               pageIndex: pageUtils.currFocusPageIndex
             })
             if (addToPage) {
-              // assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
-              assetUtils.addImage(src, img.width / img.height, {
+              assetUtils.addImage(src, isUnknown ? 1 : img.width / img.height, {
                 pageIndex: pageUtils.currFocusPageIndex,
                 // The following props is used for preview image during polling process
                 isPreview: true,
@@ -394,13 +394,13 @@ class UploadUtils {
               }, 2000)
             }
           }
-          // if (!isUnknown) {
-          img.onload = (evt) => {
-            imgCallBack(img.src)
+          if (!isUnknown) {
+            img.onload = (evt) => {
+              imgCallBack(img.src)
+            }
+          } else {
+            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
           }
-          // } else {
-          //   imgCallBack(require('@/assets/img/svg/image-preview.svg'))
-          // }
         } else if (type === 'font') {
           const tempId = brandkitUtils.createTempFont(assetId)
           xhr.open('POST', this.loginOutput.upload_map.url, true)
@@ -499,13 +499,16 @@ class UploadUtils {
         }
       }
       if (isFile) {
+        console.log('is file')
         generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
           reader.onload = (evt) => {
+            console.log(imgType)
             assetHandler(evt.target?.result as string, imgType)
           }
           reader.readAsDataURL(files[i] as File)
         })
       } else {
+        console.log('not file')
         assetHandler(files[i] as string)
       }
     }
@@ -1110,6 +1113,17 @@ class UploadUtils {
             })
           })
           .then(() => {
+            // Reference from designUtils.newDesignWithTemplae
+            store.commit('SET_assetId', generalUtils.generateAssetId())
+            const query = _.omit(router.currentRoute.query,
+              ['width', 'height'])
+            query.type = 'design'
+            query.design_id = uploadUtils.assetId
+            query.team_id = uploadUtils.teamId
+
+            router.replace({ query }).then(() => {
+              uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+            })
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
             this.isGettingDesign = false

@@ -86,8 +86,13 @@ export default Vue.extend({
   },
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
-    eventUtils.on(PanelEvent.showPhotoShadow, () => {
-      this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
+    eventUtils.on(PanelEvent.showPhotoShadow, (val) => {
+      console.warn(val)
+      if (typeof val !== 'undefined') {
+        this.show = val
+      } else {
+        this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
+      }
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
@@ -184,8 +189,10 @@ export default Vue.extend({
       if (shadow) {
         const isCurrLayerHanlingShadow = [this.handleId.layerId, this.handleId.subLayerId].includes(currLayer.id)
         const isLayerNeedRedraw = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
-        if (btn.name === 'shadow' && this.isUploadImgShadow) {
-          return !isCurrLayerHanlingShadow || this.isUploadImgShadow
+        const isShadowPanelOpen = this.currFunctionPanelType === FunctionPanelType.photoShadow
+        if (btn.name === 'shadow') {
+          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
+          // return !isCurrLayerHanlingShadow || (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true
         }

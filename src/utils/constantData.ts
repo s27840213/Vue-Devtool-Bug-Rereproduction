@@ -29,13 +29,13 @@ class PaymentData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `https://vivipic.com/templates?themes=${id.join(',')}`
+          url: `/templates?themes=${id.join(',')}`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `https://vivipic.com/templates?themes=${id}`
+          url: `/templates?themes=${id}`
         }
       }
     }
