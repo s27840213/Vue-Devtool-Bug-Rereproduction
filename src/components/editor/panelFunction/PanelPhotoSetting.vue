@@ -86,8 +86,13 @@ export default Vue.extend({
   },
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
-    eventUtils.on(PanelEvent.showPhotoShadow, () => {
-      this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
+    eventUtils.on(PanelEvent.showPhotoShadow, (val) => {
+      console.warn(val)
+      if (typeof val !== 'undefined') {
+        this.show = val
+      } else {
+        this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
+      }
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },

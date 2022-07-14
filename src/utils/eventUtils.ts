@@ -78,9 +78,9 @@ class EventUtils {
     this.eventHash[type] = callback
   }
 
-  emit(type: string) {
+  emit(type: string, param: any = undefined) {
     if (this.eventHash[type]) {
-      this.event.emit(type)
+      this.event.emit(type, param)
     }
   }
 

@@ -645,7 +645,7 @@ export default Vue.extend({
       //   return
       // } else {
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
-        eventUtils.emit(PanelEvent.showPhotoShadow)
+        eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
       ImageUtils.setImgControlDefault(false)
       // }

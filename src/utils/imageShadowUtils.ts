@@ -638,7 +638,6 @@ class ImageShadowUtils {
     const layer = subLayerIdx !== -1
       ? (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
       : layerUtils.getLayer(pageIndex, layerIndex) as IImage
-
     if (layer.type === LayerType.image) {
       const { shadow, width, height } = layer.styles
       const { effects } = shadow
@@ -860,15 +859,21 @@ class ImageShadowUtils {
   }
 
   updateShadowSrc(layerInfo: ILayerInfo, srcObj: SrcObj) {
-    console.warn('update src')
     store.commit('SET_srcObj', {
       layerInfo,
       srcObj
     })
   }
 
-  setShadowSrcState(layerInfo: ILayerInfo, effect: ShadowEffectType, effects: IShadowEffects, srcObj: SrcObj, layerState?: Partial<IImageStyle>) {
-    store.commit('SET_srcState', { layerInfo, effect, effects, srcObj, layerState })
+  setShadowSrcState(layerInfo: ILayerInfo, attrs: {
+    effect: ShadowEffectType,
+    effects: IShadowEffects,
+    layerSrcObj: SrcObj,
+    shadowSrcObj: SrcObj,
+    layerState: Partial<IImageStyle>
+  }) {
+    const { effect, effects, layerSrcObj, shadowSrcObj, layerState } = attrs
+    store.commit('SET_srcState', { layerInfo, effect, effects, layerSrcObj, shadowSrcObj, layerState })
   }
 
   setUploadId(id: ILayerIdentifier) {

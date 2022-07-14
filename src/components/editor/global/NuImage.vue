@@ -118,6 +118,7 @@ export default Vue.extend({
           img.crossOrigin = 'anonymous'
           img.onload = () => {
             const isTransparent = imageShadowUtils.isTransparentBg(img)
+            console.warn(isTransparent)
             imageShadowUtils.setHandleId()
             imageShadowUtils.updateEffectProps({
               pageIndex: this.pageIndex,
@@ -129,7 +130,7 @@ export default Vue.extend({
             }
           }
           const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
-          img.src = ImageUtils.getSrc(this.config, imgSize)
+          img.src = ImageUtils.getSrc(this.config, imgSize) + '&ver=' + generalUtils.generateRandomString(6)
           if (!isFloatingEffect) {
             imageShadowUtils.setHandleId(this.id)
           }
@@ -217,16 +218,18 @@ export default Vue.extend({
       }
       if (!this.config.imgControl && this.currentShadowEffect !== ShadowEffectType.none) {
         if (this.shadow.isTransparent) {
-          this.redrawShadow(true)
+          this.redrawShadow()
+          // this.redrawShadow(true)
         } else if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
-          this.redrawShadow(true)
+          this.redrawShadow()
+          // this.redrawShadow(true)
         }
       }
     },
     'shadow.srcObj': {
       handler: function (val) {
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
-          imageShadowUtils.setEffect(this.shadow.currentEffect)
+          imageShadowUtils.setEffect(this.shadow.currentEffect, {}, this.pageIndex, this.layerIndex, this.subLayerIndex)
         }
         this.handleUploadShadowImg()
       },
