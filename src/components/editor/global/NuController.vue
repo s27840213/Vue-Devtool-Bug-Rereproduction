@@ -1588,7 +1588,7 @@ export default Vue.extend({
             replacedImg.src = ImageUtils.getSrc(this.config, size)
             return
           } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
           }
         }
         GroupUtils.deselect()
