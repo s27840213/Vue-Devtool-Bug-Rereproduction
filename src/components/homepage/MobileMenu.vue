@@ -107,6 +107,7 @@ export default Vue.extend({
     display: block;
     width: 100%;
     text-decoration: unset;
+    color: inherit;
   }
 }
 

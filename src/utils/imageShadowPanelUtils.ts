@@ -70,7 +70,7 @@ export default new class ImageShadowPanelUtils {
           .every(([k, v]) => {
             return (shadow.srcState as any).effects[currentEffect][k] === v
           }) &&
-        (!shadow.isTransparent ||
+        ((!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched) ||
           (
             shadow.srcState.layerState && Object.entries(shadow.srcState.layerState)
               .every(([k, v]) => {
@@ -80,9 +80,9 @@ export default new class ImageShadowPanelUtils {
         ) &&
         (shadow.currentEffect !== ShadowEffectType.imageMatched ||
           (
-            shadow.srcState.srcObj.type === config.srcObj.type &&
-            shadow.srcState.srcObj.userId === config.srcObj.userId &&
-            shadow.srcState.srcObj.assetId === config.srcObj.assetId
+            shadow.srcState.layerSrcObj.type === config.srcObj.type &&
+            shadow.srcState.layerSrcObj.userId === config.srcObj.userId &&
+            shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
           )
         )
     }
@@ -106,14 +106,15 @@ export default new class ImageShadowPanelUtils {
         return
       }
       if (this.checkIfSameEffect(config) && config.styles.shadow.srcState) {
-        const { srcObj } = config.styles.shadow.srcState
+        const { shadowSrcObj } = config.styles.shadow.srcState
         const layerInfo = {
           pageIndex: _pageIndex,
           layerIndex: _layerIndex,
           subLayerIdx: _subLayerIdx
         }
-        imageShadowUtils.updateShadowSrc(layerInfo, srcObj)
+        imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
         imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         return
       }
       if (primarylayerId) {
@@ -143,8 +144,8 @@ export default new class ImageShadowPanelUtils {
       const img = new Image()
       let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600)
-      img.src += `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+      img.src = imageUtils.getSrc(config, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600) +
+        `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve) => {
         img.onload = async () => {
           const isSVG = await this.isSVG(img, config)
@@ -185,8 +186,8 @@ export default new class ImageShadowPanelUtils {
       const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
-      console.log(updateCanvas.width, updateCanvas.height)
-      console.log(drawCanvasW, drawCanvasH)
+      // console.log(updateCanvas.width, updateCanvas.height)
+      // console.log(drawCanvasW, drawCanvasH)
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
@@ -239,8 +240,8 @@ export default new class ImageShadowPanelUtils {
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
-          console.log(updateCanvas.width, right, left)
-          console.log(newWidth, newHeight)
+          // console.log(updateCanvas.width, right, left)
+          // console.log(newWidth, newHeight)
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
@@ -267,16 +268,21 @@ export default new class ImageShadowPanelUtils {
                 srcObj,
                 styles: shadowImgStyles
               })
+              const shadow = config.styles.shadow
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, srcObj)
               imageShadowUtils.updateShadowStyles({ pageIndex, layerIndex, subLayerIdx }, shadowImgStyles)
-              const shadow = config.styles.shadow
-              const layerState = shadow.isTransparent ? {
-                imgWidth: config.styles.imgWidth,
-                imgHeight: config.styles.imgHeight,
-                imgX: config.styles.imgX,
-                imgY: config.styles.imgY
-              } : undefined
-              imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, shadow.currentEffect, shadow.effects, srcObj, layerState)
+              imageShadowUtils.setShadowSrcState({ pageIndex, layerIndex, subLayerIdx }, {
+                effect: shadow.currentEffect,
+                effects: shadow.effects,
+                shadowSrcObj: srcObj,
+                layerSrcObj: config.srcObj,
+                layerState: {
+                  imgWidth: config.styles.imgWidth,
+                  imgHeight: config.styles.imgHeight,
+                  imgX: config.styles.imgX,
+                  imgY: config.styles.imgY
+                }
+              })
 
               logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
               src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))}
@@ -323,10 +329,6 @@ export default new class ImageShadowPanelUtils {
           const svg = container.getElementsByTagName('svg')[0]
           if (svg) {
             const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
-            // drawImgWidth *= pngScaleRation
-            // drawImgHeight *= pngScaleRation
-            // imgX *= pngScaleRation
-            // imgY *= pngScaleRation
             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })
