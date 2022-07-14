@@ -92,10 +92,17 @@ export default Vue.extend({
       tmpScaleRatio: 0,
       initialDist: 0,
       minScaleRatio: 0,
-      currCardIndex: 0
+      currCardIndex: 0,
+      mounted: false
     }
   },
   mounted() {
+    this.$nextTick(() => {
+      /**
+       * @Note - make the transitoin being set after the mounted hook, or when switching between all pages mode, you will see a lovely page floating from the top to its normal posiiton
+       */
+      this.mounted = true
+    })
     this.getRecently()
 
     const editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
@@ -376,7 +383,8 @@ export default Vue.extend({
       return {
         width: '100%',
         height: this.editorView ? `${cardSize}px` : '100%',
-        transform: this.editorView ? `translate3d(0,${index * cardSize - this.currCardIndex * cardSize}px,0)` : 'translate3d(0,0px,0)'
+        transform: this.editorView ? `translate3d(0,${index * cardSize - this.currCardIndex * cardSize}px,0)` : 'translate3d(0,0px,0)',
+        transition: this.mounted ? 'transform 0.3s' : 'none'
       }
     }
   }
@@ -416,7 +424,6 @@ $REULER_SIZE: 20px;
     // justify-content: center;
     overflow: scroll;
     padding: 40px;
-    transition: transform 0.3s;
     @include no-scrollbar;
   }
 }

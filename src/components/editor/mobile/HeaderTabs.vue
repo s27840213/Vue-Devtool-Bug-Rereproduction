@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="header-bar")
+  div(class="header-bar" @touchstart.stop)
     div(class="header-bar__left")
       svg-icon(class="header-bar__feature-icon mr-25"
         :iconName="'chevron-left'"
@@ -165,17 +165,21 @@ export default Vue.extend({
       }
     },
     handleIconAction(icon: string) {
+      console.log('pointer down')
       switch (icon) {
         case 'download':
         case 'more': {
+          console.log('switch tab')
           this.$emit('switchTab', icon)
           break
         }
         case 'all-pages': {
+          console.log('all pages')
           this.$emit('showAllPages')
           break
         }
         case 'resize': {
+          console.log('resize')
           this.$emit('switchTab', icon)
           break
         }

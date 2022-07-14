@@ -16,7 +16,7 @@
             :iconColor="'white'"
             :iconWidth="'20px'")
           div(class="mobile-panel__btn-click-zone"
-            @click="leftButtonAction")
+            @pointerdown="leftButtonAction")
         span(class="mobile-panel__title"
           :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
         div(class="mobile-panel__btn mobile-panel__right-btn"
@@ -27,7 +27,7 @@
             :iconColor="'white'"
             :iconWidth="'20px'")
           div(class="mobile-panel__btn-click-zone"
-            @click="rightButtonAction")
+            @pointerdown="rightButtonAction")
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll

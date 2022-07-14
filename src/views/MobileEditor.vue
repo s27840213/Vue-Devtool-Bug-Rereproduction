@@ -11,7 +11,7 @@
           :isConfigPanelOpen="isConfigPanelOpen"
           :inAllPagesMode="inAllPagesMode")
         div(v-else class="mobile-editor__page-preview")
-          page-preview
+          all-pages
       transition(name="panel-up")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
@@ -46,7 +46,7 @@ import logUtils from '@/utils/logUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
-import PagePreview from '@/components/editor/PagePreview.vue'
+import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
 
@@ -58,7 +58,7 @@ export default Vue.extend({
     HeaderTabs,
     MobilePanelTextSetting,
     FooterTabs,
-    PagePreview
+    AllPages
   },
   data() {
     return {
@@ -69,7 +69,6 @@ export default Vue.extend({
       isSaving: false,
       currActivePanel: 'none',
       currColorEvent: '',
-      inAllPagesMode: false,
       showExtraColorPanel: false,
       ColorEventType
     }
@@ -107,7 +106,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapState({
-      closeMobilePanelFlag: 'closeMobilePanelFlag'
+      closeMobilePanelFlag: 'closeMobilePanelFlag',
+      inAllPagesMode: 'mobileAllPageMode'
     }),
     ...mapState('user', [
       'role',

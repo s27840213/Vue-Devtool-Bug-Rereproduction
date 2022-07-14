@@ -16,7 +16,7 @@
       div(class="page-preview-page__highlighter"
         :class="{'focused': middlemostPageIndex === index}"
         :style="hightlighterStyles()")
-      div(v-if="isMouseOver"
+      div(v-if="isMouseOver && showMoreBtn"
         class="page-preview-page-content-more"
         @click="toggleMenu()")
         svg-icon(class="pb-5"
@@ -65,6 +65,10 @@ export default Vue.extend({
     config: {
       type: Object,
       required: true
+    },
+    showMoreBtn: {
+      default: true,
+      type: Boolean
     }
   },
   data() {
@@ -124,8 +128,8 @@ export default Vue.extend({
     },
     hightlighterStyles() {
       return {
-        width: `${this.contentWidth}px`,
-        height: `${this.config.height * this.scaleRatio}px`
+        width: `${this.contentWidth + 20}px`,
+        height: `${this.config.height * this.scaleRatio + 20}px`
       }
     },
     ...mapMutations({
@@ -234,6 +238,7 @@ export default Vue.extend({
   &-content {
     position: relative;
     box-sizing: border-box;
+    box-shadow: 0px 0px 10px setColor(gray-2, 0.4);
     transform-origin: 0 0;
     z-index: 1;
     &-more {
@@ -288,12 +293,15 @@ export default Vue.extend({
   }
   &__highlighter {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    border-radius: 4px;
+    z-index: -1;
   }
   &-title {
     position: absolute;
-    bottom: -30px;
+    bottom: -20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -328,5 +336,6 @@ export default Vue.extend({
   border: 3px solid setColor(blue-1);
   color: setColor(blue-1);
   box-sizing: border-box;
+  background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
 }
 </style>
