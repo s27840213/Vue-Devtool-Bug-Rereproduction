@@ -40,7 +40,6 @@
     "dotenv": "^8.2.0",
     "floating-vue": "^1.0.0-beta.5",
     "fontfaceobserver": "^2.1.0",
-    "fullpage.js": "^4.0.9",
     "heic2any": "^0.0.3",
     "html2pdf.js": "^0.10.1",
     "konva": "^7.2.5",
@@ -65,6 +64,7 @@
     "vue-router": "^3.5.1",
     "vue-shortkey": "^3.1.7",
     "vue-virtual-scroller": "^1.0.10",
+    "vue2-touch-events": "^3.2.2",
     "vuex": "^3.4.0",
     "vuex-map-fields": "^1.4.1"
   },

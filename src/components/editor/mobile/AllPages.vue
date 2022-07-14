@@ -2,7 +2,7 @@
 div(class="all-pages")
     template(v-for="(page, idx) in pages")
         page-preview-page-wrapper(class="m-10 border-box" :index="idx" type="full" :config="page" :showMoreBtn="false")
-    div(class="all-pages--last pointer m-10 border-box"
+    div(class="all-pages--last pointer border-box"
       @click="addPage()")
       div
         svg-icon(class="pb-5"
@@ -78,10 +78,12 @@ export default Vue.extend({
   &--last {
     // aspect-ratio: 1/1;
     position: relative;
-    padding-bottom: 100%;
+    padding-bottom: calc(100% - 20px);
     background: setColor(gray-4);
     border-radius: 5px;
     transition: 0.25s ease-in-out;
+    margin: 10px;
+    box-sizing: border-box;
     > div {
       @include size(100%);
       display: flex;

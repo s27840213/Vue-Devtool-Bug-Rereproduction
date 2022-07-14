@@ -101,6 +101,9 @@ export default Vue.extend({
       /**
        * @Note - make the transitoin being set after the mounted hook, or when switching between all pages mode, you will see a lovely page floating from the top to its normal posiiton
        */
+      // const currFocusPageIndex = pageUtils.currFocusPageIndex
+      // pageUtils.scrollIntoPage(currFocusPageIndex, 'auto')
+      // this.currCardIndex = currFocusPageIndex
       this.mounted = true
     })
     this.getRecently()

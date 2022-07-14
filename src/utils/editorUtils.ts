@@ -11,6 +11,9 @@ class EditorUtils {
   setMobileAllPageMode(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('SET_mobileAllPageMode', bool)
+      if (bool) {
+        this.setCloseMobilePanelFlag(true)
+      }
     }
   }
 }

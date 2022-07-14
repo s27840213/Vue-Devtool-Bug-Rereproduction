@@ -157,10 +157,10 @@ class PageUtils {
     FocusUtils.focusElement(`.nu-page-${this.currFocusPageIndex}`, true)
   }
 
-  scrollIntoPage(pageIndex: number): void {
+  scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
     currentPage.scrollIntoView({
-      behavior: 'smooth',
+      behavior: behavior ?? 'smooth',
       block: 'center',
       inline: 'center'
     })

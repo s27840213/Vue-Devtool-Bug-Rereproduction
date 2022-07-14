@@ -14,7 +14,7 @@
       ref="content")
       page-content(:style="contentScaleStyles" :config="config" :pageIndex="index" :scaleRatio="scaleRatio")
       div(class="page-preview-page__highlighter"
-        :class="{'focused': middlemostPageIndex === index}"
+        :class="{'focused': currFocusPageIndex === index}"
         :style="hightlighterStyles()")
       div(v-if="isMouseOver && showMoreBtn"
         class="page-preview-page-content-more"
@@ -22,7 +22,7 @@
         svg-icon(class="pb-5"
           :iconName="'more_vertical'"
           :iconWidth="'25px'")
-      div(v-if="isMenuOpen && middlemostPageIndex === index"
+      div(v-if="isMenuOpen && currFocusPageIndex === index"
         class="menu"
         v-click-outside="closeMenu")
         template(v-for="menuItem in menuItems")
@@ -41,7 +41,7 @@
       :style="styles()")
     div(v-if="type === 'full'"
       class="page-preview-page-title")
-      span(:style="{'color': middlemostPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+      span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -94,6 +94,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       middlemostPageIndex: 'getMiddlemostPageIndex',
+      currFocusPageIndex: 'getCurrFocusPageIndex',
       getPage: 'getPage',
       isDragged: 'page/getIsDragged'
     }),
@@ -301,7 +302,7 @@ export default Vue.extend({
   }
   &-title {
     position: absolute;
-    bottom: -20px;
+    bottom: -24px;
     display: flex;
     justify-content: center;
     align-items: center;

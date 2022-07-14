@@ -165,21 +165,17 @@ export default Vue.extend({
       }
     },
     handleIconAction(icon: string) {
-      console.log('pointer down')
       switch (icon) {
         case 'download':
         case 'more': {
-          console.log('switch tab')
           this.$emit('switchTab', icon)
           break
         }
         case 'all-pages': {
-          console.log('all pages')
           this.$emit('showAllPages')
           break
         }
         case 'resize': {
-          console.log('resize')
           this.$emit('switchTab', icon)
           break
         }

@@ -5,7 +5,7 @@
         div(v-if="!tab.disabled"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
-            @pointerdown="handleTabAction(tab)")
+            @click="handleTabAction(tab)")
           svg-icon(class="mb-5"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"

@@ -22,6 +22,7 @@ import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import layerUtils from '@/utils/layerUtils'
 import { mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
+import generalUtils from '@/utils/generalUtils'
 export default Vue.extend({
   components: {
     MobileSlider
@@ -45,7 +46,7 @@ export default Vue.extend({
       return this.props.lineHeight
     },
     fontSpacing(): number {
-      return this.props.fontSpacing * 1000
+      return this.props.fontSpacing
     }
   },
   methods: {

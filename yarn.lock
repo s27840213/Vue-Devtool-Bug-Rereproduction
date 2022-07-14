@@ -5807,11 +5807,6 @@ fsevents@~2.3.1:
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
   integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
 
-fullpage.js@^4.0.9:
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/fullpage.js/-/fullpage.js-4.0.9.tgz#1ef0418626dc253171aa6b942bf84fc3f6460720"
-  integrity sha512-/P9P8WqK5B1ZKGqT9PQmDdQY2xTg2lt3ersb+/X1kA47NlBakNyS/W4Zw9otW1loG2Or2OAh15VKaJVPsdMNVw==
-
 function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
@@ -11570,6 +11565,11 @@ vue-virtual-scroller@^1.0.10:
     scrollparent "^2.0.1"
     vue-observe-visibility "^0.4.4"
     vue-resize "^0.4.5"
+
+vue2-touch-events@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/vue2-touch-events/-/vue2-touch-events-3.2.2.tgz#77b760a70659ed8a75e7c685163e73497be87042"
+  integrity sha512-rGV8jxgOQEJYkJCp7uOBe3hjvmG1arThrq1wGtJHwJTgi65+P2a+0l4CYcQO/U1ZFqTq2/TT2+oTE6H7Y+6Eog==
 
 vue@^2.6.11:
   version "2.6.12"
