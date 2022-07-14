@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-template")
+  div(class="panel-template" ref="panel")
     div(v-if="showPrompt && !currentGroup"
       class="panel-template__prompt body-2")
       span {{$t('NN0247')}}
@@ -27,6 +27,7 @@
             @click.native="onAdvancedClicked()")
         popup-theme(v-if="showTheme"
           class="panel-template__theme"
+          :style="themeStyle()"
           :preSelected="theme.split(',')"
           @change="handleTheme"
           @close="showTheme = false")
@@ -322,6 +323,11 @@ export default Vue.extend({
     },
     isSubsetOf(set: Array<unknown>, subset: Array<unknown>) {
       return new Set([...set, ...subset]).size === set.length
+    },
+    themeStyle(): Record<string, string> {
+      return {
+        maxHeight: `${this.$refs.panel.clientHeight - 80}px`
+      }
     }
   }
 })
@@ -362,7 +368,6 @@ export default Vue.extend({
     position: absolute;
     left: 20px;
     right: 20px;
-    max-height: calc(100vh - 85px);
   }
   &__search {
     position: relative;
