@@ -1544,8 +1544,11 @@ export default Vue.extend({
       body.addEventListener('dragleave', this.dragLeave)
       body.addEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
-        const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-        if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
+        const shadow = this.config.styles.shadow
+        const shadowEffectNeedRedraw = shadow.isTransparentBg || shadow.currentEffect === ShadowEffectType.imageMatched
+        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
+        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
           Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })

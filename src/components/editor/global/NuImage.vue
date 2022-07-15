@@ -111,29 +111,28 @@ export default Vue.extend({
     eventUtils.on(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
         const isFloatingEffect = this.currentShadowEffect === ShadowEffectType.floating
-        if (!isFloatingEffect && (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent)) {
+        const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent)
+        if (redrawImmediately) {
           this.redrawShadow()
-        } else {
-          const img = new Image()
-          img.crossOrigin = 'anonymous'
-          img.onload = () => {
-            const isTransparent = imageShadowUtils.isTransparentBg(img)
-            console.warn(isTransparent)
-            imageShadowUtils.setHandleId()
-            imageShadowUtils.updateEffectProps({
-              pageIndex: this.pageIndex,
-              layerIndex: this.layerIndex,
-              subLayerIdx: this.subLayerIndex
-            }, { isTransparent })
-            if (!isFloatingEffect) {
-              isTransparent && this.redrawShadow()
-            }
+        }
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          const isTransparent = imageShadowUtils.isTransparentBg(img)
+          imageShadowUtils.setHandleId()
+          imageShadowUtils.updateEffectProps({
+            pageIndex: this.pageIndex,
+            layerIndex: this.layerIndex,
+            subLayerIdx: this.subLayerIndex
+          }, { isTransparent })
+          if (!redrawImmediately && isTransparent) {
+            this.redrawShadow()
           }
-          const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
-          img.src = ImageUtils.getSrc(this.config, imgSize) + '&ver=' + generalUtils.generateRandomString(6)
-          if (!isFloatingEffect) {
-            imageShadowUtils.setHandleId(this.id)
-          }
+        }
+        const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
+        img.src = ImageUtils.getSrc(this.config, imgSize) + '&ver=' + generalUtils.generateRandomString(6)
+        if (!isFloatingEffect) {
+          imageShadowUtils.setHandleId(this.id)
         }
       } else {
         stepsUtils.record()

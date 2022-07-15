@@ -203,7 +203,7 @@ class DragUtils {
           }
         }
       })
-      const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById('', layerId, subLayerId)
+      const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageUtils.getPage(pageIndex).id, layerId, subLayerId)
       layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: DragSrcObj }, subLayerIdx)
       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       const isFloatingEffect = config.styles.shadow.currentEffect === ShadowEffectType.floating
@@ -219,7 +219,7 @@ class DragUtils {
 
   onImageDragLeave(e: DragEvent, pageIndex: number) {
     const { layerId, subLayerId, styles, srcObj, shadow } = this.imgBuff
-    const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById('', layerId, subLayerId)
+    const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageUtils.getPage(pageIndex).id, layerId, subLayerId)
     if (store.state.currDraggedPhoto.srcObj.type && srcObj.type) {
       layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
