@@ -16,12 +16,12 @@
         button(class="btn-primary-mid full-width"
           :class="modalInfo.confirmButton.class"
           :style="modalInfo.confirmButton.style"
-          @pointerdown="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
+          @pointerdown.prevent="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
         button(v-if="modalInfo.cancelButton.msg"
           class="ml-10 btn-primary-mid full-width"
           :class="modalInfo.cancelButton.class"
           :style="modalInfo.cancelButton.style"
-          @pointerdown="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
+          @pointerdown.prevent="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
       div(class="modal-card__close")
         svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"  @pointerdown.native="closePopup()")
 </template>
