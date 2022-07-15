@@ -67,9 +67,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
 import { IShadowAsset, IUploadShadowImg } from '@/store/module/shadow'
 import stepsUtils from '@/utils/stepsUtils'
-import errorHandle from '@/utils/errorHandleUtils'
 import groupUtils from '@/utils/groupUtils'
-import i18n from '@/i18n'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import logUtils from '@/utils/logUtils'
 import { AxiosError } from 'axios'
@@ -509,13 +507,31 @@ export default Vue.extend({
             this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
           })
         } catch (error) {
-          const e = error as Error | AxiosError
-          logUtils.setLog(`${e.name} + ':' + ${e.message}\nerror url: ${this.src}`)
+          fetch(this.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'fetch result: ' + status + statusText)
+            })
+            .catch((e) => {
+              this.logImgError(error, 'fetch result: ' + e)
+            })
         }
       }
     },
     onLoad() {
       this.isOnError = false
+    },
+    logImgError(error: unknown, ...infos: Array<string>) {
+      const { pageIndex, layerIndex, subLayerIndex } = this
+      const { srcObj: { type, assetId, userId } } = this.config as IImage
+      const e = error as Error | AxiosError
+      let log =
+        `pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIndex}\n` +
+        `srcObj: { type: ${type}, assetId: ${assetId}, userId: ${userId} }\n` +
+        `Error config src: ${this.src}`
+      infos.forEach(info => { log += `\n${info}` })
+      console.warn(log)
+      logUtils.setLog(log)
     },
     async perviewAsLoading() {
       if (this.uploadingImagePreviewSrc) {
@@ -536,8 +552,16 @@ export default Vue.extend({
           }
           resolve()
         }
-        img.onerror = () => {
+        img.onerror = (error) => {
           reject(new Error(`cannot load the current image, src: ${this.src}`))
+          fetch(img.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+            })
+            .catch((e) => {
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+            })
         }
         img.src = src
       })
@@ -564,7 +588,17 @@ export default Vue.extend({
       return new Promise<void>((resolve, reject) => {
         const img = new Image()
         img.onload = () => resolve()
-        img.onerror = () => reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+        img.onerror = (error) => {
+          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+          fetch(img.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+            })
+            .catch((e) => {
+              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+            })
+        }
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
       })
     },
@@ -573,7 +607,7 @@ export default Vue.extend({
       if (this.userId !== 'backendRendering') {
         await this.perviewAsLoading()
         const preImg = new Image()
-        preImg.onerror = () => {
+        preImg.onerror = (error) => {
           if (type === 'pexels') {
             const srcObj = { ...this.config.srcObj, userId: 'jpeg' }
             switch (layerUtils.getLayer(this.pageIndex, this.layerIndex).type) {
@@ -587,6 +621,14 @@ export default Vue.extend({
                 layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { srcObj })
             }
           }
+          fetch(preImg.src)
+            .then(res => {
+              const { status, statusText } = res
+              this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + status + statusText)
+            })
+            .catch((e) => {
+              this.logImgError(error, 'img src:', preImg.src, 'fetch result: ' + e)
+            })
         }
         preImg.onload = () => {
           const nextImg = new Image()
