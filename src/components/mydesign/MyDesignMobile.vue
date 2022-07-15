@@ -36,7 +36,7 @@
                   iconWidth="24px")
         div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
     div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background"
-        @pointerdown.stop.prevent="setBottomMenu('')")
+        @click.stop.prevent="setBottomMenu('')")
     transition(name="slide-full")
       bottom-menu(v-if="bottomMenu !== '' || isAnySelected"
                   class="bottom-menu"
