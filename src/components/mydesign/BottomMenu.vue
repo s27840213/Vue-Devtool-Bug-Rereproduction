@@ -32,8 +32,7 @@
             div(class="menu__item-text")
               span {{ sortMenuItem.text }}
         div(v-if="bottomMenu === 'design-menu'" class="design-menu menu")
-          div(class="menu__editable-name"
-              v-click-outside="handleNameEditEnd")
+          div(class="menu__editable-name")
             div(v-if="isNameEditing"
                 class="menu__editable-name__text menu__editable-name__text-editor")
               input(ref="name"
@@ -175,6 +174,8 @@ export default Vue.extend({
     handleCloseMenu() {
       if (this.isAnySelected) {
         this.$emit('clear')
+      } else if (this.isNameEditing) {
+        this.handleNameEditEnd()
       } else {
         this.$emit('close')
       }
