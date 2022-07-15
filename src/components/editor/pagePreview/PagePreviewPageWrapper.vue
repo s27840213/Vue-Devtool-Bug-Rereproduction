@@ -3,16 +3,16 @@
     :style="styles2()"
     :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
     div(class="page-preview-page-content pointer"
-      :style="styles()"
-      @click="clickPage()"
-      @dblclick="dbclickPage()"
-      draggable="true",
-      @dragstart="handleDragStart"
-      @dragend="handleDragEnd"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-      ref="content")
-      page-content(:style="contentScaleStyles" :config="config" :pageIndex="index" :scaleRatio="scaleRatio")
+        :style="styles()"
+        @click="clickPage"
+        @dblclick="dbclickPage()"
+        draggable="true",
+        @dragstart="handleDragStart"
+        @dragend="handleDragEnd"
+        @mouseenter="handleMouseEnter"
+        @mouseleave="handleMouseLeave"
+        ref="content")
+      page-content(class="click-disabled" :style="contentScaleStyles" :config="config" :pageIndex="index" :scaleRatio="scaleRatio")
       div(class="page-preview-page__highlighter"
         :class="{'focused': currFocusPageIndex === index}"
         :style="hightlighterStyles()")
@@ -54,6 +54,7 @@ import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -154,6 +155,10 @@ export default Vue.extend({
       this.isMouseOver = false
     },
     clickPage() {
+      if (this.index === this.currFocusPageIndex) {
+        editorUtils.setMobileAllPageMode(false)
+      }
+
       this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {

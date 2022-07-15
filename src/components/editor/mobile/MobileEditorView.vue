@@ -16,7 +16,7 @@
           :key="`page-${index}`"
           class="editor-view__card"
           :style="cardStyle(index)"
-          @mousedown.left.self="outerClick($event)"
+          @pointerdown.self.prevent="outerClick($event)"
           ref="card")
         nu-page(
           :ref="`page-${index}`"

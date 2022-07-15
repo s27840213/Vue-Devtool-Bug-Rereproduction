@@ -61,6 +61,7 @@ import PanelColor from '@/components/editor/panelMobile/PanelColor.vue'
 import PanelMore from '@/components/editor/panelMobile/PanelMore.vue'
 import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue'
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
+import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
@@ -116,7 +117,8 @@ export default Vue.extend({
     PanelColor,
     PanelAdjust,
     PanelTextEffect,
-    PanelPhotoShadow
+    PanelPhotoShadow,
+    PanelObjectAdjust
   },
   data() {
     return {
@@ -134,11 +136,18 @@ export default Vue.extend({
       inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
     whiteTheme(): boolean {
-      const whiteThemePanel = ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'fonts', 'font-size', 'text-effect', 'font-format', 'font-spacing', 'download', 'more', 'color', 'adjust', 'photo-shadow', 'resize']
+      const whiteThemePanel = [
+        'replace', 'crop', 'bgRemove', 'position', 'flip',
+        'opacity', 'order', 'fonts', 'font-size', 'text-effect',
+        'font-format', 'font-spacing', 'download', 'more', 'color',
+        'adjust', 'photo-shadow', 'resize', 'object-adjust']
       return this.showColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.showColorPanel || ['replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity', 'order', 'font-size', 'font-format', 'text-effect', 'font-spacing', 'download', 'more', 'color'].includes(this.currActivePanel)
+      return this.showColorPanel || [
+        'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'order', 'font-size', 'font-format', 'text-effect',
+        'font-spacing', 'download', 'more', 'color', 'object-adjust'].includes(this.currActivePanel)
     },
     halfSizeInInitState(): boolean {
       return ['fonts'].includes(this.currActivePanel)

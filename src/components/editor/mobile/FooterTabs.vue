@@ -109,7 +109,7 @@ export default Vue.extend({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust' }
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -386,6 +386,7 @@ export default Vue.extend({
     padding: 0px 4px;
     > span {
       transform: scale(0.833);
+      transition: background-color 0.2s, color 0.2s;
     }
   }
 }
