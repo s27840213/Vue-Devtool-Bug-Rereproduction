@@ -35,14 +35,14 @@
                   iconColor="gray-2"
                   iconWidth="24px")
         div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
-    div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background")
+    div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background"
+        @click.stop.prevent="setBottomMenu('')")
     transition(name="slide-full")
       bottom-menu(v-if="bottomMenu !== '' || isAnySelected"
                   class="bottom-menu"
                   :bottomMenu="bottomMenu"
                   :selectedNum="selectedNum"
                   :isAnySelected="isAnySelected"
-                  v-click-outside="() => { setBottomMenu('') }"
                   @close="setBottomMenu('')"
                   @clear="handleClearSelection")
 </template>
