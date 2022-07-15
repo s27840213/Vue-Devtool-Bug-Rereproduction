@@ -4,7 +4,7 @@
       div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer")
         svg-icon(iconName="chevron-left" iconColor="gray-3" iconWidth="20px")
       div(class="bottom-menu__close pointer"
-          @click="handleCloseMenu")
+          @click.stop="handleCloseMenu")
         svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
       template(v-if="isAnySelected")
         div(class="multi-menu")
@@ -15,7 +15,7 @@
           div(class="multi-menu__actions")
             div(v-for="multiMenuItem in multiMenuItems"
                 class="multi-menu__action"
-                @click="multiMenuItem.action")
+                @click.stop="multiMenuItem.action")
               svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
       template(v-else)
         div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
@@ -23,7 +23,7 @@
           div(v-for="sortMenuItem in sortMenuItems"
               class="menu__item pointer"
               :class="{selected: checkSortSelected(sortMenuItem.payload)}"
-              @click="handleSortByClick(sortMenuItem.payload)")
+              @click.stop="handleSortByClick(sortMenuItem.payload)")
             div(class="menu__item-icon")
               svg-icon(:iconName="sortMenuItem.icon"
                       iconWidth="24px"
@@ -42,15 +42,15 @@
             div(v-else class="menu__editable-name__text")
               span(:title="designBuffer.name") {{ designBuffer.name }}
             div(class="menu__editable-name__icon"
-                @click="handleNameClick")
+                @click.stop="handleIconNameClick")
               svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
-          div(class="menu__description" @click.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
+          div(class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
           div(v-if="isNameEditing" style="width: 100%; height: 16px;")
           div(v-else class="menu__hr")
           template(v-if="!isNameEditing")
             div(v-for="designMenuItem in designMenuItems"
                 class="menu__item"
-                @click="handleDesignMenuAction(designMenuItem.icon)")
+                @click.stop="handleDesignMenuAction(designMenuItem.icon)")
               div(class="menu__item-icon")
                 svg-icon(:iconName="designMenuItem.icon"
                         :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
@@ -171,7 +171,7 @@ export default Vue.extend({
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
-    handleCloseMenu() {
+    handleCloseMenu(e: MouseEvent) {
       if (this.isAnySelected) {
         this.$emit('clear')
       } else if (this.isNameEditing) {
@@ -197,6 +197,13 @@ export default Vue.extend({
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
         this.handleNameEditEnd()
+      }
+    },
+    handleIconNameClick() {
+      if (this.isNameEditing) {
+        this.handleNameEditEnd()
+      } else {
+        this.handleNameClick()
       }
     },
     handleNameClick() {
