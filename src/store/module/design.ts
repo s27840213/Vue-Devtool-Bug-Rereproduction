@@ -298,6 +298,7 @@ const actions: ActionTree<IDesignState, unknown> = {
     newDesign.name = '...'
     newDesign.createdTime = new Date().toString()
     newDesign.lastUpdatedTime = newDesign.createdTime
+    newDesign.asset_index = -1
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'copy', designApis.getAssetIndex(design), null, '')
       .then((response) => {

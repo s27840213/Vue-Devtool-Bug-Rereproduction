@@ -16,8 +16,9 @@
             draggable="false"
             :src="appliedUrl")
       div(class="mobile-design-item__controller")
-        div(class="mobile-design-item__controller-content"
-          @click.self="handleClick")
+        div(v-if="!isTempDesign"
+            class="mobile-design-item__controller-content"
+            @click.self="handleClick")
           div(v-if="isSelected"
             class="mobile-design-item__checkbox-checked"
             @click.stop="emitDeselect")
@@ -134,7 +135,7 @@ export default Vue.extend({
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
-      if (this.unenterable) return
+      if (this.unenterable && this.isTempDesign) return
       designUtils.setDesign(this.config)
     },
     handleCarouselIdx(idx: number) {

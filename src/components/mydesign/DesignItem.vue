@@ -296,7 +296,7 @@ export default Vue.extend({
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
-      if (this.unenterable) return
+      if (this.unenterable && this.isTempDesign) return
       designUtils.setDesign(this.config)
     },
     handleCarouselIdx(idx: number) {

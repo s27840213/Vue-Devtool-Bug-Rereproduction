@@ -32,27 +32,39 @@
             div(class="menu__item-text")
               span {{ sortMenuItem.text }}
         div(v-if="bottomMenu === 'design-menu'" class="design-menu menu")
-          div(class="menu__editable-name")
-            div(class="menu__editable-name__text") {{ designBuffer.name }}
-            div(class="menu__editable-name__icon")
-              svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
-          div(class="menu__description") {{ `${designBuffer.width} x ${designBuffer.height}` }}
-          div(class="menu__hr")
-          div(v-for="designMenuItem in designMenuItems"
-              class="menu__item"
-              @click="handleDesignMenuAction(designMenuItem.icon)")
-            div(class="menu__item-icon")
-              svg-icon(:iconName="designMenuItem.icon"
-                      :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
-                      iconColor="gray-2")
-            div(class="menu__item-text")
-              span {{ designMenuItem.text }}
+          div(class="menu__editable-name"
+              v-click-outside="handleNameEditEnd")
+            div(v-if="isNameEditing"
+                class="menu__editable-name__text menu__editable-name__text-editor")
+              input(ref="name"
+                    v-model="editableName"
+                    @change="handleNameEditEnd"
+                    @keyup="checkNameEnter")
+            div(v-else class="menu__editable-name__text")
+              span(:title="designBuffer.name") {{ designBuffer.name }}
+            div(class="menu__editable-name__icon"
+                @click="handleNameClick")
+              svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
+          div(class="menu__description" @click.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
+          div(v-if="isNameEditing" style="width: 100%; height: 16px;")
+          div(v-else class="menu__hr")
+          template(v-if="!isNameEditing")
+            div(v-for="designMenuItem in designMenuItems"
+                class="menu__item"
+                @click="handleDesignMenuAction(designMenuItem.icon)")
+              div(class="menu__item-icon")
+                svg-icon(:iconName="designMenuItem.icon"
+                        :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
+                        iconColor="gray-2")
+              div(class="menu__item-text")
+                span {{ designMenuItem.text }}
 </template>
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions, mapMutations } from 'vuex'
+import vClickOutside from 'v-click-outside'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
@@ -86,8 +98,13 @@ export default Vue.extend({
           text: `${this.$t('NN0194')}`,
           payload: ['update', true]
         }
-      ]
+      ],
+      isNameEditing: false,
+      editableName: ''
     }
+  },
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   props: {
     bottomMenu: String,
@@ -175,6 +192,25 @@ export default Vue.extend({
         }
         this.$emit('close')
       })
+    },
+    checkNameEnter(e: KeyboardEvent) {
+      if (e.key === 'Enter') {
+        this.handleNameEditEnd()
+      }
+    },
+    handleNameClick() {
+      this.editableName = this.designBuffer.name
+      this.isNameEditing = true
+      this.$nextTick(() => {
+        const nameInput = this.$refs.name as HTMLInputElement
+        nameInput.focus()
+      })
+    },
+    handleNameEditEnd() {
+      this.isNameEditing = false
+      if (this.editableName === '' || this.editableName === this.designBuffer.name) return
+      designUtils.setDesignName(this.designBuffer, this.editableName)
+      this.editableName = ''
     }
   }
 })
@@ -253,6 +289,14 @@ export default Vue.extend({
       text-overflow: ellipsis;
       display: block;
       overflow: hidden;
+      &-editor {
+        > input {
+          width: 65vw;
+          padding: 0;
+          @include text-H6;
+          color: setColor(gray-2);
+        }
+      }
     }
     &__icon {
       @include size(18px);
