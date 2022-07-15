@@ -4,7 +4,7 @@
       div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer")
         svg-icon(iconName="chevron-left" iconColor="gray-3" iconWidth="20px")
       div(class="bottom-menu__close pointer"
-          @pointerdown="handleCloseMenu")
+          @click="handleCloseMenu")
         svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
       template(v-if="isAnySelected")
         div(class="multi-menu")
@@ -15,7 +15,7 @@
           div(class="multi-menu__actions")
             div(v-for="multiMenuItem in multiMenuItems"
                 class="multi-menu__action"
-                @pointerdown="multiMenuItem.action")
+                @click="multiMenuItem.action")
               svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
       template(v-else)
         div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
@@ -23,7 +23,7 @@
           div(v-for="sortMenuItem in sortMenuItems"
               class="menu__item pointer"
               :class="{selected: checkSortSelected(sortMenuItem.payload)}"
-              @pointerdown="handleSortByClick(sortMenuItem.payload)")
+              @click="handleSortByClick(sortMenuItem.payload)")
             div(class="menu__item-icon")
               svg-icon(:iconName="sortMenuItem.icon"
                       iconWidth="24px"
@@ -42,15 +42,15 @@
             div(v-else class="menu__editable-name__text")
               span(:title="designBuffer.name") {{ designBuffer.name }}
             div(class="menu__editable-name__icon"
-                @pointerdown="handleNameClick")
+                @click="handleNameClick")
               svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
-          div(class="menu__description" @pointerdown.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
+          div(class="menu__description" @click.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
           div(v-if="isNameEditing" style="width: 100%; height: 16px;")
           div(v-else class="menu__hr")
           template(v-if="!isNameEditing")
             div(v-for="designMenuItem in designMenuItems"
                 class="menu__item"
-                @pointerdown="handleDesignMenuAction(designMenuItem.icon)")
+                @click="handleDesignMenuAction(designMenuItem.icon)")
               div(class="menu__item-icon")
                 svg-icon(:iconName="designMenuItem.icon"
                         :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"

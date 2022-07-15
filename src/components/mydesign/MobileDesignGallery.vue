@@ -2,7 +2,7 @@
   div(v-if="allDesigns.length > 0 || isDesignsLoading" class="mobile-design-gallery")
     //- div(v-if="!noHeader && allDesigns.length > 0" class="mobile-design-gallery__header")
       div(class="mobile-design-gallery__expand-icon-container"
-          @pointerdown="toggleExpansion")
+          @click="toggleExpansion")
         svg-icon(:style="expansionIconStyles()"
                 iconName="caret-down"
                 iconWidth="10px"
