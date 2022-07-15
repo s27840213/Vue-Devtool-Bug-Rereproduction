@@ -163,9 +163,12 @@ export default Vue.extend({
       const start = sel?.start || TextUtils.getNullSel() as ISelection
       const end = sel?.end || TextUtils.getNullSel() as ISelection
       try {
+        const pageId = layerUtils.getCurrPage.id
         const { id, type } = layerUtils.getCurrLayer
         const preLayerIndex = layerUtils.layerIndex
         const subLayerIdx = layerUtils.subLayerIdx
+        const subLayerId = subLayerIdx === -1 ? '' : (layerUtils.getCurrLayer as IGroup).layers[subLayerIdx].id
+
         let contentEditable = false
         if (type === 'text') {
           contentEditable = layerUtils.getCurrLayer.contentEditable as boolean
@@ -235,7 +238,24 @@ export default Vue.extend({
               json: ''
             }
           })
-          StepsUtils.record()
+          // StepsUtils.record()
+          if (subLayerIdx === -1) { // no sub layer is selected
+            const group = layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup
+            const subIds = group.layers.filter(l => l.type === 'text').map(l => l.id)
+            TextUtils.waitGroupFontLoadingAndRecord(group, () => {
+              for (const subId of subIds) {
+                const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subId)
+                if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+                TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+              }
+            })
+          } else {
+            TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
+              const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
+              if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+              TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+            })
+          }
           TextPropUtils.updateTextPropsState({
             font: this.item.id,
             type: this.itemFontType,
@@ -290,7 +310,12 @@ export default Vue.extend({
             json: ''
           }
         })
-        StepsUtils.record()
+        // StepsUtils.record()
+        TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
+          const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
+          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+          TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        })
         TextPropUtils.updateTextPropsState({
           font: this.item.id,
           type: this.itemFontType,

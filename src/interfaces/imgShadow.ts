@@ -72,6 +72,7 @@ export interface IShadowProps {
     effect: ShadowEffectType,
     effects: IShadowEffects,
     layerState?: Partial<IImageStyle>,
-    srcObj: SrcObj
+    layerSrcObj: SrcObj,
+    shadowSrcObj: SrcObj
   }
 }

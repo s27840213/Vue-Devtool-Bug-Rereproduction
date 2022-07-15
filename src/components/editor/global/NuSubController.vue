@@ -38,7 +38,8 @@
                 @keydown.native.meta.90.exact.stop.self
                 @keydown.native.ctrl.shift.90.exact.stop.self
                 @keydown.native.meta.shift.90.exact.stop.self
-                @update="handleTextChange")
+                @update="handleTextChange"
+                @compositionend="handleTextCompositionEnd")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -71,6 +72,7 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -101,7 +103,7 @@ export default Vue.extend({
         styles: { [key: string]: number | boolean },
         srcObj: { type: string, assetId: string | number, userId: string }
       },
-      dragUtils: new DragUtils(this.primaryLayerIndex, this.layerIndex),
+      dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false
     }
   },
@@ -168,8 +170,7 @@ export default Vue.extend({
       return this.config.contentEditable
     },
     isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
+      return this.checkIfCurve(this.config)
     },
     primaryScale(): number {
       return this.primaryLayer.styles.scale
@@ -306,10 +307,9 @@ export default Vue.extend({
         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
         LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
         eventUtils.emit(PanelEvent.showPhotoShadow)
-        return
-      } else {
-        imageUtils.setImgControlDefault(false)
+        // return
       }
+      imageUtils.setImgControlDefault(false)
 
       this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
@@ -426,18 +426,43 @@ export default Vue.extend({
         })
       }
     },
+    waitFontLoadingAndRecord() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.primaryLayer.id
+      const subLayerId = this.config.id
+      TextUtils.waitFontLoadingAndRecord(this.config.paragraphs, () => {
+        const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+        if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+        TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+      })
+    },
+    checkIfCurve(config: IText): boolean {
+      const { textShape } = config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    calcSize(config: IText) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+    },
     handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { paragraphs: payload.paragraphs })
-      this.isCurveText ? this.curveTextSizeRefresh(this.config) : TextUtils.updateGroupLayerSize(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
+      this.calcSize(this.config)
       if (payload.toRecord) {
-        StepsUtils.record()
+        this.waitFontLoadingAndRecord()
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
+        // if composing starts from empty line, isSetContentRequired will be true in the first typing.
+        // However, setContent will break the composing, so skip setContent when composing.
+        // setContent will be done when 'composeend' (in NuTextEditor.vue)
         this.$nextTick(() => {
           tiptapUtils.agent(editor => {
             editor.chain().setContent(tiptapUtils.toJSON(payload.paragraphs)).selectPrevious().run()
           })
         })
+      }
+    },
+    handleTextCompositionEnd(toRecord: boolean) {
+      if (toRecord) {
+        this.waitFontLoadingAndRecord()
       }
     },
     curveTextSizeRefresh(text: IText) {
@@ -481,10 +506,12 @@ export default Vue.extend({
           }
           return
         case 'group':
-          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           if (this.getLayerType === 'image') {
-            const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-            if (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw)) {
+            const shadow = this.config.styles.shadow
+            const shadowEffectNeedRedraw = shadow.isTransparentBg || shadow.currentEffect === ShadowEffectType.imageMatched
+            const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+            const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
+            if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw))) {
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
@@ -536,7 +563,7 @@ export default Vue.extend({
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-                eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+                eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
               } else {
                 // const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
                 // const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched

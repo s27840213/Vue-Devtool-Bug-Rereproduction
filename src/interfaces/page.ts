@@ -24,5 +24,6 @@ export interface IPage {
     [index: string]: Array<number>,
     v: Array<number>,
     h: Array<number>
-  }
+  },
+  isAutoResizeNeeded: boolean
 }

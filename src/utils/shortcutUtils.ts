@@ -260,6 +260,7 @@ class ShortcutUtils {
   }
 
   async save() {
+    if (TextUtils.isFontLoading) return
     await uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
     logUtils.uploadLog()
   }

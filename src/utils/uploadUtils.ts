@@ -26,6 +26,7 @@ import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import heic2any from 'heic2any'
 import networkUtils from './networkUtils'
+import _ from 'lodash'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -252,7 +253,7 @@ class UploadUtils {
                     store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
                     // the reason why we upload here is that if user refresh the window immediately after they succefully upload the screenshot
                     // , the screenshot image in the page will get some problem
-                    this.uploadDesign(this.PutAssetDesignType.UPDATE_DB)
+                    this.uploadDesign()
                   } else if (json.flag === 1) {
                     store.commit('file/DEL_PREVIEW', { assetId })
                     LayerUtils.deleteLayerByAssetId(assetId)
@@ -311,7 +312,6 @@ class UploadUtils {
       }
 
       const assetHandler = (src: string, imgType?: string) => {
-        console.log(imgType)
         if (type === 'image') {
           const img = new Image()
           img.src = src
@@ -498,15 +498,17 @@ class UploadUtils {
           }
         }
       }
-
       if (isFile) {
+        console.log('is file')
         generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
           reader.onload = (evt) => {
+            console.log(imgType)
             assetHandler(evt.target?.result as string, imgType)
           }
           reader.readAsDataURL(files[i] as File)
         })
       } else {
+        console.log('not file')
         assetHandler(files[i] as string)
       }
     }
@@ -626,6 +628,11 @@ class UploadUtils {
             type: putAssetDesignType
           })
         }
+      })
+      .catch(async (error) => {
+        // Error: 403: Forbidden
+        console.error(error)
+        await store.dispatch('user/login', { token: this.token })
       })
   }
 
@@ -1048,6 +1055,8 @@ class UploadUtils {
       delete page.documentColors
       page.documentColors = documentColors
     }
+
+    page.isAutoResizeNeeded = false
     return page
   }
 
@@ -1104,6 +1113,17 @@ class UploadUtils {
             })
           })
           .then(() => {
+            // Reference from designUtils.newDesignWithTemplae
+            store.commit('SET_assetId', generalUtils.generateAssetId())
+            const query = _.omit(router.currentRoute.query,
+              ['width', 'height'])
+            query.type = 'design'
+            query.design_id = uploadUtils.assetId
+            query.team_id = uploadUtils.teamId
+
+            router.replace({ query }).then(() => {
+              uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH)
+            })
             themeUtils.refreshTemplateState()
             stepsUtils.reset()
             this.isGettingDesign = false
@@ -1156,12 +1176,12 @@ class UploadUtils {
                  */
                 // json.pages = pageUtils.filterBrokenImageLayer(json.pages)
                 router.replace({ query: Object.assign({}, router.currentRoute.query, { export_ids: json.exportIds }) })
+                pageUtils.setAutoResizeNeededForPages(json.pages, true)
                 store.commit('SET_pages', Object.assign(json, { loadDesign: true }))
+                stepsUtils.reset() // make sure to record and upload json right away after json fetched, so that no temp state is uploaded.
                 store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
-                //
-                stepsUtils.reset()
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {
