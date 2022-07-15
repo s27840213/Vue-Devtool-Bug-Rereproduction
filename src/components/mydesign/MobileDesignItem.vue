@@ -18,23 +18,23 @@
       div(class="mobile-design-item__controller")
         div(v-if="!isTempDesign"
             class="mobile-design-item__controller-content"
-            @click.self="handleClick")
+            @pointerdown.self="handleClick")
           div(v-if="isSelected"
             class="mobile-design-item__checkbox-checked"
-            @click.stop="emitDeselect")
+            @pointerdown.stop="emitDeselect")
             svg-icon(iconName="check-large"
                     iconWidth="10px"
                     iconHeight="8px"
                     iconColor="white")
           div(v-if="!isSelected && isAnySelected"
             class="mobile-design-item__checkbox"
-            @click.stop="emitSelect")
+            @pointerdown.stop="emitSelect")
           div(class="mobile-design-item__more"
-            @click.stop="openMenu()")
+            @pointerdown.stop="openMenu()")
             svg-icon(iconName="more_vertical"
                     iconWidth="24px"
                     iconColor="gray-2")
-          //- div(v-if="favorable && !isMultiSelected" class="mobile-design-item__favorite" @click.stop="emitLike")
+          //- div(v-if="favorable && !isMultiSelected" class="mobile-design-item__favorite" @pointerdown.stop="emitLike")
             svg-icon(v-if="isMouseOver && !config.favorite"
                     iconName="favorites"
                     iconWidth="20px"
@@ -49,11 +49,11 @@
                     iconColor="gray-4")
           span(class="mobile-design-item__index") {{ carouselIdx + 1 }}/{{ config.pageNum }}
     div(class="mobile-design-item__name"
-        @click.prevent.stop)
+        @pointerdown.prevent.stop)
       div(class="mobile-design-item__name__container")
         span(:title="config.name") {{ config.name }}
     div(class="mobile-design-item__size"
-        @click.prevent.stop)
+        @pointerdown.prevent.stop)
       span {{ `${config.width} x ${config.height}` }}
 </template>
 

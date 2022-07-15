@@ -2,13 +2,13 @@
   div(class="my-design-mobile")
     div(class="my-design-mobile__nav-bar relative")
       div(class="my-design-mobile__nav-bar__prev pointer"
-          @click="handlePrevPage")
+          @pointerdown="handlePrevPage")
         svg-icon(iconName="chevron-left" iconColor="gray-1" iconWidth="24px")
       div(class="my-design-mobile__nav-bar__title" :title="title") {{ title }}
       div(class="my-design-mobile__nav-bar__menu")
         div(v-for="button in menuButtons"
             class="my-design-mobile__nav-bar__menu-button pointer"
-            @click="button.action")
+            @pointerdown="button.action")
           svg-icon(:iconName="button.icon"
                     iconColor="gray-1"
                     :iconWidth="renderedWidth(button)"
@@ -30,13 +30,13 @@
       div(v-for="tabButton in tabButtons"
           class="my-design-mobile__tab-button pointer"
           :class="{active: tabButton.condition(currLocation)}"
-          @click="handleGoTo(tabButton.tab)")
+          @pointerdown="handleGoTo(tabButton.tab)")
         svg-icon(:iconName="tabButton.icon"
                   iconColor="gray-2"
                   iconWidth="24px")
         div(class="my-design-mobile__tab-button__text") {{ tabButton.text }}
     div(v-if="confirmMessage !== '' || bottomMenu !== ''" class="dim-background"
-        @click.stop.prevent="setBottomMenu('')")
+        @pointerdown.stop.prevent="setBottomMenu('')")
     transition(name="slide-full")
       bottom-menu(v-if="bottomMenu !== '' || isAnySelected"
                   class="bottom-menu"
