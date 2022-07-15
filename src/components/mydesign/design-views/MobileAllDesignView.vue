@@ -6,6 +6,7 @@
                           :selectedNum="selectedNum"
                           @menuAction="handleDesignMenuAction"
                           @loadMore="handleLoadMore")
+    div(class="scroll-space")
 </template>
 
 <script lang="ts">
@@ -63,5 +64,9 @@ export default Vue.extend({
 .warning { margin-top: 16px }
 
 .mobile-all-design-view {
+}
+
+.scroll-space {
+  margin-bottom: 200px;
 }
 </style>

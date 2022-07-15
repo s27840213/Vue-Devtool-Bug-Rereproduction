@@ -391,7 +391,11 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
     height: calc(100vh - #{$total-bar-height});
   }
   &__tab-bar {
+    width: 100%;
     height: $tab-bar-height;
+    position: fixed;
+    left: 0;
+    bottom: 0;
     background: #FFFFFF;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     display: flex;
