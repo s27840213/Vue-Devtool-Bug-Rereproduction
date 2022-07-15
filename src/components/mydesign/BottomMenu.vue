@@ -54,7 +54,7 @@
               div(class="menu__item-icon")
                 svg-icon(:iconName="designMenuItem.icon"
                         :iconWidth="designMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
-                        iconColor="gray-2")
+                        :iconColor="designMenuItem.icon === 'favorites-fill' ? 'gray-3' : 'gray-2'")
               div(class="menu__item-text")
                 span {{ designMenuItem.text }}
 </template>
@@ -131,7 +131,7 @@ export default Vue.extend({
     designMenuItems(): any[] {
       switch (this.currLocation) {
         case 'a':
-          return designUtils.makeMobileNormalMenuItems()
+          return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite)
         default:
           return []
       }

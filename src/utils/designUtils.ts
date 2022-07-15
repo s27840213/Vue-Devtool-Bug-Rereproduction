@@ -196,7 +196,7 @@ class DesignUtils {
     // }
   }
 
-  makeMobileNormalMenuItems(): { icon: string, text: string }[] {
+  makeMobileNormalMenuItems(isInFavorites: boolean): { icon: string, text: string }[] {
     return [
       {
         icon: 'copy',
@@ -207,8 +207,8 @@ class DesignUtils {
         text: `${i18n.t('NN0206')}`
       },
       {
-        icon: 'favorites',
-        text: `${i18n.t('NN0205')}`
+        icon: isInFavorites ? 'favorites-fill' : 'favorites',
+        text: isInFavorites ? `${i18n.t('NN0207')}` : `${i18n.t('NN0205')}`
       },
       {
         icon: 'confirm-circle',
@@ -383,6 +383,14 @@ class DesignUtils {
         this.addToFavorite(design)
         eventEmitter({
           event: 'favorDesign',
+          payload: design
+        })
+        break
+      }
+      case 'favorites-fill': {
+        this.removeFromFavorite(design)
+        eventEmitter({
+          event: 'unfavorDesign',
           payload: design
         })
         break

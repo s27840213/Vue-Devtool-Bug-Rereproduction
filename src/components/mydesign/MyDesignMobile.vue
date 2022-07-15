@@ -328,6 +328,9 @@ export default Vue.extend({
         case 'favorDesign':
           this.pushItem('favor-design')
           break
+        case 'unfavorDesign':
+          this.pushItem('unfavor-design')
+          break
       }
     },
     pushItem(type: IMobileMessageItem['type']) {
@@ -353,6 +356,8 @@ export default Vue.extend({
       switch (item.type) {
         case 'favor-design':
           return 'favorites-fill'
+        case 'unfavor-design':
+          return 'favorites'
         default:
           return ''
       }
@@ -360,7 +365,9 @@ export default Vue.extend({
     messageItemText(item: IMobileMessageItem): string {
       switch (item.type) {
         case 'favor-design':
-          return 'Added to favorites'
+          return `${this.$t('NN0683')}`
+        case 'unfavor-design':
+          return `${this.$t('NN0684')}`
         default:
           return ''
       }
