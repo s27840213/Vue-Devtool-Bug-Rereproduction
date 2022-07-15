@@ -207,7 +207,7 @@ class DesignUtils {
         text: `${i18n.t('NN0206')}`
       },
       {
-        icon: 'heart',
+        icon: 'favorites',
         text: `${i18n.t('NN0205')}`
       },
       {
@@ -375,6 +375,14 @@ class DesignUtils {
       case 'download': {
         eventEmitter({
           event: 'downloadDesign',
+          payload: design
+        })
+        break
+      }
+      case 'favorites': {
+        this.addToFavorite(design)
+        eventEmitter({
+          event: 'favorDesign',
           payload: design
         })
         break

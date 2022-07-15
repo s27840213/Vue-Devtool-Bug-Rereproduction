@@ -4,7 +4,6 @@
                           :menuItems="menuItems"
                           :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
-                          @menuAction="handleDesignMenuAction"
                           @loadMore="handleLoadMore")
     div(class="scroll-space")
 </template>
@@ -49,10 +48,6 @@ export default Vue.extend({
       fetchAllDesigns: 'fetchAllDesigns',
       fetchMoreAllDesigns: 'fetchMoreAllDesigns'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
-      const { event, payload } = extraEvent
-      this.$emit(event, payload)
-    },
     handleLoadMore() {
       designUtils.fetchDesigns(this.fetchMoreAllDesigns, false)
     }

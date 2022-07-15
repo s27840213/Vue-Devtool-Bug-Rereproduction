@@ -13,19 +13,18 @@
                     iconColor="gray-1"
                     :iconWidth="renderedWidth(button)"
                     :iconHeight="renderedHeight(button)")
-    div(class="my-design-mobile__content")
+    div(class="my-design-mobile__content relative")
       component(v-if="currLocation !== ''"
                 :is="mydesignView"
                 class="design-view"
-                @deleteItem="handleDeleteItem"
-                @clearSelection="handleClearSelection"
-                @recoverItem="handleRecoverItem"
-                @deleteFolder="handleDeleteFolder"
-                @moveItem="handleMoveItem"
-                @deleteForever="handleDeleteForever"
-                @deleteFolderForever="handleDeleteFolderForever"
-                @moveDesignToFolder="handleMoveDesignToFolder"
-                @downloadDesign="handleDownloadDesign")
+                @clearSelection="handleClearSelection")
+      transition(name="slide-fade")
+        div(v-if="isShowMessage" class="my-design-mobile__message")
+          div(class="my-design-mobile__message__icon")
+            svg-icon(:iconName="messageItemIcon(messageQueue[0])"
+                    iconColor="white"
+                    iconWidth="24px")
+          div(class="my-design-mobile__message__text") {{ messageItemText(messageQueue[0]) }}
     div(class="my-design-mobile__tab-bar")
       div(v-for="tabButton in tabButtons"
           class="my-design-mobile__tab-button pointer"
@@ -44,7 +43,8 @@
                   :selectedNum="selectedNum"
                   :isAnySelected="isAnySelected"
                   @close="setBottomMenu('')"
-                  @clear="handleClearSelection")
+                  @clear="handleClearSelection"
+                  @menuAction="handleDesignMenuAction")
 </template>
 
 <script lang="ts">
@@ -58,7 +58,7 @@ import MobileFolderDesignView from '@/components/mydesign/design-views/MobileFol
 import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTrashDesignView.vue'
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
-import { IDesign, IFolder, IPathedFolder, IQueueItem } from '@/interfaces/design'
+import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
 
 interface IMenuButton {
   icon: string,
@@ -78,13 +78,9 @@ export default Vue.extend({
   name: 'MyDesignMobile',
   data() {
     return {
-      deletedQueue: [] as IQueueItem[],
+      messageQueue: [] as IMobileMessageItem[],
       messageTimer: -1,
-      isShowDeleteMessage: false,
-      recoveredQueue: [] as IQueueItem[],
-      isShowRecoverMessage: false,
-      movedQueue: [] as IQueueItem[],
-      isShowMoveMessage: false,
+      isShowMessage: false,
       pathedFolderBuffer: undefined as IPathedFolder | undefined,
       designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
@@ -323,6 +319,52 @@ export default Vue.extend({
     handleDownloadDesign() {
       console.log('TODO')
     },
+    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
+      const { event, payload } = extraEvent
+      switch (event) {
+        case 'deleteItem':
+          this.pushItem('delete')
+          break
+        case 'favorDesign':
+          this.pushItem('favor-design')
+          break
+      }
+    },
+    pushItem(type: IMobileMessageItem['type']) {
+      this.messageQueue.push({ type })
+      if (this.messageQueue.length === 1) {
+        this.showMessage()
+      }
+    },
+    showMessage() {
+      const item = this.messageQueue[0]
+      if (item) {
+        this.isShowMessage = true
+        setTimeout(() => {
+          this.isShowMessage = false
+          setTimeout(() => {
+            this.messageQueue.shift()
+            this.showMessage()
+          }, 500)
+        }, 3000)
+      }
+    },
+    messageItemIcon(item: IMobileMessageItem): string {
+      switch (item.type) {
+        case 'favor-design':
+          return 'favorites-fill'
+        default:
+          return ''
+      }
+    },
+    messageItemText(item: IMobileMessageItem): string {
+      switch (item.type) {
+        case 'favor-design':
+          return 'Added to favorites'
+        default:
+          return ''
+      }
+    },
     renderedWidth(button: IMenuButton) {
       return button.width ?? '24px'
     },
@@ -347,6 +389,7 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 20;
     &__prev {
       position: absolute;
       left: 16px;
@@ -420,6 +463,31 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
       }
     }
   }
+  &__message {
+    z-index: 1;
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: setColor(gray-1-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 16px;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    border-radius: 5px;
+    &__icon {
+      @include size(24px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__text {
+      @include body-SM;
+      color: white;
+    }
+  }
 }
 
 .design-view {
@@ -450,5 +518,19 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
 .slide-full-enter,
 .slide-full-leave-to {
   transform: translateY(100%);
+}
+
+.slide-fade-enter-active {
+  transition: 0.3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: 0.5s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to {
+  top: -25%;
+  opacity: 0;
 }
 </style>
