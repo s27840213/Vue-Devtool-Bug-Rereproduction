@@ -246,8 +246,13 @@ export default Vue.extend({
     gap: 8px;
     margin-left: 22.5px;
     &__text {
+      max-width: 65vw;
       @include text-H6;
       color: setColor(gray-2);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: block;
+      overflow: hidden;
     }
     &__icon {
       @include size(18px);

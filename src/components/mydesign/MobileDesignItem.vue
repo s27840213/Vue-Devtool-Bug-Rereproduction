@@ -356,6 +356,7 @@ export default Vue.extend({
       border: none;
       > span {
         height: 24px;
+        max-width: 30vw;
         @include body-SM;
         color: setColor(gray-1);
         white-space: nowrap;
