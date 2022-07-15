@@ -87,7 +87,6 @@ export default Vue.extend({
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, (val) => {
-      console.warn(val)
       if (typeof val !== 'undefined') {
         this.show = val
       } else {
@@ -334,7 +333,7 @@ export default Vue.extend({
           this.show = ''
         }
       }
-      this.show = this.show.includes(name) ? '' : name
+      this.show = this.show.includes(name) || name === 'remove-bg' ? '' : name
     },
     handleOutside() {
       this.show = ''

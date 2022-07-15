@@ -119,14 +119,14 @@ export default Vue.extend({
         img.crossOrigin = 'anonymous'
         img.onload = () => {
           const isTransparent = imageShadowUtils.isTransparentBg(img)
-          imageShadowUtils.setHandleId()
           imageShadowUtils.updateEffectProps({
             pageIndex: this.pageIndex,
             layerIndex: this.layerIndex,
             subLayerIdx: this.subLayerIndex
           }, { isTransparent })
-          if (!redrawImmediately && isTransparent) {
-            this.redrawShadow()
+          if (!redrawImmediately) {
+            imageShadowUtils.setHandleId()
+            isTransparent && this.redrawShadow()
           }
         }
         const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)

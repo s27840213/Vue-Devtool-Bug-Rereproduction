@@ -94,15 +94,16 @@ export default new class ImageShadowPanelUtils {
     logUtils.setLog('phase: start upload shadow')
     console.log(layerData)
     if (layerData) {
-      imageShadowUtils.setUploadProcess(true)
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-      /** If the shadow effct has already got the img src, return */
+      imageShadowUtils.setUploadProcess(true)
+      imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
       if (config.type !== LayerType.image) {
+        /** If the shadow effct has already got the img src, return */
         return
       }
       if (this.checkIfSameEffect(config) && config.styles.shadow.srcState) {
