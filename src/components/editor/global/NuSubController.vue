@@ -507,8 +507,8 @@ export default Vue.extend({
           return
         case 'group':
           if (this.getLayerType === 'image') {
-            const shadow = this.config.styles.shadow
-            const shadowEffectNeedRedraw = shadow.isTransparentBg || shadow.currentEffect === ShadowEffectType.imageMatched
+            const shadow = (this.config as IImage).styles.shadow
+            const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
             const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
             const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
             if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw))) {

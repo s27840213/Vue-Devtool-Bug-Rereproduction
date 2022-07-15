@@ -266,10 +266,6 @@ class ImageShadowUtils {
     setMark('floating', 2)
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        // const offsetX = x * drawCanvasW * mappingScale * 0.0025 * fieldRange.floating.x.weighting
-        // const offsetY = (y - 10) * drawCanvasH * mappingScale * 0.0025 * fieldRange.floating.y.weighting
-        // console.log(canvasMaxSize.height, offsetX, offsetY)
-        // ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
         ctxMaxSize.putImageData(this.dataBuff.data, 0, 0)
 
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)

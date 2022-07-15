@@ -1544,8 +1544,8 @@ export default Vue.extend({
       body.addEventListener('dragleave', this.dragLeave)
       body.addEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
-        const shadow = this.config.styles.shadow
-        const shadowEffectNeedRedraw = shadow.isTransparentBg || shadow.currentEffect === ShadowEffectType.imageMatched
+        const shadow = (this.config as IImage).styles.shadow
+        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
         const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
         const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
@@ -1588,7 +1588,8 @@ export default Vue.extend({
             }
             const size = ['private', 'public', 'background', 'private-logo', 'public-logo'].includes(this.config.srcObj.type)
               ? 'tiny' : 100
-            replacedImg.src = ImageUtils.getSrc(this.config, size)
+            const src = ImageUtils.getSrc(this.config, size)
+            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             return
           } else {
             eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
