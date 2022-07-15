@@ -202,10 +202,10 @@ export default Vue.extend({
     handleNameClick() {
       this.editableName = this.designBuffer.name
       this.isNameEditing = true
-      this.$nextTick(() => {
+      setTimeout(() => {
         const nameInput = this.$refs.name as HTMLInputElement
         nameInput.focus()
-      })
+      }, 500)
     },
     handleNameEditEnd() {
       this.isNameEditing = false
