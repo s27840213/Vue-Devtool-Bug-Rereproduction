@@ -4,6 +4,7 @@ import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/laye
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import _ from 'lodash'
 import generalUtils from './generalUtils'
 import imageShadowPanelUtils from './imageShadowPanelUtils'
 import imageUtils from './imageUtils'
@@ -312,7 +313,6 @@ class ImageShadowUtils {
   }
 
   async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
-    console.log('start drawing imageMatched:', params.timeout)
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
@@ -623,16 +623,10 @@ class ImageShadowUtils {
     this._layerData = null
   }
 
-  setEffect(effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
+  setEffect(effect: ShadowEffectType, attrs = {}, layerInfo?: ILayerInfo): void {
     let { pageIndex, layerIndex, subLayerIdx } = layerUtils
-    if (_pageIndex !== -1) {
-      pageIndex = _pageIndex
-    }
-    if (_layerIndex !== -1) {
-      layerIndex = _layerIndex
-    }
-    if (_pageIndex !== -1 && _layerIndex !== -1 && _subLayerIdx !== -1) {
-      subLayerIdx = _subLayerIdx
+    if (layerInfo) {
+      ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
     }
 
     const layer = subLayerIdx !== -1

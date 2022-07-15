@@ -165,7 +165,6 @@ export default Vue.extend({
       // } else {
       //   imageUtils.setImgControlDefault(false)
       // }
-      console.log(imageUtils.isImgControl())
       groupUtils.deselect()
       imageUtils.setImgControlDefault(false)
       this.setInMultiSelectionMode(false)

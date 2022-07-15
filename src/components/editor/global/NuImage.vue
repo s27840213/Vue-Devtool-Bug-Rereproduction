@@ -93,7 +93,7 @@ export default Vue.extend({
       const img = new Image()
       img.crossOrigin = 'anonymous'
       const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
-      img.src = ImageUtils.getSrc(this.config, size)
+      img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       img.onload = () => {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
@@ -228,7 +228,7 @@ export default Vue.extend({
     'shadow.srcObj': {
       handler: function (val) {
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
-          imageShadowUtils.setEffect(this.shadow.currentEffect, {}, this.pageIndex, this.layerIndex, this.subLayerIndex)
+          imageShadowUtils.setEffect(this.shadow.currentEffect, {}, this.layerInfo)
         }
         this.handleUploadShadowImg()
       },

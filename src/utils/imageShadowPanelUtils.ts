@@ -1,5 +1,5 @@
 import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import { ColorEventType, FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange } from './imageShadowUtils'
 import layerUtils from './layerUtils'
@@ -360,7 +360,11 @@ export default new class ImageShadowPanelUtils {
     imageShadowUtils.setEffect(currentEffect, { color })
   }
 
-  reset(effect: ShadowEffectType = ShadowEffectType.none, pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
+  reset(effect: ShadowEffectType = ShadowEffectType.none, layerInfo?: ILayerInfo) {
+    let { pageIndex, layerIndex, subLayerIdx } = layerUtils
+    if (layerInfo) {
+      ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
+    }
     if (effect === ShadowEffectType.none) {
       if (subLayerIdx === -1) {
         effect = pageIndex !== -1 && layerIndex !== -1
@@ -377,7 +381,7 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setEffect(effect, {
         [effect]: defaultProps,
         color: '#000000'
-      }, pageIndex, layerIndex, subLayerIdx)
+      }, { pageIndex, layerIndex, subLayerIdx })
     }
   }
 
