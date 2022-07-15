@@ -593,7 +593,6 @@ class AssetUtils {
             pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
           })
           editorUtils.setCloseMobilePanelFlag(true)
-          pageUtils.fitPage()
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)

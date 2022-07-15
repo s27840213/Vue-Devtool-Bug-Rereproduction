@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="category-template-item" :style="itemStyle")
     div(class="relative pointer"
-        @click="addTemplate"
+        @pointerdown="addTemplate"
         @dragstart="dragStart($event)")
       img(class="category-template-item__img"
         draggable="true"
