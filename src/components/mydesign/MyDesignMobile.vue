@@ -357,6 +357,13 @@ export default Vue.extend({
           this.designBuffer = payload
           this.confirmMessage = 'delete-forever'
           break
+        case 'deleteFolderForever':
+          this.pathedFolderBuffer = payload
+          this.confirmMessage = 'delete-forever'
+          break
+        case 'deleteAllForever':
+          this.confirmMessage = 'delete-forever'
+          break
       }
     },
     pushItem(type: IMobileMessageItem['type']) {

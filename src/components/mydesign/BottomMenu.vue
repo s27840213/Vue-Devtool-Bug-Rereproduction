@@ -175,9 +175,10 @@ export default Vue.extend({
           icon: 'trash',
           action: () => {
             if (this.currLocation === 't') {
-              console.log('deleteAllForever')
+              this.$emit('menuAction', { event: 'deleteAllForever' })
             } else {
-              console.log('moveAllToTrash')
+              designUtils.deleteAll(Object.values(this.selectedDesigns))
+              this.$emit('menuAction', { event: 'deleteItem', payload: {} })
             }
           }
         })
