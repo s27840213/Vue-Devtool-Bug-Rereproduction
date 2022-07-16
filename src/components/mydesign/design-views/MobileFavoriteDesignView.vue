@@ -1,32 +1,26 @@
 <template lang="pug">
   div(class="mobile-favorite-design-view")
-    //- mobile-design-gallery(:noHeader="true"
-                          :menuItems="menuItems"
+    mobile-design-gallery(:noHeader="true"
                           :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
-                          @menuAction="handleDesignMenuAction"
                           @loadMore="handleLoadMore")
+    div(class="scroll-space")
 </template>
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
-// import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
+import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 
 export default Vue.extend({
   components: {
-    // MobileDesignGallery,
+    MobileDesignGallery,
     DiskWarning
   },
   mounted() {
-    designUtils.fetchDesigns(this.fetchAllDesigns)
-  },
-  data() {
-    return {
-      menuItems: designUtils.makeNormalMenuItems()
-    }
+    designUtils.fetchDesigns(this.fetchFavoriteDesigns)
   },
   watch: {
     allDesigns() {
@@ -35,7 +29,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
       allDesigns: 'getAllDesigns'
     }),
@@ -45,15 +38,11 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('design', {
-      fetchAllDesigns: 'fetchAllDesigns',
-      fetchMoreAllDesigns: 'fetchMoreAllDesigns'
+      fetchFavoriteDesigns: 'fetchFavoriteDesigns',
+      fetchMoreFavoriteDesigns: 'fetchMoreFavoriteDesigns'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
-      const { event, payload } = extraEvent
-      this.$emit(event, payload)
-    },
     handleLoadMore() {
-      designUtils.fetchDesigns(this.fetchMoreAllDesigns, false)
+      designUtils.fetchDesigns(this.fetchMoreFavoriteDesigns, false)
     }
   }
 })
@@ -63,5 +52,9 @@ export default Vue.extend({
 .warning { margin-top: 16px }
 
 .mobile-favorite-design-view {
+}
+
+.scroll-space {
+  margin-bottom: 200px;
 }
 </style>

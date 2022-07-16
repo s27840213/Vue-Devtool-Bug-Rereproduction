@@ -1,7 +1,6 @@
 <template lang="pug">
   div(class="mobile-all-design-view")
     mobile-design-gallery(:noHeader="true"
-                          :menuItems="menuItems"
                           :allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           @loadMore="handleLoadMore")
@@ -23,11 +22,6 @@ export default Vue.extend({
   mounted() {
     designUtils.fetchDesigns(this.fetchAllDesigns)
   },
-  data() {
-    return {
-      menuItems: designUtils.makeNormalMenuItems()
-    }
-  },
   watch: {
     allDesigns() {
       this.$emit('clearSelection')
@@ -35,7 +29,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
       allDesigns: 'getAllDesigns'
     }),

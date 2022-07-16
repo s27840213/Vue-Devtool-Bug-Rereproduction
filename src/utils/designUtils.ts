@@ -196,31 +196,6 @@ class DesignUtils {
     // }
   }
 
-  makeMobileNormalMenuItems(isInFavorites: boolean): { icon: string, text: string }[] {
-    return [
-      {
-        icon: 'copy',
-        text: `${i18n.t('NN0251')}`
-      },
-      {
-        icon: 'folder',
-        text: `${i18n.t('NN0206')}`
-      },
-      {
-        icon: isInFavorites ? 'favorites-fill' : 'favorites',
-        text: isInFavorites ? `${i18n.t('NN0207')}` : `${i18n.t('NN0205')}`
-      },
-      {
-        icon: 'confirm-circle',
-        text: `${i18n.t('NN0680')}`
-      },
-      {
-        icon: 'trash',
-        text: `${i18n.t('NN0034')}`
-      }
-    ]
-  }
-
   makeFavoriteMenuItems(): { icon: string, text: string, extendable?: boolean }[] {
     return [
       {
@@ -247,6 +222,48 @@ class DesignUtils {
       {
         icon: 'trash',
         text: `${i18n.t('NN0200')}`
+      }
+    ]
+  }
+
+  makeMobileNormalMenuItems(isInFavorites: boolean): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'copy',
+        text: `${i18n.t('NN0251')}`
+      },
+      {
+        icon: 'folder',
+        text: `${i18n.t('NN0206')}`
+      },
+      {
+        icon: isInFavorites ? 'favorites-fill' : 'favorites',
+        text: isInFavorites ? `${i18n.t('NN0207')}` : `${i18n.t('NN0205')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
+      }
+    ]
+  }
+
+  makeMobileFavoriteMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'favorites-fill',
+        text: `${i18n.t('NN0207')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
       }
     ]
   }

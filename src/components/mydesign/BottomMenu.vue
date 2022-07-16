@@ -132,13 +132,15 @@ export default Vue.extend({
       switch (this.currLocation) {
         case 'a':
           return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite)
+        case 'h':
+          return designUtils.makeMobileFavoriteMenuItems()
         default:
           return []
       }
     },
     multiMenuItems(): any[] {
       const res = []
-      if (['a'].includes(this.currLocation)) {
+      if (['a', 'h'].includes(this.currLocation)) {
         res.push({
           icon: 'heart',
           action: () => { console.log('toggleAllFavorite') }
@@ -150,7 +152,7 @@ export default Vue.extend({
           action: () => { console.log('moveAllToFolder') }
         })
       }
-      if (['a'].includes(this.currLocation)) {
+      if (['a', 'h'].includes(this.currLocation)) {
         res.push({
           icon: 'trash',
           action: () => { console.log('moveAllToTrash') }
