@@ -550,6 +550,7 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
     &__text {
       @include body-SM;
       color: white;
+      white-space: nowrap;
     }
   }
 }

@@ -147,7 +147,15 @@ export default Vue.extend({
       if (['a', 'h'].includes(this.currLocation)) {
         res.push({
           icon: 'heart',
-          action: () => { console.log('toggleAllFavorite') }
+          action: () => {
+            if (this.currLocation === 'h') {
+              designUtils.removeAllFromFavorite(Object.values(this.selectedDesigns))
+              this.$emit('menuAction', { event: 'unfavorDesign', payload: {} })
+            } else {
+              designUtils.addAllToFavorite(Object.values(this.selectedDesigns))
+              this.$emit('menuAction', { event: 'favorDesign', payload: {} })
+            }
+          }
         })
       }
       if (['a'].includes(this.currLocation)) {
