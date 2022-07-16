@@ -45,6 +45,20 @@
                   @close="setBottomMenu('')"
                   @clear="handleClearSelection"
                   @menuAction="handleDesignMenuAction")
+    div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click.stop="closeConfirmMessage")
+      div(class="delete-forever-message")
+        div(class="delete-forever-message__close pointer"
+            @click="closeConfirmMessage")
+          svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
+        div(class="delete-forever-message__text")
+          span {{$t('NN0200')}}
+        div(class="delete-forever-message__description")
+          span {{$t('NN0201')}}
+        div(class="delete-forever-message__buttons")
+          div(class="delete-forever-message__cancel" @click="closeConfirmMessage")
+            span {{$t('NN0203')}}
+          div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
+            span {{$t('NN0034')}}
 </template>
 
 <script lang="ts">
@@ -59,6 +73,7 @@ import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTras
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
+import generalUtils from '@/utils/generalUtils'
 
 interface IMenuButton {
   icon: string,
@@ -213,7 +228,6 @@ export default Vue.extend({
     menuButtons(): IMenuButton[] {
       switch (this.currLocation) {
         case 'a':
-          return []
         case 'h':
           return []
         case 't':
@@ -331,6 +345,18 @@ export default Vue.extend({
         case 'unfavorDesign':
           this.pushItem('unfavor-design')
           break
+        case 'recoverItem':
+          if (payload.type === 'design') {
+            this.pushItem('undo-design')
+          }
+          if (payload.type === 'folder') {
+            this.pushItem('undo-folder')
+          }
+          break
+        case 'deleteForever':
+          this.designBuffer = payload
+          this.confirmMessage = 'delete-forever'
+          break
       }
     },
     pushItem(type: IMobileMessageItem['type']) {
@@ -360,6 +386,9 @@ export default Vue.extend({
           return 'favorites-fill'
         case 'unfavor-design':
           return 'favorites'
+        case 'undo-design':
+        case 'undo-folder':
+          return 'undo'
         default:
           return ''
       }
@@ -372,9 +401,33 @@ export default Vue.extend({
           return `${this.$t('NN0683')}`
         case 'unfavor-design':
           return `${this.$t('NN0684')}`
+        case 'undo-design':
+          return `${this.$t('NN0686')}`
+        case 'undo-folder':
+          return `${this.$t('NN0687')}`
         default:
           return ''
       }
+    },
+    deleteForeverConfirmed() {
+      if (this.designBuffer) {
+        designUtils.deleteForever(this.designBuffer)
+        this.designBuffer = undefined
+        return
+      }
+      if (this.pathedFolderBuffer) {
+        designUtils.deleteFolderForever(this.pathedFolderBuffer.folder)
+        this.pathedFolderBuffer = undefined
+        return
+      }
+      if (this.isAnySelected) {
+        designUtils.deleteAllForever(Object.values(this.selectedDesigns), Object.values(this.selectedFolders))
+      }
+    },
+    closeConfirmMessage() {
+      this.confirmMessage = ''
+      this.pathedFolderBuffer = undefined
+      this.designBuffer = undefined
     },
     renderedWidth(button: IMenuButton) {
       return button.width ?? '24px'
@@ -519,6 +572,89 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
   justify-content: center;
   background-color: rgba(24, 25, 31, 0.7);
   z-index: 1000;
+}
+
+$messageTypes: delete-all, delete-folder, delete-forever;
+
+@each $messageType in $messageTypes {
+  .#{$messageType}-message {
+    position: relative;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    width: 80vw;
+    border-radius: 5px;
+    &__close {
+      position: absolute;
+      top: 16px;
+      right: 14px;
+      @include size(20px, 20px);
+      border-radius: 50%;
+      background: setColor(gray-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__text {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      > span {
+        @include text-H6;
+        color: setColor(gray-2);
+      }
+    }
+    &__description {
+      margin-top: 42px;
+      padding: 0 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      > span {
+        @include body-SM;
+        color: setColor(gray-2);
+      }
+    }
+    &__buttons {
+      margin-top: 42px;
+      margin-bottom: 16px;
+      padding: 0 28px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      > div {
+        min-width: calc(50% - 36px);
+        height: 32px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0 12px;
+        > span {
+          @include btn-SM;
+        }
+      }
+    }
+    &__cancel {
+      background-color: setColor(gray-4);
+      > span {
+        display: block;
+        color: black;
+      }
+    }
+    &__confirm {
+      background-color: setColor(red-1);
+      > span {
+        display: block;
+        color: white;
+      }
+    }
+  }
 }
 
 .slide-full-enter-active,

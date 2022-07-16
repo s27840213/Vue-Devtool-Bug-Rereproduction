@@ -302,6 +302,13 @@ class GeneralUtils {
 
     document.body.removeChild(element)
   }
+
+  capitalizeFirstWord(str: string) {
+    const words = str.split(' ').map(w => w.toLowerCase())
+    const first = words[0]
+    words[0] = first[0].toUpperCase() + first.substring(1)
+    return words.join(' ')
+  }
 }
 
 const generalUtils = new GeneralUtils()

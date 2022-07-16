@@ -268,6 +268,23 @@ class DesignUtils {
     ]
   }
 
+  makeMobileTrashMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'undo',
+        text: `${i18n.t('NN0204')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0200')}`
+      }
+    ]
+  }
+
   findFolder(folders: IFolder[], id: string): IFolder | undefined {
     for (const folder of folders) {
       if (folder.id === id) {
@@ -379,6 +396,17 @@ class DesignUtils {
               dest
             }
           })
+        })
+        break
+      }
+      case 'undo': {
+        this.recover(design)
+        eventEmitter({
+          event: 'recoverItem',
+          payload: {
+            type: 'design',
+            data: design
+          }
         })
         break
       }

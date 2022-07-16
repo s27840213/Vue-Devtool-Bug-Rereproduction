@@ -32,21 +32,23 @@
             div(class="menu__item-text")
               span {{ sortMenuItem.text }}
         div(v-if="bottomMenu === 'design-menu'" class="design-menu menu")
-          div(class="menu__editable-name")
-            div(v-if="isNameEditing"
-                class="menu__editable-name__text menu__editable-name__text-editor")
-              input(ref="name"
-                    v-model="editableName"
-                    @change="handleNameEditEnd"
-                    @keyup="checkNameEnter")
-            div(v-else class="menu__editable-name__text")
-              span(:title="designBuffer.name") {{ designBuffer.name }}
-            div(class="menu__editable-name__icon"
-                @click.stop="handleIconNameClick")
-              svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
-          div(class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
-          div(v-if="isNameEditing" style="width: 100%; height: 16px;")
-          div(v-else class="menu__hr")
+          template(v-if="currLocation !== 't'")
+            div(class="menu__editable-name")
+              div(v-if="isNameEditing"
+                  class="menu__editable-name__text menu__editable-name__text-editor")
+                input(ref="name"
+                      v-model="editableName"
+                      @change="handleNameEditEnd"
+                      @keyup="checkNameEnter")
+              div(v-else class="menu__editable-name__text")
+                span(:title="designBuffer.name") {{ designBuffer.name }}
+              div(class="menu__editable-name__icon"
+                  @click.stop="handleIconNameClick")
+                svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
+            div(class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
+            div(v-if="isNameEditing" style="width: 100%; height: 16px;")
+            div(v-else class="menu__hr")
+          div(v-else style="margin-top: 20px;")
           template(v-if="!isNameEditing")
             div(v-for="designMenuItem in designMenuItems"
                 class="menu__item"
@@ -134,6 +136,8 @@ export default Vue.extend({
           return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite)
         case 'h':
           return designUtils.makeMobileFavoriteMenuItems()
+        case 't':
+          return designUtils.makeMobileTrashMenuItems()
         default:
           return []
       }
@@ -152,10 +156,22 @@ export default Vue.extend({
           action: () => { console.log('moveAllToFolder') }
         })
       }
-      if (['a', 'h'].includes(this.currLocation)) {
+      if (['t'].includes(this.currLocation)) {
+        res.push({
+          icon: 'undo',
+          action: () => { console.log('recoverAll') }
+        })
+      }
+      if (['a', 'h', 't'].includes(this.currLocation)) {
         res.push({
           icon: 'trash',
-          action: () => { console.log('moveAllToTrash') }
+          action: () => {
+            if (this.currLocation === 't') {
+              console.log('deleteAllForever')
+            } else {
+              console.log('moveAllToTrash')
+            }
+          }
         })
       }
       return res
@@ -188,7 +204,7 @@ export default Vue.extend({
       this.$emit('refresh')
     },
     handleDesignMenuAction(icon: string) {
-      // if (this.useDelete && icon === 'trash') icon = 'delete'
+      if (this.currLocation === 't' && icon === 'trash') icon = 'delete'
       designUtils.dispatchDesignMenuAction(icon, this.designBuffer, (extraEvent) => {
         if (extraEvent) {
           this.$emit('menuAction', extraEvent)

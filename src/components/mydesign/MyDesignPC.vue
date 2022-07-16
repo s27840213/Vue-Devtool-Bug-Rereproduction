@@ -941,8 +941,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       }
       > span {
         display: block;
-        // letter-spacing: 0.32em;
-        // text-indent: 0.32em;
         color: black;
       }
     }
@@ -953,8 +951,6 @@ $messageTypes: delete-all, delete-folder, delete-forever;
       }
       > span {
         display: block;
-        // letter-spacing: 0.32em;
-        // text-indent: 0.32em;
         color: white;
       }
     }

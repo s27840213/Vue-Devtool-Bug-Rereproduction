@@ -1,15 +1,14 @@
 <template lang="pug">
   div(v-if="allDesigns.length > 0 || isDesignsLoading" class="mobile-design-gallery")
-    //- div(v-if="!noHeader && allDesigns.length > 0" class="mobile-design-gallery__header")
+    div(v-if="!noHeader && allDesigns.length > 0" class="mobile-design-gallery__header")
+      div(class="mobile-design-gallery__title")
+        span {{$tc('NN0252', 2)}}
       div(class="mobile-design-gallery__expand-icon-container"
           @click="toggleExpansion")
         svg-icon(:style="expansionIconStyles()"
-                iconName="caret-down"
-                iconWidth="10px"
-                iconHeight="5px"
-                iconColor="gray-2")
-      div(class="mobile-design-gallery__title")
-        span {{$tc('NN0252', 2)}}
+                iconName="chevron-left"
+                iconWidth="24px"
+                iconColor="gray-1")
     div(v-if="isExpanded" class="mobile-design-gallery__designs")
       mobile-design-item(v-for="(design, index) in allDesigns"
                   :key="design.asset_index"
@@ -79,7 +78,7 @@ export default Vue.extend({
       return !!this.selectedDesigns[assetIndex]
     },
     expansionIconStyles() {
-      return this.isExpanded ? {} : { transform: 'rotate(-90deg)' }
+      return this.isExpanded ? { transform: 'rotate(90deg)' } : { transform: 'rotate(-90deg)' }
     },
     toggleExpansion() {
       this.isExpanded = !this.isExpanded
@@ -103,8 +102,10 @@ export default Vue.extend({
   &__header {
     display: flex;
     align-items: center;
-    gap: 5px;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    padding-left: 24px;
+    padding-right: 16px;
+    margin-bottom: 16px;
   }
   &__expand-icon-container {
     width: 24px;
@@ -120,13 +121,12 @@ export default Vue.extend({
   &__title {
     display: flex;
     align-items: center;
-    height: 40px;
+    height: 20px;
     > span {
-      line-height: 40px;
-      font-size: 24px;
-      font-weight: 700;
+      line-height: 20px;
+      font-size: 14px;
+      font-weight: 600;
       color: setColor(gray-2);
-      letter-spacing: 0.205em;
     }
   }
   &__designs {
