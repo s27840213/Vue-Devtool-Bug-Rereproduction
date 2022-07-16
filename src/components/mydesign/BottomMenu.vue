@@ -121,6 +121,7 @@ export default Vue.extend({
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       selectedDesigns: 'getSelectedDesigns',
+      selectedFolders: 'getSelectedFolders',
       allDesigns: 'getAllDesigns',
       allFolders: 'getAllFolders',
       sortByField: 'getSortByField',
@@ -167,7 +168,10 @@ export default Vue.extend({
       if (['t'].includes(this.currLocation)) {
         res.push({
           icon: 'undo',
-          action: () => { console.log('recoverAll') }
+          action: () => {
+            designUtils.recoverAll(Object.values(this.selectedDesigns), Object.values(this.selectedFolders))
+            this.$emit('menuAction', { event: 'recoverItem', payload: { type: 'design' } })
+          }
         })
       }
       if (['a', 'h', 't'].includes(this.currLocation)) {
