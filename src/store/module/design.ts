@@ -418,12 +418,14 @@ const actions: ActionTree<IDesignState, unknown> = {
   },
   async setDesignName({ commit }, { design, name }: { design: IDesign, name: string }) {
     const originalName = design.name
+    const originalUpdateTime = design.lastUpdatedTime
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', designApis.getAssetIndex(design), null, name)
       .then((response) => {
         if (response.data.flag !== 0) {
           console.log(response.data.msg)
           design.name = originalName
+          design.lastUpdatedTime = originalUpdateTime
           commit('UPDATE_deleteDesign', design)
           commit('UPDATE_addDesign', design)
           commit('SET_isErrorShowing', true)
@@ -431,11 +433,13 @@ const actions: ActionTree<IDesignState, unknown> = {
       }).catch((error) => {
         console.error(error)
         design.name = originalName
+        design.lastUpdatedTime = originalUpdateTime
         commit('UPDATE_deleteDesign', design)
         commit('UPDATE_addDesign', design)
         commit('SET_isErrorShowing', true)
       })
     design.name = name
+    design.lastUpdatedTime = (new Date()).toISOString()
     commit('UPDATE_deleteDesign', design)
     commit('UPDATE_addDesign', design)
   },
