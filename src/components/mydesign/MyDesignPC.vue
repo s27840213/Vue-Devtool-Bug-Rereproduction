@@ -204,6 +204,7 @@ export default Vue.extend({
     view: String
   },
   async created() {
+    this.resetState()
     this.setFolders(designUtils.initializeFolders())
     await this.fetchStructuralFolders({ path: 'root' })
     if (this.view === 'all') {
@@ -331,6 +332,7 @@ export default Vue.extend({
       fetchStructuralFolders: 'fetchStructuralFolders'
     }),
     ...mapMutations('design', {
+      resetState: 'UPDATE_resetState',
       clearSelection: 'UPDATE_clearSelection',
       setCurrLocation: 'SET_currLocation',
       setFolders: 'SET_folders',

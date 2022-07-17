@@ -1219,6 +1219,12 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_clearBuffers(state: IDesignState) {
     state.mobileDesignBuffer = undefined
     state.mobileFolderBuffer = undefined
+  },
+  UPDATE_resetState(state: IDesignState) {
+    const defaultState = getDefaultState()
+    for (const [key, value] of Object.entries(defaultState)) {
+      (state as any)[key] = value
+    }
   }
 }
 
