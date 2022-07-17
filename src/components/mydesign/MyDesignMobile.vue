@@ -46,18 +46,18 @@
                   @clear="handleClearSelection"
                   @menuAction="handleDesignMenuAction")
     div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click.stop="closeConfirmMessage")
-      div(class="delete-forever-message")
+      div(class="delete-forever-message" @click.stop)
         div(class="delete-forever-message__close pointer"
-            @click="closeConfirmMessage")
+            @click.stop="closeConfirmMessage")
           svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
         div(class="delete-forever-message__text")
           span {{$t('NN0200')}}
         div(class="delete-forever-message__description")
           span {{$t('NN0201')}}
         div(class="delete-forever-message__buttons")
-          div(class="delete-forever-message__cancel" @click="closeConfirmMessage")
+          div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
             span {{$t('NN0203')}}
-          div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
+          div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
             span {{$t('NN0034')}}
 </template>
 
@@ -73,7 +73,6 @@ import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTras
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
-import generalUtils from '@/utils/generalUtils'
 
 interface IMenuButton {
   icon: string,
@@ -435,6 +434,10 @@ export default Vue.extend({
       this.confirmMessage = ''
       this.pathedFolderBuffer = undefined
       this.designBuffer = undefined
+    },
+    confirmAction(action: () => void) {
+      action()
+      this.closeConfirmMessage()
     },
     renderedWidth(button: IMenuButton) {
       return button.width ?? '24px'

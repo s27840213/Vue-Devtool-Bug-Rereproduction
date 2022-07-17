@@ -126,18 +126,18 @@
                   span {{$t('NN0206')}}
     transition(name="scale-fade")
       div(v-if="confirmMessage === 'delete-all'" class="dim-background" @click="closeConfirmMessage")
-        div(class="delete-all-message")
+        div(class="delete-all-message" @click.stop)
           div(class="delete-all-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
           div(class="delete-all-message__text")
             span {{$t('NN0244')}}
           div(class="delete-all-message__buttons")
-            div(class="delete-all-message__cancel" @click="closeConfirmMessage")
+            div(class="delete-all-message__cancel" @click.stop="closeConfirmMessage")
               span {{$t('NN0203')}}
-            div(class="delete-all-message__confirm" @click="deleteAllConfirmed")
+            div(class="delete-all-message__confirm" @click.stop="confirmAction(deleteAllConfirmed)")
               span {{$t('NN0034')}}
       div(v-if="confirmMessage === 'delete-folder'" class="dim-background" @click="closeConfirmMessage")
-        div(class="delete-folder-message")
+        div(class="delete-folder-message" @click.stop)
           div(class="delete-folder-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="76px" height="79px")
           div
@@ -145,12 +145,12 @@
               span(class="first-line") {{$t('NN0245')}}
               span {{$t('NN0246')}}
             div(class="delete-folder-message__buttons")
-              div(class="delete-folder-message__cancel" @click="closeConfirmMessage")
+              div(class="delete-folder-message__cancel" @click.stop="closeConfirmMessage")
                 span {{$t('NN0203')}}
-              div(class="delete-folder-message__confirm" @click="deleteFolder(pathedFolderBuffer)")
+              div(class="delete-folder-message__confirm" @click.stop="confirmAction(() => deleteFolder(pathedFolderBuffer))")
                 span {{$t('NN0034')}}
       div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click="closeConfirmMessage")
-        div(class="delete-forever-message")
+        div(class="delete-forever-message" @click.stop)
           div(class="delete-forever-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
           div(class="delete-forever-message__text")
@@ -158,9 +158,9 @@
           div(class="delete-forever-message__description")
             span {{$t('NN0201')}}
           div(class="delete-forever-message__buttons")
-            div(class="delete-forever-message__cancel" @click="closeConfirmMessage")
+            div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
               span {{$t('NN0203')}}
-            div(class="delete-forever-message__confirm" @click="deleteForeverConfirmed")
+            div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
               span {{$t('NN0200')}}
       div(v-if="confirmMessage === 'download'" class="dim-background")
         popup-download(class="my-design-pc__download"
@@ -559,6 +559,10 @@ export default Vue.extend({
       this.confirmMessage = ''
       this.pathedFolderBuffer = undefined
       this.designBuffer = undefined
+    },
+    confirmAction(action: () => void) {
+      action()
+      this.closeConfirmMessage()
     }
   }
 })
