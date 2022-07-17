@@ -199,7 +199,7 @@ export default Vue.extend({
       bottomMenu: 'getBottomMenu'
     }),
     selectedNum(): number {
-      return Object.keys(this.selectedDesigns).length
+      return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
     },
     isAnySelected(): boolean {
       return this.selectedNum > 0
@@ -357,7 +357,7 @@ export default Vue.extend({
           this.confirmMessage = 'delete-forever'
           break
         case 'deleteFolderForever':
-          this.pathedFolderBuffer = payload
+          this.pathedFolderBuffer = { parents: [], folder: payload }
           this.confirmMessage = 'delete-forever'
           break
         case 'deleteAllForever':

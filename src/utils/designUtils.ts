@@ -497,12 +497,23 @@ class DesignUtils {
     }
   }
 
-  dispatchFolderMenuAction(icon: string, folder: IFolder, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
+  dispatchFolderMenuAction(icon: string, folder: IFolder, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'delete': {
         eventEmitter({
           event: 'deleteFolderForever',
           payload: folder
+        })
+        break
+      }
+      case 'undo': {
+        this.recoverFolder(folder)
+        eventEmitter({
+          event: 'recoverItem',
+          payload: {
+            type: 'folder',
+            data: folder
+          }
         })
         break
       }
@@ -523,7 +534,7 @@ class DesignUtils {
     }
   }
 
-  dispatchMobileFolderMenuAction(icon: string, pathedFolder: IPathedFolder, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
+  dispatchMobileFolderMenuAction(icon: string, pathedFolder: IPathedFolder, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'trash': {
         this.deleteFolder(pathedFolder)
@@ -531,9 +542,14 @@ class DesignUtils {
           event: 'deleteItem',
           payload: {
             type: 'folder',
-            data: pathedFolder
+            data: pathedFolder.folder
           }
         })
+        break
+      }
+      case 'confirm-circle': {
+        store.commit('design/UPDATE_addFolderToSelection', pathedFolder.folder)
+        eventEmitter()
         break
       }
       default:

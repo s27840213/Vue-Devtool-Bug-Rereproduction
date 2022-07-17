@@ -1,5 +1,8 @@
 <template lang="pug">
   div(class="mobile-trash-design-view")
+    mobile-folder-gallery(:path="[]"
+                          :allFolders="allFolders"
+                          :selectedNum="selectedNum")
     mobile-design-gallery(:allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           :limitFunctions="true"
@@ -11,11 +14,13 @@
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
+import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 
 export default Vue.extend({
   components: {
+    MobileFolderGallery,
     MobileDesignGallery,
     DiskWarning
   },

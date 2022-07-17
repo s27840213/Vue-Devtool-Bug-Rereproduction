@@ -62,7 +62,7 @@ export default Vue.extend({
     }),
     emitGoto() {
       if (this.isAnySelected) {
-        this.$emit('select')
+        this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
       if (this.isTempFolder) return

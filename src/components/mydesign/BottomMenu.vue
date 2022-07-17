@@ -277,6 +277,7 @@ export default Vue.extend({
         if (extraEvent) {
           this.$emit('menuAction', extraEvent)
         }
+        this.$emit('close')
       })
     },
     checkNameEnter(e: KeyboardEvent) {
