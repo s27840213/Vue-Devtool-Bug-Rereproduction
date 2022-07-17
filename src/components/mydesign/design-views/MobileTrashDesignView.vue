@@ -3,6 +3,7 @@
     mobile-folder-gallery(:path="[]"
                           :allFolders="allFolders"
                           :selectedNum="selectedNum")
+    div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
     mobile-design-gallery(:allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           :limitFunctions="true"
@@ -45,6 +46,9 @@ export default Vue.extend({
     }),
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length + Object.keys(this.selectedFolders).length
+    },
+    isFolderDesignDivisionNeeded(): boolean {
+      return this.allFolders.length > 0 && this.allDesigns.length > 0
     }
   },
   methods: {
@@ -64,6 +68,13 @@ export default Vue.extend({
 .warning { margin-top: 16px }
 
 .mobile-trash-design-view {
+  &__hr {
+    margin: 0 16px;
+    margin-top: 16px;
+    margin-bottom: 2px;
+    background: setColor(gray-4);
+    height: 1px;
+  }
 }
 
 .scroll-space {
