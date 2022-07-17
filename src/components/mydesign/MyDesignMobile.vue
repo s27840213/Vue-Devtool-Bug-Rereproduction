@@ -530,6 +530,7 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
       font-size: 10px;
       line-height: 20px;
       color: setColor(gray-2);
+      transition: color 0.2s;
     }
     &.active {
       & > svg, & > div {
