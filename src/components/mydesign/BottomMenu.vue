@@ -59,6 +59,34 @@
                         :iconColor="designMenuItem.icon === 'favorites-fill' ? 'gray-3' : 'gray-2'")
               div(class="menu__item-text")
                 span {{ designMenuItem.text }}
+        div(v-if="bottomMenu === 'folder-menu'" class="folder-menu menu")
+          template(v-if="currLocation !== 't'")
+            div(class="menu__editable-name")
+              div(v-if="isNameEditing"
+                  class="menu__editable-name__text menu__editable-name__text-editor")
+                input(ref="name"
+                      v-model="editableName"
+                      @change="handleNameEditEnd"
+                      @keyup="checkNameEnter")
+              div(v-else class="menu__editable-name__text")
+                span(:title="folderBuffer.folder.name") {{ folderBuffer.folder.name }}
+              div(class="menu__editable-name__icon"
+                  @click.stop="handleIconNameClick")
+                svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
+            div(class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: 0 }) }}
+            div(v-if="isNameEditing" style="width: 100%; height: 16px;")
+            div(v-else class="menu__hr")
+          div(v-else style="margin-top: 20px;")
+          template(v-if="!isNameEditing")
+            div(v-for="folderMenuItem in folderMenuItems"
+                class="menu__item"
+                @click.stop="handleFolderMenuAction(folderMenuItem.icon)")
+              div(class="menu__item-icon")
+                svg-icon(:iconName="folderMenuItem.icon"
+                        :iconWidth="folderMenuItem.icon === 'confirm-circle' ? '22px' : '24px'"
+                        iconColor="gray-2")
+              div(class="menu__item-text")
+                span {{ folderMenuItem.text }}
 </template>
 
 <script lang="ts">
@@ -129,7 +157,8 @@ export default Vue.extend({
       isDesignsLoading: 'getIsDesignsLoading',
       isFoldersLoading: 'getIsFoldersLoading',
       itemCount: 'getItemCount',
-      designBuffer: 'getMobileDesignBuffer'
+      designBuffer: 'getMobileDesignBuffer',
+      folderBuffer: 'getMobileFolderBuffer'
     }),
     designMenuItems(): any[] {
       switch (this.currLocation) {
@@ -141,6 +170,20 @@ export default Vue.extend({
           return designUtils.makeMobileTrashMenuItems()
         default:
           return []
+      }
+    },
+    folderMenuItems(): any[] {
+      switch (this.currLocation) {
+        case 'l':
+          return designUtils.makeMobileNormalFolderMenuItems()
+        case 't':
+          return designUtils.makeMobileTrashFolderMenuItems()
+        default:
+          if (this.currLocation.startsWith('f')) {
+            return designUtils.makeMobileNormalFolderMenuItems()
+          } else {
+            return []
+          }
       }
     },
     multiMenuItems(): any[] {
@@ -191,6 +234,9 @@ export default Vue.extend({
     },
     isPrevButtonNeeded(): boolean {
       return PREV_BUTTON_MENUS.includes(this.bottomMenu)
+    },
+    isDesignMenu(): boolean {
+      return this.bottomMenu === 'design-menu'
     }
   },
   methods: {
@@ -202,7 +248,7 @@ export default Vue.extend({
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
-    handleCloseMenu(e: MouseEvent) {
+    handleCloseMenu() {
       if (this.isAnySelected) {
         this.$emit('clear')
       } else if (this.isNameEditing) {
@@ -214,7 +260,7 @@ export default Vue.extend({
     handleSortByClick(payload: [string, boolean]) {
       this.setSortByField(payload[0])
       this.setSortByDescending(payload[1])
-      this.$emit('refresh')
+      designUtils.emit('refresh')
     },
     handleDesignMenuAction(icon: string) {
       if (this.currLocation === 't' && icon === 'trash') icon = 'delete'
@@ -225,8 +271,17 @@ export default Vue.extend({
         this.$emit('close')
       })
     },
+    handleFolderMenuAction(icon: string) {
+      if (this.currLocation === 't' && icon === 'trash') icon = 'delete'
+      designUtils.dispatchMobileFolderMenuAction(icon, this.folderBuffer, (extraEvent) => {
+        if (extraEvent) {
+          this.$emit('menuAction', extraEvent)
+        }
+      })
+    },
     checkNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter') {
+      const originalName = this.isDesignMenu ? this.designBuffer.name : this.folderBuffer.folder.name
+      if (e.key === 'Enter' && this.editableName === originalName) {
         this.handleNameEditEnd()
       }
     },
@@ -238,7 +293,11 @@ export default Vue.extend({
       }
     },
     handleNameClick() {
-      this.editableName = this.designBuffer.name
+      if (this.isDesignMenu) {
+        this.editableName = this.designBuffer.name
+      } else {
+        this.editableName = this.folderBuffer.folder.name
+      }
       this.isNameEditing = true
       this.$nextTick(() => {
         const nameInput = this.$refs.name as HTMLInputElement
@@ -247,9 +306,27 @@ export default Vue.extend({
     },
     handleNameEditEnd() {
       this.isNameEditing = false
-      if (this.editableName === '' || this.editableName === this.designBuffer.name) return
-      designUtils.setDesignName(this.designBuffer, this.editableName)
+      if (this.isDesignMenu) {
+        if (this.editableName === '' || this.editableName === this.designBuffer.name) return
+        designUtils.setDesignName(this.designBuffer, this.editableName)
+      } else {
+        if (this.editableName === '' || this.editableName === this.folderBuffer.folder.name) return
+        designUtils.setFolderName(this.folderBuffer.folder, this.editableName, this.folderBuffer.parents as string[])
+      }
       this.editableName = ''
+    },
+    checkNameLength() {
+      if (this.editableName.length > 64) {
+        this.editableName = this.editableName.substring(0, 64)
+        // if (this.messageTimer) {
+        //   clearTimeout(this.messageTimer)
+        // }
+        // this.isShowHint = true
+        // this.messageTimer = setTimeout(() => {
+        //   this.isShowHint = false
+        //   this.messageTimer = -1
+        // }, 3000)
+      }
     }
   }
 })
@@ -390,7 +467,7 @@ export default Vue.extend({
   padding-top: 44px;
 }
 
-.design-menu {
+.design-menu, .folder-menu {
   padding-top: 24px;
 }
 

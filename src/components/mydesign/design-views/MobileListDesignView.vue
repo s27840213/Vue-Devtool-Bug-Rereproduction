@@ -1,59 +1,56 @@
 <template lang="pug">
   div(class="mobile-list-design-view")
-    //- mobile-design-gallery(:noHeader="true"
-                          :menuItems="menuItems"
-                          :allDesigns="allDesigns"
-                          :selectedNum="selectedNum"
-                          @menuAction="handleDesignMenuAction"
-                          @loadMore="handleLoadMore")
+    mobile-folder-gallery(:path="[ROOT]"
+                          :noHeader="true"
+                          :allFolders="allFolders"
+                          :selectedNum="0")
+    div(class="scroll-space")
 </template>
 
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
-// import MobileDesignGallery from '@/components/mydesign/MobileDesignGallery.vue'
+import MobileFolderGallery from '@/components/mydesign/MobileFolderGallery.vue'
 import DiskWarning from '@/components/payment/DiskWarning.vue'
 
 export default Vue.extend({
   components: {
-    // MobileDesignGallery,
+    MobileFolderGallery,
     DiskWarning
-  },
-  mounted() {
-    designUtils.fetchDesigns(this.fetchAllDesigns)
   },
   data() {
     return {
-      menuItems: designUtils.makeNormalMenuItems()
+      ROOT: designUtils.ROOT
     }
   },
+  mounted() {
+    designUtils.on('refresh', this.refreshItems)
+    this.refreshItems()
+  },
+  destroyed() {
+    designUtils.off('refresh')
+  },
   watch: {
-    allDesigns() {
+    allFolders() {
       this.$emit('clearSelection')
     }
   },
   computed: {
     ...mapGetters('design', {
-      folders: 'getFolders',
-      selectedDesigns: 'getSelectedDesigns',
-      allDesigns: 'getAllDesigns'
-    }),
-    selectedNum(): number {
-      return Object.keys(this.selectedDesigns).length
-    }
+      allFolders: 'getAllFolders'
+    })
   },
   methods: {
     ...mapActions('design', {
-      fetchAllDesigns: 'fetchAllDesigns',
-      fetchMoreAllDesigns: 'fetchMoreAllDesigns'
+      fetchFolderFolders: 'fetchFolderFolders'
     }),
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
-      const { event, payload } = extraEvent
-      this.$emit(event, payload)
-    },
-    handleLoadMore() {
-      designUtils.fetchDesigns(this.fetchMoreAllDesigns, false)
+    refreshItems() {
+      designUtils.fetchFolders(async () => {
+        await this.fetchFolderFolders({
+          path: 'root'
+        })
+      })
     }
   }
 })
@@ -63,5 +60,9 @@ export default Vue.extend({
 .warning { margin-top: 16px }
 
 .mobile-list-design-view {
+}
+
+.scroll-space {
+  margin-bottom: 200px;
 }
 </style>

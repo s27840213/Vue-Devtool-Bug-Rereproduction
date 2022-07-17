@@ -718,6 +718,7 @@ const actions: ActionTree<IDesignState, unknown> = {
   },
   async setFolderName({ commit }, { folder, name, parents }: { folder: IFolder, name: string, parents: string[] }) {
     const originalName = folder.name
+    const originalUpdateTime = folder.lastUpdatedTime
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'rename', null, folder.id, name)
       .then((response) => {
@@ -726,7 +727,8 @@ const actions: ActionTree<IDesignState, unknown> = {
           commit('UPDATE_setFolderName', {
             parents,
             folder,
-            name: originalName
+            name: originalName,
+            lastUpdatedTime: originalUpdateTime
           })
           commit('SET_isErrorShowing', true)
         }
@@ -735,14 +737,16 @@ const actions: ActionTree<IDesignState, unknown> = {
         commit('UPDATE_setFolderName', {
           parents,
           folder,
-          name: originalName
+          name: originalName,
+          lastUpdatedTime: originalUpdateTime
         })
         commit('SET_isErrorShowing', true)
       })
     commit('UPDATE_setFolderName', {
       parents,
       folder,
-      name
+      name,
+      lastUpdatedTime: (new Date()).toISOString()
     })
   },
   async moveFolder({ commit, getters }, { parents, folder, destination }: { parents: string[], folder: IDesign, destination: string[] }) {
@@ -795,12 +799,24 @@ const actions: ActionTree<IDesignState, unknown> = {
     })
   },
   async deleteFolder({ commit, dispatch, getters }, pathedFolder: IPathedFolder) {
+    if (
+      (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) ||
+      (getters.getCurrLocation === 'l' && pathedFolder.parents.length === 1)
+    ) {
+      commit('UPDATE_deleteFolder', pathedFolder.folder)
+    }
+    if (getters.getCurrLocation === 't') {
+      commit('UPDATE_addFolder', pathedFolder.folder)
+    }
     await designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'delete', null, pathedFolder.folder.id, '1')
       .then((response) => {
         if (response.data.flag !== 0) {
           console.log(response.data.msg)
-          if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) {
+          if (
+            (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) ||
+            (getters.getCurrLocation === 'l' && pathedFolder.parents.length === 1)
+          ) {
             commit('UPDATE_addFolder', pathedFolder.folder)
           }
           if (getters.getCurrLocation === 't') {
@@ -810,7 +826,10 @@ const actions: ActionTree<IDesignState, unknown> = {
         }
       }).catch((error) => {
         console.error(error)
-        if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) {
+        if (
+          (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) ||
+          (getters.getCurrLocation === 'l' && pathedFolder.parents.length === 1)
+        ) {
           commit('UPDATE_addFolder', pathedFolder.folder)
         }
         if (getters.getCurrLocation === 't') {
@@ -818,12 +837,6 @@ const actions: ActionTree<IDesignState, unknown> = {
         }
         commit('SET_isErrorShowing', true)
       })
-    if (getters.getCurrLocation.startsWith('f') && getters.getCurrLocation === `f:${pathedFolder.parents.join('/')}`) {
-      commit('UPDATE_deleteFolder', pathedFolder.folder)
-    }
-    if (getters.getCurrLocation === 't') {
-      commit('UPDATE_addFolder', pathedFolder.folder)
-    }
     dispatch('fetchStructuralFolders', { path: pathedFolder.parents.length === 1 ? 'root' : pathedFolder.parents.slice(1).join(',') })
   },
   async checkEmpty({ commit }, pathedFolder: IPathedFolder) {
@@ -1065,16 +1078,18 @@ const mutations: MutationTree<IDesignState> = {
       state.folderDesignCount -= 1
     }
   },
-  UPDATE_setFolderName(state: IDesignState, updateInfo: { name: string, parents: string[], folder: IFolder }) {
+  UPDATE_setFolderName(state: IDesignState, updateInfo: { name: string, parents: string[], folder: IFolder, lastUpdatedTime: string }) {
     const folder = designUtils.search(state.folders, designUtils.appendPath(updateInfo.parents, updateInfo.folder))
     if (folder) {
       folder.name = updateInfo.name
+      folder.lastUpdatedTime = updateInfo.lastUpdatedTime
     }
     const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.folder.id)
     if (index >= 0) {
       const newFolder = state.allFolders[index]
       state.allFolders.splice(index, 1)
       newFolder.name = updateInfo.name
+      newFolder.lastUpdatedTime = updateInfo.lastUpdatedTime
       const newIndex = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, newFolder)
       state.allFolders.splice(newIndex, 0, newFolder)
     }

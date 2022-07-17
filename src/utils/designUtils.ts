@@ -13,6 +13,7 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
+import { EventEmitter } from 'events'
 
 interface Item {
   name: string,
@@ -22,8 +23,30 @@ interface Item {
 class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = i18n.t('NN0187')
+  event = new EventEmitter()
+  eventHash: {[key: string]: () => void} = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
+
+  on(type: string, callback: () => void) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+    this.event.on(type, callback)
+    this.eventHash[type] = callback
+  }
+
+  off(type: string) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+  }
+
+  emit(type: string) {
+    this.event.emit(type)
+  }
 
   apiDesign2IDesign(design: IUserDesignContentData): IDesign {
     return {
@@ -285,6 +308,32 @@ class DesignUtils {
     ]
   }
 
+  makeMobileNormalFolderMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
+      }
+    ]
+  }
+
+  makeMobileTrashFolderMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'undo',
+        text: `${i18n.t('NN0204')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0690')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0200')}`
+      }
+    ]
+  }
+
   findFolder(folders: IFolder[], id: string): IFolder | undefined {
     for (const folder of folders) {
       if (folder.id === id) {
@@ -471,6 +520,24 @@ class DesignUtils {
         })
         break
       }
+    }
+  }
+
+  dispatchMobileFolderMenuAction(icon: string, pathedFolder: IPathedFolder, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
+    switch (icon) {
+      case 'trash': {
+        this.deleteFolder(pathedFolder)
+        eventEmitter({
+          event: 'deleteItem',
+          payload: {
+            type: 'folder',
+            data: pathedFolder
+          }
+        })
+        break
+      }
+      default:
+        this.dispatchFolderMenuAction(icon, pathedFolder.folder, eventEmitter)
     }
   }
 
