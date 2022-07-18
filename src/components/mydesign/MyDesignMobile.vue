@@ -394,6 +394,8 @@ export default Vue.extend({
     },
     messageItemIcon(item: IMobileMessageItem): string {
       switch (item.type) {
+        case 'move-design':
+          return 'folder'
         case 'delete':
           return 'trash'
         case 'favor-design':
@@ -409,6 +411,8 @@ export default Vue.extend({
     },
     messageItemText(item: IMobileMessageItem): string {
       switch (item.type) {
+        case 'move-design':
+          return `${this.$t('NN0682')}`
         case 'delete':
           return `${this.$t('NN0685')}`
         case 'favor-design':

@@ -7,7 +7,7 @@
       div(class="bottom-menu__close pointer"
           @click.stop="handleCloseMenu")
         svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-      template(v-if="isAnySelected")
+      template(v-if="isAnySelected && bottomMenu !== 'move-folder'")
         div(class="multi-menu")
           div(class="multi-menu__title")
             i18n(path="NN0254" tag="span")
@@ -249,7 +249,10 @@ export default Vue.extend({
       if (['a'].includes(this.currLocation) || isInFolder) {
         res.push({
           icon: 'folder',
-          action: () => { console.log('moveAllToFolder') }
+          action: () => {
+            this.snapshotFolders()
+            this.setBottomMenu('move-folder')
+          }
         })
       }
       if (['t'].includes(this.currLocation)) {
@@ -290,12 +293,17 @@ export default Vue.extend({
     ...mapMutations('design', {
       setSortByField: 'SET_sortByField',
       setSortByDescending: 'SET_sortByDescending',
-      clearBuffers: 'UPDATE_clearBuffers'
+      clearBuffers: 'UPDATE_clearBuffers',
+      setBottomMenu: 'SET_bottomMenu',
+      snapshotFolders: 'UPDATE_snapshotFolders'
     }),
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
     prepareForMenu(bottomMenu: string) {
+      if (bottomMenu === '') {
+        this.clearBuffers()
+      }
       if (bottomMenu === 'new-folder') {
         this.editableName = ''
         this.$nextTick(() => {
@@ -421,6 +429,7 @@ export default Vue.extend({
         this.$emit('menuAction', {
           event: 'moveItem'
         })
+        this.$emit('clear')
       }
       this.$emit('close')
     }

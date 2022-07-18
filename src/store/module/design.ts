@@ -1064,6 +1064,7 @@ const mutations: MutationTree<IDesignState> = {
     } else {
       state.copiedFolders = []
     }
+    state.moveToFolderSelectInfo = ''
   },
   UPDATE_currLocation(state: IDesignState) {
     const folders = generalUtils.deepCopy(state.folders)
