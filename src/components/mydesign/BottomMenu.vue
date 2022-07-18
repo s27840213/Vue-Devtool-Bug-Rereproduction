@@ -92,7 +92,7 @@
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
-import { mapGetters, mapActions, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
@@ -169,7 +169,7 @@ export default Vue.extend({
         case 't':
           return designUtils.makeMobileTrashMenuItems()
         default:
-          return []
+          return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite)
       }
     },
     folderMenuItems(): any[] {
@@ -188,7 +188,8 @@ export default Vue.extend({
     },
     multiMenuItems(): any[] {
       const res = []
-      if (['a', 'h'].includes(this.currLocation)) {
+      const isInFolder = this.currLocation.startsWith('f')
+      if (['a', 'h'].includes(this.currLocation) || isInFolder) {
         res.push({
           icon: 'heart',
           action: () => {
@@ -202,7 +203,7 @@ export default Vue.extend({
           }
         })
       }
-      if (['a'].includes(this.currLocation)) {
+      if (['a'].includes(this.currLocation) || isInFolder) {
         res.push({
           icon: 'folder',
           action: () => { console.log('moveAllToFolder') }
@@ -217,7 +218,7 @@ export default Vue.extend({
           }
         })
       }
-      if (['a', 'h', 't'].includes(this.currLocation)) {
+      if (['a', 'h', 't'].includes(this.currLocation) || isInFolder) {
         res.push({
           icon: 'trash',
           action: () => {
