@@ -68,8 +68,9 @@ export default Vue.extend({
   flex-direction: column;
   align-items: center;
   background-color: white;
-  min-width: 350px;
+  max-width: calc(100% - 80px);
   padding: 30px 20px;
+  margin: 0 20px;
   border-radius: 10px;
   &__close {
     position: absolute;
