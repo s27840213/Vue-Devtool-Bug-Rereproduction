@@ -45,7 +45,8 @@
                   @close="setBottomMenu('')"
                   @clear="handleClearSelection"
                   @menuAction="handleMenuAction"
-                  @back="handlePrevMenu")
+                  @back="handlePrevMenu"
+                  @push="handlePushMenu")
     div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click.stop="closeConfirmMessage")
       div(class="delete-forever-message" @click.stop)
         div(class="delete-forever-message__close pointer"
@@ -100,8 +101,6 @@ export default Vue.extend({
       pathedFolderBuffer: undefined as IPathedFolder | undefined,
       designBuffer: undefined as IDesign | undefined,
       confirmMessage: '',
-      isMoveToFolderPanelOpen: false,
-      isMovingSingleToFolder: false,
       errorMessageTimer: -1,
       menuStack: [] as string[],
       tabButtons: [
@@ -189,6 +188,11 @@ export default Vue.extend({
   watch: {
     currLocation() {
       this.handleClearSelection()
+    },
+    bottomMenu(newVal) {
+      if (newVal === '') {
+        this.menuStack = []
+      }
     }
   },
   computed: {
@@ -286,6 +290,7 @@ export default Vue.extend({
       snapshotFolders: 'UPDATE_snapshotFolders',
       setIsErrorShowing: 'SET_isErrorShowing',
       setBottomMenu: 'SET_bottomMenu',
+      setDesignBuffer: 'SET_mobileDesignBuffer',
       setPathBuffer: 'SET_mobilePathBuffer'
     }),
     handlePrevPage() {
@@ -310,6 +315,9 @@ export default Vue.extend({
         this.setBottomMenu('')
       }
     },
+    handlePushMenu(menu: string) {
+      this.menuStack.push(menu)
+    },
     handlePrevMenu() {
       if (this.menuStack.length) {
         const prev = this.menuStack.pop()
@@ -319,38 +327,16 @@ export default Vue.extend({
       }
     },
     handleClearSelection() {
-      this.isMoveToFolderPanelOpen = false
       this.$nextTick(() => {
         this.clearSelection()
       })
     },
-    handleDeleteItem() {
-      console.log('TODO')
-    },
-    handleRecoverItem() {
-      console.log('TODO')
-    },
-    handleDeleteFolder() {
-      console.log('TODO')
-    },
-    handleMoveItem() {
-      console.log('TODO')
-    },
-    handleDeleteForever() {
-      console.log('TODO')
-    },
-    handleDeleteFolderForever() {
-      console.log('TODO')
-    },
-    handleMoveDesignToFolder() {
-      console.log('TODO')
-    },
-    handleDownloadDesign() {
-      console.log('TODO')
-    },
     handleMenuAction(extraEvent: { event: string, payload: any }) {
       const { event, payload } = extraEvent
       switch (event) {
+        case 'moveItem':
+          this.pushItem('move-design')
+          break
         case 'deleteItem':
           this.pushItem('delete')
           break
@@ -378,6 +364,12 @@ export default Vue.extend({
           break
         case 'deleteAllForever':
           this.confirmMessage = 'delete-forever'
+          break
+        case 'moveDesignToFolder':
+          this.menuStack.push(this.bottomMenu)
+          this.setDesignBuffer(payload)
+          this.snapshotFolders()
+          this.setBottomMenu('move-folder')
           break
       }
     },

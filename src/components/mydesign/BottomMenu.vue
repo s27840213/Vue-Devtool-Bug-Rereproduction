@@ -27,11 +27,11 @@
                   :placeholder="$t('NN0691')"
                   v-model="editableName"
                   @change="handleNewFolder")
-            div(v-if="editableName.length" class="new-folder__icon" @click.stop.prevent="handleClearNewFolderName")
+            div(v-if="editableName.length" class="new-folder__icon" @click.stop="handleClearNewFolderName")
               svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
           div(class="new-folder__confirm"
               :class="{disabled: !editableName.length}"
-              @click.stop.prevent="handleNewFolder") {{ $t('NN0190')}}
+              @click.stop="handleNewFolder") {{ $t('NN0190') }}
         div(v-if="bottomMenu === 'sort-menu'" class="sort-menu menu")
           div(v-for="sortMenuItem in sortMenuItems"
               class="menu__item pointer"
@@ -100,6 +100,24 @@
                         iconColor="gray-2")
               div(class="menu__item-text")
                 span {{ folderMenuItem.text }}
+        div(v-if="bottomMenu === 'move-folder'" class="move-folder")
+          div(class="move-folder__folders"
+              @click.stop.prevent)
+            mobile-structure-folder(v-for="folder in realFolders"
+                            :folder="folder"
+                            :parents="[]"
+                            :level="0")
+          div(class="move-folder__hr"
+              @click.stop.prevent)
+          div(class="move-folder__footer")
+            div(class="move-folder__new-folder"
+                @click.stop.prevent="handleCreateFolder")
+              div(class="move-folder__new-folder__icon")
+                svg-icon(iconName="folder_plus" iconColor="gray-2" iconWidth="24px")
+              div(class="move-folder__new-folder__text") {{ $t('NN0190') }}
+            div(class="move-folder__confirm"
+                :class="{'disabled': moveToFolderSelectInfo === ''}"
+                @click.stop="handleMoveToFolder") {{ $t('NN0206') }}
 </template>
 
 <script lang="ts">
@@ -107,12 +125,14 @@ import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
-import { nextTick } from 'vue/types/umd'
+import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
+import { IFolder } from '@/interfaces/design'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
 export default Vue.extend({
   components: {
+    MobileStructureFolder
   },
   data() {
     return {
@@ -168,6 +188,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
+      copiedFolders: 'getCopiedFolders',
+      moveToFolderSelectInfo: 'getMoveToFolderSelectInfo',
       selectedDesigns: 'getSelectedDesigns',
       selectedFolders: 'getSelectedFolders',
       allDesigns: 'getAllDesigns',
@@ -259,6 +281,9 @@ export default Vue.extend({
     },
     isDesignMenu(): boolean {
       return this.bottomMenu === 'design-menu'
+    },
+    realFolders(): IFolder[] {
+      return designUtils.sortById([...this.copiedFolders])
     }
   },
   methods: {
@@ -302,6 +327,7 @@ export default Vue.extend({
         if (extraEvent) {
           this.$emit('menuAction', extraEvent)
         }
+        if (icon === 'folder') return
         this.$emit('close')
       })
     },
@@ -363,6 +389,9 @@ export default Vue.extend({
         // }, 3000)
       }
     },
+    handleCreateFolder() {
+      console.log('create folder')
+    },
     handleNewFolder() {
       setTimeout(() => {
         if (!this.editableName.length) return
@@ -378,6 +407,22 @@ export default Vue.extend({
     },
     handleClearNewFolderName() {
       this.editableName = ''
+    },
+    handleMoveToFolder() {
+      if (this.moveToFolderSelectInfo === '') return
+      const destination = [designUtils.ROOT, ...(designUtils.makePath(this.moveToFolderSelectInfo))]
+      if (this.designBuffer) {
+        designUtils.move(this.designBuffer, destination)
+        this.$emit('menuAction', {
+          event: 'moveItem'
+        })
+      } else {
+        designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+        this.$emit('menuAction', {
+          event: 'moveItem'
+        })
+      }
+      this.$emit('close')
     }
   }
 })
@@ -567,6 +612,71 @@ export default Vue.extend({
     color: white;
     &.disabled {
       background: setColor(gray-5);
+      color: setColor(gray-3);
+    }
+  }
+}
+
+.move-folder {
+  padding-top: 52px;
+  padding-bottom: 16px;
+  &__folders {
+    @include no-scrollbar;
+    height: 184px;
+    overflow-y: auto;
+  }
+  &__hr {
+    margin: 0px auto 12px auto;
+    width: calc(100% - 32px);
+    height: 1px;
+    background: setColor(gray-4);
+  }
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 16px;
+    padding-right: 15px;
+  }
+  &__new-folder {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 42px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 0 8px;
+    &:active {
+      background: setColor(blue-4);
+    }
+    &__icon {
+      @include size(24px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__text {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 180%;
+      color: setColor(gray-2);
+    }
+  }
+  &__confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: setColor(blue-1);
+    border-radius: 5px;
+    height: 42px;
+    padding: 0 12px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 180%;
+    color: white;
+    box-sizing: border-box;
+    &.disabled {
+      background: setColor(gray-6);
       color: setColor(gray-3);
     }
   }
