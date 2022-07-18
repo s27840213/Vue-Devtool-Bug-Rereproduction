@@ -164,6 +164,13 @@ export default Vue.extend({
       if (this.type === 'panel') {
         pageUtils.jumpIntoPage(this.index)
       }
+
+      if (GeneralUtils.isTouchDevice()) {
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+          pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+        })
+      }
     },
     dbclickPage() {
       this._setmiddlemostPageIndex(this.index)

@@ -17,12 +17,24 @@ class PageUtils {
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get pageNum(): number { return this.getPages.length }
   get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get isLastPage(): boolean {
+    return this.pageNum - 1 === this.currFocusPageIndex
+  }
+
   get middlemostPageIndex(): number {
     return store.getters.getMiddlemostPageIndex
+  }
+
+  /**
+   * @param currCardIndex - only used in touch device
+   */
+  get currCardIndex(): number {
+    return store.getters.getCurrCardIndex
   }
 
   get currActivePageIndex(): number {
@@ -252,6 +264,11 @@ class PageUtils {
   }
 
   findCentralPageIndexInfo(preventFocus = false) {
+    // for mobile version
+    if (generalUtils.isTouchDevice()) {
+      return this.currCardIndex
+    }
+
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
       const rect = (page as HTMLElement).getBoundingClientRect()
       return {
@@ -294,7 +311,8 @@ class PageUtils {
   }
 
   isOutOfBound(pageIndex: number) {
-    return pageIndex <= this.topBound || pageIndex >= this.bottomBound
+    return generalUtils.isTouchDevice() ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
+      : pageIndex <= this.topBound || pageIndex >= this.bottomBound
   }
 
   // Algorithm: Binary Search

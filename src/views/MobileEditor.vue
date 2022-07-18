@@ -50,6 +50,7 @@ import { IFooterTabProps } from '@/interfaces/editor'
 import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
+import Vconsole from 'vconsole'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -104,6 +105,9 @@ export default Vue.extend({
     eventUtils.on(PanelEvent.showMobilePhotoShadow, () => {
       this.currActivePanel = 'photo-shadow'
     })
+
+    const vconsole = new Vconsole()
+    vconsole.setSwitchPosition(10, 80)
   },
   computed: {
     ...mapState({

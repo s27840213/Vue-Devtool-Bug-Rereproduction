@@ -53,10 +53,12 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       _addPage: 'ADD_page',
-      _setPagesPerRow: 'page/SET_PagesPerRow'
+      _setPagesPerRow: 'page/SET_PagesPerRow',
+      _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
       this._addPage(pageUtils.newPage({}))
+      this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
       stepsUtils.record()
     }
   }
