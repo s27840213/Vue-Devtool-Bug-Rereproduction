@@ -22,7 +22,11 @@
         div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
         div(v-if="bottomMenu === 'new-folder'" class="new-folder")
           div(class="new-folder__name-editor")
-            input(class="new-folder__input" v-model="editableName" @change="handleNewFolder")
+            input(ref="name"
+                  class="new-folder__input"
+                  :placeholder="$t('NN0691')"
+                  v-model="editableName"
+                  @change="handleNewFolder")
             div(v-if="editableName.length" class="new-folder__icon" @click.stop.prevent="handleClearNewFolderName")
               svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
           div(class="new-folder__confirm"
@@ -103,6 +107,7 @@ import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
+import { nextTick } from 'vue/types/umd'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
@@ -149,14 +154,15 @@ export default Vue.extend({
     selectedNum: Number,
     isAnySelected: Boolean
   },
+  mounted() {
+    this.prepareForMenu(this.bottomMenu)
+  },
   destroyed() {
     this.clearBuffers()
   },
   watch: {
     bottomMenu(newVal) {
-      if (newVal === 'new-folder') {
-        this.editableName = ''
-      }
+      this.prepareForMenu(newVal)
     }
   },
   computed: {
@@ -263,6 +269,15 @@ export default Vue.extend({
     }),
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
+    },
+    prepareForMenu(bottomMenu: string) {
+      if (bottomMenu === 'new-folder') {
+        this.editableName = ''
+        this.$nextTick(() => {
+          const nameInput = this.$refs.name as HTMLInputElement
+          nameInput.focus()
+        })
+      }
     },
     handlePrevMenu() {
       this.$emit('back')
@@ -529,6 +544,9 @@ export default Vue.extend({
     font-size: 16px;
     line-height: 180%;
     color: setColor(gray-2);
+    &::placeholder {
+      color: setColor(gray-4);
+    }
   }
   &__icon {
     @include size(24px);
