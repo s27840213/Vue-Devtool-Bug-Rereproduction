@@ -179,7 +179,7 @@ class PaymentData {
       label: i18n.t('NN0007')
     }]
     themeUtils.checkThemeState()
-    if (mobile) return _.filter(list, (it: Record<string, string>) => !['MyDesign', 'BrandKit'].includes(it.name))
+    if (mobile) return _.filter(list, (it: Record<string, string>) => !['BrandKit'].includes(it.name))
     else return list
   }
 
