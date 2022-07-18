@@ -54,6 +54,7 @@
     "uglifyjs-webpack-plugin": "^2.2.0",
     "uuid": "^8.3.2",
     "v-click-outside": "^3.1.2",
+    "vconsole": "^3.14.6",
     "vue": "^2.6.11",
     "vue-color": "git+https://github.com/s27840213/CustomColorPicker.git",
     "vue-i18n": "^8.26.3",

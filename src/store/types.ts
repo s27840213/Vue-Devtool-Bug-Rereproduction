@@ -74,7 +74,8 @@ export interface IEditorState {
   closeMobilePanelFlag: boolean,
   mobileAllPageMode: boolean
   isGlobalLoading: boolean,
-  inMultiSelectionMode: boolean
+  inMultiSelectionMode: boolean,
+  currCardIndex: number
 }
 
 export enum SidebarPanelType {

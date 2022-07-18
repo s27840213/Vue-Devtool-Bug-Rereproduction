@@ -304,7 +304,9 @@ export default Vue.extend({
         }
         case 'trash': {
           groupUtils.deselect()
-          this._deletePage(pageUtils.currActivePageIndex)
+          const tmpIndex = pageUtils.currActivePageIndex
+          this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
+          this._deletePage(tmpIndex)
           stepsUtils.record()
           break
         }

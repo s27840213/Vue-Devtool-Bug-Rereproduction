@@ -91,7 +91,6 @@ export default Vue.extend({
       scrollHeight: 0,
       tmpScaleRatio: 0,
       initialDist: 0,
-      currCardIndex: 0,
       mounted: false,
       cardSize: 0
     }
@@ -175,7 +174,7 @@ export default Vue.extend({
       pageUtils.findCentralPageIndexInfo(true)
     },
     currFocusPageIndex(newVal) {
-      this.currCardIndex = newVal
+      this.setCurrCardIndex(newVal)
     }
   },
 
@@ -201,7 +200,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      currFocusPageIndex: 'getCurrFocusPageIndex'
+      currFocusPageIndex: 'getCurrFocusPageIndex',
+      currCardIndex: 'getCurrCardIndex'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -247,7 +247,8 @@ export default Vue.extend({
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
       setInMultiSelectionMode: 'SET_inMultiSelectionMode',
-      addPage: 'ADD_page'
+      addPage: 'ADD_page',
+      setCurrCardIndex: 'SET_currCardIndex'
     }),
     ...mapActions('layouts',
       [
@@ -375,7 +376,7 @@ export default Vue.extend({
       if (this.pageNum - 1 !== this.currCardIndex) {
         pageUtils.fitPage()
         pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
-        this.currCardIndex++
+        this.setCurrCardIndex(this.currCardIndex + 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
       } else {
@@ -390,7 +391,7 @@ export default Vue.extend({
       if (this.currCardIndex !== 0) {
         pageUtils.fitPage()
         pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
-        this.currCardIndex--
+        this.setCurrCardIndex(this.currCardIndex - 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
       }

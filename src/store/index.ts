@@ -106,7 +106,8 @@ const getDefaultState = (): IEditorState => ({
   closeMobilePanelFlag: false,
   mobileAllPageMode: false,
   isGlobalLoading: false,
-  inMultiSelectionMode: false
+  inMultiSelectionMode: false,
+  currCardIndex: 0
 })
 
 const state = getDefaultState()
@@ -203,6 +204,9 @@ const getters: GetterTree<IEditorState, unknown> = {
     return pageIndex >= 0 ? pageIndex
       : state.currActivePageIndex >= 0
         ? state.currActivePageIndex : state.middlemostPageIndex
+  },
+  getCurrCardIndex(state: IEditorState): number {
+    return state.currCardIndex
   },
   getCurrHoveredPageIndex(state: IEditorState): number {
     return state.currHoveredPageIndex
@@ -816,6 +820,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_inMultiSelectionMode(state: IEditorState, bool: boolean) {
     state.inMultiSelectionMode = bool
+  },
+  SET_currCardIndex(state: IEditorState, number) {
+    state.currCardIndex = number
   },
   ...imgShadowMutations
 }
