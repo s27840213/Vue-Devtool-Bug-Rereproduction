@@ -105,7 +105,7 @@
             class="my-design-pc__change-folder"
             :class="{centered: isMovingSingleToFolder}"
             v-click-outside="() => { isMoveToFolderPanelOpen = false }")
-          div(class="my-design-pc__change-folder__container")
+          div(class="my-design-pc__change-folder__container scrollbar-gray-thin")
             div(class="my-design-pc__change-folder__header")
               div(class="my-design-pc__change-folder__title")
                 span {{$t('NN0206')}}
@@ -712,9 +712,6 @@ export default Vue.extend({
     background-color: white;
     width: 415px;
     height: 627px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     box-shadow: 0px 2px 9px rgba(151, 150, 150, 0.35);
     border-radius: 3px;
     &.centered {
@@ -738,6 +735,8 @@ export default Vue.extend({
       height: 43px;
       flex-direction: column;
       align-items: center;
+      z-index: 1;
+      margin: 0 2px;
     }
     &__title {
       margin-top: 11px;
@@ -762,8 +761,9 @@ export default Vue.extend({
       background-color: setColor(gray-4);
     }
     &__folders {
-      width: 100%;
+      width: calc(100% - 4px);
       min-height: calc(100% - 101px);
+      margin: auto;
     }
     &__footer {
       position: sticky;
@@ -773,6 +773,7 @@ export default Vue.extend({
       height: 58px;
       flex-direction: column;
       align-items: center;
+      margin: 0 2px;
     }
     &__buttons {
       height: 25px;
