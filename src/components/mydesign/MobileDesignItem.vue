@@ -97,13 +97,17 @@ export default Vue.extend({
   created() {
     this.checkImageSize(this.startCarousel)
   },
+  mounted() {
+    window.addEventListener('resize', this.handleResize)
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.handleResize)
+  },
   watch: {
     'config.asset_index': {
       handler: function () {
-        this.$nextTick(() => {
-          this.showCarousel = false
-          this.checkImageSize(this.startCarousel)
-        })
+        this.showCarousel = false
+        this.checkImageSize(this.startCarousel)
       }
     }
   },
@@ -167,7 +171,9 @@ export default Vue.extend({
           this.imgHeight = height
           this.previewCheckReady = true
           this.config.thumbnail = exists ? this.configPreview : this.previewPlaceholder
-          callback()
+          this.$nextTick(() => {
+            callback()
+          })
         })
       }
     },
@@ -186,7 +192,9 @@ export default Vue.extend({
         this.imgHeight = height
         if (exists) {
           this.config.thumbnail = this.configPreview
-          callback()
+          this.$nextTick(() => {
+            callback()
+          })
         } else if (step < 35) {
           setTimeout(() => {
             this.pollingStep(step + 1, callback)
@@ -214,15 +222,29 @@ export default Vue.extend({
     },
     startCarousel() {
       if (this.config.pageNum === 1) return
-      this.waitTimer = setTimeout(() => {
-        this.showCarousel = true
-        const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
-        this.renderedWidth = thumbnailElement.width
-        this.renderedHeight = thumbnailElement.height
+      this.waitTimer = setInterval(() => {
+        const success = this.getThumbnailSize()
+        if (success) {
+          clearInterval(this.waitTimer)
+        } else {
+          return
+        }
         if (this.config.polling) {
           this.multiPollingStep()
         }
+        this.showCarousel = true
       }, 100)
+    },
+    getThumbnailSize(): boolean {
+      const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
+      if (!thumbnailElement) return false
+      this.renderedWidth = thumbnailElement.width
+      this.renderedHeight = thumbnailElement.height
+      return true
+    },
+    handleResize() {
+      this.showCarousel = false
+      this.checkImageSize(this.startCarousel)
     }
   }
 })
