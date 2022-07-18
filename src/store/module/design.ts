@@ -1130,6 +1130,16 @@ const mutations: MutationTree<IDesignState> = {
       targetFolder.subFolders.push(pathedFolder.folder)
     }
   },
+  UPDATE_insertFolderToCopied(state: IDesignState, pathedFolder: IPathedFolder) {
+    if (pathedFolder.parents.length === 0) {
+      state.copiedFolders.push(pathedFolder.folder)
+    } else {
+      const targetFolder = designUtils.search(state.copiedFolders, pathedFolder.parents)
+      if (targetFolder) {
+        targetFolder.subFolders.push(pathedFolder.folder)
+      }
+    }
+  },
   UPDATE_replaceFolder(state: IDesignState, updateInfo: { parents: string[], id: string, folder: IFolder }) {
     const index = state.allFolders.findIndex((folder_) => folder_.id === updateInfo.id)
     if (index >= 0) {
@@ -1139,6 +1149,16 @@ const mutations: MutationTree<IDesignState> = {
     if (targetFolder) {
       const index = targetFolder.subFolders.findIndex((folder_) => folder_.id === updateInfo.id)
       targetFolder.subFolders.splice(index, 1, updateInfo.folder)
+    }
+    if (updateInfo.parents.length === 1) {
+      const index = state.copiedFolders.findIndex((folder_) => folder_.id === updateInfo.id)
+      state.copiedFolders.splice(index, 1, updateInfo.folder)
+    } else {
+      const targetFolder = designUtils.search(state.copiedFolders, updateInfo.parents.slice(1))
+      if (targetFolder) {
+        const index = targetFolder.subFolders.findIndex((folder_) => folder_.id === updateInfo.id)
+        targetFolder.subFolders.splice(index, 1, updateInfo.folder)
+      }
     }
   },
   UPDATE_addToSelection(state: IDesignState, design: IDesign) {

@@ -7,7 +7,7 @@
       div(class="bottom-menu__close pointer"
           @click.stop="handleCloseMenu")
         svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-      template(v-if="isAnySelected && bottomMenu !== 'move-folder'")
+      template(v-if="isAnySelected && bottomMenu === ''")
         div(class="multi-menu")
           div(class="multi-menu__title")
             i18n(path="NN0254" tag="span")
@@ -172,7 +172,8 @@ export default Vue.extend({
   props: {
     bottomMenu: String,
     selectedNum: Number,
-    isAnySelected: Boolean
+    isAnySelected: Boolean,
+    menuStack: Array
   },
   mounted() {
     this.prepareForMenu(this.bottomMenu)
@@ -286,7 +287,7 @@ export default Vue.extend({
       return this.bottomMenu === 'design-menu'
     },
     realFolders(): IFolder[] {
-      return designUtils.sortById([...this.copiedFolders])
+      return designUtils.sortByCreateTime([...this.copiedFolders])
     }
   },
   methods: {
@@ -295,6 +296,7 @@ export default Vue.extend({
       setSortByDescending: 'SET_sortByDescending',
       clearBuffers: 'UPDATE_clearBuffers',
       setBottomMenu: 'SET_bottomMenu',
+      setPathBuffer: 'SET_mobilePathBuffer',
       snapshotFolders: 'UPDATE_snapshotFolders'
     }),
     checkSortSelected(payload: [string, boolean]): boolean {
@@ -316,11 +318,10 @@ export default Vue.extend({
       this.$emit('back')
     },
     handleCloseMenu() {
-      if (this.isAnySelected) {
-        this.$emit('clear')
-      } else if (this.isNameEditing) {
+      if (this.isNameEditing) {
         this.handleNameEditEnd()
       } else {
+        this.$emit('clear')
         this.$emit('close')
       }
     },
@@ -398,19 +399,30 @@ export default Vue.extend({
       }
     },
     handleCreateFolder() {
-      console.log('create folder')
+      this.$emit('push', this.bottomMenu)
+      this.setPathBuffer([designUtils.ROOT])
+      this.setBottomMenu('new-folder')
     },
     handleNewFolder() {
       setTimeout(() => {
         if (!this.editableName.length) return
         const folderName = this.editableName
         this.editableName = ''
-        this.$emit('back')
-        const id = designUtils.addNewFolder(this.pathBuffer, true, folderName)
-        const folder = designUtils.findFolder(this.allFolders, id)
-        if (folder) {
-          designUtils.createFolder(this.pathBuffer, folder, folderName)
+        if (this.menuStack.length && this.menuStack[this.menuStack.length - 1] === 'move-folder') {
+          const id = designUtils.addNewFolder(this.pathBuffer, false, folderName, true)
+          console.log(this.copiedFolders)
+          const folder = designUtils.search(this.copiedFolders, [...this.pathBuffer, id].slice(1))
+          if (folder) {
+            designUtils.createFolder(this.pathBuffer, folder, folderName)
+          }
+        } else {
+          const id = designUtils.addNewFolder(this.pathBuffer, true, folderName)
+          const folder = designUtils.findFolder(this.allFolders, id)
+          if (folder) {
+            designUtils.createFolder(this.pathBuffer, folder, folderName)
+          }
         }
+        this.$emit('back')
       }, 500)
     },
     handleClearNewFolderName() {

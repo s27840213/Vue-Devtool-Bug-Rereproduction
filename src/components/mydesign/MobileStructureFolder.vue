@@ -4,17 +4,17 @@
         :title="folder.name"
         @click="handleSelection")
       svg-icon(iconName="folder"
-          iconColor="gray-2"
+          :iconColor="isTempFolder ? 'gray-4' : 'gray-2'"
           iconWidth="24px"
           style="pointer-events: none")
-      div(:class="`nav-folder-${level}__text`"
+      div(:class="[`nav-folder-${level}__text`, {disabled: isTempFolder}]"
           style="pointer-events: none")
           span {{ folder.name }}
       div(class="nav-folder__expand-icon-container"
           @click.stop="toggleExpansion")
         svg-icon(class="nav-folder__expand-icon"
             iconName="chevron-left"
-            iconColor="gray-2"
+            :iconColor="isTempFolder ? 'gray-4' : 'gray-2'"
             iconWidth="24px"
             :style="expandIconStyles()")
     mobile-structure-folder(v-for="subFolder in checkExpand(realFolders)"
@@ -36,11 +36,14 @@ export default Vue.extend({
     isPopup: Boolean
   },
   computed: {
+    isTempFolder(): boolean {
+      return this.folder.id.endsWith('_new')
+    },
     path(): string[] {
       return designUtils.appendPath(this.parents as string[], this.folder as IFolder)
     },
     realFolders(): IFolder[] {
-      return designUtils.sortById([...this.folder.subFolders])
+      return designUtils.sortByCreateTime([...this.folder.subFolders])
     }
   },
   watch: {
@@ -62,9 +65,11 @@ export default Vue.extend({
       return this.folder.isExpanded ? { transform: 'rotate(90deg)' } : { transform: 'rotate(-90deg)' }
     },
     handleSelection() {
+      if (this.isTempFolder) return
       this.setMoveToFolderSelectInfo(`f:${this.path.join('/')}`)
     },
     toggleExpansion() {
+      if (this.isTempFolder) return
       this.setCopiedExpand({ path: this.path, isExpanded: !this.folder.isExpanded })
     },
     checkExpand(folders: IFolder[]): IFolder[] {
@@ -112,6 +117,9 @@ $maxLevels: 5;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      &.disabled > span {
+        color: setColor(gray-4);
       }
     }
   }

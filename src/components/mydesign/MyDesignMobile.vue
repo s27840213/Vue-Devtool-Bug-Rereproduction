@@ -42,6 +42,7 @@
                   :bottomMenu="bottomMenu"
                   :selectedNum="selectedNum"
                   :isAnySelected="isAnySelected"
+                  :menuStack="menuStack"
                   @close="setBottomMenu('')"
                   @clear="handleClearSelection"
                   @menuAction="handleMenuAction"
@@ -307,13 +308,6 @@ export default Vue.extend({
     },
     handleGoTo(tab: string) {
       this.setCurrLocation(tab)
-    },
-    handleCloseMenu() {
-      if (this.isAnySelected) {
-        this.handleClearSelection()
-      } else {
-        this.setBottomMenu('')
-      }
     },
     handlePushMenu(menu: string) {
       this.menuStack.push(menu)

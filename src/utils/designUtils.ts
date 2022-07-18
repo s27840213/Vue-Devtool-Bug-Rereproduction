@@ -120,21 +120,21 @@ class DesignUtils {
     return index >= 0 ? index : items.length
   }
 
-  sortById(folders: IFolder[]): IFolder[] {
+  sortByCreateTime(folders: IFolder[]): IFolder[] {
     folders.sort((a, b) => {
-      return a.id.localeCompare(b.id)
+      return (Date.parse(b.createdTime) - Date.parse(a.createdTime))
     })
     return folders
   }
 
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
-    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : new Date()
+    const time = randomTime ? new Date(generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())).toISOString() : new Date().toISOString()
     return {
       id: isROOT ? this.ROOT : generalUtils.generateAssetId() + '_new',
       name,
       author,
-      createdTime: time.toString(),
-      lastUpdatedTime: time.toString(),
+      createdTime: time,
+      lastUpdatedTime: time,
       isExpanded: false,
       isCurrLocation: false,
       subFolders: []
@@ -160,15 +160,15 @@ class DesignUtils {
       this.newFolder('日本行銷', 'Daniel', true)
     ]
     // for (let i = 0; i < 15; i++) {
-    //   const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
+    //   const time = new Date(generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())).toISOString()
     //   template[0].subFolders[0].designs.push({
     //     name: `Name${i + 1}`,
     //     width: 1200,
     //     height: 1200,
     //     id: generalUtils.generateAssetId(),
     //     thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
-    //     createdTime: time.toString(),
-    //     lastUpdatedTime: time.toString(),
+    //     createdTime: time,
+    //     lastUpdatedTime: time,
     //     favorite: false,
     //     ver: 0
     //   })
@@ -557,12 +557,19 @@ class DesignUtils {
     }
   }
 
-  addNewFolder(path: string[], fromFolderView = false, name: string | undefined = undefined): string {
+  addNewFolder(path: string[], fromFolderView = false, name: string | undefined = undefined, insertToCopied = false): string {
     const folder = this.newFolder(name ?? `${i18n.t('NN0249')}`, 'SYSTEM')
+    console.log(folder)
     store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
     })
+    if (insertToCopied) {
+      store.commit('design/UPDATE_insertFolderToCopied', {
+        parents: path.slice(1),
+        folder
+      })
+    }
     if (fromFolderView) {
       store.commit('design/UPDATE_addFolder', folder)
     }

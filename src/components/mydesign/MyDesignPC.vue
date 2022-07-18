@@ -284,7 +284,7 @@ export default Vue.extend({
       return this.selectedNum > 1
     },
     realFolders(): IFolder[] {
-      return designUtils.sortById([...this.copiedFolders])
+      return designUtils.sortByCreateTime([...this.copiedFolders])
     }
   },
   watch: {
