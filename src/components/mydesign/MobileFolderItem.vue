@@ -69,6 +69,7 @@ export default Vue.extend({
       this.$emit('goto')
     },
     openMenu() {
+      if (this.isTempFolder) return
       this.clearSelection()
       this.setMobileFolderBuffer({
         parents: this.path,

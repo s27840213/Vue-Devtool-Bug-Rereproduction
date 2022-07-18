@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="bottom-menu")
     div(class="bottom-menu__wrapper relative")
-      div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer")
+      div(v-if="isPrevButtonNeeded" class="bottom-menu__prev pointer"
+          @click.stop="handlePrevMenu")
         svg-icon(iconName="chevron-left" iconColor="gray-3" iconWidth="20px")
       div(class="bottom-menu__close pointer"
           @click.stop="handleCloseMenu")
@@ -19,6 +20,14 @@
               svg-icon(:iconName="multiMenuItem.icon" iconWidth="24px" iconColor="gray-2")
       template(v-else)
         div(v-if="bottomMenu === 'trash-info'" class="trash-info") {{$t('NN0241')}}
+        div(v-if="bottomMenu === 'new-folder'" class="new-folder")
+          div(class="new-folder__name-editor")
+            input(class="new-folder__input" v-model="editableName" @change="handleNewFolder")
+            div(v-if="editableName.length" class="new-folder__icon" @click.stop.prevent="handleClearNewFolderName")
+              svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
+          div(class="new-folder__confirm"
+              :class="{disabled: !editableName.length}"
+              @click.stop.prevent="handleNewFolder") {{ $t('NN0190')}}
         div(v-if="bottomMenu === 'sort-menu'" class="sort-menu menu")
           div(v-for="sortMenuItem in sortMenuItems"
               class="menu__item pointer"
@@ -144,6 +153,11 @@ export default Vue.extend({
     this.clearBuffers()
   },
   watch: {
+    bottomMenu(newVal) {
+      if (newVal === 'new-folder') {
+        this.editableName = ''
+      }
+    }
   },
   computed: {
     ...mapGetters('design', {
@@ -158,7 +172,8 @@ export default Vue.extend({
       isFoldersLoading: 'getIsFoldersLoading',
       itemCount: 'getItemCount',
       designBuffer: 'getMobileDesignBuffer',
-      folderBuffer: 'getMobileFolderBuffer'
+      folderBuffer: 'getMobileFolderBuffer',
+      pathBuffer: 'getMobilePathBuffer'
     }),
     designMenuItems(): any[] {
       switch (this.currLocation) {
@@ -249,6 +264,9 @@ export default Vue.extend({
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
     },
+    handlePrevMenu() {
+      this.$emit('back')
+    },
     handleCloseMenu() {
       if (this.isAnySelected) {
         this.$emit('clear')
@@ -329,6 +347,22 @@ export default Vue.extend({
         //   this.messageTimer = -1
         // }, 3000)
       }
+    },
+    handleNewFolder() {
+      setTimeout(() => {
+        if (!this.editableName.length) return
+        const folderName = this.editableName
+        this.editableName = ''
+        this.$emit('back')
+        const id = designUtils.addNewFolder(this.pathBuffer, true, folderName)
+        const folder = designUtils.findFolder(this.allFolders, id)
+        if (folder) {
+          designUtils.createFolder(this.pathBuffer, folder, folderName)
+        }
+      }, 500)
+    },
+    handleClearNewFolderName() {
+      this.editableName = ''
     }
   }
 })
@@ -471,6 +505,53 @@ export default Vue.extend({
 
 .design-menu, .folder-menu {
   padding-top: 24px;
+}
+
+.new-folder {
+  padding: 16px;
+  padding-top: 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  &__name-editor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6.5px 8px 6.5px 15px;
+    height: 42px;
+    border: 1px solid #D9DBE1;
+    border-radius: 3px;
+    box-sizing: border-box;
+  }
+  &__input {
+    padding: 0;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 180%;
+    color: setColor(gray-2);
+  }
+  &__icon {
+    @include size(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: setColor(blue-1);
+    border-radius: 5px;
+    height: 42px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 180%;
+    color: white;
+    &.disabled {
+      background: setColor(gray-5);
+      color: setColor(gray-3);
+    }
+  }
 }
 
 .multi-menu {

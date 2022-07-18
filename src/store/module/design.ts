@@ -29,7 +29,8 @@ interface IDesignState {
   folderFolderCount: number,
   bottomMenu: string,
   mobileDesignBuffer: IDesign | undefined,
-  mobileFolderBuffer: IPathedFolder | undefined
+  mobileFolderBuffer: IPathedFolder | undefined,
+  mobilePathBuffer: string[]
 }
 
 const getDefaultState = (): IDesignState => ({
@@ -54,7 +55,8 @@ const getDefaultState = (): IDesignState => ({
   folderFolderCount: 0,
   bottomMenu: '',
   mobileDesignBuffer: undefined,
-  mobileFolderBuffer: undefined
+  mobileFolderBuffer: undefined,
+  mobilePathBuffer: []
 })
 
 const state = getDefaultState()
@@ -121,6 +123,9 @@ const getters: GetterTree<IDesignState, unknown> = {
   },
   getMobileFolderBuffer(state: IDesignState): IPathedFolder | undefined {
     return state.mobileFolderBuffer
+  },
+  getMobilePathBuffer(state: IDesignState): string[] {
+    return state.mobilePathBuffer
   }
 }
 
@@ -1028,6 +1033,9 @@ const mutations: MutationTree<IDesignState> = {
   SET_mobileFolderBuffer(state: IDesignState, mobileFolderBuffer: IPathedFolder | undefined) {
     state.mobileFolderBuffer = mobileFolderBuffer
   },
+  SET_mobilePathBuffer(state: IDesignState, mobilePathBuffer: string[]) {
+    state.mobilePathBuffer = mobilePathBuffer
+  },
   UPDATE_folders(state: IDesignState, updateInfo: { path: string, folders: IFolder[] }) {
     let pathNodes
     if (updateInfo.path === 'root') {
@@ -1219,6 +1227,7 @@ const mutations: MutationTree<IDesignState> = {
   UPDATE_clearBuffers(state: IDesignState) {
     state.mobileDesignBuffer = undefined
     state.mobileFolderBuffer = undefined
+    state.mobilePathBuffer = []
   },
   UPDATE_resetState(state: IDesignState) {
     const defaultState = getDefaultState()

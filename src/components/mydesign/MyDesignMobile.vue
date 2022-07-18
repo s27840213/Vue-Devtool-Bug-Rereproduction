@@ -8,9 +8,9 @@
       div(class="my-design-mobile__nav-bar__menu")
         div(v-for="button in menuButtons"
             class="my-design-mobile__nav-bar__menu-button pointer"
-            @click="button.action")
+            @click="() => { !button.disabled && button.action() }")
           svg-icon(:iconName="button.icon"
-                    iconColor="gray-1"
+                    :iconColor="button.disabled? 'gray-3' : 'gray-1'"
                     :iconWidth="renderedWidth(button)"
                     :iconHeight="renderedHeight(button)")
     div(class="my-design-mobile__content relative")
@@ -44,7 +44,8 @@
                   :isAnySelected="isAnySelected"
                   @close="setBottomMenu('')"
                   @clear="handleClearSelection"
-                  @menuAction="handleDesignMenuAction")
+                  @menuAction="handleMenuAction"
+                  @back="handlePrevMenu")
     div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click.stop="closeConfirmMessage")
       div(class="delete-forever-message" @click.stop)
         div(class="delete-forever-message__close pointer"
@@ -78,6 +79,7 @@ interface IMenuButton {
   icon: string,
   width?: string,
   height?: string,
+  disabled?: boolean,
   action: () => void
 }
 
@@ -101,6 +103,7 @@ export default Vue.extend({
       isMoveToFolderPanelOpen: false,
       isMovingSingleToFolder: false,
       errorMessageTimer: -1,
+      menuStack: [] as string[],
       tabButtons: [
         {
           icon: 'all',
@@ -240,8 +243,10 @@ export default Vue.extend({
         default:
           return [{
             icon: 'folder_plus',
+            disabled: designUtils.isMaxLevelReached(this.path.length - 2),
             action: () => {
-              console.log('add folder')
+              this.setPathBuffer(this.currLocation === 'l' ? [designUtils.ROOT] : this.path)
+              this.setBottomMenu('new-folder')
             }
           }, {
             icon: 'sequence',
@@ -280,7 +285,8 @@ export default Vue.extend({
       setFolders: 'SET_folders',
       snapshotFolders: 'UPDATE_snapshotFolders',
       setIsErrorShowing: 'SET_isErrorShowing',
-      setBottomMenu: 'SET_bottomMenu'
+      setBottomMenu: 'SET_bottomMenu',
+      setPathBuffer: 'SET_mobilePathBuffer'
     }),
     handlePrevPage() {
       if (['a', 'h', 'l', 't'].includes(this.currLocation)) {
@@ -300,6 +306,14 @@ export default Vue.extend({
     handleCloseMenu() {
       if (this.isAnySelected) {
         this.handleClearSelection()
+      } else {
+        this.setBottomMenu('')
+      }
+    },
+    handlePrevMenu() {
+      if (this.menuStack.length) {
+        const prev = this.menuStack.pop()
+        this.setBottomMenu(prev)
       } else {
         this.setBottomMenu('')
       }
@@ -334,7 +348,7 @@ export default Vue.extend({
     handleDownloadDesign() {
       console.log('TODO')
     },
-    handleDesignMenuAction(extraEvent: { event: string, payload: any }) {
+    handleMenuAction(extraEvent: { event: string, payload: any }) {
       const { event, payload } = extraEvent
       switch (event) {
         case 'deleteItem':
