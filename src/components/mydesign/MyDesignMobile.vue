@@ -10,7 +10,7 @@
             class="my-design-mobile__nav-bar__menu-button pointer"
             @click="() => { !button.disabled && button.action() }")
           svg-icon(:iconName="button.icon"
-                    :iconColor="button.disabled? 'gray-3' : 'gray-1'"
+                    :iconColor="button.disabled? 'gray-4' : 'gray-2'"
                     :iconWidth="renderedWidth(button)"
                     :iconHeight="renderedHeight(button)")
     div(class="my-design-mobile__content relative")

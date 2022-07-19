@@ -113,10 +113,13 @@
               @click.stop.prevent="clearMoveToFolderSelectInfo")
           div(class="move-folder__footer")
             div(class="move-folder__new-folder"
+                :class="{disabled: isMaxLevelReached}"
                 @click.stop.prevent="handleCreateFolder")
               div(class="move-folder__new-folder__icon")
-                svg-icon(iconName="folder_plus" iconColor="gray-2" iconWidth="24px")
-              div(class="move-folder__new-folder__text") {{ $t('NN0190') }}
+                svg-icon(iconName="folder_plus"
+                        :iconColor="isMaxLevelReached ? 'gray-4' : 'gray-2'"
+                        iconWidth="24px")
+              div(class="move-folder__new-folder__text" :class="{disabled: isMaxLevelReached}") {{ $t('NN0190') }}
             div(class="move-folder__confirm"
                 :class="{'disabled': moveToFolderSelectInfo === ''}"
                 @click.stop="handleMoveToFolder") {{ $t('NN0206') }}
@@ -290,6 +293,13 @@ export default Vue.extend({
     },
     realFolders(): IFolder[] {
       return designUtils.sortByCreateTime([...this.copiedFolders])
+    },
+    isMaxLevelReached(): boolean {
+      if (this.moveToFolderSelectInfo === '') {
+        return false
+      } else {
+        return designUtils.isMaxLevelReached(designUtils.makePath(this.moveToFolderSelectInfo).length - 1)
+      }
     }
   },
   methods: {
@@ -411,6 +421,7 @@ export default Vue.extend({
       }
     },
     handleCreateFolder() {
+      if (this.isMaxLevelReached) return
       this.$emit('push', this.bottomMenu)
       if (this.moveToFolderSelectInfo === '') {
         this.setPathBuffer([designUtils.ROOT])
@@ -690,9 +701,6 @@ export default Vue.extend({
     border-radius: 4px;
     box-sizing: border-box;
     padding: 0 8px;
-    &:active {
-      background: setColor(blue-4);
-    }
     &__icon {
       @include size(24px);
       display: flex;
@@ -704,6 +712,10 @@ export default Vue.extend({
       font-size: 14px;
       line-height: 180%;
       color: setColor(gray-2);
+      transition: color 0.2s;
+      &.disabled {
+        color: setColor(gray-4);
+      }
     }
   }
   &__confirm {
