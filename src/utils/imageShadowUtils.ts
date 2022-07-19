@@ -243,8 +243,11 @@ class ImageShadowUtils {
     if ((this.handlerId === handlerId) || !timeout) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-      const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
-      ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
+      // const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
+      // ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2 + 20)
+      const shadowWidth = attrFactor * config.styles.initWidth * (size * 0.01)
+      const shadowHeight = FLOATING_SHADOW_SIZE * attrFactor * (thinkness * 0.01)
+      ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, shadowWidth, shadowHeight, 0, 0, Math.PI * 2 + 20)
       // ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
@@ -535,7 +538,6 @@ class ImageShadowUtils {
         return
       }
       setMark('shadow', 3)
-
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
           ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
@@ -651,8 +653,8 @@ class ImageShadowUtils {
           imgY
         })
         layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-          initWidth: width,
-          initHeight: height,
+          // initWidth: width,
+          // initHeight: height,
           scale: 1
         }, subLayerIdx)
       }
@@ -775,7 +777,7 @@ class ImageShadowUtils {
           x: 0,
           y: 0,
           radius: 60,
-          size: 60,
+          size: 100,
           thinkness: 50,
           opacity: 65
         }
@@ -948,7 +950,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   imageMatched: {
-    distance: { max: 100, min: 0, weighting: 4 },
+    distance: { max: 100, min: 0, weighting: 2.8 },
     angle: { max: 180, min: -180, weighting: 1 },
     size: { max: 120, min: 50, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 1.5 },
@@ -963,9 +965,9 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 3 },
     thinkness: { max: 100, min: 0 },
-    size: { max: 200, min: 50 },
+    size: { max: 150, min: 25 },
     x: { max: 100, min: -100, weighting: 1 },
-    y: { max: 75, min: -100, weighting: 1 }
+    y: { max: 100, min: -100, weighting: 1 }
   }
 } as any
 

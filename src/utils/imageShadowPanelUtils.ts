@@ -114,6 +114,7 @@ export default new class ImageShadowPanelUtils {
           subLayerIdx: _subLayerIdx
         }
         imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
+        imageShadowUtils.setUploadProcess(false)
         imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
         imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         return

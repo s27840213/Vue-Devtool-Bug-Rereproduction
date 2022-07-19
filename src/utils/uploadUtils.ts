@@ -499,16 +499,13 @@ class UploadUtils {
         }
       }
       if (isFile) {
-        console.log('is file')
         generalUtils.getFileImageTypeByByte(files[i] as File).then((imgType: string) => {
           reader.onload = (evt) => {
-            console.log(imgType)
             assetHandler(evt.target?.result as string, imgType)
           }
           reader.readAsDataURL(files[i] as File)
         })
       } else {
-        console.log('not file')
         assetHandler(files[i] as string)
       }
     }
