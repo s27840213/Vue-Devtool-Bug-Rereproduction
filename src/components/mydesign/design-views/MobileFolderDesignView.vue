@@ -3,11 +3,13 @@
     mobile-folder-gallery(:path="path"
                           :allFolders="allFolders"
                           :selectedNum="0")
-    div(v-if="isFolderDesignDivisionNeeded" class="mobile-trash-design-view__hr")
+    div(v-if="isFolderDesignDivisionNeeded" class="mobile-folder-design-view__hr")
     mobile-design-gallery(:allDesigns="allDesigns"
                           :selectedNum="selectedNum"
                           @loadMore="handleLoadMore")
-    div(class="scroll-space")
+    div(v-if="isEmpty && !isDesignsLoading && !isFoldersLoading" class="mobile-folder-design-view__empty")
+      img(class="mobile-folder-design-view__empty__img" :src="require('@/assets/img/png/mydesign/empty-folder.png')")
+    div(v-else class="scroll-space")
 </template>
 
 <script lang="ts">
@@ -46,6 +48,8 @@ export default Vue.extend({
     ...mapGetters('design', {
       currLocation: 'getCurrLocation',
       selectedDesigns: 'getSelectedDesigns',
+      isDesignsLoading: 'getIsDesignsLoading',
+      isFoldersLoading: 'getIsFoldersLoading',
       allDesigns: 'getAllDesigns',
       allFolders: 'getAllFolders'
     }),
@@ -58,6 +62,9 @@ export default Vue.extend({
     },
     selectedNum(): number {
       return Object.keys(this.selectedDesigns).length
+    },
+    isEmpty(): boolean {
+      return this.allFolders.length + this.allDesigns.length === 0
     },
     isFolderDesignDivisionNeeded(): boolean {
       return this.allFolders.length > 0 && this.allDesigns.length > 0
@@ -96,6 +103,24 @@ export default Vue.extend({
 .warning { margin-top: 16px }
 
 .mobile-folder-design-view {
+  &__hr {
+    margin: 0 16px;
+    margin-top: 16px;
+    margin-bottom: 2px;
+    background: setColor(gray-4);
+    height: 1px;
+  }
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    &__img {
+      width: 186px;
+      height: 165px;
+    }
+  }
 }
 
 .scroll-space {
