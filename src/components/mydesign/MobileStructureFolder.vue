@@ -4,17 +4,17 @@
         :title="folder.name"
         @click="handleSelection")
       svg-icon(iconName="folder"
-          :iconColor="isTempFolder ? 'gray-4' : 'gray-2'"
+          :iconColor="isDisabled ? 'gray-4' : 'gray-2'"
           iconWidth="24px"
           style="pointer-events: none")
-      div(:class="[`nav-folder-${level}__text`, {disabled: isTempFolder}]"
+      div(:class="[`nav-folder-${level}__text`, {disabled: isDisabled}]"
           style="pointer-events: none")
           span {{ folder.name }}
       div(class="nav-folder__expand-icon-container"
           @click.stop="toggleExpansion")
         svg-icon(class="nav-folder__expand-icon"
             iconName="chevron-left"
-            :iconColor="isTempFolder ? 'gray-4' : 'gray-2'"
+            :iconColor="isDisabled ? 'gray-4' : 'gray-2'"
             iconWidth="24px"
             :style="expandIconStyles()")
     mobile-structure-folder(v-for="subFolder in checkExpand(realFolders)"
@@ -25,7 +25,7 @@
 import Vue from 'vue'
 import { IFolder } from '@/interfaces/design'
 import designUtils from '@/utils/designUtils'
-import { mapActions, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default Vue.extend({
   name: 'mobile-structure-folder',
@@ -36,8 +36,20 @@ export default Vue.extend({
     isPopup: Boolean
   },
   computed: {
+    ...mapGetters('design', {
+      folderBuffer: 'getMobileFolderBuffer'
+    }),
     isTempFolder(): boolean {
       return this.folder.id.endsWith('_new')
+    },
+    isDisabled(): boolean {
+      return this.isTempFolder || (
+        this.folderBuffer &&
+        (
+          designUtils.isMaxLevelReached(this.parents.length) ||
+          designUtils.isParentOrEqual(this.folderBuffer, { parents: [designUtils.ROOT, ...this.parents as string[]], folder: this.folder })
+        )
+      )
     },
     path(): string[] {
       return designUtils.appendPath(this.parents as string[], this.folder as IFolder)
@@ -65,11 +77,11 @@ export default Vue.extend({
       return this.folder.isExpanded ? { transform: 'rotate(90deg)' } : { transform: 'rotate(-90deg)' }
     },
     handleSelection() {
-      if (this.isTempFolder) return
+      if (this.isDisabled) return
       this.setMoveToFolderSelectInfo(`f:${this.path.join('/')}`)
     },
     toggleExpansion() {
-      if (this.isTempFolder) return
+      if (this.isDisabled) return
       this.setCopiedExpand({ path: this.path, isExpanded: !this.folder.isExpanded })
     },
     checkExpand(folders: IFolder[]): IFolder[] {

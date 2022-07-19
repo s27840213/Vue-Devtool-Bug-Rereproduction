@@ -355,6 +355,7 @@ export default Vue.extend({
         if (extraEvent) {
           this.$emit('menuAction', extraEvent)
         }
+        if (icon === 'folder') return
         this.$emit('close')
       })
     },
@@ -442,6 +443,11 @@ export default Vue.extend({
       const destination = [designUtils.ROOT, ...(designUtils.makePath(this.moveToFolderSelectInfo))]
       if (this.designBuffer) {
         designUtils.move(this.designBuffer, destination)
+        this.$emit('menuAction', {
+          event: 'moveItem'
+        })
+      } else if (this.folderBuffer) {
+        designUtils.moveFolder(this.folderBuffer, destination)
         this.$emit('menuAction', {
           event: 'moveItem'
         })

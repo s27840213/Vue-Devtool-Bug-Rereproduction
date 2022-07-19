@@ -759,17 +759,16 @@ const actions: ActionTree<IDesignState, unknown> = {
     })
   },
   async moveFolder({ commit, getters }, { parents, folder, destination }: { parents: string[], folder: IDesign, destination: string[] }) {
+    const originalPath = parents
     designApis.updateDesigns(designApis.getToken(), designApis.getLocale(), designApis.getUserId(),
       'move', null, folder.id, destination.slice(1).join(','))
       .then((response) => {
         if (response.data.flag !== 0) {
           console.log(response.data.msg)
-          if (getters.getCurrLocation.startsWith('f')) {
-            if (getters.getCurrLocation === `f:${destination.join('/')}`) {
-              commit('UPDATE_deleteFolder', folder)
-            } else {
-              commit('UPDATE_addFolder', folder)
-            }
+          if (getters.getCurrLocation === `f:${destination.join('/')}`) {
+            commit('UPDATE_deleteFolder', folder)
+          } else if (getters.getCurrLocation === `f:${originalPath.join('/')}` || (getters.getCurrLocation === 'l' && originalPath.length === 1)) {
+            commit('UPDATE_addFolder', folder)
           }
           commit('UPDATE_removeFolder', {
             parents: destination,
@@ -780,12 +779,10 @@ const actions: ActionTree<IDesignState, unknown> = {
         }
       }).catch((error) => {
         console.error(error)
-        if (getters.getCurrLocation.startsWith('f')) {
-          if (getters.getCurrLocation === `f:${destination.join('/')}`) {
-            commit('UPDATE_deleteFolder', folder)
-          } else {
-            commit('UPDATE_addFolder', folder)
-          }
+        if (getters.getCurrLocation === `f:${destination.join('/')}`) {
+          commit('UPDATE_deleteFolder', folder)
+        } else if (getters.getCurrLocation === `f:${originalPath.join('/')}` || (getters.getCurrLocation === 'l' && originalPath.length === 1)) {
+          commit('UPDATE_addFolder', folder)
         }
         commit('UPDATE_removeFolder', {
           parents: destination,
@@ -794,12 +791,10 @@ const actions: ActionTree<IDesignState, unknown> = {
         commit('UPDATE_insertFolder', { parents, folder })
         commit('SET_isErrorShowing', true)
       })
-    if (getters.getCurrLocation.startsWith('f')) {
-      if (getters.getCurrLocation === `f:${destination.join('/')}`) {
-        commit('UPDATE_addFolder', folder)
-      } else {
-        commit('UPDATE_deleteFolder', folder)
-      }
+    if (getters.getCurrLocation === `f:${destination.join('/')}`) {
+      commit('UPDATE_addFolder', folder)
+    } else if (getters.getCurrLocation === `f:${originalPath.join('/')}` || (getters.getCurrLocation === 'l' && originalPath.length === 1)) {
+      commit('UPDATE_deleteFolder', folder)
     }
     commit('UPDATE_removeFolder', { parents, folder })
     commit('UPDATE_insertFolder', {
@@ -1108,8 +1103,10 @@ const mutations: MutationTree<IDesignState> = {
     }
   },
   UPDATE_addFolder(state: IDesignState, folder: IFolder) {
-    const index = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, folder)
-    state.allFolders.splice(index, 0, folder)
+    const index = state.allFolders.findIndex(folder_ => folder_.id === folder.id)
+    if (index >= 0) return
+    const insertIndex = designUtils.getInsertIndex(state.allFolders, state.sortByField, state.sortByDescending, folder)
+    state.allFolders.splice(insertIndex, 0, folder)
     state.folderFolderCount += 1
   },
   UPDATE_deleteFolder(state: IDesignState, folder: IFolder) {

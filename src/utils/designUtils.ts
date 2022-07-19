@@ -311,6 +311,10 @@ class DesignUtils {
   makeMobileNormalFolderMenuItems(): { icon: string, text: string }[] {
     return [
       {
+        icon: 'folder',
+        text: `${i18n.t('NN0206')}`
+      },
+      {
         icon: 'trash',
         text: `${i18n.t('NN0034')}`
       }
@@ -536,6 +540,13 @@ class DesignUtils {
 
   dispatchMobileFolderMenuAction(icon: string, pathedFolder: IPathedFolder, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
     switch (icon) {
+      case 'folder': {
+        eventEmitter({
+          event: 'moveDesignToFolder',
+          payload: undefined
+        })
+        break
+      }
       case 'trash': {
         this.deleteFolder(pathedFolder)
         eventEmitter({

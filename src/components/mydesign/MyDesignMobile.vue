@@ -362,7 +362,6 @@ export default Vue.extend({
           break
         case 'moveDesignToFolder':
           this.menuStack.push(this.bottomMenu)
-          this.setDesignBuffer(payload)
           this.snapshotFolders()
           this.setBottomMenu('move-folder')
           break
