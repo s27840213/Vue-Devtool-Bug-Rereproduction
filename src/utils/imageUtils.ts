@@ -6,13 +6,14 @@ import ControlUtils from './controlUtils'
 import LayerUtils from './layerUtils'
 import FrameUtils from './frameUtils'
 import { IImageSize, IUserImageContentData } from '@/interfaces/api'
-import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import imageApi from '@/apis/image-api'
 import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
+import pageUtils from '@/utils/pageUtils'
+import generalUtils from './generalUtils'
 
-const FORCE_UPDATE_VER = '&ver=303120221747'
+const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
@@ -41,7 +42,7 @@ class ImageUtils {
 
   getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
-    let { type, userId, assetId, brandId } = {} as SrcObj
+    let { type, userId, assetId, brandId, updateQuery = false } = {} as SrcObj
     let ratio = 1
     if (this.isSrcObj(config)) {
       ({ type, userId, assetId, brandId } = config)
@@ -59,13 +60,32 @@ class ImageUtils {
           config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
         )
       }
+      if (config.srcObj?.updateQuery) {
+        /**
+         * If the srcObj contian updateQuery flag, means this src should return a new query to prevent cache
+         * and the updateQuery flag should be removed
+         */
+        updateQuery = true
+        const pageIndex = pageUtils.getPages.findIndex(p => p.layers.some(l => l.id === config.id))
+        if (pageIndex !== -1) {
+          const layerIndex = pageUtils.getPage(pageIndex).layers.findIndex(l => l.id === config.id)
+          if (layerIndex !== -1) {
+            LayerUtils.updateLayerProps(pageIndex, layerIndex, {
+              srcObj: {
+                ...config.srcObj,
+                updateQuery: false
+              }
+            })
+          }
+        }
+      }
       ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     }
 
     switch (type) {
       case 'public': {
         const query = forBgRemove ? `?${FORCE_UPDATE_VER.substring(1)}` : `?origin=true${FORCE_UPDATE_VER}`
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query}`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery ? generalUtils.generateRandomString(4) : '')}`
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
@@ -73,12 +93,6 @@ class ImageUtils {
 
         return editorImg(assetId) ? editorImg(assetId)[size as string] + query : ''
       }
-      // case 'public':
-      //   return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}?origin=true` + FORCE_UPDATE_VER
-      // case 'private': {
-      //   const editorImg = store.getters['file/getEditorViewImages']
-      //   return editorImg(assetId) ? editorImg(assetId)[size as string] + '&origin=true' + FORCE_UPDATE_VER : ''
-      // }
       case 'logo-public':
         return `https://template.vivipic.com/admin/${userId}/asset/logo/${brandId}/${assetId}/${size}?origin=true` + FORCE_UPDATE_VER
       case 'logo-private': {
