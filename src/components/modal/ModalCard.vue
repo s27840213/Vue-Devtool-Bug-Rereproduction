@@ -16,17 +16,15 @@
         button(class="btn-primary-mid full-width"
           :class="modalInfo.confirmButton.class"
           :style="modalInfo.confirmButton.style"
-          @pointerdown.prevent.stop="confirmAction()"
-          @touchstart.prevent) {{ modalInfo.confirmButton.msg || $t('NN0358') }}
+          @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
         button(v-if="modalInfo.cancelButton.msg"
           class="ml-10 btn-primary-mid full-width"
           :class="modalInfo.cancelButton.class"
           :style="modalInfo.cancelButton.style"
-          @pointerdown.prevent.stop="cancelAction()"
-          @touchstart.prevent) {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-      div(class="modal-card__close")
-        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
-                @pointerdown.native="closePopup()" @touchstart.prevent)
+          @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
+      div(class="modal-card__close"
+          @click="closePopup()")
+        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'" )
 </template>
 
 <script lang="ts">
@@ -70,8 +68,9 @@ export default Vue.extend({
   flex-direction: column;
   align-items: center;
   background-color: white;
-  min-width: 350px;
+  max-width: calc(100% - 80px);
   padding: 30px 20px;
+  margin: 0 20px;
   border-radius: 10px;
   &__close {
     position: absolute;
