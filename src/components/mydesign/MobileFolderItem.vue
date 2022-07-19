@@ -20,7 +20,7 @@
       div(class="mobile-folder-item__info")
         div(class="mobile-folder-item__name")
           span(:title="config.name") {{ config.name }}
-        div(class="mobile-folder-item__description") {{ $t('NN0197', { num: 0 }) }}
+        //- div(class="mobile-folder-item__description") {{ $t('NN0197', { num: 0 }) }}
     div(class="mobile-folder-item__more"
         @click.stop="openMenu()")
       svg-icon(iconName="more_vertical"

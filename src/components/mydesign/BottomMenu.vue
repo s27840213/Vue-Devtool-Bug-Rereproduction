@@ -86,7 +86,8 @@
               div(class="menu__editable-name__icon"
                   @click.stop="handleIconNameClick")
                 svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
-            div(class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: 0 }) }}
+            div(v-if="itemCount >= 0" class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: itemCount }) }}
+            div(v-else class="menu__description" @click.stop.prevent) ...
             div(v-if="isNameEditing" style="width: 100%; height: 16px;")
             div(v-else class="menu__hr")
           div(v-else style="margin-top: 20px;")
@@ -123,7 +124,7 @@
 <script lang="ts">
 import designUtils from '@/utils/designUtils'
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
 import { IFolder } from '@/interfaces/design'
@@ -291,6 +292,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('design', {
+      fetchItemCount: 'fetchItemCount'
+    }),
     ...mapMutations('design', {
       setSortByField: 'SET_sortByField',
       setSortByDescending: 'SET_sortByDescending',
@@ -311,6 +315,11 @@ export default Vue.extend({
         this.$nextTick(() => {
           const nameInput = this.$refs.name as HTMLInputElement
           nameInput.focus()
+        })
+      }
+      if (bottomMenu === 'folder-menu') {
+        this.fetchItemCount({
+          path: designUtils.createPath(this.folderBuffer).slice(1).join(',')
         })
       }
     },

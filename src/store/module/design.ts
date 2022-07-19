@@ -194,6 +194,10 @@ const actions: ActionTree<IDesignState, unknown> = {
   },
   async fetchItemCount({ commit }, { path }) {
     try {
+      commit('SET_itemCount', {
+        designCount: -1,
+        folderCount: -1
+      })
       const { data } = await designApis.getDesigns(designApis.getToken(), path, 3, 'update', true)
       commit('SET_itemCount', {
         designCount: data.data.design.file_count,
