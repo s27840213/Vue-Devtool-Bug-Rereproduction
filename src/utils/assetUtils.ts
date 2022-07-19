@@ -8,7 +8,6 @@ import pageUtils from './pageUtils'
 import ShapeUtils from './shapeUtils'
 import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
-import GeneralUtils from './generalUtils'
 import ImageUtils from './imageUtils'
 import { IGroup, IImage, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
@@ -22,6 +21,7 @@ import { IPage } from '@/interfaces/page'
 import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
+import generalUtils from './generalUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -47,7 +47,7 @@ class AssetUtils {
 
   get(item: IListServiceContentDataItem): Promise<IAsset> {
     const asset = this.getAsset(item.id)
-    return (asset && asset.ver === item.ver) ? Promise.resolve(GeneralUtils.deepCopy(asset)) : this.fetch(item)
+    return (asset && asset.ver === item.ver) ? Promise.resolve(generalUtils.deepCopy(asset)) : this.fetch(item)
   }
 
   // used for api category
@@ -149,7 +149,7 @@ class AssetUtils {
     const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
-    json = await this.updateBackground(GeneralUtils.deepCopy(json))
+    json = await this.updateBackground(generalUtils.deepCopy(json))
     pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
@@ -383,7 +383,7 @@ class AssetUtils {
   }
 
   addText(json: any, attrs: IAssetProps = {}) {
-    json = GeneralUtils.deepCopy(json)
+    json = generalUtils.deepCopy(json)
     const { pageIndex, styles = {} } = attrs
     const { x, y } = styles
     const { width, height } = json.styles
@@ -416,7 +416,7 @@ class AssetUtils {
           body: 'isBody'
         } as { [key: string]: string }
         const field = fieldMap[type]
-        const textLayer = GeneralUtils.deepCopy(jsonData.default)
+        const textLayer = generalUtils.deepCopy(jsonData.default)
         textLayer.paragraphs[0].spans[0].text = text
         if (locale === 'tw') {
           textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
@@ -510,7 +510,7 @@ class AssetUtils {
     return Promise.all(promises)
       .then(assets => {
         const updatePromise = assets.map(asset =>
-          this.updateBackground(GeneralUtils.deepCopy(asset.jsonData) || {})
+          this.updateBackground(generalUtils.deepCopy(asset.jsonData) || {})
             .then(json => LayerFactary.newTemplate(TemplateUtils.updateTemplate(json)))
         )
         return Promise.all(updatePromise)
@@ -555,8 +555,10 @@ class AssetUtils {
           stepsUtils.record()
 
           // Close MobilePanel and fit in
-          editorUtils.setCloseMobilePanelFlag(true)
-          pageUtils.fitPage()
+          if (generalUtils.isTouchDevice()) {
+            editorUtils.setCloseMobilePanelFlag(true)
+            pageUtils.fitPage()
+          }
         })
       })
   }
@@ -589,8 +591,10 @@ class AssetUtils {
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs).then(() => {
-            pageUtils.fitPage()
-            pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+            if (generalUtils.isTouchDevice()) {
+              pageUtils.fitPage()
+              pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+            }
           })
           editorUtils.setCloseMobilePanelFlag(true)
           break
@@ -634,7 +638,7 @@ class AssetUtils {
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
       // @TODO 手動加入最近使用
-      const categories = GeneralUtils.deepCopy((store.state as any)[typeModule].categories)
+      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
       const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
       if (recentlyUsed) {
         const assetIndex = recentlyUsed.list.findIndex((asset: IListServiceContentDataItem) => asset.id === id)

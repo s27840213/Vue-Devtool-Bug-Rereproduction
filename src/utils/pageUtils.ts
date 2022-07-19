@@ -5,11 +5,12 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
 import designUtils from './designUtils'
+import editorUtils from './editorUtils'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
-import uploadUtils from './uploadUtils'
+
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -345,7 +346,12 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage() {
+  fitPage(scrollToTop = false) {
+    console.trace()
+    if (editorUtils.mobileAllPageMode) {
+      return
+    }
+
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
     const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.currFocusPageSize.width
     const targetHeight = this.inBgRemoveMode ? this.autoRemoveResult.height : this.currFocusPageSize.height
@@ -359,9 +365,11 @@ class PageUtils {
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
-    Vue.nextTick(() => {
-      editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
-    })
+    if (scrollToTop) {
+      Vue.nextTick(() => {
+        editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
+      })
+    }
   }
 
   fillPage() {
