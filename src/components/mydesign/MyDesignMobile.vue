@@ -76,6 +76,7 @@ import MobileTrashDesignView from '@/components/mydesign/design-views/MobileTras
 import vClickOutside from 'v-click-outside'
 import designUtils from '@/utils/designUtils'
 import { IDesign, IFolder, IPathedFolder, IMobileMessageItem } from '@/interfaces/design'
+import generalUtils from '@/utils/generalUtils'
 
 interface IMenuButton {
   icon: string,
@@ -107,7 +108,7 @@ export default Vue.extend({
       tabButtons: [
         {
           icon: 'all',
-          text: `${this.$t('NN0187')}`,
+          text: generalUtils.capitalizeFirstWord(`${this.$t('NN0080')}`),
           tab: 'a',
           condition: (currLocation: string) => {
             return currLocation === 'a'
@@ -222,7 +223,7 @@ export default Vue.extend({
     title(): string {
       switch (this.currLocation) {
         case 'a':
-          return `${this.$t('NN0187')}`
+          return generalUtils.capitalizeFirstWord(`${this.$t('NN0080')}`)
         case 'h':
           return `${this.$t('NN0188')}`
         case 't':
