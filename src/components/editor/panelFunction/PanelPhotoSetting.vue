@@ -70,9 +70,6 @@ export default Vue.extend({
           show: 'panel-photo-shadow',
           hint: this.$t('NN0500'),
           condition: (): boolean => {
-            if (!this.$store.getters['user/isAdmin']) {
-              return false
-            }
             const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
             if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
               return (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image
@@ -86,8 +83,12 @@ export default Vue.extend({
   },
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
-    eventUtils.on(PanelEvent.showPhotoShadow, () => {
-      this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
+    eventUtils.on(PanelEvent.showPhotoShadow, (val) => {
+      if (typeof val !== 'undefined') {
+        this.show = val
+      } else {
+        this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
+      }
     })
     this.$store.commit('SET_currFunctionPanelType', FunctionPanelType.photoSetting)
   },
@@ -184,8 +185,10 @@ export default Vue.extend({
       if (shadow) {
         const isCurrLayerHanlingShadow = [this.handleId.layerId, this.handleId.subLayerId].includes(currLayer.id)
         const isLayerNeedRedraw = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
-        if (btn.name === 'shadow' && this.isUploadImgShadow) {
-          return !isCurrLayerHanlingShadow || this.isUploadImgShadow
+        const isShadowPanelOpen = this.currFunctionPanelType === FunctionPanelType.photoShadow
+        if (btn.name === 'shadow') {
+          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
+          // return !isCurrLayerHanlingShadow || (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true
         }
@@ -214,18 +217,29 @@ export default Vue.extend({
             imageUtils.setImgControlDefault()
           } else {
             let index
-            const currLayer = layerUtils.getCurrConfig
+            const currLayer = layerUtils.getCurrLayer
             switch (currLayer.type) {
-              case 'image': {
+              case LayerType.group: {
+                const target = (currLayer as IGroup).layers.find(l => l.type === LayerType.image && l.active)
+                if (target && target.type === LayerType.image) {
+                  const { shadow } = (target as IImage).styles
+                  const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
+                  if (!(this.isHandleShadow && needRedrawShadow)) {
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                  }
+                }
+                break
+              }
+              case LayerType.image: {
                 const { shadow } = (currLayer as IImage).styles
                 const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
                 if (!(this.isHandleShadow && needRedrawShadow)) {
-                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
                 }
-              }
                 break
-              case 'frame':
-                index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+              }
+              case LayerType.frame:
+                index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === LayerType.image && l.active), 0)
                 if (index >= 0) {
                   frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
                 }
@@ -316,7 +330,7 @@ export default Vue.extend({
           this.show = ''
         }
       }
-      this.show = this.show.includes(name) ? '' : name
+      this.show = this.show.includes(name) || name === 'remove-bg' ? '' : name
     },
     handleOutside() {
       this.show = ''

@@ -10,9 +10,6 @@ import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
 import MobileEditor from '../views/MobileEditor.vue'
-import MobileTextEffect from '../views/MobileTextEffect.vue'
-import MobileImageAdjust from '../views/MobileImageAdjust.vue'
-import MobileTextTyping from '../views/MobileTextTyping.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import Pricing from '../views/Pricing.vue'
@@ -205,21 +202,6 @@ const routes: Array<RouteConfig> = [
         console.log(error)
       }
     }
-  },
-  {
-    path: 'mobile-text',
-    name: 'MobileTextEffect',
-    component: MobileTextEffect
-  },
-  {
-    path: 'mobile-image',
-    name: 'MobileImageAdjust',
-    component: MobileImageAdjust
-  },
-  {
-    path: 'mobile-typing',
-    name: 'MobileTextTyping',
-    component: MobileTextTyping
   },
   {
     path: 'pricing',

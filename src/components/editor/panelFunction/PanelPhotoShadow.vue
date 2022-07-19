@@ -104,7 +104,6 @@ export default Vue.extend({
   },
   mounted() {
     imageShadowPanelUtils.mount()
-    setTimeout(() => this.focusOnPanel())
   },
   beforeDestroy() {
     imageShadowPanelUtils.handleShadowUpload()
@@ -168,7 +167,7 @@ export default Vue.extend({
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
-      this.focusOnPanel()
+      // this.focusOnPanel()
     },
     handleEffectUpdate(event: Event): void {
       const { name, value } = event.target as HTMLInputElement
@@ -181,8 +180,8 @@ export default Vue.extend({
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
-    reset(effect: ShadowEffectType = ShadowEffectType.none, pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
-      imageShadowPanelUtils.reset(...arguments)
+    reset(effect?: ShadowEffectType) {
+      imageShadowPanelUtils.reset(effect || this.currentEffect)
     },
     setIsUploading(pageId: string, layerId: string, subLayerId: string, isUploading: boolean) {
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
@@ -190,10 +189,10 @@ export default Vue.extend({
         isUploading
       }, subLayerIdx)
     },
-    focusOnPanel() {
-      const panel = this.$refs.panel as HTMLElement
-      panel.focus()
-    },
+    // focusOnPanel() {
+    //   const panel = this.$refs.panel as HTMLElement
+    //   panel.focus()
+    // },
     setUploadingData(layerIdentifier: ILayerIdentifier, id: string) {
       const { pageId, layerId, subLayerId } = layerIdentifier
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId || '')

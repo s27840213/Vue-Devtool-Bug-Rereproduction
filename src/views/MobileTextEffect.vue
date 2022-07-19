@@ -348,7 +348,8 @@ export default Vue.extend({
         guidelines: {
           v: [],
           h: []
-        }
+        },
+        isAutoResizeNeeded: true
       }
     ])
   },

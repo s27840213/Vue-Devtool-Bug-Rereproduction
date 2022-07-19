@@ -126,7 +126,7 @@ export default Vue.extend({
         return
       }
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        eventUtils.emit(PanelEvent.showPhotoShadow)
+        eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
       if (this.isUploading) {
         e.preventDefault()
@@ -181,6 +181,9 @@ export default Vue.extend({
       })
     },
     addImage(photo: IAssetPhoto) {
+      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        eventUtils.emit(PanelEvent.showPhotoShadow, '')
+      }
       if (!this.online) {
         networkUtils.notifyNetworkError()
         return

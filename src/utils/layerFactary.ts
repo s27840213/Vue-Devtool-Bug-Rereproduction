@@ -15,7 +15,7 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 class LayerFactary {
   newImage(config: any): IImage {
-    const { width = 0, height = 0, initWidth = 0, initHeight = 0, zindex = 0, opacity = 0 } = config.styles
+    const { width = 0, height = 0, initWidth = 0, initHeight = 0, zindex = 0, opacity = 0, scale = 1 } = config.styles
     const basicConfig = {
       type: 'image',
       ...(config.previewSrc && { previewSrc: config.previewSrc }),
@@ -37,7 +37,8 @@ class LayerFactary {
       styles: {
         x: 0,
         y: 0,
-        scale: (!Number.isNaN(width / initWidth) && (width / initWidth)) ? (width / initWidth || 1) : 1,
+        scale,
+        // scale: (!Number.isNaN(width / initWidth) && (width / initWidth)) ? (width / initWidth || 1) : 1,
         scaleX: 1,
         scaleY: 1,
         rotate: 0,
@@ -79,7 +80,7 @@ class LayerFactary {
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 
-    basicConfig.styles.scale = basicConfig.styles.width / basicConfig.styles.initWidth
+    // basicConfig.styles.scale = basicConfig.styles.width / basicConfig.styles.initWidth
     const image = Object.assign(basicConfig, config)
     return image
   }

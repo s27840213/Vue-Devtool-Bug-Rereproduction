@@ -36,7 +36,8 @@ export default Vue.extend({
   },
   created () {
     this.computeDimensions(this.spans)
-    TextUtils.loadAllFonts(this.config, 1)
+    // TextUtils.loadAllFonts(this.config, 1)
+    TextUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true

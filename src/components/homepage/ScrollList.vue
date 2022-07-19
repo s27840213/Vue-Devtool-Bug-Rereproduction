@@ -52,7 +52,7 @@
               @click="clickTemplate(item)")
             img(loading="lazy"
               :src="`https://template.vivipic.com/template/${item.match_cover.id}/prev_2x?ver=${item.ver}`"
-              :style="templateImgStyle")
+              :style="templateImgStyle(item.match_cover)")
             pro-item(v-if="item.plan === 1")
 </template>
 
@@ -109,11 +109,6 @@ export default Vue.extend({
     }),
     listContentSytle(): Record<string, string> {
       return { width: this.type === 'theme' ? 'fit-content' : '80vw' }
-    },
-    templateImgStyle(): Record<string, string> {
-      return ['3', '7'].includes(this.theme)
-        ? { 'max-width': '160px' }
-        : { 'max-height': '160px' }
     }
   },
   created() {
@@ -175,14 +170,30 @@ export default Vue.extend({
       items.scrollLeft += items.offsetWidth / 2 * (next ? 1 : -1)
     },
     templateUrl(item: IAssetTemplate): string {
-      return this.theme === '7'
-        ? `editor?type=product-page-template&design_id=${item.group_id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
-        : `/editor?type=new-design-template&design_id=${item.match_cover.id}&width=${item.match_cover.width}&height=${item.match_cover.height}`
+      return this.$router.resolve({
+        name: 'Editor',
+        query: {
+          type: this.theme === '7' ? 'product-page-template' : 'new-design-template',
+          design_id: this.theme === '7' ? item.group_id : item.match_cover.id,
+          themeId: item.content_ids[0].themes.join(','),
+          width: String(item.match_cover.width),
+          height: String(item.match_cover.height)
+        }
+      }).href
     },
     clickTemplate(item: IAssetTemplate) {
       const template = templateCenterUtils.iAssetTemplate2Template(item, 4)
       if (!paymentUtils.checkProTemplate(template)) return
       window.open(this.templateUrl(item), '_blank')
+    },
+    templateImgStyle(match_cover: Record<string, number>): Record<string, string> {
+      const height = this.theme === '3' ? 284
+        : this.theme === '7' ? 320
+          : 160
+      return {
+        height: `${height}px`,
+        width: `${match_cover.width / match_cover.height * height}px`
+      }
     }
   }
 })
@@ -206,6 +217,7 @@ export default Vue.extend({
   &__righticon {
     position: absolute;
     cursor: pointer;
+    z-index: 1;
   }
   &__lefticon {
     left: -30px;
@@ -257,20 +269,11 @@ export default Vue.extend({
       height: 84px;
     }
   }
-}
-@media screen and (max-width: 1440px) and (min-width: 768.02px) {
-  .list-content-items__theme-item {
-    &-new {
-      width: 90px;
-      height: 90px;
-    }
-    &-preset {
-      width: 140px;
-      height: 120px;
-    }
+  .list-content__lefticon, .list-content__righticon {
+    display: none;
   }
 }
-@media screen and (min-width: 1440.02px) {
+@media screen and (min-width: 768.02px) {
   .list-content-items__theme-item {
     &-new {
       width: 90px;

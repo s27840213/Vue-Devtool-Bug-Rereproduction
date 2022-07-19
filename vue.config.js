@@ -14,6 +14,13 @@ function resolve (dir) {
 
 module.exports = {
     chainWebpack: (config) => {
+        // To prevent safari use cached app.js, https://github.com/vuejs/vue-cli/issues/1132#issuecomment-409916879
+        if (process.env.NODE_ENV === 'development') {
+            config
+                .output
+                .filename('[name].[hash].js')
+                .end()
+        }
         config.module
             .rule('mjs')
             .test(/\.mjs$/)
@@ -77,8 +84,8 @@ module.exports = {
         }
         if (process.env.BITBUCKET_BUILD_NUMBER) {
             config.plugin('define').tap(args => {
-                let name = 'process.env'
-                args[0][name]['VUE_APP_BUILD_NUMBER'] = process.env.BITBUCKET_BUILD_NUMBER || ''
+                const name = 'process.env'
+                args[0][name].VUE_APP_BUILD_NUMBER = process.env.BITBUCKET_BUILD_NUMBER || ''
                 return args
             })
         }

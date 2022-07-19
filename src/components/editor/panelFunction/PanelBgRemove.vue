@@ -60,7 +60,10 @@ import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
+import { IImage } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   data() {
@@ -114,6 +117,14 @@ export default Vue.extend({
     },
     save() {
       const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
+      const image = layerUtils.getLayer(pageIndex, index) as IImage
+      if (image.type === LayerType.image) {
+        if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+          const layerInfo = { pageIndex, layerIndex: index }
+          imageShadowUtils.setEffect(ShadowEffectType.none, {}, layerInfo)
+          imageShadowUtils.updateShadowSrc(layerInfo, { type: '', assetId: '', userId: '' })
+        }
+      }
       if (!this.modifiedFlag) {
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {

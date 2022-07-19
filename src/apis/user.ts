@@ -22,6 +22,7 @@ export default {
     method: 'POST',
     data: {
       token,
+      team_id: store.getters['user/getTeamId'],
       ...attrs
     }
   }),

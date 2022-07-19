@@ -258,7 +258,8 @@ export default Vue.extend({
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode) {
-        !this.isHandleShadow && GroupUtils.deselect()
+        // !this.isHandleShadow && GroupUtils.deselect()
+        GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
         pageUtils.findCentralPageIndexInfo()
@@ -284,6 +285,9 @@ export default Vue.extend({
     selecting(e: MouseEvent) {
       if (!this.isSelecting) {
         if (this.currSelectedInfo.layers.length === 1 && this.currSelectedInfo.layers[0].locked) {
+          // TODO
+          // GroupUtils.deselect()
+          // imageUtils.setImgControlDefault(false)
           if (!this.isHandleShadow) {
             GroupUtils.deselect()
           } else {
@@ -322,6 +326,9 @@ export default Vue.extend({
     },
     selectEnd() {
       if (this.isSelecting) {
+        // TODO
+        // GroupUtils.deselect()
+        // imageUtils.setImgControlDefault(false)
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
@@ -344,6 +351,12 @@ export default Vue.extend({
           } else {
             imageUtils.setImgControlDefault(false)
           }
+          // TODO
+          // if (!this.isHandleShadow) {
+          //   this.handleSelectionData(selectionArea.getBoundingClientRect())
+          // } else {
+          //   imageUtils.setImgControlDefault(false)
+          // }
         }
       })
     },

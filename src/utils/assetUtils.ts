@@ -150,6 +150,7 @@ class AssetUtils {
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
     json = await this.updateBackground(GeneralUtils.deepCopy(json))
+    pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
     pageUtils.updateSpecPage(targetPageIndex, newLayer)
     if (width && height) {
@@ -524,6 +525,7 @@ class AssetUtils {
           targetIndex = this.getPages.length
           replace = false
         }
+        pageUtils.setAutoResizeNeededForPages(jsonDataList, true)
         pageUtils.appendPagesTo(jsonDataList, targetIndex, replace)
         Vue.nextTick(() => {
           pageUtils.scrollIntoPage(targetIndex)
@@ -584,7 +586,6 @@ class AssetUtils {
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           editorUtils.setCloseMobilePanelFlag(true)
-
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)

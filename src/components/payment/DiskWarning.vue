@@ -146,7 +146,7 @@ export default Vue.extend({
       return { 'background-color': this.cur.bgcolor as string }
     },
     diskStyle(): Record<string, string> {
-      return { width: `${this._diskPercent * 100}%` }
+      return { width: `${Math.min(1, this._diskPercent) * 100}%` }
     }
   },
   methods: {

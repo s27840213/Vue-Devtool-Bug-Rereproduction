@@ -29,13 +29,13 @@ class PaymentData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `https://vivipic.com/templates?themes=${id.join(',')}`
+          url: `/templates?themes=${id.join(',')}`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `https://vivipic.com/templates?themes=${id}`
+          url: `/templates?themes=${id}`
         }
       }
     }
@@ -53,7 +53,13 @@ class PaymentData {
       us: [{
         label: i18n.t('NN0667'),
         content: [
-          ...[1, 8, 2, 3].map((id) => themeItem(id)), {
+          ...[1].map((id) => themeItem(id)),
+          {
+            label: 'Facebook Cover',
+            url: 'https://blog.vivipic.com/us/facebook-cover/'
+          },
+          ...[2, 3].map((id) => themeItem(id)),
+          {
             label: 'Youtube Thumbnail',
             url: 'https://blog.vivipic.com/us/youtube-thumbnail/'
           }]

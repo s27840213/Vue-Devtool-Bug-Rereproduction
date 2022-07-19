@@ -52,16 +52,17 @@ export default Vue.extend({
     return {
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
-      isLoading: true,
       initSize: {
         width: this.config.styles.width,
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
-      }
+      },
+      isLoading: true
     }
   },
   created() {
-    TextUtils.loadAllFonts(this.config, 1)
+    // TextUtils.loadAllFonts(this.config, 1)
+    TextUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true
@@ -69,6 +70,9 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
+    TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+      this.isLoading = false
+    })
     if (this.currSelectedInfo.layers >= 1) {
       TextPropUtils.updateTextPropsState()
     }
@@ -87,7 +91,7 @@ export default Vue.extend({
       // console.log('resize')
 
       let widthLimit
-      if (this.isLoading) {
+      if (this.isLoading && this.isAutoResizeNeeded) {
         widthLimit = TextUtils.autoResize(config, this.initSize)
       } else {
         widthLimit = config.widthLimit
@@ -139,6 +143,9 @@ export default Vue.extend({
     },
     spans(): ISpan[] {
       return textShapeUtils.flattenSpans(this.config)
+    },
+    isAutoResizeNeeded(): boolean {
+      return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
     }
   },
   watch: {

@@ -5,7 +5,7 @@
       :iconName="'download'"
       :iconWidth="'18px'"
       :type="'primary-sm'"
-      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow"
+      :disabled="inprogress || inBgRemoveMode || uploadingImgs.length !== 0 || isHandlingShadow || isFontLoading"
       class="btn-download rounded full-height full-width"
       @click.native="() => handleShowPopup(true)")
       span(v-if="!inprogress") {{$t('NN0010')}}
@@ -41,7 +41,8 @@ export default Vue.extend({
       uploadingImgs: 'file/getUploadingImgs',
       isUploadShadowImg: 'shadow/isUploading',
       isProcessShadowImg: 'shadow/isProcessing',
-      getCurrFunctionPanelType: 'getCurrFunctionPanelType'
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isFontLoading: 'text/getIsFontLoading'
     }),
     isHandlingShadow(): boolean {
       return this.isUploadShadowImg || this.isProcessShadowImg || this.getCurrFunctionPanelType === FunctionPanelType.photoShadow
@@ -59,7 +60,6 @@ export default Vue.extend({
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(this.$t('NN0323') as string, [], '')
       }
-      console.log(this.show)
     }
   }
 })

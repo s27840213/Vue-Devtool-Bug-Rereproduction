@@ -329,7 +329,8 @@ export default Vue.extend({
         guidelines: {
           v: [],
           h: []
-        }
+        },
+        isAutoResizeNeeded: true
       }
     ])
     groupUtils.select(0, [0])

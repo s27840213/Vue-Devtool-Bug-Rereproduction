@@ -65,9 +65,16 @@ class ThemeUtils {
   }
 
   setPageThemes(pageIndex?: number, themes?: Itheme[], newDesignType?: number) {
-    const pageSize = this.getFocusPageSize(pageIndex)
-    const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
-    this.setTemplateThemes(pageThemes)
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('themeId')) {
+      store.commit('templates/SET_STATE', {
+        theme: urlParams.get('themeId')
+      })
+    } else {
+      const pageSize = this.getFocusPageSize(pageIndex)
+      const pageThemes = (themes || this.getThemesBySize(pageSize.width, pageSize.height, newDesignType))
+      this.setTemplateThemes(pageThemes)
+    }
   }
 
   getThemesBySize(width: number, height: number, newDesignType?: number) {
