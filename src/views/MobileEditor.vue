@@ -91,7 +91,7 @@ export default Vue.extend({
       if (event.touches.length > 1 || nearHrEdge) {
         event.preventDefault()
       }
-    }, { passive: false })
+    }, { passive: true })
 
     let lastTouchEnd = 0
     document.addEventListener('touchend', (event) => {
@@ -106,8 +106,8 @@ export default Vue.extend({
       this.currActivePanel = 'photo-shadow'
     })
 
-    const vconsole = new Vconsole()
-    vconsole.setSwitchPosition(10, 80)
+    // const vconsole = new Vconsole()
+    // vconsole.setSwitchPosition(10, 80)
   },
   computed: {
     ...mapState({

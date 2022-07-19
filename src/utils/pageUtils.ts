@@ -266,6 +266,7 @@ class PageUtils {
   findCentralPageIndexInfo(preventFocus = false) {
     // for mobile version
     if (generalUtils.isTouchDevice()) {
+      store.commit('SET_middlemostPageIndex', this.currCardIndex)
       return this.currCardIndex
     }
 
