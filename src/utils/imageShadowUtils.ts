@@ -799,7 +799,7 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.imageMatched:
         (effect as IImageMatchedEffect) = {
-          distance: 40,
+          distance: 60,
           angle: 40,
           radius: 50,
           size: 100,
@@ -950,9 +950,9 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   imageMatched: {
-    distance: { max: 100, min: 0, weighting: 2.8 },
+    distance: { max: 100, min: 0, weighting: 3.5 },
     angle: { max: 180, min: -180, weighting: 1 },
-    size: { max: 120, min: 50, weighting: 0.01 },
+    size: { max: 110, min: 70, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
