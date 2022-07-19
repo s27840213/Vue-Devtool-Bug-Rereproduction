@@ -2,7 +2,7 @@
   section
     div(:class="[`nav-folder-${level}`, {'bg-blue-4': folder.isCurrLocation}]"
         :title="folder.name"
-        @click="handleSelection")
+        @click.stop="handleSelection")
       svg-icon(iconName="folder"
           :iconColor="isDisabled ? 'gray-4' : 'gray-2'"
           iconWidth="24px"
@@ -78,10 +78,17 @@ export default Vue.extend({
     },
     handleSelection() {
       if (this.isDisabled) return
-      this.setMoveToFolderSelectInfo(`f:${this.path.join('/')}`)
+      if (this.folder.isCurrLocation) {
+        this.setMoveToFolderSelectInfo('')
+      } else {
+        this.setMoveToFolderSelectInfo(`f:${this.path.join('/')}`)
+      }
     },
     toggleExpansion() {
       if (this.isDisabled) return
+      if (!this.folder.isExpanded) {
+        this.handleSelection()
+      }
       this.setCopiedExpand({ path: this.path, isExpanded: !this.folder.isExpanded })
     },
     checkExpand(folders: IFolder[]): IFolder[] {

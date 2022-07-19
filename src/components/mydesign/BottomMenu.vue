@@ -101,15 +101,16 @@
                         iconColor="gray-2")
               div(class="menu__item-text")
                 span {{ folderMenuItem.text }}
-        div(v-if="bottomMenu === 'move-folder'" class="move-folder")
+        div(v-if="bottomMenu === 'move-folder'" class="move-folder"
+            @click.stop.prevent="clearMoveToFolderSelectInfo")
           div(class="move-folder__folders"
-              @click.stop.prevent)
+              @click.stop.prevent="clearMoveToFolderSelectInfo")
             mobile-structure-folder(v-for="folder in realFolders"
                             :folder="folder"
                             :parents="[]"
                             :level="0")
           div(class="move-folder__hr"
-              @click.stop.prevent)
+              @click.stop.prevent="clearMoveToFolderSelectInfo")
           div(class="move-folder__footer")
             div(class="move-folder__new-folder"
                 @click.stop.prevent="handleCreateFolder")
@@ -301,7 +302,8 @@ export default Vue.extend({
       clearBuffers: 'UPDATE_clearBuffers',
       setBottomMenu: 'SET_bottomMenu',
       setPathBuffer: 'SET_mobilePathBuffer',
-      snapshotFolders: 'UPDATE_snapshotFolders'
+      snapshotFolders: 'UPDATE_snapshotFolders',
+      setMoveToFolderSelectInfo: 'SET_moveToFolderSelectInfo'
     }),
     checkSortSelected(payload: [string, boolean]): boolean {
       return this.sortByField === payload[0] && this.sortByDescending === payload[1]
@@ -459,6 +461,9 @@ export default Vue.extend({
         this.$emit('clear')
       }
       this.$emit('close')
+    },
+    clearMoveToFolderSelectInfo() {
+      this.setMoveToFolderSelectInfo('')
     }
   }
 })
