@@ -658,11 +658,11 @@ export default Vue.extend({
   padding-bottom: 16px;
   &__folders {
     @include no-scrollbar;
-    height: 184px;
+    height: 174px;
     overflow-y: auto;
   }
   &__hr {
-    margin: 0px auto 12px auto;
+    margin: 10px auto 12px auto;
     width: calc(100% - 32px);
     height: 1px;
     background: setColor(gray-4);
