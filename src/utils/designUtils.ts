@@ -570,7 +570,6 @@ class DesignUtils {
 
   addNewFolder(path: string[], fromFolderView = false, name: string | undefined = undefined, insertToCopied = false): string {
     const folder = this.newFolder(name ?? `${i18n.t('NN0249')}`, 'SYSTEM')
-    console.log(folder)
     store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder

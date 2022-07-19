@@ -412,7 +412,11 @@ export default Vue.extend({
     },
     handleCreateFolder() {
       this.$emit('push', this.bottomMenu)
-      this.setPathBuffer([designUtils.ROOT])
+      if (this.moveToFolderSelectInfo === '') {
+        this.setPathBuffer([designUtils.ROOT])
+      } else {
+        this.setPathBuffer([designUtils.ROOT, ...designUtils.makePath(this.moveToFolderSelectInfo)])
+      }
       this.setBottomMenu('new-folder')
     },
     handleNewFolder() {
@@ -422,7 +426,6 @@ export default Vue.extend({
         this.editableName = ''
         if (this.menuStack.length && this.menuStack[this.menuStack.length - 1] === 'move-folder') {
           const id = designUtils.addNewFolder(this.pathBuffer, false, folderName, true)
-          console.log(this.copiedFolders)
           const folder = designUtils.search(this.copiedFolders, [...this.pathBuffer, id].slice(1))
           if (folder) {
             designUtils.createFolder(this.pathBuffer, folder, folderName)
