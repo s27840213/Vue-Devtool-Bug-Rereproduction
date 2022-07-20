@@ -118,8 +118,8 @@ export default Vue.extend({
       const { config } = this
       const shadow = this.config.styles.shadow
       const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
-      const isHandleBgRemove = config.inProcess === 'bgRemove'
       const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
+      const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
     }
   },

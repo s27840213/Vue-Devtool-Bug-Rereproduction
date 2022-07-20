@@ -39,6 +39,7 @@ import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
 import { FunctionPanelType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -126,7 +127,7 @@ export default Vue.extend({
         return
       }
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
-        eventUtils.emit(PanelEvent.showPhotoShadow)
+        eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
       if (this.isUploading) {
         e.preventDefault()
@@ -171,6 +172,21 @@ export default Vue.extend({
           isPreview: this.isUploading,
           previewsrc: this.previewSrc
         })
+        // @Test
+        // if (!['pixels', 'unsplash'].includes(srcObj.type)) {
+        //   const img = new Image()
+        //   img.crossOrigin = 'anonymous'
+        //   const src = imageUtils.getSrc(srcObj, 'tiny')
+        //   img.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        //   const time1 = new Date()
+        //   img.onload = () => {
+        //     const time2 = new Date()
+        //     console.log(time2.getTime() - time1.getTime())
+        //     const isTransparent = imageShadowUtils.isTransparentBg(img)
+        //     console.log(isTransparent)
+        //     this.setCurrDraggedPhoto({ isTransparent })
+        //   }
+        // }
       }
     },
     dragEnd() {
@@ -181,6 +197,9 @@ export default Vue.extend({
       })
     },
     addImage(photo: IAssetPhoto) {
+      if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
+        eventUtils.emit(PanelEvent.showPhotoShadow, '')
+      }
       if (!this.online) {
         networkUtils.notifyNetworkError()
         return

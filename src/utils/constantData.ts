@@ -53,7 +53,13 @@ class PaymentData {
       us: [{
         label: i18n.t('NN0667'),
         content: [
-          ...[1, 8, 2, 3].map((id) => themeItem(id)), {
+          ...[1].map((id) => themeItem(id)),
+          {
+            label: 'Facebook Cover',
+            url: 'https://blog.vivipic.com/us/facebook-cover/'
+          },
+          ...[2, 3].map((id) => themeItem(id)),
+          {
             label: 'Youtube Thumbnail',
             url: 'https://blog.vivipic.com/us/youtube-thumbnail/'
           }]

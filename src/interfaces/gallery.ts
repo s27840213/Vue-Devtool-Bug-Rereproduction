@@ -32,5 +32,6 @@ export interface SrcObj {
   type: string,
   userId: string,
   assetId: string | number,
-  brandId?: string
+  brandId?: string,
+  updateQuery?: string
 }

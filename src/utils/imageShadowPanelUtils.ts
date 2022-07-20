@@ -1,5 +1,5 @@
 import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
-import { ColorEventType, FunctionPanelType, LayerProcessType, LayerType } from '@/store/types'
+import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
 import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange } from './imageShadowUtils'
 import layerUtils from './layerUtils'
@@ -88,24 +88,25 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
-  async handleShadowUpload(_layerData?: any) {
+  async handleShadowUpload(_layerData?: any, forceUpload = false) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = _layerData ?? imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
     console.log(layerData)
     if (layerData) {
-      imageShadowUtils.setUploadProcess(true)
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-      /** If the shadow effct has already got the img src, return */
+      imageShadowUtils.setUploadProcess(true)
+      imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
       if (config.type !== LayerType.image) {
+        /** If the shadow effct has already got the img src, return */
         return
       }
-      if (this.checkIfSameEffect(config) && config.styles.shadow.srcState) {
+      if (!forceUpload && (this.checkIfSameEffect(config) && config.styles.shadow.srcState)) {
         const { shadowSrcObj } = config.styles.shadow.srcState
         const layerInfo = {
           pageIndex: _pageIndex,
@@ -113,6 +114,7 @@ export default new class ImageShadowPanelUtils {
           subLayerIdx: _subLayerIdx
         }
         imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
+        imageShadowUtils.setUploadProcess(false)
         imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
         imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
         return
@@ -144,7 +146,7 @@ export default new class ImageShadowPanelUtils {
       const img = new Image()
       let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600) +
+      img.src = imageUtils.getSrc(config.srcObj, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600) +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve) => {
         img.onload = async () => {
@@ -186,8 +188,7 @@ export default new class ImageShadowPanelUtils {
       const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
-      // console.log(updateCanvas.width, updateCanvas.height)
-      // console.log(drawCanvasW, drawCanvasH)
+
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
@@ -359,7 +360,11 @@ export default new class ImageShadowPanelUtils {
     imageShadowUtils.setEffect(currentEffect, { color })
   }
 
-  reset(effect: ShadowEffectType = ShadowEffectType.none, pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
+  reset(effect: ShadowEffectType = ShadowEffectType.none, layerInfo?: ILayerInfo) {
+    let { pageIndex, layerIndex, subLayerIdx } = layerUtils
+    if (layerInfo) {
+      ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
+    }
     if (effect === ShadowEffectType.none) {
       if (subLayerIdx === -1) {
         effect = pageIndex !== -1 && layerIndex !== -1
@@ -376,7 +381,7 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setEffect(effect, {
         [effect]: defaultProps,
         color: '#000000'
-      }, pageIndex, layerIndex, subLayerIdx)
+      }, { pageIndex, layerIndex, subLayerIdx })
     }
   }
 

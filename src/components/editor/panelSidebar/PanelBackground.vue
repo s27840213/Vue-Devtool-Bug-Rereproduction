@@ -117,8 +117,7 @@ export default Vue.extend({
       return [{
         id: key,
         type: key,
-        // size: (this.$refs.colorBlock as HTMLElement).style.height
-        size: generalUtils.isTouchDevice() ? 180 : 150
+        size: generalUtils.isTouchDevice() ? window.innerWidth / 2 : 157
       }]
     },
     listCategories(): any[] {
@@ -296,6 +295,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   &__item {
     width: 145px;
     height: 145px;

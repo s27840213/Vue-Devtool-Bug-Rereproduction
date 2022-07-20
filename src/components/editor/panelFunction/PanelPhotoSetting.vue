@@ -70,9 +70,6 @@ export default Vue.extend({
           show: 'panel-photo-shadow',
           hint: this.$t('NN0500'),
           condition: (): boolean => {
-            if (!this.$store.getters['user/isAdmin']) {
-              return false
-            }
             const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
             if (currLayer.type === LayerType.group && subLayerIdx !== -1) {
               return (currLayer as IGroup).layers[subLayerIdx].type === LayerType.image
@@ -87,7 +84,6 @@ export default Vue.extend({
   mounted() {
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, (val) => {
-      console.warn(val)
       if (typeof val !== 'undefined') {
         this.show = val
       } else {
@@ -334,7 +330,7 @@ export default Vue.extend({
           this.show = ''
         }
       }
-      this.show = this.show.includes(name) ? '' : name
+      this.show = this.show.includes(name) || name === 'remove-bg' ? '' : name
     },
     handleOutside() {
       this.show = ''

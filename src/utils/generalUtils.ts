@@ -234,6 +234,7 @@ class GeneralUtils {
           case '47494638':
             type = 'gif'
             break
+          case '3c3f786d':
           case '3c737667':
             type = 'svg'
             break
