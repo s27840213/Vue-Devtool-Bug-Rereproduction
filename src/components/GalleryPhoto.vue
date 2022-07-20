@@ -7,7 +7,7 @@
       :checkedValues="checkedAssets"
       :disabled="isUploading"
       @update="handleCheck")
-    svg-icon(v-if="!inFilePanel && !inLogoPanel" class="pointer gallery-photo__more"
+    svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
       :iconName="'more_vertical'"
       :iconColor="'gray-2'"
@@ -109,6 +109,9 @@ export default Vue.extend({
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
       return imageUtils.getSrc(data, photo.width)
+    },
+    showMoreBtn(): boolean {
+      return !this.inFilePanel && !this.inLogoPanel && !generalUtils.isTouchDevice()
     }
   },
   methods: {

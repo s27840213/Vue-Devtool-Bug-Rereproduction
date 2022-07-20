@@ -6,7 +6,13 @@
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
       @final="handleChangeStop")
-    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" :showPanelBtn="false" @openColorPicker="openColorPicker" @openColorMore="openColorMore")
+    color-slips(v-if="showPalette"
+      :whiteTheme="true"
+      :noPadding="true"
+      :showPanelBtn="false"
+      :allRecentlyControl="showAllRecently"
+      @openColorPicker="openColorPicker"
+      @openColorMore="openColorMore")
     div(v-if="showDocumentColors" class="panel-color__document-colors")
       div(v-if="hasMultiColors"
         class="panel-color__document-color"
@@ -30,7 +36,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
-import ColorPanel from '@/components/editor/ColorSlips.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
 import { ColorEventType, LayerType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -57,7 +63,7 @@ export default Vue.extend({
   components: {
     MobileSlider,
     ColorPicker,
-    ColorPanel
+    ColorSlips
   },
   created() {
     colorUtils.setCurrEvent(this.currEvent)
@@ -111,6 +117,9 @@ export default Vue.extend({
     },
     showPalette(): boolean {
       return ['color-palette', 'color-more'].includes(this.lastHistory) || (this.inInitialState && !this.showDocumentColors)
+    },
+    showAllRecently(): boolean {
+      return this.lastHistory === 'color-more'
     },
     hasMultiColors(): boolean {
       return shapeUtils.hasMultiColors
@@ -278,7 +287,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-color {
   width: 100%;
-  max-height: 250px;
   overflow-y: scroll;
   box-sizing: border-box;
 

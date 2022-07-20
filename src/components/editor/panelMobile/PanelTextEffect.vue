@@ -215,9 +215,9 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-text-effect {
   width: 100%;
-  max-height: 40vh;
+  height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
   &__options {
     width: 100%;
@@ -226,7 +226,7 @@ export default Vue.extend({
     border-radius: 5px;
     overflow-x: scroll;
     @include no-scrollbar;
-    padding: 20px 0 20px 0;
+    padding-bottom: 20px;
   }
 
   &__option {

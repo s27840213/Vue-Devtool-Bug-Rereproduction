@@ -347,7 +347,6 @@ class PageUtils {
   }
 
   fitPage(scrollToTop = false) {
-    console.trace()
     if (editorUtils.mobileAllPageMode) {
       return
     }

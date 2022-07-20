@@ -12,11 +12,11 @@
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
         div(class="text-left mb-5")
           div(class="flex-center")
-            svg-icon(v-if="showAllRecently && !isTouchDevice" iconName="chevron-left"
+            svg-icon(v-if="showAllRecentlyColor && !isTouchDevice" iconName="chevron-left"
                   iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                   class="mr-5" @click.native="lessRecently()")
             span {{$t('NN0679')}}
-          span(v-if="!showAllRecently" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+          span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
         div
           div(class="color-panel__add-color pointer"
             @click="openColorPanel($event)")
@@ -24,7 +24,7 @@
             class="color-panel__color"
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
-      template(v-if="!showAllRecently")
+      template(v-if="!showAllRecentlyColor")
         //- Brandkit select
         div(class="relative")
           brand-selector(theme="panel")
@@ -106,6 +106,13 @@ export default Vue.extend({
     showPanelBtn: {
       type: Boolean,
       default: true
+    },
+    /**
+     * @param allRecentlyControl - is used when you want to switch the all recently panel from parent component
+     */
+    allRecentlyControl: {
+      type: Boolean,
+      required: false
     }
   },
   components: {
@@ -189,8 +196,11 @@ export default Vue.extend({
     currentPalettes(): IBrandColorPalette[] {
       return (this.currentBrand as IBrand).colorPalettes
     },
+    showAllRecentlyColor(): boolean {
+      return this.allRecentlyControl ?? this.showAllRecently
+    },
     recentlyColors(): string[] {
-      return this.showAllRecently
+      return this.showAllRecentlyColor
         ? this.allRecentlyColors
         : this.allRecentlyColors.slice(0, 20)
     },

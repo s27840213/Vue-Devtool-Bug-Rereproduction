@@ -6,18 +6,18 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          svg-icon(class="mb-5"
+          svg-icon(class="mb-5 click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
             :iconWidth="'24px'")
-          span(class="text-body-4 no-wrap"
+          span(class="text-body-4 no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
@@ -70,6 +70,7 @@ export default Vue.extend({
             currColorEvent: ColorEventType.text
           }
         },
+        { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
@@ -109,7 +110,7 @@ export default Vue.extend({
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust' }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', disabled: !this.showShapeAdjust }
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -226,6 +227,18 @@ export default Vue.extend({
         transform: `translate3d(0,${this.contentEditable ? 100 : 0}%,0)`,
         opacity: `${this.contentEditable ? 0 : 1}`
       }
+    },
+    currLayer(): ILayer {
+      return layerUtils.getCurrLayer
+    },
+    isLine(): boolean {
+      return this.currLayer.type === 'shape' && this.currLayer.category === 'D'
+    },
+    isBasicShape(): boolean {
+      return this.currLayer.type === 'shape' && this.currLayer.category === 'E'
+    },
+    showShapeAdjust(): boolean {
+      return this.isLine || this.isBasicShape
     }
   },
   watch: {

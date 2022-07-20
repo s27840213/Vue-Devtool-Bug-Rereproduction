@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="mobile-panel p-15"
-      :style="panelStyle")
+      :style="panelStyle"
+      v-click-outside="vcoConfig()")
     div(class="mobile-panel__top-section")
       div(class="mobile-panel__drag-bar"
         :class="{'visible-hidden': panelTitle !== ''}"
@@ -65,7 +66,7 @@ import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -74,6 +75,7 @@ import frameUtils from '@/utils/frameUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import { ColorEventType } from '@/store/types'
+import colorUtils from '@/utils/colorUtils'
 
 export default Vue.extend({
   props: {
@@ -146,14 +148,24 @@ export default Vue.extend({
     fixSize(): boolean {
       return this.showColorPanel || [
         'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
-        'order', 'font-size', 'font-format', 'text-effect',
-        'font-spacing', 'download', 'more', 'color', 'object-adjust'].includes(this.currActivePanel)
+        'order', 'font-size', 'font-format',
+        'font-spacing', 'download', 'more', 'object-adjust'].includes(this.currActivePanel)
+    },
+    extraFixSizeCondition(): boolean {
+      switch (this.currActivePanel) {
+        case 'color': {
+          return this.currColorEvent === ColorEventType.shape && this.panelHistory.length === 0
+        }
+        case 'text-effect': {
+          return this.panelHistory.length === 0
+        }
+        default: {
+          return false
+        }
+      }
     },
     halfSizeInInitState(): boolean {
-      return ['fonts'].includes(this.currActivePanel)
-    },
-    maxHalfSize(): boolean {
-      return ['adjust', 'photo-shadow'].includes(this.currActivePanel)
+      return ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -182,8 +194,8 @@ export default Vue.extend({
     },
     panelStyle(): { [index: string]: string } {
       const heightStyle = {
-        maxHeight: this.fixSize ? '80%' : this.maxHalfSize ? '50%' : '90%',
-        height: this.fixSize ? 'initial' : this.panelHeight + 'px'
+        maxHeight: '90%',
+        height: this.fixSize || this.extraFixSizeCondition ? 'initial' : this.panelHeight + 'px'
       }
       return {
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
@@ -314,6 +326,13 @@ export default Vue.extend({
 
           case 'resize': {
             (this.$refs.panelResize as any).applySelectedFormat()
+            break
+          }
+
+          case 'color': {
+            if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
+              this.addRecentlyColors(colorUtils.currColor)
+            }
           }
         }
         this.closeMobilePanel()
@@ -324,6 +343,24 @@ export default Vue.extend({
     this.panelHeight = this.initHeightPx()
   },
   methods: {
+    ...mapActions({
+      fetchPalettes: 'brandkit/fetchPalettes',
+      initRecentlyColors: 'color/initRecentlyColors',
+      addRecentlyColors: 'color/addRecentlyColors'
+    }),
+    vcoConfig() {
+      return {
+        handler: this.closeMobilePanel,
+        middleware: this.middleware,
+        events: ['dblclick', 'click', 'contextmenu', 'pointerdown', 'touchstart']
+        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
+      }
+    },
+    middleware(event: MouseEvent | TouchEvent | PointerEvent) {
+      console.log((event.target as HTMLElement).className)
+      console.log((event.target as HTMLElement).className.includes('footer-tabs'))
+      return !(event.target as HTMLElement).className.includes('footer-tabs')
+    },
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
       this.panelHistory = []
