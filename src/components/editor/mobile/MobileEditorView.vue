@@ -374,11 +374,15 @@ export default Vue.extend({
     swipeUpHandler(e: AnyTouchEvent) {
       e.stopImmediatePropagation()
       if (this.pageNum - 1 !== this.currCardIndex) {
-        pageUtils.fitPage()
         pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         this.setCurrCardIndex(this.currCardIndex + 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            pageUtils.fitPage()
+          }, 300)
+        })
       } else {
         this.addPage(pageUtils.newPage({}))
         pageUtils.fitPage()
@@ -389,11 +393,15 @@ export default Vue.extend({
     swipeDownHandler(e: AnyTouchEvent) {
       e.stopImmediatePropagation()
       if (this.currCardIndex !== 0) {
-        pageUtils.fitPage()
         pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         this.setCurrCardIndex(this.currCardIndex - 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            pageUtils.fitPage()
+          }, 100)
+        })
       }
     },
     cardStyle(index: number): { [index: string]: string | number } {
