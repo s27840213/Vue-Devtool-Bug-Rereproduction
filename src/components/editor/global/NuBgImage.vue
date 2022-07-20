@@ -43,6 +43,7 @@ export default Vue.extend({
     srcObj: {
       deep: true,
       handler: function () {
+        console.log('srcObj watch', this.isColorBackground)
         if (this.isColorBackground) {
           this.src = ''
         } else {
@@ -56,6 +57,7 @@ export default Vue.extend({
     if (!srcObj || !srcObj.type) return
 
     const { assetId } = this.image.config.srcObj
+    console.log('1', srcObj.type === 'private')
     if (srcObj.type === 'private') {
       const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
@@ -64,6 +66,7 @@ export default Vue.extend({
       }
     }
 
+    console.log('2', this.userId !== 'backendRendering')
     if (this.userId !== 'backendRendering') {
       this.perviewAsLoading()
       const nextImg = new Image()
@@ -185,6 +188,7 @@ export default Vue.extend({
     async perviewAsLoading() {
       return new Promise<void>((resolve, reject) => {
         const config = this.image.config as IImage
+        console.log('preview 1', config.previewSrc, config.srcObj.type === 'background')
         if (config.previewSrc) {
           this.src = config.previewSrc
         } else if (config.srcObj.type === 'background') {
@@ -192,8 +196,10 @@ export default Vue.extend({
         }
         const img = new Image()
         const src = ImageUtils.getSrc(this.image.config)
+        console.log('p2', src)
         img.onload = () => {
           /** If after onload the img, the config.srcObj is the same, set the src. */
+          console.log('onload', ImageUtils.getSrc(this.image.config), src, ImageUtils.getSrc(this.image.config) === src)
           if (ImageUtils.getSrc(this.image.config) === src) {
             this.src = src
           }
@@ -202,7 +208,9 @@ export default Vue.extend({
         img.onerror = () => {
           reject(new Error('cannot load the current image'))
         }
+        console.log('img.src = src', img.src, src)
         img.src = src
+        console.log('img.src = src(after)', img.src, src)
       })
     },
     stylesConverter(): { [key: string]: string } {
