@@ -52,6 +52,7 @@ export interface IEditorState {
       width: number,
       height: number
     },
+    isTransparent?: boolean,
     isPreview: boolean,
     previewSrc?: string
   },

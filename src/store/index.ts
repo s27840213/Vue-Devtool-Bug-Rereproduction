@@ -80,6 +80,7 @@ const getDefaultState = (): IEditorState => ({
       width: 0,
       height: 0
     },
+    isTransparent: false,
     isPreview: false
   },
   currSubSelectedInfo: {
@@ -426,17 +427,28 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string }) {
-    state.currDraggedPhoto.srcObj = {
-      ...state.currDraggedPhoto.srcObj,
-      ...photo.srcObj
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string, isTransparent: boolean }) {
+    if (photo.srcObj) {
+      state.currDraggedPhoto.srcObj = {
+        ...state.currDraggedPhoto.srcObj,
+        ...photo.srcObj
+      }
     }
-    state.currDraggedPhoto.styles = {
-      ...state.currDraggedPhoto.styles,
-      ...photo.styles
+    if (photo.styles) {
+      state.currDraggedPhoto.styles = {
+        ...state.currDraggedPhoto.styles,
+        ...photo.styles
+      }
     }
-    state.currDraggedPhoto.isPreview = photo.isPreview
-    state.currDraggedPhoto.previewSrc = photo.previewSrc
+    if (typeof photo.isPreview !== 'undefined') {
+      state.currDraggedPhoto.isPreview = photo.isPreview
+    }
+    if (photo.previewSrc) {
+      state.currDraggedPhoto.previewSrc = photo.previewSrc
+    }
+    if (typeof photo.isTransparent !== 'undefined') {
+      state.currDraggedPhoto.isTransparent = photo.isTransparent
+    }
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
     state.hasCopiedFormat = value

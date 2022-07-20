@@ -42,7 +42,7 @@ class ImageUtils {
 
   getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
-    let { type, userId, assetId, brandId, updateQuery = false } = {} as SrcObj
+    let { type, userId, assetId, brandId, updateQuery } = {} as SrcObj
     let ratio = 1
     if (this.isSrcObj(config)) {
       ({ type, userId, assetId, brandId } = config)
@@ -51,7 +51,7 @@ class ImageUtils {
       if (config.previewSrc) {
         return config.previewSrc
       }
-      ({ type, userId, assetId, brandId } = config.srcObj || config.src_obj as SrcObj)
+      ({ type, userId, assetId, brandId, updateQuery } = config.srcObj || config.src_obj as SrcObj)
       if (typeof size === 'undefined' && config.styles) {
         const { imgWidth, imgHeight } = config.styles
         const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
@@ -60,32 +60,13 @@ class ImageUtils {
           config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
         )
       }
-      if (config.srcObj?.updateQuery) {
-        /**
-         * If the srcObj contian updateQuery flag, means this src should return a new query to prevent cache
-         * and the updateQuery flag should be removed
-         */
-        updateQuery = true
-        const pageIndex = pageUtils.getPages.findIndex(p => p.layers.some(l => l.id === config.id))
-        if (pageIndex !== -1) {
-          const layerIndex = pageUtils.getPage(pageIndex).layers.findIndex(l => l.id === config.id)
-          if (layerIndex !== -1) {
-            LayerUtils.updateLayerProps(pageIndex, layerIndex, {
-              srcObj: {
-                ...config.srcObj,
-                updateQuery: false
-              }
-            })
-          }
-        }
-      }
       ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     }
 
     switch (type) {
       case 'public': {
         const query = forBgRemove ? `?${FORCE_UPDATE_VER.substring(1)}` : `?origin=true${FORCE_UPDATE_VER}`
-        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery ? generalUtils.generateRandomString(4) : '')}`
+        return `https://template.vivipic.com/admin/${userId}/asset/image/${assetId}/${size || 'midd'}${query + (updateQuery || '')}`
       }
       case 'private': {
         const editorImg = store.getters['file/getEditorViewImages']
