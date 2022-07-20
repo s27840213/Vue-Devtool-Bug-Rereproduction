@@ -58,6 +58,7 @@ class ImageUtils {
           type,
           config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
         )
+        console.log('size', size)
       }
       ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
     }
