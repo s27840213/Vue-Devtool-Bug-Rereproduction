@@ -381,6 +381,7 @@ export default Vue.extend({
         this.$nextTick(() => {
           setTimeout(() => {
             pageUtils.fitPage()
+            pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
           }, 300)
         })
       } else {
@@ -400,6 +401,7 @@ export default Vue.extend({
         this.$nextTick(() => {
           setTimeout(() => {
             pageUtils.fitPage()
+            pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
           }, 100)
         })
       }
