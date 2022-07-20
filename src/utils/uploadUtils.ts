@@ -284,6 +284,7 @@ class UploadUtils {
     }
 
     const isFile = typeof files[0] !== 'string'
+    console.log(`isFile: ${isFile}`)
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
@@ -313,11 +314,15 @@ class UploadUtils {
       }
 
       const assetHandler = (src: string, imgType?: string) => {
+        console.log('asset handler')
+        console.log(`src: ${src}`)
+        console.log(`Image Type: ${imgType}`)
         if (type === 'image') {
           const img = new Image()
           img.src = src
           const isUnknown = imgType === 'unknown'
           const imgCallBack = (src: string) => {
+            console.log('in img callback')
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
@@ -334,6 +339,7 @@ class UploadUtils {
             xhr.open('POST', this.loginOutput.upload_map.url, true)
             let increaseInterval = undefined as any
             if (!isShadow) {
+              console.log('add preview')
               store.commit('file/ADD_PREVIEW', {
                 width: isUnknown ? 250 : img.width,
                 height: isUnknown ? 250 : img.height,
@@ -361,6 +367,7 @@ class UploadUtils {
             xhr.send(formData)
             xhr.onerror = networkUtils.notifyNetworkError
             xhr.onload = () => {
+              console.log('xhr onload callback')
               // polling the JSON file of uploaded image
               const interval = setInterval(() => {
                 const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
@@ -397,11 +404,13 @@ class UploadUtils {
             }
           }
           if (!isUnknown) {
-            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
-            // img.onload = (evt) => {
-            //   imgCallBack(img.src)
-            // }
+            console.log('notUnknown!')
+            img.onload = (evt) => {
+              console.log('handler onload callback')
+              imgCallBack(img.src)
+            }
           } else {
+            console.log('handle unknow callback')
             imgCallBack(require('@/assets/img/svg/image-preview.svg'))
           }
         } else if (type === 'font') {
