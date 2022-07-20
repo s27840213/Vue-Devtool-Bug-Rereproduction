@@ -218,10 +218,10 @@ export default Vue.extend({
   padding: 72px 32px;
   background-color: setColor(blue-1);
   &__off {
-      position: absolute;
-      top: -20px;
-      right: -70px;
-    }
+    position: absolute;
+    top: -20px;
+    right: -70px;
+  }
   &-price {
     @include body-MD;
     position: relative;
@@ -239,6 +239,7 @@ export default Vue.extend({
   }
   &-buy.btn {
     width: 80%;
+    max-width: 294px;
     border-radius: 8px;
   }
 }
