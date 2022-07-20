@@ -249,8 +249,8 @@ class DesignUtils {
     ]
   }
 
-  makeMobileNormalMenuItems(isInFavorites: boolean): { icon: string, text: string }[] {
-    return [
+  makeMobileNormalMenuItems(isInFavorites: boolean, isInFolderView: boolean): { icon: string, text: string }[] {
+    const res = [
       {
         icon: 'copy',
         text: `${i18n.t('NN0251')}`
@@ -272,6 +272,13 @@ class DesignUtils {
         text: `${i18n.t('NN0034')}`
       }
     ]
+    if (isInFolderView) {
+      res.splice(2, 0, {
+        icon: 'folder_minus',
+        text: `${i18n.t('NN0692')}`
+      })
+    }
+    return res
   }
 
   makeMobileFavoriteMenuItems(): { icon: string, text: string }[] {
@@ -308,8 +315,8 @@ class DesignUtils {
     ]
   }
 
-  makeMobileNormalFolderMenuItems(): { icon: string, text: string }[] {
-    return [
+  makeMobileNormalFolderMenuItems(isInFolderView: boolean): { icon: string, text: string }[] {
+    const res = [
       {
         icon: 'folder',
         text: `${i18n.t('NN0206')}`
@@ -319,6 +326,13 @@ class DesignUtils {
         text: `${i18n.t('NN0034')}`
       }
     ]
+    if (isInFolderView) {
+      res.splice(1, 0, {
+        icon: 'folder_minus',
+        text: `${i18n.t('NN0692')}`
+      })
+    }
+    return res
   }
 
   makeMobileTrashFolderMenuItems(): { icon: string, text: string }[] {
@@ -498,6 +512,14 @@ class DesignUtils {
         eventEmitter()
         break
       }
+      case 'folder_minus': {
+        this.move(design, [this.ROOT])
+        eventEmitter({
+          event: 'rootDesign',
+          payload: undefined
+        })
+        break
+      }
     }
   }
 
@@ -561,6 +583,14 @@ class DesignUtils {
       case 'confirm-circle': {
         store.commit('design/UPDATE_addFolderToSelection', pathedFolder.folder)
         eventEmitter()
+        break
+      }
+      case 'folder_minus': {
+        this.moveFolder(pathedFolder, [this.ROOT])
+        eventEmitter({
+          event: 'rootFolder',
+          payload: undefined
+        })
         break
       }
       default:

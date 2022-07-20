@@ -364,6 +364,12 @@ export default Vue.extend({
               break
           }
           break
+        case 'rootDesign':
+          this.pushItem('root-design')
+          break
+        case 'rootFolder':
+          this.pushItem('root-folder')
+          break
         case 'deleteForever':
           this.designBuffer = payload
           this.confirmMessage = 'delete-forever'
@@ -431,6 +437,10 @@ export default Vue.extend({
           return `${this.$t('NN0682', { item: this.$tc('NN0252', 2), dest: this.$tc('NN0253').toLowerCase() })}`
         case 'move-folder':
           return `${this.$t('NN0682', { item: this.$tc('NN0253'), dest: this.$tc('NN0253').toLowerCase() })}`
+        case 'root-design':
+          return `${this.$t('NN0682', { item: this.$tc('NN0252'), dest: `${this.$t('NN0080')}`.toLowerCase() })}`
+        case 'root-folder':
+          return `${this.$t('NN0682', { item: this.$tc('NN0253'), dest: `${this.$t('NN0080')}`.toLowerCase() })}`
         case 'delete':
           return `${this.$t('NN0685')}`
         case 'favor-design':

@@ -218,24 +218,24 @@ export default Vue.extend({
     designMenuItems(): any[] {
       switch (this.currLocation) {
         case 'a':
-          return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite)
+          return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite, false)
         case 'h':
           return designUtils.makeMobileFavoriteMenuItems()
         case 't':
           return designUtils.makeMobileTrashMenuItems()
         default:
-          return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite)
+          return designUtils.makeMobileNormalMenuItems(this.designBuffer.favorite, true)
       }
     },
     folderMenuItems(): any[] {
       switch (this.currLocation) {
         case 'l':
-          return designUtils.makeMobileNormalFolderMenuItems()
+          return designUtils.makeMobileNormalFolderMenuItems(false)
         case 't':
           return designUtils.makeMobileTrashFolderMenuItems()
         default:
           if (this.currLocation.startsWith('f')) {
-            return designUtils.makeMobileNormalFolderMenuItems()
+            return designUtils.makeMobileNormalFolderMenuItems(true)
           } else {
             return []
           }
