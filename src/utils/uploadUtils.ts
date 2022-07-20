@@ -397,9 +397,10 @@ class UploadUtils {
             }
           }
           if (!isUnknown) {
-            img.onload = (evt) => {
-              imgCallBack(img.src)
-            }
+            imgCallBack(require('@/assets/img/svg/image-preview.svg'))
+            // img.onload = (evt) => {
+            //   imgCallBack(img.src)
+            // }
           } else {
             imgCallBack(require('@/assets/img/svg/image-preview.svg'))
           }
@@ -508,7 +509,6 @@ class UploadUtils {
           reader.readAsDataURL(files[i] as File)
         })
       } else {
-        console.log('not file')
         assetHandler(files[i] as string)
       }
     }
