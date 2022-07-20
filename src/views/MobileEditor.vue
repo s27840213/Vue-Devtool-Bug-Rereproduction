@@ -83,6 +83,8 @@ export default Vue.extend({
      * check the blog below to see some method to prevent this error
      * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
      */
+
+    stepsUtils.MAX_STORAGE_COUNT = 15
     document.addEventListener('touchstart', (event: TouchEvent) => {
       /**
        * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
@@ -92,7 +94,7 @@ export default Vue.extend({
       if (event.touches.length > 1 || nearHrEdge) {
         event.preventDefault()
       }
-    }, { passive: true })
+    }, { passive: false })
 
     let lastTouchEnd = 0
     document.addEventListener('touchend', (event) => {

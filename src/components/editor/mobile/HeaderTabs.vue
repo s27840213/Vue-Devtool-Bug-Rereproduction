@@ -179,6 +179,10 @@ export default Vue.extend({
           this.$emit('switchTab', icon)
           break
         }
+        case 'copy': {
+          shotcutUtils.duplicate()
+          break
+        }
         default: {
           mappingUtils.mappingIconAction(icon)
           break

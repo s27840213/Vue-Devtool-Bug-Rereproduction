@@ -73,6 +73,7 @@ export default Vue.extend({
   },
   mounted() {
     this.coordinate = this.$refs.coordinate as HTMLElement
+    screen.orientation.lock('portrait')
   },
   beforeDestroy() {
     networkUtils.unregisterNetworkListener()
