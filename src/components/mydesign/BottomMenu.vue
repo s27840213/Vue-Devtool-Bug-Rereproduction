@@ -26,9 +26,11 @@
                   class="new-folder__input"
                   :placeholder="$t('NN0691')"
                   v-model="editableName"
-                  @change="handleNewFolder")
+                  @change="handleNewFolder"
+                  @keyup="checkNameLength")
             div(v-if="editableName.length" class="new-folder__icon" @click.stop="handleClearNewFolderName")
               svg-icon(iconName="close" iconColor="gray-3" iconWidth="24px")
+          div(v-if="isShowHint" class="menu__hint in-new-folder") {{ $t('NN0226') }}
           div(class="new-folder__confirm"
               :class="{disabled: !editableName.length}"
               @click.stop="handleNewFolder") {{ $t('NN0190') }}
@@ -58,8 +60,8 @@
               div(class="menu__editable-name__icon"
                   @click.stop="handleIconNameClick")
                 svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
-            div(class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
-            div(v-if="isNameEditing" style="width: 100%; height: 16px;")
+            div(v-if="!isNameEditing" class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
+            div(v-if="isNameEditing" style="width: 100%; height: 8px;")
             div(v-else class="menu__hr")
           div(v-else style="margin-top: 20px;")
           template(v-if="!isNameEditing")
@@ -86,9 +88,11 @@
               div(class="menu__editable-name__icon"
                   @click.stop="handleIconNameClick")
                 svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
-            div(v-if="itemCount >= 0" class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: itemCount }) }}
-            div(v-else class="menu__description" @click.stop.prevent) ...
-            div(v-if="isNameEditing" style="width: 100%; height: 16px;")
+            template(v-if="!isNameEditing")
+              div(v-if="itemCount >= 0" class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: itemCount }) }}
+              div(v-else class="menu__description" @click.stop.prevent) ...
+            div(v-if="isNameEditing && isShowHint" class="menu__hint in-folder-menu") {{ $t('NN0226') }}
+            div(v-if="isNameEditing" style="width: 100%; height: 8px;")
             div(v-else class="menu__hr")
           div(v-else style="margin-top: 20px;")
           template(v-if="!isNameEditing")
@@ -168,7 +172,9 @@ export default Vue.extend({
         }
       ],
       isNameEditing: false,
-      editableName: ''
+      editableName: '',
+      messageTimer: -1,
+      isShowHint: false
     }
   },
   directives: {
@@ -337,6 +343,7 @@ export default Vue.extend({
     },
     handlePrevMenu() {
       this.$emit('back')
+      this.handleClearNewFolderName()
     },
     handleCloseMenu() {
       if (this.isNameEditing) {
@@ -375,7 +382,9 @@ export default Vue.extend({
       const originalName = this.isDesignMenu ? this.designBuffer.name : this.folderBuffer.folder.name
       if (e.key === 'Enter' && this.editableName === originalName) {
         this.handleNameEditEnd()
+        return
       }
+      this.checkNameLength()
     },
     handleIconNameClick() {
       if (this.isNameEditing) {
@@ -403,6 +412,7 @@ export default Vue.extend({
         designUtils.setDesignName(this.designBuffer, this.editableName)
       } else {
         if (this.editableName === '' || this.editableName === this.folderBuffer.folder.name) return
+        this.checkNameLength()
         designUtils.setFolderName(this.folderBuffer.folder, this.editableName, this.folderBuffer.parents as string[])
       }
       this.editableName = ''
@@ -410,14 +420,14 @@ export default Vue.extend({
     checkNameLength() {
       if (this.editableName.length > 64) {
         this.editableName = this.editableName.substring(0, 64)
-        // if (this.messageTimer) {
-        //   clearTimeout(this.messageTimer)
-        // }
-        // this.isShowHint = true
-        // this.messageTimer = setTimeout(() => {
-        //   this.isShowHint = false
-        //   this.messageTimer = -1
-        // }, 3000)
+        if (this.messageTimer) {
+          clearTimeout(this.messageTimer)
+        }
+        this.isShowHint = true
+        this.messageTimer = setTimeout(() => {
+          this.isShowHint = false
+          this.messageTimer = -1
+        }, 3000)
       }
     },
     handleCreateFolder() {
@@ -612,6 +622,20 @@ export default Vue.extend({
       }
     }
   }
+  &__hint {
+    text-align: left;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 140%;
+    color: setColor(red);
+    &.in-folder-menu {
+      margin-top: 10px;
+      margin-left: 22.5px;
+    }
+    &.in-new-folder {
+      padding: 0 8px;
+    }
+  }
 }
 
 .sort-menu {
@@ -627,7 +651,6 @@ export default Vue.extend({
   padding-top: 56px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
   &__name-editor {
     display: flex;
     align-items: center;
@@ -637,6 +660,7 @@ export default Vue.extend({
     border: 1px solid #D9DBE1;
     border-radius: 3px;
     box-sizing: border-box;
+    margin-bottom: 8px;
   }
   &__input {
     padding: 0;
@@ -665,6 +689,7 @@ export default Vue.extend({
     font-size: 14px;
     line-height: 180%;
     color: white;
+    margin-top: 8px;
     &.disabled {
       background: setColor(gray-5);
       color: setColor(gray-3);
