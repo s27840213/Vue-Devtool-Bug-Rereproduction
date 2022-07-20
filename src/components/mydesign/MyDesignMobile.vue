@@ -330,7 +330,17 @@ export default Vue.extend({
       const { event, payload } = extraEvent
       switch (event) {
         case 'moveItem':
-          this.pushItem('move-design')
+          switch (payload) {
+            case 'design':
+              this.pushItem('move-design')
+              break
+            case 'folder':
+              this.pushItem('move-folder')
+              break
+            case 'multi':
+              this.pushItem('move-designs')
+              break
+          }
           break
         case 'deleteItem':
           this.pushItem('delete')
@@ -342,11 +352,16 @@ export default Vue.extend({
           this.pushItem('unfavor-design')
           break
         case 'recoverItem':
-          if (payload.type === 'design') {
-            this.pushItem('undo-design')
-          }
-          if (payload.type === 'folder') {
-            this.pushItem('undo-folder')
+          switch (payload.type) {
+            case 'design':
+              this.pushItem('undo-design')
+              break
+            case 'folder':
+              this.pushItem('undo-folder')
+              break
+            case 'multi':
+              this.pushItem('undo-multi')
+              break
           }
           break
         case 'deleteForever':
@@ -389,6 +404,10 @@ export default Vue.extend({
     messageItemIcon(item: IMobileMessageItem): string {
       switch (item.type) {
         case 'move-design':
+        case 'move-designs':
+        case 'move-folder':
+        case 'root-design':
+        case 'root-folder':
           return 'folder'
         case 'delete':
           return 'trash'
@@ -398,6 +417,7 @@ export default Vue.extend({
           return 'favorites'
         case 'undo-design':
         case 'undo-folder':
+        case 'undo-multi':
           return 'undo'
         default:
           return ''
@@ -406,7 +426,11 @@ export default Vue.extend({
     messageItemText(item: IMobileMessageItem): string {
       switch (item.type) {
         case 'move-design':
-          return `${this.$t('NN0682')}`
+          return `${this.$t('NN0682', { item: this.$tc('NN0252'), dest: this.$tc('NN0253').toLowerCase() })}`
+        case 'move-designs':
+          return `${this.$t('NN0682', { item: this.$tc('NN0252', 2), dest: this.$tc('NN0253').toLowerCase() })}`
+        case 'move-folder':
+          return `${this.$t('NN0682', { item: this.$tc('NN0253'), dest: this.$tc('NN0253').toLowerCase() })}`
         case 'delete':
           return `${this.$t('NN0685')}`
         case 'favor-design':
@@ -414,9 +438,11 @@ export default Vue.extend({
         case 'unfavor-design':
           return `${this.$t('NN0684')}`
         case 'undo-design':
-          return `${this.$t('NN0686')}`
+          return `${this.$t('NN0686', { item: this.$tc('NN0252') })}`
         case 'undo-folder':
-          return `${this.$t('NN0687')}`
+          return `${this.$t('NN0686', { item: this.$tc('NN0253') })}`
+        case 'undo-multi':
+          return `${this.$t('NN0686', { item: this.$tc('NN0687', 2) })}`
         default:
           return ''
       }

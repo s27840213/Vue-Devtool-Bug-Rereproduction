@@ -135,7 +135,7 @@ import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import MobileStructureFolder from '@/components/mydesign/MobileStructureFolder.vue'
-import { IFolder } from '@/interfaces/design'
+import { IDesign, IFolder } from '@/interfaces/design'
 
 const PREV_BUTTON_MENUS = ['new-folder', 'move-folder']
 
@@ -271,8 +271,17 @@ export default Vue.extend({
         res.push({
           icon: 'undo',
           action: () => {
-            designUtils.recoverAll(Object.values(this.selectedDesigns), Object.values(this.selectedFolders))
-            this.$emit('menuAction', { event: 'recoverItem', payload: { type: 'design' } })
+            const selectedDesigns = Object.values(this.selectedDesigns) as IDesign[]
+            const selectedFolders = Object.values(this.selectedFolders) as IFolder[]
+            const designCount = selectedDesigns.length
+            const folderCount = selectedFolders.length
+            designUtils.recoverAll(selectedDesigns, selectedFolders)
+            this.$emit('menuAction', {
+              event: 'recoverItem',
+              payload: {
+                type: (designCount + folderCount > 1) ? 'multi' : (designCount > 0 ? 'design' : 'folder')
+              }
+            })
           }
         })
       }
@@ -470,17 +479,21 @@ export default Vue.extend({
       if (this.designBuffer) {
         designUtils.move(this.designBuffer, destination)
         this.$emit('menuAction', {
-          event: 'moveItem'
+          event: 'moveItem',
+          payload: 'design'
         })
       } else if (this.folderBuffer) {
         designUtils.moveFolder(this.folderBuffer, destination)
         this.$emit('menuAction', {
-          event: 'moveItem'
+          event: 'moveItem',
+          payload: 'folder'
         })
       } else {
-        designUtils.moveAll(Object.values(this.selectedDesigns), destination)
+        const selectedDesigns = Object.values(this.selectedDesigns) as IDesign[]
+        designUtils.moveAll(selectedDesigns, destination)
         this.$emit('menuAction', {
-          event: 'moveItem'
+          event: 'moveItem',
+          payload: selectedDesigns.length > 1 ? 'multi' : 'design'
         })
         this.$emit('clear')
       }

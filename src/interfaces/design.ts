@@ -37,5 +37,9 @@ export interface IQueueItem {
 }
 
 export interface IMobileMessageItem {
-  type: 'move-design' | 'favor-design' | 'unfavor-design' | 'delete' | 'undo-design' | 'undo-folder' | 'copy-link' | 'copy-design'
+  type: 'move-design' | 'move-designs' | 'move-folder' |
+    'favor-design' | 'unfavor-design' | 'delete' |
+    'undo-design' | 'undo-folder' | 'undo-multi' |
+    'root-design' | 'root-folder' |
+    'copy-link' | 'copy-design'
 }
