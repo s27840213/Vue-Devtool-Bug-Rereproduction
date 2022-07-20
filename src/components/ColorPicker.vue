@@ -64,7 +64,7 @@ export default Vue.extend({
   mounted() {
     const root = this.$refs.colorPicker as HTMLElement
     const input = this.$refs.input as HTMLInputElement
-    if (!generalUtils.isTouchDevice) {
+    if (!generalUtils.isTouchDevice()) {
       root.focus()
       input.select()
     }
@@ -78,6 +78,9 @@ export default Vue.extend({
       const formatedColor = this.convertHex(this.color)
       this.$emit('update', formatedColor)
       return formatedColor
+    },
+    isTouchDevice() {
+      return generalUtils.isTouchDevice()
     }
   },
   watch: {
@@ -159,9 +162,6 @@ export default Vue.extend({
       this.finalizeTimer = setTimeout(() => {
         this.$emit('final', formatedColor)
       }, 500)
-    },
-    isTouchDevice() {
-      return generalUtils.isTouchDevice()
     }
   }
 })
