@@ -110,8 +110,8 @@ export default Vue.extend({
     })
 
     if (process.env.NODE_ENV === 'development') {
-      // const vconsole = new Vconsole()
-      // vconsole.setSwitchPosition(10, 80)
+      const vconsole = new Vconsole()
+      vconsole.setSwitchPosition(10, 80)
     }
   },
   computed: {
