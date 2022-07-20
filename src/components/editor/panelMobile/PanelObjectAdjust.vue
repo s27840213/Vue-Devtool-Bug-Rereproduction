@@ -52,7 +52,7 @@
           template(v-for="markerslot in makeSlots")
             div(class="panel-object-adjust__option bg-gray-5"
                 :class="{'outline-blue-1': endMarker === markerslot.marker}"
-                @pointerup="handleStartMarkerUpdate(markerslot.marker)")
+                @pointerup="handleEndMarkerUpdate(markerslot.marker)")
               marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
                 :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
                 :svg="markerContentMap[markerslot.marker].svg"
@@ -289,7 +289,7 @@ export default Vue.extend({
       )
       stepsUtils.record()
     },
-    handleEndMarkerUpdate(index: number, value: string) {
+    handleEndMarkerUpdate(value: string) {
       const currLayer = (this.currLayer as IShape)
       const { styleArray, svg, trimWidth, vSize, trimOffset } = this.markerContentMap[value]
       layerUtils.updateLayerProps(
