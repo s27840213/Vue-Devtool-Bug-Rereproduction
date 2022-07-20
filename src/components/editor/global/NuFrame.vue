@@ -146,8 +146,8 @@ export default Vue.extend({
       const shadow = this.config.styles.shadow
       if (shadow && shadow.srcObj.type) {
         const { width, height } = this.config.styles
-        const size = ImageUtils.getSrcSize(shadow.srcObj.type, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
-        return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj.type, size))
+        const size = ImageUtils.getSrcSize(shadow.srcObj, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
+        return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
       }
       return ''
     },

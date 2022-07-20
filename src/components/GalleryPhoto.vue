@@ -157,11 +157,11 @@ export default Vue.extend({
 
         const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)
         const imgPreview = new Image()
-        imgPreview.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, previewSize))
+        imgPreview.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(srcObj, previewSize))
         imgPreview.onload = () => {
           const significantSize = imageUtils.getSignificantDimension(photoWidth, photoHeight)
           const imgPreload = new Image()
-          imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(type, significantSize))
+          imgPreload.src = imageUtils.getSrc({ srcObj } as IImage, imageUtils.getSrcSize(srcObj, significantSize))
         }
 
         this.setCurrDraggedPhoto({

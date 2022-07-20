@@ -128,7 +128,7 @@ export default Vue.extend({
             isTransparent && this.redrawShadow()
           }
         }
-        const imgSize = ImageUtils.getSrcSize(this.config.srcObj.type, 100)
+        const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
         img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
         if (!isFloatingEffect) {
           imageShadowUtils.setHandleId(this.id)
@@ -372,14 +372,14 @@ export default Vue.extend({
       }
     },
     getImgDimension(): number {
-      const { type } = this.config.srcObj
+      const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
-      return ImageUtils.getSrcSize(type, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
+      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },
     getPreviewSize(): number {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return ImageUtils
-        .getSrcSize(this.config.srcObj.type, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
+        .getSrcSize(this.config.srcObj, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
       const { styles } = this.config
@@ -469,13 +469,13 @@ export default Vue.extend({
       const _scale = 1 / ((this.config as IImage).parentLayerStyles?.scale ?? 1)
       const imgRatio = imgWidth / imgHeight
       const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
-      return ImageUtils.getSrcSize(this.config.srcObj.type, maxSize * (this.scaleRatio / 100))
+      return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
     },
     shadowSrc(): string {
       if (!this.shadow || !this.shadow.srcObj) {
         return ''
       }
-      return ImageUtils.getSrc(this.shadow.srcObj, ImageUtils.getSrcSize(this.shadow.srcObj.type, this.getImgDimension))
+      return ImageUtils.getSrc(this.shadow.srcObj, ImageUtils.getSrcSize(this.shadow.srcObj, this.getImgDimension))
     },
     id(): ILayerIdentifier {
       return {
@@ -496,7 +496,16 @@ export default Vue.extend({
     onError() {
       this.isOnError = true
       let updater
-      const srcObj = this.config.srcObj
+      const { srcObj, styles: { width, height } } = this.config
+      if (ImageUtils.getSrcSize(srcObj, Math.max(width, height)) === 'xtra') {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, {
+          srcObj: {
+            ...srcObj,
+            maxSize: 'larg'
+          }
+        })
+        return
+      }
       switch (srcObj.type) {
         case 'private':
           updater = async () => await this.updateImages({ assetSet: new Set<string>([srcObj.assetId]) })
@@ -612,7 +621,7 @@ export default Vue.extend({
               this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
             })
         }
-        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj.type, val, preLoadType)))
+        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, val, preLoadType)))
       })
     },
     async handleInitLoad() {
@@ -647,9 +656,9 @@ export default Vue.extend({
         }
         preImg.onload = () => {
           const nextImg = new Image()
-          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'next')))
+          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'next')))
         }
-        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(type, this.getImgDimension, 'pre')))
+        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
