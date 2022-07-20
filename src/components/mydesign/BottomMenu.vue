@@ -292,8 +292,12 @@ export default Vue.extend({
             if (this.currLocation === 't') {
               this.$emit('menuAction', { event: 'deleteAllForever' })
             } else {
-              designUtils.deleteAll(Object.values(this.selectedDesigns))
-              this.$emit('menuAction', { event: 'deleteItem', payload: {} })
+              if (Object.values(this.selectedDesigns).length === 1) {
+                designUtils.deleteAll(Object.values(this.selectedDesigns))
+                this.$emit('menuAction', { event: 'deleteItem' })
+              } else {
+                this.$emit('menuAction', { event: 'deleteAll' })
+              }
             }
           }
         })

@@ -48,20 +48,31 @@
                   @menuAction="handleMenuAction"
                   @back="handlePrevMenu"
                   @push="handlePushMenu")
-    div(v-if="confirmMessage === 'delete-forever'" class="dim-background" @click.stop="closeConfirmMessage")
-      div(class="delete-forever-message" @click.stop)
-        div(class="delete-forever-message__close pointer"
+    div(v-if="confirmMessage !== ''" class="dim-background" @click.stop="closeConfirmMessage")
+      div(class="message" @click.stop)
+        div(class="message__close pointer"
             @click.stop="closeConfirmMessage")
           svg-icon(iconName="close" iconColor="gray-3" iconWidth="20px")
-        div(class="delete-forever-message__text")
-          span {{$t('NN0200')}}
-        div(class="delete-forever-message__description")
-          span {{$t('NN0201')}}
-        div(class="delete-forever-message__buttons")
-          div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
+        div(class="message__text")
+          span {{getMessageText()}}
+        div(class="message__description")
+          span(v-html="getMessageDescription()")
+        div(class="message__buttons")
+          div(class="message__cancel" @click.stop="closeConfirmMessage")
             span {{$t('NN0203')}}
-          div(class="delete-forever-message__confirm" @click.stop="confirmAction(deleteForeverConfirmed)")
+          div(class="message__confirm" @click.stop="confirmAction")
             span {{$t('NN0034')}}
+    div(v-if="isErrorShowing" class="dim-background" @click.stop="closeErrorMessage")
+      div(class="message" @click.stop)
+        div(class="message__close-minimal pointer"
+            @click.stop="closeErrorMessage")
+          svg-icon(iconName="close" iconColor="gray-2" iconWidth="20px")
+        div(class="message__text")
+          span {{$t('NN0456')}}
+        div(class="message__description")
+          span {{$t('NN0242')}}
+        div(class="message__ok" @click.stop="closeErrorMessage")
+          span {{$t('NN0563')}}
 </template>
 
 <script lang="ts">
@@ -386,6 +397,13 @@ export default Vue.extend({
           this.snapshotFolders()
           this.setBottomMenu('move-folder')
           break
+        case 'deleteAll':
+          this.confirmMessage = 'delete-all'
+          break
+        case 'deleteFolder':
+          this.pathedFolderBuffer = payload
+          this.confirmMessage = 'delete-folder'
+          break
       }
     },
     pushItem(type: IMobileMessageItem['type']) {
@@ -457,6 +475,30 @@ export default Vue.extend({
           return ''
       }
     },
+    getMessageText(): string {
+      switch (this.confirmMessage) {
+        case 'delete-forever':
+          return `${this.$t('NN0200')}`
+        case 'delete-all':
+          return `${this.$t('NN0693')}`
+        case 'delete-folder':
+          return `${this.$t('NN0199')}`
+        default:
+          return ''
+      }
+    },
+    getMessageDescription() {
+      switch (this.confirmMessage) {
+        case 'delete-forever':
+          return `${this.$t('NN0201')}`
+        case 'delete-all':
+          return `${this.$t('NN0244')}`
+        case 'delete-folder':
+          return `${this.$t('NN0694')}<br>${this.$t('NN0246')}`
+        default:
+          return ''
+      }
+    },
     deleteForeverConfirmed() {
       if (this.designBuffer) {
         designUtils.deleteForever(this.designBuffer)
@@ -477,8 +519,23 @@ export default Vue.extend({
       this.pathedFolderBuffer = undefined
       this.designBuffer = undefined
     },
-    confirmAction(action: () => void) {
-      action()
+    closeErrorMessage() {
+      this.setIsErrorShowing(false)
+    },
+    confirmAction() {
+      switch (this.confirmMessage) {
+        case 'delete-forever':
+          this.deleteForeverConfirmed()
+          break
+        case 'delete-all':
+          designUtils.deleteAll(Object.values(this.selectedDesigns))
+          break
+        case 'delete-folder':
+          if (this.pathedFolderBuffer) {
+            designUtils.deleteFolder(this.pathedFolderBuffer)
+          }
+          break
+      }
       this.closeConfirmMessage()
     },
     renderedWidth(button: IMenuButton) {
@@ -628,85 +685,106 @@ $total-bar-height: $nav-bar-height + $tab-bar-height;
   z-index: 1000;
 }
 
-$messageTypes: delete-all, delete-folder, delete-forever;
-
-@each $messageType in $messageTypes {
-  .#{$messageType}-message {
-    position: relative;
-    background-color: white;
+.message {
+  position: relative;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  border-radius: 5px;
+  &__close {
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    @include size(20px, 20px);
+    border-radius: 50%;
+    background: setColor(gray-4);
     display: flex;
-    flex-direction: column;
-    width: 80vw;
-    border-radius: 5px;
-    &__close {
-      position: absolute;
-      top: 16px;
-      right: 14px;
-      @include size(20px, 20px);
-      border-radius: 50%;
-      background: setColor(gray-4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    align-items: center;
+    justify-content: center;
+  }
+  &__close-minimal {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    @include size(20px, 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__text {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    > span {
+      @include text-H6;
+      color: setColor(gray-2);
     }
-    &__text {
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 22px;
-      > span {
-        @include text-H6;
-        color: setColor(gray-2);
-      }
+  }
+  &__description {
+    margin-top: 42px;
+    padding: 0 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    > span {
+      @include body-SM;
+      color: setColor(gray-2);
     }
-    &__description {
-      margin-top: 42px;
-      padding: 0 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      > span {
-        @include body-SM;
-        color: setColor(gray-2);
-      }
-    }
-    &__buttons {
-      margin-top: 42px;
-      margin-bottom: 16px;
-      padding: 0 28px;
+  }
+  &__buttons {
+    margin-top: 42px;
+    margin-bottom: 16px;
+    padding: 0 28px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    > div {
+      min-width: calc(50% - 36px);
       height: 32px;
+      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      > div {
-        min-width: calc(50% - 36px);
-        height: 32px;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        padding: 0 12px;
-        > span {
-          @include btn-SM;
-        }
+      cursor: pointer;
+      padding: 0 12px;
+      > span {
+        @include btn-SM;
       }
     }
-    &__cancel {
-      background-color: setColor(gray-4);
-      > span {
-        display: block;
-        color: black;
-      }
+  }
+  &__cancel {
+    background-color: setColor(gray-4);
+    > span {
+      display: block;
+      color: black;
     }
-    &__confirm {
-      background-color: setColor(red-1);
-      > span {
-        display: block;
-        color: white;
-      }
+  }
+  &__confirm {
+    background-color: setColor(red-1);
+    > span {
+      display: block;
+      color: white;
+    }
+  }
+  &__ok {
+    margin-top: 42px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    > span {
+      @include btn-SM;
+      width: 60vw;
+      padding: 10px 0;
+      border-radius: 4px;
+      background-color: setColor(blue-1);
+      display: block;
+      color: white;
     }
   }
 }

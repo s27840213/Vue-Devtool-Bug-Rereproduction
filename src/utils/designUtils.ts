@@ -570,12 +570,21 @@ class DesignUtils {
         break
       }
       case 'trash': {
-        this.deleteFolder(pathedFolder)
-        eventEmitter({
-          event: 'deleteItem',
-          payload: {
-            type: 'folder',
-            data: pathedFolder.folder
+        this.checkEmpty(pathedFolder).then((empty) => {
+          if (empty) {
+            this.deleteFolder(pathedFolder)
+            eventEmitter({
+              event: 'deleteItem',
+              payload: {
+                type: 'folder',
+                data: pathedFolder.folder
+              }
+            })
+          } else {
+            eventEmitter({
+              event: 'deleteFolder',
+              payload: pathedFolder
+            })
           }
         })
         break
