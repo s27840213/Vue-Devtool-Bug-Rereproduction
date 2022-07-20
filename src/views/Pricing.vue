@@ -33,7 +33,7 @@
             span(class="text-H1") {{plans[planSelected][periodUi].now}}
             span {{' ' + $t('NN0516')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
-            span(class="btn-LG") {{canAddCard ? $t('NN0517') : $t('NN0518')}}
+            span(class="btn-LG") {{canAddCard ? $t('NN0517', {day: trialDay}) : $t('NN0518')}}
       span(class="pricing-currency") {{$t('NN0519')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
@@ -92,7 +92,8 @@ export default Vue.extend({
       plans: 'plans',
       planSelected: 'planSelected',
       userCountryUi: 'userCountryUi',
-      status: 'status'
+      status: 'status',
+      trialDay: 'trialDay'
     }),
     ...mapFields({ periodUi: 'periodUi' }),
     off(): string { return this.isUiTW ? '26off' : '25off' },
