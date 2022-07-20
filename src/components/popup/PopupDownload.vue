@@ -61,7 +61,7 @@
               class="mb-10"
               group-name="product_page"
               :label="$t('NN0345')"
-              :default-checked="!selectedDetailPage.noLimit"
+              :default-checked="selectedDetailPage.noLimit"
               @change="handleDetailPageIsLimited"
               value="no-limit")
             div
@@ -69,7 +69,7 @@
                 class="mb-5"
                 group-name="product_page"
                 :label="$t('NN0346')"
-                :default-checked="selectedDetailPage.noLimit"
+                :default-checked="!selectedDetailPage.noLimit"
                 @change="handleDetailPageIsLimited"
                 value="height-limit")
               div(class="flex items-center")
