@@ -124,7 +124,6 @@ export default Vue.extend({
         } else if (this.$i18n.locale === 'jp') {
           btnWidth = '180px'
         }
-        modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(
           this.$t('NN0695') as string,
           [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],

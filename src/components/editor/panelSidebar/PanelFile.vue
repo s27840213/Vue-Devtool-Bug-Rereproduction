@@ -116,7 +116,6 @@ export default Vue.extend({
       } else if (uploadUtils.isLogin) {
         uploadUtils.chooseAssets('image')
       } else {
-        modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
       }
     },
@@ -130,7 +129,6 @@ export default Vue.extend({
         } else if (uploadUtils.isLogin) {
           uploadUtils.uploadAsset('image', files)
         } else {
-          modalUtils.setIsModalOpen(true)
           modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
         }
       }

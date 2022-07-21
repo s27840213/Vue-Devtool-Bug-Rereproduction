@@ -145,7 +145,6 @@ export default Vue.extend({
             addToPage: true
           })
         } else {
-          modalUtils.setIsModalOpen(true)
           modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
         }
       }

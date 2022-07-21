@@ -65,11 +65,9 @@ class PaymentUtils {
     switch (msg) {
       case 'EXCEED_SIZE_LIMIT':
         modalUtils.setModalInfo(i18n.t('NN0137') as string, [i18n.t('NN0645') as string])
-        modalUtils.setIsModalOpen(true)
         break
       case 'EXCEED_CAPACITY':
         modalUtils.setModalInfo(i18n.t('NN0137') as string, [i18n.t('NN0644') as string])
-        modalUtils.setIsModalOpen(true)
         break
       case 'NOT_SUBSCRIBED':
         this.openPayment(initView)
@@ -85,7 +83,6 @@ class PaymentUtils {
             style: { width: '230px', height: '44px' },
             action: this.contactUs
           })
-        modalUtils.setIsModalOpen(true)
         break
       case 'BG_DEPLETED_MONTH':
         modalUtils.setModalInfo(i18n.t('NN0646') as string,
@@ -100,7 +97,6 @@ class PaymentUtils {
             style: { width: '243px', height: '44px' },
             action: () => { this.openPayment('switch1') }
           })
-        modalUtils.setIsModalOpen(true)
         break
       default:
         Vue.notify({ group: 'error', text: msg })

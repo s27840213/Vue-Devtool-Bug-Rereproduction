@@ -59,7 +59,6 @@ export default Vue.extend({
         popupUtils.closePopup()
       } else {
         modalUtils.setModalInfo('上傳錯誤', ['Design Id 長度不符合格式(20碼)'])
-        modalUtils.setIsModalOpen(true)
       }
     }
   }

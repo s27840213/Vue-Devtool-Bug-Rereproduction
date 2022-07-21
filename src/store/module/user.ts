@@ -214,7 +214,6 @@ const actions: ActionTree<IUserModule, unknown> = {
       const { flag, group_id: groupId, msg } = data
       console.log(data)
       const isDelete = params.list?.length === 0 && params.update === 1
-      modalUtils.setIsModalOpen(true)
       if (flag === 0) {
         commit('SET_groupId', groupId, { root: true })
         if (!isDelete) {

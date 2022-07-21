@@ -294,7 +294,6 @@ class UploadUtils {
           i18n.t('NN0137') as string,
           [i18n.t('NN0696') as string] // todo: fix i18n
         )
-        modalUtils.setIsModalOpen(true)
         return
       }
     }
@@ -450,7 +449,6 @@ class UploadUtils {
         } else if (type === 'avatar') {
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
-          modalUtils.setIsModalOpen(true)
           modalUtils.setIsPending(true)
           modalUtils.setModalInfo(`${i18n.t('NN0136')}`, [])
           xhr.onerror = networkUtils.notifyNetworkError
@@ -472,12 +470,11 @@ class UploadUtils {
                       store.commit('user/SET_STATE', {
                         avatar: targetUrls
                       })
-                      modalUtils.setIsPending(false)
                       modalUtils.setModalInfo(`${i18n.t('NN0224')}`, [])
                     } else {
-                      console.log('Failed to upload the file')
                       modalUtils.setModalInfo(`${i18n.t('NN0223')}`, [])
                     }
+                    modalUtils.setIsPending(false)
                   })
                 }
               })
@@ -768,7 +765,6 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }
@@ -837,9 +833,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
-        // console.log(designId)
       }
     }
   }
@@ -856,7 +850,6 @@ class UploadUtils {
       const list = deleteGroup && update === GroupDesignUpdateFlag.UPDATE_GROUP ? '' : pages.map((page: IPage) => page.designId).join(',')
       if (ecomm) {
         if (!pageUtils.isAllPageSizeEqual()) {
-          modalUtils.setIsModalOpen(true)
           modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'])
           return
         }
@@ -933,7 +926,6 @@ class UploadUtils {
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
 
-    modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
     modalUtils.setModalInfo('上傳中', [])
     xhr.onerror = networkUtils.notifyNetworkError
@@ -951,7 +943,6 @@ class UploadUtils {
       const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
       const { creator_id: creatorId } = res.data
       if (creatorId !== this.userId) {
-        modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'])
         return
       }
@@ -989,7 +980,6 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
-    modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
     modalUtils.setModalInfo('更新模板中', [])
     xhr.onerror = networkUtils.notifyNetworkError

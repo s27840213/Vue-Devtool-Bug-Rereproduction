@@ -9,6 +9,7 @@ class ModalUtils {
       confirmButton: confirmButton === undefined ? this.generateIModalTemplate() : confirmButton,
       cancelButton: cancelButton === undefined ? this.generateIModalTemplate() : cancelButton
     })
+    store.commit('modal/SET_MODAL_OPEN', true)
   }
 
   setIsPending(pending: boolean) {
