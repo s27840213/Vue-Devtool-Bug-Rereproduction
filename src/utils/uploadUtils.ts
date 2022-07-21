@@ -148,7 +148,7 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-
+    console.log('choose asset')
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -162,6 +162,7 @@ class UploadUtils {
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
       if (evt) {
+        console.log('choose asset callback')
         const files = (<HTMLInputElement>evt.target).files
         const params: { brandId?: string } = {}
         if (type === 'logo') {
@@ -279,6 +280,7 @@ class UploadUtils {
     brandId?: string
     isShadow?: boolean
   } = {}) {
+    console.log('upload asset')
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
@@ -315,7 +317,6 @@ class UploadUtils {
 
       const assetHandler = (src: string, imgType?: string) => {
         console.log('asset handler')
-        console.log(`src: ${src}`)
         console.log(`Image Type: ${imgType}`)
         if (type === 'image') {
           const img = new Image()
