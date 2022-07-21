@@ -557,7 +557,7 @@ class AssetUtils {
           // Close MobilePanel and fit in
           if (generalUtils.isTouchDevice()) {
             editorUtils.setCloseMobilePanelFlag(true)
-            pageUtils.fitPage()
+            // Call fitPage at pageUtils.appendPagesTo
           }
         })
       })
@@ -580,46 +580,32 @@ class AssetUtils {
               }
             }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
           )
-          editorUtils.setCloseMobilePanelFlag(true)
-
           break
         case 5:
         case 9:
           this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
-          editorUtils.setCloseMobilePanelFlag(true)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
-          this.addTemplate(asset.jsonData, attrs).then(() => {
-            if (generalUtils.isTouchDevice()) {
-              pageUtils.fitPage()
-              pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
-            }
-          })
-          editorUtils.setCloseMobilePanelFlag(true)
+          this.addTemplate(asset.jsonData, attrs)
+          // Call fitPage at pageUtils.updateSpecPage
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
-          editorUtils.setCloseMobilePanelFlag(true)
           break
         case 8:
           this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
-          editorUtils.setCloseMobilePanelFlag(true)
-
           break
         case 10:
           this.addLine(asset.jsonData, attrs)
-          editorUtils.setCloseMobilePanelFlag(true)
-
           break
         case 11:
           this.addBasicShape(asset.jsonData, attrs)
-          editorUtils.setCloseMobilePanelFlag(true)
-
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
+      editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
     } catch (error) {
       console.log(error)

@@ -203,6 +203,7 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
+      if (generalUtils.isTouchDevice()) this.fitPage(false, pagesTmp[0])
       store.commit('SET_pages', this.newPages(pagesTmp))
     }
     console.log('Update spec page')
@@ -261,6 +262,7 @@ class PageUtils {
     } else {
       currentPagesTmp = currentPagesTmp.concat(newPages)
     }
+    if (generalUtils.isTouchDevice()) this.fitPage(false, newPages[0])
     store.commit('SET_pages', currentPagesTmp)
   }
 
@@ -346,14 +348,16 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage(scrollToTop = false) {
+  fitPage(scrollToTop = false, targetSize = null) {
     if (editorUtils.mobileAllPageMode) {
       return
     }
 
+    const { width: targetWidth, height: targetHeight } =
+      targetSize ||
+      (this.inBgRemoveMode ? this.autoRemoveResult
+        : this.currFocusPageSize)
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.currFocusPageSize.width
-    const targetHeight = this.inBgRemoveMode ? this.autoRemoveResult.height : this.currFocusPageSize.height
     const resizeRatio = Math.min(editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)), editorViewBox.clientHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
 
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
@@ -369,6 +373,7 @@ class PageUtils {
         editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
       })
     }
+    pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
   }
 
   fillPage() {
