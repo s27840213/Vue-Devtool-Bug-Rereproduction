@@ -120,14 +120,14 @@ export default Vue.extend({
         if (this.$i18n.locale === 'tw') {
           btnWidth = '120px'
         } else if (this.$i18n.locale === 'us') {
-          btnWidth = '150px'
+          btnWidth = '160px'
         } else if (this.$i18n.locale === 'jp') {
           btnWidth = '180px'
         }
         modalUtils.setIsModalOpen(true)
         modalUtils.setModalInfo(
-          `${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`,
-          [],
+          this.$t('NN0695') as string,
+          [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],
           '',
           {
             msg: `${this.$t('NN0208')}`,
