@@ -159,13 +159,7 @@ export default Vue.extend({
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
     },
-    pageClickHandler(): void {
-      // if (!this.isHandleShadow) {
-      //   groupUtils.deselect()
-      // } else {
-      //   imageUtils.setImgControlDefault(false)
-      // }
-      console.log(imageUtils.isImgControl())
+    pageClickHandler(e: PointerEvent): void {
       groupUtils.deselect()
       imageUtils.setImgControlDefault(false)
       this.setInMultiSelectionMode(false)
