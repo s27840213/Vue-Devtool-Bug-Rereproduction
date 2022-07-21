@@ -146,9 +146,9 @@ module.exports = {
                         },
                         // 生产环境自动删除console
                         compress: {
-                            drop_debugger: true, // 清除 debugger 语句
-                            drop_console: true, // 清除console语句
-                            pure_funcs: ['console.log']
+                            // drop_debugger: true, // 清除 debugger 语句
+                            // drop_console: true, // 清除console语句
+                            // pure_funcs: ['console.log']
                         }
                     },
                     sourceMap: false,
