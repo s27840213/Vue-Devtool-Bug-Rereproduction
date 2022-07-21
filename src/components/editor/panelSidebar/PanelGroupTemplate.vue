@@ -67,7 +67,6 @@ export default Vue.extend({
       modalUtils.setModalInfo(
         this.isDetailPage ? '確認刪除詳情頁模板？' : '確認刪除群組模板？',
         [],
-        '',
         {
           msg: '',
           action: () => {

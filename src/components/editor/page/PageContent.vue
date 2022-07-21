@@ -146,7 +146,7 @@ export default Vue.extend({
           })
         } else {
           modalUtils.setIsModalOpen(true)
-          modalUtils.setModalInfo(`${this.$t('NN0350')}`, [], '')
+          modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
         }
       }
     },

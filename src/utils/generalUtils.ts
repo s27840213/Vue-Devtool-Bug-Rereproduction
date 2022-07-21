@@ -158,7 +158,7 @@ class GeneralUtils {
     })
     console.log(pages)
     modalUtils.setIsModalOpen(true)
-    modalUtils.setModalInfo('測試', [`修改過的 templates: ${modifiedPageIndex.join(' ')}`, `數量: ${modifiedPageIndex.length}`], '')
+    modalUtils.setModalInfo('測試', [`修改過的 templates: ${modifiedPageIndex.join(' ')}`, `數量: ${modifiedPageIndex.length}`])
   }
 
   downloadImage(src: string, name = 'image.png') {
