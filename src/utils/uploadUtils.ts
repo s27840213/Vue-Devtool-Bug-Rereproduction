@@ -156,6 +156,8 @@ class UploadUtils {
       logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
+    document.body.appendChild(inputNode)
+    inputNode.style.display = 'none'
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
@@ -169,6 +171,17 @@ class UploadUtils {
         params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
       this.uploadAsset(type, files as FileList, params)
+    }, false)
+    inputNode.addEventListener('change', (evt: Event) => {
+      console.log('choose asset callback')
+      // const files = (<HTMLInputElement>evt.target).files
+      const files = inputNode.files
+      const params: { brandId?: string } = {}
+      if (type === 'logo') {
+        params.brandId = store.getters['brandkit/getCurrentBrandId']
+      }
+      this.uploadAsset(type, files as FileList, params)
+      document.body.removeChild(inputNode)
     }, false)
   }
 
