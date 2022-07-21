@@ -154,9 +154,9 @@
           div(class="delete-forever-message__img")
             img(:src="require('@/assets/img/png/mydesign/delete-confirm.png')" width="55px" height="57px")
           div(class="delete-forever-message__text")
-            span {{$t('NN0202')}}
+            span {{$tc('NN0202', isMultiSelected ? 2 : 1)}}
           div(class="delete-forever-message__description")
-            span {{$t('NN0201')}}
+            span {{$tc('NN0201', isMultiSelected ? 2 : 1)}}
           div(class="delete-forever-message__buttons")
             div(class="delete-forever-message__cancel" @click.stop="closeConfirmMessage")
               span {{$t('NN0203')}}
