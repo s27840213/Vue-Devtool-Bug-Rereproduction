@@ -161,6 +161,7 @@ class UploadUtils {
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
+      console.log('changed')
       if (evt) {
         console.log('choose asset callback')
         const files = (<HTMLInputElement>evt.target).files
