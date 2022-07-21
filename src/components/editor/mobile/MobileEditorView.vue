@@ -377,20 +377,17 @@ export default Vue.extend({
       }
       e.stopImmediatePropagation()
       if (this.pageNum - 1 !== this.currCardIndex) {
-        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         this.setCurrCardIndex(this.currCardIndex + 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
         this.$nextTick(() => {
           setTimeout(() => {
             pageUtils.fitPage()
-            pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
           }, 300)
         })
       } else {
         this.addPage(pageUtils.newPage({}))
         pageUtils.fitPage()
-        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         StepsUtils.record()
       }
     },
@@ -400,14 +397,12 @@ export default Vue.extend({
       }
       e.stopImmediatePropagation()
       if (this.currCardIndex !== 0) {
-        pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         this.setCurrCardIndex(this.currCardIndex - 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
         this.$nextTick(() => {
           setTimeout(() => {
             pageUtils.fitPage()
-            pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
           }, 100)
         })
       }

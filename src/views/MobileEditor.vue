@@ -229,7 +229,6 @@ export default Vue.extend({
       if (!this.inAllPagesMode) {
         this.$nextTick(() => {
           pageUtils.fitPage()
-          pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
         })
       }
     },
