@@ -898,6 +898,9 @@ export default Vue.extend({
             if (this.movingByControlPoint) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             }
+            if (this.config.contentEditable) {
+              tiptapUtils.focus({ scrollIntoView: false })
+            }
           }
           this.isMoved = false
         }
