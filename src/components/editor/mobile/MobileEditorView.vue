@@ -372,6 +372,9 @@ export default Vue.extend({
       })
     },
     swipeUpHandler(e: AnyTouchEvent) {
+      if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
+        return
+      }
       e.stopImmediatePropagation()
       if (this.pageNum - 1 !== this.currCardIndex) {
         this.setCurrCardIndex(this.currCardIndex + 1)
@@ -389,6 +392,9 @@ export default Vue.extend({
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
+      if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
+        return
+      }
       e.stopImmediatePropagation()
       if (this.currCardIndex !== 0) {
         this.setCurrCardIndex(this.currCardIndex - 1)

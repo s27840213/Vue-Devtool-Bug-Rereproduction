@@ -148,7 +148,7 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-
+    console.log('choose asset')
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -156,19 +156,31 @@ class UploadUtils {
       logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
+    document.body.appendChild(inputNode)
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
     inputNode.addEventListener('change', (evt: Event) => {
-      if (evt) {
-        const files = (<HTMLInputElement>evt.target).files
-        const params: { brandId?: string } = {}
-        if (type === 'logo') {
-          params.brandId = store.getters['brandkit/getCurrentBrandId']
-        }
-        this.uploadAsset(type, files as FileList, params)
+      console.log('choose asset callback')
+      // const files = (<HTMLInputElement>evt.target).files
+      const files = inputNode.files
+      const params: { brandId?: string } = {}
+      if (type === 'logo') {
+        params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
+      this.uploadAsset(type, files as FileList, params)
+    }, false)
+    inputNode.addEventListener('change', (evt: Event) => {
+      console.log('choose asset callback')
+      // const files = (<HTMLInputElement>evt.target).files
+      const files = inputNode.files
+      const params: { brandId?: string } = {}
+      if (type === 'logo') {
+        params.brandId = store.getters['brandkit/getCurrentBrandId']
+      }
+      this.uploadAsset(type, files as FileList, params)
+      document.body.removeChild(inputNode)
     }, false)
   }
 
@@ -279,11 +291,13 @@ class UploadUtils {
     brandId?: string
     isShadow?: boolean
   } = {}) {
+    console.log('upload asset')
     if (type === 'font') {
       this.emitFontUploadEvent('uploading')
     }
 
     const isFile = typeof files[0] !== 'string'
+    console.log(`isFile: ${isFile}`)
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
       const assetId = id ?? generalUtils.generateAssetId()
@@ -313,11 +327,14 @@ class UploadUtils {
       }
 
       const assetHandler = (src: string, imgType?: string) => {
+        console.log('asset handler')
+        console.log(`Image Type: ${imgType}`)
         if (type === 'image') {
           const img = new Image()
           img.src = src
           const isUnknown = imgType === 'unknown'
           const imgCallBack = (src: string) => {
+            console.log('in img callback')
             store.commit('file/SET_UPLOADING_IMGS', {
               id: assetId,
               adding: true,
@@ -334,6 +351,7 @@ class UploadUtils {
             xhr.open('POST', this.loginOutput.upload_map.url, true)
             let increaseInterval = undefined as any
             if (!isShadow) {
+              console.log('add preview')
               store.commit('file/ADD_PREVIEW', {
                 width: isUnknown ? 250 : img.width,
                 height: isUnknown ? 250 : img.height,
@@ -361,6 +379,7 @@ class UploadUtils {
             xhr.send(formData)
             xhr.onerror = networkUtils.notifyNetworkError
             xhr.onload = () => {
+              console.log('xhr onload callback')
               // polling the JSON file of uploaded image
               const interval = setInterval(() => {
                 const pollingTargetSrc = `https://template.vivipic.com/export/${this.teamId}/${assetId}/result.json?ver=${generalUtils.generateRandomString(6)}`
@@ -397,10 +416,13 @@ class UploadUtils {
             }
           }
           if (!isUnknown) {
+            console.log('notUnknown!')
             img.onload = (evt) => {
+              console.log('handler onload callback')
               imgCallBack(img.src)
             }
           } else {
+            console.log('handle unknow callback')
             imgCallBack(require('@/assets/img/svg/image-preview.svg'))
           }
         } else if (type === 'font') {
@@ -508,7 +530,6 @@ class UploadUtils {
           reader.readAsDataURL(files[i] as File)
         })
       } else {
-        console.log('not file')
         assetHandler(files[i] as string)
       }
     }
