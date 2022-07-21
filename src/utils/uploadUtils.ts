@@ -282,6 +282,22 @@ class UploadUtils {
       this.emitFontUploadEvent('uploading')
     }
 
+    // Check if file size over limit.
+    for (let i = 0; i < files.length; i++) {
+      const fileSize = (typeof files[i] === 'string'
+        ? (files[i] as string).length / 4 * 3
+        : (files[i] as File).size) / 1024 / 1024
+      const fileSizeLimit = type === 'font' ? 50 : 25
+
+      if (fileSize > fileSizeLimit) {
+        modalUtils.setModalInfo(
+          i18n.t('NN0137') as string,
+          [i18n.t('NN0696') as string] // todo: fix i18n
+        )
+        return
+      }
+    }
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
@@ -433,9 +449,8 @@ class UploadUtils {
         } else if (type === 'avatar') {
           xhr.open('POST', this.loginOutput.upload_map.url, true)
           xhr.send(formData)
-          modalUtils.setIsModalOpen(true)
           modalUtils.setIsPending(true)
-          modalUtils.setModalInfo(`${i18n.t('NN0136')}`, [], '')
+          modalUtils.setModalInfo(`${i18n.t('NN0136')}`, [])
           xhr.onerror = networkUtils.notifyNetworkError
           xhr.onload = () => {
             // polling the JSON file of uploaded image
@@ -455,12 +470,11 @@ class UploadUtils {
                       store.commit('user/SET_STATE', {
                         avatar: targetUrls
                       })
-                      modalUtils.setIsPending(false)
-                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`, [], '')
+                      modalUtils.setModalInfo(`${i18n.t('NN0224')}`, [])
                     } else {
-                      console.log('Failed to upload the file')
-                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`, [], '')
+                      modalUtils.setModalInfo(`${i18n.t('NN0223')}`, [])
                     }
+                    modalUtils.setIsPending(false)
                   })
                 }
               })
@@ -751,8 +765,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'], '')
+        modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }
   }
@@ -820,9 +833,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'], '')
-        // console.log(designId)
+        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }
   }
@@ -839,8 +850,7 @@ class UploadUtils {
       const list = deleteGroup && update === GroupDesignUpdateFlag.UPDATE_GROUP ? '' : pages.map((page: IPage) => page.designId).join(',')
       if (ecomm) {
         if (!pageUtils.isAllPageSizeEqual()) {
-          modalUtils.setIsModalOpen(true)
-          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'], '')
+          modalUtils.setModalInfo('上傳 or 更新詳情頁失敗', ['Page 寬度不一致'])
           return
         }
       }
@@ -916,14 +926,13 @@ class UploadUtils {
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
 
-    modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
-    modalUtils.setModalInfo('上傳中', [], '')
+    modalUtils.setModalInfo('上傳中', [])
     xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       navigator.clipboard.writeText(designId)
       modalUtils.setIsPending(false)
-      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'], '')
+      modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
     }
   }
 
@@ -934,8 +943,7 @@ class UploadUtils {
       const res = await designApis.getDesignInfo(this.token, 'template', designId, 'select', JSON.stringify({}))
       const { creator_id: creatorId } = res.data
       if (creatorId !== this.userId) {
-        modalUtils.setIsModalOpen(true)
-        modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'], '')
+        modalUtils.setModalInfo('更新失敗', ['無法更新他人模板'])
         return
       }
     }
@@ -972,17 +980,16 @@ class UploadUtils {
 
     xhr.open('POST', this.loginOutput.upload_admin_map.url, true)
     xhr.send(formData)
-    modalUtils.setIsModalOpen(true)
     modalUtils.setIsPending(true)
-    modalUtils.setModalInfo('更新模板中', [], '')
+    modalUtils.setModalInfo('更新模板中', [])
     xhr.onerror = networkUtils.notifyNetworkError
     xhr.onload = () => {
       modalUtils.setIsPending(false)
       const status = xhr.status
       if (status >= 200 && status < 300) {
-        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`], '')
+        modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`])
       } else if (status >= 400 && status < 500) {
-        modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'], '')
+        modalUtils.setModalInfo('更新失敗', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`, '已複製錯誤訊息至剪貼簿，麻煩將錯誤訊息貼至群組'])
         navigator.clipboard.writeText([`Design ID: ${designId}`, `Status code: ${xhr.status}`, `Status Text: ${xhr.statusText}`, `Response Text: ${xhr.responseText}`].join('\n'))
       }
     }
