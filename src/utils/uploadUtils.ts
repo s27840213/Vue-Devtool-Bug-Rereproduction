@@ -282,6 +282,23 @@ class UploadUtils {
       this.emitFontUploadEvent('uploading')
     }
 
+    // Check if file size over limit.
+    for (let i = 0; i < files.length; i++) {
+      const fileSize = (typeof files[i] === 'string'
+        ? (files[i] as string).length / 4 * 3
+        : (files[i] as File).size) / 1024 / 1024
+      const fileSizeLimit = type === 'font' ? 50 : 25
+
+      if (fileSize > fileSizeLimit) {
+        modalUtils.setModalInfo(
+          i18n.t('NN0137') as string,
+          [i18n.t('NN0696') as string], '' // todo: fix i18n
+        )
+        modalUtils.setIsModalOpen(true)
+        return
+      }
+    }
+
     const isFile = typeof files[0] !== 'string'
     for (let i = 0; i < files.length; i++) {
       const reader = new FileReader()
