@@ -490,7 +490,7 @@ export default Vue.extend({
     getMessageDescription() {
       switch (this.confirmMessage) {
         case 'delete-forever':
-          if (Object.values(this.selectedDesigns).length + Object.values(this.selectedFolders).length > 1) {
+          if (this.selectedNum > 1) {
             return `${this.$tc('NN0201', 2)}`
           } else {
             return `${this.$tc('NN0201', 1)}`
