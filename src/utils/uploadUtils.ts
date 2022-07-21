@@ -160,15 +160,7 @@ class UploadUtils {
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
-    inputNode.addEventListener('change', (evt: Event) => {
-      // const files = (<HTMLInputElement>evt.target).files
-      const files = inputNode.files
-      const params: { brandId?: string } = {}
-      if (type === 'logo') {
-        params.brandId = store.getters['brandkit/getCurrentBrandId']
-      }
-      this.uploadAsset(type, files as FileList, params)
-    }, false)
+
     inputNode.addEventListener('change', (evt: Event) => {
       // const files = (<HTMLInputElement>evt.target).files
       const files = inputNode.files
