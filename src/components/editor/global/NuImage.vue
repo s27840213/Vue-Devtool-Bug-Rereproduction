@@ -7,7 +7,7 @@
       :style="canvasWrapperStyle")
       canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
     div(v-if="shadowSrc && !config.isFrameImg"
-      class="shadow__picture"
+      :class="{ 'shadow__picture': true, 'layer-flip': flippedAnimation }"
       :style="imgShadowStyles")
       img(ref="shadow-img"
         :class="{'nu-image__picture': true }"
@@ -363,12 +363,13 @@ export default Vue.extend({
         return {}
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
-      const { scale } = this.config.styles
+      const { scale, horizontalFlip, verticalFlip } = this.config.styles
+      const xFactor = horizontalFlip ? -1 : 1
+      const yFactor = verticalFlip ? -1 : 1
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
-        // transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px)`
-        transform: `translate(${imgX * scale}px, ${imgY * scale}px) scale(${scale})`
+        transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${xFactor}) scaleY(${yFactor}) scale(${scale})`
       }
     },
     getImgDimension(): number {
