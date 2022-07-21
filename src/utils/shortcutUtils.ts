@@ -349,14 +349,17 @@ class ShortcutUtils {
       Vue.nextTick(() => {
         tiptapUtils.agent(editor => {
           const currLayer = LayerUtils.getCurrLayer
+          let textLayer = currLayer
           if (!currLayer.active) return
           if (currLayer.type === 'group') {
             const subLayerIndex = LayerUtils.subLayerIdx
             if (subLayerIndex === -1) return
             const subLayer = (currLayer as IGroup).layers[subLayerIndex]
             if (!subLayer.active || subLayer.type !== 'text') return
+            textLayer = subLayer
           } else if (currLayer.type !== 'text') return
-          editor.chain().sync().focus().run()
+          editor.commands.sync()
+          textLayer.contentEditable && editor.commands.focus(null, { scrollIntoView: false })
           tiptapUtils.prevText = tiptapUtils.getText(editor)
           TextPropUtils.updateTextPropsState()
         })
@@ -370,14 +373,17 @@ class ShortcutUtils {
       Vue.nextTick(() => {
         tiptapUtils.agent(editor => {
           const currLayer = LayerUtils.getCurrLayer
+          let textLayer = currLayer
           if (!currLayer.active) return
           if (currLayer.type === 'group') {
             const subLayerIndex = LayerUtils.subLayerIdx
             if (subLayerIndex === -1) return
             const subLayer = (currLayer as IGroup).layers[subLayerIndex]
             if (!subLayer.active || subLayer.type !== 'text') return
+            textLayer = subLayer
           } else if (currLayer.type !== 'text') return
-          editor.chain().sync().focus().run()
+          editor.commands.sync()
+          textLayer.contentEditable && editor.commands.focus(null, { scrollIntoView: false })
           tiptapUtils.prevText = tiptapUtils.getText(editor)
           TextPropUtils.updateTextPropsState()
         })

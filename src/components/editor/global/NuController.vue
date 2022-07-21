@@ -374,7 +374,7 @@ export default Vue.extend({
           editor.setEditable(newVal)
         })
       }
-      StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+      !generalUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
