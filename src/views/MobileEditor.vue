@@ -109,10 +109,10 @@ export default Vue.extend({
       this.currActivePanel = 'photo-shadow'
     })
 
-    // if (process.env.NODE_ENV === 'development') {
-    const vconsole = new Vconsole()
-    vconsole.setSwitchPosition(10, 80)
-    // }
+    if (process.env.NODE_ENV === 'development') {
+      // const vconsole = new Vconsole()
+      // vconsole.setSwitchPosition(10, 80)
+    }
   },
   computed: {
     ...mapState({
