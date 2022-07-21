@@ -158,7 +158,6 @@ export default Vue.extend({
       setBgImageSrc: 'SET_backgroundImageSrc'
     }),
     onError() {
-      console.log('image on error')
       let updater
       const srcObj = this.image.config.srcObj
       switch (srcObj.type) {

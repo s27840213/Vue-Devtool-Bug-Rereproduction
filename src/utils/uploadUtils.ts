@@ -148,7 +148,6 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -156,19 +155,22 @@ class UploadUtils {
       logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
+    document.body.appendChild(inputNode)
+    inputNode.setAttribute('class', 'inputNode')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
+
     inputNode.addEventListener('change', (evt: Event) => {
-      if (evt) {
-        const files = (<HTMLInputElement>evt.target).files
-        const params: { brandId?: string } = {}
-        if (type === 'logo') {
-          params.brandId = store.getters['brandkit/getCurrentBrandId']
-        }
-        this.uploadAsset(type, files as FileList, params)
+      // const files = (<HTMLInputElement>evt.target).files
+      const files = inputNode.files
+      const params: { brandId?: string } = {}
+      if (type === 'logo') {
+        params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
+      this.uploadAsset(type, files as FileList, params)
+      document.body.removeChild(inputNode)
     }, false)
   }
 
@@ -243,7 +245,6 @@ class UploadUtils {
                 clearInterval(increaseInterval)
                 response.json().then((json: IUploadAssetResponse) => {
                   if (json.flag === 0) {
-                    console.log(json)
                     console.log('Successfully upload the file')
                     store.commit('file/UPDATE_PROGRESS', {
                       assetId: assetId,
@@ -508,7 +509,6 @@ class UploadUtils {
           reader.readAsDataURL(files[i] as File)
         })
       } else {
-        console.log('not file')
         assetHandler(files[i] as string)
       }
     }

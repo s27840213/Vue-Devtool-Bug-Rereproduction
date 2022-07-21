@@ -5,7 +5,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import ZindexUtils from '@/utils/zindexUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
-import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import TextPropUtils from './textPropUtils'
 import ShapeUtils from './shapeUtils'
@@ -14,8 +14,11 @@ import uploadUtils from './uploadUtils'
 import logUtils from './logUtils'
 import tiptapUtils from './tiptapUtils'
 import pageUtils from './pageUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 class ShortcutUtils {
+  get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+
   get currSelectedPageIndex() {
     return store.getters.getCurrSelectedPageIndex
   }
@@ -31,6 +34,39 @@ class ShortcutUtils {
   // constructor(target: HTMLElement) {
   //   this.target = target
   // }
+
+  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp) {
+    layer.styles.x += 10
+    layer.styles.y += 10
+    layer.id = GeneralUtils.generateRandomString(8)
+    layer.shown = false
+
+    switch (layer.type) {
+      case 'image':
+        (layer as IImage).imgControl = false
+        break
+      case 'shape':
+        (layer as IShape).className = ShapeUtils.classGenerator()
+        break
+      case 'group':
+        (layer as IGroup).layers
+          .forEach(l => {
+            if (l.type === 'shape') {
+              l.className = ShapeUtils.classGenerator()
+            }
+          })
+        break
+      case 'tmp':
+        (layer as IGroup).layers
+          .forEach(l => {
+            if (l.type === 'shape') {
+              l.className = ShapeUtils.classGenerator()
+            }
+          })
+        break
+    }
+    return layer
+  }
 
   async getClipboardContents(): Promise<string | undefined> {
     try {
@@ -84,37 +120,8 @@ class ShortcutUtils {
       return
     }
 
-    const clipboardInfo = [JSON.parse(text)].map((layer: ILayer) => {
-      layer.styles.x += 10
-      layer.styles.y += 10
-      layer.id = GeneralUtils.generateRandomString(8)
-      layer.shown = false
-
-      switch (layer.type) {
-        case 'image':
-          (layer as IImage).imgControl = false
-          break
-        case 'shape':
-          (layer as IShape).className = ShapeUtils.classGenerator()
-          break
-        case 'group':
-          (layer as IGroup).layers
-            .forEach(l => {
-              if (l.type === 'shape') {
-                l.className = ShapeUtils.classGenerator()
-              }
-            })
-          break
-        case 'tmp':
-          (layer as IGroup).layers
-            .forEach(l => {
-              if (l.type === 'shape') {
-                l.className = ShapeUtils.classGenerator()
-              }
-            })
-          break
-      }
-      return layer
+    const clipboardInfo = [JSON.parse(text)].map((layer: IText | IShape | IImage | IGroup | ITmp) => {
+      return this.regenerateLayerInfo(layer)
     })
     /**
      * @todo change middlemost to currFocusPageindex
@@ -151,6 +158,42 @@ class ShortcutUtils {
     Vue.nextTick(() => {
       StepsUtils.record()
     })
+  }
+
+  duplicate() {
+    const { getCurrLayer: currLayer } = LayerUtils
+    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer))
+
+    const middlemostPageIndex = store.getters.getMiddlemostPageIndex
+    const isTmp: boolean = currLayer.type === 'tmp'
+    if (store.getters.getCurrSelectedIndex >= 0 && middlemostPageIndex === store.getters.getCurrSelectedPageIndex) {
+      const tmpIndex = store.getters.getCurrSelectedIndex
+      const tmpLayers = store.getters.getCurrSelectedLayers
+      const tmpLayersNum = isTmp ? tmpLayers.length : 1
+      GroupUtils.deselect()
+      if (isTmp) {
+        store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(newLayer.layers))
+      } else {
+        store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, [newLayer])
+      }
+      ZindexUtils.reassignZindex(middlemostPageIndex)
+    } else {
+      const currFocusPageIndex = store.getters.currFocusPageIndex
+      if (store.getters.getCurrSelectedIndex >= 0) {
+        GroupUtils.deselect()
+      }
+      if (isTmp) {
+        store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [newLayer] })
+        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, GeneralUtils.deepCopy(newLayer.layers))
+      } else {
+        store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [newLayer] })
+        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, [newLayer])
+      }
+      ZindexUtils.reassignZindex(currFocusPageIndex)
+    }
+    StepsUtils.record()
   }
 
   textCopy() {
@@ -306,14 +349,17 @@ class ShortcutUtils {
       Vue.nextTick(() => {
         tiptapUtils.agent(editor => {
           const currLayer = LayerUtils.getCurrLayer
+          let textLayer = currLayer
           if (!currLayer.active) return
           if (currLayer.type === 'group') {
             const subLayerIndex = LayerUtils.subLayerIdx
             if (subLayerIndex === -1) return
             const subLayer = (currLayer as IGroup).layers[subLayerIndex]
             if (!subLayer.active || subLayer.type !== 'text') return
+            textLayer = subLayer
           } else if (currLayer.type !== 'text') return
-          editor.chain().sync().focus().run()
+          editor.commands.sync()
+          textLayer.contentEditable && editor.commands.focus(null, { scrollIntoView: false })
           tiptapUtils.prevText = tiptapUtils.getText(editor)
           TextPropUtils.updateTextPropsState()
         })
@@ -327,14 +373,17 @@ class ShortcutUtils {
       Vue.nextTick(() => {
         tiptapUtils.agent(editor => {
           const currLayer = LayerUtils.getCurrLayer
+          let textLayer = currLayer
           if (!currLayer.active) return
           if (currLayer.type === 'group') {
             const subLayerIndex = LayerUtils.subLayerIdx
             if (subLayerIndex === -1) return
             const subLayer = (currLayer as IGroup).layers[subLayerIndex]
             if (!subLayer.active || subLayer.type !== 'text') return
+            textLayer = subLayer
           } else if (currLayer.type !== 'text') return
-          editor.chain().sync().focus().run()
+          editor.commands.sync()
+          textLayer.contentEditable && editor.commands.focus(null, { scrollIntoView: false })
           tiptapUtils.prevText = tiptapUtils.getText(editor)
           TextPropUtils.updateTextPropsState()
         })

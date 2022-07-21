@@ -339,6 +339,9 @@ export default Vue.extend({
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         }
+        if (this.config.contentEditable) {
+          tiptapUtils.focus({ scrollIntoView: false })
+        }
       }
       document.removeEventListener('mouseup', this.onMouseup)
       this.isControlling = false

@@ -374,7 +374,7 @@ export default Vue.extend({
           editor.setEditable(newVal)
         })
       }
-      StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+      !generalUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
@@ -903,6 +903,9 @@ export default Vue.extend({
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
             if (this.movingByControlPoint) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+            }
+            if (this.config.contentEditable) {
+              tiptapUtils.focus({ scrollIntoView: false })
             }
           }
           this.isMoved = false
