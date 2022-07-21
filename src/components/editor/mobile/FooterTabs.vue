@@ -60,7 +60,7 @@ export default Vue.extend({
       fontTabs: [
         mainMenu,
         { icon: 'edit', text: `${this.$t('NN0504')}` },
-        { icon: 'font', text: `${this.$tc('NN0353', 2)}`, panelType: 'fonts' },
+        { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
           icon: 'color',

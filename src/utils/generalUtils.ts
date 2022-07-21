@@ -309,6 +309,11 @@ class GeneralUtils {
 
     document.body.removeChild(element)
   }
+
+  capitalize(str: string): string {
+    if (str.length === 0) return str
+    return str[0].toUpperCase() + str.substring(1).toLowerCase()
+  }
 }
 
 const generalUtils = new GeneralUtils()
