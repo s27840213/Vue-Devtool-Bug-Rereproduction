@@ -358,7 +358,7 @@ export default Vue.extend({
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       return !(typeof (event.target as HTMLElement).className === 'object' || // classNamm can be SVGAnimatedString
-      (event.target as HTMLElement).className.includes('footer-tabs'))
+        (event.target as HTMLElement).className.includes('footer-tabs') || (event.target as HTMLElement).className === 'inputNode')
     },
     closeMobilePanel() {
       this.$emit('switchTab', 'none')

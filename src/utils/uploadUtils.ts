@@ -156,6 +156,7 @@ class UploadUtils {
     }
     const inputNode = document.createElement('input')
     document.body.appendChild(inputNode)
+    inputNode.setAttribute('class', 'inputNode')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
