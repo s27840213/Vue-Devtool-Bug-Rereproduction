@@ -252,8 +252,9 @@ export default Vue.extend({
     width: 100%;
     position: relative;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
+    background-color: setColor(gray-5);;
   }
   &__bottom {
     z-index: setZindex("footer");

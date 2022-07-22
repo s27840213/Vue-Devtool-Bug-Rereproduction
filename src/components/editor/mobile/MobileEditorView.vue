@@ -10,8 +10,7 @@
     div(class="editor-view__canvas"
         ref="canvas"
         @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler"
-        :style="canvasStyle")
+        @swipedown="swipeDownHandler")
       div(v-for="(page,index) in pages"
           :key="`page-${index}`"
           class="editor-view__card"
@@ -229,11 +228,6 @@ export default Vue.extend({
     },
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
-    },
-    canvasStyle(): { [index: string]: string } {
-      return {
-        paddingBottom: this.currActivePanel !== 'none' ? '40%' : '0px'
-      }
     },
     minScaleRatio(): number {
       return pageUtils.mobileMinScaleRatio
