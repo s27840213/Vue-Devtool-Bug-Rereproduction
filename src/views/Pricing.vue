@@ -111,6 +111,9 @@ export default Vue.extend({
   async mounted() {
     await this.getBillingInfo()
     this.getPrice(this.userCountryUi)
+    if (new URLSearchParams(window.location.search).get('coupon')) {
+      paymentUtils.openPayment('step1-coupon')
+    }
   },
   methods: {
     ...mapActions({

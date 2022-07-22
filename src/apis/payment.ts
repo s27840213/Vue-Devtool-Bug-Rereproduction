@@ -3,6 +3,7 @@ import axios from '@/apis'
 import authToken from './auth-token'
 import { AxiosPromise } from 'axios'
 import store from '@/store'
+import * as Ipayment from '@/interfaces/payment'
 
 class Payment {
   planList (country: string): AxiosPromise {
@@ -207,6 +208,34 @@ class Payment {
     const ws = new WebSocket(`${'wss://proc.vivipic.com'}?token=${authToken().token || ''}&proc_id=${procId}`)
     ws.onmessage = callback
     ws.onerror = (event) => { console.log('socket error', event) }
+  }
+
+  verifyCoupon(coupon: string) {
+    return axios.request<Ipayment.IDataCouponCheck>({
+      url: '/verify-coupon',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        add: 0,
+        coupon
+      }
+    })
+  }
+
+  applyCoupon(coupon: string, plan_id: string, is_bundle: number) {
+    return axios.request<Ipayment.IDataCoupon>({
+      url: '/verify-coupon',
+      method: 'POST',
+      data: {
+        token: authToken().token || '',
+        locale: i18n.locale,
+        add: 0,
+        coupon,
+        plan_id,
+        is_bundle
+      }
+    })
   }
 }
 

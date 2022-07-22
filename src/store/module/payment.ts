@@ -37,7 +37,12 @@ interface IPaymentState {
     issuer: string
     last4: string
     date: string
-  }
+  },
+  coupon: {
+    input: string
+    msg: string
+    status: string
+  },
   // nextBillingHistoryIndex: number
   billingHistory: {
     date: string
@@ -104,6 +109,13 @@ const IPayType = {
   1: 'tappay',
   2: 'stripe'
 }
+
+const ICouponError = [
+  'INVALID_COUPON',
+  'ALREADY_USED',
+  'NOT_TRIAL',
+  'NOT_SUBSCRIBED'
+]
 
 function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
   if (!isPro && !isCancelingPro && cardStatus === 2) return '-1'
@@ -175,6 +187,11 @@ const getDefaultState = (): IPaymentState => ({
     issuer: '',
     last4: '',
     date: ''
+  },
+  coupon: {
+    input: '',
+    msg: '',
+    status: 'input'
   },
   // nextBillingHistoryIndex: 0,
   billingHistory: [],
@@ -528,6 +545,49 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }
     paymentApi.calcUserAsset(procId)
     paymentApi.calcDone(procId, callback)
+  },
+  verifyCoupon({ commit }) {
+    commit('SET_state', {
+      coupon: {
+        input: state.coupon.input, // No change
+        msg: '',
+        status: 'loading'
+      }
+    })
+    paymentApi.verifyCoupon(state.coupon.input).then(({ data }) => {
+      console.log('data', data)
+      const error = Boolean(ICouponError.includes(data.msg))
+      commit('SET_state', {
+        coupon: {
+          input: state.coupon.input, // No change
+          msg: error ? i18n.t('NN0698') : data.msg,
+          status: error ? 'error' : 'accept'
+        }
+      })
+    })
+  },
+  applyCoupon({ commit }) {
+    if (state.coupon.status !== 'accept') return
+    paymentApi.applyCoupon(
+      state.coupon.input,
+      state.planSelected,
+      Number(state.periodUi === 'yearly')
+    ).then(({ data }) => {
+      // if (data.flag) throw Error(data.msg)
+      console.log('data2', data)
+      commit('SET_state', {
+        //
+      })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  clearCouponMsg({ commit }) {
+    commit('SET_state', {
+      coupon: {
+        input: state.coupon.input,
+        msg: '',
+        status: 'input'
+      }
+    })
   }
 }
 
