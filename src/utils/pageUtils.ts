@@ -353,7 +353,7 @@ class PageUtils {
       return
     }
 
-    const { width: targetWidth, height: targetHeight } =
+    const { width: targetWidth, height: targetHeight }: { width:number, height:number } =
       targetSize ||
       (this.inBgRemoveMode ? this.autoRemoveResult
         : this.currFocusPageSize)

@@ -207,14 +207,12 @@ export default Vue.extend({
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
     panelStyle(): { [index: string]: string } {
-      const heightStyle = {
-        maxHeight: '90%',
-        height: this.fixSize || this.extraFixSizeCondition ? 'initial' : this.panelHeight + 'px'
-      }
       return {
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-        ...heightStyle
+        height: this.fixSize || this.extraFixSizeCondition
+          ? 'initial'
+          : this.panelHeight + 'px'
       }
     },
     dynamicBindProps(): { [index: string]: any } {
@@ -420,14 +418,15 @@ export default Vue.extend({
     },
     dragPanelEnd() {
       const maxHeightPx = this.maxHeightPx()
-      this.panelHeight = this.panelHeight >= maxHeightPx * 0.75
-        ? maxHeightPx
-        : this.panelHeight < maxHeightPx * 0.25
-          ? 0
-          : maxHeightPx * 0.5
+      if (this.panelHeight < maxHeightPx * 0.25) {
+        this.closeMobilePanel()
+      } else if (this.panelHeight >= maxHeightPx * 0.75) {
+        this.panelHeight = maxHeightPx
+      } else {
+        this.panelHeight = maxHeightPx * 0.5
+      }
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
-      if (this.panelHeight === 0) this.closeMobilePanel()
     },
     disableTouchEvent(e: TouchEvent) {
       if (generalUtils.isTouchDevice()) {
@@ -441,12 +440,9 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .mobile-panel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  position: relative;
   width: 100%;
   box-sizing: border-box;
-  background-color: setColor(sidebar-panel);
   z-index: setZindex(mobile-panel);
   border-radius: 10px 10px 0 0;
   box-shadow: 0px -2px 5px setColor(gray-4, 0.5);

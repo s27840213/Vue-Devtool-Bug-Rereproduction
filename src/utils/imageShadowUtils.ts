@@ -4,6 +4,7 @@ import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/laye
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
+import _ from 'lodash'
 import generalUtils from './generalUtils'
 import imageShadowPanelUtils from './imageShadowPanelUtils'
 import imageUtils from './imageUtils'
@@ -242,8 +243,11 @@ class ImageShadowUtils {
     if ((this.handlerId === handlerId) || !timeout) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-      const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
-      ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
+      // const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
+      // ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2 + 20)
+      const shadowWidth = attrFactor * config.styles.initWidth * (size * 0.01)
+      const shadowHeight = FLOATING_SHADOW_SIZE * attrFactor * (thinkness * 0.01)
+      ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, shadowWidth, shadowHeight, 0, 0, Math.PI * 2 + 20)
       // ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
@@ -265,10 +269,6 @@ class ImageShadowUtils {
     setMark('floating', 2)
     await this.asyncProcessing(() => {
       if (this.handlerId === handlerId) {
-        // const offsetX = x * drawCanvasW * mappingScale * 0.0025 * fieldRange.floating.x.weighting
-        // const offsetY = (y - 10) * drawCanvasH * mappingScale * 0.0025 * fieldRange.floating.y.weighting
-        // console.log(canvasMaxSize.height, offsetX, offsetY)
-        // ctxMaxSize.putImageData(this.dataBuff.data, offsetX, offsetY)
         ctxMaxSize.putImageData(this.dataBuff.data, 0, 0)
 
         ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
@@ -312,7 +312,6 @@ class ImageShadowUtils {
   }
 
   async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
-    console.log('start drawing imageMatched:', params.timeout)
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
@@ -539,7 +538,6 @@ class ImageShadowUtils {
         return
       }
       setMark('shadow', 3)
-
       await this.asyncProcessing(() => {
         if (this.handlerId === handlerId) {
           ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
@@ -599,17 +597,22 @@ class ImageShadowUtils {
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const { width, height } = canvas
     const data = ctx.getImageData(0, 0, width, height).data
-      .reduce((arr, val, i) => {
-        if (i % 4 === 0) {
-          arr.push([val])
-        } else {
-          arr[arr.length - 1].push(val)
-        }
-        return arr
-      }, [] as Array<Array<number>>)
+    return data[3] !== 255 ||
+      data[width * 4 - 1] !== 255 ||
+      data[data.length - 1] !== 255 ||
+      data[data.length - width * 4 + 3] !== 255
+    // const data = ctx.getImageData(0, 0, width, height).data
+    //   .reduce((arr, val, i) => {
+    //     if (i % 4 === 0) {
+    //       arr.push([val])
+    //     } else {
+    //       arr[arr.length - 1].push(val)
+    //     }
+    //     return arr
+    //   }, [] as Array<Array<number>>)
 
-    const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
-    return pivots.some(p => p[3] !== 255)
+    // const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
+    // return pivots.some(p => p[3] !== 255)
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {
@@ -623,16 +626,10 @@ class ImageShadowUtils {
     this._layerData = null
   }
 
-  setEffect(effect: ShadowEffectType, attrs = {}, _pageIndex = -1, _layerIndex = -1, _subLayerIdx = -1): void {
+  setEffect(effect: ShadowEffectType, attrs = {}, layerInfo?: ILayerInfo): void {
     let { pageIndex, layerIndex, subLayerIdx } = layerUtils
-    if (_pageIndex !== -1) {
-      pageIndex = _pageIndex
-    }
-    if (_layerIndex !== -1) {
-      layerIndex = _layerIndex
-    }
-    if (_pageIndex !== -1 && _layerIndex !== -1 && _subLayerIdx !== -1) {
-      subLayerIdx = _subLayerIdx
+    if (layerInfo) {
+      ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
     }
 
     const layer = subLayerIdx !== -1
@@ -656,8 +653,8 @@ class ImageShadowUtils {
           imgY
         })
         layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-          initWidth: width,
-          initHeight: height,
+          // initWidth: width,
+          // initHeight: height,
           scale: 1
         }, subLayerIdx)
       }
@@ -780,7 +777,7 @@ class ImageShadowUtils {
           x: 0,
           y: 0,
           radius: 60,
-          size: 60,
+          size: 100,
           thinkness: 50,
           opacity: 65
         }
@@ -802,7 +799,7 @@ class ImageShadowUtils {
         break
       case ShadowEffectType.imageMatched:
         (effect as IImageMatchedEffect) = {
-          distance: 40,
+          distance: 60,
           angle: 40,
           radius: 50,
           size: 100,
@@ -953,9 +950,9 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   imageMatched: {
-    distance: { max: 100, min: 0, weighting: 4 },
+    distance: { max: 100, min: 0, weighting: 3.5 },
     angle: { max: 180, min: -180, weighting: 1 },
-    size: { max: 120, min: 50, weighting: 0.01 },
+    size: { max: 110, min: 70, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
@@ -968,9 +965,9 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 3 },
     thinkness: { max: 100, min: 0 },
-    size: { max: 200, min: 50 },
+    size: { max: 150, min: 25 },
     x: { max: 100, min: -100, weighting: 1 },
-    y: { max: 75, min: -100, weighting: 1 }
+    y: { max: 100, min: -100, weighting: 1 }
   }
 } as any
 
