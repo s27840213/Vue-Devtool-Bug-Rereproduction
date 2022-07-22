@@ -10,7 +10,6 @@
             @click.left.stop="isTouchDevice ? null :onClickEvent($event)"
             @pointerdown.stop="isTouchDevice ? onClickEvent($event): null"
             @dragenter="onDragEnter($event)"
-            @mouseenter="onFrameMouseEnter($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -117,6 +116,10 @@ export default Vue.extend({
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
     this.parentId = this.primaryLayer.id as string
+
+    if (this.type === LayerType.frame && this.config.type === LayerType.image) {
+      body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -340,6 +343,9 @@ export default Vue.extend({
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
+        }
+        if (this.config.contentEditable) {
+          tiptapUtils.focus({ scrollIntoView: false })
         }
       }
       document.removeEventListener('mouseup', this.onMouseup)
@@ -706,9 +712,9 @@ export default Vue.extend({
           // horizontalFlip: currLayer.styles.horizontalFlip,
           // verticalFlip: currLayer.styles.verticalFlip
         })
-        const controller = this.$refs.body as HTMLElement
-        controller.addEventListener('mouseleave', this.onFrameMouseLeave)
-        controller.addEventListener('mouseup', this.onFrameMouseUp)
+        const body = this.$refs.body as HTMLElement
+        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent) {
@@ -728,9 +734,9 @@ export default Vue.extend({
           ...this.imgBuff.styles
         })
       }
-      const controller = this.$refs.body as HTMLElement
-      controller.removeEventListener('mouseup', this.onFrameMouseUp)
-      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       if (this.isDraggedPanelPhoto) return
@@ -742,9 +748,9 @@ export default Vue.extend({
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }
-      const controller = this.$refs.body as HTMLElement
-      controller.removeEventListener('mouseup', this.onFrameMouseUp)
-      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     }
   }
 })
@@ -752,13 +758,16 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-sub-controller {
+  touch-action: none;
   transform-style: preserve-3d;
   &__wrapper {
     top: 0;
     left: 0;
     position: absolute;
+    touch-action: none;
   }
   &__content {
+    touch-action: none;
     display: flex;
     justify-content: center;
     align-items: center;

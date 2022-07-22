@@ -374,7 +374,7 @@ export default Vue.extend({
           editor.setEditable(newVal)
         })
       }
-      StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+      !generalUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
@@ -543,28 +543,35 @@ export default Vue.extend({
         shown
       })
     },
+    zindex(type: string) {
+      const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
+      const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
+      let offset = 0
+      let zindex
+      if (this.isMoving && LayerUtils.layerIndex !== this.layerIndex) {
+        /** The offset is used for frame enter/leave detection */
+        offset += LayerUtils.getCurrLayer.styles.zindex + 1
+      }
+      if (type === 'control-point') {
+        zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
+      }
+      if (isFrame || isGroup) {
+        zindex = (this.layerIndex + 1) * 1000
+      }
+      if (this.getLayerType === 'tmp') {
+        /**
+         * @Todo - find the reason why this been set to certain value istead of 0
+         * set to 0 will make the layer below the empty area of tmp layer selectable
+         */
+        zindex = (this.layerIndex + 1) * 1000
+      }
+      if (this.getLayerType === 'text' && this.isActive) {
+        zindex = (this.layerIndex + 1) * 99
+      }
+      return (zindex ?? (this.config.styles.zindex + 1)) + offset
+    },
     styles(type: string) {
-      const zindex = (() => {
-        const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
-        const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
-        if (type === 'control-point') {
-          return (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
-        }
-        if (isFrame || isGroup) {
-          return (this.layerIndex + 1) * 1000
-        }
-        if (this.getLayerType === 'tmp') {
-          /**
-           * @Todo - find the reason why this been set to certain value istead of 0
-           * set to 0 will make the layer below the empty area of tmp layer selectable
-           */
-          return (this.layerIndex + 1) * 1000
-        }
-        if (this.getLayerType === 'text' && this.isActive) {
-          return (this.layerIndex + 1) * 99
-        }
-        return this.config.styles.zindex + 1
-      })()
+      const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
@@ -573,13 +580,14 @@ export default Vue.extend({
         height: `${height}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
-        'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
+        'pointer-events': this.isImgControl ? 'none' : 'initial',
         /**
          * @Note - set touchAction to none because pointer event will be canceled by touch action
          * So, if we want to control the layer, we need to set it to none.
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
-        touchAction: this.isActive ? 'none' : 'initial',
+        // touchAction: this.isActive ? 'none' : 'initial',
+        touchAction: 'none',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
@@ -631,6 +639,8 @@ export default Vue.extend({
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)
+      const body = (event.target as HTMLElement)
+      body.releasePointerCapture((event as PointerEvent).pointerId)
 
       if (eventType === 'pointer') {
         const pointerEvent = event as PointerEvent
@@ -642,21 +652,16 @@ export default Vue.extend({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      // if (this.isProcessImgShadow) {
-      //   return
-      // } else {
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
       ImageUtils.setImgControlDefault(false)
-      // }
 
       /**
        * @Note - in Mobile version, we can't select the layer directly, we should make it active first
        * The exception is that we are in multi-selection mode
        */
       if (this.isTouchDevice && !this.isActive && !this.isLocked && !this.inMultiSelectionMode) {
-        const body = (this.$refs.body as HTMLElement)
         body.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -902,6 +907,9 @@ export default Vue.extend({
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { isTyping: true })
             if (this.movingByControlPoint) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
+            }
+            if (this.config.contentEditable) {
+              tiptapUtils.focus({ scrollIntoView: false })
             }
           }
           this.isMoved = false
@@ -1929,6 +1937,7 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
     transform-style: preserve-3d;
+    touch-action: none;
   }
   &__ctrl-points {
     display: flex;
