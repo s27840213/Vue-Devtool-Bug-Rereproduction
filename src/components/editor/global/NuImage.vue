@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="nu-image"
+    :id="`nu-image-${config.id}`"
     :style="styles"
     draggable="false")
     div(v-if="showCanvas"
@@ -7,7 +8,8 @@
       :style="canvasWrapperStyle")
       canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
     div(v-if="shadowSrc && !config.isFrameImg"
-      :class="{ 'shadow__picture': true, 'layer-flip': flippedAnimation }"
+      :id="`nu-image-${config.id}__shadow`"
+      :class="{ 'shadow__picture': true }"
       :style="imgShadowStyles")
       img(ref="shadow-img"
         :class="{'nu-image__picture': true }"
@@ -358,6 +360,12 @@ export default Vue.extend({
         height: `${imgHeight}px`
       }
     },
+    imgShadowFlipStyle(): any {
+      const { horizontalFlip, verticalFlip } = this.config.styles
+      return {
+        transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1})`
+      }
+    },
     imgShadowStyles(): any {
       if (this.forRender) {
         return {}
@@ -369,7 +377,8 @@ export default Vue.extend({
       return {
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
-        transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${xFactor}) scaleY(${yFactor}) scale(${scale})`
+        transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
+        // transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scale(${scale})`
       }
     },
     getImgDimension(): number {
@@ -1012,7 +1021,7 @@ canvas {
   height: 100%;
 }
 
-.layer-flip {
-  transition: transform 0.2s linear;
-}
+// .layer-flip {
+//   transition: transform 0.2s linear;
+// }
 </style>
