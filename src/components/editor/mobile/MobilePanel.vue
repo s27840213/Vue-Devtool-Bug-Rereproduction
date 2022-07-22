@@ -77,7 +77,7 @@ import { IFrame } from '@/interfaces/layer'
 import frameUtils from '@/utils/frameUtils'
 import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
@@ -132,7 +132,8 @@ export default Vue.extend({
       panelHistory: [] as Array<string>,
       panelHeight: 0,
       lastPointerY: 0,
-      showColorPanel: false
+      showExtraColorPanel: false,
+      extraColorEvent: ColorEventType.text
     }
   },
   computed: {
@@ -156,10 +157,10 @@ export default Vue.extend({
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust']
 
-      return this.inSelectionState || this.showColorPanel || whiteThemePanel.includes(this.currActivePanel)
+      return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.showColorPanel || this.inSelectionState || [
+      return this.showExtraColorPanel || this.inSelectionState || [
         'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust'].includes(this.currActivePanel)
@@ -200,7 +201,7 @@ export default Vue.extend({
       return this.whiteTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showColorPanel)
+      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -217,10 +218,10 @@ export default Vue.extend({
       }
     },
     dynamicBindProps(): { [index: string]: any } {
-      if (this.showColorPanel) {
+      if (this.showExtraColorPanel) {
         return {
           is: 'panel-color',
-          currEvent: ColorEventType.background,
+          currEvent: this.extraColorEvent,
           panelHistory: this.panelHistory
         }
       }
@@ -272,14 +273,27 @@ export default Vue.extend({
             }
           }
         }
+        case 'photo-shadow': {
+          return {
+            pushHistory: (history: string) => {
+              this.panelHistory.push(history)
+            },
+            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+              this.showExtraColorPanel = true
+              this.extraColorEvent = colorEventType
+              this.panelHistory.push(initColorPanelType)
+            }
+          }
+        }
         case 'background': {
           // bind listener to let the parent access the grandchild's event
           // return this.$listeners
 
           return {
-            openExtraColorModal: () => {
-              this.showColorPanel = true
-              this.panelHistory.push('color-picker')
+            openExtraColorModal: (colorEventType: ColorEventType, initColorPanelType: MobileColorPanelType) => {
+              this.showExtraColorPanel = true
+              this.extraColorEvent = colorEventType
+              this.panelHistory.push(initColorPanelType)
             }
           }
         }
@@ -302,10 +316,10 @@ export default Vue.extend({
         return 'close-circle'
       }
     },
-    leftButtonAction(): () => void {
-      if (this.showColorPanel) {
+    leftButtonAction(): (e: PointerEvent) => void {
+      if (this.showExtraColorPanel && this.panelHistory.length === 1) {
         return () => {
-          this.showColorPanel = false
+          this.showExtraColorPanel = false
         }
       }
       if (this.panelHistory.length > 0) {
@@ -358,6 +372,14 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
+  },
+  watch: {
+    panelHistory: {
+      handler(newVal) {
+        console.log(newVal)
+      },
+      deep: true
+    }
   },
   methods: {
     ...mapActions({
@@ -460,6 +482,7 @@ export default Vue.extend({
     left: 0;
     transform: translate(-4px, -4px);
     border-radius: 50%;
+    touch-action: manipulation;
   }
 
   &__bottom-section {
@@ -483,6 +506,7 @@ export default Vue.extend({
 
   &__drag-bar {
     position: absolute;
+    touch-action: manipulation;
     top: 2px;
     padding: 10px 20px;
     border-radius: 5px;

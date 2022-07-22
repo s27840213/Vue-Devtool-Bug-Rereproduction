@@ -60,7 +60,7 @@ import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
@@ -267,7 +267,7 @@ export default Vue.extend({
     },
     handleColorModal(color: string) {
       if (generalUtils.isTouchDevice()) {
-        this.$emit('openExtraColorModal')
+        this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
         return
       }
       colorUtils.setCurrEvent(ColorEventType.background)

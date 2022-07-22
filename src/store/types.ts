@@ -105,6 +105,12 @@ export enum ColorEventType {
   photoShadow = 'setPhotoEffectColor'
 }
 
+export enum MobileColorPanelType {
+  palette = 'color-palette',
+  picker = 'color-picker',
+  more = 'color-more'
+}
+
 export enum PopupSliderEventType {
   stop = 'changeStop',
   opacity = 'setLayerOpacity',
