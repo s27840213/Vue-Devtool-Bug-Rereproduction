@@ -58,8 +58,7 @@ export default Vue.extend({
         uploadUtils.uploadLayer(this.updateType, this.id)
         popupUtils.closePopup()
       } else {
-        modalUtils.setModalInfo('上傳錯誤', ['Design Id 長度不符合格式(20碼)'], '')
-        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('上傳錯誤', ['Design Id 長度不符合格式(20碼)'])
       }
     }
   }

@@ -60,7 +60,14 @@ import stepsUtils from '@/utils/stepsUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IUploadAssetResponse } from '@/interfaces/upload'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
+import { IImage } from '@/interfaces/layer'
+import { ShadowEffectType } from '@/interfaces/imgShadow'
+import imageShadowUtils from '@/utils/imageShadowUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import generalUtils from '@/utils/generalUtils'
+import imageUtils from '@/utils/imageUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   data() {
@@ -114,6 +121,7 @@ export default Vue.extend({
     },
     save() {
       const { index, pageIndex } = this.currSelectedInfo as ICurrSelectedInfo
+      imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex: index }, { type: 'after-bg-remove', userId: '', assetId: '' })
       if (!this.modifiedFlag) {
         layerUtils.updateLayerProps(pageIndex, index, {
           srcObj: {
@@ -123,6 +131,18 @@ export default Vue.extend({
           },
           trace: 1
         })
+        const image = layerUtils.getLayer(pageIndex, index) as IImage
+        if (image.type === LayerType.image) {
+          if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+            const layerInfo = { pageIndex, layerIndex: index }
+            const layerData = {
+              config: image,
+              layerInfo
+            }
+            imageShadowPanelUtils.handleShadowUpload(layerData, true)
+            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          }
+        }
         this.setInBgRemoveMode(false)
         this.setIsProcessing(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
@@ -131,17 +151,12 @@ export default Vue.extend({
         const { teamId, id } = (this.autoRemoveResult as IBgRemoveInfo)
         const previewSrc = this.canvas.toDataURL('image/png;base64')
         const { pageId, layerId } = this.bgRemoveIdInfo
-        const targetPageIndex = pageUtils.getPageIndexById(pageId)
-        const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
-
-        layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+        layerUtils.updateLayerProps(pageIndex, index, {
           previewSrc,
           trace: 1
         })
-
         this.setInBgRemoveMode(false)
         this.setPageScaleRatio(this.prevPageScaleRatio)
-
         // If the result image is still uploading, we need to prevent the bg-remove btn from being clicked.
         // The reason is if the image is still uploading, then the image in the page is dataUrl.
         // So we need to set isProcessing to true
@@ -150,17 +165,32 @@ export default Vue.extend({
         uploadUtils.uploadAsset('image', [previewSrc], {
           addToPage: false,
           pollingCallback: (json: IUploadAssetResponse) => {
-            layerUtils.updateLayerProps(pageIndex, index, {
-              srcObj: {
-                type: this.isAdmin ? 'public' : 'private',
-                userId: teamId,
-                assetId: this.isAdmin ? json.data.id : json.data.asset_index
-              },
+            const targetPageIndex = pageUtils.getPageIndexById(pageId)
+            const targetLayerIndex = layerUtils.getLayerIndexById(targetPageIndex, layerId)
+            const srcObj = {
+              type: this.isAdmin ? 'public' : 'private',
+              userId: teamId,
+              assetId: this.isAdmin ? json.data.id : json.data.asset_index
+            }
+            layerUtils.updateLayerProps(targetPageIndex, targetLayerIndex, {
+              srcObj,
               trace: 1
             })
+            const image = layerUtils.getLayer(pageIndex, index) as IImage
+            if (image.type === LayerType.image) {
+              if (image.styles.shadow.currentEffect !== ShadowEffectType.none) {
+                const layerInfo = { pageIndex: targetPageIndex, layerIndex: targetLayerIndex }
+                const layerData = {
+                  config: image,
+                  layerInfo
+                }
+                imageShadowPanelUtils.handleShadowUpload(layerData, true)
+                Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+              }
+            }
+            stepsUtils.record()
             this.setLoading(false)
             this.setIsProcessing(false)
-            stepsUtils.record()
           },
           id: id,
           needCompressed: false

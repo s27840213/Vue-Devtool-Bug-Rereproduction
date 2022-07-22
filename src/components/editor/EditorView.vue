@@ -326,9 +326,6 @@ export default Vue.extend({
     },
     selectEnd() {
       if (this.isSelecting) {
-        // TODO
-        // GroupUtils.deselect()
-        // imageUtils.setImgControlDefault(false)
         if (!this.isHandleShadow) {
           GroupUtils.deselect()
         } else {
@@ -351,12 +348,6 @@ export default Vue.extend({
           } else {
             imageUtils.setImgControlDefault(false)
           }
-          // TODO
-          // if (!this.isHandleShadow) {
-          //   this.handleSelectionData(selectionArea.getBoundingClientRect())
-          // } else {
-          //   imageUtils.setImgControlDefault(false)
-          // }
         }
       })
     },
@@ -372,7 +363,6 @@ export default Vue.extend({
       })
 
       if (layerIndexs.length > 0) {
-        // this.addSelectedLayer(layerIndexs as number[])
         GroupUtils.select(pageUtils.currFocusPageIndex, layerIndexs)
       }
     },
