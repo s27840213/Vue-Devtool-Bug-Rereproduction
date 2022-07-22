@@ -73,14 +73,14 @@ export default Vue.extend({
             pageIndex: this.pageIndex,
             srcObj: { ...srcObj, userId: 'jpeg' }
           })
-          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+          nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
         }
       }
       nextImg.onload = () => {
         const preImg = new Image()
-        preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'pre'))
+        preImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'pre'))
       }
-      nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj.type, this.getImgDimension, 'next'))
+      nextImg.src = ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(srcObj, this.getImgDimension, 'next'))
     } else {
       this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
     }

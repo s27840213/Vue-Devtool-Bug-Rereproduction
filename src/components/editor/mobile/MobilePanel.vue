@@ -18,8 +18,11 @@
             :iconWidth="'20px'")
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="leftButtonAction")
-        span(class="mobile-panel__title"
-          :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
+        div(class="mobile-panel__title")
+          span(class="mobile-panel__title-text body-1 mr-10"
+            :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
+          div(v-if="inSelectionState" class="mobile-panel__layer-num")
+            span(class="label-sm text-white") {{layerNum}}
         div(class="mobile-panel__btn mobile-panel__right-btn"
             :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
           svg-icon(
@@ -76,7 +79,8 @@ import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import { ColorEventType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import pageUtils from '@/utils/pageUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   props: {
@@ -136,18 +140,26 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      inMultiSelectionMode: 'getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      currSelectedInfo: 'getCurrSelectedInfo'
     }),
+    layerNum(): number {
+      return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
+    },
+    inSelectionState(): boolean {
+      return this.currActivePanel === 'none' && this.inMultiSelectionMode
+    },
     whiteTheme(): boolean {
       const whiteThemePanel = [
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
         'adjust', 'photo-shadow', 'resize', 'object-adjust']
-      return this.showColorPanel || whiteThemePanel.includes(this.currActivePanel)
+
+      return this.inSelectionState || this.showColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.showColorPanel || [
+      return this.showColorPanel || this.inSelectionState || [
         'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust'].includes(this.currActivePanel)
@@ -175,7 +187,7 @@ export default Vue.extend({
         }
         case 'none': {
           if (this.inMultiSelectionMode) {
-            return ''
+            return '已選取'
           }
           return ''
         }
@@ -191,7 +203,7 @@ export default Vue.extend({
       return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showColorPanel)
     },
     hideDynamicComp(): boolean {
-      return this.currActivePanel === 'crop'
+      return this.currActivePanel === 'crop' || this.inSelectionState
     },
     panelStyle(): { [index: string]: string } {
       return {
@@ -335,6 +347,10 @@ export default Vue.extend({
           }
         }
         this.closeMobilePanel()
+
+        if (this.inMultiSelectionMode && this.inSelectionState) {
+          editorUtils.setInMultiSelectionMode(false)
+        }
       }
     }
   },
@@ -450,7 +466,15 @@ export default Vue.extend({
   }
 
   &__title {
+    @include flexCenter();
     font-weight: bold;
+  }
+
+  &__layer-num {
+    @include size(20px);
+    @include flexCenter();
+    background-color: setColor(blue-1);
+    border-radius: 50%;
   }
 
   &__drag-bar {

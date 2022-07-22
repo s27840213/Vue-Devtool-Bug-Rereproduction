@@ -7,7 +7,8 @@
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
-            @click.left.stop="onClickEvent($event)"
+            @click.left.stop="isTouchDevice ? null :onClickEvent($event)"
+            @pointerdown.stop="isTouchDevice ? onClickEvent($event): null"
             @dragenter="onDragEnter($event)"
             @mousedown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
@@ -71,6 +72,7 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -130,8 +132,12 @@ export default Vue.extend({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
+    isTouchDevice(): boolean {
+      return GeneralUtils.isTouchDevice()
+    },
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -480,7 +486,7 @@ export default Vue.extend({
     onClickEvent(e: MouseEvent) {
       if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
           groupUtils.deselectTargetLayer(this.layerIndex)
         }
         return
@@ -511,10 +517,12 @@ export default Vue.extend({
           }
           return
         case 'group':
-          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
           if (this.getLayerType === 'image') {
-            const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-            if (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw)) {
+            const shadow = (this.config as IImage).styles.shadow
+            const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
+            const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+            const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
+            if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.subLayerId !== this.config.id && !shadowEffectNeedRedraw))) {
               this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
               body.addEventListener('dragleave', this.onDragLeave)
             } else {
@@ -566,7 +574,7 @@ export default Vue.extend({
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-                eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+                eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
               } else {
                 // const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
                 // const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched

@@ -162,6 +162,8 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
+import mobileEditor from '@/store/module/mobileEditor'
+import editorUtils from '@/utils/editorUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -237,7 +239,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'getInMultiSelectionMode',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
@@ -392,8 +394,7 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -657,7 +658,11 @@ export default Vue.extend({
       }
       ImageUtils.setImgControlDefault(false)
 
-      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
+      /**
+       * @Note - in Mobile version, we can't select the layer directly, we should make it active first
+       * The exception is that we are in multi-selection mode
+       */
+      if (this.isTouchDevice && !this.isActive && !this.isLocked && !this.inMultiSelectionMode) {
         body.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -666,8 +671,8 @@ export default Vue.extend({
       }
 
       this.movingByControlPoint = false
-      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
+      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
       if (!this.isLocked) {
         event.stopPropagation()
       }
@@ -1553,8 +1558,11 @@ export default Vue.extend({
       body.addEventListener('dragleave', this.dragLeave)
       body.addEventListener('drop', this.onDrop)
       if (this.getLayerType === 'image') {
-        const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparentBg || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-        if (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw)) {
+        const shadow = (this.config as IImage).styles.shadow
+        const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
+        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+        const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
+        if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
         } else {
           Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
@@ -1594,10 +1602,11 @@ export default Vue.extend({
             }
             const size = ['private', 'public', 'background', 'private-logo', 'public-logo'].includes(this.config.srcObj.type)
               ? 'tiny' : 100
-            replacedImg.src = ImageUtils.getSrc(this.config, size)
+            const src = ImageUtils.getSrc(this.config, size)
+            replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             return
           } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
           }
         }
         GroupUtils.deselect()
@@ -1746,7 +1755,7 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
-        // this.setInMultiSelectionMode(true)
+        editorUtils.setInMultiSelectionMode(true)
         return
       }
       /**

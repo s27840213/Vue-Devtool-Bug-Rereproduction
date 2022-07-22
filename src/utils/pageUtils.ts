@@ -35,7 +35,7 @@ class PageUtils {
    * @param currCardIndex - only used in touch device
    */
   get currCardIndex(): number {
-    return store.getters.getCurrCardIndex
+    return store.getters['mobileEditor/getCurrCardIndex']
   }
 
   get currActivePageIndex(): number {

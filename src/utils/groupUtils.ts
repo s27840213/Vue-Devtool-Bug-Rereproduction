@@ -63,7 +63,7 @@ class GroupUtils {
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
-  get inMultiSelecitonMode() { return store.getters.getInMultiSelectionMode }
+  get inMultiSelecitonMode() { return store.getters['mobileEditor/getInMultiSelectionMode'] }
 
   calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set<string> {
     const typeSet = new Set<string>()
@@ -172,6 +172,7 @@ class GroupUtils {
       } else {
         // when we select multiple layer
         const layers = MappingUtils.mappingLayers(pageIndex, layerIndexs)
+          .filter(l => !l.locked)
         const tmpStyles = calcTmpProps(layers)
         const currSelectedLayers = this.mapLayersToTmp(layers, tmpStyles)
         const topIndex = Math.max(...layerIndexs)
@@ -386,7 +387,7 @@ class GroupUtils {
    */
   mapLayersToPage(layers: Array<IShape | IText | IImage | IGroup>, tmpLayer: ITmp): Array<IShape | IText | IImage | IGroup> {
     layers = JSON.parse(JSON.stringify(layers))
-    layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       // calculate scale offset
       if (layer.type === 'image') {
         layer = layer as IImage
@@ -453,6 +454,15 @@ class GroupUtils {
         layer.styles.width = layer.styles.width as number * tmpLayer.styles.scale
         layer.styles.height = layer.styles.height as number * tmpLayer.styles.scale
         layer.styles.scale *= tmpLayer.styles.scale
+        if (layer.type === LayerType.frame && (layer as IFrame).clips[0].isFrameImg) {
+          const img = (layer as IFrame).clips[0]
+          img.styles.width = layer.styles.width
+          img.styles.height = layer.styles.height
+          img.styles.imgWidth *= tmpLayer.styles.scale
+          img.styles.imgHeight *= tmpLayer.styles.scale
+          img.styles.imgX *= tmpLayer.styles.scale
+          img.styles.imgY *= tmpLayer.styles.scale
+        }
         if (layer.type === 'text') {
           const { widthLimit, styles } = layer as IText
           if (widthLimit === -1) {
@@ -553,7 +563,7 @@ class GroupUtils {
 
   mapGroupLayersToTmp(groupLayer: IGroup): Array<IShape | IText | IImage | IGroup> {
     const layers = JSON.parse(JSON.stringify(groupLayer.layers))
-    layers.forEach((layer: IShape | IText | IImage | IGroup) => {
+    layers.forEach((layer: IShape | IText | IImage | IGroup | IFrame) => {
       // calculate scale offset
       if (layer.type === 'image') {
         layer = layer as IImage

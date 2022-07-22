@@ -584,7 +584,15 @@ export default Vue.extend({
         return
       }
       GroupUtils.deselect()
-      const page = generalUtils.deepCopy(this.getPage(this.pageIndex))
+      const page = generalUtils.deepCopy(this.getPage(this.pageIndex)) as IPage
+      page.layers.forEach(l => {
+        l.id = generalUtils.generateRandomString(8)
+        if (l.type === LayerType.frame) {
+          (l as IFrame).clips.forEach(c => (c.id = generalUtils.generateRandomString(8)))
+        } else if (l.type === LayerType.group) {
+          (l as IGroup).layers.forEach(l => (l.id = generalUtils.generateRandomString(8)))
+        }
+      })
       page.designId = ''
       page.id = generalUtils.generateRandomString(8)
       pageUtils.addPageToPos(page, this.pageIndex + 1)

@@ -19,6 +19,7 @@ interface IPaymentState {
   prime: string
   isPro: boolean
   trialStatus: string
+  trialDay: number
   isCancelingPro: boolean
   paymentPaidDate: string
   myPaidDate: string
@@ -155,6 +156,7 @@ const getDefaultState = (): IPaymentState => ({
   isPro: false,
   isCancelingPro: false,
   trialStatus: '',
+  trialDay: 14,
   // 'payment' means when user trying to scribe a plan,
   // 'my' means /settings/payment plan info
   paymentPaidDate: '',
@@ -234,6 +236,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       const res = response.data.data
       commit('SET_state', {
         planSelected: res[0].plan_id,
+        trialDay: response.data.trial_day,
         plans: res.reduce((acc: Record<string, Record<string, string | number>>, item: Record<string, string | number>) => ({
           ...acc,
           [item.plan_id]: {

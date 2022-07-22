@@ -104,11 +104,8 @@ export default Vue.extend({
   },
   mounted() {
     imageShadowPanelUtils.mount()
-    console.log('mount')
-    // setTimeout(() => this.focusOnPanel())
   },
   beforeDestroy() {
-    console.log('close')
     imageShadowPanelUtils.handleShadowUpload()
   },
   destroyed() {
@@ -183,8 +180,8 @@ export default Vue.extend({
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
-    reset(effect: ShadowEffectType = ShadowEffectType.none, pageIndex = -1, layerIndex = -1, subLayerIdx = -1) {
-      imageShadowPanelUtils.reset(...arguments)
+    reset(effect?: ShadowEffectType) {
+      imageShadowPanelUtils.reset(effect || this.currentEffect)
     },
     setIsUploading(pageId: string, layerId: string, subLayerId: string, isUploading: boolean) {
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)

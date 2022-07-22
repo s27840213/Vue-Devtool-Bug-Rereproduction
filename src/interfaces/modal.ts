@@ -8,7 +8,6 @@ export interface IModalInfo {
   [key: string]: string | Array<string> | IModalButton
   title: string,
   content: Array<string>,
-  component: string,
   confirmButton: IModalButton,
   cancelButton: IModalButton
 }

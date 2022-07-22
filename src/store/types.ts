@@ -52,6 +52,7 @@ export interface IEditorState {
       width: number,
       height: number
     },
+    isTransparent?: boolean,
     isPreview: boolean,
     previewSrc?: string
   },
@@ -71,11 +72,7 @@ export interface IEditorState {
   inGestureToolMode: boolean,
   isMobile: boolean
   isLargeDesktop: boolean,
-  closeMobilePanelFlag: boolean,
-  mobileAllPageMode: boolean
-  isGlobalLoading: boolean,
-  inMultiSelectionMode: boolean,
-  currCardIndex: number
+  isGlobalLoading: boolean
 }
 
 export enum SidebarPanelType {
