@@ -132,7 +132,7 @@ export default Vue.extend({
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-      inMultiSelectionMode: 'getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
     isTouchDevice(): boolean {
       return GeneralUtils.isTouchDevice()

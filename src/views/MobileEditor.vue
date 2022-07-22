@@ -50,7 +50,6 @@ import { IFooterTabProps } from '@/interfaces/editor'
 import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
-import Vconsole from 'vconsole'
 import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
@@ -70,7 +69,6 @@ export default Vue.extend({
       isConfigPanelOpen: false,
       isLoading: false,
       isSaving: false,
-      currActivePanel: 'none',
       currColorEvent: '',
       showExtraColorPanel: false,
       ColorEventType
@@ -106,7 +104,7 @@ export default Vue.extend({
     }, false)
 
     eventUtils.on(PanelEvent.showMobilePhotoShadow, () => {
-      this.currActivePanel = 'photo-shadow'
+      this.setCurrActivePanel('photo-shadow')
     })
 
     if (process.env.NODE_ENV === 'development') {
@@ -115,7 +113,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState({
+    ...mapState('mobileEditor', {
       closeMobilePanelFlag: 'closeMobilePanelFlag',
       inAllPagesMode: 'mobileAllPageMode'
     }),
@@ -131,7 +129,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
-      inMultiSelectionMode: 'getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      currActivePanel: 'mobileEditor/getCurrActivePanel'
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
@@ -181,7 +180,7 @@ export default Vue.extend({
     closeMobilePanelFlag(newVal) {
       if (newVal) {
         this.setCloseMobilePanelFlag(false)
-        this.currActivePanel = 'none'
+        this.setCurrActivePanel('none')
         this.showExtraColorPanel = false
       }
     }
@@ -205,13 +204,14 @@ export default Vue.extend({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType) {
-        this.currActivePanel = 'none'
+        this.setCurrActivePanel('none')
       } else {
-        this.currActivePanel = panelType
+        this.setCurrActivePanel(panelType)
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
             this.currColorEvent = props.currColorEvent

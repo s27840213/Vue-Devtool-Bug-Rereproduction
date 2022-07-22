@@ -23,6 +23,7 @@ import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
 import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
+import mobileEditor from '@/store/module/mobileEditor'
 import brandkit from './module/brandkit'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
@@ -103,11 +104,7 @@ const getDefaultState = (): IEditorState => ({
   inGestureToolMode: false,
   isMobile: false,
   isLargeDesktop: false,
-  closeMobilePanelFlag: false,
-  mobileAllPageMode: false,
-  isGlobalLoading: false,
-  inMultiSelectionMode: false,
-  currCardIndex: 0
+  isGlobalLoading: false
 })
 
 const state = getDefaultState()
@@ -205,9 +202,6 @@ const getters: GetterTree<IEditorState, unknown> = {
       : state.currActivePageIndex >= 0
         ? state.currActivePageIndex : state.middlemostPageIndex
   },
-  getCurrCardIndex(state: IEditorState): number {
-    return state.currCardIndex
-  },
   getCurrHoveredPageIndex(state: IEditorState): number {
     return state.currHoveredPageIndex
   },
@@ -275,9 +269,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsGlobalLoading(state: IEditorState) {
     return state.isGlobalLoading
-  },
-  getInMultiSelectionMode(state: IEditorState) {
-    return state.inMultiSelectionMode
   }
 }
 
@@ -809,20 +800,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_inGestureMode(state: IEditorState, bool: boolean) {
     state.inGestureToolMode = bool
   },
-  SET_closeMobilePanelFlag(state: IEditorState, bool: boolean) {
-    state.closeMobilePanelFlag = bool
-  },
-  SET_mobileAllPageMode(state: IEditorState, bool: boolean) {
-    state.mobileAllPageMode = bool
-  },
   SET_isGlobalLoading(state: IEditorState, bool: boolean) {
     state.isGlobalLoading = bool
-  },
-  SET_inMultiSelectionMode(state: IEditorState, bool: boolean) {
-    state.inMultiSelectionMode = bool
-  },
-  SET_currCardIndex(state: IEditorState, number) {
-    state.currCardIndex = number
   },
   ...imgShadowMutations
 }
@@ -849,6 +828,7 @@ export default new Vuex.Store({
     templates,
     textStock,
     background,
+    mobileEditor,
     modal,
     popup,
     page,

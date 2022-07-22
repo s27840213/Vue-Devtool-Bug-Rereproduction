@@ -74,7 +74,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState({
-      closeMobilePanelFlag: 'closeMobilePanelFlag'
+      closeMobilePanelFlag: 'mobileEditor/closeMobilePanelFlag'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -121,7 +121,7 @@ export default Vue.extend({
       deleteCheckedAssets: 'file/DELETE_CHECKED_ASSETS',
       updateCheckedAssets: 'file/UPDATE_CHECKED_ASSETS',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
-      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     dragStart(e: DragEvent, photo: any) {
       if (!this.online) {

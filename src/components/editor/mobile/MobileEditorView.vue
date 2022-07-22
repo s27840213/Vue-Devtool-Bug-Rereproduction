@@ -48,6 +48,7 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import generalUtils from '@/utils/generalUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -183,7 +184,7 @@ export default Vue.extend({
       'role',
       'adminMode']),
     ...mapState({
-      mobileAllPageMode: 'mobileAllPageMode'
+      mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
     }),
     ...mapGetters({
       groupId: 'getGroupId',
@@ -201,7 +202,7 @@ export default Vue.extend({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       currFocusPageIndex: 'getCurrFocusPageIndex',
-      currCardIndex: 'getCurrCardIndex'
+      currCardIndex: 'mobileEditor/getCurrCardIndex'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -246,9 +247,8 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode',
       addPage: 'ADD_page',
-      setCurrCardIndex: 'SET_currCardIndex'
+      setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
     }),
     ...mapActions('layouts',
       [
@@ -270,7 +270,7 @@ export default Vue.extend({
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
-        this.setInMultiSelectionMode(false)
+        editorUtils.setInMultiSelectionMode(false)
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })

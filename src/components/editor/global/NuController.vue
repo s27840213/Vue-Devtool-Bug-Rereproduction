@@ -162,6 +162,8 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
+import mobileEditor from '@/store/module/mobileEditor'
+import editorUtils from '@/utils/editorUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -237,7 +239,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'getInMultiSelectionMode',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
@@ -392,8 +394,7 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -1750,7 +1751,7 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
-        this.setInMultiSelectionMode(true)
+        editorUtils.setInMultiSelectionMode(true)
         return
       }
       /**

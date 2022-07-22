@@ -223,7 +223,7 @@ export default Vue.extend({
     ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor',
-      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     colorStyles(color: string) {
       return {

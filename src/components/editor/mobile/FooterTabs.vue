@@ -58,10 +58,36 @@ export default Vue.extend({
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
         { panelType: 'brand', text: `${this.$t('NN0007')}`, disabled: true }
-      ] as Array<IFooterTab>,
-      fontTabs: [
-        mainMenu,
-        { icon: 'edit', text: `${this.$t('NN0504')}` },
+      ] as Array<IFooterTab>
+    }
+  },
+  computed: {
+    ...mapGetters({
+      currSidebarPanel: 'getCurrFunctionPanelType',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      currSubSelectedInfo: 'getCurrSubSelectedInfo',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
+      InBgRemoveLastStep: 'bgRemove/inLastStep'
+    }),
+    groupTab(): IFooterTab {
+      return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 }
+    },
+    photoTabs(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo', disabled: true },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', disabled: this.isFrameImage }
+        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+      ]
+    },
+    fontTabs(): Array<IFooterTab> {
+      return [
+        { icon: 'edit', text: `${this.$t('NN0504')}`, disabled: this.selectMultiple },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
@@ -76,28 +102,32 @@ export default Vue.extend({
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
-      ] as Array<IFooterTab>
-    }
-  },
-  computed: {
-    ...mapGetters({
-      currSidebarPanel: 'getCurrFunctionPanelType',
-      currSelectedInfo: 'getCurrSelectedInfo',
-      currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      isShowPagePreview: 'page/getIsShowPagePreview',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
-    }),
-    photoTabs(): Array<IFooterTab> {
+      ]
+    },
+    multiPhotoTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'photo', disabled: true },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', disabled: this.isFrameImage }
-        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+        ...this.multiGeneralTabs,
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+      ]
+    },
+    multiFontTabs(): Array<IFooterTab> {
+      return [
+        ...this.multiGeneralTabs,
+        ...this.fontTabs
+      ]
+    },
+    multiObjectTabs(): Array<IFooterTab> {
+      return [
+        ...this.multiGeneralTabs,
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          disabled: shapeUtils.getDocumentColors.length === 0,
+          props: {
+            currColorEvent: ColorEventType.shape
+          }
+        }
       ]
     },
     objectTabs(): Array<IFooterTab> {
@@ -135,6 +165,15 @@ export default Vue.extend({
         { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 }
       ]
     },
+    multiGeneralTabs(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        this.groupTab,
+        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
+      ]
+    },
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
@@ -143,7 +182,7 @@ export default Vue.extend({
         return this.photoTabs.concat(this.genearlLayerTabs)
       } else if (this.showFontTabs) {
         // this.$emit('switchTab', 'none')
-        return this.fontTabs.concat(this.genearlLayerTabs)
+        return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs]
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
       } else if (this.showGeneralTabs) {
@@ -211,9 +250,6 @@ export default Vue.extend({
       const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || getCurrConfig.type === LayerType.frame
       return stateCondition && typeConditon
     },
-    isSuperUser(): boolean {
-      return generalUtils.isSuperUser
-    },
     layerType(): { [key: string]: string } {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
       return {
@@ -247,6 +283,9 @@ export default Vue.extend({
     },
     showShapeAdjust(): boolean {
       return this.isLine || this.isBasicShape
+    },
+    selectMultiple(): boolean {
+      return this.selectedLayerNum > 1
     }
   },
   watch: {

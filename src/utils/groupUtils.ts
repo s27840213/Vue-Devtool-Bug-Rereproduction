@@ -63,7 +63,7 @@ class GroupUtils {
   get getPage() { return store.getters.getPage }
   get currSubSelectedInfo() { return store.getters.getCurrSubSelectedInfo }
   get tmpLayer() { return store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex) }
-  get inMultiSelecitonMode() { return store.getters.getInMultiSelectionMode }
+  get inMultiSelecitonMode() { return store.getters['mobileEditor/getInMultiSelectionMode'] }
 
   calcType(layers: Array<IShape | IText | IImage | IGroup | IFrame>): Set<string> {
     const typeSet = new Set<string>()

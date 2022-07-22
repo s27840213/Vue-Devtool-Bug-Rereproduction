@@ -71,11 +71,7 @@ export interface IEditorState {
   inGestureToolMode: boolean,
   isMobile: boolean
   isLargeDesktop: boolean,
-  closeMobilePanelFlag: boolean,
-  mobileAllPageMode: boolean
-  isGlobalLoading: boolean,
-  inMultiSelectionMode: boolean,
-  currCardIndex: number
+  isGlobalLoading: boolean
 }
 
 export enum SidebarPanelType {

@@ -45,6 +45,7 @@ import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import textUtils from '@/utils/textUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -109,7 +110,6 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode',
       updatePageProps: 'UPDATE_pageProps'
     }),
     ...mapActions({
@@ -162,7 +162,7 @@ export default Vue.extend({
     pageClickHandler(e: PointerEvent): void {
       groupUtils.deselect()
       imageUtils.setImgControlDefault(false)
-      this.setInMultiSelectionMode(false)
+      editorUtils.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {

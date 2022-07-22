@@ -140,7 +140,7 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      inMultiSelectionMode: 'getInMultiSelectionMode',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
     layerNum(): number {
