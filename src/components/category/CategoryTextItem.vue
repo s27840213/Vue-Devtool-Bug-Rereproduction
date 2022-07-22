@@ -5,11 +5,14 @@
     style="object-fit: contain;"
     @dragstart="dragStart($event)"
     @click="addText"
+    @click.right.prevent="openUpdateDesignPopup()"
     @error="handleNotFound")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
+import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
@@ -25,6 +28,11 @@ export default Vue.extend({
     }
   },
   components: {},
+  computed: {
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    })
+  },
   methods: {
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
@@ -39,6 +47,14 @@ export default Vue.extend({
         .then(() => {
           textPropUtils.updateTextPropsState()
         })
+    },
+    openUpdateDesignPopup() {
+      if (this.isAdmin) {
+        const isUpdateDesignOpen = true
+        const updateDesignId = this.item.id
+        const updateDesignType = 'text'
+        store.commit('user/SET_STATE', { isUpdateDesignOpen, updateDesignId, updateDesignType })
+      }
     }
   }
 })
