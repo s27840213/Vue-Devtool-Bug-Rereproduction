@@ -6,6 +6,7 @@ import layerUtils from './layerUtils'
 import popupUtils from './popupUtils'
 import flipUtils from './flipUtils'
 import stepsUtils from './stepsUtils'
+import groupUtils from './groupUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -141,6 +142,14 @@ class MappingUtils {
         const { index, pageIndex } = layerUtils.currSelectedInfo
         layerUtils.updateLayerProps(pageIndex, index, { locked: false })
         stepsUtils.record()
+        break
+      }
+      case 'group': {
+        groupUtils.group()
+        break
+      }
+      case 'ungroup': {
+        groupUtils.ungroup()
         break
       }
       case 'trash': {

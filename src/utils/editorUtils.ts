@@ -20,6 +20,12 @@ class EditorUtils {
       }
     }
   }
+
+  setInMultiSelectionMode(bool: boolean): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('SET_inMultiSelectionMode', bool)
+    }
+  }
 }
 
 const editorUtils = new EditorUtils()

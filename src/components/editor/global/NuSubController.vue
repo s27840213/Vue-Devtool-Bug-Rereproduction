@@ -7,7 +7,8 @@
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
-            @click.left.stop="onClickEvent($event)"
+            @click.left.stop="isTouchDevice ? null :onClickEvent($event)"
+            @pointerdown.stop="isTouchDevice ? onClickEvent($event): null"
             @dragenter="onDragEnter($event)"
             @mouseenter="onFrameMouseEnter($event)"
             @mousedown="onMousedown($event)")
@@ -127,8 +128,12 @@ export default Vue.extend({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      inMultiSelectionMode: 'getInMultiSelectionMode'
     }),
+    isTouchDevice(): boolean {
+      return GeneralUtils.isTouchDevice()
+    },
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -474,7 +479,7 @@ export default Vue.extend({
     onClickEvent(e: MouseEvent) {
       if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
           groupUtils.deselectTargetLayer(this.layerIndex)
         }
         return

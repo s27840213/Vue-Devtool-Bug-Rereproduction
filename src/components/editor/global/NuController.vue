@@ -631,6 +631,7 @@ export default Vue.extend({
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)
+
       if (eventType === 'pointer') {
         const pointerEvent = event as PointerEvent
         if (pointerEvent.button !== 0) return
@@ -650,7 +651,11 @@ export default Vue.extend({
       ImageUtils.setImgControlDefault(false)
       // }
 
-      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
+      /**
+       * @Note - in Mobile version, we can't select the layer directly, we should make it active first
+       * The exception is that we are in multi-selection mode
+       */
+      if (this.isTouchDevice && !this.isActive && !this.isLocked && !this.inMultiSelectionMode) {
         const body = (this.$refs.body as HTMLElement)
         body.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
@@ -660,8 +665,8 @@ export default Vue.extend({
       }
 
       this.movingByControlPoint = false
-      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
+      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
       if (!this.isLocked) {
         event.stopPropagation()
       }
@@ -1737,7 +1742,7 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
-        // this.setInMultiSelectionMode(true)
+        this.setInMultiSelectionMode(true)
         return
       }
       /**

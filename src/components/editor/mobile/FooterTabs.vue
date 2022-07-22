@@ -28,6 +28,7 @@ import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import mappingUtils from '@/utils/mappingUtils'
 
 export default Vue.extend({
   components: {
@@ -48,6 +49,7 @@ export default Vue.extend({
     return {
       mainMenu,
       isFontsPanelOpened: false,
+      disableTabScroll: false,
       homeTabs: [
         { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
         { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
@@ -144,6 +146,8 @@ export default Vue.extend({
         return this.fontTabs.concat(this.genearlLayerTabs)
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
+      } else if (this.showGeneralTabs) {
+        return [this.mainMenu, ...this.genearlLayerTabs]
       } else {
         return this.homeTabs
       }
@@ -197,6 +201,10 @@ export default Vue.extend({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.targetIs('text') && this.singleTargetType()
     },
+    showGeneralTabs(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum !== 0
+    },
     showShapeSetting(): boolean {
       const { getCurrConfig } = layerUtils
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
@@ -249,6 +257,10 @@ export default Vue.extend({
     },
     tabs: {
       handler() {
+        if (this.disableTabScroll) {
+          this.disableTabScroll = false
+          return
+        }
         const container = this.$refs.container as HTMLElement
         container.scrollTo(0, 0)
       },
@@ -335,6 +347,12 @@ export default Vue.extend({
           })
 
           tiptapUtils.focus({ scrollIntoView: false })
+          break
+        }
+        case 'group':
+        case 'ungroup': {
+          this.disableTabScroll = true
+          mappingUtils.mappingIconAction(tab.icon)
           break
         }
         default: {
