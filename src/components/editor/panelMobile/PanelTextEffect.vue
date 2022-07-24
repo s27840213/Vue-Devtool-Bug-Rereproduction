@@ -14,8 +14,7 @@
           :iconName="'text-shape-none'"
           iconWidth="60px"
           iconColor="gray-5"
-          @click.native="pushHistory('text-shape')"
-        )
+          @click.native="pushHistory('text-shape')")
         span(class="body-3") {{$t('NN0070')}}
     div(v-if="showTextEffect" class="panel-text-effect__options")
       div(v-for="(icon, idx) in shadowOption"
@@ -166,6 +165,8 @@ export default Vue.extend({
     },
     currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
+      console.log(textEffect.name)
+      console.log(this.shadowOption)
       return textEffect.name || 'none'
     },
     currentShape(): string {
@@ -226,12 +227,17 @@ export default Vue.extend({
     border-radius: 5px;
     overflow-x: scroll;
     @include no-scrollbar;
+    padding-top: 2px;
     padding-bottom: 20px;
   }
 
   &__option {
     margin: 0 8px;
     width: 60px;
+    box-sizing: border-box;
+    &--selected {
+      outline: 2px solid setColor(blue-1);
+    }
   }
 
   &__form {

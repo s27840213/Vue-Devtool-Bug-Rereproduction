@@ -389,7 +389,7 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['dblclick', 'click', 'contextmenu', 'pointerdown', 'touchstart']
+        events: ['contextmenu', 'pointerdown', 'touchstart']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
     },
