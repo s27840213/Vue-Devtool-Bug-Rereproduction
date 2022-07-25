@@ -37,6 +37,9 @@ export default Vue.extend({
       isAdmin: 'isAdmin'
     })
   },
+  created() {
+    this.item.db = 'svg'
+  },
   methods: {
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
