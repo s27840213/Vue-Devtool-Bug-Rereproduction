@@ -371,14 +371,6 @@ export default Vue.extend({
   mounted() {
     this.panelHeight = this.initHeightPx()
   },
-  watch: {
-    panelHistory: {
-      handler(newVal) {
-        console.log(newVal)
-      },
-      deep: true
-    }
-  },
   methods: {
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes',

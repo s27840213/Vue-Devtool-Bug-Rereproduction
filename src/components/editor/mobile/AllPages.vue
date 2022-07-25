@@ -13,7 +13,6 @@ div(class="all-pages")
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
-import PagePreviewPageWrapper from '@/components/editor/pagePreview/PagePreviewPageWrapper.vue'
 import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue'
 import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
@@ -28,7 +27,7 @@ export default Vue.extend({
     }
   },
   components: {
-    PagePreviewPageWrapper,
+    PagePreviewPageWrapper: () => import('@/components/editor/pagePreview/PagePreviewPageWrapper.vue'),
     PagePreviewPlus
   },
   computed: {
@@ -49,6 +48,7 @@ export default Vue.extend({
       this.screenWidth = document.body.clientWidth - 130
       this._setPagesPerRow(floor(this.screenWidth / 180))
     })
+    console.log('mounted')
   },
   methods: {
     ...mapMutations({

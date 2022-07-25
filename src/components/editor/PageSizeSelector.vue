@@ -425,7 +425,6 @@ export default Vue.extend({
       @extend .page-size-selector__body__text;
       width: 45%;
       white-space: nowrap;
-      transform: scale(0.85);
     }
     &__buttons {
       display: flex;

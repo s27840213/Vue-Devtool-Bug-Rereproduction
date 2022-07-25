@@ -206,7 +206,6 @@ class PageUtils {
       if (generalUtils.isTouchDevice()) this.fitPage(false, pagesTmp[0])
       store.commit('SET_pages', this.newPages(pagesTmp))
     }
-    console.log('Update spec page')
   }
 
   startBackgroundImageControl(pageIndex: number): void {
@@ -353,7 +352,7 @@ class PageUtils {
       return
     }
 
-    const { width: targetWidth, height: targetHeight }: { width:number, height:number } =
+    const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       targetSize ||
       (this.inBgRemoveMode ? this.autoRemoveResult
         : this.currFocusPageSize)

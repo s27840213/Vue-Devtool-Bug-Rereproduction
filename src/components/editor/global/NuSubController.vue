@@ -7,10 +7,9 @@
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
-            @click.left.stop="isTouchDevice ? null :onClickEvent($event)"
-            @pointerdown.stop="isTouchDevice ? onClickEvent($event): null"
+            @click.left.stop="onClickEvent($event)"
             @dragenter="onDragEnter($event)"
-            @mousedown="onMousedown($event)")
+            @pointerdown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
@@ -420,21 +419,6 @@ export default Vue.extend({
         }
       } else {
         return 'none'
-      }
-    },
-    onRightClick(event: MouseEvent) {
-      if (this.isHandleShadow) {
-        return
-      }
-      imageUtils.setImgControlDefault(false)
-      if (!this.isLocked) {
-        this.setIsLayerDropdownsOpened(true)
-        this.$nextTick(() => {
-          const el = document.querySelector('.dropdowns--layer') as HTMLElement
-          const mousePos = MouseUtils.getMouseAbsPoint(event)
-          el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-          el.focus()
-        })
       }
     },
     waitFontLoadingAndRecord() {
