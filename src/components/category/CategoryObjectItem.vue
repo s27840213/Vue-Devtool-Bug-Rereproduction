@@ -30,6 +30,9 @@ export default Vue.extend({
     src: String,
     item: Object
   },
+  created() {
+    this.item.db = 'svg'
+  },
   methods: {
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'

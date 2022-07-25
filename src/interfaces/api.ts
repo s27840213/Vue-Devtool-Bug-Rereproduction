@@ -132,8 +132,9 @@ export interface IGroupDesignInputParams {
 
 export interface IListServiceContentDataItem {
   id: string
-  type: number
+  type: number,
   ver: number
+  db?: 'svg' | 'text',
   width?: number
   height?: number
   title?: string

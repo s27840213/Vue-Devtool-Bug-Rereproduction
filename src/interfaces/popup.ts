@@ -10,7 +10,8 @@ export interface IPopupProps {
 export interface IPopupComponent {
   component: string,
   properties: Partial<IPopupProps>,
-  closeHandler: () => void
+  closeHandler: () => void,
+  props: { [key: string]: string }
 }
 
 export interface IPopupOptions {

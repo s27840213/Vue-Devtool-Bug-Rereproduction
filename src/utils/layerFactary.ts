@@ -334,6 +334,7 @@ class LayerFactary {
       moved: false,
       dragging: false,
       designId: config.designId,
+      db: config.db,
       styles: {
         x: config.styles.x,
         y: config.styles.y,

@@ -148,7 +148,8 @@ export interface IFrameStyle extends IStyle {
   }
 }
 export interface IGroup extends ILayer<IStyle> {
-  layers: Array<IShape | IText | IImage | IGroup>
+  layers: Array<IShape | IText | IImage | IGroup>,
+  db?: 'svg' | 'text'
 }
 export interface ITmp extends ILayer<IStyle> {
   layers: Array<IShape | IText | IImage | IGroup>

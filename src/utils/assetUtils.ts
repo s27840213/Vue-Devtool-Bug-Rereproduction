@@ -98,15 +98,15 @@ class AssetUtils {
   }
 
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
-    const { id, type, ver, ...attrs } = item
+    const { id, type, ver, db, ...attrs } = item
     const typeCategory = this.getTypeCategory(type)
     const asset = {
       id,
       type,
       ver,
       urls: {
-        prev: [this.host, typeCategory, id, this.preview].join('/'),
-        json: [this.host, typeCategory, id, this.data].join('/')
+        prev: [this.host, db || typeCategory, id, this.preview].join('/'),
+        json: [this.host, db || typeCategory, id, this.data].join('/')
       },
       ...attrs
     } as IAsset
@@ -579,7 +579,7 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
           editorUtils.setCloseMobilePanelFlag(true)
           break
         case 6:
@@ -588,7 +588,7 @@ class AssetUtils {
           editorUtils.setCloseMobilePanelFlag(true)
           break
         case 7:
-          this.addText(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          this.addText(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
           editorUtils.setCloseMobilePanelFlag(true)
           break
         case 8:

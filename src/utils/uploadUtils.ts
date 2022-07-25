@@ -1420,13 +1420,15 @@ class UploadUtils {
       }
       case 'group': {
         const group = layer as IGroup
-        const { type, layers, styles } = group
+        const { type, layers, styles, designId, db } = group
         const filteredLayers = layers
           .map(layer => {
             return this.layerInfoFilter(layer)
           })
         return {
           type,
+          designId,
+          db,
           layers: filteredLayers,
           styles: this.styleFilter(styles)
         }
