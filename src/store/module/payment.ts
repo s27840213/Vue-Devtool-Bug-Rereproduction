@@ -268,7 +268,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       commit('SET_state', {
         planSelected: res[0].plan_id,
         trialDay: response.data.trial_day,
-        plans: res.reduce((acc: Record<string, Record<string, string | number>>, item: Record<string, string | number>) => ({
+        plans: res.reduce((acc: any, item: type.IDataBillingInfoList) => ({
           ...acc,
           [item.plan_id]: {
             name: item.plan_id,
@@ -283,7 +283,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
               nextPaid: item.price_bundle_discount
             }
           }
-        }), {})
+        }), {}) as type.IPlan
       })
     })
   },
@@ -334,7 +334,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.billingHistory(0/* state.nextBillingHistoryIndex */).then((response) => {
       commit('SET_state', {
         // nextBillingHistoryIndex: response.data.next_page,
-        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item: Record<string, string | number>) => {
+        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item: type.IDataBillingInfoHistory) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
             month: 'long',

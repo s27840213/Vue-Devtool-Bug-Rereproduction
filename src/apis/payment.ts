@@ -6,8 +6,8 @@ import store from '@/store'
 import * as type from '@/interfaces/payment'
 
 class Payment {
-  planList (country: string): AxiosPromise {
-    return axios.request<any>({
+  planList (country: string) {
+    return axios.request<type.IApiBillingInfoList>({
       url: '/billing-info',
       method: 'POST',
       data: {
@@ -18,8 +18,8 @@ class Payment {
     })
   }
 
-  billingInfo (): AxiosPromise {
-    return axios.request<any>({
+  billingInfo () {
+    return axios.request<type.IApiBillingInfoStatus>({
       url: '/billing-info',
       method: 'POST',
       data: {
@@ -30,8 +30,8 @@ class Payment {
     })
   }
 
-  billingHistory (index: number): AxiosPromise {
-    return axios.request<any>({
+  billingHistory (index: number) {
+    return axios.request<type.IApiBillingInfoHistory>({
       url: '/billing-info',
       method: 'POST',
       data: {
@@ -43,8 +43,8 @@ class Payment {
     })
   }
 
-  updateBillingInfo (params: any): AxiosPromise {
-    return axios.request<any>({
+  updateBillingInfo (params: type.IParamMeta) {
+    return axios.request<type.IApiBasic>({
       url: '/billing-info',
       method: 'POST',
       data: {
@@ -57,8 +57,8 @@ class Payment {
   }
 
   // For both stripe & tappay
-  init (): AxiosPromise {
-    return axios.request<any>({
+  init () {
+    return axios.request<type.IApiPaymentInit>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -69,8 +69,8 @@ class Payment {
     })
   }
 
-  tappayAdd (params: any): AxiosPromise {
-    return axios.request<any>({
+  tappayAdd (params: type.IParamTappayAdd) {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -79,13 +79,13 @@ class Payment {
         action: 'add_card',
         type: 'tappay',
         campaign: localStorage.getItem('campaign') || undefined,
-        ...params // country, plan_id, is_bundle, prime
+        ...params
       }
     })
   }
 
-  stripeAdd (params: any): AxiosPromise {
-    return axios.request<any>({
+  stripeAdd (params: type.IParamStripeAdd) {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -94,13 +94,13 @@ class Payment {
         action: 'add_card',
         type: 'stripe',
         campaign: localStorage.getItem('campaign') || undefined,
-        ...params // country, plan_id, is_bundle,
+        ...params
       }
     })
   }
 
-  tappayUpdate (params: any): AxiosPromise {
-    return axios.request<any>({
+  tappayUpdate (params: type.IParamPrime) {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -108,13 +108,13 @@ class Payment {
         locale: i18n.locale,
         action: 'update_card',
         type: 'tappay',
-        ...params // prime
+        ...params
       }
     })
   }
 
-  stripeUpdate (): AxiosPromise {
-    return axios.request<any>({
+  stripeUpdate () {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -126,8 +126,8 @@ class Payment {
     })
   }
 
-  getSwitchPrice (params: any): AxiosPromise {
-    return axios.request<any>({
+  getSwitchPrice (params: type.IParamSwitch) {
+    return axios.request<type.IApiPaymentSwitch>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -140,8 +140,8 @@ class Payment {
     })
   }
 
-  switch (params: any): AxiosPromise {
-    return axios.request<any>({
+  switch (params: type.IParamSwitch) {
+    return axios.request<type.IApiPaymentSwitch>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -154,8 +154,8 @@ class Payment {
     })
   }
 
-  cancel (reason: string): AxiosPromise {
-    return axios.request<any>({
+  cancel (reason: string) {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -167,8 +167,8 @@ class Payment {
     })
   }
 
-  resume (): AxiosPromise {
-    return axios.request<any>({
+  resume () {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -179,8 +179,8 @@ class Payment {
     })
   }
 
-  deleteCard(): AxiosPromise {
-    return axios.request<any>({
+  deleteCard() {
+    return axios.request<type.IApiBasic>({
       url: '/payment',
       method: 'POST',
       data: {
@@ -192,7 +192,7 @@ class Payment {
   }
 
   calcUserAsset(procId: string): AxiosPromise {
-    return axios.request<any>({
+    return axios.request<type.IApiBasic>({
       url: '/calc-user-asset',
       method: 'POST',
       data: {
@@ -211,7 +211,7 @@ class Payment {
   }
 
   verifyCoupon(coupon: string) {
-    return axios.request<type.IDataCouponCheck>({
+    return axios.request<type.IApiCouponCheck>({
       url: '/verify-coupon',
       method: 'POST',
       data: {
@@ -224,7 +224,7 @@ class Payment {
   }
 
   applyCoupon(coupon: string, plan_id: string, is_bundle: number) {
-    return axios.request<type.IDataCoupon>({
+    return axios.request<type.IApiCoupon>({
       url: '/verify-coupon',
       method: 'POST',
       data: {
