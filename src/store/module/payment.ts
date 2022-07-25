@@ -47,24 +47,7 @@ interface IPaymentState {
     paymentPaidDate: string
   },
   // nextBillingHistoryIndex: number
-  billingHistory: {
-    date: string
-    description: string
-    price: number
-    success: boolean
-    payType: string
-    url: string
-    id: string
-    name: string
-    company: string
-    address: string
-    email: string
-    items: [{
-      description: string
-      date: string
-      price: string
-    }]
-  }[]
+  billingHistory: Array<type.IBillingHistory>
   // User input
   planSelected: string
   periodUi: string
@@ -268,7 +251,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       commit('SET_state', {
         planSelected: res[0].plan_id,
         trialDay: response.data.trial_day,
-        plans: res.reduce((acc: any, item: type.IDataBillingInfoList) => ({
+        plans: res.reduce((acc, item) => ({
           ...acc,
           [item.plan_id]: {
             name: item.plan_id,
@@ -352,6 +335,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
             company: item.company,
             address: item.country !== 'us' ? item.address_line1 : `${item.address_line1}${item.address_line2 ? `, ${item.address_line2}` : ''}\n${item.address_city}, ${item.address_state} ${item.postal_code} US`,
             email: item.email,
+            couponCentent: item.coupon_content,
             items: [{
               description: item.title,
               date: date,

@@ -142,3 +142,23 @@ export interface IPlan {
     nextPaid: number
   }
 }
+
+export interface IBillingHistory {
+  date: string
+  description: string
+  price: number
+  success: boolean
+  payType: string
+  url: string
+  id: string
+  name: string
+  company: string
+  address: string
+  email: string
+  couponCentent: string
+  items: [{
+    description: string
+    date: string
+    price: number
+  }]
+}
