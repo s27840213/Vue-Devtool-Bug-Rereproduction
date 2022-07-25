@@ -440,9 +440,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .mobile-panel {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  position: relative;
   width: 100%;
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);

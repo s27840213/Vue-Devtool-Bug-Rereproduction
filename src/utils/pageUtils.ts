@@ -353,24 +353,35 @@ class PageUtils {
       return
     }
 
+    // Get size of target(design) and editor.
+    // Target size can be pass by param or get according to situation.
+    const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width:number, height:number } =
       targetSize ||
       (this.inBgRemoveMode ? this.autoRemoveResult
         : this.currFocusPageSize)
-    const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const resizeRatio = Math.min(editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)), editorViewBox.clientHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
 
+    // Add the height of MobilePanel if mobile-editor, because MobilePanel occupy editor sapce.
+    const mobilePanelBox = document.getElementsByClassName('mobile-panel')[0]
+    if (generalUtils.isTouchDevice() && mobilePanelBox) {
+      editorHeight += mobilePanelBox.clientHeight
+    }
+
+    // Calculate and do resize
+    const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
       store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
     }
+
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
     if (scrollToTop) {
       Vue.nextTick(() => {
-        editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
+        editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
       })
     }
     pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
