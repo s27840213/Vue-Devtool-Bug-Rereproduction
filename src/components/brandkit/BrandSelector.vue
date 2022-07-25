@@ -198,6 +198,10 @@ export default Vue.extend({
   &.panel-theme {
     margin-left: 1px;
   }
+  &.mobile-panel-theme {
+    margin-left: 0px;
+    gap: 16px;
+  }
   &__brand-name {
     @include text-H4;
     line-height: unset;
@@ -256,6 +260,37 @@ export default Vue.extend({
       color: inherit;
       font-family: inherit;
     }
+    &.mobile-panel-theme {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 140%;
+      height: 24px;
+      max-width: calc(100% - 140px);
+      color: setColor(gray-2);
+      & > input {
+        padding: 0px;
+        background-color: transparent;
+      }
+      & > span {
+        padding: 0px;
+        cursor: initial;
+      }
+    }
+    & > span {
+      display: block;
+      cursor: text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    & > input {
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+      letter-spacing: inherit;
+      color: inherit;
+      font-family: inherit;
+    }
   }
   &__dropdown {
     width: 24px;
@@ -270,6 +305,9 @@ export default Vue.extend({
     &.editor-theme > svg,
     &.panel-theme > svg {
       color: white;
+    }
+    &.mobile-panel-theme > svg {
+      color: setColor(gray-2);
     }
     &.brandkit-theme > svg {
       color: setColor(bu);

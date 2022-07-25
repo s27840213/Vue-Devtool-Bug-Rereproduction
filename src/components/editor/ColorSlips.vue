@@ -27,10 +27,10 @@
       template(v-if="!showAllRecentlyColor")
         //- Brandkit select
         div(class="relative")
-          brand-selector(theme="panel")
+          brand-selector(theme="mobile-panel")
           div(class="color-panel__brand-settings pointer"
               @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
+            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
         //- Brandkit palettes
         div(v-if="isPalettesLoading" class="color-panel__colors")
           svg-icon(iconName="loading"

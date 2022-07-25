@@ -7,11 +7,11 @@
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
         keep-alive
-          mobile-editor-view(v-if="!inAllPagesMode"
+          mobile-editor-view(v-show="!inAllPagesMode"
             :currActivePanel="currActivePanel"
             :isConfigPanelOpen="isConfigPanelOpen"
             :inAllPagesMode="inAllPagesMode")
-          div(v-else class="mobile-editor__page-preview")
+          div(v-show="inAllPagesMode" class="mobile-editor__page-preview")
             all-pages
       transition(name="panel-up")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
@@ -38,7 +38,7 @@ import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
@@ -51,6 +51,7 @@ import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -111,6 +112,8 @@ export default Vue.extend({
       // const vconsole = new Vconsole()
       // vconsole.setSwitchPosition(10, 80)
     }
+
+    brandkitUtils.fetchBrands(this.fetchBrands)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -207,6 +210,9 @@ export default Vue.extend({
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
     }),
+    ...mapActions({
+      fetchBrands: 'brandkit/fetchBrands'
+    }),
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType) {
         this.setCurrActivePanel('none')
@@ -254,7 +260,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
-    background-color: setColor(gray-5);;
+    background-color: setColor(gray-5);
   }
   &__bottom {
     z-index: setZindex("footer");
