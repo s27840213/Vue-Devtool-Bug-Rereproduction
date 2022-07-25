@@ -1,6 +1,6 @@
 <template lang="pug">
 div(class="coupon-input")
-  input(v-model="coupon.input" @input="changeCoupon")
+  input(v-model="coupon.input" @input="changeCoupon" @paste="pasteCoupon()")
   span(:class="coupon.status==='error'?'text-red':'text-green-1'") {{coupon.msg}}
   button(v-if="coupon.status==='input'" @click="sendCoupon()") APPLY
   svg-icon(v-if="coupon.status==='loading'" iconName="loading"
@@ -32,6 +32,7 @@ export default Vue.extend({
   mounted() {
     if (!this.coupon.input) {
       this.coupon.input = new URLSearchParams(window.location.search).get('coupon') || ''
+      this.coupon.input && this.sendCoupon()
     }
   },
   methods: {
@@ -39,6 +40,9 @@ export default Vue.extend({
       verifyCoupon: 'verifyCoupon',
       resetCouponResult: 'resetCouponResult'
     }),
+    pasteCoupon() {
+      setTimeout(this.sendCoupon, 10)
+    },
     sendCoupon() {
       this.verifyCoupon()
     },

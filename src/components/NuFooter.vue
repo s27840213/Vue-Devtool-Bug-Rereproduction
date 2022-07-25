@@ -31,7 +31,7 @@
             :class="featureExpand[1] ? 'expand' : ''")
             a(:href="facebookPage") {{$t('NN0158')}}
             a(href="/templates") {{$t('NN0145')}}
-            span(@click="coupon()") {{$t('NN0697')}}
+            span(class="pointer" @click="coupon()") {{$t('NN0697')}}
         div(class="nu-footer__feature-region")
           div(class="label-lg nu-footer__feature-title"
             @click="expandItems(2, !featureExpand[2])")
