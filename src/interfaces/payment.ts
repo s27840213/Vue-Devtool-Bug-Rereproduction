@@ -7,5 +7,19 @@ export interface IDataCouponCheck {
 export interface IDataCoupon extends IDataCouponCheck {
   price_original: number
   price: number
-  change_time: number
+  charge_time: string
+}
+
+export interface IPlan {
+  name: string
+  monthly: {
+    original: string
+    now: string
+    nextPaid: number
+  },
+  yearly: {
+    original: string
+    now: string
+    nextPaid: number
+  }
 }

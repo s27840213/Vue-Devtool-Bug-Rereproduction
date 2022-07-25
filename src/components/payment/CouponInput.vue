@@ -37,14 +37,13 @@ export default Vue.extend({
   methods: {
     ...mapActions('payment', {
       verifyCoupon: 'verifyCoupon',
-      clearCouponMsg: 'clearCouponMsg'
+      resetCouponResult: 'resetCouponResult'
     }),
     sendCoupon() {
       this.verifyCoupon()
     },
     changeCoupon() {
-      console.log('change')
-      this.clearCouponMsg()
+      this.resetCouponResult()
     }
   }
 })

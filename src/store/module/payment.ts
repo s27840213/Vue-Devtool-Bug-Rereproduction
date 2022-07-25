@@ -7,6 +7,7 @@ import paymentApi from '@/apis/payment'
 import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
+import * as type from '@/interfaces/payment'
 
 interface IPaymentState {
   isLoading: boolean
@@ -14,7 +15,7 @@ interface IPaymentState {
   templateImg: string
   // Constant
   status: string
-  plans: Record<string, Record<string, Record<string, string> | string>>
+  plans: Record<string, type.IPlan>
   stripeClientSecret: string
   prime: string
   isPro: boolean
@@ -42,6 +43,8 @@ interface IPaymentState {
     input: string
     msg: string
     status: string
+    discount: number // Amonut of money user save.
+    paymentPaidDate: string
   },
   // nextBillingHistoryIndex: number
   billingHistory: {
@@ -154,12 +157,12 @@ const getDefaultState = (): IPaymentState => ({
       monthly: {
         original: '',
         now: '',
-        nextPaid: ''
+        nextPaid: 0
       },
       yearly: {
         original: '',
         now: '',
-        nextPaid: ''
+        nextPaid: 0
       }
     }
   },
@@ -191,7 +194,9 @@ const getDefaultState = (): IPaymentState => ({
   coupon: {
     input: '',
     msg: '',
-    status: 'input'
+    status: 'input',
+    discount: 0,
+    paymentPaidDate: ''
   },
   // nextBillingHistoryIndex: 0,
   billingHistory: [],
@@ -240,6 +245,15 @@ function isLegalGUI(GUI: string) { // Government Uniform Invoice, 統編
   return GUI[6] === '7' // Check if divisible by 5
     ? GUIsum % divisor === 0 || (GUIsum + 1) % divisor === 0
     : GUIsum % divisor === 0
+}
+
+function string2Date(time: string) {
+  return new Date(time)
+    .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
 }
 
 const actions: ActionTree<IPaymentState, unknown> = {
@@ -547,22 +561,16 @@ const actions: ActionTree<IPaymentState, unknown> = {
     paymentApi.calcDone(procId, callback)
   },
   verifyCoupon({ commit }) {
-    commit('SET_state', {
-      coupon: {
-        input: state.coupon.input, // No change
-        msg: '',
-        status: 'loading'
-      }
+    commit('SET_coupon', {
+      msg: '',
+      status: 'loading'
     })
     paymentApi.verifyCoupon(state.coupon.input).then(({ data }) => {
       console.log('data', data)
       const error = Boolean(ICouponError.includes(data.msg))
-      commit('SET_state', {
-        coupon: {
-          input: state.coupon.input, // No change
-          msg: error ? i18n.t('NN0698') : data.msg,
-          status: error ? 'error' : 'accept'
-        }
+      commit('SET_coupon', {
+        msg: error ? i18n.t('NN0698') : data.msg,
+        status: error ? 'error' : 'accept'
       })
     })
   },
@@ -575,18 +583,27 @@ const actions: ActionTree<IPaymentState, unknown> = {
     ).then(({ data }) => {
       // if (data.flag) throw Error(data.msg)
       console.log('data2', data)
-      commit('SET_state', {
-        //
+      commit('SET_coupon', {
+        discount: data.price_original - data.price,
+        paymentPaidDate: string2Date(data.charge_time)
       })
     }).catch(msg => Vue.notify({ group: 'error', text: msg }))
   },
-  clearCouponMsg({ commit }) {
-    commit('SET_state', {
-      coupon: {
-        input: state.coupon.input,
-        msg: '',
-        status: 'input'
-      }
+  resetCouponResult({ commit }) {
+    commit('SET_coupon', {
+      msg: '',
+      status: 'input',
+      discount: 0,
+      paymentPaidDate: ''
+    })
+  },
+  resetCoupon({ commit }) {
+    commit('SET_coupon', {
+      input: '',
+      msg: '',
+      status: 'input',
+      discount: 0,
+      paymentPaidDate: ''
     })
   }
 }
@@ -598,12 +615,7 @@ const mutations: MutationTree<IPaymentState> = {
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
       if (['paymentPaidDate', 'myPaidDate', 'switchPaidDate'].includes(key) && newState[key]) {
-        (state[key] as any) = new Date(newState[key] as string)
-          .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
+        (state[key] as any) = string2Date(newState[key] as string)
       } else if (key in state) {
         (state[key] as any) = newState[key]
       }
@@ -629,6 +641,9 @@ const mutations: MutationTree<IPaymentState> = {
   },
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime
+  },
+  SET_coupon(state: IPaymentState, data: Record<string, string>) {
+    Object.assign(state.coupon, data)
   }
 }
 
@@ -648,6 +663,9 @@ const getters: GetterTree<IPaymentState, unknown> = {
   },
   getIsPro(state) {
     return state.isPro
+  },
+  getPaidDate(state) {
+    return state.coupon.paymentPaidDate || state.paymentPaidDate
   }
 }
 

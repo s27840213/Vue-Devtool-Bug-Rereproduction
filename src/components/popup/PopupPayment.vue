@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="popup-window")
   div(class="wrapper")
-    div(class="payment" v-click-outside="vcoConfig")
+    div(class="payment" v-click-outside="vcoConfig()")
       svg-icon(class="payment__close" iconName="close" iconWidth="32px"
               iconColor="gray-0" @click.native="closePopup()")
       div(class="payment-left")
@@ -99,12 +99,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      vcoConfig: {
-        handler: () => { this.$emit('close') },
-        middleware: (event: MouseEvent) => {
-          return (event.target as HTMLElement).className === 'popup-window'
-        }
-      },
       // View variable
       view: '',
       currentStep: 0,
@@ -163,6 +157,7 @@ export default Vue.extend({
       getBillingInfo: 'getBillingInfo',
       init: 'init',
       applyCoupon: 'applyCoupon',
+      resetCoupon: 'resetCoupon',
       getSwitchPrice: 'getSwitchPrice',
       switch: 'switch',
       cancelApi: 'cancel',
@@ -267,6 +262,14 @@ export default Vue.extend({
           break
       }
     },
+    vcoConfig() {
+      return {
+        handler: this.closePopup,
+        middleware: (event: MouseEvent) => {
+          return (event.target as HTMLElement).className === 'popup-window'
+        }
+      }
+    },
     setPeriod(value: string) {
       if (this.view === 'step1') { this.periodUi = value }
     },
@@ -285,7 +288,10 @@ export default Vue.extend({
         this.closePopup
       ).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
-    closePopup() { this.$emit('close') }
+    closePopup() {
+      this.$emit('close')
+      this.resetCoupon() // Ask kitty clear input or not.
+    }
   }
 })
 </script>

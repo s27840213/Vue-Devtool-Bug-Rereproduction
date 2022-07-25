@@ -3,7 +3,7 @@ import axios from '@/apis'
 import authToken from './auth-token'
 import { AxiosPromise } from 'axios'
 import store from '@/store'
-import * as Ipayment from '@/interfaces/payment'
+import * as type from '@/interfaces/payment'
 
 class Payment {
   planList (country: string): AxiosPromise {
@@ -211,7 +211,7 @@ class Payment {
   }
 
   verifyCoupon(coupon: string) {
-    return axios.request<Ipayment.IDataCouponCheck>({
+    return axios.request<type.IDataCouponCheck>({
       url: '/verify-coupon',
       method: 'POST',
       data: {
@@ -224,7 +224,7 @@ class Payment {
   }
 
   applyCoupon(coupon: string, plan_id: string, is_bundle: number) {
-    return axios.request<Ipayment.IDataCoupon>({
+    return axios.request<type.IDataCoupon>({
       url: '/verify-coupon',
       method: 'POST',
       data: {
