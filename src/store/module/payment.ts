@@ -437,7 +437,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
       prime: state.prime,
-      email: state.billingInfo.email
+      email: state.billingInfo.email,
+      coupon: state.coupon.input
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       recordThePlanToGTM(state.trialStatus, getters.getIsBundle)
@@ -458,7 +459,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       country: state.userCountryUi,
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
-      email: state.billingInfo.email
+      email: state.billingInfo.email,
+      coupon: state.coupon.input
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       recordThePlanToGTM(state.trialStatus, getters.getIsBundle)
