@@ -13,13 +13,34 @@
 </template>
 
 <script lang="ts">
+import { LayerType } from '@/store/types'
+import layerUtils from '@/utils/layerUtils'
 import MappingUtils from '@/utils/mappingUtils'
+import { Function } from 'lodash'
 import Vue from 'vue'
 
 export default Vue.extend({
   data() {
     return {
-      MappingUtils
+      MappingUtils,
+      destoryCb: undefined as unknown as () => void | undefined
+    }
+  },
+  mounted() {
+    const target = layerUtils.getCurrConfig
+    if (target.type === LayerType.image) {
+      const el = document.getElementById(`nu-image-${target.id}__shadow`)
+      if (el) {
+        el.classList.add('layer-flip')
+        this.destoryCb = () => {
+          el.classList.remove('layer-flip')
+        }
+      }
+    }
+  },
+  destroyed() {
+    if (this.destoryCb) {
+      this.destoryCb()
     }
   },
   methods: {

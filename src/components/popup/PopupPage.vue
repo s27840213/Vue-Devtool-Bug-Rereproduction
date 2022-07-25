@@ -157,7 +157,7 @@ export default Vue.extend({
       const detachedBackgroundImage = GeneralUtils.deepCopy(this.getBackgroundImage(pageUtils.currFocusPageIndex))
       if (detachedBackgroundImage.config.srcObj.assetId) {
         /** get a tiny photo in order to get the aspectRatio of the image */
-        const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj.type, 50))
+        const src = imageUtils.getSrc(detachedBackgroundImage.config, imageUtils.getSrcSize(detachedBackgroundImage.config.srcObj, 50))
         const img = new Image()
         img.onload = () => {
           const ratio = img.naturalWidth / img.naturalHeight

@@ -10,6 +10,7 @@ import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } f
 import { EventEmitter } from 'events'
 import textPropUtils from './textPropUtils'
 import textEffectUtils from './textEffectUtils'
+import generalUtils from './generalUtils'
 
 class TiptapUtils {
   event: any
@@ -39,6 +40,9 @@ class TiptapUtils {
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
         }
+      },
+      parseOptions: {
+        preserveWhitespace: 'full'
       },
       editable,
       onCreate: ({ editor }) => {
@@ -118,7 +122,8 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          pObj.content = p.spans.map(s => {
+          const spans = this.splitLastWhiteSpaces(p.spans)
+          pObj.content = spans.map(s => {
             return {
               type: 'text',
               text: s.text,
@@ -131,6 +136,22 @@ class TiptapUtils {
         }
         return pObj
       })
+    }
+  }
+
+  splitLastWhiteSpaces(spans: ISpan[]): ISpan[] {
+    const lastSpan = spans[spans.length - 1]
+    if (!lastSpan.text.endsWith(' ')) return spans
+    const copiedSpans = generalUtils.deepCopy(spans)
+    const lastWhiteSpaces = lastSpan.text.match(/ +$/)?.[0] ?? ''
+    const prevText = lastSpan.text.substring(0, lastSpan.text.length - lastWhiteSpaces.length)
+    if (prevText === '') {
+      copiedSpans[copiedSpans.length - 1].styles.pre = true
+      return copiedSpans
+    } else {
+      copiedSpans[copiedSpans.length - 1].text = prevText
+      copiedSpans.push({ text: lastWhiteSpaces, styles: { ...lastSpan.styles, pre: true } })
+      return copiedSpans
     }
   }
 
@@ -154,8 +175,8 @@ class TiptapUtils {
   }
 
   makeSpanStyle(attributes: any): ISpanStyle {
-    const { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } = attributes
-    return { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl } as ISpanStyle
+    const { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl, pre } = attributes
+    return { font, weight, size, decoration, style, color, type, userId, assetId, fontUrl, pre } as ISpanStyle
   }
 
   extractSpanStyleForParagraph(attributes: any): Partial<ISpanStyle> {
@@ -254,6 +275,10 @@ class TiptapUtils {
           isSetContentRequired = true
         }
         if (paragraph.attrs.spanStyle) {
+          isSetContentRequired = true
+        }
+        const lastSpanText = spans[spans.length - 1].text
+        if (lastSpanText.endsWith(' ') && !lastSpanText.match(/^ +$/)) {
           isSetContentRequired = true
         }
         result.push({ spans, styles: pStyles })

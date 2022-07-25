@@ -286,7 +286,7 @@ export default new class ImageShadowPanelUtils {
               })
 
               logUtils.setLog(`phase: finish whole process, srcObj: { userId: ${srcObj.userId}, assetId: ${srcObj.assetId}}
-              src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))}
+              src: ${imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))}
               pageIndex: ${pageIndex}, layerIndex: ${layerIndex}, subLayerIndex: ${subLayerIdx}
               pageId: ${pageId}, layerId: ${layerId}, subLayerId: ${subLayerId}`)
             }
@@ -298,7 +298,7 @@ export default new class ImageShadowPanelUtils {
               imageShadowUtils.updateShadowSrc({ pageIndex, layerIndex, subLayerIdx }, { type: '', assetId: '', userId: '' })
               imageShadowUtils.updateEffectState({ pageIndex, layerIndex, subLayerIdx }, ShadowEffectType.none)
             }
-            newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj.type, Math.max(newWidth, newHeight)))
+            newImg.src = imageUtils.getSrc(srcObj, imageUtils.getSrcSize(srcObj, Math.max(newWidth, newHeight)))
           }).catch((e: Error) => {
             console.error(e)
             logUtils.setLog('error' + e.message)

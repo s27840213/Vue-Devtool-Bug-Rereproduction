@@ -33,7 +33,7 @@
             span(class="text-H1") {{plans[planSelected][periodUi].now}}
             span {{' ' + $t('NN0516')}}
           btn(class="pricing-plan-right-buy" type="light-lg" @click.native="tryAddCard()")
-            span(class="btn-LG") {{canAddCard ? $t('NN0517') : $t('NN0518')}}
+            span(class="btn-LG") {{buyLabel}}
       span(class="pricing-currency") {{$t('NN0519')}}
       div(class="pricing-compare")
         div(v-for="item in compareTable")
@@ -55,6 +55,7 @@
 import Vue from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
+import i18n from '@/i18n'
 import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import SlideToggle from '@/components/global/SlideToggle.vue'
@@ -92,11 +93,20 @@ export default Vue.extend({
       plans: 'plans',
       planSelected: 'planSelected',
       userCountryUi: 'userCountryUi',
-      status: 'status'
+      status: 'status',
+      trialStatus: 'trialStatus',
+      trialDay: 'trialDay'
     }),
     ...mapFields({ periodUi: 'periodUi' }),
     off(): string { return this.isUiTW ? '26off' : '25off' },
-    canAddCard(): boolean { return ['Initial', 'Deleted'].includes(this.status) }
+    canAddCard():boolean { return ['Initial', 'Deleted'].includes(this.status) },
+    buyLabel():string {
+      return (this.trialStatus === 'not used'
+        ? i18n.t('NN0517', { day: this.trialDay })
+        : this.canAddCard
+          ? i18n.t('NN0587')
+          : i18n.t('NN0518')) as string
+    }
   },
   async mounted() {
     await this.getBillingInfo()
@@ -208,10 +218,10 @@ export default Vue.extend({
   padding: 72px 32px;
   background-color: setColor(blue-1);
   &__off {
-      position: absolute;
-      top: -20px;
-      right: -70px;
-    }
+    position: absolute;
+    top: -20px;
+    right: -70px;
+  }
   &-price {
     @include body-MD;
     position: relative;
@@ -229,6 +239,7 @@ export default Vue.extend({
   }
   &-buy.btn {
     width: 80%;
+    max-width: 294px;
     border-radius: 8px;
   }
 }
