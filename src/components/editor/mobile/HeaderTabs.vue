@@ -6,19 +6,19 @@
         svg-icon(
           :iconName="'chevron-left'"
           :iconColor="'white'"
-          :iconWidth="'22px'")
+          :iconWidth="'20px'")
       div(class="header-bar__feature-icon mr-20"
-          :class="{'click-disabled': isLocked}"
+          :class="{'click-disabled': isLocked || stepsUtils.isInFirstStep}"
           @pointerdown="undo()")
         svg-icon(:iconName="'undo'"
           :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
-          :iconWidth="'22px'")
+          :iconWidth="'20px'")
       div(class="header-bar__feature-icon"
-          :class="{'click-disabled': isLocked}"
+          :class="{'click-disabled': isLocked | stepsUtils.isInLastStep}"
           @pointerdown="redo()")
         svg-icon(:iconName="'redo'"
           :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
-          :iconWidth="'22px'")
+          :iconWidth="'20px'")
     div(class="header-bar__right")
       div(v-for="tab in rightTabs" class="header-bar__feature-icon"
           :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
@@ -26,7 +26,7 @@
         svg-icon(
           :iconName="tab.icon"
           :iconColor="iconColor(tab)"
-          :iconWidth="'22px'")
+          :iconWidth="'20px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -262,6 +262,12 @@ export default Vue.extend({
   &__feature-icon {
     width: 22px;
     height: 22px;
+    transition: background-color 0.1s;
+    padding: 2px;
+    border-radius: 3px;
+    &:active {
+      background-color: setColor(gray-2);
+    }
   }
 
   &__left {
@@ -272,7 +278,7 @@ export default Vue.extend({
     grid-auto-flow: column;
     grid-template-rows: auto;
     grid-auto-columns: auto;
-    column-gap: 24px;
+    column-gap: 18px;
   }
 }
 </style>
