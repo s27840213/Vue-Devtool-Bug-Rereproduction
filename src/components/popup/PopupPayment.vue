@@ -117,7 +117,10 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapGetters({ isBundle: 'payment/getIsBundle' }),
+    ...mapGetters({
+      isLogin: 'user/isLogin',
+      isBundle: 'payment/getIsBundle'
+    }),
     ...mapFields({ periodUi: 'periodUi' }),
     ...mapState('payment', {
       initView: 'initView',
@@ -150,7 +153,12 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.changeView(this.initView)
+    if (!this.isLogin) {
+      this.$router.push({ name: 'Login', query: { redirect: this.$route.fullPath } })
+      this.closePopup()
+    } else {
+      this.changeView(this.initView)
+    }
   },
   methods: {
     ...mapActions('payment', {

@@ -86,8 +86,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isUiTW: 'payment/isUiTW',
-      isLogin: 'user/isLogin'
+      isUiTW: 'payment/isUiTW'
     }),
     ...mapState('payment', {
       plans: 'plans',
@@ -121,9 +120,7 @@ export default Vue.extend({
       getPrice: 'payment/getPrice'
     }),
     tryAddCard() {
-      if (!this.isLogin) {
-        this.$router.push('login')
-      } else if (this.canAddCard) {
+      if (this.canAddCard) {
         paymentUtils.openPayment('step1')
       } else {
         this.$router.push('/settings/payment')
