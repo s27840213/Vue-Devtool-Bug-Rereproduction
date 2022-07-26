@@ -178,16 +178,12 @@ export default Vue.extend({
       if (this.inAllPagesMode) {
         return this.pageTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && this.singleTargetType()) {
-        console.log('multi image')
         return this.multiPhotoTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text') && this.singleTargetType()) {
-        console.log('multi text')
         return this.multiFontTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
-        console.log('multi shape')
         return this.multiObjectTabs
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
-        console.log('multi normal')
         return this.multiGeneralTabs
       } else if (this.showPhotoTabs) {
         return this.photoTabs.concat(this.genearlLayerTabs)
