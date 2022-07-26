@@ -1812,6 +1812,9 @@ export default Vue.extend({
       })
     },
     onPress(event: AnyTouchEvent) {
+      if (!this.isActive) {
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+      }
       if (this.getLayerType === 'text') {
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
       }
