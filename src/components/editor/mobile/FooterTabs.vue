@@ -87,7 +87,7 @@ export default Vue.extend({
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, disabled: this.selectMultiple },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, disabled: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
@@ -123,7 +123,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          disabled: shapeUtils.getDocumentColors.length === 0,
+          disabled: !this.selectMultiple && shapeUtils.getDocumentColors.length === 0,
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -170,18 +170,28 @@ export default Vue.extend({
         this.mainMenu,
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', disabled: this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && this.singleTargetType()) {
+        console.log('multi image')
+        return this.multiPhotoTabs
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text') && this.singleTargetType()) {
+        console.log('multi text')
+        return this.multiFontTabs
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
+        console.log('multi shape')
+        return this.multiObjectTabs
+      } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
+        console.log('multi normal')
+        return this.multiGeneralTabs
       } else if (this.showPhotoTabs) {
-        // this.$emit('switchTab', 'none')
         return this.photoTabs.concat(this.genearlLayerTabs)
       } else if (this.showFontTabs) {
-        // this.$emit('switchTab', 'none')
         return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs]
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
@@ -375,17 +385,24 @@ export default Vue.extend({
           break
         }
         case 'text-format': {
-          tiptapUtils.agent(editor => editor.commands.selectAll())
+          if (!this.selectMultiple && !this.isGroup) {
+            tiptapUtils.agent(editor => editor.commands.selectAll())
+          }
           break
         }
         case 'edit': {
           const { index, pageIndex } = layerUtils.currSelectedInfo
+          if (!this.hasSubSelectedLayer) {
+            layerUtils.updateLayerProps(pageIndex, index, {
+              contentEditable: true
+            })
 
-          layerUtils.updateLayerProps(pageIndex, index, {
-            contentEditable: true
-          })
-
-          tiptapUtils.focus({ scrollIntoView: false })
+            tiptapUtils.focus({ scrollIntoView: false })
+          } else {
+            /**
+             * @Todo handle the sub controler
+             */
+          }
           break
         }
         case 'group':

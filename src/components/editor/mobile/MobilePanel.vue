@@ -22,7 +22,7 @@
           span(class="mobile-panel__title-text body-1 mr-10"
             :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
           div(v-if="inSelectionState" class="mobile-panel__layer-num")
-            span(class="label-sm text-white") {{layerNum}}
+            span(class="label-sm text-white") {{selectedLayerNum}}
         div(class="mobile-panel__btn mobile-panel__right-btn"
             :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
           svg-icon(
@@ -144,7 +144,7 @@ export default Vue.extend({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    layerNum(): number {
+    selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
     inSelectionState(): boolean {
@@ -365,6 +365,13 @@ export default Vue.extend({
         if (this.inMultiSelectionMode && this.inSelectionState) {
           editorUtils.setInMultiSelectionMode(false)
         }
+      }
+    }
+  },
+  watch: {
+    selectedLayerNum(newVal: number) {
+      if (newVal === 0) {
+        editorUtils.setInMultiSelectionMode(false)
       }
     }
   },

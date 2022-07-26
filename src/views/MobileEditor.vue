@@ -37,7 +37,6 @@ import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
-import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
@@ -59,7 +58,6 @@ export default Vue.extend({
     MobileEditorView,
     MobilePanel,
     HeaderTabs,
-    MobilePanelTextSetting,
     FooterTabs,
     AllPages
   },

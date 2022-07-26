@@ -1755,6 +1755,9 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
+        if (this.getLayerType === 'text') {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+        }
         editorUtils.setInMultiSelectionMode(true)
         return
       }

@@ -329,12 +329,12 @@ export default Vue.extend({
         else if (!this.isActive) {
           this.isControlling = true
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-          document.addEventListener('mouseup', this.onMouseup)
+          eventUtils.addPointerEvent('pointerup', this.onMouseup)
           return
         }
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
       }
-      document.addEventListener('mouseup', this.onMouseup)
+      eventUtils.addPointerEvent('pointerup', this.onMouseup)
       this.isControlling = true
     },
     onMouseup() {
@@ -348,7 +348,7 @@ export default Vue.extend({
           tiptapUtils.focus({ scrollIntoView: false })
         }
       }
-      document.removeEventListener('mouseup', this.onMouseup)
+      eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
     },
     positionStyles() {
@@ -468,6 +468,7 @@ export default Vue.extend({
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
     },
     onClickEvent(e: MouseEvent) {
+      console.log(this.isPrimaryActive, this.isMoved, this.type)
       if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
@@ -761,14 +762,6 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
   }
-  &__ctrl-points {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    box-sizing: border-box;
-    pointer-events: "none";
-  }
 
   &__lock-icon {
     @include size(30px, 30px);
@@ -779,37 +772,6 @@ export default Vue.extend({
     border: 1px solid setColor(red);
     border-radius: 50%;
     background-color: setColor(white);
-  }
-}
-
-.control-point {
-  pointer-events: auto;
-  position: absolute;
-  background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
-  transform-style: preserve-3d;
-
-  &__resize-bar {
-    position: absolute;
-    pointer-events: auto;
-    border: 2.5px solid #00000000;
-    color: "#00000000";
-  }
-  &__rotater-wrapper {
-    position: absolute;
-    top: 100%;
-    padding: 20px;
-  }
-  &__rotater {
-    @include size(20px, 20px);
-    position: relative;
-    left: 0;
-    top: 0;
-    pointer-events: auto;
-    cursor: move;
-  }
-  &__move-bar {
-    cursor: move;
   }
 }
 
