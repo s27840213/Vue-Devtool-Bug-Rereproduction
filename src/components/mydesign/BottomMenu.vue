@@ -57,9 +57,9 @@
                       @keyup="checkNameEnter")
               div(v-else class="menu__editable-name__text")
                 span(:title="designBuffer.name") {{ designBuffer.name }}
-              div(class="menu__editable-name__icon"
-                  @click.stop="handleIconNameClick")
-                svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
+              div(v-if="!isNameEditing" class="menu__editable-name__icon"
+                  @click.stop="handleNameClick")
+                svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
             div(v-if="!isNameEditing" class="menu__description" @click.stop.prevent) {{ `${designBuffer.width} x ${designBuffer.height}` }}
             div(v-if="isNameEditing" style="width: 100%; height: 8px;")
             div(v-else class="menu__hr")
@@ -85,9 +85,9 @@
                       @keyup="checkNameEnter")
               div(v-else class="menu__editable-name__text")
                 span(:title="folderBuffer.folder.name") {{ folderBuffer.folder.name }}
-              div(class="menu__editable-name__icon"
-                  @click.stop="handleIconNameClick")
-                svg-icon(iconName="pen" iconWidth="18px" :iconColor="isNameEditing ? 'blue-1' : 'gray-2'")
+              div(v-if="!isNameEditing" class="menu__editable-name__icon"
+                  @click.stop="handleNameClick")
+                svg-icon(iconName="pen" iconWidth="18px" iconColor="gray-2")
             template(v-if="!isNameEditing")
               div(v-if="itemCount >= 0" class="menu__description" @click.stop.prevent) {{ $t('NN0197', { num: itemCount }) }}
               div(v-else class="menu__description" @click.stop.prevent) ...
@@ -398,13 +398,6 @@ export default Vue.extend({
         return
       }
       this.checkNameLength()
-    },
-    handleIconNameClick() {
-      if (this.isNameEditing) {
-        this.handleNameEditEnd()
-      } else {
-        this.handleNameClick()
-      }
     },
     handleNameClick() {
       if (this.isDesignMenu) {
