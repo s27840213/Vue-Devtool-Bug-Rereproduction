@@ -297,6 +297,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+input {
+  @include default-input;
+}
+
 .wrapper {
   @include hide-scrollbar;
   &:hover {
@@ -441,12 +445,7 @@ export default Vue.extend({
   }
   &__other {
     @include body-SM;
-    box-sizing: border-box;
-    height: 40px;
     margin-top: 10px;
-    padding: 10px;
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
   }
 }
 

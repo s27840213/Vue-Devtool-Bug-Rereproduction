@@ -54,17 +54,12 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+input {
+  @include default-input;
+}
+
 .coupon-input {
   position: relative;
-  input {
-    @include body-SM;
-    box-sizing: border-box;
-    height: 40px;
-    padding: 10px;
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
-  }
-
   button, .animation, .svg-icon {
     @include btn-SM;
     position: absolute;

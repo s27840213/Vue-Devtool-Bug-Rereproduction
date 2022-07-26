@@ -244,6 +244,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+input {
+  @include default-input;
+}
+
 .field {
   @include body-SM;
   display: flex;
@@ -289,19 +293,8 @@ export default Vue.extend({
 
 .field-invoice {
   margin-top: 20px;
-  &__input > input {
-    width: calc(100% - 22px);
-    height: 18px;
-    margin: 4px 0;
-    padding: 10px;
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
-    &:focus {
-      border-color: setColor(blue-1);
-    }
-    &[invalid="true"] {
-      border-color: red;
-    }
+  &__input + &__input {
+    margin-top: 4px;
   }
 }
 
