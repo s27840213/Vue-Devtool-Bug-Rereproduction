@@ -468,7 +468,6 @@ export default Vue.extend({
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
     },
     onClickEvent(e: MouseEvent) {
-      console.log(this.isPrimaryActive, this.isMoved, this.type)
       if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
