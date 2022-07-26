@@ -302,9 +302,8 @@ export default Vue.extend({
         display: flex;
         flex-direction: column;
       }
-      > a,
-      div {
-        color: black;
+      > a, div, span {
+        color: setColor(gray-1);;
         text-decoration: none;
         text-align: left;
         @include layout-mobile {

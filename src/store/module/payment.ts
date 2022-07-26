@@ -552,11 +552,9 @@ const actions: ActionTree<IPaymentState, unknown> = {
       status: 'loading'
     })
     paymentApi.verifyCoupon(state.coupon.input).then(({ data }) => {
-      console.log('data', data)
-      const error = Boolean(ICouponError.includes(data.msg))
       commit('SET_coupon', {
-        msg: error ? i18n.t('NN0698') : data.msg,
-        status: error ? 'error' : 'accept'
+        msg: data.flag ? i18n.t('NN0698') : data.msg,
+        status: data.flag ? 'error' : 'accept'
       })
     })
   },
@@ -567,8 +565,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
       state.planSelected,
       Number(state.periodUi === 'yearly')
     ).then(({ data }) => {
-      // if (data.flag) throw Error(data.msg)
-      console.log('data2', data)
       commit('SET_coupon', {
         discount: data.price_original - data.price,
         paymentPaidDate: string2Date(data.charge_time)
@@ -577,15 +573,6 @@ const actions: ActionTree<IPaymentState, unknown> = {
   },
   resetCouponResult({ commit }) {
     commit('SET_coupon', {
-      msg: '',
-      status: 'input',
-      discount: 0,
-      paymentPaidDate: ''
-    })
-  },
-  resetCoupon({ commit }) {
-    commit('SET_coupon', {
-      input: '',
       msg: '',
       status: 'input',
       discount: 0,

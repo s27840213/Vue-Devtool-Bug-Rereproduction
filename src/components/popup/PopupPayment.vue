@@ -157,7 +157,7 @@ export default Vue.extend({
       getBillingInfo: 'getBillingInfo',
       init: 'init',
       applyCoupon: 'applyCoupon',
-      resetCoupon: 'resetCoupon',
+      resetCouponResult: 'resetCouponResult',
       getSwitchPrice: 'getSwitchPrice',
       switch: 'switch',
       cancelApi: 'cancel',
@@ -191,6 +191,21 @@ export default Vue.extend({
           }]
           break
         case 'step1-coupon':
+          this.getPrice(this.userCountryUi)
+          this.init()
+          this.currentStep = 1
+          this.totalStep = 2
+          this.title = i18n.t('NN0701') as string
+          this.description = i18n.t('NN0702') as string
+          this.buttons = [{
+            label: i18n.t('NN0550') as string,
+            func: () => {
+              this.applyCoupon()
+              this.changeView(name.replace('1', '2'))
+            }
+          }]
+          this.img = 'remover.jpg'
+          break
         case 'step1':
           this.getPrice(this.userCountryUi)
           this.init()
@@ -201,7 +216,6 @@ export default Vue.extend({
           this.buttons = [{
             label: i18n.t('NN0550') as string,
             func: () => {
-              this.applyCoupon()
               this.changeView(name.replace('1', '2'))
             }
           }]
@@ -290,7 +304,7 @@ export default Vue.extend({
     },
     closePopup() {
       this.$emit('close')
-      this.resetCoupon() // Ask kitty clear input or not.
+      this.resetCouponResult()
     }
   }
 })
@@ -391,7 +405,7 @@ input {
 }
 
 .payment-left-content-coupon {
-  margin: -8px 0 40px 0;
+  margin: -8px 0 25px 0;
 }
 .payment-left-content-period {
   display: flex;
