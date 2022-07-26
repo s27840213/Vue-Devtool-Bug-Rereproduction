@@ -689,8 +689,6 @@ export default Vue.extend({
         case '':
           imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
       }
-      if (this.shadow.srcObj.type === 'shadow-private') {
-      }
     },
     handleUploadShadowImg() {
       const { srcObj } = this.shadow

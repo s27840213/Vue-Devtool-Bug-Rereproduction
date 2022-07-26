@@ -306,6 +306,7 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
+      if (e.button !== 0) return
       if (this.isProcessShadow) {
         return
       }

@@ -106,7 +106,7 @@ class PopupUtils {
     })
   }
 
-  openPopup(type: string, properties?: Partial<IPopupProps>) {
+  openPopup(type: string, properties?: Partial<IPopupProps>, props = {}) {
     if (!this.popupEl) {
       this.popupEl = document.querySelector('.popup') as HTMLElement
     }
@@ -124,6 +124,7 @@ class PopupUtils {
     store.dispatch('popup/openPopup', {
       component: `popup-${type}`,
       properties,
+      props,
       closeHandler: () => {
         return false
       }
