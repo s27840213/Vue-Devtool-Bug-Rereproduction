@@ -50,16 +50,12 @@ import { mapState, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
-  components: {
-    PageContent
-  },
   props: {
     type: String,
     index: Number,
@@ -71,6 +67,9 @@ export default Vue.extend({
       default: true,
       type: Boolean
     }
+  },
+  components: {
+    PageContent: () => import('@/components/editor/page/PageContent.vue')
   },
   data() {
     return {

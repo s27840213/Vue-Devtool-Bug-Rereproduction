@@ -1,30 +1,32 @@
 <template lang="pug">
   div(class="header-bar" @pointerdown.stop)
     div(class="header-bar__left")
-      svg-icon(class="header-bar__feature-icon mr-25"
-        :iconName="'chevron-left'"
-        :iconColor="'white'"
-        :iconWidth="'22px'"
-        @pointerdown.native="backBtnAction()")
-      svg-icon(class="header-bar__feature-icon mr-20"
-        :class="{'click-disabled': isLocked}"
-        :iconName="'undo'"
-        :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
-        :iconWidth="'22px'"
-        @pointerdown.native="undo()")
-      svg-icon(class="header-bar__feature-icon"
-        :class="{'click-disabled': isLocked}"
-        :iconName="'redo'"
-        :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
-        :iconWidth="'22px'"
-        @pointerdown.native="redo()")
+      div(class="header-bar__feature-icon mr-25"
+          @pointerdown="backBtnAction()")
+        svg-icon(
+          :iconName="'chevron-left'"
+          :iconColor="'white'"
+          :iconWidth="'22px'")
+      div(class="header-bar__feature-icon mr-20"
+          :class="{'click-disabled': isLocked}"
+          @pointerdown="undo()")
+        svg-icon(:iconName="'undo'"
+          :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
+          :iconWidth="'22px'")
+      div(class="header-bar__feature-icon"
+          :class="{'click-disabled': isLocked}"
+          @pointerdown="redo()")
+        svg-icon(:iconName="'redo'"
+          :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
+          :iconWidth="'22px'")
     div(class="header-bar__right")
-      svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
-        :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
-        :iconName="tab.icon"
-        :iconColor="iconColor(tab)"
-        :iconWidth="'22px'"
-        @pointerdown.native="handleIconAction(tab.icon)")
+      div(v-for="tab in rightTabs" class="header-bar__feature-icon"
+          :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
+          @pointerdown="handleIconAction(tab.icon)")
+        svg-icon(
+          :iconName="tab.icon"
+          :iconColor="iconColor(tab)"
+          :iconWidth="'22px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -256,6 +258,11 @@ export default Vue.extend({
   padding: 0px 16px;
   box-sizing: border-box;
   z-index: setZindex("editor-header");
+
+  &__feature-icon {
+    width: 22px;
+    height: 22px;
+  }
 
   &__left {
     display: flex;

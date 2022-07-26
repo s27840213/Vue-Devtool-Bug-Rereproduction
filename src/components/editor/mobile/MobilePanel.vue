@@ -22,7 +22,7 @@
           span(class="mobile-panel__title-text body-1 mr-10"
             :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
           div(v-if="inSelectionState" class="mobile-panel__layer-num")
-            span(class="label-sm text-white") {{layerNum}}
+            span(class="label-sm text-white") {{selectedLayerNum}}
         div(class="mobile-panel__btn mobile-panel__right-btn"
             :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
           svg-icon(
@@ -144,7 +144,7 @@ export default Vue.extend({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo'
     }),
-    layerNum(): number {
+    selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
     inSelectionState(): boolean {
@@ -160,7 +160,7 @@ export default Vue.extend({
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.showExtraColorPanel || this.inSelectionState || [
+      return this.inSelectionState || [
         'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust'].includes(this.currActivePanel)
@@ -179,7 +179,7 @@ export default Vue.extend({
       }
     },
     halfSizeInInitState(): boolean {
-      return ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
+      return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -263,7 +263,6 @@ export default Vue.extend({
     },
     dynamicBindMethod(): { [index: string]: any } {
       switch (this.currActivePanel) {
-        case 'text-effect':
         case 'color': {
           return {
             pushHistory: (history: string) => {
@@ -271,6 +270,7 @@ export default Vue.extend({
             }
           }
         }
+        case 'text-effect':
         case 'photo-shadow': {
           return {
             pushHistory: (history: string) => {
@@ -315,9 +315,15 @@ export default Vue.extend({
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
-      if (this.showExtraColorPanel && this.panelHistory.length === 1) {
+      if (this.panelHistory.length === 1) {
         return () => {
           this.showExtraColorPanel = false
+        }
+      }
+      if (this.showExtraColorPanel) {
+        return () => {
+          this.showExtraColorPanel = false
+          this.panelHistory.pop()
         }
       }
       if (this.panelHistory.length > 0) {
@@ -368,16 +374,15 @@ export default Vue.extend({
       }
     }
   },
+  watch: {
+    selectedLayerNum(newVal: number) {
+      if (newVal === 0) {
+        editorUtils.setInMultiSelectionMode(false)
+      }
+    }
+  },
   mounted() {
     this.panelHeight = this.initHeightPx()
-  },
-  watch: {
-    panelHistory: {
-      handler(newVal) {
-        console.log(newVal)
-      },
-      deep: true
-    }
   },
   methods: {
     ...mapActions({
@@ -389,7 +394,7 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['dblclick', 'click', 'contextmenu', 'pointerdown', 'touchstart']
+        events: ['contextmenu', 'pointerdown', 'touchstart']
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
     },

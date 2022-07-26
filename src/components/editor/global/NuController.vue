@@ -672,7 +672,8 @@ export default Vue.extend({
 
       this.movingByControlPoint = false
       // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      const { inMultiSelectionMode } = this
       if (!this.isLocked) {
         event.stopPropagation()
       }
@@ -694,7 +695,7 @@ export default Vue.extend({
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
-            if (!inSelectionMode) {
+            if (!inSelectionMode && !inMultiSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedLayerIndex(this.layerIndex)
@@ -734,6 +735,9 @@ export default Vue.extend({
           }
       }
 
+      /**
+       * @Note InMultiSelection mode should still can move the layer
+       */
       if (!this.config.locked && !inSelectionMode) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -751,7 +755,7 @@ export default Vue.extend({
           // already have selected layer
           if (this.currSelectedInfo.index >= 0) {
             // Did not press shift/cmd/ctrl key -> deselect selected layers first
-            if (!inSelectionMode) {
+            if (!inSelectionMode && !inMultiSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedLayerIndex(this.layerIndex)
@@ -914,6 +918,28 @@ export default Vue.extend({
             }
           }
           this.isMoved = false
+          if (this.inMultiSelectionMode) {
+            if (this.config.type !== 'tmp') {
+              let targetIndex = this.layerIndex
+              if (this.isActive && this.currSelectedInfo.layers.length === 1) {
+                GroupUtils.deselect()
+                targetIndex = this.config.styles.zindex - 1
+                this.setLastSelectedLayerIndex(this.layerIndex)
+              } else if (!this.isActive) {
+                // already have selected layer
+                if (this.currSelectedInfo.index >= 0) {
+                  // this if statement is used to prevent select the layer in another page
+                  if (this.pageIndex === pageUtils.currFocusPageIndex) {
+                    GroupUtils.select(this.pageIndex, [targetIndex])
+                  }
+                } else {
+                  targetIndex = this.config.styles.zindex - 1
+                  this.setLastSelectedLayerIndex(this.layerIndex)
+                  GroupUtils.select(this.pageIndex, [targetIndex])
+                }
+              }
+            }
+          }
         }
         this.isControlling = false
         this.setCursorStyle('')
@@ -1755,6 +1781,11 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
+        if (this.getLayerType === 'text') {
+          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+        }
+
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
         editorUtils.setInMultiSelectionMode(true)
         return
       }

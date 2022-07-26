@@ -34,9 +34,7 @@ const MOBILE_ROUTES = [
   'MobileWarning',
   'Preview',
   'MobileEditor',
-  'MobileTextEffect',
   'MobileImageAdjust',
-  'MobileTextTyping',
   'Pricing'
 ]
 

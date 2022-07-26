@@ -7,11 +7,11 @@
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
         keep-alive
-          mobile-editor-view(v-if="!inAllPagesMode"
+          mobile-editor-view(v-show="!inAllPagesMode"
             :currActivePanel="currActivePanel"
             :isConfigPanelOpen="isConfigPanelOpen"
             :inAllPagesMode="inAllPagesMode")
-          div(v-else class="mobile-editor__page-preview")
+          div(v-show="inAllPagesMode" class="mobile-editor__page-preview")
             all-pages
       transition(name="panel-up")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
@@ -37,7 +37,6 @@ import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
-import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
@@ -59,7 +58,6 @@ export default Vue.extend({
     MobileEditorView,
     MobilePanel,
     HeaderTabs,
-    MobilePanelTextSetting,
     FooterTabs,
     AllPages
   },
@@ -260,7 +258,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
-    background-color: setColor(gray-5);;
+    background-color: setColor(gray-5);
   }
   &__bottom {
     z-index: setZindex("footer");

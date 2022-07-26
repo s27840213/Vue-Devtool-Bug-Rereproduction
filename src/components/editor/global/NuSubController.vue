@@ -7,10 +7,9 @@
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
-            @click.left.stop="isTouchDevice ? null :onClickEvent($event)"
-            @pointerdown.stop="isTouchDevice ? onClickEvent($event): null"
+            @click.left.stop="onClickEvent($event)"
             @dragenter="onDragEnter($event)"
-            @mousedown="onMousedown($event)")
+            @pointerdown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
@@ -330,12 +329,12 @@ export default Vue.extend({
         else if (!this.isActive) {
           this.isControlling = true
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-          document.addEventListener('mouseup', this.onMouseup)
+          eventUtils.addPointerEvent('pointerup', this.onMouseup)
           return
         }
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
       }
-      document.addEventListener('mouseup', this.onMouseup)
+      eventUtils.addPointerEvent('pointerup', this.onMouseup)
       this.isControlling = true
     },
     onMouseup() {
@@ -349,7 +348,7 @@ export default Vue.extend({
           tiptapUtils.focus({ scrollIntoView: false })
         }
       }
-      document.removeEventListener('mouseup', this.onMouseup)
+      eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
     },
     positionStyles() {
@@ -420,21 +419,6 @@ export default Vue.extend({
         }
       } else {
         return 'none'
-      }
-    },
-    onRightClick(event: MouseEvent) {
-      if (this.isHandleShadow) {
-        return
-      }
-      imageUtils.setImgControlDefault(false)
-      if (!this.isLocked) {
-        this.setIsLayerDropdownsOpened(true)
-        this.$nextTick(() => {
-          const el = document.querySelector('.dropdowns--layer') as HTMLElement
-          const mousePos = MouseUtils.getMouseAbsPoint(event)
-          el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-          el.focus()
-        })
       }
     },
     waitFontLoadingAndRecord() {
@@ -777,14 +761,6 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
   }
-  &__ctrl-points {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    box-sizing: border-box;
-    pointer-events: "none";
-  }
 
   &__lock-icon {
     @include size(30px, 30px);
@@ -795,37 +771,6 @@ export default Vue.extend({
     border: 1px solid setColor(red);
     border-radius: 50%;
     background-color: setColor(white);
-  }
-}
-
-.control-point {
-  pointer-events: auto;
-  position: absolute;
-  background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
-  transform-style: preserve-3d;
-
-  &__resize-bar {
-    position: absolute;
-    pointer-events: auto;
-    border: 2.5px solid #00000000;
-    color: "#00000000";
-  }
-  &__rotater-wrapper {
-    position: absolute;
-    top: 100%;
-    padding: 20px;
-  }
-  &__rotater {
-    @include size(20px, 20px);
-    position: relative;
-    left: 0;
-    top: 0;
-    pointer-events: auto;
-    cursor: move;
-  }
-  &__move-bar {
-    cursor: move;
   }
 }
 

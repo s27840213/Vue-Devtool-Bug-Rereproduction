@@ -14,8 +14,7 @@
           :iconName="'text-shape-none'"
           iconWidth="60px"
           iconColor="gray-5"
-          @click.native="pushHistory('text-shape')"
-        )
+          @click.native="pushHistory('text-shape')")
         span(class="body-3") {{$t('NN0070')}}
     div(v-if="showTextEffect" class="panel-text-effect__options")
       div(v-for="(icon, idx) in shadowOption"
@@ -40,6 +39,12 @@
           :max="fieldRange[field].max"
           :min="fieldRange[field].min"
           @update="handleEffectUpdate")
+      div(v-if="canChangeColor"
+        class="panel-text-effect__color")
+        div(class="panel-text-effect__color-name") {{$t('NN0017')}}
+        div(class="panel-text-effect__color-slip"
+          :style="{ backgroundColor: currentStyle.textEffect.color }"
+          @click="openColorPanel")
     div(v-if="showTextShapeEffect" class="panel-text-effect__options")
       div(v-for="(icon, idx) in shapeOption"
           :key="`shadow-${icon}`"
@@ -72,6 +77,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -177,6 +183,9 @@ export default Vue.extend({
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
     },
+    openColorPanel() {
+      this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
+    },
     onEffectClick(effectName: string): void {
       textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
       stepsUtils.record()
@@ -219,6 +228,7 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
+
   &__options {
     width: 100%;
     display: flex;
@@ -226,12 +236,17 @@ export default Vue.extend({
     border-radius: 5px;
     overflow-x: scroll;
     @include no-scrollbar;
+    padding-top: 2px;
     padding-bottom: 20px;
   }
 
   &__option {
     margin: 0 8px;
     width: 60px;
+    box-sizing: border-box;
+    &--selected {
+      outline: 2px solid setColor(blue-1);
+    }
   }
 
   &__form {
@@ -243,6 +258,20 @@ export default Vue.extend({
   &__field {
     > div:nth-child(n) {
       margin-bottom: 20px;
+    }
+  }
+
+  &__color {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+    position: relative;
+    color: setColor(gray-3);
+    &-slip {
+      height: 100%;
+      width: 32px;
     }
   }
 }

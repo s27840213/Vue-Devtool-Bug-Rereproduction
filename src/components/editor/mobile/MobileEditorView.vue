@@ -397,7 +397,7 @@ export default Vue.extend({
         this.$nextTick(() => {
           setTimeout(() => {
             pageUtils.fitPage()
-          }, 100)
+          }, 300)
         })
       }
     },
