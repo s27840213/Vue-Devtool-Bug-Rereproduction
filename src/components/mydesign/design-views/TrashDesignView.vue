@@ -69,8 +69,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      trashDesigns: 'getTrashDesigns',
-      trashFolders: 'getTrashFolders',
       selectedDesigns: 'getSelectedDesigns',
       selectedFolders: 'getSelectedFolders',
       allDesigns: 'getAllDesigns',
