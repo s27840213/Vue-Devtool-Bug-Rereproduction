@@ -141,29 +141,13 @@ export default Vue.extend({
       })
     },
     handleColorUpdate(newColor: string) {
+      console.log(newColor)
+      console.log(this.currEvent)
       switch (this.currEvent) {
         case ColorEventType.text: {
           if (newColor === this.props.color) return
-          const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
-
-          switch (currLayer.type) {
-            case 'text':
-              tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
-              break
-            case 'tmp':
-            case 'group':
-              if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
-                textPropUtils.applyPropsToAll('span', { newColor }, layerIndex, subLayerIdx)
-                if (subLayerIdx !== -1) {
-                  tiptapUtils.updateHtml()
-                }
-              } else {
-                tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
-              }
-          }
-          textEffectUtils.refreshColor()
-          stepsUtils.record()
-          textPropUtils.updateTextPropsState({ newColor })
+          const hex = tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor)
+          tiptapUtils.spanStyleHandler('color', hex)
           break
         }
         case ColorEventType.shape: {
@@ -192,7 +176,7 @@ export default Vue.extend({
                 if (subLayerType === 'shape') {
                   const color = [...this.getDocumentColors]
                   color[this.currSelectedColorIndex] = newColor
-                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { newColor })
+                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
                 }
               }
               break
