@@ -287,12 +287,20 @@ class UploadUtils {
       const fileSize = (typeof files[i] === 'string'
         ? (files[i] as string).length / 4 * 3
         : (files[i] as File).size) / 1024 / 1024
-      const fileSizeLimit = type === 'font' ? 50 : 25
+      const fileSizeLimit = // 50 for font, BGremove and shadow.
+        (typeof files[i] === 'string' || type === 'font') ? 50 : 25
+      const modalDesc = typeof files[i] === 'string'
+        ? i18n.t('NN0705',
+          { size: fileSizeLimit }
+        )
+        : i18n.t('NN0696',
+          { file: (files[i] as File)?.name, size: fileSizeLimit }
+        )
 
       if (fileSize > fileSizeLimit) {
         modalUtils.setModalInfo(
           i18n.t('NN0137') as string,
-          [i18n.t('NN0696') as string] // todo: fix i18n
+          [modalDesc as string]
         )
         return
       }

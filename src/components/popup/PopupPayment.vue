@@ -293,7 +293,7 @@ export default Vue.extend({
       }
     },
     setPeriod(value: string) {
-      if (this.view === 'step1') { this.periodUi = value }
+      if (this.view.includes('step1')) { this.periodUi = value }
     },
     preStep() {
       if (this.view.startsWith('step2')) this.changeView(this.view.replace('2', '1'))
