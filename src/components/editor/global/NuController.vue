@@ -695,7 +695,7 @@ export default Vue.extend({
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
-            if (!inSelectionMode) {
+            if (!inSelectionMode && !inMultiSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedLayerIndex(this.layerIndex)

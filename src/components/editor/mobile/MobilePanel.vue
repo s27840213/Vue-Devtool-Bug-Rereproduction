@@ -373,6 +373,10 @@ export default Vue.extend({
       if (newVal === 0) {
         editorUtils.setInMultiSelectionMode(false)
       }
+    },
+    currActivePanel(newVal: string) {
+      console.log(newVal)
+      this.initHeightPx()
     }
   },
   mounted() {

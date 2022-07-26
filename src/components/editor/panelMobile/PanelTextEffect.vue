@@ -165,8 +165,6 @@ export default Vue.extend({
     },
     currentEffect(): string {
       const { textEffect = {} } = this.currentStyle
-      console.log(textEffect.name)
-      console.log(this.shadowOption)
       return textEffect.name || 'none'
     },
     currentShape(): string {
