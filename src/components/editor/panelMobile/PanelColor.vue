@@ -205,6 +205,15 @@ export default Vue.extend({
 
         case ColorEventType.background: {
           colorUtils.setCurrPageBackgroundColor(newColor)
+          break
+        }
+
+        case ColorEventType.textEffect: {
+          const { styles } = textEffectUtils.getCurrentLayer()
+          const { textEffect = {} } = styles
+
+          const currentEffect = textEffect.name || 'none'
+          textEffectUtils.setTextEffect(currentEffect, { color: newColor })
         }
       }
     },

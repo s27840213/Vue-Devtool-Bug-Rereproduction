@@ -160,7 +160,7 @@ export default Vue.extend({
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     fixSize(): boolean {
-      return this.showExtraColorPanel || this.inSelectionState || [
+      return this.inSelectionState || [
         'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust'].includes(this.currActivePanel)
@@ -179,7 +179,7 @@ export default Vue.extend({
       }
     },
     halfSizeInInitState(): boolean {
-      return ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
+      return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
     panelTitle(): string {
       switch (this.currActivePanel) {
@@ -263,7 +263,6 @@ export default Vue.extend({
     },
     dynamicBindMethod(): { [index: string]: any } {
       switch (this.currActivePanel) {
-        case 'text-effect':
         case 'color': {
           return {
             pushHistory: (history: string) => {
@@ -271,6 +270,7 @@ export default Vue.extend({
             }
           }
         }
+        case 'text-effect':
         case 'photo-shadow': {
           return {
             pushHistory: (history: string) => {
@@ -315,9 +315,15 @@ export default Vue.extend({
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
-      if (this.showExtraColorPanel && this.panelHistory.length === 1) {
+      if (this.panelHistory.length === 1) {
         return () => {
           this.showExtraColorPanel = false
+        }
+      }
+      if (this.showExtraColorPanel) {
+        return () => {
+          this.showExtraColorPanel = false
+          this.panelHistory.pop()
         }
       }
       if (this.panelHistory.length > 0) {
@@ -373,10 +379,6 @@ export default Vue.extend({
       if (newVal === 0) {
         editorUtils.setInMultiSelectionMode(false)
       }
-    },
-    currActivePanel(newVal: string) {
-      console.log(newVal)
-      this.initHeightPx()
     }
   },
   mounted() {

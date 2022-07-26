@@ -39,6 +39,12 @@
           :max="fieldRange[field].max"
           :min="fieldRange[field].min"
           @update="handleEffectUpdate")
+      div(v-if="canChangeColor"
+        class="panel-text-effect__color")
+        div(class="panel-text-effect__color-name") {{$t('NN0017')}}
+        div(class="panel-text-effect__color-slip"
+          :style="{ backgroundColor: currentStyle.textEffect.color }"
+          @click="openColorPanel")
     div(v-if="showTextShapeEffect" class="panel-text-effect__options")
       div(v-for="(icon, idx) in shapeOption"
           :key="`shadow-${icon}`"
@@ -71,6 +77,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -176,6 +183,9 @@ export default Vue.extend({
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
     },
+    openColorPanel() {
+      this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
+    },
     onEffectClick(effectName: string): void {
       textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
       stepsUtils.record()
@@ -218,6 +228,7 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
+
   &__options {
     width: 100%;
     display: flex;
@@ -247,6 +258,20 @@ export default Vue.extend({
   &__field {
     > div:nth-child(n) {
       margin-bottom: 20px;
+    }
+  }
+
+  &__color {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+    position: relative;
+    color: setColor(gray-3);
+    &-slip {
+      height: 100%;
+      width: 32px;
     }
   }
 }
