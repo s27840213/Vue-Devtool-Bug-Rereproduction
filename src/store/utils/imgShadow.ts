@@ -30,9 +30,12 @@ const imgShadowMutations = {
     const { pageIndex, layerIndex, subLayerIdx } = layerInfo
     if (pageIndex === -1 || layerIndex === -1) return
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
-      Object.assign(((state.pages[pageIndex].layers[layerIndex] as IGroup)
-        .layers[subLayerIdx] as IImage)
-        .styles.shadow, payload)
+      const shadow = ((state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow
+      if (shadow) {
+        Object.assign(shadow, payload)
+      } else {
+        ((state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage).styles.shadow = payload as any
+      }
     } else {
       Object.assign((state.pages[pageIndex].layers[layerIndex] as IImage).styles.shadow, payload)
     }

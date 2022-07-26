@@ -19,6 +19,9 @@ export default Vue.extend({
     src: String,
     item: Object
   },
+  created() {
+    this.item.db = 'text'
+  },
   data() {
     return {
       fallbackSrc: ''

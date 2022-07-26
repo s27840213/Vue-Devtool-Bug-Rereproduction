@@ -98,6 +98,7 @@ import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import tiptapUtils from '@/utils/tiptapUtils'
+import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -207,6 +208,28 @@ export default Vue.extend({
             setTimeout(() => {
               this.$nextTick(() => {
                 popupUtils.openPopup('submit', { event })
+              })
+            }, 0)
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳 元素群組',
+          condition: this.inAdminMode && this.isLogin && this.isGroup,
+          shortcutText: '',
+          action: () => {
+            uploadUtils.uploadLayer('shape')
+          }
+        },
+        {
+          icon: 'copy',
+          text: '上傳 元素群組 + ID',
+          condition: this.inAdminMode && this.isLogin && this.isGroup,
+          shortcutText: '',
+          action: (event?: MouseEvent) => {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                popupUtils.openPopup('submit', { event }, { type: 'shape' })
               })
             }, 0)
           }

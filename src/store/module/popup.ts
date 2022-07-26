@@ -13,6 +13,7 @@ const getDefaultState = (): IPopupState => ({
   popupComponent: {
     component: '',
     properties: {},
+    props: {},
     closeHandler: () => {
       return false
     }
