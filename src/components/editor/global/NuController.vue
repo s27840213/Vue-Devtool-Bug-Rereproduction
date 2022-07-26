@@ -16,6 +16,7 @@
         @dragenter="dragEnter($event)"
         @dragover.prevent
         @click.right.stop="onRightClick"
+        @press="onPress"
         @contextmenu.prevent
         @pointerdown="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
@@ -162,8 +163,8 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
-import mobileEditor from '@/store/module/mobileEditor'
 import editorUtils from '@/utils/editorUtils'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -222,6 +223,14 @@ export default Vue.extend({
     if (this.config.active) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
     }
+
+    const body = (this.$refs.body as HTMLElement)
+
+    const bodyAt = new AnyTouch(body)
+    //  销毁
+    this.$on('hook:destroyed', () => {
+      bodyAt.destroy()
+    })
   },
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -1781,12 +1790,7 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
-        if (this.getLayerType === 'text') {
-          LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
-        }
-
-        eventUtils.removePointerEvent('pointerup', this.moveEnd)
-        editorUtils.setInMultiSelectionMode(true)
+        event.preventDefault()
         return
       }
       /**
@@ -1806,6 +1810,14 @@ export default Vue.extend({
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
+    },
+    onPress(event: AnyTouchEvent) {
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+      }
+
+      eventUtils.removePointerEvent('pointerup', this.moveEnd)
+      editorUtils.setInMultiSelectionMode(true)
     },
     clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
       if (!this.isActive) {
