@@ -8,7 +8,7 @@
 			margin: auto;
 			outline: none;
 			background: none;
-			box-shadow: none !important;
+			-webkit-appearance: none;
 
 			&::-webkit-slider-runnable-track {
 				height: 2px;

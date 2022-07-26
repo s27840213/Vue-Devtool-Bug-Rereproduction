@@ -17,11 +17,13 @@ import TooltipUtils from './utils/tooltipUtils'
 import VueGtm from '@gtm-support/vue2-gtm'
 import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
+import longpress from './utils/longpress'
+import generalUtils from './utils/generalUtils'
 window.onerror = function (msg, url, line) {
   const message = [
-      'Message: ' + msg,
-      'URL: ' + url,
-      'Line: ' + line,
+    'Message: ' + msg,
+    'URL: ' + url,
+    'Line: ' + line,
   ].join(' - ')
   logUtils.setLog(message)
 }
@@ -130,6 +132,8 @@ Vue.directive('header-border', {
     }
   }
 })
+
+Vue.directive('press', longpress)
 
 const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
 const req = require.context('@/assets/icon', true, /\.svg$/)

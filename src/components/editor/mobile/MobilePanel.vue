@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="mobile-panel p-15"
       :style="panelStyle"
-      v-click-outside="vcoConfig()")
+      v-click-outside="vcoConfig()"
+      ref="panel")
     div(class="mobile-panel__top-section")
       div(class="mobile-panel__drag-bar"
         :class="{'visible-hidden': panelTitle !== ''}"
@@ -214,7 +215,10 @@ export default Vue.extend({
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
         maxHeight: this.fixSize || this.extraFixSizeCondition
           ? 'initial'
-          : this.isDraggingPanel ? '90%' : this.panelHeight + 'px'
+          : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
+        // height: this.fixSize || this.extraFixSizeCondition
+        //   ? 'initial'
+        //   : this.panelHeight + 'px'
       }
     },
     dynamicBindProps(): { [index: string]: any } {
@@ -412,8 +416,16 @@ export default Vue.extend({
     maxHeightPx() {
       return (this.$el.parentElement as HTMLElement).clientHeight * 0.9
     },
+    getMaxHeightPx(): number {
+      return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
+    },
     dragPanelStart(event: MouseEvent | PointerEvent) {
+      if (this.fixSize) {
+        return
+      }
+      this.isDraggingPanel = true
       this.lastPointerY = event.clientY
+      this.panelHeight = (this.$refs.panel as HTMLElement).clientHeight
       eventUtils.addPointerEvent('pointermove', this.dragingPanel)
       eventUtils.addPointerEvent('pointerup', this.dragPanelEnd)
     },
@@ -422,16 +434,22 @@ export default Vue.extend({
       this.lastPointerY = event.clientY
     },
     dragPanelEnd() {
+      this.isDraggingPanel = false
       const maxHeightPx = this.maxHeightPx()
       if (this.panelHeight < maxHeightPx * 0.25) {
         this.closeMobilePanel()
       } else if (this.panelHeight >= maxHeightPx * 0.75) {
         this.panelHeight = maxHeightPx
-        this.$nextTick(() => { pageUtils.fitPage() })
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
       } else {
         this.panelHeight = maxHeightPx * 0.5
-        this.$nextTick(() => { pageUtils.fitPage() })
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
       }
+
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)
     },
