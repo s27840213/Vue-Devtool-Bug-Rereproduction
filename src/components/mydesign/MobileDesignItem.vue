@@ -4,7 +4,7 @@
       div(class="mobile-design-item__img-container")
         image-carousel(v-if="showCarousel && previewCheckReady"
           :imgs="pageImages"
-          :speed="3000"
+          :speed="2000"
           @change="handleCarouselIdx")
           template(v-slot="{ url }")
             img(class="mobile-design-item__thumbnail"
