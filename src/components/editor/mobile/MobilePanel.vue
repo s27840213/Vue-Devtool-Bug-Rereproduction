@@ -402,9 +402,18 @@ export default Vue.extend({
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
     },
+    isModal(target: HTMLElement):boolean {
+      if (!target || target.id === 'app') return false
+      else if (target.className.includes('modal')) return true
+      return this.isModal(target.parentNode as HTMLElement)
+    },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
-      return !(typeof (event.target as HTMLElement).className === 'object' || // classNamm can be SVGAnimatedString
-        (event.target as HTMLElement).className.includes('footer-tabs') || (event.target as HTMLElement).className === 'inputNode')
+      const target = event.target as HTMLElement
+      return !(typeof target.className === 'object' || // className is SVGAnimatedString
+        this.isModal(target) ||
+        target.className.includes('footer-tabs') ||
+        target.className === 'inputNode'
+      )
     },
     closeMobilePanel() {
       this.$emit('switchTab', 'none')
