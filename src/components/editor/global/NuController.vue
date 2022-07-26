@@ -1813,6 +1813,7 @@ export default Vue.extend({
     },
     onPress(event: AnyTouchEvent) {
       if (!this.isActive) {
+        GroupUtils.deselect()
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
       if (this.getLayerType === 'text') {
