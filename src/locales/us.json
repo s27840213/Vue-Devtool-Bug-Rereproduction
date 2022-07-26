@@ -700,7 +700,7 @@
   "NN0693": "Delete designs",
   "NN0694": "This file contains multiple items.",
   "NN0695": "Template size doesn't match page size.",
-  "NN0696": "File ({file}) exceeds the maximum allowed size ({size}MB).",
+  "NN0696": "One of the files exceeds the maximum allowed size",
   "NN0697": "coupon code",
   "NN0698": "Invalid coupon code",
   "NN0699": "Save",

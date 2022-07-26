@@ -42,25 +42,29 @@ class ImageUtils {
 
   getSrc(config: Partial<IImage> | SrcObj, size?: string | number, ver?: number, forBgRemove?: boolean): string {
     // Documentation: https://www.notion.so/vivipic/Image-layer-sources-a27a45f5cff7477aba9125b86492204c
-    let { type, userId, assetId, brandId, updateQuery } = {} as SrcObj
+    let { type, userId, assetId, brandId, updateQuery, maxSize } = {} as SrcObj
     let ratio = 1
     if (this.isSrcObj(config)) {
-      ({ type, userId, assetId, brandId } = config)
+      ({ type, userId, assetId, brandId, maxSize } = config)
     } else {
       if (!config.srcObj && !config.src_obj) return ''
       if (config.previewSrc) {
         return config.previewSrc
       }
-      ({ type, userId, assetId, brandId, updateQuery } = config.srcObj || config.src_obj as SrcObj)
+      const srcObj = config.srcObj || config.src_obj as SrcObj
+      ({ type, userId, assetId, brandId, updateQuery, maxSize } = srcObj)
       if (typeof size === 'undefined' && config.styles) {
         const { imgWidth, imgHeight } = config.styles
         const pageSizeRatio = Math.max(LayerUtils.getCurrPage.width, LayerUtils.getCurrPage.height) / 1080
         size = this.getSrcSize(
-          type,
+          srcObj,
           config.styles ? this.getSignificantDimension(imgWidth, imgHeight) * store.getters.getPageScaleRatio * 0.01 * pageSizeRatio : 0
         )
       }
       ratio = config.styles ? config.styles.imgHeight / config.styles.imgWidth : 1
+    }
+    if (size === 'xtra' && maxSize && maxSize !== 'xtra') {
+      size = maxSize
     }
 
     switch (type) {
@@ -102,7 +106,8 @@ class ImageUtils {
     }
   }
 
-  getSrcSize(type: string, dimension: number, preload = '') {
+  getSrcSize(srcObj: SrcObj, dimension: number, preload = '') {
+    const { type, maxSize } = srcObj
     if (!type) {
       return 0
     }
@@ -110,7 +115,7 @@ class ImageUtils {
     const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
-      while (dimension <= sizeMap[i].size && i < sizeMap.length - 1) {
+      while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
         i++
       }
       i = Math.max(i - 1, 0)

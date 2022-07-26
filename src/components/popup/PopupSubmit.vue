@@ -24,6 +24,12 @@ export default Vue.extend({
       id: ''
     }
   },
+  props: {
+    type: {
+      type: String,
+      default: ''
+    }
+  },
   mounted() {
     (this.$refs.input as HTMLInputElement).focus()
   },
@@ -55,11 +61,10 @@ export default Vue.extend({
   methods: {
     upload() {
       if (this.id.length === 20) {
-        uploadUtils.uploadLayer(this.updateType, this.id)
+        uploadUtils.uploadLayer(this.type || this.updateType, this.id)
         popupUtils.closePopup()
       } else {
-        modalUtils.setModalInfo('上傳錯誤', ['Design Id 長度不符合格式(20碼)'], '')
-        modalUtils.setIsModalOpen(true)
+        modalUtils.setModalInfo('上傳錯誤', ['Design Id 長度不符合格式(20碼)'])
       }
     }
   }
