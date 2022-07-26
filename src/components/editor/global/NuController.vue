@@ -636,7 +636,7 @@ export default Vue.extend({
       }
     },
     hintStyles() {
-      return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)
@@ -1145,7 +1145,7 @@ export default Vue.extend({
       const { angle, yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = ((angle / Math.PI * 180 + (1 - markerIndex) * 180) + 360) % 360
       this.hintLength = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
 
@@ -1174,7 +1174,7 @@ export default Vue.extend({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintLength = lineLength
       this.hintAngle = lineAngle
 
@@ -1413,7 +1413,7 @@ export default Vue.extend({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
       eventUtils.addPointerEvent('pointermove', this.rotating)
@@ -1445,7 +1445,7 @@ export default Vue.extend({
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-        this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
 
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
@@ -1478,7 +1478,7 @@ export default Vue.extend({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
       eventUtils.addPointerEvent('pointermove', this.lineRotating)
@@ -1512,7 +1512,7 @@ export default Vue.extend({
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-        this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
 
         ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, point)
