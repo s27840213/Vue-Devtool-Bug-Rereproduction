@@ -1821,6 +1821,7 @@ export default Vue.extend({
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
       }
 
+      eventUtils.removePointerEvent('pointermove', this.moving)
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
       editorUtils.setInMultiSelectionMode(true)
     },
