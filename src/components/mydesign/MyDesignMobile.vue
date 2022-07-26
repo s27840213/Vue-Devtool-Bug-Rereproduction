@@ -458,7 +458,7 @@ export default Vue.extend({
         case 'root-design':
           return `${this.$t('NN0682', { item: this.$tc('NN0252'), dest: `${this.$t('NN0080')}`.toLowerCase() })}`
         case 'root-folder':
-          return `${this.$t('NN0682', { item: this.$tc('NN0253'), dest: `${this.$t('NN0080')}`.toLowerCase() })}`
+          return `${this.$t('NN0704')}`
         case 'delete':
           return `${this.$t('NN0685')}`
         case 'favor-design':
