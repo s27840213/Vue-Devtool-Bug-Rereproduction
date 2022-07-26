@@ -141,8 +141,6 @@ export default Vue.extend({
       })
     },
     handleColorUpdate(newColor: string) {
-      console.log(newColor)
-      console.log(this.currEvent)
       switch (this.currEvent) {
         case ColorEventType.text: {
           if (newColor === this.props.color) return
