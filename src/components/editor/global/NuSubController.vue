@@ -8,7 +8,8 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @dragenter="onDragEnter($event)"
-            @pointerdown="onMousedown($event)")
+            @pointerdown="onMousedown($event)"
+            @click.left.stop="onClick")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
@@ -352,6 +353,17 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
 
+      // if (!this.isPrimaryActive || this.isMoved) return
+      // if (this.type === 'tmp') {
+      //   if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+      //     groupUtils.deselectTargetLayer(this.layerIndex)
+      //   }
+      //   return
+      // }
+      // colorUtils.event.emit('closeColorPanel', false)
+      // this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
+    },
+    onClick(e: MouseEvent) {
       if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {

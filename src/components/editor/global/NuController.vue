@@ -16,7 +16,6 @@
         @dragenter="dragEnter($event)"
         @dragover.prevent
         @click.right.stop="onRightClick"
-        @press="onPress"
         @contextmenu.prevent
         @pointerdown="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
@@ -226,11 +225,11 @@ export default Vue.extend({
 
     const body = (this.$refs.body as HTMLElement)
 
-    const bodyAt = new AnyTouch(body)
-    //  销毁
-    this.$on('hook:destroyed', () => {
-      bodyAt.destroy()
-    })
+    // const bodyAt = new AnyTouch(body)
+    // //  销毁
+    // this.$on('hook:destroyed', () => {
+    //   bodyAt.destroy()
+    // })
   },
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -1812,7 +1811,6 @@ export default Vue.extend({
       })
     },
     onPress(event: AnyTouchEvent) {
-      console.log('on press')
       if (!this.isActive) {
         GroupUtils.deselect()
         GroupUtils.select(this.pageIndex, [this.layerIndex])
