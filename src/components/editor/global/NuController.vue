@@ -1784,6 +1784,8 @@ export default Vue.extend({
         if (this.getLayerType === 'text') {
           LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
         }
+
+        eventUtils.removePointerEvent('pointerup', this.moveEnd)
         editorUtils.setInMultiSelectionMode(true)
         return
       }
