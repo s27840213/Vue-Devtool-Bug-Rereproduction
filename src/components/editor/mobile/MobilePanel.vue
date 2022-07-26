@@ -81,6 +81,7 @@ import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   props: {
@@ -426,8 +427,10 @@ export default Vue.extend({
         this.closeMobilePanel()
       } else if (this.panelHeight >= maxHeightPx * 0.75) {
         this.panelHeight = maxHeightPx
+        this.$nextTick(() => { pageUtils.fitPage() })
       } else {
         this.panelHeight = maxHeightPx * 0.5
+        this.$nextTick(() => { pageUtils.fitPage() })
       }
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
       eventUtils.removePointerEvent('pointerup', this.dragPanelEnd)

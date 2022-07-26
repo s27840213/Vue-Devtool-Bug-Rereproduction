@@ -12,7 +12,9 @@
           :inAllPagesMode="inAllPagesMode")
         div(v-else class="mobile-editor__page-preview")
           all-pages
-      transition(name="panel-up")
+      transition(name="panel-up"
+                @after-enter="fitPage"
+                @after-leave="fitPage")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
@@ -237,6 +239,9 @@ export default Vue.extend({
     },
     openExtraColorModal() {
       this.showExtraColorPanel = !this.showExtraColorPanel
+    },
+    fitPage() {
+      pageUtils.fitPage()
     }
   }
 })

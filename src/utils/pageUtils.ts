@@ -355,17 +355,11 @@ class PageUtils {
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    let { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
+    const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       targetSize ||
       (this.inBgRemoveMode ? this.autoRemoveResult
         : this.currFocusPageSize)
-
-    // Add the height of MobilePanel if mobile-editor, because MobilePanel occupy editor sapce.
-    const mobilePanelBox = document.getElementsByClassName('mobile-panel')[0]
-    if (generalUtils.isTouchDevice() && mobilePanelBox) {
-      editorHeight += mobilePanelBox.clientHeight
-    }
 
     // Calculate and do resize
     const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
