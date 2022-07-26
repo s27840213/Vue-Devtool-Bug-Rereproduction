@@ -6,13 +6,12 @@
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
-        keep-alive
-          mobile-editor-view(v-show="!inAllPagesMode"
-            :currActivePanel="currActivePanel"
-            :isConfigPanelOpen="isConfigPanelOpen"
-            :inAllPagesMode="inAllPagesMode")
-          div(v-show="inAllPagesMode" class="mobile-editor__page-preview")
-            all-pages
+        mobile-editor-view(v-if="!inAllPagesMode"
+          :currActivePanel="currActivePanel"
+          :isConfigPanelOpen="isConfigPanelOpen"
+          :inAllPagesMode="inAllPagesMode")
+        div(class="mobile-editor__page-preview")
+          all-pages
       transition(name="panel-up")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
