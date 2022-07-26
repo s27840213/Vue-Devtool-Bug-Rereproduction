@@ -388,10 +388,14 @@ export default Vue.extend({
         }
         case 'edit': {
           const { index, pageIndex } = layerUtils.currSelectedInfo
+          const { getCurrLayer: currLayer } = layerUtils
+
           if (!this.hasSubSelectedLayer) {
-            layerUtils.updateLayerProps(pageIndex, index, {
-              contentEditable: true
-            })
+            if (currLayer.type === 'text') {
+              layerUtils.updateLayerProps(pageIndex, index, {
+                contentEditable: true
+              })
+            }
 
             tiptapUtils.focus({ scrollIntoView: false })
           } else {

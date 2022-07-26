@@ -7,7 +7,6 @@
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
-            @click.left.stop="onClickEvent($event)"
             @dragenter="onDragEnter($event)"
             @pointerdown="onMousedown($event)")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
@@ -338,7 +337,8 @@ export default Vue.extend({
       eventUtils.addPointerEvent('pointerup', this.onMouseup)
       this.isControlling = true
     },
-    onMouseup() {
+    onMouseup(e: PointerEvent) {
+      e.stopPropagation()
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
@@ -351,6 +351,16 @@ export default Vue.extend({
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
+
+      if (!this.isPrimaryActive || this.isMoved) return
+      if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
+        return
+      }
+      colorUtils.event.emit('closeColorPanel', false)
+      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     positionStyles() {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
@@ -467,17 +477,6 @@ export default Vue.extend({
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
-    },
-    onClickEvent(e: MouseEvent) {
-      if (!this.isPrimaryActive || this.isMoved) return
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
-      colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onDblClick() {
       if (this.type === 'tmp') {
