@@ -10,7 +10,7 @@
           :currActivePanel="currActivePanel"
           :isConfigPanelOpen="isConfigPanelOpen"
           :inAllPagesMode="inAllPagesMode")
-        div(class="mobile-editor__page-preview")
+        div(v-else class="mobile-editor__page-preview")
           all-pages
       transition(name="panel-up")
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
