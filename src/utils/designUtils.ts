@@ -13,6 +13,7 @@ import Vue from 'vue'
 import i18n from '@/i18n'
 import stepsUtils from './stepsUtils'
 import _ from 'lodash'
+import { EventEmitter } from 'events'
 
 interface Item {
   name: string,
@@ -22,8 +23,30 @@ interface Item {
 class DesignUtils {
   ROOT = '$ROOT$'
   ROOT_DISPLAY = i18n.t('NN0187')
+  event = new EventEmitter()
+  eventHash: {[key: string]: () => void} = {}
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get teamId(): string { return store.getters['user/getTeamId'] }
+
+  on(type: string, callback: () => void) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+    this.event.on(type, callback)
+    this.eventHash[type] = callback
+  }
+
+  off(type: string) {
+    if (this.eventHash[type]) {
+      this.event.off(type, this.eventHash[type])
+      delete this.eventHash[type]
+    }
+  }
+
+  emit(type: string) {
+    this.event.emit(type)
+  }
 
   apiDesign2IDesign(design: IUserDesignContentData): IDesign {
     return {
@@ -97,21 +120,21 @@ class DesignUtils {
     return index >= 0 ? index : items.length
   }
 
-  sortById(folders: IFolder[]): IFolder[] {
+  sortByCreateTime(folders: IFolder[]): IFolder[] {
     folders.sort((a, b) => {
-      return a.id.localeCompare(b.id)
+      return (Date.parse(b.createdTime) - Date.parse(a.createdTime))
     })
     return folders
   }
 
   newFolder(name: string, author: string, randomTime = false, isROOT = false): IFolder {
-    const time = randomTime ? generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date()) : new Date()
+    const time = randomTime ? new Date(generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())).toISOString() : new Date().toISOString()
     return {
       id: isROOT ? this.ROOT : generalUtils.generateAssetId() + '_new',
       name,
       author,
-      createdTime: time.toString(),
-      lastUpdatedTime: time.toString(),
+      createdTime: time,
+      lastUpdatedTime: time,
       isExpanded: false,
       isCurrLocation: false,
       subFolders: []
@@ -132,25 +155,29 @@ class DesignUtils {
   makeDesignsForTesting(): IFolder[] {
     const template: IFolder[] = []
     template[0] = this.newFolder(this.ROOT, 'SYSTEM', true, true)
-    // template[0].subFolders = [
-    //   this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
-    //   this.newFolder('日本行銷', 'Daniel', true)
-    // ]
+    template[0].subFolders = [
+      this.newFolders('Toby/素材2/材質3/材質4/材質5', 'Daniel'),
+      this.newFolder('日本行銷', 'Daniel', true)
+    ]
     // for (let i = 0; i < 15; i++) {
-    //   const time = generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())
+    //   const time = new Date(generalUtils.generateRandomTime(new Date(2021, 1, 1), new Date())).toISOString()
     //   template[0].subFolders[0].designs.push({
     //     name: `Name${i + 1}`,
     //     width: 1200,
     //     height: 1200,
     //     id: generalUtils.generateAssetId(),
     //     thumbnail: require(`@/assets/img/png/mydesign/sample${i + 1}.png`),
-    //     createdTime: time.toString(),
-    //     lastUpdatedTime: time.toString(),
+    //     createdTime: time,
+    //     lastUpdatedTime: time,
     //     favorite: false,
     //     ver: 0
     //   })
     // }
     return template
+  }
+
+  initializeFolders(): IFolder[] {
+    return [this.newFolder(this.ROOT, 'SYSTEM', true, true)]
   }
 
   makePath(selectInfo: string): string[] {
@@ -222,6 +249,109 @@ class DesignUtils {
     ]
   }
 
+  makeMobileNormalMenuItems(isInFavorites: boolean, isInFolderView: boolean): { icon: string, text: string }[] {
+    const res = [
+      {
+        icon: 'copy',
+        text: `${i18n.t('NN0251')}`
+      },
+      {
+        icon: 'folder',
+        text: `${i18n.t('NN0206')}`
+      },
+      {
+        icon: isInFavorites ? 'favorites-fill' : 'favorites',
+        text: isInFavorites ? `${i18n.t('NN0207')}` : `${i18n.t('NN0205')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
+      }
+    ]
+    if (isInFolderView) {
+      res.splice(2, 0, {
+        icon: 'folder_minus',
+        text: `${i18n.t('NN0692')}`
+      })
+    }
+    return res
+  }
+
+  makeMobileFavoriteMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'favorites-fill',
+        text: `${i18n.t('NN0207')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
+      }
+    ]
+  }
+
+  makeMobileTrashMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'undo',
+        text: `${i18n.t('NN0204')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0680')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0200')}`
+      }
+    ]
+  }
+
+  makeMobileNormalFolderMenuItems(isInFolderView: boolean): { icon: string, text: string }[] {
+    const res = [
+      {
+        icon: 'folder',
+        text: `${i18n.t('NN0206')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0034')}`
+      }
+    ]
+    if (isInFolderView) {
+      res.splice(1, 0, {
+        icon: 'folder_minus',
+        text: `${i18n.t('NN0692')}`
+      })
+    }
+    return res
+  }
+
+  makeMobileTrashFolderMenuItems(): { icon: string, text: string }[] {
+    return [
+      {
+        icon: 'undo',
+        text: `${i18n.t('NN0204')}`
+      },
+      {
+        icon: 'confirm-circle',
+        text: `${i18n.t('NN0690')}`
+      },
+      {
+        icon: 'trash',
+        text: `${i18n.t('NN0200')}`
+      }
+    ]
+  }
+
   findFolder(folders: IFolder[], id: string): IFolder | undefined {
     for (const folder of folders) {
       if (folder.id === id) {
@@ -240,6 +370,7 @@ class DesignUtils {
   }
 
   search(folders: IFolder[], path: string[]): IFolder | undefined {
+    if (path.length === 0) return undefined
     const parents = path.slice(0, path.length - 1)
     const id = path[path.length - 1]
 
@@ -294,10 +425,12 @@ class DesignUtils {
     return bFullPath.startsWith(aFullPath)
   }
 
-  dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
+  dispatchDesignMenuAction(icon: string, design: IDesign, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'copy': {
-        store.dispatch('design/copyDesign', design)
+        store.dispatch('design/copyDesign', design).then(() => {
+          eventEmitter()
+        })
         break
       }
       case 'trash': {
@@ -333,6 +466,17 @@ class DesignUtils {
         })
         break
       }
+      case 'undo': {
+        this.recover(design)
+        eventEmitter({
+          event: 'recoverItem',
+          payload: {
+            type: 'design',
+            data: design
+          }
+        })
+        break
+      }
       case 'folder': {
         eventEmitter({
           event: 'moveDesignToFolder',
@@ -347,15 +491,55 @@ class DesignUtils {
         })
         break
       }
+      case 'favorites': {
+        this.addToFavorite(design)
+        eventEmitter({
+          event: 'favorDesign',
+          payload: design
+        })
+        break
+      }
+      case 'favorites-fill': {
+        this.removeFromFavorite(design)
+        eventEmitter({
+          event: 'unfavorDesign',
+          payload: design
+        })
+        break
+      }
+      case 'confirm-circle': {
+        store.commit('design/UPDATE_addToSelection', design)
+        eventEmitter()
+        break
+      }
+      case 'folder_minus': {
+        this.move(design, [this.ROOT])
+        eventEmitter({
+          event: 'rootDesign',
+          payload: undefined
+        })
+        break
+      }
     }
   }
 
-  dispatchFolderMenuAction(icon: string, folder: IFolder, eventEmitter: (extraEvent: { event: string, payload: any }) => void) {
+  dispatchFolderMenuAction(icon: string, folder: IFolder, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
     switch (icon) {
       case 'delete': {
         eventEmitter({
           event: 'deleteFolderForever',
           payload: folder
+        })
+        break
+      }
+      case 'undo': {
+        this.recoverFolder(folder)
+        eventEmitter({
+          event: 'recoverItem',
+          payload: {
+            type: 'folder',
+            data: folder
+          }
         })
         break
       }
@@ -376,12 +560,65 @@ class DesignUtils {
     }
   }
 
-  addNewFolder(path: string[], fromFolderView = false): string {
-    const folder = this.newFolder(`${i18n.t('NN0249')}`, 'SYSTEM')
+  dispatchMobileFolderMenuAction(icon: string, pathedFolder: IPathedFolder, eventEmitter: (extraEvent?: { event: string, payload: any }) => void) {
+    switch (icon) {
+      case 'folder': {
+        eventEmitter({
+          event: 'moveDesignToFolder',
+          payload: undefined
+        })
+        break
+      }
+      case 'trash': {
+        this.checkEmpty(pathedFolder).then((empty) => {
+          if (empty) {
+            this.deleteFolder(pathedFolder)
+            eventEmitter({
+              event: 'deleteItem',
+              payload: {
+                type: 'folder',
+                data: pathedFolder.folder
+              }
+            })
+          } else {
+            eventEmitter({
+              event: 'deleteFolder',
+              payload: pathedFolder
+            })
+          }
+        })
+        break
+      }
+      case 'confirm-circle': {
+        store.commit('design/UPDATE_addFolderToSelection', pathedFolder.folder)
+        eventEmitter()
+        break
+      }
+      case 'folder_minus': {
+        this.moveFolder(pathedFolder, [this.ROOT])
+        eventEmitter({
+          event: 'rootFolder',
+          payload: undefined
+        })
+        break
+      }
+      default:
+        this.dispatchFolderMenuAction(icon, pathedFolder.folder, eventEmitter)
+    }
+  }
+
+  addNewFolder(path: string[], fromFolderView = false, name: string | undefined = undefined, insertToCopied = false): string {
+    const folder = this.newFolder(name ?? `${i18n.t('NN0249')}`, 'SYSTEM')
     store.commit('design/UPDATE_insertFolder', {
       parents: path,
       folder
     })
+    if (insertToCopied) {
+      store.commit('design/UPDATE_insertFolderToCopied', {
+        parents: path.slice(1),
+        folder
+      })
+    }
     if (fromFolderView) {
       store.commit('design/UPDATE_addFolder', folder)
     }

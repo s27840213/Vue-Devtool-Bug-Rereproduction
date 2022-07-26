@@ -100,7 +100,7 @@ export default Vue.extend({
       return this.selectedNum > 1
     },
     realFolders(): IFolder[] {
-      return designUtils.sortById([...this.folder.subFolders])
+      return designUtils.sortByCreateTime([...this.folder.subFolders])
     },
     isTempFolder(): boolean {
       return this.folder.id.endsWith('_new')
@@ -271,7 +271,7 @@ export default Vue.extend({
     },
     checkExpand(folders: IFolder[]): IFolder[] {
       if (this.folder.isExpanded) {
-        return designUtils.sortById([...folders])
+        return designUtils.sortByCreateTime([...folders])
       } else {
         return []
       }

@@ -78,7 +78,7 @@
           svg-icon(class="header-icon"
                   iconName="folder_plus"
                   iconWidth="18px"
-                  :iconColor="newFolderColor")
+                  :iconColor="isMaxLevelReached ? 'gray-3' : 'gray-2'")
         div(class="folder-design-view__sort-by"
             @click="toggleSortMenu"
             v-click-outside="closeSortMenu")
@@ -230,8 +230,8 @@ export default Vue.extend({
     isEmpty(): boolean {
       return this.allFolders.length + this.allDesigns.length === 0
     },
-    newFolderColor(): string {
-      return designUtils.isMaxLevelReached(this.parents.length - 1) ? 'gray-3' : 'gray-2'
+    isMaxLevelReached(): boolean {
+      return designUtils.isMaxLevelReached(this.parents.length - 1)
     }
   },
   methods: {
@@ -247,7 +247,7 @@ export default Vue.extend({
       setSortByDescending: 'SET_sortByDescending'
     }),
     newFolderStyles() {
-      return designUtils.isMaxLevelReached(this.parents.length - 1) ? { pointerEvents: 'none' } : {}
+      return this.isMaxLevelReached ? { pointerEvents: 'none' } : {}
     },
     goToParent(index: number) {
       const selectedParents = this.parents.slice(0, index + 1)
