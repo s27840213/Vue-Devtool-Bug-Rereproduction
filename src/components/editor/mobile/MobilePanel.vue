@@ -133,7 +133,8 @@ export default Vue.extend({
       panelHeight: 0,
       lastPointerY: 0,
       showExtraColorPanel: false,
-      extraColorEvent: ColorEventType.text
+      extraColorEvent: ColorEventType.text,
+      isDraggingPanel: false
     }
   },
   computed: {
@@ -210,9 +211,9 @@ export default Vue.extend({
       return {
         'row-gap': this.hideDynamicComp ? '0px' : '10px',
         backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-        height: this.fixSize || this.extraFixSizeCondition
+        maxHeight: this.fixSize || this.extraFixSizeCondition
           ? 'initial'
-          : this.panelHeight + 'px'
+          : this.isDraggingPanel ? '90%' : this.panelHeight + 'px'
       }
     },
     dynamicBindProps(): { [index: string]: any } {
@@ -315,11 +316,6 @@ export default Vue.extend({
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
-      if (this.panelHistory.length === 1) {
-        return () => {
-          this.showExtraColorPanel = false
-        }
-      }
       if (this.showExtraColorPanel) {
         return () => {
           this.showExtraColorPanel = false
@@ -379,6 +375,9 @@ export default Vue.extend({
       if (newVal === 0) {
         editorUtils.setInMultiSelectionMode(false)
       }
+    },
+    currActivePanel() {
+      this.panelHistory = []
     }
   },
   mounted() {
