@@ -36,6 +36,9 @@ export default Vue.extend({
       return generalUtils.isTouchDevice()
     }
   },
+  created() {
+    this.item.db = 'svg'
+  },
   methods: {
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'

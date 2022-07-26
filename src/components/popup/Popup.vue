@@ -3,6 +3,7 @@
     component(:is="component"
     v-click-outside="vcoConfig"
     :updateOptions="sharedUpdateOptions"
+    v-bind="props"
     @close="close")
 </template>
 
@@ -75,6 +76,9 @@ export default Vue.extend({
     }),
     component(): string {
       return (this.popupComponent as IPopupComponent).component
+    },
+    props(): { [key:string]: string } {
+      return (this.popupComponent as IPopupComponent).props
     },
     hasDesignId(): boolean {
       return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
