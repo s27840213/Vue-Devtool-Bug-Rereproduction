@@ -29,6 +29,8 @@ import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -69,8 +71,16 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
+    backgroundImgControl(): boolean {
+      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
+    },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
+    },
     groupTab(): IFooterTab {
       return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 }
     },
@@ -81,7 +91,10 @@ export default Vue.extend({
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', disabled: this.isFrameImage }
+        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', disabled: this.isFrameImage },
+        ...this.genearlLayerTabs,
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}` },
+        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, disabled: true }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
       ]
     },
@@ -102,6 +115,24 @@ export default Vue.extend({
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+      ]
+    },
+    bgSettingTab(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', disabled: true },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        {
+          icon: 'color',
+          text: `${this.$t('NN0495')}`,
+          panelType: 'color',
+          props: {
+            currColorEvent: ColorEventType.background
+          }
+        },
+        { icon: 'bg-separate', text: `${this.$t('NN0708')}` }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -186,13 +217,15 @@ export default Vue.extend({
       } else if ((this.selectMultiple || (this.isGroup && !this.hasSubSelectedLayer)) && !this.singleTargetType()) {
         return this.multiGeneralTabs
       } else if (this.showPhotoTabs) {
-        return this.photoTabs.concat(this.genearlLayerTabs)
+        return this.photoTabs
       } else if (this.showFontTabs) {
         return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs]
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
       } else if (this.showGeneralTabs) {
         return [this.mainMenu, ...this.genearlLayerTabs]
+      } else if (this.inBgSettingMode) {
+        return this.bgSettingTab
       } else {
         return this.homeTabs
       }
@@ -325,26 +358,35 @@ export default Vue.extend({
       _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
       _setCurrActivePageIndex: 'SET_currActivePageIndex',
       _setIsDragged: 'page/SET_IsDragged',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview'
+      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
+      setBgImageControl: 'SET_backgroundImageControl'
     }),
     handleTabAction(tab: IFooterTab) {
       switch (tab.icon) {
         case 'crop': {
-          if (this.isCropping) {
-            imageUtils.setImgControlDefault()
-          } else {
-            let index
-            switch (layerUtils.getCurrLayer.type) {
-              case 'image':
-                layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
-                break
-              case 'frame':
-                index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
-                if (index >= 0) {
-                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-                }
-                break
+          if (this.selectedLayerNum > 0) {
+            if (this.isCropping) {
+              imageUtils.setImgControlDefault()
+            } else {
+              let index
+              switch (layerUtils.getCurrLayer.type) {
+                case 'image':
+                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                  break
+                case 'frame':
+                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                  if (index >= 0) {
+                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                  }
+                  break
+              }
             }
+          } else if (this.inBgSettingMode) {
+            if (this.backgroundLocked) return this.handleLockedNotify()
+            this.setBgImageControl({
+              pageIndex: pageUtils.currFocusPageIndex,
+              imgControl: !this.backgroundImgControl
+            })
           }
           break
         }
@@ -353,6 +395,10 @@ export default Vue.extend({
           this.$emit('switchTab', 'none')
           if (this.inAllPagesMode) {
             this.$emit('showAllPages')
+          }
+
+          if (this.inBgSettingMode) {
+            editorUtils.setInBgSettingMode(false)
           }
           break
         }
@@ -411,6 +457,14 @@ export default Vue.extend({
           mappingUtils.mappingIconAction(tab.icon)
           break
         }
+        case 'bg-separate': {
+          if (this.inBgSettingMode) {
+            backgroundUtils.detachBgImage()
+          } else {
+            backgroundUtils.setBgImageSrc()
+          }
+          break
+        }
         default: {
           break
         }
@@ -444,6 +498,9 @@ export default Vue.extend({
       } else {
         return this.currSelectedInfo.types.size === 1
       }
+    },
+    handleLockedNotify() {
+      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
     }
   }
 })

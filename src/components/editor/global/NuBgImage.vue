@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="nu-background-image"
     :style="mainStyles"
+    @pointerdown.stop="setInBgSettingMode"
     draggable="false")
     div(v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
@@ -26,6 +27,7 @@ import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import errorHandle from '@/utils/errorHandleUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   props: {
@@ -210,6 +212,9 @@ export default Vue.extend({
         height: `${this.image.config.styles.imgHeight}px`,
         transform: `translate(${this.image.posX}px, ${this.image.posY}px) ${this.flipStyles.transform}`
       }
+    },
+    setInBgSettingMode() {
+      editorUtils.setInBgSettingMode(true)
     }
   }
 })

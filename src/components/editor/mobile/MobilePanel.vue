@@ -70,7 +70,7 @@ import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import layerUtils from '@/utils/layerUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -145,8 +145,16 @@ export default Vue.extend({
       showPagePanel: 'page/getShowPagePanel',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
+    backgroundImgControl(): boolean {
+      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
+    },
+    backgroundLocked(): boolean {
+      const { locked } = pageUtils.currFocusPage.backgroundImage.config
+      return locked
+    },
     selectedLayerNum(): number {
       return (this.currSelectedInfo as ICurrSelectedInfo).layers.length
     },
@@ -337,21 +345,29 @@ export default Vue.extend({
       return () => {
         switch (this.currActivePanel) {
           case 'crop': {
-            if (imageUtils.isImgControl()) {
-              imageUtils.setImgControlDefault()
-            } else {
-              let index
-              switch (layerUtils.getCurrLayer.type) {
-                case 'image':
-                  layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
-                  break
-                case 'frame':
-                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
-                  if (index >= 0) {
-                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-                  }
-                  break
+            if (this.selectedLayerNum > 0) {
+              if (imageUtils.isImgControl()) {
+                imageUtils.setImgControlDefault()
+              } else {
+                let index
+                switch (layerUtils.getCurrLayer.type) {
+                  case 'image':
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
+                    break
+                  case 'frame':
+                    index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
+                    if (index >= 0) {
+                      frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
+                    }
+                    break
+                }
               }
+            } else if (this.inBgSettingMode) {
+              if (this.backgroundLocked) return this.handleLockedNotify()
+              this.setBgImageControl({
+                pageIndex: pageUtils.currFocusPageIndex,
+                imgControl: !this.backgroundImgControl
+              })
             }
             break
           }
@@ -389,6 +405,9 @@ export default Vue.extend({
     this.panelHeight = this.initHeightPx()
   },
   methods: {
+    ...mapMutations({
+      setBgImageControl: 'SET_backgroundImageControl'
+    }),
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes',
       initRecentlyColors: 'color/initRecentlyColors',
@@ -402,7 +421,7 @@ export default Vue.extend({
         // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
       }
     },
-    isModal(target: HTMLElement):boolean {
+    isModal(target: HTMLElement): boolean {
       if (!target || target.id === 'app') return false
       else if (target.className.includes('modal')) return true
       return this.isModal(target.parentNode as HTMLElement)
@@ -467,6 +486,9 @@ export default Vue.extend({
         e.preventDefault()
         e.stopPropagation()
       }
+    },
+    handleLockedNotify() {
+      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
     }
   }
 })

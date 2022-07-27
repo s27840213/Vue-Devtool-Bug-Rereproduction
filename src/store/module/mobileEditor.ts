@@ -5,7 +5,8 @@ interface IMobileEditorState {
   mobileAllPageMode: boolean
   inMultiSelectionMode: boolean,
   currCardIndex: number,
-  currActivePanel: string
+  currActivePanel: string,
+  inBgSettingMode: boolean
 }
 
 const getDefaultState = (): IMobileEditorState => ({
@@ -13,7 +14,8 @@ const getDefaultState = (): IMobileEditorState => ({
   mobileAllPageMode: false,
   inMultiSelectionMode: false,
   currCardIndex: 0,
-  currActivePanel: 'none'
+  currActivePanel: 'none',
+  inBgSettingMode: false
 })
 
 const state = getDefaultState()
@@ -29,10 +31,23 @@ const getters: GetterTree<IMobileEditorState, unknown> = {
   },
   getMobileAllPageMode(state: IMobileEditorState): boolean {
     return state.mobileAllPageMode
+  },
+  getInBgSettingMode(state: IMobileEditorState): boolean {
+    return state.inBgSettingMode
   }
 }
 
 const mutations: MutationTree<IMobileEditorState> = {
+  SET_STATE(state: IMobileEditorState, props: Partial<IMobileEditorState>) {
+    const newState = props || getDefaultState()
+    const keys = Object.keys(newState) as Array<keyof IMobileEditorState>
+    keys
+      .forEach(key => {
+        if (key in state) {
+          (state[key] as any) = newState[key]
+        }
+      })
+  },
   SET_closeMobilePanelFlag(state: IMobileEditorState, bool: boolean) {
     state.closeMobilePanelFlag = bool
   },

@@ -3,7 +3,7 @@
     div(v-for="(data,index) in flipData()"
         :key="`popup-${index}`"
         class="panel-flip__item"
-        @click="MappingUtils.mappingIconAction(data.icon)")
+        @click="handleFlipAction(data)")
       svg-icon(
         class="pointer"
         :iconName="data.icon"
@@ -17,6 +17,7 @@ import Vue from 'vue'
 import MappingUtils from '@/utils/mappingUtils'
 import { mapGetters } from 'vuex'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
+import backgroundUtils from '@/utils/backgroundUtils'
 
 export default Vue.extend({
   data() {
@@ -45,6 +46,13 @@ export default Vue.extend({
           text: texts[index]
         }
       })
+    },
+    handleFlipAction(data: { icon: string, text: string }) {
+      if (this.layerNum > 0) {
+        MappingUtils.mappingIconAction(data.icon)
+      } else if (backgroundUtils.inBgSettingMode) {
+        backgroundUtils.handleImageFlip(data.icon)
+      }
     }
   }
 })

@@ -1,9 +1,21 @@
 import store from '@/store'
 import generalUtils from './generalUtils'
 
+interface IMobileEditorState {
+  closeMobilePanelFlag: boolean,
+  mobileAllPageMode: boolean
+  inMultiSelectionMode: boolean,
+  currCardIndex: number,
+  currActivePanel: string,
+  inBgSettingMode: boolean
+}
 class EditorUtils {
   get mobileAllPageMode() {
     return store.getters['mobileEditor/mobileAllPageMode']
+  }
+
+  private setState(props: Partial<IMobileEditorState>) {
+    store.commit('mobileEditor/SET_STATE', props)
   }
 
   setCloseMobilePanelFlag(bool: boolean): void {
@@ -30,6 +42,12 @@ class EditorUtils {
   setCurrActivePanel(panel: string): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_currActivePanel', panel)
+    }
+  }
+
+  setInBgSettingMode(bool: boolean): void {
+    if (generalUtils.isTouchDevice()) {
+      this.setState({ inBgSettingMode: bool })
     }
   }
 }

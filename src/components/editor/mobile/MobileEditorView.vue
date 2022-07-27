@@ -201,7 +201,8 @@ export default Vue.extend({
       hasCopiedFormat: 'getHasCopiedFormat',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       currFocusPageIndex: 'getCurrFocusPageIndex',
-      currCardIndex: 'mobileEditor/getCurrCardIndex'
+      currCardIndex: 'mobileEditor/getCurrCardIndex',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -261,6 +262,7 @@ export default Vue.extend({
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode) {
+        editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()

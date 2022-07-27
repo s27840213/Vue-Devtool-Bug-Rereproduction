@@ -46,6 +46,7 @@ import DragUtils from '@/utils/dragUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -170,6 +171,10 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (generalUtils.isTouchDevice()) {
+        return
+      }
+
       this.setCurrActivePageIndex(this.pageIndex)
       if (!this.isHandleShadow) {
         groupUtils.deselect()

@@ -17,6 +17,7 @@ import { mapGetters } from 'vuex'
 import frameUtils from '@/utils/frameUtils'
 import pageUtils from '@/utils/pageUtils'
 import { IFrame } from '@/interfaces/layer'
+import backgroundUtils from '@/utils/backgroundUtils'
 export default Vue.extend({
   components: {
     MobileSlider
@@ -74,6 +75,10 @@ export default Vue.extend({
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo
       const { index, type } = this.currSubSelectedInfo
+      if (index === -1 && backgroundUtils.inBgSettingMode) {
+        backgroundUtils.handleChangeBgAdjust(adjust)
+        return
+      }
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
           if (index >= 0) {
