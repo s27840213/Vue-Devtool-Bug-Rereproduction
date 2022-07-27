@@ -355,6 +355,7 @@ class PageUtils {
     // Get size of target(design) and editor.
     // Target size can be pass by param or get according to situation.
     const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    if (!editorViewBox) return
     const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
     const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
       targetSize ||

@@ -417,8 +417,7 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['contextmenu', 'pointerdown', 'touchstart']
-        // events: ['dblclick', 'click', 'contextmenu', 'mousedown']
+        events: ['contextmenu', 'touchstart']
       }
     },
     isModal(target: HTMLElement): boolean {
@@ -428,6 +427,7 @@ export default Vue.extend({
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
+      console.log('target', target)
       return !(typeof target.className === 'object' || // className is SVGAnimatedString
         this.isModal(target) ||
         target.className.includes('footer-tabs') ||
