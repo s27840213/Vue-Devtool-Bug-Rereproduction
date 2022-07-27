@@ -18,7 +18,6 @@
         mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
-          @openExtraColorModal="openExtraColorModal"
           @switchTab="switchTab")
       //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
       //-   :currActivePanel="'color'"
@@ -70,7 +69,6 @@ export default Vue.extend({
       isLoading: false,
       isSaving: false,
       currColorEvent: '',
-      showExtraColorPanel: false,
       ColorEventType
     }
   },
@@ -181,9 +179,9 @@ export default Vue.extend({
   watch: {
     closeMobilePanelFlag(newVal) {
       if (newVal) {
+        this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
         this.setCurrActivePanel('none')
-        this.showExtraColorPanel = false
       }
     }
   },
@@ -207,7 +205,8 @@ export default Vue.extend({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
-      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
@@ -236,9 +235,6 @@ export default Vue.extend({
           pageUtils.fitPage()
         })
       }
-    },
-    openExtraColorModal() {
-      this.showExtraColorPanel = !this.showExtraColorPanel
     },
     fitPage() {
       pageUtils.fitPage()

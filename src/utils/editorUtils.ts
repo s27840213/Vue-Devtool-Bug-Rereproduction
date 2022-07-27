@@ -14,6 +14,14 @@ class EditorUtils {
     return store.getters['mobileEditor/mobileAllPageMode']
   }
 
+  get currActivePanel() {
+    return store.getters['mobileEditor/getCurrActivePanel']
+  }
+
+  get currActiveSubPanel() {
+    return store.getters['mobileEditor/getCurrActiveSubPanel']
+  }
+
   private setState(props: Partial<IMobileEditorState>) {
     store.commit('mobileEditor/SET_STATE', props)
   }
@@ -42,6 +50,12 @@ class EditorUtils {
   setCurrActivePanel(panel: string): void {
     if (generalUtils.isTouchDevice()) {
       store.commit('mobileEditor/SET_currActivePanel', panel)
+    }
+  }
+
+  setCurrActiveSubPanel(panel: string): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('mobileEditor/SET_currActiveSubPanel', panel)
     }
   }
 

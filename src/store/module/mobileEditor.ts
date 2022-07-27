@@ -6,6 +6,7 @@ interface IMobileEditorState {
   inMultiSelectionMode: boolean,
   currCardIndex: number,
   currActivePanel: string,
+  currActiveSubPanel: string,
   inBgSettingMode: boolean
 }
 
@@ -15,6 +16,7 @@ const getDefaultState = (): IMobileEditorState => ({
   inMultiSelectionMode: false,
   currCardIndex: 0,
   currActivePanel: 'none',
+  currActiveSubPanel: 'none',
   inBgSettingMode: false
 })
 
@@ -28,6 +30,9 @@ const getters: GetterTree<IMobileEditorState, unknown> = {
   },
   getCurrActivePanel(state: IMobileEditorState): string {
     return state.currActivePanel
+  },
+  getCurrActiveSubPanel(state: IMobileEditorState): string {
+    return state.currActiveSubPanel
   },
   getMobileAllPageMode(state: IMobileEditorState): boolean {
     return state.mobileAllPageMode
@@ -62,6 +67,9 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_currActivePanel(state: IMobileEditorState, panel: string) {
     state.currActivePanel = panel
+  },
+  SET_currActiveSubPanel(state: IMobileEditorState, subPanel: string) {
+    state.currActiveSubPanel = subPanel
   }
 }
 

@@ -18,8 +18,8 @@
         :title="brandName"
         @click="handleNameClick") {{ brandName }}
     div(class="brand-selector__dropdown pointer"
-      :class="`${theme}-theme`"
-      @click="isBrandListOpen = true")
+      :class="[`${theme}-theme`, {mobile: isMobile}]"
+      @click="handleOpenMenu")
       svg-icon(:class="`${theme}-theme`"
         :style="dropdownStyles()"
         iconName="chevron-down"
@@ -62,6 +62,8 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand } from '@/interfaces/brandkit'
+import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   props: {
@@ -94,6 +96,9 @@ export default Vue.extend({
     }),
     brandName(): string {
       return brandkitUtils.getDisplayedBrandName(this.currentBrand)
+    },
+    isMobile(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   watch: {
@@ -161,6 +166,13 @@ export default Vue.extend({
         type: 'brand',
         content: brand
       })
+    },
+    handleOpenMenu() {
+      if (this.isMobile) {
+        editorUtils.setCurrActiveSubPanel('brand-list')
+      } else {
+        this.isBrandListOpen = true
+      }
     },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.brandName) {
@@ -299,7 +311,7 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     border-radius: 4px;
-    &:hover {
+    &:not(.mobile-panel-theme):not(.mobile):hover {
       background: setColor(blue-4);
     }
     &.editor-theme > svg,
@@ -313,7 +325,7 @@ export default Vue.extend({
       color: setColor(bu);
     }
     &.editor-theme:hover > svg,
-    &.panel-theme:hover > svg {
+    &.panel-theme:not(.mobile):hover > svg {
       color: setColor(gray-3);
     }
     & > svg {

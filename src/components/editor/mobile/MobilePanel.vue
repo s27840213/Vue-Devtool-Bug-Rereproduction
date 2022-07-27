@@ -18,7 +18,8 @@
             :iconColor="'white'"
             :iconWidth="'20px'")
           div(class="mobile-panel__btn-click-zone"
-            @pointerdown="leftButtonAction")
+            @pointerdown="leftButtonAction"
+            @touchstart="disableTouchEvent")
         div(class="mobile-panel__title")
           span(class="mobile-panel__title-text body-1 mr-10"
             :class="whiteTheme ? 'text-gray-2': 'text-white'") {{panelTitle}}
@@ -32,7 +33,8 @@
             :iconColor="'white'"
             :iconWidth="'20px'")
           div(class="mobile-panel__btn-click-zone"
-            @pointerdown="rightButtonAction")
+            @pointerdown="rightButtonAction"
+            @touchstart="disableTouchEvent")
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
@@ -41,6 +43,12 @@
           v-bind="dynamicBindProps"
           v-on="dynamicBindMethod"
           @close="closeMobilePanel")
+    transition(name="panel-up")
+      mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
+        :currActivePanel="currActiveSubPanel"
+        :currColorEvent="currSubColorEvent"
+        :isSubPanel="true"
+        @switchTab="switchTab")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -68,6 +76,7 @@ import PanelTextEffect from '@/components/editor/panelMobile/PanelTextEffect.vue
 import PanelAdjust from '@/components/editor/panelMobile/PanelAdjust.vue'
 import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust.vue'
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
+import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -80,11 +89,12 @@ import eventUtils from '@/utils/eventUtils'
 import generalUtils from '@/utils/generalUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import colorUtils from '@/utils/colorUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
+  name: 'mobile-panel',
   props: {
     currActivePanel: {
       default: 'none',
@@ -94,7 +104,7 @@ export default Vue.extend({
       default: 'text',
       type: String
     },
-    isExtraPanel: {
+    isSubPanel: {
       default: false,
       type: Boolean
     }
@@ -127,7 +137,8 @@ export default Vue.extend({
     PanelAdjust,
     PanelTextEffect,
     PanelPhotoShadow,
-    PanelObjectAdjust
+    PanelObjectAdjust,
+    PanelBrandList
   },
   data() {
     return {
@@ -136,7 +147,8 @@ export default Vue.extend({
       lastPointerY: 0,
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
-      isDraggingPanel: false
+      isDraggingPanel: false,
+      currSubColorEvent: ''
     }
   },
   computed: {
@@ -146,7 +158,8 @@ export default Vue.extend({
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo',
-      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -166,7 +179,7 @@ export default Vue.extend({
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
@@ -174,7 +187,7 @@ export default Vue.extend({
       return this.inSelectionState || [
         'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -218,16 +231,19 @@ export default Vue.extend({
       return this.currActivePanel === 'crop' || this.inSelectionState
     },
     panelStyle(): { [index: string]: string } {
-      return {
-        'row-gap': this.hideDynamicComp ? '0px' : '10px',
-        backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
-        maxHeight: this.fixSize || this.extraFixSizeCondition
-          ? 'initial'
-          : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
-        // height: this.fixSize || this.extraFixSizeCondition
-        //   ? 'initial'
-        //   : this.panelHeight + 'px'
-      }
+      return Object.assign(
+        (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as {[index: string]: string},
+        {
+          'row-gap': this.hideDynamicComp ? '0px' : '10px',
+          backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
+          maxHeight: this.fixSize || this.extraFixSizeCondition
+            ? 'initial'
+            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
+          // height: this.fixSize || this.extraFixSizeCondition
+          //   ? 'initial'
+          //   : this.panelHeight + 'px'
+        }
+      )
     },
     dynamicBindProps(): { [index: string]: any } {
       if (this.showExtraColorPanel) {
@@ -269,6 +285,19 @@ export default Vue.extend({
           return Object.assign(defaultVal, {
             ref: 'panelResize'
           })
+        }
+        case 'brand-list': {
+          if (editorUtils.currActivePanel === 'text') {
+            return Object.assign(defaultVal, {
+              defaultOption: true
+            })
+          }
+          if (editorUtils.currActivePanel === 'brand') {
+            return Object.assign(defaultVal, {
+              hasAddBrand: true
+            })
+          }
+          return defaultVal
         }
         default: {
           return defaultVal
@@ -406,7 +435,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setBgImageControl: 'SET_backgroundImageControl'
+      setBgImageControl: 'SET_backgroundImageControl',
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
       fetchPalettes: 'brandkit/fetchPalettes',
@@ -489,6 +519,18 @@ export default Vue.extend({
     },
     handleLockedNotify() {
       this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+    },
+    switchTab(panelType: string, props?: IFooterTabProps) {
+      if (this.currActiveSubPanel === panelType) {
+        this.setCurrActiveSubPanel('none')
+      } else {
+        this.setCurrActiveSubPanel(panelType)
+        if (props) {
+          if (panelType === 'color' && props.currColorEvent) {
+            this.currSubColorEvent = props.currColorEvent
+          }
+        }
+      }
     }
   }
 })
