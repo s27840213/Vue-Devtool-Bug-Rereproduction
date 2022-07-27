@@ -3,11 +3,13 @@ import store from '@/store'
 import i18n from '@/i18n'
 import modalUtils from './modalUtils'
 import popupUtils from './popupUtils'
-import { ITemplate } from '@/interfaces/template'
-import templateCenterUtils from './templateCenterUtils'
-import { IAssetTemplate } from '@/interfaces/api'
+import router from '@/router'
 
 class PaymentUtils {
+  get status(): string { return store.getters['payment/getStatus'] }
+  get isAdmin(): string { return store.getters['user/isAdmin'] }
+  get isPro(): boolean { return store.getters['payment/getIsPro'] }
+
   openPayment(initView: string, templateImg = '') {
     store.commit('brandkit/SET_isSettingsOpen', false)
     store.commit('payment/SET_initView', initView)
@@ -16,8 +18,8 @@ class PaymentUtils {
   }
 
   checkPro(template: {plan: number}, target: string) {
-    if (store.getters['user/isAdmin']) return true
-    if (template.plan === 1 && !store.getters['payment/getIsPro']) {
+    if (this.isAdmin) return true
+    if (template.plan === 1 && !this.isPro) {
       this.openPayment(target)
       return false
     }
@@ -38,12 +40,35 @@ class PaymentUtils {
   }
 
   _checkProTemplate(plan:number, url: string) {
-    if (store.getters['user/isAdmin']) return true
-    if (plan === 1 && !store.getters['payment/getIsPro']) {
+    if (this.isAdmin) return true
+    if (plan === 1 && !this.isPro) {
       this.openPayment('pro-template', url)
       return false
     }
     return true
+  }
+
+  checkCoupon() {
+    const modal = (desc: string) => {
+      modalUtils.setModalInfo(
+        i18n.tc('NN0709'),
+        i18n.tc(desc), {
+          msg: i18n.tc('NN0518'),
+          style: { width: '300px' },
+          action: () => { router.push('/settings/payment') }
+        }
+      )
+    }
+
+    if (['Fail', 'Subscribed'].includes(this.status)) {
+      modal('NN0711')
+      return false
+    } else if (['Leave', 'Abort', 'Canceled'].includes(this.status)) {
+      modal('NN0710')
+      return false
+    } else {
+      return true
+    }
   }
 
   contactUsUrl() {

@@ -622,6 +622,9 @@ const mutations: MutationTree<IPaymentState> = {
 
 const getters: GetterTree<IPaymentState, unknown> = {
   getField,
+  getStatus(): string {
+    return state.status
+  },
   getDiskPercent(): number {
     return state.usage.diskUsed / state.usage.diskTotal
   },

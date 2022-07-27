@@ -73,6 +73,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import i18n from '@/i18n'
+import paymentUtils from '@/utils/paymentUtils'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
@@ -156,6 +157,8 @@ export default Vue.extend({
     if (!this.isLogin) {
       this.$router.push({ name: 'Login', query: { redirect: this.$route.fullPath } })
       this.closePopup()
+    } else if (this.initView === 'step1-coupon') {
+      paymentUtils.checkCoupon() ? this.changeView('step1-coupon') : this.closePopup()
     } else {
       this.changeView(this.initView)
     }
@@ -466,7 +469,6 @@ input {
     margin-right: 15px;
   }
   &__other {
-    @include body-SM;
     margin-top: 10px;
   }
 }
