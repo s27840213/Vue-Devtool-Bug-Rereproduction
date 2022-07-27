@@ -9,7 +9,7 @@ div(class="all-pages")
           :iconColor="'gray-2'"
           :iconName="'plus-origin'"
           :iconWidth="'25px'")
-    img(v-for="index in 200" :src="`https://picsum.photos/200?random=${index}`")
+    //- img(v-for="index in 200" :src="`https://picsum.photos/200?random=${index}`")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -98,10 +98,6 @@ export default Vue.extend({
       top: 0px;
       left: 0px;
     }
-  }
-
-  > img {
-    width: 100%;
   }
 }
 </style>
