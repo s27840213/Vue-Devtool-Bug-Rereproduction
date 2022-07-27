@@ -80,6 +80,12 @@
             :style="Object.assign(end, {'cursor': 'pointer'})"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
+        div(v-for="(cornerRotater, index) in (!isLine) ? cornerRotaters(controlPoints.cornerRotaters) : []"
+            class="control-point__corner-rotate scaler"
+            :key="`corner-rotate-${index}`"
+            :style="Object.assign(cornerRotater.styles, cursorStyles(cornerRotater.cursor, getLayerRotate))"
+            @pointerdown.stop="rotateStart"
+            @touchstart="disableTouchEvent")
         div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
@@ -477,13 +483,12 @@ export default Vue.extend({
       return resizers
     },
     scaler(scalers: any) {
-      // switch (this.config.type) {
-      //   case LayerType.image:
-      //     if (this.config.styles.shadow.currentEffect !== ShadowEffectType.none) {
-      //       return []
-      //     }
-      //     break
-      // }
+      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth * this.scaleRatio < LIMIT
+      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+    },
+    cornerRotaters(scalers: any) {
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth * this.scaleRatio < LIMIT
@@ -1514,19 +1519,22 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
-    cursorStyles(index: number, rotateAngle: number) {
+    cursorStyles(index: number | string, rotateAngle: number) {
       if (this.isControlling) return { cursor: 'initial' }
-
-      switch (this.getLayerType) {
-        case 'text':
-          if (this.config.styles.writingMode.includes('vertical')) index += 4
-          break
-        case 'shape':
-          if (this.config.scaleType === 3) index += 4
+      if (typeof index === 'number') {
+        switch (this.getLayerType) {
+          case 'text':
+            if (this.config.styles.writingMode.includes('vertical')) index += 4
+            break
+          case 'shape':
+            if (this.config.scaleType === 3) index += 4
+        }
+        const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
+          : (index + Math.ceil(rotateAngle / 45) + 8) % 8
+        return { cursor: this.controlPoints.cursors[cursorIndex] }
+      } else {
+        return { cursor: index }
       }
-      const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
-        : (index + Math.ceil(rotateAngle / 45) + 8) % 8
-      return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
@@ -2002,6 +2010,12 @@ export default Vue.extend({
   }
   &__move-bar {
     cursor: move;
+  }
+  &__corner-rotate {
+    background-color: none;
+    border: none;
+    pointer-events: auto;
+    position: absolute;
   }
 }
 
