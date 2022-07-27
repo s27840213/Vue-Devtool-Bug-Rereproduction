@@ -59,7 +59,7 @@ export default Vue.extend({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
-        { panelType: 'brand', text: `${this.$t('NN0007')}`, disabled: true }
+        { icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }
       ] as Array<IFooterTab>
     }
   },

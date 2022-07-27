@@ -14,6 +14,12 @@
           :class="{selected: isDefaultSelected}"
           @click="handleSelectDefault")
           span(class="panel-brand-list__brand-title") {{ $t('NN0089') }}
+    template(v-if="hasAddBrand")
+      div(class="horizontal-rule")
+      div(class="panel-brand-list__add-brand")
+        div(class="panel-brand-list__add-brand__icon")
+          svg-icon(iconName="plus-origin" iconColor="gray-2" iconWidth="16px")
+        span(class="panel-brand-list__add-brand__text") {{ $t('NN0396') }}
 </template>
 
 <script lang="ts">
@@ -102,6 +108,23 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  &__add-brand {
+    display: flex;
+    align-items: center;
+    padding: 16px 0 1px 13px;
+    gap: 20px;
+    &__icon {
+      @include size(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__text {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 180%;
+    }
   }
 }
 

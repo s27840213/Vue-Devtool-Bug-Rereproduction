@@ -6,8 +6,8 @@
       :class="`${theme}-theme`")
       span {{ $t('NN0089') }}
     div(v-else
-      class="brand-selector__brand-name hover"
-      :class="`${theme}-theme`")
+      class="brand-selector__brand-name"
+      :class="[`${theme}-theme`, {hover: !isMobile}]")
       input(v-if="isNameEditing"
         ref="brandName"
         v-model="editableName"
@@ -125,6 +125,7 @@ export default Vue.extend({
       } : {}
     },
     handleNameClick() {
+      if (this.isMobile) return
       this.editableName = this.brandName
       this.isNameEditing = true
       this.$nextTick(() => {
@@ -324,7 +325,7 @@ export default Vue.extend({
     &.brandkit-theme > svg {
       color: setColor(bu);
     }
-    &.editor-theme:hover > svg,
+    &.editor-theme:not(.mobile):hover > svg,
     &.panel-theme:not(.mobile):hover > svg {
       color: setColor(gray-3);
     }
