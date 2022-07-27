@@ -67,7 +67,7 @@ input {
   button, .animation, .svg-icon {
     @include btn-SM;
     position: absolute;
-    top: 8px;
+    top: 10px;
     right: 8px;
     padding: 0;
   }

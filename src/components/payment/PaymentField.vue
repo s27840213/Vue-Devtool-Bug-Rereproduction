@@ -294,7 +294,7 @@ input {
 .field-invoice {
   margin-top: 20px;
   &__input + &__input {
-    margin-top: 4px;
+    margin-top: 8px;
   }
 }
 
