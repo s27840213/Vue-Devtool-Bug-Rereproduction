@@ -75,7 +75,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel-brand-list {
-  padding: 16px 0 0 0;
+  padding: 6px 0 0 0;
   &__brands {
     display: flex;
     flex-direction: column;
