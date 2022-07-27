@@ -2,6 +2,7 @@ import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import assetUtils from './assetUtils'
+import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
 import imageUtils from './imageUtils'
 import layerFactary from './layerFactary'
@@ -153,6 +154,10 @@ class BackgroundUtils {
       pageUtils.updateBackgroundImageMode(pageIndex, true)
       shotcutUtils.del()
     })
+
+    if (generalUtils.isTouchDevice()) {
+      editorUtils.setInBgSettingMode(true)
+    }
   }
 }
 
