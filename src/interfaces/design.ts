@@ -35,3 +35,11 @@ export interface IQueueItem {
   data: IDesign | IFolder | undefined,
   dest?: string
 }
+
+export interface IMobileMessageItem {
+  type: 'move-design' | 'move-designs' | 'move-folder' |
+    'favor-design' | 'unfavor-design' | 'delete' |
+    'undo-design' | 'undo-folder' | 'undo-multi' |
+    'root-design' | 'root-folder' |
+    'copy-link' | 'copy-design'
+}

@@ -38,7 +38,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('design', {
-      folders: 'getFolders',
       selectedDesigns: 'getSelectedDesigns',
       allDesigns: 'getAllDesigns'
     }),

@@ -176,6 +176,20 @@ export default Extension.create({
                 'data-font-fontUrl': attributes.fontUrl
               }
             }
+          },
+          pre: {
+            default: undefined,
+            parseHTML: element => {
+              const spanStyle = element.style
+              const whiteSpace = spanStyle.getPropertyValue('white-space')
+              return whiteSpace === 'pre'
+            },
+            renderHTML: attributes => {
+              if (!attributes.pre) return {}
+              return {
+                style: 'white-space: pre'
+              }
+            }
           }
         }
       }, {

@@ -139,7 +139,7 @@ export default Vue.extend({
           this.$emit('metaSelectFolder')
           return
         }
-        this.$emit('select')
+        this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
       if (this.isTempFolder) return

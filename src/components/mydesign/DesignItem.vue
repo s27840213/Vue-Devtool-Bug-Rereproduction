@@ -296,14 +296,14 @@ export default Vue.extend({
         this.$emit(this.isSelected ? 'deselect' : 'select')
         return
       }
-      if (this.unenterable) return
+      if (this.unenterable && this.isTempDesign) return
       designUtils.setDesign(this.config)
     },
     handleCarouselIdx(idx: number) {
       this.carouselIdx = idx
     },
     checkNameEnter(e: KeyboardEvent) {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && this.editableName === this.config.name) {
         this.handleNameEditEnd()
       }
     },
