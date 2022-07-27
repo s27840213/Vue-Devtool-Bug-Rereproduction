@@ -156,6 +156,7 @@ export default Vue.extend({
     clickPage() {
       if (this.index === this.currFocusPageIndex) {
         editorUtils.setMobileAllPageMode(false)
+        editorUtils.setCurrCardIndex(this.index)
       }
 
       this._setmiddlemostPageIndex(this.index)

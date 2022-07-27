@@ -19,6 +19,7 @@ import { floor } from 'lodash'
 import stepsUtils from '@/utils/stepsUtils'
 import generalUtils from '@/utils/generalUtils'
 import { IPage } from '@/interfaces/page'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   data() {
@@ -58,7 +59,8 @@ export default Vue.extend({
     }),
     addPage() {
       this._addPage(pageUtils.newPage({}))
-      this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
+      this._setCurrActivePageIndex(pageUtils.pageNum - 1)
+      editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
       stepsUtils.record()
     }
   }

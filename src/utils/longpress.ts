@@ -20,6 +20,10 @@ const cancel = (e: PointerEvent) => {
   }
 }
 
+const preventDefault = (e: MouseEvent) => {
+  e.preventDefault()
+}
+
 const longpress = {
   bind: function (el: HTMLElement, binding: DirectiveBinding, vNode: VNode) {
     if (typeof binding.value !== 'function') {
@@ -32,6 +36,7 @@ const longpress = {
     const startEvent = start(handler)
 
     el.addEventListener('pointerdown', startEvent)
+    el.addEventListener('contextmenu', preventDefault)
     el.addEventListener('pointerout', cancel)
     el.addEventListener('pointermove', cancel)
     el.addEventListener('pointerup', cancel)
@@ -42,6 +47,7 @@ const longpress = {
   },
   unbind(el: HTMLElement) {
     el.removeEventListener('pointerdown', (el as any).handler)
+    el.removeEventListener('contextmenu', preventDefault)
     el.removeEventListener('pointerout', cancel)
     el.removeEventListener('pointermove', cancel)
     el.removeEventListener('pointerup', cancel)

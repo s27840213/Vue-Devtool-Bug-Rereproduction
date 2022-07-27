@@ -45,6 +45,12 @@ class EditorUtils {
     }
   }
 
+  setCurrCardIndex(index: number): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('mobileEditor/SET_currCardIndex', index)
+    }
+  }
+
   setInBgSettingMode(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       this.setState({ inBgSettingMode: bool })
