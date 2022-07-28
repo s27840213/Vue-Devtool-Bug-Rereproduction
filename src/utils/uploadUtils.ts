@@ -24,7 +24,6 @@ import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import heic2any from 'heic2any'
 import networkUtils from './networkUtils'
 import _ from 'lodash'
 
