@@ -208,6 +208,10 @@ export default Vue.extend({
   &.editor-theme {
     margin-left: 2px;
   }
+  &.mobile-editor-theme {
+    margin-left: 1px;
+    gap: 10px;
+  }
   &.panel-theme {
     margin-left: 1px;
   }
@@ -236,6 +240,17 @@ export default Vue.extend({
         color: setColor(gray-3);
       }
     }
+    &.mobile-editor-theme {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 140%;
+      height: 24px;
+      max-width: calc(50vw);
+      color: white;
+      & > span {
+        padding: 0px;
+      }
+    }
     &.panel-theme {
       @include text-H6;
       max-width: calc(100% - 110px);
@@ -247,12 +262,23 @@ export default Vue.extend({
       }
       & > span {
         padding: 0px;
-        cursor: initial;
       }
       &.hover > span {
         &:hover {
           color: setColor(gray-3);
         }
+      }
+    }
+    &.mobile-panel-theme {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 140%;
+      height: 24px;
+      max-width: calc(100% - 140px);
+      color: setColor(gray-2);
+      & > span {
+        padding: 0px;
+        cursor: initial;
       }
     }
     & > span {
@@ -272,22 +298,6 @@ export default Vue.extend({
       letter-spacing: inherit;
       color: inherit;
       font-family: inherit;
-    }
-    &.mobile-panel-theme {
-      font-weight: 600;
-      font-size: 18px;
-      line-height: 140%;
-      height: 24px;
-      max-width: calc(100% - 140px);
-      color: setColor(gray-2);
-      & > input {
-        padding: 0px;
-        background-color: transparent;
-      }
-      & > span {
-        padding: 0px;
-        cursor: initial;
-      }
     }
     & > span {
       display: block;
@@ -312,10 +322,11 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     border-radius: 4px;
-    &:not(.mobile-panel-theme):not(.mobile):hover {
+    &:not(.mobile):hover {
       background: setColor(blue-4);
     }
     &.editor-theme > svg,
+    &.mobile-editor-theme > svg,
     &.panel-theme > svg {
       color: white;
     }

@@ -59,7 +59,7 @@ import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
-import PanelBrand from '@/components/editor/panelSidebar/PanelBrand.vue'
+import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
 import PanelPosition from '@/components/editor/panelMobile/PanelPosition.vue'
 import PanelFlip from '@/components/editor/panelMobile/PanelFlip.vue'
@@ -298,6 +298,11 @@ export default Vue.extend({
             })
           }
           return defaultVal
+        }
+        case 'brand': {
+          return Object.assign(defaultVal, {
+            maxheight: this.maxHeightPx()
+          })
         }
         default: {
           return defaultVal
