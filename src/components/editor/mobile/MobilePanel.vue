@@ -1,9 +1,11 @@
 <template lang="pug">
-  div(class="mobile-panel p-15"
+  div(class="mobile-panel"
+      :class="{'p-15': !noPaddingTheme}"
       :style="panelStyle"
       v-click-outside="vcoConfig()"
       ref="panel")
-    div(class="mobile-panel__top-section")
+    div(class="mobile-panel__top-section"
+      :class="{'self-padding': noPaddingTheme}")
       div(class="mobile-panel__drag-bar"
         :class="{'visible-hidden': panelTitle !== ''}"
         @pointerdown="dragPanelStart"
@@ -11,7 +13,7 @@
           div
       div
         div(class="mobile-panel__btn mobile-panel__left-btn"
-            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn}")
+            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn,}")
           svg-icon(
             class="click-disabled"
             :iconName="leftBtnName"
@@ -182,6 +184,9 @@ export default Vue.extend({
         'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
+    },
+    noPaddingTheme(): boolean {
+      return ['brand-list'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return this.inSelectionState || [
@@ -561,6 +566,11 @@ export default Vue.extend({
     width: 100%;
     justify-content: center;
     align-items: center;
+    &.self-padding {
+      padding: 15px;
+      padding-bottom: 0;
+      box-sizing: border-box;
+    }
     > div:nth-child(2) {
       width: 100%;
       display: flex;
