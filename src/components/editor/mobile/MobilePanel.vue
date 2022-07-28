@@ -35,7 +35,7 @@
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
-      div(class="mobile-panel__inner-tab")
+      div(v-if="innerTabs.length" class="mobile-panel__inner-tab")
         div(v-for="tab in innerTabs" :active="tab.name===innerTab"
               @click="switchInnerTab(tab.name)") {{tab.label}}
           hr
@@ -460,6 +460,11 @@ export default Vue.extend({
       } else {
         this.innerTab = ''
       }
+      // Use v-show to show MobilePanel will cause
+      // mounted not triggered, use watch to reset height.
+      if (newVal === 'none') {
+        this.panelHeight = this.initHeightPx()
+      }
     }
   },
   mounted() {
@@ -500,10 +505,10 @@ export default Vue.extend({
       this.panelHistory = []
     },
     initHeightPx() {
-      return (this.$el.parentElement as HTMLElement).clientHeight * (this.halfSizeInInitState ? 0.5 : 0.9)
+      return (this.$el.parentElement as HTMLElement).clientHeight * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {
-      return (this.$el.parentElement as HTMLElement).clientHeight * 0.9
+      return (this.$el.parentElement as HTMLElement).clientHeight * 1.0
     },
     getMaxHeightPx(): number {
       return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
