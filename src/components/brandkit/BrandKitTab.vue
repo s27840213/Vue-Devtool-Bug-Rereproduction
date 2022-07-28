@@ -13,19 +13,14 @@
       component(:is="`brand-kit-tab-${selectedTab}${isThemeEditorLike ? '-sidebar' : ''}${isThemeMobile ? '-mobile' : ''}`"
                 :maxheight="maxheight"
                 @deleteItem="handleDeleteItem")
-    div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect")
-      template(v-if="isThemeEditorLike")
-        div
-          img(class="brand-kit-tab__disconnect__sidebar-image" :src="require('@/assets/img/png/brandkit/disconnect.png')")
-        span(class="brand-kit-tab__disconnect__sidebar-title") {{$t('NN0456')}}
-        span(class="brand-kit-tab__disconnect__sidebar-description1") {{$t('NN0457')}}
-        span(class="brand-kit-tab__disconnect__sidebar-description2") {{$t('NN0458')}}
-      template(v-else)
-        div
-          img(:src="require('@/assets/img/png/brandkit/disconnect.png')")
-        span(class="brand-kit-tab__disconnect__title") {{$t('NN0456')}}
-        span(class="brand-kit-tab__disconnect__description1") {{$t('NN0457')}}
-        span(class="brand-kit-tab__disconnect__description2") {{$t('NN0458')}}
+    div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect" :style="minHeightStyles()")
+      div
+        img(class="brand-kit-tab__disconnect-image"
+          :class="`${theme}-theme`"
+          :src="require('@/assets/img/png/brandkit/disconnect.png')")
+      span(class="brand-kit-tab__disconnect-title" :class="`${theme}-theme`") {{$t('NN0456')}}
+      span(class="brand-kit-tab__disconnect-description1" :class="`${theme}-theme`") {{$t('NN0457')}}
+      span(class="brand-kit-tab__disconnect-description2" :class="`${theme}-theme`") {{$t('NN0458')}}
 </template>
 
 <script lang="ts">
@@ -97,6 +92,9 @@ export default Vue.extend({
     ...mapMutations('brandkit', {
       setSelectedTab: 'SET_selectedTab'
     }),
+    minHeightStyles() {
+      return this.theme === 'mobile-editor' ? { minHeight: `${this.maxheight}px` } : {}
+    },
     checkSelected(tabKey: string) {
       return this.selectedTab === tabKey
     },
@@ -199,38 +197,65 @@ export default Vue.extend({
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    &__title {
-      margin-top: 69px;
-      @include text-H1;
-      color: setColor(blue-1);
+    &-image {
+      &.editor-theme {
+        transform: scale(0.7);
+      }
+      &.mobile-editor-theme {
+        width: 50%;
+        height: auto;
+      }
     }
-    &__description1 {
-      margin-top: 13px;
-      @include body-XL;
-      color: setColor(gray-1);
+    &-title {
+      &.brandkit-theme {
+        margin-top: 69px;
+        @include text-H1;
+        color: setColor(blue-1);
+      }
+      &.editor-theme {
+        margin-top: 69px;
+        @include text-H2;
+        color: setColor(blue-1);
+      }
+      &.mobile-editor-theme {
+        margin-top: 10px;
+        @include text-H3;
+        color: setColor(blue-1);
+      }
     }
-    &__description2 {
-      margin-top: 14px;
-      @include text-H5;
-      color: setColor(gray-2);
+    &-description1 {
+      &.brandkit-theme {
+        margin-top: 13px;
+        @include body-XL;
+        color: setColor(gray-1);
+      }
+      &.editor-theme {
+        margin-top: 23px;
+        @include body-XL;
+        color: setColor(gray-4);
+      }
+      &.mobile-editor-theme {
+        margin-top: 8px;
+        @include body-MD;
+        color: setColor(gray-4);
+      }
     }
-    &__sidebar-image {
-      transform: scale(0.7);
-    }
-    &__sidebar-title {
-      margin-top: 69px;
-      @include text-H2;
-      color: setColor(blue-1);
-    }
-    &__sidebar-description1 {
-      margin-top: 23px;
-      @include body-XL;
-      color: setColor(gray-4);
-    }
-    &__sidebar-description2 {
-      margin-top: 24px;
-      @include text-H5;
-      color: setColor(gray-5);
+    &-description2 {
+      &.brandkit-theme {
+        margin-top: 14px;
+        @include text-H5;
+        color: setColor(gray-2);
+      }
+      &.editor-theme {
+        margin-top: 24px;
+        @include text-H5;
+        color: setColor(gray-5);
+      }
+      &.mobile-editor-theme {
+        margin-top: 8px;
+        @include text-H6;
+        color: setColor(gray-5);
+      }
     }
   }
 }
