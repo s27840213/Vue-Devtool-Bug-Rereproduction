@@ -34,7 +34,6 @@ class ShapeUtils {
 
   get getDocumentColors() {
     const layer = layerUtils.getCurrLayer
-    console.log(layer.type)
     switch (layer.type) {
       case 'shape':
         return (layer as IShape).color || []
@@ -42,8 +41,6 @@ class ShapeUtils {
       case 'group': {
         const { subLayerIdx } = layerUtils
         if (subLayerIdx === -1) {
-          console.log('-1')
-          console.log(this.hasMultiColors)
           if (!this.hasMultiColors) {
             const layers = (layer as IGroup).layers
               .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)
