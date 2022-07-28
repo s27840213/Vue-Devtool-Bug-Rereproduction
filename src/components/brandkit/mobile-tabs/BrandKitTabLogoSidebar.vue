@@ -1,6 +1,6 @@
 <template lang="pug">
   div(v-if="logos.length === 0 && !isLogosLoading" class="hint" :style="minHeightStyles()")
-    no-items-hint(type="logo")
+    no-items-hint(type="logo" :mobile="true")
   div(v-else class="brand-kit-tab-logo" :style="minHeightStyles()")
     recycle-scroller(:items="rows")
       template(v-slot="{ item }")

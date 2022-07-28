@@ -1,6 +1,6 @@
 <template lang="pug">
   div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint" :style="minHeightStyles()")
-    no-items-hint(type="color")
+    no-items-hint(type="color" :mobile="true")
   div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
     div(v-if="isPalettesLoading" class="loading")
       svg-icon(iconName="loading"
