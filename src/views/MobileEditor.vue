@@ -15,7 +15,7 @@
       transition(name="panel-up"
                 @after-enter="fitPage"
                 @after-leave="fitPage")
-        mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
+        mobile-panel(v-show="currActivePanel !== 'none' || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")

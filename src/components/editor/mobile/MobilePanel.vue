@@ -35,6 +35,10 @@
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
+      div(class="mobile-panel__inner-tab")
+        div(v-for="tab in innerTabs" :active="tab.name===innerTab"
+              @click="switchInnerTab(tab.name)") {{tab.label}}
+          hr
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
@@ -148,7 +152,8 @@ export default Vue.extend({
       showExtraColorPanel: false,
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
-      currSubColorEvent: ''
+      currSubColorEvent: '',
+      innerTab: ''
     }
   },
   computed: {
@@ -185,7 +190,7 @@ export default Vue.extend({
     },
     fixSize(): boolean {
       return this.inSelectionState || [
-        'replace', 'crop', 'bgRemove', 'position', 'flip', 'opacity',
+        'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
     },
@@ -245,6 +250,20 @@ export default Vue.extend({
         }
       )
     },
+    innerTabs():Record<string, string>[] {
+      switch (this.currActivePanel) {
+        case 'replace':
+          return [{
+            name: 'photo',
+            label: this.$tc('NN0002', 2)
+          }, {
+            name: 'file',
+            label: this.$tc('NN0006')
+          }]
+        default:
+          return []
+      }
+    },
     dynamicBindProps(): { [index: string]: any } {
       if (this.showExtraColorPanel) {
         return {
@@ -299,6 +318,10 @@ export default Vue.extend({
           }
           return defaultVal
         }
+        case 'replace':
+          return {
+            is: `panel-${this.innerTab}`
+          }
         default: {
           return defaultVal
         }
@@ -426,8 +449,13 @@ export default Vue.extend({
         editorUtils.setInMultiSelectionMode(false)
       }
     },
-    currActivePanel() {
+    currActivePanel(newVal) {
       this.panelHistory = []
+      if (newVal === 'replace') {
+        this.innerTab = 'photo'
+      } else {
+        this.innerTab = ''
+      }
     }
   },
   mounted() {
@@ -457,7 +485,6 @@ export default Vue.extend({
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
       const target = event.target as HTMLElement
-      console.log('target', target)
       return !(typeof target.className === 'object' || // className is SVGAnimatedString
         this.isModal(target) ||
         target.className.includes('footer-tabs') ||
@@ -531,6 +558,9 @@ export default Vue.extend({
           }
         }
       }
+    },
+    switchInnerTab(panelType: string) {
+      this.innerTab = panelType
     }
   }
 })
@@ -584,6 +614,27 @@ export default Vue.extend({
     height: 100%;
     overflow-y: scroll;
     @include no-scrollbar;
+  }
+
+  &__inner-tab {
+    display: grid;
+    grid-auto-flow: column;
+    width: 100%;
+    margin: 15px 0 14px 0;
+    > div {
+      @include text-H6;
+      > hr {
+        margin: 5px auto 0 auto;
+        border: 1px solid transparent;
+        width: 50%;
+      }
+    }
+    > div[active='true'] {
+      color: setColor(blue-1);
+      > hr {
+        border: 1px solid setColor(blue-1);
+      }
+    }
   }
 
   &__title {
