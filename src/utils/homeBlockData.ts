@@ -23,32 +23,18 @@ class HomeBlockData {
       ],
       align: 'column'
     }, {
-      title: i18n.t('NN0468', { newline: '<br>' }),
-      description: i18n.t('NN0469'),
-      link: {
-        text: i18n.t('NN0470'),
-        to: '/templates'
-      },
+      title: i18n.t('NN0480', { newline: '<br>' }),
+      description: i18n.t('NN0481'),
       img: {
-        name: 'business.json',
-        width: 500
+        name: 'remover.mp4',
+        width: 500,
+        height: 374.48
       },
-      colorBlock: [
-        {
-          name: 'oval_blue1.svg',
-          top: -107,
-          left: -96
-        }, {
-          name: 'oval_orange1.svg',
-          top: -107,
-          left: -96
-        }, {
-          name: 'oval_pink2.svg',
-          ref: 'img',
-          top: 351,
-          left: 329
-        }
-      ],
+      colorBlock: [{
+        name: 'oval_blue2.svg',
+        top: 120,
+        left: 297
+      }],
       align: 'row'
     }, {
       title: i18n.t('NN0471', { newline: '<br>' }),
@@ -106,6 +92,34 @@ class HomeBlockData {
       ],
       align: 'alternately'
     }, {
+      title: i18n.t('NN0468', { newline: '<br>' }),
+      description: i18n.t('NN0469'),
+      link: {
+        text: i18n.t('NN0470'),
+        to: '/templates'
+      },
+      img: {
+        name: 'business.json',
+        width: 500
+      },
+      colorBlock: [
+        {
+          name: 'oval_blue1.svg',
+          top: -107,
+          left: -96
+        }, {
+          name: 'oval_orange1.svg',
+          top: -107,
+          left: -96
+        }, {
+          name: 'oval_pink2.svg',
+          ref: 'img',
+          top: 351,
+          left: 329
+        }
+      ],
+      align: 'alternately'
+    }, {
       title: i18n.t('NN0478', { newline: '<br>' }),
       description: i18n.t('NN0479'),
       link: {
@@ -124,22 +138,7 @@ class HomeBlockData {
       }],
       align: 'alternately'
     }, {
-      comingSoon: true,
-      title: i18n.t('NN0480', { newline: '<br>' }),
-      description: i18n.t('NN0481'),
-      img: {
-        name: 'remover.mp4',
-        width: 500,
-        height: 374.48
-      },
-      colorBlock: [{
-        name: 'oval_blue2.svg',
-        top: 120,
-        left: 297
-      }],
-      align: 'alternately'
-    }, {
-      comingSoon: true,
+
       title: i18n.t('NN0482', { newline: '<br>' }),
       description: i18n.t('NN0483'),
       img: {

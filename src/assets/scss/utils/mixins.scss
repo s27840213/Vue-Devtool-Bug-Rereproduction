@@ -1,5 +1,6 @@
 @use '@/assets/scss/utils/variables.scss' as *;
 @use '@/assets/scss/utils/functions.scss' as *;
+@use '@/assets/scss/utils/formatStyle.scss' as *;
 
 @mixin size($w, $h: $w) {
   width: $w;
@@ -19,18 +20,16 @@
 }
 
 @mixin firefoxOnly {
-
   // Only for Firefox, https://stackoverflow.com/a/32455002
-  @supports (-moz-appearance:none) {
+  @supports (-moz-appearance: none) {
     @content;
   }
 }
 
 @mixin safariOnly {
-
   // Only for Safari, https://stackoverflow.com/a/25975282
-  @media not all and (min-resolution:.001dpcm) {
-    @supports (-webkit-appearance:none) {
+  @media not all and (min-resolution: 0.001dpcm) {
+    @supports (-webkit-appearance: none) {
       @content;
     }
   }
@@ -47,7 +46,7 @@
   scrollbar-width: none !important;
 }
 
-// For layout which 
+// For layout which
 //   1. Need push scroll bar to outside. Ex: Categorylist
 //   2. Don't have padding-right originally.
 // Usage: use push-scrollbar10 first, then hide-scrollbar
@@ -78,7 +77,7 @@
   }
 }
 
-$thumb-color: #D9DBE1; // gray-4
+$thumb-color: #d9dbe1; // gray-4
 
 @mixin hide-scrollbar($padding-right: 11px) {
   // Disable x scrollbar and let y scrollbar appear only when hovering it
@@ -133,9 +132,29 @@ $thumb-color: #D9DBE1; // gray-4
   justify-content: center;
   align-items: center;
   background-color: #000000a1;
-  z-index: setZindex('popup');
+  z-index: setZindex("popup");
 }
 
 .popup-window {
   @include popup-window;
+}
+
+@mixin default-input {
+  @include body-SM;
+  box-sizing: border-box;
+  height: 44px;
+  padding: 10px;
+  border-radius: 4px;
+  color: setColor(gray-2);
+  border: 1px solid setColor(gray-4);
+  &:focus {
+    border-color: setColor(blue-1);
+  }
+  &[invalid="true"] {
+    border-color: setColor(red);
+  }
+}
+
+.default-input {
+  @include default-input;
 }

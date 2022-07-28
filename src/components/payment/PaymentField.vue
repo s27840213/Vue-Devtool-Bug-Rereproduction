@@ -14,9 +14,12 @@
       div(:class="{hidden: useTappay}" class="field-card-stripe" id="stripe")
         svg-icon(iconName="loading" iconColor="gray-1")
       template(v-if="!isChange")
-        div(v-if="paymentPaidDate" class="field-card__info")
-          span {{$t('NN0552', {date: paymentPaidDate})}}
-          span {{'$'+plans[planSelected][periodUi].nextPaid}}
+        div(v-if="PaidDate" class="field-card__info")
+          span {{$t('NN0552', {date: PaidDate})}}
+          span {{`$${plans[planSelected][periodUi].nextPaid - coupon.discount}`}}
+        div(v-if="coupon.discount!==0" class="field-card__info text-green-1")
+          span {{$t('NN0699')}}
+          span {{`-$${coupon.discount}`}}
         div(class="field-card__info overline-LG")
           span {{$t('NN0553')}}
           span {{priceToday}}
@@ -31,7 +34,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import i18n from '@/i18n'
 import Options from '@/components/global/Options.vue'
@@ -74,6 +77,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters('payment', {
+      PaidDate: 'getPaidDate'
+    }),
     ...mapFields({
       userCountryUi: 'userCountryUi',
       bi: 'billingInfo',
@@ -86,8 +92,8 @@ export default Vue.extend({
       userCountryInfo: 'userCountryInfo',
       clientSecret: 'stripeClientSecret',
       biv: 'billingInfoInvalid',
-      paymentPaidDate: 'paymentPaidDate',
-      trialStatus: 'trialStatus'
+      trialStatus: 'trialStatus',
+      coupon: 'coupon'
     }),
     useTappay(): boolean {
       // When update credit card (isChange is true), use countryInfo instead of countryUi.
@@ -95,7 +101,7 @@ export default Vue.extend({
         : this.userCountryUi === 'tw'
     },
     priceToday(): string {
-      if (!this.paymentPaidDate) return '$' + this.plans[this.planSelected][this.periodUi].nextPaid
+      if (!this.PaidDate) return '$' + this.plans[this.planSelected][this.periodUi].nextPaid
       else if (this.userCountryUi === 'tw') return '$0'
       else return '$0.00'
     },
@@ -238,11 +244,16 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+input {
+  @include default-input;
+}
+
 .field {
   @include body-SM;
   display: flex;
   flex-direction: column;
   height: 100%; // Let button at the same position as popup payment step1
+  color: setColor(gray-1);
   &__close {
     // Relaive to SettingsPayment.vue .sp-field
     position: absolute;
@@ -275,7 +286,6 @@ export default Vue.extend({
 }
 
 .field-card__info {
-  color: setColor(gray-1);
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
@@ -283,19 +293,8 @@ export default Vue.extend({
 
 .field-invoice {
   margin-top: 20px;
-  &__input > input {
-    width: calc(100% - 22px);
-    height: 18px;
-    margin: 4px 0;
-    padding: 10px;
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
-    &:focus {
-      border-color: setColor(blue-1);
-    }
-    &[invalid="true"] {
-      border-color: red;
-    }
+  &__input + &__input {
+    margin-top: 8px;
   }
 }
 
