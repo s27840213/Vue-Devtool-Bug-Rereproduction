@@ -588,7 +588,6 @@ class AssetUtils {
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
-          // Call fitPage at pageUtils.updateSpecPage
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)

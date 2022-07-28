@@ -60,7 +60,7 @@ export default Vue.extend({
       nextIndex: 0,
       rows: [] as any[],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
   watch: {
