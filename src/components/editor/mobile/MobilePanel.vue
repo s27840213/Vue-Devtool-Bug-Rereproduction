@@ -322,6 +322,10 @@ export default Vue.extend({
           return {
             is: `panel-${this.innerTab}`
           }
+        case 'none':
+          return {
+            is: ''
+          }
         default: {
           return defaultVal
         }

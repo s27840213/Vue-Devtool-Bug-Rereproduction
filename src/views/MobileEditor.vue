@@ -183,6 +183,7 @@ export default Vue.extend({
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
         this.setCurrActivePanel('none')
+        this.showMP = false
       }
     }
   },
@@ -224,6 +225,9 @@ export default Vue.extend({
           }
         }
       }
+      this.$nextTick(() => {
+        pageUtils.fitPage()
+      })
 
       if (this.currActivePanel !== 'none' && this.inAllPagesMode) {
         editorUtils.setMobileAllPageMode(false)
@@ -242,8 +246,8 @@ export default Vue.extend({
       pageUtils.fitPage()
     },
     afterLeave() {
-      pageUtils.fitPage()
       this.setCurrActivePanel('none')
+      pageUtils.fitPage()
     }
   }
 })
