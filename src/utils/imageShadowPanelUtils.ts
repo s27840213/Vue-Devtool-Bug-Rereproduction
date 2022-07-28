@@ -102,7 +102,6 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
       if (config.type !== LayerType.image) {
-        /** If the shadow effct has already got the img src, return */
         return
       }
       if (!forceUpload && (this.checkIfSameEffect(config) && config.styles.shadow.srcState)) {
@@ -140,7 +139,6 @@ export default new class ImageShadowPanelUtils {
         layerId: primarylayerId || config.id || '',
         subLayerId: primarylayerId ? config.id || '' : ''
       })
-
       // Handle the params for drawing
       const img = new Image()
       let MAXSIZE = 1600
@@ -161,6 +159,11 @@ export default new class ImageShadowPanelUtils {
             MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
             resolve()
           }
+        }
+        img.onerror = () => {
+          logUtils.setLog('img is svg check error' + 'img.src: ' + img.src)
+          console.log('img is svg check error' + 'img.src: ' + img.src)
+          resolve()
         }
       })
 
@@ -240,8 +243,6 @@ export default new class ImageShadowPanelUtils {
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
-          // console.log(updateCanvas.width, right, left)
-          // console.log(newWidth, newHeight)
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
@@ -308,6 +309,8 @@ export default new class ImageShadowPanelUtils {
         }
       })
     } else {
+      logUtils.setLog('layerDate is undefined')
+      console.log('layerDate is undefined')
       imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     }
   }
