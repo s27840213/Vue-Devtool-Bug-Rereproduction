@@ -242,7 +242,7 @@ export default Vue.extend({
     },
     panelStyle(): { [index: string]: string } {
       return Object.assign(
-        (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as {[index: string]: string},
+        (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.hideDynamicComp ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
@@ -255,7 +255,7 @@ export default Vue.extend({
         }
       )
     },
-    innerTabs():Record<string, string>[] {
+    innerTabs(): Record<string, string>[] {
       switch (this.currActivePanel) {
         case 'replace':
           return [{
@@ -472,9 +472,9 @@ export default Vue.extend({
       }
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      if (newVal === 'none') {
-        this.panelHeight = this.initHeightPx()
-      }
+      // if (newVal === 'none') {
+      this.panelHeight = this.initHeightPx()
+      // }
     }
   },
   mounted() {
@@ -494,7 +494,7 @@ export default Vue.extend({
       return {
         handler: this.closeMobilePanel,
         middleware: this.middleware,
-        events: ['contextmenu', 'touchstart']
+        events: ['contextmenu', 'touchstart', 'pointerdown']
       }
     },
     isModal(target: HTMLElement): boolean {
@@ -653,7 +653,7 @@ export default Vue.extend({
         width: 50%;
       }
     }
-    > div[active='true'] {
+    > div[active="true"] {
       color: setColor(blue-1);
       > hr {
         border: 1px solid setColor(blue-1);

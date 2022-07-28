@@ -29,7 +29,7 @@ export default Vue.extend({
     }
   },
   created() {
-    Object.assign(this.adjustVal, imageAdjustUtil.getDefaultProps(), this.currLayerAdjust)
+    Object.assign(this.adjustVal, imageAdjustUtil.getDefaultProps(), backgroundUtils.inBgSettingMode ? this.backgroundAdjust : this.currLayerAdjust)
   },
   computed: {
     ...mapGetters({
@@ -64,6 +64,10 @@ export default Vue.extend({
     },
     currLayerAdjust(): any {
       return this.currLayer.styles?.adjust ?? {}
+    },
+    backgroundAdjust(): any {
+      const { styles: { adjust } } = pageUtils.currFocusPage.backgroundImage.config
+      return adjust
     }
   },
   methods: {

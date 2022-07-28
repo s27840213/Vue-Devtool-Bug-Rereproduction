@@ -1,6 +1,7 @@
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import Vue from 'vue'
 import assetUtils from './assetUtils'
 import editorUtils from './editorUtils'
 import generalUtils from './generalUtils'
@@ -73,12 +74,40 @@ class BackgroundUtils {
     })
   }
 
+  handleLockBackground() {
+    this.setBgImage({
+      pageIndex: pageUtils.currFocusPageIndex,
+      config: {
+        locked: !this.backgroundLocked
+      }
+    })
+    this.setBgImageControl({
+      pageIndex: pageUtils.currFocusPageIndex,
+      imgControl: false
+    })
+    stepsUtils.record()
+  }
+
+  handleDeleteBackground() {
+    if (this.backgroundLocked) return this.handleLockedNotify()
+    store.commit('REMOVE_background', { pageIndex: pageUtils.currFocusPageIndex })
+    stepsUtils.record()
+  }
+
+  handleLockedNotify() {
+    Vue.notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+  }
+
   setBgImage(props: { pageIndex: number, config: Partial<IImage> }) {
     store.commit('SET_backgroundImage', props)
   }
 
   setBgImageStyles(props: { pageIndex: number, styles: Partial<IImageStyle> }) {
     store.commit('SET_backgroundImageStyles', props)
+  }
+
+  setBgImageControl(props: { pageIndex: number, imgControl: boolean }) {
+    store.commit('SET_backgroundImageControl', props)
   }
 
   detachBgImage() {

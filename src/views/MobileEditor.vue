@@ -222,6 +222,7 @@ export default Vue.extend({
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType || panelType === 'none') {
         this.showMP = false
+        this.setCurrActivePanel('none')
       } else {
         const oldCAP = this.currActivePanel
         this.showMP = true

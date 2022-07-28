@@ -11,27 +11,30 @@ import generalUtils from '@/utils/generalUtils'
 import pageUtils from './pageUtils'
 
 class ShapeUtils {
-  /**
-   * @param hasMultiColors - if the curr layer is tmp or groupe, and there isn't any selected sub layer
-   */
   get hasMultiColors() {
     const currLayer = layerUtils.getCurrLayer
-    let oneColorObjNum = 0
 
     if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-      for (const layer of (currLayer as IGroup).layers) {
-        if (layer.type === 'shape' && (layer as IShape).color && (layer as IShape).color.length === 1) {
-          oneColorObjNum++
-        }
-      }
-      return oneColorObjNum >= 2 && !(currLayer as IGroup).layers
+      return this.getSingleColorObjNum >= 2 && !(currLayer as IGroup).layers
         .some(l => l.type === 'shape' && l.active)
     }
     return false
   }
 
+  get getSingleColorObjNum(): number {
+    const currLayer = layerUtils.getCurrLayer
+    let oneColorObjNum = 0
+    for (const layer of (currLayer as IGroup).layers) {
+      if (layer.type === 'shape' && (layer as IShape).color && (layer as IShape).color.length === 1) {
+        oneColorObjNum++
+      }
+    }
+    return oneColorObjNum
+  }
+
   get getDocumentColors() {
     const layer = layerUtils.getCurrLayer
+    console.log(layer.type)
     switch (layer.type) {
       case 'shape':
         return (layer as IShape).color || []
@@ -39,6 +42,8 @@ class ShapeUtils {
       case 'group': {
         const { subLayerIdx } = layerUtils
         if (subLayerIdx === -1) {
+          console.log('-1')
+          console.log(this.hasMultiColors)
           if (!this.hasMultiColors) {
             const layers = (layer as IGroup).layers
               .filter((l: ILayer) => l.type === 'shape' && (l as IShape).color && (l as IShape).color.length === 1)

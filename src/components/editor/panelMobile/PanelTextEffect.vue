@@ -3,6 +3,7 @@
     div(v-if="inInitialState" class="panel-text-effect__options flex-evenly")
       div(class="panel-text-effect__option pointer")
         svg-icon(
+          class="panel-text-effect__option-icon"
           :iconName="'text-effect-none'"
           iconWidth="60px"
           iconColor="gray-5"
@@ -11,6 +12,7 @@
         span(class="body-3") {{$t('NN0112')}}
       div(class="panel-text-effect__option pointer")
         svg-icon(
+          class="panel-text-effect__option-icon"
           :iconName="'text-shape-none'"
           iconWidth="60px"
           iconColor="gray-5"
@@ -23,7 +25,8 @@
         svg-icon(
           :iconName="`text-effect-${icon}`"
           @click.native="onEffectClick(icon)"
-          :class="{ 'panel-text-effect__option--selected': currentEffect === icon }"
+          class="panel-text-effect__option-icon"
+          :class="{ 'panel-text-effect__option-icon--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-5")
         span(class="body-3") {{i18nMap[`shadow-${icon}`]}}
@@ -52,7 +55,8 @@
         svg-icon(
           :iconName="`text-shape-${icon}`"
           @click.native="onShapeClick(icon)"
-          :class="{ 'panel-text-effect__option--selected': currentShape === icon }"
+          class="panel-text-effect__option-icon"
+          :class="{ 'panel-text-effect__option-icon--selected': currentShape === icon }"
           iconWidth="60px"
           iconColor="gray-5")
         span(class="body-3") {{i18nMap[`shape-${icon}`]}}
@@ -244,8 +248,15 @@ export default Vue.extend({
     margin: 0 8px;
     width: 60px;
     box-sizing: border-box;
+  }
+
+  &__option-icon {
+    border-radius: 5px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+
     &--selected {
-      outline: 2px solid setColor(blue-1);
+      border-color: setColor(blue-1);
     }
   }
 

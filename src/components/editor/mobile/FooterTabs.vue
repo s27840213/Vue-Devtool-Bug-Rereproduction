@@ -154,7 +154,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          disabled: !this.selectMultiple && shapeUtils.getDocumentColors.length === 0,
+          disabled: shapeUtils.getSingleColorObjNum === 0,
           props: {
             currColorEvent: ColorEventType.shape
           }

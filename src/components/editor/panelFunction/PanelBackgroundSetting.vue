@@ -78,6 +78,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import PopupAdjust from '@/components/popup/PopupAdjust.vue'
 import pageUtils from '@/utils/pageUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 
 export default Vue.extend({
   components: { PopupAdjust },
@@ -157,27 +158,14 @@ export default Vue.extend({
       setBgColor: 'SET_backgroundColor',
       removeBg: 'REMOVE_background',
       setBgOpacity: 'SET_backgroundOpacity',
-      setBgConfig: 'SET_backgroundImageConfig',
       setBgImageControl: 'SET_backgroundImageControl',
       setBgImageStyles: 'SET_backgroundImageStyles'
     }),
     handleDeleteBackground() {
-      if (this.backgroundLocked) return this.handleLockedNotify()
-      this.removeBg({ pageIndex: pageUtils.currFocusPageIndex })
-      stepsUtils.record()
+      backgroundUtils.handleDeleteBackground()
     },
     handleLockBackground() {
-      this.setBgConfig({
-        pageIndex: pageUtils.currFocusPageIndex,
-        config: {
-          locked: !this.backgroundLocked
-        }
-      })
-      this.setBgImageControl({
-        pageIndex: pageUtils.currFocusPageIndex,
-        imgControl: false
-      })
-      stepsUtils.record()
+      backgroundUtils.handleLockBackground()
     },
     handleChangeBgColor(color: string) {
       this.setBgColor({

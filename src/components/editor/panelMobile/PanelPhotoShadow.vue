@@ -149,7 +149,7 @@ export default Vue.extend({
       min-width: 60px;
       box-sizing: border-box;
       margin-top: 10px;
-      border-radius: 3px;
+      border-radius: 5px;
       border: 2px solid transparent;
       &:not(&--selected):hover {
         border-color: setColor(blue-1, 0.5);

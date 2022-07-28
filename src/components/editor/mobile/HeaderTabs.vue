@@ -8,16 +8,16 @@
           :iconColor="'white'"
           :iconWidth="'20px'")
       div(class="header-bar__feature-icon mr-20"
-          :class="{'click-disabled': isLocked || stepsUtils.isInFirstStep}"
+          :class="{'click-disabled': stepsUtils.isInFirstStep}"
           @pointerdown="undo()")
         svg-icon(:iconName="'undo'"
-          :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
+          :iconColor="(!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
           :iconWidth="'20px'")
       div(class="header-bar__feature-icon"
-          :class="{'click-disabled': isLocked | stepsUtils.isInLastStep}"
+          :class="{'click-disabled': stepsUtils.isInLastStep}"
           @pointerdown="redo()")
         svg-icon(:iconName="'redo'"
-          :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
+          :iconColor="(!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
           :iconWidth="'20px'")
     div(class="header-bar__right")
       div(v-for="tab in rightTabs" class="header-bar__feature-icon"
@@ -36,6 +36,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 
 export default Vue.extend({
   components: {
@@ -69,7 +70,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
     stepCount(): number {
       return stepsUtils.steps.length
@@ -81,9 +83,17 @@ export default Vue.extend({
         { icon: 'trash' }
       ]
     },
+    bgSettingTabs(): Array<{ icon: string, disabled?: boolean }> {
+      return [
+        { icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' },
+        { icon: 'trash' }
+      ]
+    },
     rightTabs(): Array<{ icon: string, disabled?: boolean }> {
       if (this.selectedLayerNum > 0) {
         return this.layerTabs
+      } else if (this.inBgSettingMode) {
+        return this.bgSettingTabs
       } else {
         return this.homeTabs
       }
@@ -92,7 +102,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getTmpLayer().locked
     },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
