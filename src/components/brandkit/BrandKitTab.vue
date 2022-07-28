@@ -179,6 +179,7 @@ export default Vue.extend({
       transition: 0.3s ease;
       &.mobile-editor-theme {
         @include text-H6;
+        transition: none;
       }
     }
   }
