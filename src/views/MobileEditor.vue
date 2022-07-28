@@ -13,9 +13,9 @@
         div(v-else class="mobile-editor__page-preview")
           all-pages
       transition(name="panel-up"
-                @after-enter="fitPage"
-                @after-leave="fitPage")
-        mobile-panel(v-show="currActivePanel !== 'none' || inMultiSelectionMode"
+                @after-enter="afterEnter"
+                @after-leave="afterLeave")
+        mobile-panel(v-show="showMP || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")
@@ -69,7 +69,8 @@ export default Vue.extend({
       isLoading: false,
       isSaving: false,
       currColorEvent: '',
-      ColorEventType
+      ColorEventType,
+      showMP: false
     }
   },
   mounted() {
@@ -213,8 +214,9 @@ export default Vue.extend({
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType) {
-        this.setCurrActivePanel('none')
+        this.showMP = false
       } else {
+        this.showMP = true
         this.setCurrActivePanel(panelType)
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
@@ -236,8 +238,12 @@ export default Vue.extend({
         })
       }
     },
-    fitPage() {
+    afterEnter() {
       pageUtils.fitPage()
+    },
+    afterLeave() {
+      pageUtils.fitPage()
+      this.setCurrActivePanel('none')
     }
   }
 })
