@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-background-image"
     :style="mainStyles"
-    @pointerdown.stop="setInBgSettingMode"
+    @pointerdown="setInBgSettingMode"
     draggable="false")
     div(v-show="!isColorBackground")
       div(v-if="isAdjustImage" :style="frameStyles")
@@ -22,11 +22,9 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import cssConverter from '@/utils/cssConverter'
-import layerUtils from '@/utils/layerUtils'
 import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import errorHandle from '@/utils/errorHandleUtils'
 import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
