@@ -164,10 +164,12 @@ export default Vue.extend({
     },
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
-      imageShadowUtils.setEffect(effectName, {
-        ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
-      })
-      // this.focusOnPanel()
+      if (!alreadySetEffect) {
+        const data = imageShadowUtils.getLocalEffectAttrs(effectName) || imageShadowUtils.getDefaultEffect(effectName)
+        imageShadowUtils.setEffect(effectName, { [effectName]: data })
+      } else {
+        imageShadowUtils.setEffect(effectName, {})
+      }
     },
     handleEffectUpdate(event: Event): void {
       const { name, value } = event.target as HTMLInputElement

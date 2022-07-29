@@ -49,11 +49,9 @@ const marks = {
   ]
 }
 const setMark = function (type: 'shadow' | 'imageMatched' | 'floating', i: number) {
-  // if (isProduction) return
   performance.mark(marks[type][i])
 }
 const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs: string[]) {
-  // if (isProduction) return
   logs.forEach(log => {
     logUtils.setLog(log)
   })
@@ -95,7 +93,9 @@ class ImageShadowUtils {
   private _layerData = null as {
     config: IImage,
     pageId: string,
-    /** This identifier is used to indexing the sub-layer */
+    /**
+     * This identifier is used to indexing the sub-layer
+     * */
     primarylayerId?: string,
     options?: DrawParams
   } | null
@@ -147,11 +147,6 @@ class ImageShadowUtils {
           layerId: primarylayerId || config.id || '',
           subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
         })
-        // ctxT.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvasT.width, canvasT.height)
-        // this.updateEffectProps(layerInfo, {
-        //   isTransparent: this.isTransparentBg(canvasT)
-        // })
-        // ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       }
       if (params) {
         this._layerData.options = {
@@ -169,7 +164,6 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
-    // this.drawingInit(canvas, img, config, params)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
@@ -226,7 +220,6 @@ class ImageShadowUtils {
     const canvasMaxW = canvas.width * mappingScale
     const ellipseX = canvasMaxW * 0.5
     const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
-    // const ellipseY = (1.25 * canvas.height + 0.75 * drawCanvasH) * 0.5 * mappingScale
     const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}`
     const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.floating &&
       this.dataBuff.radius === radius && this.dataBuff.size === size &&
@@ -243,12 +236,9 @@ class ImageShadowUtils {
     if ((this.handlerId === handlerId) || !timeout) {
       canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
       canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-      // const shadowSize = FLOATING_SHADOW_SIZE * Math.max(layerWidth / _imgWidth, 0.3)
-      // ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2 + 20)
       const shadowWidth = attrFactor * config.styles.initWidth * (size * 0.01)
       const shadowHeight = FLOATING_SHADOW_SIZE * attrFactor * (thinkness * 0.01)
       ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, shadowWidth, shadowHeight, 0, 0, Math.PI * 2 + 20)
-      // ctxMaxSize.ellipse(ellipseX, ellipseY, 2 * attrFactor * shadowSize * (size * 0.01 + 2), shadowSize * attrFactor * (thinkness * 0.01), 0, 0, Math.PI * 2)
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
@@ -288,6 +278,7 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        this.storeEffectsAttrs(config)
         cb && cb()
       }
     })
@@ -299,7 +290,6 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
     const { timeout = DRAWING_TIMEOUT } = params
-    // this.drawingInit(canvas, img, config, params)
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
     if (timeout) {
@@ -410,6 +400,7 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        this.storeEffectsAttrs(config)
         cb && cb()
         setMark('imageMatched', 3)
         logMark('imageMatched', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
@@ -424,8 +415,6 @@ class ImageShadowUtils {
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) return
-    // this.drawingInit(canvas, img, config, params)
-
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
       setMark('shadow', 0)
@@ -558,6 +547,7 @@ class ImageShadowUtils {
             timeout && this.setIsProcess(layerInfo, false)
           }
           this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+          this.storeEffectsAttrs(config)
           cb && cb()
         }
       })
@@ -580,6 +570,18 @@ class ImageShadowUtils {
         resolve()
       }, 0)
     })
+  }
+
+  storeEffectsAttrs(config: IImage) {
+    const { currentEffect, effects } = config.styles.shadow
+    if (currentEffect !== ShadowEffectType.none) {
+      localStorage.setItem(currentEffect, JSON.stringify(effects[currentEffect]))
+    }
+  }
+
+  getLocalEffectAttrs(effectName: ShadowEffectType) {
+    const data = localStorage.getItem(effectName)
+    return data && Object.keys(JSON.parse(data)).length ? JSON.parse(data) : null
   }
 
   isTransparentBg(target: HTMLCanvasElement | HTMLImageElement): boolean {
@@ -873,11 +875,17 @@ class ImageShadowUtils {
     store.commit('SET_srcState', { layerInfo, effect, effects, layerSrcObj, shadowSrcObj, layerState })
   }
 
-  setUploadId(id: ILayerIdentifier) {
+  setUploadId(id?: ILayerIdentifier) {
+    if (!id) {
+      id = { pageId: '', layerId: '', subLayerId: '' }
+    }
     store.commit('shadow/SET_UPLOAD_ID', id)
   }
 
-  setProcessId(id: ILayerIdentifier) {
+  setProcessId(id?: ILayerIdentifier) {
+    if (!id) {
+      id = { pageId: '', layerId: '', subLayerId: '' }
+    }
     store.commit('shadow/SET_PROCESS_ID', id)
   }
 

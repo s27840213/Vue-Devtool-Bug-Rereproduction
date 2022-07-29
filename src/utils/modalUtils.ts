@@ -2,7 +2,8 @@ import { IModalButton } from '@/interfaces/modal'
 import store from '@/store'
 
 class ModalUtils {
-  setModalInfo(title: string, content: Array<string>, confirmButton?: IModalButton, cancelButton?: IModalButton) {
+  setModalInfo(title: string, content: Array<string> | string, confirmButton?: IModalButton, cancelButton?: IModalButton) {
+    if (typeof content === 'string') content = [content]
     store.commit('modal/SET_MODAL_INFO', {
       title,
       content,

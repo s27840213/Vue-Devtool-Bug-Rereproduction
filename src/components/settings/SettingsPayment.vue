@@ -217,6 +217,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+input {
+  @include default-input;
+}
+
 .sp {
   @include body-MD;
   padding: 60px 13% 20px 13%;
@@ -296,20 +300,6 @@ export default Vue.extend({
   }
   label {
     color: setColor(gray-3);
-  }
-  input {
-    box-sizing: border-box;
-    height: 40px;
-    padding: 10px;
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
-    color: setColor(gray-2);
-    &:focus {
-      border-color: setColor(blue-1);
-    }
-    &[invalid="true"] {
-      border-color: red;
-    }
   }
   &__half {
     display: grid;

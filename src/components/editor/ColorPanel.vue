@@ -361,6 +361,7 @@ export default Vue.extend({
     padding-top: 100%;
     background-image: url("~@/assets/img/svg/addColor.png");
     background-size: cover;
+    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
   }
 
   &__color {

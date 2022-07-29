@@ -1,9 +1,6 @@
 <template lang="pug">
   div(class="block" :style="blockStyle")
     div(class="block-text" :style="blockTextStyle")
-      div(v-if="content.comingSoon"
-        class="block-text__coming_soon overline-SM")
-        span {{'COMING SOON'}}
       div(class="block-text__title")
         span(v-html="content.title")
         img(v-for="cb in content.colorBlock.filter((i)=>!i.ref)"
@@ -98,12 +95,6 @@ export default Vue.extend({
   flex-direction: column;
   position: -webkit-sticky; // For safari < 13
   margin-bottom: 10px;
-  &__coming_soon {
-    padding: 4px;
-    color: white;
-    background: #ffba49;
-    border-radius: 4px;
-  }
   &__title {
     position: relative;
   }

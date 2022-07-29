@@ -299,6 +299,7 @@ export default Vue.extend({
       }
     },
     onMousedown(e: MouseEvent) {
+      if (e.button !== 0) return
       if (this.isProcessShadow) {
         return
       }
@@ -307,7 +308,6 @@ export default Vue.extend({
         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
         LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
         eventUtils.emit(PanelEvent.showPhotoShadow)
-        // return
       }
       imageUtils.setImgControlDefault(false)
 
