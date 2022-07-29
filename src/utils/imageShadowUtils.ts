@@ -124,35 +124,31 @@ class ImageShadowUtils {
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
-    this.clearLayerData()
     const { canvasT } = this
-    const ctxT = canvasT.getContext('2d')
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
     }
-    if (ctxT) {
-      this._layerData = { config, pageId: params.pageId || pageUtils.currFocusPage.id }
-      const { layerInfo } = params || {}
-      if (layerInfo) {
-        const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
-        this._layerData.primarylayerId = primarylayerId
-        this.setProcessId({
-          pageId: pageUtils.currFocusPage.id,
-          layerId: primarylayerId || config.id || '',
-          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-        })
-        this.setHandleId({
-          pageId: pageUtils.currFocusPage.id,
-          layerId: primarylayerId || config.id || '',
-          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-        })
-      }
-      if (params) {
-        this._layerData.options = {
-          ...this._layerData.options,
-          ...params
-        }
+    this._layerData = { config, pageId: params.pageId || pageUtils.currFocusPage.id }
+    const { layerInfo } = params || {}
+    if (layerInfo) {
+      const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+      this._layerData.primarylayerId = primarylayerId
+      this.setProcessId({
+        pageId: pageUtils.currFocusPage.id,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      })
+      this.setHandleId({
+        pageId: pageUtils.currFocusPage.id,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      })
+    }
+    if (params) {
+      this._layerData.options = {
+        ...this._layerData.options,
+        ...params
       }
     }
     if (this._draw) {

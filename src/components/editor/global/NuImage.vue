@@ -758,7 +758,6 @@ export default Vue.extend({
           }
           const img = shadowBuff.canvasShadowImg.shadow as HTMLImageElement || new Image()
           imageShadowUtils.drawingInit(canvas, this.$refs.img as HTMLImageElement, this.config, params)
-          // if (shadowBuff.canvasShadowImg.shadow && shadowBuff.canvasShadowImg.shadow.src === this.src) {
           if (shadowBuff.canvasShadowImg.shadow && !imageShadowUtils.inUploadProcess) {
             imageShadowUtils.drawShadow(canvasList, img, this.config, params)
           } else {

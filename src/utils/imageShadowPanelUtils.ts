@@ -101,10 +101,10 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setUploadProcess(true)
       imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
-      if (config.type !== LayerType.image) {
-        return
-      }
-      if (!forceUpload && (this.checkIfSameEffect(config) && config.styles.shadow.srcState)) {
+      if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
+        /**
+         * Check if the state of the shadow is the same
+         */
         const { shadowSrcObj } = config.styles.shadow.srcState
         const layerInfo = {
           pageIndex: _pageIndex,
@@ -145,7 +145,7 @@ export default new class ImageShadowPanelUtils {
       img.crossOrigin = 'anonynous'
       img.src = imageUtils.getSrc(config.srcObj, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600) +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      await new Promise<void>((resolve) => {
+      await new Promise<void>((resolve, reject) => {
         img.onload = async () => {
           const isSVG = await this.isSVG(img, config)
           if (isSVG) {
@@ -160,10 +160,11 @@ export default new class ImageShadowPanelUtils {
             resolve()
           }
         }
-        img.onerror = () => {
-          logUtils.setLog('img is svg check error' + 'img.src: ' + img.src)
-          console.log('img is svg check error' + 'img.src: ' + img.src)
-          resolve()
+        img.onerror = (e) => {
+          const log = 'phase: img is svg check error, can not load img. ' + 'img.src: ' + img.src + 'error:' + e.toString()
+          logUtils.setLog(log)
+          console.log(log, e)
+          reject(e)
         }
       })
 
@@ -232,8 +233,6 @@ export default new class ImageShadowPanelUtils {
         pollingCallback: (json: IUploadAssetResponse) => {
           logUtils.setLog('phase: finish uploading')
           const isAdmin = store.getters['user/isAdmin']
-          imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-          imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
             type: isAdmin ? 'public' : 'shadow-private',
             userId: json.data.team_id || '',
@@ -304,13 +303,15 @@ export default new class ImageShadowPanelUtils {
             logUtils.setLog('error' + e.message)
           }).finally(() => {
             imageShadowUtils.clearLayerData()
+            imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
           })
         }
       })
     } else {
-      logUtils.setLog('layerDate is undefined')
-      console.log('layerDate is undefined')
+      logUtils.setLog('layerData is undefined')
+      console.log('layerData is undefined')
       imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     }
   }
