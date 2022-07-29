@@ -17,6 +17,10 @@ class BackgroundUtils {
     return store.getters['mobileEditor/getInBgSettingMode']
   }
 
+  get hasBgImage(): boolean {
+    return this.backgroundImage.assetId !== 0
+  }
+
   get currPage(): IPage {
     return pageUtils.getPage(pageUtils.currFocusPageIndex)
   }

@@ -2,7 +2,7 @@
   div(class="footer-tabs" ref="tabs")
     div(class="footer-tabs__container" :style="containerStyles"  ref="container")
       template(v-for="(tab, index) in tabs")
-        div(v-if="!tab.disabled"
+        div(v-if="!tab.hidden"
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
@@ -82,25 +82,25 @@ export default Vue.extend({
       return locked
     },
     groupTab(): IFooterTab {
-      return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 }
+      return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
     },
     photoTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', disabled: true },
+        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', disabled: this.isFrameImage },
+        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isFrameImage },
         ...this.genearlLayerTabs,
         { icon: 'bg-separate', text: `${this.$t('NN0707')}` },
-        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, disabled: true }
-        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, hidden: true }
+        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
     fontTabs(): Array<IFooterTab> {
       return [
-        { icon: 'edit', text: `${this.$t('NN0504')}`, disabled: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
+        { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
@@ -114,25 +114,27 @@ export default Vue.extend({
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
         { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
-        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text', disabled: true }
+        // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
     bgSettingTab(): Array<IFooterTab> {
+      const { hasBgImage } = backgroundUtils
       return [
         this.mainMenu,
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', disabled: true },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
           props: {
             currColorEvent: ColorEventType.background
-          }
+          },
+          disabled: this.backgroundLocked
         },
-        { icon: 'bg-separate', text: `${this.$t('NN0708')}` }
+        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: hasBgImage, disabled: this.backgroundLocked }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -154,7 +156,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          disabled: shapeUtils.getSingleColorObjNum === 0,
+          hidden: shapeUtils.getSingleColorObjNum === 0,
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -168,12 +170,12 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          disabled: shapeUtils.getDocumentColors.length === 0,
+          hidden: shapeUtils.getDocumentColors.length === 0,
           props: {
             currColorEvent: ColorEventType.shape
           }
         },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', disabled: !this.showShapeAdjust }
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
       ]
     },
     pageTabs(): Array<IFooterTab> {
@@ -182,7 +184,7 @@ export default Vue.extend({
         { icon: 'add-page', text: `${this.$t('NN0139')}` },
         { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
         // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
-        { icon: 'trash', text: `${this.$t('NN0141')}`, disabled: pageUtils.getPages.length <= 1 }
+        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 }
         // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
@@ -191,9 +193,9 @@ export default Vue.extend({
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
+        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
-        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 }
+        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
@@ -201,7 +203,7 @@ export default Vue.extend({
         this.mainMenu,
         this.groupTab,
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', disabled: this.hasSubSelectedLayer },
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
