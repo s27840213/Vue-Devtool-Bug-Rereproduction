@@ -41,7 +41,7 @@ export default Vue.extend({
   data() {
     return {
       rows: [] as any[],
-      galleryUtils: new GalleryUtils(300, 100, 5)
+      galleryUtils: new GalleryUtils(window.innerWidth - 34, 95, 16)
     }
   },
   props: {
