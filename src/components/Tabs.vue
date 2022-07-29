@@ -2,10 +2,10 @@
   div(class="tabs")
     div(v-for="(tab,index) in tabs"
         class="tabs__item"
-        :class="tabStyle(index)"
+        :style="tabStyle(index)"
         @click="switchTab(index)")
       span(
-        class="subtitle-2") {{tab}}
+        class="text-H6") {{tab}}
 </template>
 
 <script lang="ts">
@@ -17,7 +17,7 @@ export default Vue.extend({
       type: Array as PropType<string[]>,
       default: () => []
     },
-    theme: {
+    theme: { // value: dark, light
       type: String,
       default: 'dark'
     }
@@ -28,10 +28,31 @@ export default Vue.extend({
     }
   },
   computed: {
+    colors() {
+      switch (this.theme) {
+        case 'light':
+          return {
+            active: '#4EABE6',
+            inactive: '#969BAB'
+          }
+        case 'dark':
+        default:
+          return {
+            active: 'white',
+            inactive: '#969BAB'
+          }
+      }
+    }
   },
   methods: {
     tabStyle(tabIndex: number) {
-      return tabIndex === this.currActiveTabIndex ? 'text-white show-border ' : 'text-gray-3'
+      const activeMode = tabIndex === this.currActiveTabIndex ? 'active' : 'inactive'
+      return {
+        color: this.colors[activeMode],
+        borderBottom: `2px solid ${this.colors[activeMode]}`,
+        width: `${100 / this.tabs.length / 2}%`
+
+      }
     },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
@@ -47,18 +68,13 @@ export default Vue.extend({
   display: flex;
   align-items: center;
   justify-content: space-around;
-  color: white;
   margin-bottom: 24px;
   &__item {
-    width: 20%;
-    padding: 4px 0px;
-    transition: border-color 0.2s, color 0.2s;
+    padding-bottom: 4px;
     box-sizing: border-box;
+    min-width: fit-content;
+    transition: border-color 0.2s, color 0.2s;
     border-bottom: 2px solid transparent;
   }
-}
-
-.show-border {
-  border-bottom: 2px solid setColor(white);
 }
 </style>

@@ -37,10 +37,8 @@
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
-      div(v-if="innerTabs.length" class="mobile-panel__inner-tab")
-        div(v-for="tab in innerTabs" :active="tab.name===innerTab"
-              @click="switchInnerTab(tab.name)") {{tab.label}}
-          hr
+      tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
+          :tabs="innerTabs.label" @switchTab="switchInnerTab")
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
@@ -84,6 +82,7 @@ import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
@@ -144,7 +143,8 @@ export default Vue.extend({
     PanelTextEffect,
     PanelPhotoShadow,
     PanelObjectAdjust,
-    PanelBrandList
+    PanelBrandList,
+    Tabs
   },
   data() {
     return {
@@ -255,18 +255,23 @@ export default Vue.extend({
         }
       )
     },
-    innerTabs(): Record<string, string>[] {
+    innerTabs(): Record<string, string[]> {
       switch (this.currActivePanel) {
         case 'replace':
-          return [{
-            name: 'photo',
-            label: this.$tc('NN0002', 2)
-          }, {
-            name: 'file',
-            label: this.$tc('NN0006')
-          }]
+          return {
+            key: [
+              'photo',
+              'file'
+            ],
+            label: [
+              this.$tc('NN0002', 2),
+              this.$tc('NN0006')
+            ]
+          }
         default:
-          return []
+          return {
+            key: ['']
+          }
       }
     },
     dynamicBindProps(): { [index: string]: any } {
@@ -465,16 +470,10 @@ export default Vue.extend({
     },
     currActivePanel(newVal) {
       this.panelHistory = []
-      if (newVal === 'replace') {
-        this.innerTab = 'photo'
-      } else {
-        this.innerTab = ''
-      }
+      this.innerTab = this.innerTabs.key[0]
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
-      // if (newVal === 'none') {
       this.panelHeight = this.initHeightPx()
-      // }
     }
   },
   mounted() {
@@ -579,8 +578,8 @@ export default Vue.extend({
         }
       }
     },
-    switchInnerTab(panelType: string) {
-      this.innerTab = panelType
+    switchInnerTab(panelIndex: number) {
+      this.innerTab = this.innerTabs.key[panelIndex]
     }
   }
 })
@@ -642,24 +641,7 @@ export default Vue.extend({
   }
 
   &__inner-tab {
-    display: grid;
-    grid-auto-flow: column;
-    width: 100%;
     margin: 15px 0 14px 0;
-    > div {
-      @include text-H6;
-      > hr {
-        margin: 5px auto 0 auto;
-        border: 1px solid transparent;
-        width: 50%;
-      }
-    }
-    > div[active="true"] {
-      color: setColor(blue-1);
-      > hr {
-        border: 1px solid setColor(blue-1);
-      }
-    }
   }
 
   &__title {
