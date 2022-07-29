@@ -365,7 +365,7 @@ class PageUtils {
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
-      if (newRatio < 1) return
+      if (newRatio < 2) return
       store.commit('SET_pageScaleRatio', newRatio)
     }
 
