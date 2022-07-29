@@ -103,7 +103,8 @@ export default Vue.extend({
         srcObj: { type: string, assetId: string | number, userId: string }
       },
       dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
-      isPrimaryActive: false
+      isPrimaryActive: false,
+      dblTabsFlag: false
     }
   },
   mounted() {
@@ -187,6 +188,9 @@ export default Vue.extend({
     }
   },
   watch: {
+    'config.imgControl'(val) {
+      console.warn(val)
+    },
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
@@ -307,9 +311,45 @@ export default Vue.extend({
     },
     onMousedown(e: MouseEvent) {
       if (e.button !== 0) return
-      if (this.isProcessShadow) {
-        return
+      const body = this.$refs.body as HTMLElement
+      if (!this.dblTabsFlag && this.isActive) {
+        const touchtime = new Date().getTime()
+        const interval = 500
+        const doubleTap = (e: PointerEvent) => {
+          e.preventDefault()
+          if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+            /**
+             * This is the dbl-click callback block
+             */
+            if (this.getLayerType === LayerType.image) {
+              switch (this.type) {
+                case LayerType.group:
+                  console.log(this.primaryLayerIndex, this.layerIndex)
+                  console.log(this.config.imgControl)
+                  LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
+                  console.log(this.config.imgControl)
+                  break
+                case LayerType.frame:
+                  console.log(this.primaryLayerIndex, this.layerIndex)
+                  console.log(this.config.imgControl)
+                  FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { imgControl: true })
+                  console.log(this.config.imgControl)
+                  break
+              }
+            }
+            this.dblTabsFlag = true
+          }
+        }
+        body.addEventListener('pointerdown', doubleTap)
+        setTimeout(() => {
+          body.removeEventListener('pointerdown', doubleTap)
+          this.dblTabsFlag = false
+        }, interval)
       }
+
+      // if (this.isProcessShadow) {
+      //   return
+      // }
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
         groupUtils.deselect()
         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])

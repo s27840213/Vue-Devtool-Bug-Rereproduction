@@ -36,6 +36,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -69,7 +70,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      isHandleShadow: 'shadow/isHandling'
     }),
     stepCount(): number {
       return stepsUtils.steps.length
@@ -168,7 +170,14 @@ export default Vue.extend({
     },
     handleIconAction(icon: string) {
       switch (icon) {
-        case 'download':
+        case 'download': {
+          if (!this.isHandleShadow) {
+            this.$emit('switchTab', icon)
+          } else {
+            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+          }
+          break
+        }
         case 'more': {
           this.$emit('switchTab', icon)
           break

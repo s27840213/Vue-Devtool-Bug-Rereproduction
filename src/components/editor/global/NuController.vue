@@ -215,7 +215,8 @@ export default Vue.extend({
       movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
       isMoved: false,
-      isDoingGestureAction: false
+      isDoingGestureAction: false,
+      dblTabsFlag: false
     }
   },
   mounted() {
@@ -649,8 +650,33 @@ export default Vue.extend({
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)
+      /**
+       * used for frame layer for entering detection
+       */
       const body = (event.target as HTMLElement)
       body.releasePointerCapture((event as PointerEvent).pointerId)
+
+      if (!this.dblTabsFlag && this.isActive) {
+        const touchtime = new Date().getTime()
+        const interval = 500
+        const doubleTap = (e: PointerEvent) => {
+          e.preventDefault()
+          if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+            /**
+             * This is the dbl-click callback block
+             */
+            if (this.getLayerType === LayerType.image) {
+              LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            }
+            this.dblTabsFlag = true
+          }
+        }
+        body.addEventListener('pointerdown', doubleTap)
+        setTimeout(() => {
+          body.removeEventListener('pointerdown', doubleTap)
+          this.dblTabsFlag = false
+        }, interval)
+      }
 
       if (eventType === 'pointer') {
         const pointerEvent = event as PointerEvent
@@ -1857,6 +1883,7 @@ export default Vue.extend({
       }
     },
     dblSubController(targetIndex: number) {
+      console.log('dbl')
       if (this.isHandleShadow) {
         return
       }

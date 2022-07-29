@@ -31,6 +31,7 @@ import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   components: {
@@ -72,7 +73,8 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
-      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      isHandleShadow: 'shadow/isHandling'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -188,12 +190,12 @@ export default Vue.extend({
     },
     genearlLayerTabs(): Array<IFooterTab> {
       return [
+        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', disabled: this.currSelectedInfo.types.has(LayerType.frame) },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
-        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 }
+        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
@@ -465,11 +467,17 @@ export default Vue.extend({
           }
           break
         }
+        case 'effect': {
+          if (this.isHandleShadow) {
+            Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
+            return
+          }
+          break
+        }
         default: {
           break
         }
       }
-
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
