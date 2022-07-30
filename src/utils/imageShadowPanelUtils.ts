@@ -209,6 +209,7 @@ export default new class ImageShadowPanelUtils {
         case ShadowEffectType.none:
           return
         default:
+          logUtils.setLog('Error: effect type error: ' + config.styles.shadow.currentEffect)
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
       logUtils.setLog('phase: finish drawing')
