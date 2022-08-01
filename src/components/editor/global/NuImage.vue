@@ -88,26 +88,26 @@ export default Vue.extend({
     this.handleInitLoad()
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender) {
       this.handleShadowInit()
-    }
-    if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
-      img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        canvas.setAttribute('width', img.naturalWidth.toString())
-        canvas.setAttribute('height', img.naturalHeight.toString())
-        ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
-        imageShadowUtils.updateEffectProps(this.layerInfo, {
-          isTransparent: imageShadowUtils.isTransparentBg(canvas)
-        })
+
+      if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
+        img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+          canvas.setAttribute('width', img.naturalWidth.toString())
+          canvas.setAttribute('height', img.naturalHeight.toString())
+          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+          imageShadowUtils.updateEffectProps(this.layerInfo, {
+            isTransparent: imageShadowUtils.isTransparentBg(canvas)
+          })
+        }
       }
     }
   },
   mounted() {
-    // console.log(this.config.previewSrc)
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
     eventUtils.on(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
