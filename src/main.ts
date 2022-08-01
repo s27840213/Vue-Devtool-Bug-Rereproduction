@@ -19,9 +19,9 @@ import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
 window.onerror = function (msg, url, line) {
   const message = [
-      'Message: ' + msg,
-      'URL: ' + url,
-      'Line: ' + line,
+    'Message: ' + msg,
+    'URL: ' + url,
+    'Line: ' + line,
   ].join(' - ')
   logUtils.setLog(message)
 }
@@ -58,7 +58,6 @@ Vue.config.productionTip = false
 Vue.use(VueRecyclerviewNew, vueColor)
 Vue.use(Notifications)
 Vue.use(VueMeta)
-Vue.use(require('vue-shortkey'))
 Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
