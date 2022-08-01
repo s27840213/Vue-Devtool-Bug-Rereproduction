@@ -72,6 +72,9 @@ export default Vue.extend({
       showMP: false
     }
   },
+  created() {
+    eventUtils.on(PanelEvent.switchTab, this.switchTab)
+  },
   mounted() {
     /**
      * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
@@ -100,10 +103,6 @@ export default Vue.extend({
       }
       lastTouchEnd = now
     }, false)
-
-    eventUtils.on(PanelEvent.showMobilePhotoShadow, () => {
-      this.setCurrActivePanel('photo-shadow')
-    })
 
     if (process.env.NODE_ENV === 'development') {
       // const vconsole = new Vconsole()

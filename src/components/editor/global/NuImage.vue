@@ -86,10 +86,11 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender) {
+    const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
+    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
     }
-    if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
+    if (typeof this.config.styles.shadow.isTransparent === 'undefined' && !isPrimaryLayerFrame) {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
