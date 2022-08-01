@@ -38,6 +38,7 @@ class GeneralUtils {
     const scrollCenterY = (2 * el.scrollTop + el.clientHeight)
     const oldScrollWidth = el.scrollWidth
     const oldScrollHeight = el.scrollHeight
+
     Vue.nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
@@ -313,6 +314,13 @@ class GeneralUtils {
   capitalize(str: string): string {
     if (str.length === 0) return str
     return str[0].toUpperCase() + str.substring(1).toLowerCase()
+  }
+
+  capitalizeFirstWord(str: string) {
+    const words = str.split(' ').map(w => w.toLowerCase())
+    const first = words[0]
+    words[0] = first[0].toUpperCase() + first.substring(1)
+    return words.join(' ')
   }
 }
 

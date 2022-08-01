@@ -14,6 +14,8 @@ import stepsUtils from './stepsUtils'
 import textUtils from './textUtils'
 import pageUtils from './pageUtils'
 import { LayerType } from '@/store/types'
+import editorUtils from './editorUtils'
+import backgroundUtils from './backgroundUtils'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -236,6 +238,9 @@ class GroupUtils {
       }
     }
 
+    if (backgroundUtils.inBgSettingMode) {
+      editorUtils.setInBgSettingMode(false)
+    }
     store.commit('SET_currActivePageIndex', pageIndex)
   }
 

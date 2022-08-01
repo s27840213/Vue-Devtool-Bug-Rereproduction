@@ -18,13 +18,13 @@
           :style="modalInfo.confirmButton.style"
           @click="confirmAction()") {{ modalInfo.confirmButton.msg || $t('NN0358') }}
         button(v-if="modalInfo.cancelButton.msg"
-          class="ml-10 btn-primary-mid full-width"
+          class="btn-primary-mid full-width"
           :class="modalInfo.cancelButton.class"
           :style="modalInfo.cancelButton.style"
           @click="cancelAction()") {{ modalInfo.cancelButton.msg || $t('NN0359') }}
-      div(class="modal-card__close"
-          @click="closePopup()")
-        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'" )
+      div(class="modal-card__close")
+        svg-icon(class="pointer" :iconName="'close'" :iconWidth="'20px'"
+                iconColor="gray-2" @click.native="closePopup()")
 </template>
 
 <script lang="ts">
@@ -68,7 +68,7 @@ export default Vue.extend({
   flex-direction: column;
   align-items: center;
   background-color: white;
-  max-width: calc(100% - 80px);
+  max-width: min(calc(100% - 40px), 500px);
   padding: 30px 20px;
   margin: 0 20px;
   border-radius: 10px;
@@ -93,7 +93,20 @@ export default Vue.extend({
       @include btn-LG;
       transition: background-color 0.3s;
       border-radius: 4px;
-      width: 320px;
+      width: 200px;
+    }
+    > button + button {
+      margin-left: 20px;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .modal-card__button {
+    flex-direction: column;
+    align-items: center;
+    > button + button {
+      margin: 20px 0 0 0;
     }
   }
 }

@@ -41,7 +41,7 @@ export default Vue.extend({
       return designUtils.appendPath(this.parents as string[], this.folder as IFolder)
     },
     realFolders(): IFolder[] {
-      return designUtils.sortById([...this.folder.subFolders])
+      return designUtils.sortByCreateTime([...this.folder.subFolders])
     }
   },
   watch: {

@@ -245,7 +245,7 @@ class BrandKitUtils {
   }
 
   getTabNames(theme: string): { [key: string]: string } {
-    return theme === 'editor' ? SIDEBAR_TAB_NAMES : TAB_NAMES
+    return theme.includes('editor') ? SIDEBAR_TAB_NAMES : TAB_NAMES
   }
 
   getTabKeys(): string[] {

@@ -21,6 +21,7 @@ export interface IFooterTab {
   icon: string,
   text: string,
   panelType?: string,
+  hidden?: boolean,
   disabled?: boolean,
   props?: IFooterTabProps
 }

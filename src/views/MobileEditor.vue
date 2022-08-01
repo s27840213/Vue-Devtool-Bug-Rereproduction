@@ -6,12 +6,11 @@
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
-        mobile-editor-view(v-if="!inAllPagesMode"
-          :currActivePanel="currActivePanel"
-          :isConfigPanelOpen="isConfigPanelOpen"
-          :inAllPagesMode="inAllPagesMode")
-        div(v-else class="mobile-editor__page-preview")
-          all-pages
+        keep-alive
+          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+            :currActivePanel="currActivePanel"
+            :isConfigPanelOpen="isConfigPanelOpen"
+            :inAllPagesMode="inAllPagesMode")
       transition(name="panel-up"
                 @after-enter="afterEnter"
                 @after-leave="afterLeave")
@@ -182,7 +181,7 @@ export default Vue.extend({
       if (newVal) {
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
-        this.setCurrActivePanel('none')
+        this.showMP = false
       }
     }
   },
@@ -212,12 +211,26 @@ export default Vue.extend({
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
+    /**
+     * There are three case need fitPage:
+     * 1. Panel open => afterEnter
+     * 2. Panel close => afterLeave
+     * 3. Panel switch => switchTab else if(oldCAP!=='none'),
+     *    fitPage should call after setCurrActivePanel, or it will get wrong value.
+    */
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType) {
+      if (this.currActivePanel === panelType || panelType === 'none') {
         this.showMP = false
+        editorUtils.setInMultiSelectionMode(false)
       } else {
+        const oldCAP = this.currActivePanel
         this.showMP = true
         this.setCurrActivePanel(panelType)
+        if (oldCAP !== 'none') {
+          this.$nextTick(() => {
+            pageUtils.fitPage()
+          })
+        }
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
             this.currColorEvent = props.currColorEvent
@@ -242,8 +255,8 @@ export default Vue.extend({
       pageUtils.fitPage()
     },
     afterLeave() {
-      pageUtils.fitPage()
       this.setCurrActivePanel('none')
+      pageUtils.fitPage()
     }
   }
 })

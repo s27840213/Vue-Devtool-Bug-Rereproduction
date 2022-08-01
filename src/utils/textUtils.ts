@@ -1056,7 +1056,7 @@ class TextUtils {
       const writingMode = config.styles.writingMode.includes('vertical') ? 'hw' : 'wh'
       console.log(`TEXT RESIZE DONE: id-${config.id ?? ''} ${initSize.widthLimit} ${initSize[dimension]} ${widthLimit} ${otherDimension} ${writingMode} ${firstPText}`)
     }
-    if (limitDiff / initSize.widthLimit > 0.05) {
+    if (limitDiff / initSize.widthLimit > 0.20) {
       return initSize.widthLimit
     } else {
       return widthLimit

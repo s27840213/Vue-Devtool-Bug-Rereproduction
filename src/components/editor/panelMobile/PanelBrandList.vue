@@ -86,7 +86,7 @@ export default Vue.extend({
   }
   &__brand-item {
     height: 40px;
-    padding: 0 1px 0 9px;
+    padding: 0 16px 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -112,7 +112,7 @@ export default Vue.extend({
   &__add-brand {
     display: flex;
     align-items: center;
-    padding: 16px 0 1px 13px;
+    padding: 16px 0 16px 28px;
     gap: 20px;
     &__icon {
       @include size(16px);
@@ -131,7 +131,7 @@ export default Vue.extend({
 .horizontal-rule {
   height: 1px;
   background-color: setColor(gray-4);
-  width: 100%;
+  width: calc(100% - 30px);
   margin-left: auto;
   margin-right: auto;
 }

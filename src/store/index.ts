@@ -383,9 +383,6 @@ const mutations: MutationTree<IEditorState> = {
     updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
     // state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
   },
-  SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
-    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
-  },
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
     state.pages[updateInfo.pageIndex].backgroundImage.posY = updateInfo.imagePos.y
