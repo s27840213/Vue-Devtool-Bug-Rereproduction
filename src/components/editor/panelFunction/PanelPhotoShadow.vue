@@ -87,7 +87,7 @@ import { ColorEventType, FunctionPanelType } from '@/store/types'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IShadowEffects, ShadowEffectType } from '@/interfaces/imgShadow'
 import { mapActions, mapGetters } from 'vuex'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
@@ -165,7 +165,7 @@ export default Vue.extend({
     onEffectClick(effectName: ShadowEffectType): void {
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
       if (!alreadySetEffect) {
-        const data = imageShadowUtils.getLocalEffectAttrs(effectName) || imageShadowUtils.getDefaultEffect(effectName)
+        const data = imageShadowUtils.getLocalEffectAttrs(effectName) || (imageShadowUtils.getDefaultEffect(effectName) as any)[effectName]
         imageShadowUtils.setEffect(effectName, { [effectName]: data })
       } else {
         imageShadowUtils.setEffect(effectName, {})

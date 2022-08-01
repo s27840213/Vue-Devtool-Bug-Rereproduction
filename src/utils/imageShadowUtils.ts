@@ -285,7 +285,6 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-        this.storeEffectsAttrs(config)
         cb && cb()
       }
     })
@@ -418,7 +417,6 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-        this.storeEffectsAttrs(config)
         cb && cb()
         setMark('imageMatched', 3)
         logMark('imageMatched', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
@@ -576,7 +574,6 @@ class ImageShadowUtils {
             timeout && this.setIsProcess(layerInfo, false)
           }
           this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-          this.storeEffectsAttrs(config)
           cb && cb()
         }
       })
@@ -633,18 +630,6 @@ class ImageShadowUtils {
       data[width * 4 - 1] !== 255 ||
       data[data.length - 1] !== 255 ||
       data[data.length - width * 4 + 3] !== 255
-    // const data = ctx.getImageData(0, 0, width, height).data
-    //   .reduce((arr, val, i) => {
-    //     if (i % 4 === 0) {
-    //       arr.push([val])
-    //     } else {
-    //       arr[arr.length - 1].push(val)
-    //     }
-    //     return arr
-    //   }, [] as Array<Array<number>>)
-
-    // const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
-    // return pivots.some(p => p[3] !== 255)
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {
@@ -705,6 +690,7 @@ class ImageShadowUtils {
         ...effects,
         ...attrs
       })
+      this.storeEffectsAttrs(layer)
     }
   }
 
