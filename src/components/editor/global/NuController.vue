@@ -696,7 +696,7 @@ export default Vue.extend({
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
-      ImageUtils.setImgControlDefault(false)
+      // ImageUtils.setImgControlDefault(false)
 
       /**
        * @Note - in Mobile version, we can't select the layer directly, we should make it active first

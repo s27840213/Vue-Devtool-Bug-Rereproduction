@@ -36,11 +36,8 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
-<<<<<<< HEAD
 import i18n from '@/i18n'
-=======
 import backgroundUtils from '@/utils/backgroundUtils'
->>>>>>> e906fab134273487b1c974e40ee4ad32d87cda13
 
 export default Vue.extend({
   components: {
@@ -75,11 +72,8 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
-<<<<<<< HEAD
-      isHandleShadow: 'shadow/isHandling'
-=======
+      isHandleShadow: 'shadow/isHandling',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode'
->>>>>>> e906fab134273487b1c974e40ee4ad32d87cda13
     }),
     stepCount(): number {
       return stepsUtils.steps.length

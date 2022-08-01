@@ -196,14 +196,9 @@ export default Vue.extend({
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', disabled: this.currSelectedInfo.types.has(LayerType.frame) },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-<<<<<<< HEAD
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', disabled: true },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
-=======
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' },
         { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
->>>>>>> e906fab134273487b1c974e40ee4ad32d87cda13
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
