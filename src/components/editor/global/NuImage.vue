@@ -131,11 +131,11 @@ export default Vue.extend({
             isTransparent && this.redrawShadow()
           }
         }
+        img.onerror = (e) => {
+          logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
+        }
         const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
         img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-        if (!isFloatingEffect) {
-          imageShadowUtils.setHandleId(this.id)
-        }
       } else {
         stepsUtils.record()
       }
@@ -413,7 +413,6 @@ export default Vue.extend({
         }
       })()
       return isCurrShadowEffectApplied && isHandling
-      // return isCurrShadowEffectApplied && (isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
