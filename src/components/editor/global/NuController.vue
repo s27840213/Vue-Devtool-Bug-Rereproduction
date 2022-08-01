@@ -571,17 +571,17 @@ export default Vue.extend({
       if (type === 'control-point') {
         zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
       }
-      if (isFrame) {
+      if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
         zindex = (this.layerIndex + 1) * 1000
-      }
-      if (this.getLayerType === 'tmp') {
+      } else if (isFrame) {
+        zindex = (this.layerIndex + 1) * 1000
+      } else if (this.getLayerType === LayerType.frame) {
         /**
-         * @Todo - find the reason why this been set to certain value istead of 0
+         * @Todo - find the reason why this been set to certain value instead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
         zindex = (this.layerIndex + 1) * 1000
-      }
-      if (this.getLayerType === 'text' && this.isActive) {
+      } else if (this.getLayerType === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
       return (zindex ?? (this.config.styles.zindex + 1)) + offset
@@ -657,6 +657,7 @@ export default Vue.extend({
       const eventType = eventUtils.getEventType(event)
       /**
        * used for frame layer for entering detection
+       * This is used for moving image to replace frame element
        */
       const body = (event.target as HTMLElement)
       body.releasePointerCapture((event as PointerEvent).pointerId)
@@ -1881,13 +1882,17 @@ export default Vue.extend({
       if (!this.isHandleShadow) {
         if (this.currSubSelectedInfo.index !== -1) {
           for (let idx = 0; idx < layers.length; idx++) {
-            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+            if (idx !== targetIndex) {
+              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+            }
             if (this.currSubSelectedInfo.type === 'image') {
               updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
             }
           }
         }
-        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+        if (!this.config.layers[targetIndex].active) {
+          updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+        }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
     },

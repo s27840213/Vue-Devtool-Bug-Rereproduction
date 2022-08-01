@@ -73,7 +73,7 @@ class EventUtils {
     this.eventHash = {}
   }
 
-  on(type: string, callback: (...argu: Array<any>) => void) {
+  on(type: string, callback: (...args: Array<any>) => void) {
     this.off(type)
     this.event.on(type, callback)
     this.eventHash[type] = callback
