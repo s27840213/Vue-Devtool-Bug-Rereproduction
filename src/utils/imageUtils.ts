@@ -239,7 +239,6 @@ class ImageUtils {
   }
 
   setImgControlDefault(deselect = true) {
-    console.warn('default img')
     const { pageIndex, layerIndex, getCurrLayer: currLayer } = LayerUtils
     if (currLayer) {
       switch (currLayer.type) {

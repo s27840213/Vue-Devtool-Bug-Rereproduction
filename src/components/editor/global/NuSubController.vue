@@ -336,6 +336,7 @@ export default Vue.extend({
                   console.log(this.config.imgControl)
                   break
               }
+              eventUtils.emit(PanelEvent.switchTab, 'crop')
             }
             this.dblTabsFlag = true
           }

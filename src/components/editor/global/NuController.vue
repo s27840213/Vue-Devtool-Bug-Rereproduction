@@ -672,6 +672,7 @@ export default Vue.extend({
              */
             if (this.getLayerType === LayerType.image) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+              eventUtils.emit(PanelEvent.switchTab, 'crop')
             }
             this.dblTabsFlag = true
           }
