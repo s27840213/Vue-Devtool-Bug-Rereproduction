@@ -315,6 +315,13 @@ class GeneralUtils {
     if (str.length === 0) return str
     return str[0].toUpperCase() + str.substring(1).toLowerCase()
   }
+
+  capitalizeFirstWord(str: string) {
+    const words = str.split(' ').map(w => w.toLowerCase())
+    const first = words[0]
+    words[0] = first[0].toUpperCase() + first.substring(1)
+    return words.join(' ')
+  }
 }
 
 const generalUtils = new GeneralUtils()

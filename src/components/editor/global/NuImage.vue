@@ -704,7 +704,12 @@ export default Vue.extend({
     handleNewShadowEffect(clearShadowSrc = true) {
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
-        !canvas && console.warn('the canvas is undefined')
+        if (!canvas) {
+          imageShadowUtils.setIsProcess(this.layerInfo, false)
+          imageShadowUtils.setProcessId()
+          imageShadowUtils.setHandleId()
+          console.warn('the canvas is undefined')
+        }
         return
       }
       clearShadowSrc && this.clearShadowSrc()
@@ -753,7 +758,6 @@ export default Vue.extend({
           }
           const img = shadowBuff.canvasShadowImg.shadow as HTMLImageElement || new Image()
           imageShadowUtils.drawingInit(canvas, this.$refs.img as HTMLImageElement, this.config, params)
-          // if (shadowBuff.canvasShadowImg.shadow && shadowBuff.canvasShadowImg.shadow.src === this.src) {
           if (shadowBuff.canvasShadowImg.shadow && !imageShadowUtils.inUploadProcess) {
             imageShadowUtils.drawShadow(canvasList, img, this.config, params)
           } else {

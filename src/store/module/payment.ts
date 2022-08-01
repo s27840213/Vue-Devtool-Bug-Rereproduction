@@ -7,6 +7,7 @@ import paymentApi from '@/apis/payment'
 import generalUtils from '@/utils/generalUtils'
 import gtmUtils from '@/utils/gtmUtils'
 import fbPixelUtils from '@/utils/fbPixelUtils'
+import * as type from '@/interfaces/payment'
 
 interface IPaymentState {
   isLoading: boolean
@@ -14,7 +15,7 @@ interface IPaymentState {
   templateImg: string
   // Constant
   status: string
-  plans: Record<string, Record<string, Record<string, string> | string>>
+  plans: Record<string, type.IPlan>
   stripeClientSecret: string
   prime: string
   isPro: boolean
@@ -37,26 +38,16 @@ interface IPaymentState {
     issuer: string
     last4: string
     date: string
-  }
+  },
+  coupon: {
+    input: string
+    msg: string
+    status: string
+    discount: number // Amonut of money user save.
+    paymentPaidDate: string
+  },
   // nextBillingHistoryIndex: number
-  billingHistory: {
-    date: string
-    description: string
-    price: number
-    success: boolean
-    payType: string
-    url: string
-    id: string
-    name: string
-    company: string
-    address: string
-    email: string
-    items: [{
-      description: string
-      date: string
-      price: string
-    }]
-  }[]
+  billingHistory: Array<type.IBillingHistory>
   // User input
   planSelected: string
   periodUi: string
@@ -105,6 +96,13 @@ const IPayType = {
   2: 'stripe'
 }
 
+const ICouponError = [
+  'INVALID_COUPON',
+  'ALREADY_USED',
+  'NOT_TRIAL',
+  'NOT_SUBSCRIBED'
+]
+
 function getStatus(isPro: number, isCancelingPro: number, cardStatus: number) {
   if (!isPro && !isCancelingPro && cardStatus === 2) return '-1'
   else if (!isPro && !isCancelingPro && cardStatus === 0) return 'Fail'
@@ -142,12 +140,12 @@ const getDefaultState = (): IPaymentState => ({
       monthly: {
         original: '',
         now: '',
-        nextPaid: ''
+        nextPaid: 0
       },
       yearly: {
         original: '',
         now: '',
-        nextPaid: ''
+        nextPaid: 0
       }
     }
   },
@@ -175,6 +173,13 @@ const getDefaultState = (): IPaymentState => ({
     issuer: '',
     last4: '',
     date: ''
+  },
+  coupon: {
+    input: '',
+    msg: '',
+    status: 'input',
+    discount: 0,
+    paymentPaidDate: ''
   },
   // nextBillingHistoryIndex: 0,
   billingHistory: [],
@@ -225,6 +230,15 @@ function isLegalGUI(GUI: string) { // Government Uniform Invoice, 統編
     : GUIsum % divisor === 0
 }
 
+function string2Date(time: string) {
+  return new Date(time)
+    .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+}
+
 const actions: ActionTree<IPaymentState, unknown> = {
   async getPrice({ commit }, country: string) {
     if (country === '') {
@@ -237,7 +251,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
       commit('SET_state', {
         planSelected: res[0].plan_id,
         trialDay: response.data.trial_day,
-        plans: res.reduce((acc: Record<string, Record<string, string | number>>, item: Record<string, string | number>) => ({
+        plans: res.reduce((acc, item) => ({
           ...acc,
           [item.plan_id]: {
             name: item.plan_id,
@@ -252,7 +266,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
               nextPaid: item.price_bundle_discount
             }
           }
-        }), {})
+        }), {}) as type.IPlan
       })
     })
   },
@@ -303,7 +317,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
     return paymentApi.billingHistory(0/* state.nextBillingHistoryIndex */).then((response) => {
       commit('SET_state', {
         // nextBillingHistoryIndex: response.data.next_page,
-        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item: Record<string, string | number>) => {
+        billingHistory: /* state.billingHistory.concat( */response.data.data.map((item: type.IDataBillingInfoHistory) => {
           const date = new Date(item.create_time).toLocaleDateString('en', {
             year: 'numeric',
             month: 'long',
@@ -321,6 +335,7 @@ const actions: ActionTree<IPaymentState, unknown> = {
             company: item.company,
             address: item.country !== 'us' ? item.address_line1 : `${item.address_line1}${item.address_line2 ? `, ${item.address_line2}` : ''}\n${item.address_city}, ${item.address_state} ${item.postal_code} US`,
             email: item.email,
+            couponCentent: item.coupon_content,
             items: [{
               description: item.title,
               date: date,
@@ -406,7 +421,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
       prime: state.prime,
-      email: state.billingInfo.email
+      email: state.billingInfo.email,
+      coupon: state.coupon.input
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       recordThePlanToGTM(state.trialStatus, getters.getIsBundle)
@@ -427,7 +443,8 @@ const actions: ActionTree<IPaymentState, unknown> = {
       country: state.userCountryUi,
       plan_id: state.planSelected,
       is_bundle: Number(state.periodUi === 'yearly'),
-      email: state.billingInfo.email
+      email: state.billingInfo.email,
+      coupon: state.coupon.input
     }).then(({ data }) => {
       if (data.flag) throw Error(data.msg)
       recordThePlanToGTM(state.trialStatus, getters.getIsBundle)
@@ -528,6 +545,39 @@ const actions: ActionTree<IPaymentState, unknown> = {
     }
     paymentApi.calcUserAsset(procId)
     paymentApi.calcDone(procId, callback)
+  },
+  verifyCoupon({ commit }) {
+    commit('SET_coupon', {
+      msg: '',
+      status: 'loading'
+    })
+    paymentApi.verifyCoupon(state.coupon.input).then(({ data }) => {
+      commit('SET_coupon', {
+        msg: data.flag ? i18n.t('NN0698') : data.msg,
+        status: data.flag ? 'error' : 'accept'
+      })
+    })
+  },
+  applyCoupon({ commit }) {
+    if (state.coupon.status !== 'accept') return
+    paymentApi.applyCoupon(
+      state.coupon.input,
+      state.planSelected,
+      Number(state.periodUi === 'yearly')
+    ).then(({ data }) => {
+      commit('SET_coupon', {
+        discount: data.price_original - data.price,
+        paymentPaidDate: string2Date(data.charge_time)
+      })
+    }).catch(msg => Vue.notify({ group: 'error', text: msg }))
+  },
+  resetCouponResult({ commit }) {
+    commit('SET_coupon', {
+      msg: '',
+      status: 'input',
+      discount: 0,
+      paymentPaidDate: ''
+    })
   }
 }
 
@@ -538,12 +588,7 @@ const mutations: MutationTree<IPaymentState> = {
     const keys = Object.keys(newState) as Array<keyof IPaymentState>
     keys.forEach(key => {
       if (['paymentPaidDate', 'myPaidDate', 'switchPaidDate'].includes(key) && newState[key]) {
-        (state[key] as any) = new Date(newState[key] as string)
-          .toLocaleDateString(i18n.locale === 'us' ? 'en' : 'zh', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
+        (state[key] as any) = string2Date(newState[key] as string)
       } else if (key in state) {
         (state[key] as any) = newState[key]
       }
@@ -569,11 +614,17 @@ const mutations: MutationTree<IPaymentState> = {
   },
   SET_prime(state: IPaymentState, prime) {
     state.prime = prime
+  },
+  SET_coupon(state: IPaymentState, data: Record<string, string>) {
+    Object.assign(state.coupon, data)
   }
 }
 
 const getters: GetterTree<IPaymentState, unknown> = {
   getField,
+  getStatus(): string {
+    return state.status
+  },
   getDiskPercent(): number {
     return state.usage.diskUsed / state.usage.diskTotal
   },
@@ -588,6 +639,9 @@ const getters: GetterTree<IPaymentState, unknown> = {
   },
   getIsPro(state) {
     return state.isPro
+  },
+  getPaidDate(state) {
+    return state.coupon.paymentPaidDate || state.paymentPaidDate
   }
 }
 

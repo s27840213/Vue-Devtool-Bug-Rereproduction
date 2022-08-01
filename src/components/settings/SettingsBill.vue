@@ -10,9 +10,11 @@
       span {{$t('NN0617')}}
       span {{$t('NN0618')}}
       template(v-for="his, idx in historys")
-        span {{his.date}}
-        span {{his.description}}
-        span {{his.price}}
+        div {{his.date}}
+        div(class="bill-table-description")
+          span {{his.description}}
+          span(class="body-XS text-gray-3") {{his.couponCentent}}
+        div {{his.price}}
         div(v-if="!his.success" class="text-red")
           span {{$t('NN0620')}}
           svg-icon(iconName="error" iconWidth="24px" iconColor="red")
@@ -53,6 +55,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import * as type from '@/interfaces/payment'
 // import ObserverSentinel from '@/components/ObserverSentinel.vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -73,7 +76,7 @@ export default Vue.extend({
       historys: 'billingHistory',
       isLoading: 'isLoading'
     }),
-    curInvoice(): Record<string, string | Array<Record<string, string>>> {
+    curInvoice(): type.IBillingHistory {
       return this.historys[this.hisIndex]
     },
     customerAddr(): string {
@@ -86,8 +89,8 @@ export default Vue.extend({
         .join('\n')
     },
     totalPrice(): number {
-      return (this.curInvoice.items as Array<Record<string, string>>)
-        .reduce((acc: number, cur: Record<string, unknown>) => {
+      return this.curInvoice.items
+        .reduce((acc, cur) => {
           return acc + (cur.price as number)
         }, 0)
     }
@@ -102,10 +105,10 @@ export default Vue.extend({
     ...mapMutations({
       setIsLoading: 'payment/SET_isLoading'
     }),
-    canDownloadInvoice(his: Record<string, string>): boolean {
+    canDownloadInvoice(his: type.IBillingHistory): boolean {
       return Boolean((his.payType === 'tappay' && his.url) || his.payType === 'stripe')
     },
-    async pdf(index: number, his: Record<string, string>) {
+    async pdf(index: number, his: type.IBillingHistory) {
       if (his.payType === 'tappay') {
         location.href = his.url
         return
@@ -141,10 +144,15 @@ export default Vue.extend({
   &-table {
     display: grid;
     grid-template-columns: 5fr 5fr 5fr 3fr;
+    align-items: center;
+    &-description {
+      display: flex;
+      flex-direction: column;
+    }
     > span {
       height: 45px;
     }
-    > span:nth-child(4n + 1) {
+    > span:nth-child(4n + 1), div:nth-child(4n + 1) {
       text-align: left;
     }
     > span:nth-child(-n + 4) {

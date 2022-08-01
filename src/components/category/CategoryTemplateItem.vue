@@ -128,18 +128,17 @@ export default Vue.extend({
           this.$t('NN0695') as string,
           [`${this.$t('NN0209', { tsize: `${width}x${height}`, psize: `${currPage.width}x${currPage.height}` })}`],
           {
-            msg: `${this.$t('NN0208')}`,
-            style: { width: btnWidth, height: '32px' },
-            action: cb
-          },
-          {
             msg: `${this.$t('NN0021')}`,
-            class: 'border-blue-1 btn-light-mid',
-            style: { width: btnWidth, height: '32px' },
+            class: 'btn-light-mid',
+            style: { border: '1px solid #4EABE6' },
             action: () => {
               const resize = { width: currPage.width, height: currPage.height }
               cb(resize)
             }
+          },
+          {
+            msg: `${this.$t('NN0208')}`,
+            action: cb
           }
         )
       } else {
