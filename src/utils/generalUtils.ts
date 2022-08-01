@@ -38,6 +38,7 @@ class GeneralUtils {
     const scrollCenterY = (2 * el.scrollTop + el.clientHeight)
     const oldScrollWidth = el.scrollWidth
     const oldScrollHeight = el.scrollHeight
+
     Vue.nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)

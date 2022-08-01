@@ -154,7 +154,6 @@ import NuHeader from '@/components/NuHeader.vue'
 import NuFooter from '@/components/NuFooter.vue'
 import HashtagCategoryRow from '@/components/templates/HashtagCategoryRow.vue'
 import TemplateWaterfall from '@/components/templates/TemplateWaterfall.vue'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IContentTemplate, ITemplate } from '@/interfaces/template'
 import { Itheme } from '@/interfaces/theme'
 import templateCenterUtils from '@/utils/templateCenterUtils'
@@ -171,8 +170,7 @@ export default Vue.extend({
     SearchBar,
     NuFooter,
     HashtagCategoryRow,
-    TemplateWaterfall,
-    ObserverSentinel
+    TemplateWaterfall
   },
   directives: {
     clickOutside: vClickOutside.directive

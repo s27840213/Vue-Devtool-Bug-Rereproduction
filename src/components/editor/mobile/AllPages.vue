@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="all-pages")
     template(v-for="(page, idx) in pages")
-        page-preview-page-wrapper(class="m-10 border-box" :index="idx" type="full" :config="page" :showMoreBtn="false")
+      page-preview-page-wrapper(class="m-10 border-box" :index="idx" type="full" :config="page" :showMoreBtn="false")
     div(class="all-pages--last pointer border-box"
       @click="addPage()")
       div
@@ -21,6 +21,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import generalUtils from '@/utils/generalUtils'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default Vue.extend({
   data() {
@@ -30,6 +31,7 @@ export default Vue.extend({
   },
   components: {
     PagePreviewPageWrapper: () => import('@/components/editor/pagePreview/PagePreviewPageWrapper.vue'),
+    ObserverSentinel,
     PagePreviewPlus
   },
   computed: {

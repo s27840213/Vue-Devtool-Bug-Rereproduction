@@ -631,10 +631,10 @@ class ImageShadowUtils {
     if (layerInfo) {
       ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
     }
-
     const layer = subLayerIdx !== -1
       ? (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
       : layerUtils.getLayer(pageIndex, layerIndex) as IImage
+
     if (layer.type === LayerType.image) {
       const { shadow, width, height } = layer.styles
       const { effects } = shadow

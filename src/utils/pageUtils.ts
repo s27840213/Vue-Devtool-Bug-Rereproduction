@@ -10,6 +10,7 @@ import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
+import { throttle } from 'lodash'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -263,7 +264,9 @@ class PageUtils {
     store.commit('SET_pages', currentPagesTmp)
   }
 
-  findCentralPageIndexInfo(preventFocus = false) {
+  findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
+
+  private findCentralPageIndexInfoHandler(preventFocus = false) {
     // for mobile version
     if (generalUtils.isTouchDevice()) {
       store.commit('SET_middlemostPageIndex', this.currCardIndex)
@@ -362,6 +365,7 @@ class PageUtils {
     // Calculate and do resize
     const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
     const newRatio = Math.round(this.scaleRatio * resizeRatio)
+
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {

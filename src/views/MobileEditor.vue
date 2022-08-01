@@ -6,12 +6,11 @@
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
-        mobile-editor-view(v-if="!inAllPagesMode"
-          :currActivePanel="currActivePanel"
-          :isConfigPanelOpen="isConfigPanelOpen"
-          :inAllPagesMode="inAllPagesMode")
-        div(v-else class="mobile-editor__page-preview")
-          all-pages
+        keep-alive
+          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+            :currActivePanel="currActivePanel"
+            :isConfigPanelOpen="isConfigPanelOpen"
+            :inAllPagesMode="inAllPagesMode")
       transition(name="panel-up"
                 @after-enter="afterEnter"
                 @after-leave="afterLeave")
