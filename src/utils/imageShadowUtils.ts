@@ -664,9 +664,16 @@ class ImageShadowUtils {
       ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
     }
 
-    const layer = subLayerIdx !== -1
-      ? (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
-      : layerUtils.getLayer(pageIndex, layerIndex) as IImage
+    let _layer = layerUtils.getLayer(pageIndex, layerIndex)
+    if (subLayerIdx === -1) {
+      if (_layer.type === LayerType.group) {
+        _layer = (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
+      } else if (_layer.type === LayerType.frame) {
+        return
+      }
+    }
+    const layer = _layer as IImage
+
     if (layer.type === LayerType.image) {
       const { shadow, width, height } = layer.styles
       const { effects } = shadow
