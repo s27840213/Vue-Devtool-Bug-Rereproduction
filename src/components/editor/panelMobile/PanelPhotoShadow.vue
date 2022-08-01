@@ -108,6 +108,7 @@ export default Vue.extend({
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
+      this.$emit('fitPage')
     },
     handleEffectUpdate(value: string, name: string): void {
       imageShadowPanelUtils.handleEffectUpdate(name, value)
@@ -193,7 +194,7 @@ export default Vue.extend({
   }
 
   &__attrs {
-    transition: max-height 1s ease-out;
+    // transition: max-height 1s ease-out;
     display: flex;
     flex-direction: column;
     row-gap: 5px;

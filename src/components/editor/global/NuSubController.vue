@@ -8,8 +8,8 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @dragenter="onDragEnter($event)"
-            @pointerdown="onMousedown($event)"
-            @click.left.stop="onClick")
+            @pointerdown="onMousedown($event)")
+          //- @click.left.stop="onClickEvent($event)"
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
@@ -103,7 +103,8 @@ export default Vue.extend({
         srcObj: { type: string, assetId: string | number, userId: string }
       },
       dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
-      isPrimaryActive: false
+      isPrimaryActive: false,
+      dblTabsFlag: false
     }
   },
   mounted() {
@@ -187,6 +188,9 @@ export default Vue.extend({
     }
   },
   watch: {
+    'config.imgControl'(val) {
+      console.warn(val)
+    },
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
@@ -305,18 +309,52 @@ export default Vue.extend({
         transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
       }
     },
-    onMousedown(e: MouseEvent) {
-      if (e.button !== 0) return
-      if (this.isProcessShadow) {
-        return
+    disableTouchEvent(e: TouchEvent) {
+      if (this.isTouchDevice) {
+        e.preventDefault()
+        e.stopPropagation()
       }
+    },
+    onMousedown(e: PointerEvent) {
+      if (e.button !== 0) return
+      const body = this.$refs.body as HTMLElement
+      body.addEventListener('touchstart', this.disableTouchEvent)
+      if (!this.dblTabsFlag && this.isActive) {
+        const touchtime = new Date().getTime()
+        const interval = 500
+        const doubleTap = (e: PointerEvent) => {
+          e.preventDefault()
+          if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+            /**
+             * This is the dbl-click callback block
+             */
+            if (this.getLayerType === LayerType.image) {
+              switch (this.type) {
+                case LayerType.group:
+                  LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
+                  break
+                case LayerType.frame:
+                  FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { imgControl: true })
+                  break
+              }
+              eventUtils.emit(PanelEvent.switchTab, 'crop')
+            }
+            this.dblTabsFlag = true
+          }
+        }
+        body.addEventListener('pointerdown', doubleTap)
+        setTimeout(() => {
+          body.removeEventListener('pointerdown', doubleTap)
+          this.dblTabsFlag = false
+        }, interval)
+      }
+
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
         groupUtils.deselect()
         groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
         LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
         eventUtils.emit(PanelEvent.showPhotoShadow)
       }
-      imageUtils.setImgControlDefault(false)
 
       this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
@@ -345,33 +383,19 @@ export default Vue.extend({
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         }
+        // else {
+        //   LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
+        //   if (this.config.contentEditable) {
+        //     tiptapUtils.focus({ scrollIntoView: false })
+        //   }
+        // }
         if (this.config.contentEditable) {
           tiptapUtils.focus({ scrollIntoView: false })
         }
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
-
-      // if (!this.isPrimaryActive || this.isMoved) return
-      // if (this.type === 'tmp') {
-      //   if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-      //     groupUtils.deselectTargetLayer(this.layerIndex)
-      //   }
-      //   return
-      // }
-      // colorUtils.event.emit('closeColorPanel', false)
-      // this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
-    },
-    onClick(e: MouseEvent) {
-      if (!this.isPrimaryActive || this.isMoved) return
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
-      colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
+      this.onClickEvent(e)
     },
     positionStyles() {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
@@ -488,6 +512,18 @@ export default Vue.extend({
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
+    },
+    onClickEvent(e: MouseEvent) {
+      if (!this.isPrimaryActive) return
+      // if (!this.isPrimaryActive || this.isMoved) return
+      if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
+        return
+      }
+      colorUtils.event.emit('closeColorPanel', false)
+      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onDblClick() {
       if (this.type === 'tmp') {

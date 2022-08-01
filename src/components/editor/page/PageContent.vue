@@ -169,7 +169,7 @@ export default Vue.extend({
     },
     pageClickHandler(e: PointerEvent): void {
       groupUtils.deselect()
-      imageUtils.setImgControlDefault(false)
+      // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()

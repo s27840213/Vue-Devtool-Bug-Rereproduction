@@ -86,7 +86,8 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender) {
+    const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
+    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
 
       if (typeof this.config.styles.shadow.isTransparent === 'undefined') {

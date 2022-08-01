@@ -46,7 +46,8 @@
           class="border-box p-2"
           v-bind="dynamicBindProps"
           v-on="dynamicBindMethod"
-          @close="closeMobilePanel")
+          @close="closeMobilePanel"
+          @fitPage="fitPage")
     transition(name="panel-up")
       mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
         :currActivePanel="currActiveSubPanel"
@@ -580,6 +581,11 @@ export default Vue.extend({
     },
     switchInnerTab(panelIndex: number) {
       this.innerTab = this.innerTabs.key[panelIndex]
+    },
+    fitPage() {
+      this.$nextTick(() => {
+        pageUtils.fitPage()
+      })
     }
   }
 })

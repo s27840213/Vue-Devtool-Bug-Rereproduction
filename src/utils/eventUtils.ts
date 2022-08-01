@@ -15,12 +15,13 @@ const mobileHash = {
 
 export enum PanelEvent {
   showPhotoShadow = 'showPhotoShadow',
-  showMobilePhotoShadow = 'showMobilePhotoShadow'
+  switchTab = 'switchTab'
 }
 
 export enum ImageEvent {
   redrawCanvasShadow = 'redrawCanvasShadow'
 }
+
 class EventUtils {
   checkIsMultiTouch(event: MouseEvent | TouchEvent | PointerEvent) {
     switch (eventUtils.getEventType(event)) {
@@ -72,15 +73,15 @@ class EventUtils {
     this.eventHash = {}
   }
 
-  on(type: string, callback: (type?: string) => void) {
+  on(type: string, callback: (...args: Array<any>) => void) {
     this.off(type)
     this.event.on(type, callback)
     this.eventHash[type] = callback
   }
 
-  emit(type: string, param: any = undefined) {
+  emit(type: string, ...param: Array<any>) {
     if (this.eventHash[type]) {
-      this.event.emit(type, param)
+      this.event.emit(type, ...param)
     }
   }
 
