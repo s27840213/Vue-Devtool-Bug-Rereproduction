@@ -143,7 +143,7 @@ export default new class ImageShadowPanelUtils {
       const img = new Image()
       let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config.srcObj, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600) +
+      img.src = imageUtils.getSrc(config.srcObj, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve, reject) => {
         img.onload = async () => {
@@ -153,6 +153,11 @@ export default new class ImageShadowPanelUtils {
               img.onload = () => {
                 MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
                 resolve()
+              }
+              img.onerror = () => {
+                const log = 'error: isSVG img loading error, src: ' + img.src
+                logUtils.setLog(log)
+                console.log(log)
               }
             })
           } else {
