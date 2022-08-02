@@ -1,11 +1,11 @@
 <template lang="pug">
 div(class="page-preview")
-    template(v-for="(page, idx) in pages")
+    template(v-for="(page, idx) in getPages")
         page-preview-plus(:index="idx" last=false)
-        page-preview-page-wrapper(:index="idx" type="full" :config="page")
+        page-preview-page-wrapper(:index="idx" type="full" :config="wrappedPage(page)")
         page-preview-plus(v-if="(idx+1) % getPagesPerRow === 0"
                         :index="idx+1" last=false)
-    page-preview-plus(:index="pages.length" last=true)
+    page-preview-plus(:index="getPages.length" last=true)
     div(class="page-preview-page-last pointer"
       @click="addPage()")
       svg-icon(class="pb-5"
@@ -21,7 +21,6 @@ import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue
 import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
 import stepsUtils from '@/utils/stepsUtils'
-import generalUtils from '@/utils/generalUtils'
 import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
@@ -38,12 +37,7 @@ export default Vue.extend({
     ...mapGetters({
       getPages: 'getPages',
       getPagesPerRow: 'page/getPagesPerRow'
-    }),
-    pages(): IPage[] {
-      const pages = generalUtils.deepCopy(this.getPages)
-      pageUtils.setAutoResizeNeededForPages(pages, false)
-      return pages
-    }
+    })
   },
   mounted() {
     this.screenWidth = document.body.clientWidth - 130
@@ -61,6 +55,9 @@ export default Vue.extend({
     addPage() {
       this._addPage(pageUtils.newPage({}))
       stepsUtils.record()
+    },
+    wrappedPage(page: IPage) {
+      return { ...page, isAutoResizeNeeded: false }
     }
   }
 })

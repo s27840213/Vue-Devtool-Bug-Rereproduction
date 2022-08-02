@@ -581,14 +581,14 @@ export default Vue.extend({
                 replacedImg.crossOrigin = 'anonynous'
                 replacedImg.onload = () => {
                   const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-                  if (isTransparent) {
-                    const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
-                    imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
-                    imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
-                  }
+                  const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
+                  imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
+                  // if (isTransparent) {
+                  //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
+                  //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
+                  // }
                 }
-                const size = ['private', 'public', 'background', 'private-logo', 'public-logo'].includes(this.config.srcObj.type)
-                  ? 'tiny' : 100
+                const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
                 replacedImg.src = imageUtils.getSrc(this.config, size)
               }
               body.removeEventListener('dragleave', this.onDragLeave)
