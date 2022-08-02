@@ -78,7 +78,7 @@ export default Vue.extend({
       pageUtils.setPagesName(value)
     },
     gotoDesktop() { // TO-DELETE
-      this.$router.push(this.$router.currentRoute.path.replace('mobile-editor', 'editor'))
+      this.$router.push(this.$router.currentRoute.fullPath.replace('mobile-editor', 'editor'))
     }
   }
 })
