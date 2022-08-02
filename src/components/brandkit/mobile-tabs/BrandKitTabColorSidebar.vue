@@ -29,6 +29,10 @@ export default Vue.extend({
     maxheight: {
       default: window.innerHeight * 0.9,
       type: Number
+    },
+    settingmode: {
+      default: false,
+      type: Boolean
     }
   },
   components: {
