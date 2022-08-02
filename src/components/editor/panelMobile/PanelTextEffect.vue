@@ -193,6 +193,7 @@ export default Vue.extend({
     onEffectClick(effectName: string): void {
       textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
       stepsUtils.record()
+      this.$emit('fitPage')
     },
     handleEffectUpdate(value: number, name: string): void {
       const { currentEffect, fieldRange } = this
@@ -208,6 +209,7 @@ export default Vue.extend({
       textShapeUtils.setTextShape(shapeName)
       textPropUtils.updateTextPropsState()
       this.recordChange()
+      this.$emit('fitPage')
     },
     handleShapeStatus(focus: boolean): void {
       const { currentShape } = this

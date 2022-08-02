@@ -86,10 +86,11 @@ export default Vue.extend({
   },
   async created() {
     this.handleInitLoad()
-    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender) {
+    const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
+    if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
     }
-    if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
+    if (typeof this.config.styles.shadow.isTransparent === 'undefined' && !isPrimaryLayerFrame) {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
@@ -704,7 +705,12 @@ export default Vue.extend({
     handleNewShadowEffect(clearShadowSrc = true) {
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
-        !canvas && console.warn('the canvas is undefined')
+        if (!canvas) {
+          imageShadowUtils.setIsProcess(this.layerInfo, false)
+          imageShadowUtils.setProcessId()
+          imageShadowUtils.setHandleId()
+          console.warn('the canvas is undefined')
+        }
         return
       }
       clearShadowSrc && this.clearShadowSrc()
@@ -753,7 +759,6 @@ export default Vue.extend({
           }
           const img = shadowBuff.canvasShadowImg.shadow as HTMLImageElement || new Image()
           imageShadowUtils.drawingInit(canvas, this.$refs.img as HTMLImageElement, this.config, params)
-          // if (shadowBuff.canvasShadowImg.shadow && shadowBuff.canvasShadowImg.shadow.src === this.src) {
           if (shadowBuff.canvasShadowImg.shadow && !imageShadowUtils.inUploadProcess) {
             imageShadowUtils.drawShadow(canvasList, img, this.config, params)
           } else {

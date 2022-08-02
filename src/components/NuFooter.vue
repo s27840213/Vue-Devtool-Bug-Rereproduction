@@ -31,6 +31,7 @@
             :class="featureExpand[1] ? 'expand' : ''")
             a(:href="facebookPage") {{$t('NN0158')}}
             a(href="/templates") {{$t('NN0145')}}
+            span(class="pointer" @click="coupon()") {{$t('NN0697')}}
         div(class="nu-footer__feature-region")
           div(class="label-lg nu-footer__feature-title"
             @click="expandItems(2, !featureExpand[2])")
@@ -108,6 +109,7 @@ import { Itheme } from '@/interfaces/theme'
 import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
 import localeUtils, { ILocale } from '@/utils/localeUtils'
+import paymentUtils from '@/utils/paymentUtils'
 
 export default Vue.extend({
   props: {
@@ -179,6 +181,9 @@ export default Vue.extend({
     },
     getLocaleValue(text: string) {
       return this.localeOptions.find(x => x.name === text)?.code
+    },
+    coupon() {
+      paymentUtils.openPayment('step1-coupon')
     },
     switchUrl(locale: string) {
       switch (locale) {
@@ -297,9 +302,8 @@ export default Vue.extend({
         display: flex;
         flex-direction: column;
       }
-      > a,
-      div {
-        color: black;
+      > a, div, span {
+        color: setColor(gray-1);;
         text-decoration: none;
         text-align: left;
         @include layout-mobile {

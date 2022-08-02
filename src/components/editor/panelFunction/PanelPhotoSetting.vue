@@ -85,7 +85,7 @@ export default Vue.extend({
     document.addEventListener('mouseup', this.handleClick)
     eventUtils.on(PanelEvent.showPhotoShadow, (val) => {
       if (typeof val !== 'undefined') {
-        this.show = val
+        this.show = val as string
       } else {
         this.show = this.show === 'panel-photo-shadow' ? '' : 'panel-photo-shadow'
       }

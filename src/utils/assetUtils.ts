@@ -557,7 +557,6 @@ class AssetUtils {
           // Close MobilePanel and fit in
           if (generalUtils.isTouchDevice()) {
             editorUtils.setCloseMobilePanelFlag(true)
-            // Call fitPage at pageUtils.appendPagesTo
           }
         })
       })

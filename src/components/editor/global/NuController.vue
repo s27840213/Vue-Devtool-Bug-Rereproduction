@@ -81,6 +81,12 @@
             :style="Object.assign(end, {'cursor': 'pointer'})"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
+        //- div(v-for="(cornerRotater, index) in (!isLine) ? cornerRotaters(controlPoints.cornerRotaters) : []"
+        //-     class="control-point__corner-rotate scaler"
+        //-     :key="`corner-rotate-${index}`"
+        //-     :style="Object.assign(cornerRotater.styles, cursorStyles(cornerRotater.cursor, getLayerRotate))"
+        //-     @pointerdown.stop="rotateStart"
+        //-     @touchstart="disableTouchEvent")
         div(v-for="(scaler, index) in (!isLine) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
@@ -215,7 +221,8 @@ export default Vue.extend({
       movingByControlPoint: false,
       widthLimitSetDuringComposition: false,
       isMoved: false,
-      isDoingGestureAction: false
+      isDoingGestureAction: false,
+      dblTabsFlag: false
     }
   },
   mounted() {
@@ -487,13 +494,12 @@ export default Vue.extend({
       return resizers
     },
     scaler(scalers: any) {
-      // switch (this.config.type) {
-      //   case LayerType.image:
-      //     if (this.config.styles.shadow.currentEffect !== ShadowEffectType.none) {
-      //       return []
-      //     }
-      //     break
-      // }
+      const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth * this.scaleRatio < LIMIT
+      return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
+    },
+    cornerRotaters(scalers: any) {
       const LIMIT = (this.getLayerType === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth * this.scaleRatio < LIMIT
@@ -565,17 +571,17 @@ export default Vue.extend({
       if (type === 'control-point') {
         zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
       }
-      if (isFrame) {
+      if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
         zindex = (this.layerIndex + 1) * 1000
-      }
-      if (this.getLayerType === 'tmp') {
+      } else if (isFrame) {
+        zindex = (this.layerIndex + 1) * 1000
+      } else if (this.getLayerType === LayerType.frame) {
         /**
-         * @Todo - find the reason why this been set to certain value istead of 0
+         * @Todo - find the reason why this been set to certain value instead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
         zindex = (this.layerIndex + 1) * 1000
-      }
-      if (this.getLayerType === 'text' && this.isActive) {
+      } else if (this.getLayerType === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
       return (zindex ?? (this.config.styles.zindex + 1)) + offset
@@ -649,8 +655,35 @@ export default Vue.extend({
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)
+      /**
+       * used for frame layer for entering detection
+       * This is used for moving image to replace frame element
+       */
       const body = (event.target as HTMLElement)
       body.releasePointerCapture((event as PointerEvent).pointerId)
+
+      if (!this.dblTabsFlag && this.isActive) {
+        const touchtime = new Date().getTime()
+        const interval = 500
+        const doubleTap = (e: PointerEvent) => {
+          e.preventDefault()
+          if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+            /**
+             * This is the dbl-click callback block
+             */
+            if (this.getLayerType === LayerType.image) {
+              LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+              eventUtils.emit(PanelEvent.switchTab, 'crop')
+            }
+            this.dblTabsFlag = true
+          }
+        }
+        body.addEventListener('pointerdown', doubleTap)
+        setTimeout(() => {
+          body.removeEventListener('pointerdown', doubleTap)
+          this.dblTabsFlag = false
+        }, interval)
+      }
 
       if (eventType === 'pointer') {
         const pointerEvent = event as PointerEvent
@@ -665,7 +698,7 @@ export default Vue.extend({
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
-      ImageUtils.setImgControlDefault(false)
+      // ImageUtils.setImgControlDefault(false)
 
       /**
        * @Note - in Mobile version, we can't select the layer directly, we should make it active first
@@ -1563,19 +1596,22 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
-    cursorStyles(index: number, rotateAngle: number) {
+    cursorStyles(index: number | string, rotateAngle: number) {
       if (this.isControlling) return { cursor: 'initial' }
-
-      switch (this.getLayerType) {
-        case 'text':
-          if (this.config.styles.writingMode.includes('vertical')) index += 4
-          break
-        case 'shape':
-          if (this.config.scaleType === 3) index += 4
+      if (typeof index === 'number') {
+        switch (this.getLayerType) {
+          case 'text':
+            if (this.config.styles.writingMode.includes('vertical')) index += 4
+            break
+          case 'shape':
+            if (this.config.scaleType === 3) index += 4
+        }
+        const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
+          : (index + Math.ceil(rotateAngle / 45) + 8) % 8
+        return { cursor: this.controlPoints.cursors[cursorIndex] }
+      } else {
+        return { cursor: index }
       }
-      const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
-        : (index + Math.ceil(rotateAngle / 45) + 8) % 8
-      return { cursor: this.controlPoints.cursors[cursorIndex] }
     },
     setCursorStyle(cursor: string) {
       const layer = this.$el as HTMLElement
@@ -1846,17 +1882,22 @@ export default Vue.extend({
       if (!this.isHandleShadow) {
         if (this.currSubSelectedInfo.index !== -1) {
           for (let idx = 0; idx < layers.length; idx++) {
-            updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+            if (idx !== targetIndex) {
+              updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { active: false })
+            }
             if (this.currSubSelectedInfo.type === 'image') {
               updateSubLayerProps(this.pageIndex, this.layerIndex, idx, { imgControl: false })
             }
           }
         }
-        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+        if (!this.config.layers[targetIndex].active) {
+          updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
+        }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
     },
     dblSubController(targetIndex: number) {
+      console.log('dbl')
       if (this.isHandleShadow) {
         return
       }
@@ -2065,6 +2106,12 @@ export default Vue.extend({
   }
   &__move-bar {
     cursor: move;
+  }
+  &__corner-rotate {
+    background-color: none;
+    border: none;
+    pointer-events: auto;
+    position: absolute;
   }
 }
 

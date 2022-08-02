@@ -92,7 +92,6 @@ export default new class ImageShadowPanelUtils {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = _layerData ?? imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
-    console.log(layerData)
     if (layerData) {
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
@@ -102,11 +101,10 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setUploadProcess(true)
       imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
-      if (config.type !== LayerType.image) {
-        /** If the shadow effct has already got the img src, return */
-        return
-      }
-      if (!forceUpload && (this.checkIfSameEffect(config) && config.styles.shadow.srcState)) {
+      if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
+        /**
+         * Check if the state of the shadow is the same
+         */
         const { shadowSrcObj } = config.styles.shadow.srcState
         const layerInfo = {
           pageIndex: _pageIndex,
@@ -141,14 +139,13 @@ export default new class ImageShadowPanelUtils {
         layerId: primarylayerId || config.id || '',
         subLayerId: primarylayerId ? config.id || '' : ''
       })
-
       // Handle the params for drawing
       const img = new Image()
       let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
       img.src = imageUtils.getSrc(config.srcObj, ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type) ? 'larg' : 1600) +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      await new Promise<void>((resolve) => {
+      await new Promise<void>((resolve, reject) => {
         img.onload = async () => {
           const isSVG = await this.isSVG(img, config)
           if (isSVG) {
@@ -162,6 +159,12 @@ export default new class ImageShadowPanelUtils {
             MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
             resolve()
           }
+        }
+        img.onerror = (e) => {
+          const log = 'phase: img is svg check error, can not load img. ' + 'img.src: ' + img.src + 'error:' + e.toString()
+          logUtils.setLog(log)
+          console.log(log, e)
+          reject(e)
         }
       })
 
@@ -206,6 +209,7 @@ export default new class ImageShadowPanelUtils {
         case ShadowEffectType.none:
           return
         default:
+          logUtils.setLog('Error: effect type error: ' + config.styles.shadow.currentEffect)
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
       logUtils.setLog('phase: finish drawing')
@@ -230,8 +234,6 @@ export default new class ImageShadowPanelUtils {
         pollingCallback: (json: IUploadAssetResponse) => {
           logUtils.setLog('phase: finish uploading')
           const isAdmin = store.getters['user/isAdmin']
-          imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-          imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           const srcObj = {
             type: isAdmin ? 'public' : 'shadow-private',
             userId: json.data.team_id || '',
@@ -241,8 +243,6 @@ export default new class ImageShadowPanelUtils {
           const _height = config.styles.height / config.styles.scale
           const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
           const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
-          // console.log(updateCanvas.width, right, left)
-          // console.log(newWidth, newHeight)
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
@@ -304,11 +304,15 @@ export default new class ImageShadowPanelUtils {
             logUtils.setLog('error' + e.message)
           }).finally(() => {
             imageShadowUtils.clearLayerData()
+            imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
           })
         }
       })
     } else {
+      logUtils.setLog('layerData is undefined')
+      console.log('layerData is undefined')
       imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
     }
   }

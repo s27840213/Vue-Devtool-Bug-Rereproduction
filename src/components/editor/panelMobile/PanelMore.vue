@@ -23,8 +23,7 @@
     div(class="panel-more__item"
         @click="onLogoutClicked()")
         span(class="body-2 pointer") {{$tc('NN0167',2)}}
-    div(v-if="buildNumber"
-      class="body-2 panel-more__item")
+    div(class="body-2 panel-more__item" @click="gotoDesktop")
       span(class="text-gray-3") Version: {{buildNumber}}
 </template>
 
@@ -77,6 +76,9 @@ export default Vue.extend({
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
+    },
+    gotoDesktop() { // TO-DELETE
+      this.$router.push(this.$router.currentRoute.path.replace('mobile-editor', 'editor'))
     }
   }
 })

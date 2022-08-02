@@ -1,7 +1,7 @@
 <template lang="pug">
 div(class="popup-window")
   div(class="wrapper")
-    div(class="payment" v-click-outside="vcoConfig")
+    div(class="payment" v-click-outside="vcoConfig()")
       svg-icon(class="payment__close" iconName="close" iconWidth="32px"
               iconColor="gray-0" @click.native="closePopup()")
       div(class="payment-left")
@@ -15,7 +15,8 @@ div(class="popup-window")
         //- switch(view)
         div(class="payment-left-content")
           //- case step1 or switch1
-          template(v-if="['step1', 'switch1'].includes(view)")
+          template(v-if="['step1', 'switch1', 'step1-coupon'].includes(view)")
+            coupon-input(v-if="view === 'step1-coupon'" class="payment-left-content-coupon")
             div(v-for="p in periodInput" :isSelected="p.value === userPeriod"
                 class="payment-left-content-period" @click="setPeriod(p.value)")
               svg-icon(iconWidth="20px"
@@ -28,7 +29,7 @@ div(class="popup-window")
               span(v-if="p.value==='yearly'"
                   class="payment-left-content-period__off") {{$t('NN0549')}}
           //- case step2
-          PaymentField(v-if="view === 'step2'" @next="changeView('finish')")
+          PaymentField(v-if="['step2', 'step2-coupon'].includes(view)" @next="changeView('finish')")
           //- case switch2
           template(v-if="view === 'switch2'")
             card-info(:card="card")
@@ -72,10 +73,12 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { createHelpers } from 'vuex-map-fields'
 import vClickOutside from 'v-click-outside'
 import i18n from '@/i18n'
+import paymentUtils from '@/utils/paymentUtils'
 import PaymentField from '@/components/payment/PaymentField.vue'
 import RadioBtn from '@/components/global/RadioBtn.vue'
 import Animation from '@/components/Animation.vue'
 import CardInfo from '@/components/payment/CardInfo.vue'
+import CouponInput from '@/components/payment/CouponInput.vue'
 import paymentData from '@/utils/constantData'
 
 const { mapFields } = createHelpers({
@@ -89,19 +92,14 @@ export default Vue.extend({
     PaymentField,
     RadioBtn,
     Animation,
-    CardInfo
+    CardInfo,
+    CouponInput
   },
   directives: {
     clickOutside: vClickOutside.directive
   },
   data() {
     return {
-      vcoConfig: {
-        handler: () => { this.$emit('close') },
-        middleware: (event: MouseEvent) => {
-          return (event.target as HTMLElement).className === 'popup-window'
-        }
-      },
       // View variable
       view: '',
       currentStep: 0,
@@ -120,7 +118,10 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapGetters({ isBundle: 'payment/getIsBundle' }),
+    ...mapGetters({
+      isLogin: 'user/isLogin',
+      isBundle: 'payment/getIsBundle'
+    }),
     ...mapFields({ periodUi: 'periodUi' }),
     ...mapState('payment', {
       initView: 'initView',
@@ -141,7 +142,7 @@ export default Vue.extend({
         : this.periodUi
     },
     showPreStep(): boolean {
-      return ['step2', 'switch2'].includes(this.view)
+      return ['step2', 'step2-coupon', 'switch2'].includes(this.view)
     },
     showFeature(): boolean {
       return ['cancel1', 'brandkit', 'bgrm', 'pro-template', 'pro-object'].includes(this.view)
@@ -153,16 +154,25 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.changeView(this.initView)
+    if (!this.isLogin) {
+      this.$router.push({ name: 'Login', query: { redirect: this.$route.fullPath } })
+      this.closePopup()
+    } else if (this.initView === 'step1-coupon') {
+      paymentUtils.checkCoupon() ? this.changeView('step1-coupon') : this.closePopup()
+    } else {
+      this.changeView(this.initView)
+    }
   },
   methods: {
-    ...mapActions({
-      getBillingInfo: 'payment/getBillingInfo',
-      init: 'payment/init',
-      getSwitchPrice: 'payment/getSwitchPrice',
-      switch: 'payment/switch',
-      cancelApi: 'payment/cancel',
-      getPrice: 'payment/getPrice'
+    ...mapActions('payment', {
+      getBillingInfo: 'getBillingInfo',
+      init: 'init',
+      applyCoupon: 'applyCoupon',
+      resetCouponResult: 'resetCouponResult',
+      getSwitchPrice: 'getSwitchPrice',
+      switch: 'switch',
+      cancelApi: 'cancel',
+      getPrice: 'getPrice'
     }),
     getAd(name: string): string[] {
       switch (name) {
@@ -191,6 +201,22 @@ export default Vue.extend({
             func: () => this.changeView('step1')
           }]
           break
+        case 'step1-coupon':
+          this.getPrice(this.userCountryUi)
+          this.init()
+          this.currentStep = 1
+          this.totalStep = 2
+          this.title = i18n.t('NN0701') as string
+          this.description = i18n.t('NN0702') as string
+          this.buttons = [{
+            label: i18n.t('NN0550') as string,
+            func: () => {
+              this.applyCoupon()
+              this.changeView(name.replace('1', '2'))
+            }
+          }]
+          this.img = 'remover.jpg'
+          break
         case 'step1':
           this.getPrice(this.userCountryUi)
           this.init()
@@ -200,10 +226,13 @@ export default Vue.extend({
           this.description = (this.trialStatus === 'not used' ? i18n.t('NN0546') : i18n.t('NN0547')) as string
           this.buttons = [{
             label: i18n.t('NN0550') as string,
-            func: () => this.changeView('step2')
+            func: () => {
+              this.changeView(name.replace('1', '2'))
+            }
           }]
           this.img = 'remover.jpg'
           break
+        case 'step2-coupon':
         case 'step2':
           this.currentStep = 2
           this.title = i18n.t('NN0551') as string
@@ -223,7 +252,7 @@ export default Vue.extend({
           }]
           await this.getPrice(this.userCountryInfo)
           this.getSwitchPrice()
-          // A potential issue here: planId retury by getPrice may different from the planId user is subscribing,
+          // A potential issue here: planId return by getPrice may different from the planId user is subscribing,
           // it will let user cannot switch plan since they should switch in the same plan.
           break
         case 'switch2':
@@ -258,11 +287,19 @@ export default Vue.extend({
           break
       }
     },
+    vcoConfig() {
+      return {
+        handler: this.closePopup,
+        middleware: (event: MouseEvent) => {
+          return (event.target as HTMLElement).className === 'popup-window'
+        }
+      }
+    },
     setPeriod(value: string) {
-      if (this.view === 'step1') { this.periodUi = value }
+      if (this.view.includes('step1')) { this.periodUi = value }
     },
     preStep() {
-      if (this.view === 'step2') this.changeView('step1')
+      if (this.view.startsWith('step2')) this.changeView(this.view.replace('2', '1'))
       else if (this.view === 'switch2') this.changeView('switch1')
     },
     curPlan(period: string): string {
@@ -276,12 +313,19 @@ export default Vue.extend({
         this.closePopup
       ).catch(msg => Vue.notify({ group: 'error', text: msg }))
     },
-    closePopup() { this.$emit('close') }
+    closePopup() {
+      this.$emit('close')
+      this.resetCouponResult()
+    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+input {
+  @include default-input;
+}
+
 .wrapper {
   @include hide-scrollbar;
   &:hover {
@@ -371,6 +415,9 @@ export default Vue.extend({
   }
 }
 
+.payment-left-content-coupon {
+  margin: -8px 0 25px 0;
+}
 .payment-left-content-period {
   display: flex;
   align-items: center;
@@ -422,13 +469,7 @@ export default Vue.extend({
     margin-right: 15px;
   }
   &__other {
-    @include body-SM;
-    box-sizing: border-box;
-    height: 40px;
     margin-top: 10px;
-    padding: 10px;
-    border: 1px solid setColor(gray-4);
-    border-radius: 4px;
   }
 }
 

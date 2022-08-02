@@ -62,6 +62,10 @@ export default Vue.extend({
     isPagePreview: {
       type: Boolean,
       required: false
+    },
+    handleSequentially: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -83,10 +87,10 @@ export default Vue.extend({
   },
   mounted() {
     if (this.setLayersDone) {
-      this.loadLayerImg()
+      this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
     }
     if (this.config.isAutoResizeNeeded) {
-      this.handleFontLoading()
+      this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
     }
   },
   watch: {
@@ -94,12 +98,12 @@ export default Vue.extend({
       // When first page mounted, its layers is not ready,
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
-        this.loadLayerImg()
+        this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
       }
     },
     'config.isAutoResizeNeeded'(newVal) {
       if (newVal) {
-        this.handleFontLoading()
+        this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
       }
     }
   },
@@ -161,7 +165,7 @@ export default Vue.extend({
     },
     pageClickHandler(e: PointerEvent): void {
       groupUtils.deselect()
-      imageUtils.setImgControlDefault(false)
+      // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
@@ -193,7 +197,7 @@ export default Vue.extend({
         this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
     },
-    handleFontLoading() {
+    async handleFontLoading() {
       textUtils.untilFontLoadedForPage(this.config).then(() => {
         this.updatePageProps({
           pageIndex: this.pageIndex,
