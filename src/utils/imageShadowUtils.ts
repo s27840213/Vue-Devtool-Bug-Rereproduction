@@ -124,35 +124,31 @@ class ImageShadowUtils {
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
-    this.clearLayerData()
     const { canvasT } = this
-    const ctxT = canvasT.getContext('2d')
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
     }
-    if (ctxT) {
-      this._layerData = { config, pageId: params.pageId || pageUtils.currFocusPage.id }
-      const { layerInfo } = params || {}
-      if (layerInfo) {
-        const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
-        this._layerData.primarylayerId = primarylayerId
-        this.setProcessId({
-          pageId: pageUtils.currFocusPage.id,
-          layerId: primarylayerId || config.id || '',
-          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-        })
-        this.setHandleId({
-          pageId: pageUtils.currFocusPage.id,
-          layerId: primarylayerId || config.id || '',
-          subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-        })
-      }
-      if (params) {
-        this._layerData.options = {
-          ...this._layerData.options,
-          ...params
-        }
+    this._layerData = { config, pageId: params.pageId || pageUtils.currFocusPage.id }
+    const { layerInfo } = params || {}
+    if (layerInfo) {
+      const primarylayerId = layerUtils.getLayer(layerInfo.pageIndex, layerInfo.layerIndex).id
+      this._layerData.primarylayerId = primarylayerId
+      this.setProcessId({
+        pageId: pageUtils.currFocusPage.id,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      })
+      this.setHandleId({
+        pageId: pageUtils.currFocusPage.id,
+        layerId: primarylayerId || config.id || '',
+        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      })
+    }
+    if (params) {
+      this._layerData.options = {
+        ...this._layerData.options,
+        ...params
       }
     }
     if (this._draw) {
@@ -162,7 +158,14 @@ class ImageShadowUtils {
 
   async drawFloatingShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     const canvas = canvas_s[0] || undefined
-    if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) return
+    if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) {
+      if (canvas) {
+        logUtils.setLog('Error: drawFloatingShadow with wrong effect type:' + config.styles.shadow.currentEffect)
+      } else {
+        logUtils.setLog('Error: input canvas is undefined')
+      }
+      return
+    }
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
@@ -176,13 +179,17 @@ class ImageShadowUtils {
   }
 
   async floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    logUtils.setLog('canvas drawing: floatingHandler start:')
     const canvas = canvas_s[0] || undefined
     setMark('floating', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
     const ctxMaxSize = canvasMaxSize.getContext('2d')
 
-    if (!ctxT || !ctxMaxSize) return
+    if (!ctxT || !ctxMaxSize) {
+      logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
+      return
+    }
     ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
@@ -278,7 +285,6 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-        this.storeEffectsAttrs(config)
         cb && cb()
       }
     })
@@ -288,7 +294,14 @@ class ImageShadowUtils {
 
   async drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     const canvas = canvas_s[0] || undefined
-    if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) return
+    if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) {
+      if (canvas) {
+        logUtils.setLog('Error: drawImageMatchedShadow with wrong effect type:' + config.styles.shadow.currentEffect)
+      } else {
+        logUtils.setLog('Error: input canvas is undefined')
+      }
+      return
+    }
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
     this.handlerId = handlerId
@@ -302,13 +315,17 @@ class ImageShadowUtils {
   }
 
   async imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+    logUtils.setLog('canvas drawing: drawImageMatchedShadow start:')
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
     const { canvasT, canvasMaxSize } = this
     const ctxT = canvasT.getContext('2d')
     const ctxMaxSize = canvasMaxSize.getContext('2d')
 
-    if (!ctxT || !ctxMaxSize) return
+    if (!ctxT || !ctxMaxSize) {
+      logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
+      return
+    }
     ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
@@ -400,7 +417,6 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-        this.storeEffectsAttrs(config)
         cb && cb()
         setMark('imageMatched', 3)
         logMark('imageMatched', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
@@ -414,14 +430,25 @@ class ImageShadowUtils {
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
     const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
-    if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) return
+    if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
+      if (canvas) {
+        logUtils.setLog('Error: drawShadow with wrong effect type:' + currentEffect)
+      } else {
+        logUtils.setLog('Error: input canvas is undefined')
+      }
+      return
+    }
     const handlerId = generalUtils.generateRandomString(6)
     const handler = async () => {
+      logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
       const { canvasT, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
       const ctxMaxSize = canvasMaxSize.getContext('2d')
-      if (!ctxT || !ctxMaxSize) return
+      if (!ctxT || !ctxMaxSize) {
+        logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
+        return
+      }
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
@@ -547,13 +574,13 @@ class ImageShadowUtils {
             timeout && this.setIsProcess(layerInfo, false)
           }
           this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-          this.storeEffectsAttrs(config)
           cb && cb()
         }
       })
       setMark('shadow', 4)
       logMark('shadow', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
     }
+
     this.handlerId = handlerId
     if (timeout) {
       this._draw = setTimeout(handler, timeout)
@@ -603,18 +630,6 @@ class ImageShadowUtils {
       data[width * 4 - 1] !== 255 ||
       data[data.length - 1] !== 255 ||
       data[data.length - width * 4 + 3] !== 255
-    // const data = ctx.getImageData(0, 0, width, height).data
-    //   .reduce((arr, val, i) => {
-    //     if (i % 4 === 0) {
-    //       arr.push([val])
-    //     } else {
-    //       arr[arr.length - 1].push(val)
-    //     }
-    //     return arr
-    //   }, [] as Array<Array<number>>)
-
-    // const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
-    // return pivots.some(p => p[3] !== 255)
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {
@@ -634,9 +649,16 @@ class ImageShadowUtils {
       ({ pageIndex, layerIndex, subLayerIdx = -1 } = layerInfo)
     }
 
-    const layer = subLayerIdx !== -1
-      ? (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
-      : layerUtils.getLayer(pageIndex, layerIndex) as IImage
+    let _layer = layerUtils.getLayer(pageIndex, layerIndex)
+    if (subLayerIdx === -1) {
+      if (_layer.type === LayerType.group) {
+        _layer = (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
+      } else if (_layer.type === LayerType.frame) {
+        return
+      }
+    }
+    const layer = _layer as IImage
+
     if (layer.type === LayerType.image) {
       const { shadow, width, height } = layer.styles
       const { effects } = shadow
@@ -668,6 +690,7 @@ class ImageShadowUtils {
         ...effects,
         ...attrs
       })
+      this.storeEffectsAttrs(layer)
     }
   }
 

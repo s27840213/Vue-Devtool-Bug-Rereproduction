@@ -591,6 +591,7 @@ body {
     overflow-x: hidden;
     position: relative;
     @include no-scrollbar;
+    padding-right: 0;
   }
   &__absolute-searchbar {
     position: absolute;
@@ -980,7 +981,7 @@ body {
       align-items: center;
       justify-content: center;
       top: calc(#{$header-height} / 2);
-      right: 45px;
+      right: 55px;
       width: 25px;
       height: 25px;
       z-index: 20;
