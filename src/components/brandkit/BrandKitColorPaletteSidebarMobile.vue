@@ -115,7 +115,7 @@ export default Vue.extend({
     justify-content: start;
     color: white;
     & > span {
-      @include body-MD;
+      @include body-SM;
       line-height: 24px;
       height: 24px;
       display: block;
@@ -125,10 +125,11 @@ export default Vue.extend({
     }
   }
   &__colors {
-    margin-top: 20px;
+    margin-top: 17px;
+    padding: 0 20.5px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
-    gap: 7px 8px;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    gap: 12px;
     &__color-wrapper {
       position: relative;
       width: 100%;

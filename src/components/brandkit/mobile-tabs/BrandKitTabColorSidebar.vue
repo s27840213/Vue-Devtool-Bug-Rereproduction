@@ -2,19 +2,20 @@
   div(v-if="colorPalettes.length === 0 && !isPalettesLoading" class="hint" :style="minHeightStyles()")
     no-items-hint(type="color" :mobile="true")
   div(v-else class="brand-kit-tab-color" :style="minHeightStyles()")
-    div(v-if="isPalettesLoading" class="loading")
-      svg-icon(iconName="loading"
-              iconWidth="24px"
-              iconColor="gray-3")
-    template(v-else)
-      brand-kit-color-palette-sidebar(v-for="colorPalette in colorPalettes"
-                                      :colorPalette="colorPalette")
+    div(class="brand-kit-tab-color__palettes")
+      div(v-if="isPalettesLoading" class="loading")
+        svg-icon(iconName="loading"
+                iconWidth="24px"
+                iconColor="gray-3")
+      template(v-else)
+        brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
+                                        :colorPalette="colorPalette")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
-import BrandKitColorPaletteSidebar from '@/components/brandkit/BrandKitColorPaletteSidebar.vue'
+import BrandKitColorPaletteSidebarMobile from '@/components/brandkit/BrandKitColorPaletteSidebarMobile.vue'
 import NoItemsHint from '@/components/brandkit/NoItemsHint.vue'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
@@ -31,7 +32,7 @@ export default Vue.extend({
     }
   },
   components: {
-    BrandKitColorPaletteSidebar,
+    BrandKitColorPaletteSidebarMobile,
     NoItemsHint
   },
   mounted() {
@@ -67,13 +68,16 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .brand-kit-tab-color {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   height: 100%;
-  line-height: 0;
-  text-align: left;
-  box-sizing: border-box;
+  &__palettes {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    line-height: 0;
+    text-align: left;
+    box-sizing: border-box;
+  }
 }
 
 .loading {
