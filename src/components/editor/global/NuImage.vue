@@ -89,26 +89,26 @@ export default Vue.extend({
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
-    }
-    if (typeof this.config.styles.shadow.isTransparent === 'undefined' && !isPrimaryLayerFrame) {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
-      img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-        canvas.setAttribute('width', img.naturalWidth.toString())
-        canvas.setAttribute('height', img.naturalHeight.toString())
-        ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
-        imageShadowUtils.updateEffectProps(this.layerInfo, {
-          isTransparent: imageShadowUtils.isTransparentBg(canvas)
-        })
+
+      if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
+        img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+          canvas.setAttribute('width', img.naturalWidth.toString())
+          canvas.setAttribute('height', img.naturalHeight.toString())
+          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+          imageShadowUtils.updateEffectProps(this.layerInfo, {
+            isTransparent: imageShadowUtils.isTransparentBg(canvas)
+          })
+        }
       }
     }
   },
   mounted() {
-    // console.log(this.config.previewSrc)
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
     eventUtils.on(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
@@ -131,11 +131,11 @@ export default Vue.extend({
             isTransparent && this.redrawShadow()
           }
         }
+        img.onerror = (e) => {
+          logUtils.setLog('Nu-image: img onload error in mounted hook: src:' + img.src + 'error:' + e.toString())
+        }
         const imgSize = ImageUtils.getSrcSize(this.config.srcObj, 100)
         img.src = ImageUtils.getSrc(this.config, imgSize) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-        if (!isFloatingEffect) {
-          imageShadowUtils.setHandleId(this.id)
-        }
       } else {
         stepsUtils.record()
       }
@@ -413,7 +413,6 @@ export default Vue.extend({
         }
       })()
       return isCurrShadowEffectApplied && isHandling
-      // return isCurrShadowEffectApplied && (isShadowUploading || (isPhotoShadowPanelOpen && isCurrLayerActive))
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -563,7 +562,6 @@ export default Vue.extend({
       logUtils.setLog(log)
     },
     async perviewAsLoading() {
-      // console.log(this.config.previewSrc)
       if (this.config.previewSrc) {
         return
       }
@@ -573,7 +571,6 @@ export default Vue.extend({
        **/
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
-        // console.log(this.src)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         const img = new Image()
         img.onload = () => {

@@ -238,7 +238,6 @@ export default Vue.extend({
   &__options {
     width: 100%;
     display: flex;
-    align-items: center;
     border-radius: 5px;
     overflow-x: scroll;
     @include no-scrollbar;
@@ -266,6 +265,7 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
+    padding-bottom: 12px;
   }
 
   &__field {

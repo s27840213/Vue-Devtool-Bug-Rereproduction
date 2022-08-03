@@ -37,7 +37,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       getPages: 'getPages',
-      getPagesPerRow: 'page/getPagesPerRow'
+      getPagesPerRow: 'page/getPagesPerRow',
+      allPageMode: 'mobileEditor/getMobileAllPageMode'
     }),
     pages(): IPage[] {
       const pages = generalUtils.deepCopy(this.getPages)
@@ -52,7 +53,6 @@ export default Vue.extend({
       this.screenWidth = document.body.clientWidth - 130
       this._setPagesPerRow(floor(this.screenWidth / 180))
     })
-    console.log('mounted')
   },
   methods: {
     ...mapMutations({

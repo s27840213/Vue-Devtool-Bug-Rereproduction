@@ -382,8 +382,15 @@ export default Vue.extend({
           }, 300)
         })
       } else {
+        GroupUtils.deselect()
         this.addPage(pageUtils.newPage({}))
-        pageUtils.fitPage()
+        this.$nextTick(() => {
+          editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
+          this.setCurrActivePageIndex(this.currCardIndex)
+          setTimeout(() => {
+            pageUtils.fitPage()
+          }, 300)
+        })
         StepsUtils.record()
       }
     },

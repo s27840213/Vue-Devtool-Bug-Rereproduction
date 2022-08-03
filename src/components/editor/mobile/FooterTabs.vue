@@ -96,7 +96,7 @@ export default Vue.extend({
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isFrameImage },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}` },
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isFrameImage },
         { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, hidden: true }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
@@ -125,9 +125,9 @@ export default Vue.extend({
       return [
         this.mainMenu,
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -137,7 +137,7 @@ export default Vue.extend({
           },
           disabled: this.backgroundLocked
         },
-        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: hasBgImage, disabled: this.backgroundLocked }
+        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: !hasBgImage, disabled: this.backgroundLocked }
       ]
     },
     multiPhotoTabs(): Array<IFooterTab> {
@@ -216,7 +216,7 @@ export default Vue.extend({
         return this.pageTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && this.singleTargetType()) {
         return this.multiPhotoTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text') && this.singleTargetType()) {
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
         return this.multiFontTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
         return this.multiObjectTabs
@@ -428,6 +428,7 @@ export default Vue.extend({
           groupUtils.deselect()
           const tmpIndex = pageUtils.currActivePageIndex
           this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
+          editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
           this._deletePage(tmpIndex)
           stepsUtils.record()
           break
@@ -482,6 +483,15 @@ export default Vue.extend({
           break
         }
       }
+      if (tab.icon !== 'crop') {
+        if (this.isCropping) {
+          imageUtils.setImgControlDefault()
+        }
+        if (backgroundUtils.backgroundImageControl) {
+          backgroundUtils.setAllBackgroundImageControlDefault()
+        }
+      }
+
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
@@ -527,7 +537,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto;
     grid-auto-flow: column;
-    grid-auto-columns: 60px;
+    grid-auto-columns: 65px;
     column-gap: 32px;
     background-color: setColor(nav);
     padding: 8px 12px;
@@ -543,7 +553,7 @@ export default Vue.extend({
     box-sizing: border-box;
     padding: 0px 4px;
     > span {
-      transform: scale(0.833);
+      transform: scale(0.8);
       transition: background-color 0.2s, color 0.2s;
     }
   }

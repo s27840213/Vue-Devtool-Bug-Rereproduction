@@ -47,6 +47,7 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
+import queueUtils from '@/utils/queueUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -87,10 +88,12 @@ export default Vue.extend({
   },
   mounted() {
     if (this.setLayersDone) {
-      this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
+      // this.loadLayerImg()
+      this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
     }
     if (this.config.isAutoResizeNeeded) {
-      this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
+      // this.handleFontLoading()
+      this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
     }
   },
   watch: {
@@ -98,12 +101,14 @@ export default Vue.extend({
       // When first page mounted, its layers is not ready,
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
-        this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
+        // this.loadLayerImg()
+        this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
       }
     },
     'config.isAutoResizeNeeded'(newVal) {
       if (newVal) {
-        this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
+        // this.handleFontLoading()
+        this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
       }
     }
   },

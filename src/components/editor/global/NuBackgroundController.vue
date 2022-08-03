@@ -4,7 +4,8 @@
     div(class="nu-controller__body"
         ref="body"
         :style="styles()"
-        @pointerdown.stop="moveStart")
+        @pointerdown.stop="moveStart"
+        @touchstart="disableTouchEvent")
       div(v-for="(scaler, index)  in controlPoints.scalers"
           class="controller-point"
           :key="index"
@@ -24,6 +25,8 @@ import MathUtils from '@/utils/mathUtils'
 import PageUtils from '@/utils/pageUtils'
 import { IPage } from '@/interfaces/page'
 import stepsUtils from '@/utils/stepsUtils'
+import eventUtils from '@/utils/eventUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -135,14 +138,14 @@ export default Vue.extend({
         'pointer-events': 'none'
       }
     },
-    moveStart(event: MouseEvent) {
+    moveStart(event: PointerEvent) {
       this.isControlling = true
       this.initialPos = MouseUtils.getMouseAbsPoint(event)
       this.initImgControllerPos = this.getImgController
       Object.assign(this.initImgPos, { imgX: this.getImgX, imgY: this.getImgY })
 
-      window.addEventListener('mouseup', this.moveEnd)
-      window.addEventListener('mousemove', this.moving)
+      eventUtils.addPointerEvent('pointermove', this.moving)
+      eventUtils.addPointerEvent('pointerup', this.moveEnd)
 
       this.setCursorStyle('move')
     },
@@ -183,8 +186,9 @@ export default Vue.extend({
       stepsUtils.record()
       PageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
-      window.removeEventListener('mouseup', this.moveEnd)
-      window.removeEventListener('mousemove', this.moving)
+
+      eventUtils.removePointerEvent('pointermove', this.moving)
+      eventUtils.removePointerEvent('pointerup', this.moveEnd)
     },
     scaleStart(event: MouseEvent) {
       this.isControlling = true
@@ -205,8 +209,9 @@ export default Vue.extend({
       this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
       this.currCursorStyling(event)
-      window.addEventListener('mousemove', this.scaling, false)
-      window.addEventListener('mouseup', this.scaleEnd, false)
+
+      eventUtils.addPointerEvent('pointermove', this.scaling)
+      eventUtils.addPointerEvent('pointerup', this.scaleEnd)
     },
     scaling(event: MouseEvent) {
       event.preventDefault()
@@ -289,8 +294,8 @@ export default Vue.extend({
       stepsUtils.record()
       PageUtils.startBackgroundImageControl(this.pageIndex)
       this.setCursorStyle('default')
-      window.removeEventListener('mousemove', this.scaling, false)
-      window.removeEventListener('mouseup', this.scaleEnd, false)
+      eventUtils.removePointerEvent('pointermove', this.scaling)
+      eventUtils.removePointerEvent('pointerup', this.scaleEnd)
     },
     cursorStyles(index: number, rotateAngle: number) {
       const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
@@ -305,6 +310,12 @@ export default Vue.extend({
     currCursorStyling(e: MouseEvent) {
       const el = e.target as HTMLElement
       this.setCursorStyle(el.style.cursor)
+    },
+    disableTouchEvent(e: TouchEvent) {
+      if (generalUtils.isTouchDevice()) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
     }
   }
 })

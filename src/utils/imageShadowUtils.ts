@@ -168,7 +168,9 @@ class ImageShadowUtils {
     }
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
-    this.handlerId = handlerId
+    if (!store.getters['shadow/isUploading'] || !params.timeout) {
+      this.handlerId = handlerId
+    }
     if (timeout) {
       setTimeout(() => {
         this.floatingHandler(canvas_s, img, config, handlerId, params)
@@ -285,7 +287,6 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-        this.storeEffectsAttrs(config)
         cb && cb()
       }
     })
@@ -305,7 +306,9 @@ class ImageShadowUtils {
     }
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
-    this.handlerId = handlerId
+    if (!store.getters['shadow/isUploading'] || !params.timeout) {
+      this.handlerId = handlerId
+    }
     if (timeout) {
       setTimeout(() => {
         this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
@@ -418,7 +421,6 @@ class ImageShadowUtils {
           timeout && this.setIsProcess(layerInfo, false)
         }
         this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-        this.storeEffectsAttrs(config)
         cb && cb()
         setMark('imageMatched', 3)
         logMark('imageMatched', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
@@ -434,9 +436,13 @@ class ImageShadowUtils {
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
-        logUtils.setLog('Error: drawShadow with wrong effect type:' + currentEffect)
+        const log = 'Error: drawShadow with wrong effect type:' + currentEffect
+        console.log(log)
+        logUtils.setLog(log)
       } else {
-        logUtils.setLog('Error: input canvas is undefined')
+        const log = 'Error: input canvas is undefined'
+        console.log(log)
+        logUtils.setLog(log)
       }
       return
     }
@@ -576,7 +582,6 @@ class ImageShadowUtils {
             timeout && this.setIsProcess(layerInfo, false)
           }
           this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-          this.storeEffectsAttrs(config)
           cb && cb()
         }
       })
@@ -584,7 +589,9 @@ class ImageShadowUtils {
       logMark('shadow', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
     }
 
-    this.handlerId = handlerId
+    if (!store.getters['shadow/isUploading'] || !params.timeout) {
+      this.handlerId = handlerId
+    }
     if (timeout) {
       this._draw = setTimeout(handler, timeout)
     } else {
@@ -593,8 +600,8 @@ class ImageShadowUtils {
     }
   }
 
-  async asyncProcessing(cb: () => void) {
-    return new Promise<void>(resolve => {
+  async asyncProcessing(cb: () => void, disable = false) {
+    return disable ? cb() : new Promise<void>(resolve => {
       setTimeout(() => {
         cb()
         resolve()
@@ -633,18 +640,6 @@ class ImageShadowUtils {
       data[width * 4 - 1] !== 255 ||
       data[data.length - 1] !== 255 ||
       data[data.length - width * 4 + 3] !== 255
-    // const data = ctx.getImageData(0, 0, width, height).data
-    //   .reduce((arr, val, i) => {
-    //     if (i % 4 === 0) {
-    //       arr.push([val])
-    //     } else {
-    //       arr[arr.length - 1].push(val)
-    //     }
-    //     return arr
-    //   }, [] as Array<Array<number>>)
-
-    // const pivots = [data[0], data[width - 1], data[data.length - width - 1], data[data.length - 1]]
-    // return pivots.some(p => p[3] !== 255)
   }
 
   setIsProcess(layerInfo: ILayerInfo, drawing: boolean) {
@@ -705,6 +700,7 @@ class ImageShadowUtils {
         ...effects,
         ...attrs
       })
+      this.storeEffectsAttrs(layer)
     }
   }
 
