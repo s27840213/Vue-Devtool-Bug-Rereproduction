@@ -5,11 +5,11 @@
     :throttle="false"
     :handleNotIntersecting="true"
     @callback="handleCallback")
-    div(class="page-preview-page"
-      :style="styles2()"
+    div(v-if="allPageMode" class="page-preview-page"
+      :style="styles2"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
       div(class="page-preview-page-content pointer"
-          :style="styles()"
+          :style="styles"
           @click="clickPage"
           @dblclick="dbclickPage()"
           draggable="true",
@@ -24,11 +24,10 @@
           :config="config"
           :pageIndex="index"
           :scaleRatio="scaleRatio"
-          :handleSequentially="true"
-          @pushAsyncEvent="pushAsyncEvent")
+          :handleSequentially="true")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
-          :style="hightlighterStyles()")
+          :style="hightlighterStyles")
         div(v-if="isMouseOver && showMoreBtn"
           class="page-preview-page-content-more"
           @click="toggleMenu()")
@@ -51,10 +50,11 @@
           class="page-preview-page-icon")
           span {{index+1}}
       div(class="page-preview-page__background"
-        :style="styles()")
+        :style="styles")
       div(v-if="type === 'full'"
         class="page-preview-page-title")
         span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+    div(v-else :style="loadingStyle")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -118,27 +118,29 @@ export default Vue.extend({
       middlemostPageIndex: 'getMiddlemostPageIndex',
       currFocusPageIndex: 'getCurrFocusPageIndex',
       getPage: 'getPage',
-      isDragged: 'page/getIsDragged'
+      isDragged: 'page/getIsDragged',
+      allPageMode: 'mobileEditor/getMobileAllPageMode'
     }),
+    pageWidth(): number {
+      return this.config.width
+    },
+    pageHeight(): number {
+      return this.config.height
+    },
     scaleRatio(): number {
-      return this.contentWidth / (this.config as IPage).width
+      return this.contentWidth / this.pageWidth
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
         transform: `scale(${this.scaleRatio})`
       }
-    }
-  },
-  mounted() {
-    this.contentWidth = (this.$refs.content as HTMLElement).offsetWidth
-  },
-  methods: {
-    styles() {
+    },
+    styles(): { [index: string]: string } {
       return {
-        height: `${this.config.height * this.scaleRatio}px`
+        height: `${this.pageHeight * this.scaleRatio}px`
       }
     },
-    styles2() {
+    styles2(): { [index: string]: string } {
       if (this.type === 'panel' &&
         this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
         return {
@@ -149,12 +151,27 @@ export default Vue.extend({
         }
       }
     },
-    hightlighterStyles() {
+    hightlighterStyles(): { [index: string]: string } {
       return {
         width: `${this.contentWidth + 20}px`,
-        height: `${this.config.height * this.scaleRatio + 20}px`
+        height: `${this.pageHeight * this.scaleRatio + 20}px`
       }
     },
+    loadingStyle(): { [index: string]: string } {
+      return {
+        width: '100%',
+        height: '100%'
+      }
+    }
+  },
+  mounted() {
+    const contentRef = (this.$refs.content as HTMLElement)
+    this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
+  },
+  activated() {
+    this.contentWidth = (this.$refs.content as HTMLElement).offsetWidth
+  },
+  methods: {
     ...mapMutations({
       _addPageToPos: 'ADD_pageToPos',
       _deletePage: 'DELETE_page',
@@ -260,24 +277,6 @@ export default Vue.extend({
     },
     handleCallback(entries: Array<IntersectionObserverEntry>) {
       this.inTheTarget = entries[0].isIntersecting
-    },
-    pushAsyncEvent(callback: () => Promise<void>) {
-      this.asyncTaskQueue.push(callback)
-
-      if (!this.isHandlingAsyncTask) {
-        this.handleAsyncTask()
-        this.isHandlingAsyncTask = true
-      }
-    },
-    handleAsyncTask() {
-      const func = this.asyncTaskQueue.shift()
-      typeof func === 'function' && func()
-      typeof func === 'function' && func().then(() => {
-        console.log('mission complete')
-        if (this.asyncTaskQueue.length === 0) {
-          this.isHandlingAsyncTask = false
-        }
-      })
     }
   }
 })
@@ -356,12 +355,13 @@ export default Vue.extend({
   }
   &-title {
     position: absolute;
-    bottom: -24px;
+    bottom: -8px;
+    transform: translate3d(0, 100%, 0);
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 30px;
     font-size: 16px;
     font-weight: bold;
   }
@@ -383,7 +383,7 @@ export default Vue.extend({
   &__background {
     position: absolute;
     width: 100%;
-    background: setColor(gray-3);
+    background: setColor(gray-3, 0.3);
     z-index: -1;
   }
 }
