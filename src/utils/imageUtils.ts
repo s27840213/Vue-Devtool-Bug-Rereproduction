@@ -273,10 +273,9 @@ class ImageUtils {
         }
       }
     }
-
-    if (editorUtils.currActivePanel === 'crop') {
-      editorUtils.setCloseMobilePanelFlag(true)
-    }
+    // if (editorUtils.currActivePanel === 'crop') {
+    //   editorUtils.setCloseMobilePanelFlag(true)
+    // }
   }
 
   initLayerSize: ISize = {
