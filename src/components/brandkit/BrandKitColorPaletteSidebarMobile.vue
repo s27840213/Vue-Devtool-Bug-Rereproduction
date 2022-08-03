@@ -8,7 +8,7 @@
         class="brand-kit-color-palette__colors__color-wrapper")
         div(class="brand-kit-color-palette__colors__color"
           :style="backgroundColorStyles(color.color)"
-          @click="handleSetColor(color.color)")
+          @click="handleSetColor(index)")
 </template>
 
 <script lang="ts">
@@ -22,7 +22,11 @@ export default Vue.extend({
     }
   },
   props: {
-    colorPalette: Object
+    colorPalette: Object,
+    settingmode: {
+      default: false,
+      type: Boolean
+    }
   },
   computed: {
     paletteName(): string {
@@ -36,22 +40,9 @@ export default Vue.extend({
     getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
       return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
-    handleSetColor(color: string) {
-      // const type = this.applicable
-      // let pageIndex = 0
-      // switch (type) {
-      //   case 'text':
-      //     pageIndex = this.handleSetTextColor(color)
-      //     break
-      //   case 'shape':
-      //     pageIndex = this.handleSetShapeColor(color)
-      //     break
-      //   default:
-      //     return
-      // }
-      // stepsUtils.record()
-      // colorUtils.setCurrColor(color)
-      // this.updateDocumentColors({ pageIndex, color })
+    handleSetColor(index: number) {
+      if (!this.settingmode) return
+      console.log('change color for', `${this.colorPalette.id}::${index}`)
     }
   }
 })

@@ -3,8 +3,6 @@
     div(class="brand-kit-tab-text__styles")
       div(v-for="type in Object.keys(MAPPING)"
         class="brand-kit-tab-text__setting pointer"
-        draggable="true"
-        @dragstart="standardTextDrag($event, type)"
         @click="handleAddText(type)")
         span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
         br
@@ -106,17 +104,6 @@ export default Vue.extend({
     },
     handleAddText(type: string) {
       assetUtils.addStandardText(type, this.MAPPING[type], this.$i18n.locale, undefined, undefined, this.getSpanStyles(type))
-    },
-    standardTextDrag(e: DragEvent, type: string) {
-      new DragUtils().itemDragStart(e, 'standardText', {
-        textType: type,
-        text: this.MAPPING[type],
-        locale: this.$i18n.locale,
-        spanStyles: this.getSpanStyles(type)
-      }, {
-        offsetX: 20,
-        offsetY: 30
-      })
     }
   }
 })
