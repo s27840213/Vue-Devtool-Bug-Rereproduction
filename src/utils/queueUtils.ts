@@ -12,14 +12,13 @@ class QueueUtils {
   push(callback: () => Promise<void>) {
     this.queue.push(callback)
     if (!this.isHandlingAsyncTask) {
-      this.handleAsyncTask()
       this.isHandlingAsyncTask = true
+      this.handleAsyncTask()
     }
   }
 
-  async handleAsyncTask() {
+  handleAsyncTask() {
     const func = this.queue.shift()
-    typeof func === 'function' && func()
     typeof func === 'function' && func().then(() => {
       if (this.queue.length === 0) {
         this.isHandlingAsyncTask = false
