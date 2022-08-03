@@ -1,9 +1,10 @@
+
 import axios from '@/apis'
 import authToken from './auth-token'
 import { IDownloadServiceParams, IDownloadServiceResponse } from '@/interfaces/download'
 import { AxiosError } from 'axios'
 import designUtils from '@/utils/designUtils'
-
+import i18n from '@/i18n'
 class DownloadService {
   createFile (params: IDownloadServiceParams, useDev = 0, newChrome = 0) {
     const data = {
@@ -21,6 +22,7 @@ class DownloadService {
       split_size: params.splitSize,
       new_test: useDev,
       new_chrome: newChrome,
+      locale: i18n.locale,
       title: designUtils.getDesignName()
     }
     return axios.request<IDownloadServiceResponse>({
