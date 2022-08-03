@@ -686,7 +686,9 @@ export default Vue.extend({
 
       this.movingByControlPoint = false
       // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
+
       const { inMultiSelectionMode } = this
       if (!this.isLocked) {
         event.stopPropagation()
@@ -694,6 +696,10 @@ export default Vue.extend({
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
+
+      if (inCopyMode) {
+        ShortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
+      }
 
       switch (this.getLayerType) {
         case 'text': {

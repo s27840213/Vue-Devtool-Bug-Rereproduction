@@ -35,9 +35,9 @@ class ShortcutUtils {
   //   this.target = target
   // }
 
-  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp) {
-    layer.styles.x += 10
-    layer.styles.y += 10
+  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp, offset = 10) {
+    layer.styles.x += offset
+    layer.styles.y += offset
     layer.id = GeneralUtils.generateRandomString(8)
     layer.shown = false
 
@@ -194,6 +194,29 @@ class ShortcutUtils {
       ZindexUtils.reassignZindex(currFocusPageIndex)
     }
     StepsUtils.record()
+  }
+
+  altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
+    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config), 0)
+    newLayer.active = false
+
+    const isTmp: boolean = config.type === 'tmp'
+    const { index, layers } = LayerUtils.currSelectedInfo
+    const currFocusPageIndex = pageUtils.currFocusPageIndex
+
+    const tmpIndex = index
+    const tmpLayersNum = isTmp ? layers.length : 1
+
+    if (isTmp) {
+      // const layers2Page = GroupUtils.mapLayersToPage(layers, config as ITmp)
+      // store.commit('ADD_layersToPos', { pageIndex: currFocusPageIndex, layers: [...layers2Page], pos: tmpIndex })
+      // GroupUtils.set(currFocusPageIndex, tmpIndex + tmpLayersNum, [newLayer])
+      return
+    } else {
+      store.commit('ADD_layersToPos', { pageIndex: currFocusPageIndex, layers: [newLayer], pos: tmpIndex })
+      GroupUtils.set(currFocusPageIndex, tmpIndex + 1, [newLayer])
+    }
+    ZindexUtils.reassignZindex(currFocusPageIndex)
   }
 
   textCopy() {
