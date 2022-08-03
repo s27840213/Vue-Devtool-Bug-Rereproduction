@@ -8,10 +8,12 @@
       div(class="panel-brand__header relative")
         brand-selector(theme="mobile-editor")
         div(class="panel-brand__settings pointer"
-          @click="handleOpenSettings")
-          svg-icon(iconName="settings" iconColor="white" iconWidth="24px")
+          @click="handleToggleSettings")
+          svg-icon(:iconName="isInSettingMode ? 'confirm-circle' : 'settings'"
+                    iconColor="white"
+                    iconWidth="24px")
       div(class="panel-brand__tab")
-        brand-kit-tab(theme="mobile-editor" :maxheight="maxheight - 180")
+        brand-kit-tab(theme="mobile-editor" :maxheight="maxheight - 180" :settingmode="isInSettingMode")
 </template>
 
 <script lang="ts">
@@ -25,6 +27,11 @@ export default Vue.extend({
     BrandSelector,
     BrandKitTab
   },
+  data() {
+    return {
+      isInSettingMode: false
+    }
+  },
   props: {
     maxheight: {
       default: window.innerHeight * 0.9,
@@ -37,11 +44,8 @@ export default Vue.extend({
     })
   },
   methods: {
-    ...mapMutations('brandkit', {
-      setSettingsOpen: 'SET_isSettingsOpen'
-    }),
-    handleOpenSettings() {
-      this.setSettingsOpen(true)
+    handleToggleSettings() {
+      this.isInSettingMode = !this.isInSettingMode
     }
   }
 })

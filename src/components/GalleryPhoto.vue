@@ -17,7 +17,7 @@
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
       @dragend="dragEnd"
-      @click="(hasCheckedAssets && inFilePanel) ? modifyCheckedAssets(photo.assetIndex) : addImage(photo)")
+      @click="onClick($event, photo)")
     div(v-if="isUploading"
         class="gallery-photo__progress")
       div(class="gallery-photo__progress-bar"
@@ -37,9 +37,10 @@ import networkUtils from '@/utils/networkUtils'
 import layerUtils from '@/utils/layerUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
-import { FunctionPanelType } from '@/store/types'
+import { FunctionPanelType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import mouseUtils from '@/utils/mouseUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -77,6 +78,7 @@ export default Vue.extend({
     ...mapState({
       closeMobilePanelFlag: 'mobileEditor/closeMobilePanelFlag'
     }),
+    ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getPageSize: 'getPageSize',
@@ -199,6 +201,51 @@ export default Vue.extend({
         previewsrc: ''
       })
     },
+    onClick(e: MouseEvent, photo: IAssetPhoto) {
+      if (generalUtils.isTouchDevice() && this.mobilePanel === 'replace') {
+        this.replaceImg(photo)
+      } else if (this.hasCheckedAssets && this.inFilePanel) {
+        this.modifyCheckedAssets(photo.assetIndex as number)
+      } else {
+        this.addImage(photo)
+      }
+    },
+    replaceImg(photo: IAssetPhoto) {
+      const { getCurrConfig: _config, pageIndex, layerIndex, subLayerIdx } = layerUtils
+      if (_config.type !== LayerType.image) return
+
+      const url = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc
+      const type = imageUtils.getSrcType(url)
+      const assetIndex = (this.inFilePanel || this.inLogoPanel) && !photo.id ? photo.assetIndex : undefined
+      const srcObj = {
+        type,
+        userId: imageUtils.getUserId(url, type),
+        assetId: assetIndex ?? (imageUtils.getAssetId(url, type)),
+        brandId: imageUtils.getBrandId(url, type)
+      }
+
+      const resizeRatio = RESIZE_RATIO_IMAGE
+      const pageAspectRatio = this.pageSize.width / this.pageSize.height
+      const photoAspectRatio = photo.width / photo.height
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+
+      const config = _config as IImage
+      const { imgWidth, imgHeight } = config.styles
+      const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
+      const styles = {
+        ...config.styles,
+        ...mouseUtils.clipperHandler({
+          styles: {
+            width: photoWidth,
+            height: photoHeight
+          }
+        } as unknown as IImage, path, config.styles).styles
+      }
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+      this.setCloseMobilePanelFlag(true)
+    },
     addImage(photo: IAssetPhoto) {
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
@@ -209,7 +256,6 @@ export default Vue.extend({
       }
       const src = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc
       const photoAspectRatio = photo.width / photo.height
-
       AssetUtils.addImage(
         src,
         photoAspectRatio,

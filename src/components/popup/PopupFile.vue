@@ -165,7 +165,7 @@ export default Vue.extend({
       window.location.href = '/'
     },
     gotoMobile() { // TO-DELETE
-      this.$router.push(this.$router.currentRoute.path.replace('editor', 'mobile-editor'))
+      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })
