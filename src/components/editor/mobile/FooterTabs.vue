@@ -92,12 +92,12 @@ export default Vue.extend({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        { icon: 'set-as-frame', text: `${this.$t('NN0706')}` },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isFrameImage },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isFrameImage },
-        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, hidden: true }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isFrameImage }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -394,6 +394,10 @@ export default Vue.extend({
               imgControl: !this.backgroundImgControl
             })
           }
+          break
+        }
+        case 'set-as-frame': {
+          frameUtils.updateImgToFrame()
           break
         }
         case 'main-menu': {
