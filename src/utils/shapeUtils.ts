@@ -6,25 +6,30 @@ import AssetUtils from './assetUtils'
 import { IAsset } from '@/interfaces/module'
 import layerUtils from './layerUtils'
 import { LayerType } from '@/store/types'
+import mappingUtils from './mappingUtils'
+import generalUtils from '@/utils/generalUtils'
+import pageUtils from './pageUtils'
 
 class ShapeUtils {
-  /**
-   * @param hasMultiColors - if the curr layer is tmp or groupe, and there isn't any selected sub layer
-   */
   get hasMultiColors() {
     const currLayer = layerUtils.getCurrLayer
-    let oneColorObjNum = 0
 
     if (currLayer.type === 'tmp' || currLayer.type === 'group') {
-      for (const layer of (currLayer as IGroup).layers) {
-        if (layer.type === 'shape' && (layer as IShape).color && (layer as IShape).color.length === 1) {
-          oneColorObjNum++
-        }
-      }
-      return oneColorObjNum >= 2 && !(currLayer as IGroup).layers
+      return this.getSingleColorObjNum >= 2 && !(currLayer as IGroup).layers
         .some(l => l.type === 'shape' && l.active)
     }
     return false
+  }
+
+  get getSingleColorObjNum(): number {
+    const currLayer = layerUtils.getCurrLayer
+    let oneColorObjNum = 0
+    for (const layer of (currLayer as IGroup).layers) {
+      if (layer.type === 'shape' && (layer as IShape).color && (layer as IShape).color.length === 1) {
+        oneColorObjNum++
+      }
+    }
+    return oneColorObjNum
   }
 
   get getDocumentColors() {
@@ -646,6 +651,32 @@ class ShapeUtils {
       }
     }
     return newPoint
+  }
+
+  setLineWidth(value: number) {
+    const { min, max } = mappingUtils.mappingMinMax('lineWidth')
+    const lineWidth = parseInt(generalUtils.boundValue(value, min, max))
+    const { getCurrLayer: currLayer } = layerUtils
+    const { point, styles, size } = (currLayer as IShape)
+
+    layerUtils.updateLayerProps(
+      pageUtils.currFocusPageIndex,
+      layerUtils.layerIndex,
+      { size: [lineWidth, ...(size ?? []).slice(1)] }
+    )
+
+    const isLine = currLayer.type === 'shape' && currLayer.category === 'D'
+    if (isLine) {
+      const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, size?.[0] ?? 1, lineWidth)
+      layerUtils.updateLayerStyles(
+        pageUtils.currFocusPageIndex,
+        layerUtils.layerIndex,
+        {
+          x: trans.x,
+          y: trans.y
+        }
+      )
+    }
   }
 }
 

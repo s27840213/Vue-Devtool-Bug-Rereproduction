@@ -530,25 +530,7 @@ export default Vue.extend({
       }, { [key]: color })
     },
     setLineWidth(value: number) {
-      const lineWidth = parseInt(this.boundValue(value, this.fieldRange.lineWidth.min, this.fieldRange.lineWidth.max))
-      const { currLayer } = this
-      const { point, styles, size } = (currLayer as IShape)
-      LayerUtils.updateLayerProps(
-        pageUtils.currFocusPageIndex,
-        this.currSelectedIndex,
-        { size: [lineWidth, ...(size ?? []).slice(1)] }
-      )
-      if (this.isLine) {
-        const trans = shapeUtils.getTranslateCompensationForLineWidth(point ?? [], styles, size?.[0] ?? 1, lineWidth)
-        LayerUtils.updateLayerStyles(
-          pageUtils.currFocusPageIndex,
-          this.currSelectedIndex,
-          {
-            x: trans.x,
-            y: trans.y
-          }
-        )
-      }
+      shapeUtils.setLineWidth(value)
     },
     handleLineDashEdgeUpdate(index: number, value: number) {
       if (index === 0) {

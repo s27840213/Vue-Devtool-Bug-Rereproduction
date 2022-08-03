@@ -7,7 +7,7 @@
       :checkedValues="checkedAssets"
       :disabled="isUploading"
       @update="handleCheck")
-    svg-icon(v-if="!inFilePanel && !inLogoPanel" class="pointer gallery-photo__more"
+    svg-icon(v-if="showMoreBtn" class="pointer gallery-photo__more"
       @click.native="showPhotoInfo"
       :iconName="'more_vertical'"
       :iconColor="'gray-2'"
@@ -75,7 +75,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState({
-      closeMobilePanelFlag: 'closeMobilePanelFlag'
+      closeMobilePanelFlag: 'mobileEditor/closeMobilePanelFlag'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -110,6 +110,9 @@ export default Vue.extend({
         srcObj: { type: vendor, userId: '', assetId: photo.id }
       } as IImage
       return imageUtils.getSrc(data, photo.width)
+    },
+    showMoreBtn(): boolean {
+      return !this.inFilePanel && !this.inLogoPanel && !generalUtils.isTouchDevice()
     }
   },
   methods: {
@@ -119,7 +122,7 @@ export default Vue.extend({
       deleteCheckedAssets: 'file/DELETE_CHECKED_ASSETS',
       updateCheckedAssets: 'file/UPDATE_CHECKED_ASSETS',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto',
-      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     dragStart(e: DragEvent, photo: any) {
       if (!this.online) {

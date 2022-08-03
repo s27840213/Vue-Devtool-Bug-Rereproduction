@@ -3,6 +3,7 @@
     div(v-if="inInitialState" class="panel-text-effect__options flex-evenly")
       div(class="panel-text-effect__option pointer")
         svg-icon(
+          class="panel-text-effect__option-icon"
           :iconName="'text-effect-none'"
           iconWidth="60px"
           iconColor="gray-5"
@@ -11,11 +12,11 @@
         span(class="body-3") {{$t('NN0112')}}
       div(class="panel-text-effect__option pointer")
         svg-icon(
+          class="panel-text-effect__option-icon"
           :iconName="'text-shape-none'"
           iconWidth="60px"
           iconColor="gray-5"
-          @click.native="pushHistory('text-shape')"
-        )
+          @click.native="pushHistory('text-shape')")
         span(class="body-3") {{$t('NN0070')}}
     div(v-if="showTextEffect" class="panel-text-effect__options")
       div(v-for="(icon, idx) in shadowOption"
@@ -24,7 +25,8 @@
         svg-icon(
           :iconName="`text-effect-${icon}`"
           @click.native="onEffectClick(icon)"
-          :class="{ 'panel-text-effect__option--selected': currentEffect === icon }"
+          class="panel-text-effect__option-icon"
+          :class="{ 'panel-text-effect__option-icon--selected': currentEffect === icon }"
           iconWidth="60px"
           iconColor="gray-5")
         span(class="body-3") {{i18nMap[`shadow-${icon}`]}}
@@ -40,6 +42,12 @@
           :max="fieldRange[field].max"
           :min="fieldRange[field].min"
           @update="handleEffectUpdate")
+      div(v-if="canChangeColor"
+        class="panel-text-effect__color")
+        div(class="panel-text-effect__color-name") {{$t('NN0017')}}
+        div(class="panel-text-effect__color-slip"
+          :style="{ backgroundColor: currentStyle.textEffect.color }"
+          @click="openColorPanel")
     div(v-if="showTextShapeEffect" class="panel-text-effect__options")
       div(v-for="(icon, idx) in shapeOption"
           :key="`shadow-${icon}`"
@@ -47,7 +55,8 @@
         svg-icon(
           :iconName="`text-shape-${icon}`"
           @click.native="onShapeClick(icon)"
-          :class="{ 'panel-text-effect__option--selected': currentShape === icon }"
+          class="panel-text-effect__option-icon"
+          :class="{ 'panel-text-effect__option-icon--selected': currentShape === icon }"
           iconWidth="60px"
           iconColor="gray-5")
         span(class="body-3") {{i18nMap[`shape-${icon}`]}}
@@ -72,6 +81,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 
 export default Vue.extend({
   components: {
@@ -177,6 +187,9 @@ export default Vue.extend({
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
     },
+    openColorPanel() {
+      this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
+    },
     onEffectClick(effectName: string): void {
       textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
       stepsUtils.record()
@@ -215,10 +228,11 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-text-effect {
   width: 100%;
-  max-height: 40vh;
+  height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
+
   &__options {
     width: 100%;
     display: flex;
@@ -226,12 +240,24 @@ export default Vue.extend({
     border-radius: 5px;
     overflow-x: scroll;
     @include no-scrollbar;
-    padding: 20px 0 20px 0;
+    padding-top: 2px;
+    padding-bottom: 20px;
   }
 
   &__option {
     margin: 0 8px;
     width: 60px;
+    box-sizing: border-box;
+  }
+
+  &__option-icon {
+    border-radius: 5px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+
+    &--selected {
+      border-color: setColor(blue-1);
+    }
   }
 
   &__form {
@@ -243,6 +269,20 @@ export default Vue.extend({
   &__field {
     > div:nth-child(n) {
       margin-bottom: 20px;
+    }
+  }
+
+  &__color {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+    position: relative;
+    color: setColor(gray-3);
+    &-slip {
+      height: 100%;
+      width: 32px;
     }
   }
 }

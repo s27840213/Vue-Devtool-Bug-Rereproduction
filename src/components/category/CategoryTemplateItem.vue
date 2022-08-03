@@ -52,12 +52,12 @@ export default Vue.extend({
       return this.designGroupType === 1 || this.groupItem?.group_type === 1
     },
     previewStyle(): any {
-      const { width, height } = this.item.preview || {}
+      const { width, height } = this.item.preview || { width: GeneralUtils.getListRowItemSize(), height: GeneralUtils.getListRowItemSize() }
       return { width: `${width}px`, height: `${height}px` }
     },
     itemStyle(): any {
-      const { width } = this.item.preview || {}
-      return { width: `${width || 145}px` }
+      const { width } = this.item.preview || { width: GeneralUtils.getListRowItemSize() }
+      return { width: `${width}px` }
     }
   },
   methods: {

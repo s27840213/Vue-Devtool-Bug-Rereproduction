@@ -38,6 +38,7 @@ class GeneralUtils {
     const scrollCenterY = (2 * el.scrollTop + el.clientHeight)
     const oldScrollWidth = el.scrollWidth
     const oldScrollHeight = el.scrollHeight
+
     Vue.nextTick(() => {
       el.scrollLeft = Math.round((scrollCenterX * el.scrollWidth / oldScrollWidth - el.clientWidth) / 2)
       el.scrollTop = Math.round((scrollCenterY * el.scrollHeight / oldScrollHeight - el.clientHeight) / 2)
@@ -171,6 +172,13 @@ class GeneralUtils {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
   }
 
+  getListRowItemSize(): number {
+    return !this.isTouchDevice() ? 145
+      : window.innerWidth >= 600
+        ? (window.innerWidth - 50) / 3
+        : (window.innerWidth - 40) / 2
+  }
+
   getEventType(e: MouseEvent | TouchEvent) {
     switch (e.type) {
       case 'touchstart':
@@ -301,6 +309,11 @@ class GeneralUtils {
     element.click()
 
     document.body.removeChild(element)
+  }
+
+  capitalize(str: string): string {
+    if (str.length === 0) return str
+    return str[0].toUpperCase() + str.substring(1).toLowerCase()
   }
 
   capitalizeFirstWord(str: string) {

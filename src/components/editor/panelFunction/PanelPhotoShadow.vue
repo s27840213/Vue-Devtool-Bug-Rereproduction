@@ -81,7 +81,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import ColorPicker from '@/components/ColorPicker.vue'
-import ColorPanel from '@/components/editor/ColorPanel.vue'
+import ColorPanel from '@/components/editor/ColorSlips.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, FunctionPanelType } from '@/store/types'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'

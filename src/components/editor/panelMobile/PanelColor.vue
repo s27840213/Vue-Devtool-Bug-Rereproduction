@@ -1,12 +1,18 @@
 <template lang="pug">
-  div(class="panel-color scrollbar-gray-thin")
+  div(class="panel-color px-5")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
       :currentColor="colorUtils.currColor"
       @update="handleDragUpdate"
       @final="handleChangeStop")
-    color-panel(v-if="showPalette" :whiteTheme="true" :noPadding="true" :showPanelBtn="false" @openColorPicker="openColorPicker")
+    color-slips(v-if="showPalette"
+      :whiteTheme="true"
+      :noPadding="true"
+      :showPanelBtn="false"
+      :allRecentlyControl="showAllRecently"
+      @openColorPicker="openColorPicker"
+      @openColorMore="openColorMore")
     div(v-if="showDocumentColors" class="panel-color__document-colors")
       div(v-if="hasMultiColors"
         class="panel-color__document-color"
@@ -30,7 +36,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
-import ColorPanel from '@/components/editor/ColorPanel.vue'
+import ColorSlips from '@/components/editor/ColorSlips.vue'
 import { ColorEventType, LayerType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
@@ -57,9 +63,9 @@ export default Vue.extend({
   components: {
     MobileSlider,
     ColorPicker,
-    ColorPanel
+    ColorSlips
   },
-  mounted() {
+  created() {
     colorUtils.setCurrEvent(this.currEvent)
     switch (this.currEvent) {
       case ColorEventType.text: {
@@ -68,6 +74,10 @@ export default Vue.extend({
       }
       case ColorEventType.shape: {
         colorUtils.setCurrColor(this.getDocumentColors[this.currSelectedColorIndex])
+        break
+      }
+      case ColorEventType.background: {
+        colorUtils.setCurrColor(colorUtils.currPageBackgroundColor)
         break
       }
       default: {
@@ -106,7 +116,10 @@ export default Vue.extend({
       return this.inInitialState && this.currEvent === ColorEventType.shape
     },
     showPalette(): boolean {
-      return this.lastHistory === 'color-palette' || (this.inInitialState && !this.showDocumentColors)
+      return ['color-palette', 'color-more'].includes(this.lastHistory) || (this.inInitialState && !this.showDocumentColors)
+    },
+    showAllRecently(): boolean {
+      return this.lastHistory === 'color-more'
     },
     hasMultiColors(): boolean {
       return shapeUtils.hasMultiColors
@@ -128,61 +141,61 @@ export default Vue.extend({
       })
     },
     handleColorUpdate(newColor: string) {
-      if (this.currEvent === ColorEventType.text) {
-        if (newColor === this.props.color) return
-        const { subLayerIdx, getCurrLayer: currLayer, layerIndex } = layerUtils
-
-        switch (currLayer.type) {
-          case 'text':
-            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
-            break
-          case 'tmp':
-          case 'group':
-            if (subLayerIdx === -1 || !(currLayer as IGroup).layers[subLayerIdx].contentEditable) {
-              textPropUtils.applyPropsToAll('span', { newColor }, layerIndex, subLayerIdx)
-              if (subLayerIdx !== -1) {
-                tiptapUtils.updateHtml()
-              }
-            } else {
-              tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor))
-            }
+      switch (this.currEvent) {
+        case ColorEventType.text: {
+          if (newColor === this.props.color) return
+          const hex = tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor)
+          tiptapUtils.spanStyleHandler('color', hex)
+          break
         }
-        textEffectUtils.refreshColor()
-        stepsUtils.record()
-        textPropUtils.updateTextPropsState({ newColor })
-      } else if (this.currEvent === ColorEventType.shape) {
-        const currLayer = layerUtils.getCurrLayer
-        switch (currLayer.type) {
-          case 'shape': {
-            const color = [...this.getDocumentColors]
-            color[this.currSelectedColorIndex] = newColor
-            layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
-            break
-          }
-          case 'tmp':
-          case 'group': {
-            const { subLayerIdx } = layerUtils
-            if (subLayerIdx === -1) {
-              for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
-                if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
-                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+        case ColorEventType.shape: {
+          const currLayer = layerUtils.getCurrLayer
+          switch (currLayer.type) {
+            case 'shape': {
+              const color = [...this.getDocumentColors]
+              color[this.currSelectedColorIndex] = newColor
+              layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.currSelectedIndex, { color })
+              break
+            }
+            case 'tmp':
+            case 'group': {
+              const { subLayerIdx } = layerUtils
+              if (subLayerIdx === -1) {
+                for (const [i, layer] of (currLayer as IGroup).layers.entries()) {
+                  if (layer.type === 'shape' && (layer as IShape).color.length === 1) {
+                    layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, +i, { color: [newColor] })
+                  }
+                }
+              } else {
+                const subLayerType = layerUtils.getCurrConfig.type
+                if (subLayerType === 'frame') {
+                  this.handleFrameColorUpdate(newColor)
+                }
+                if (subLayerType === 'shape') {
+                  const color = [...this.getDocumentColors]
+                  color[this.currSelectedColorIndex] = newColor
+                  layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { color })
                 }
               }
-            } else {
-              const subLayerType = layerUtils.getCurrConfig.type
-              if (subLayerType === 'frame') {
-                this.handleFrameColorUpdate(newColor)
-              }
-              if (subLayerType === 'shape') {
-                const color = [...this.getDocumentColors]
-                color[this.currSelectedColorIndex] = newColor
-                layerUtils.updateSelectedLayerProps(pageUtils.currFocusPageIndex, subLayerIdx, { newColor })
-              }
+              break
             }
-            break
+            case 'frame':
+              this.handleFrameColorUpdate(newColor)
           }
-          case 'frame':
-            this.handleFrameColorUpdate(newColor)
+          break
+        }
+
+        case ColorEventType.background: {
+          colorUtils.setCurrPageBackgroundColor(newColor)
+          break
+        }
+
+        case ColorEventType.textEffect: {
+          const { styles } = textEffectUtils.getCurrentLayer()
+          const { textEffect = {} } = styles
+
+          const currentEffect = textEffect.name || 'none'
+          textEffectUtils.setTextEffect(currentEffect, { color: newColor })
         }
       }
     },
@@ -213,6 +226,9 @@ export default Vue.extend({
     },
     recordChange() {
       stepsUtils.record()
+    },
+    openColorMore() {
+      this.$emit('pushHistory', 'color-more')
     },
     openColorPicker() {
       this.$emit('pushHistory', 'color-picker')
@@ -262,7 +278,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-color {
   width: 100%;
-  max-height: 250px;
   overflow-y: scroll;
   box-sizing: border-box;
 

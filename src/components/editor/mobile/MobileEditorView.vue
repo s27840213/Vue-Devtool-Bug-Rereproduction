@@ -10,13 +10,12 @@
     div(class="editor-view__canvas"
         ref="canvas"
         @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler"
-        :style="canvasStyle")
+        @swipedown="swipeDownHandler")
       div(v-for="(page,index) in pages"
           :key="`page-${index}`"
           class="editor-view__card"
           :style="cardStyle(index)"
-          @mousedown.left.self="outerClick($event)"
+          @pointerdown.self.prevent="outerClick($event)"
           ref="card")
         nu-page(
           :ref="`page-${index}`"
@@ -48,6 +47,7 @@ import BgRemoveArea from '@/components/editor/backgroundRemove/BgRemoveArea.vue'
 import generalUtils from '@/utils/generalUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   components: {
@@ -91,11 +91,20 @@ export default Vue.extend({
       scrollHeight: 0,
       tmpScaleRatio: 0,
       initialDist: 0,
-      minScaleRatio: 0,
-      currCardIndex: 0
+      mounted: false,
+      cardSize: 0
     }
   },
   mounted() {
+    this.$nextTick(() => {
+      /**
+       * @Note - make the transitoin being set after the mounted hook, or when switching between all pages mode, you will see a lovely page floating from the top to its normal posiiton
+       */
+      // const currFocusPageIndex = pageUtils.currFocusPageIndex
+      // pageUtils.scrollIntoPage(currFocusPageIndex, 'auto')
+      // this.currCardIndex = currFocusPageIndex
+      this.mounted = true
+    })
     this.getRecently()
 
     const editorViewAt = new AnyTouch(this.$refs.editorView as HTMLElement, { preventDefault: false })
@@ -111,11 +120,13 @@ export default Vue.extend({
     this.guidelinesArea = this.$refs.guidelinesArea as HTMLElement
     this.canvasRect = (this.$refs.canvas as HTMLElement).getBoundingClientRect()
 
+    this.cardSize = this.editorView ? this.editorView.clientHeight : 0
+
     pageUtils.fitPage()
     this.tmpScaleRatio = pageUtils.scaleRatio
 
     if (generalUtils.isTouchDevice()) {
-      this.minScaleRatio = pageUtils.scaleRatio
+      pageUtils.mobileMinScaleRatio = this.tmpScaleRatio
     }
 
     this.$nextTick(() => {
@@ -162,10 +173,8 @@ export default Vue.extend({
     screenHeight() {
       pageUtils.findCentralPageIndexInfo(true)
     },
-    inAllPagesMode(newVal) {
-      if (!newVal) {
-        this.currCardIndex = 0
-      }
+    currFocusPageIndex(newVal) {
+      this.setCurrCardIndex(newVal)
     }
   },
 
@@ -173,6 +182,9 @@ export default Vue.extend({
     ...mapState('user', [
       'role',
       'adminMode']),
+    ...mapState({
+      mobileAllPageMode: 'mobileEditor/mobileAllPageMode'
+    }),
     ...mapGetters({
       groupId: 'getGroupId',
       pages: 'getPages',
@@ -187,7 +199,10 @@ export default Vue.extend({
       lockGuideline: 'getLockGuideline',
       isShowPagePreview: 'page/getIsShowPagePreview',
       hasCopiedFormat: 'getHasCopiedFormat',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
+      currFocusPageIndex: 'getCurrFocusPageIndex',
+      currCardIndex: 'mobileEditor/getCurrCardIndex',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -216,10 +231,8 @@ export default Vue.extend({
     pageSize(): { width: number, height: number } {
       return this.getPageSize(0)
     },
-    canvasStyle(): { [index: string]: string } {
-      return {
-        paddingBottom: this.currActivePanel !== 'none' ? '40%' : '0px'
-      }
+    minScaleRatio(): number {
+      return pageUtils.mobileMinScaleRatio
     }
   },
   methods: {
@@ -229,8 +242,8 @@ export default Vue.extend({
       setPageScaleRatio: 'SET_pageScaleRatio',
       _setAdminMode: 'user/SET_ADMIN_MODE',
       setInBgRemoveMode: 'SET_inBgRemoveMode',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode',
-      addPage: 'ADD_page'
+      addPage: 'ADD_page',
+      setCurrCardIndex: 'mobileEditor/SET_currCardIndex'
     }),
     ...mapActions('layouts',
       [
@@ -249,10 +262,11 @@ export default Vue.extend({
     },
     outerClick(e: MouseEvent) {
       if (!this.inBgRemoveMode) {
+        editorUtils.setInBgSettingMode(false)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(-1)
         pageUtils.setBackgroundImageControlDefault()
-        this.setInMultiSelectionMode(false)
+        editorUtils.setInMultiSelectionMode(false)
         pageUtils.findCentralPageIndexInfo()
         if (imageUtils.isImgControl()) {
           ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
@@ -354,30 +368,47 @@ export default Vue.extend({
       })
     },
     swipeUpHandler(e: AnyTouchEvent) {
+      if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
+        return
+      }
       e.stopImmediatePropagation()
       if (this.pageNum - 1 !== this.currCardIndex) {
-        this.currCardIndex++
+        this.setCurrCardIndex(this.currCardIndex + 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            pageUtils.fitPage()
+          }, 300)
+        })
       } else {
         this.addPage(pageUtils.newPage({}))
+        pageUtils.fitPage()
         StepsUtils.record()
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
+      if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
+        return
+      }
       e.stopImmediatePropagation()
       if (this.currCardIndex !== 0) {
-        this.currCardIndex--
+        this.setCurrCardIndex(this.currCardIndex - 1)
         GroupUtils.deselect()
         this.setCurrActivePageIndex(this.currCardIndex)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            pageUtils.fitPage()
+          }, 300)
+        })
       }
     },
     cardStyle(index: number): { [index: string]: string | number } {
-      const cardSize = this.editorView ? this.editorView.clientHeight : 0
       return {
         width: '100%',
-        height: this.editorView ? `${cardSize}px` : '100%',
-        transform: this.editorView ? `translate3d(0,${index * cardSize - this.currCardIndex * cardSize}px,0)` : 'translate3d(0,0px,0)'
+        height: this.editorView ? `${this.cardSize}px` : '100%',
+        transform: this.editorView ? `translate3d(0,${index * this.cardSize - this.currCardIndex * this.cardSize}px,0)` : 'translate3d(0,0px,0)',
+        transition: this.mounted ? 'transform 0.3s' : 'none'
       }
     }
   }
@@ -417,7 +448,6 @@ $REULER_SIZE: 20px;
     // justify-content: center;
     overflow: scroll;
     padding: 40px;
-    transition: transform 0.3s;
     @include no-scrollbar;
   }
 }

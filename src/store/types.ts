@@ -72,9 +72,7 @@ export interface IEditorState {
   inGestureToolMode: boolean,
   isMobile: boolean
   isLargeDesktop: boolean,
-  closeMobilePanelFlag: boolean,
-  isGlobalLoading: boolean,
-  inMultiSelectionMode: boolean
+  isGlobalLoading: boolean
 }
 
 export enum SidebarPanelType {
@@ -106,6 +104,12 @@ export enum ColorEventType {
   shape = 'setShapeColor',
   background = 'setBackgroundColor',
   photoShadow = 'setPhotoEffectColor'
+}
+
+export enum MobileColorPanelType {
+  palette = 'color-palette',
+  picker = 'color-picker',
+  more = 'color-more'
 }
 
 export enum PopupSliderEventType {

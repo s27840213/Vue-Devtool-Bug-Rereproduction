@@ -262,10 +262,7 @@ export default Vue.extend({
       uploadUtils.chooseAssets('font')
     },
     capitalize(str: string): string {
-      if (str.length > 0) {
-        return str[0].toUpperCase() + str.substring(1)
-      }
-      return str
+      return generalUtils.capitalize(str)
     }
   }
 })
