@@ -40,7 +40,8 @@
               :isMoved="isMoved"
               @onSubDrop="onSubDrop"
               @clickSubController="clickSubController"
-              @dblSubController="dblSubController")
+              @dblSubController="dblSubController"
+              @pointerDownSubController="pointerDownSubController")
       template(v-if="config.type === 'text' && isActive")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml" :id="`text-${layerIndex}`"
@@ -222,7 +223,8 @@ export default Vue.extend({
       widthLimitSetDuringComposition: false,
       isMoved: false,
       isDoingGestureAction: false,
-      dblTabsFlag: false
+      dblTabsFlag: false,
+      isPointerDownSubController: false
     }
   },
   mounted() {
@@ -919,7 +921,8 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos.x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos.y - this.initTranslate.y)
         }
-        if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
+        const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+        if (hasActiualMove) {
           if (this.getLayerType === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
@@ -983,6 +986,17 @@ export default Vue.extend({
             }
           }
         }
+
+        if (!this.isPointerDownSubController && !hasActiualMove) {
+          if (this.config.type === LayerType.group) {
+            for (let i = 0; i < (this.config as IGroup).layers.length; i++) {
+              if ((this.config as IGroup).layers[i].active) {
+                LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: false }, i)
+              }
+            }
+          }
+        }
+        this.isPointerDownSubController = false
         this.isControlling = false
         this.setCursorStyle('')
         eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -1895,6 +1909,9 @@ export default Vue.extend({
         }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
+    },
+    pointerDownSubController() {
+      this.isPointerDownSubController = true
     },
     dblSubController(targetIndex: number) {
       console.log('dbl')

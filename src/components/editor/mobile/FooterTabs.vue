@@ -214,8 +214,11 @@ export default Vue.extend({
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && this.singleTargetType()) {
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
+        /** tmp layer treated as group */
         return this.multiPhotoTabs
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
+        return this.photoTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
         return this.multiFontTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
@@ -236,6 +239,12 @@ export default Vue.extend({
         return this.homeTabs
       }
     },
+    isWholeGroup(): boolean {
+      /**
+       * Select whole group and no sub-layer selected
+       */
+      return this.isGroup && this.groupTypes.size === 1 && layerUtils.subLayerIdx === -1
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -246,7 +255,7 @@ export default Vue.extend({
       return layerUtils.getTmpLayer().locked
     },
     isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+      return (layerUtils.getCurrLayer.type === LayerType.tmp || this.currSelectedInfo.types.has('group')) && this.currSelectedInfo.layers.length === 1
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
