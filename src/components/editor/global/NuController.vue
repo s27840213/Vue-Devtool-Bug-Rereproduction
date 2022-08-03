@@ -607,6 +607,47 @@ export default Vue.extend({
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
+    // styles(type: string) {
+    //   const zindex = (() => {
+    //     const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
+    //     const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
+    //     if (type === 'control-point') {
+    //       return (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
+    //     }
+    //     if (isFrame || isGroup) {
+    //       return (this.layerIndex + 1) * 1000
+    //     }
+    //     if (this.getLayerType === 'tmp') {
+    //       /**
+    //        * @Todo - find the reason why this been set to certain value istead of 0
+    //        * set to 0 will make the layer below the empty area of tmp layer selectable
+    //        */
+    //       return (this.layerIndex + 1) * 1000
+    //     }
+    //     if (this.getLayerType === 'text' && this.isActive) {
+    //       return (this.layerIndex + 1) * 99
+    //     }
+    //     return this.config.styles.zindex + 1
+    //   })()
+    //   const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+    //   const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+    //   return {
+    //     transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
+    //     width: `${width}px`,
+    //     height: `${height}px`,
+    //     outline: this.outlineStyles(),
+    //     opacity: this.isImgControl ? 0 : 1,
+    //     'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
+    //     /**
+    //      * @Note - set touchAction to none because pointer event will be canceled by touch action
+    //      * So, if we want to control the layer, we need to set it to none.
+    //      * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
+    //      */
+    //     touchAction: this.isActive ? 'none' : 'initial',
+    //     ...textEffectStyles,
+    //     '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+    //   }
+    // },
     lineControlPointStyles() {
       const { angle } = shapeUtils.lineDimension(this.config.point)
       const degree = angle / Math.PI * 180
