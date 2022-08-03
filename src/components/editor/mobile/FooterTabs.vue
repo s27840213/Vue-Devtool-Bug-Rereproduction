@@ -16,7 +16,7 @@
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -65,6 +65,7 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -471,7 +472,7 @@ export default Vue.extend({
           break
         }
         case 'effect': {
-          if (this.isHandleShadow) {
+          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
             Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
             return
           }
