@@ -48,6 +48,10 @@ class BackgroundUtils {
     return this.currPage.backgroundImage
   }
 
+  get backgroundImageControl(): boolean {
+    return this.backgroundImage.config.imgControl
+  }
+
   get backgroundImgControl(): boolean {
     return this.currPage.backgroundImage.config?.imgControl ?? false
   }
@@ -112,6 +116,10 @@ class BackgroundUtils {
 
   setBgImageControl(props: { pageIndex: number, imgControl: boolean }) {
     store.commit('SET_backgroundImageControl', props)
+  }
+
+  setAllBackgroundImageControlDefault(): void {
+    store.commit('SET_allBackgroundImageControl', false)
   }
 
   detachBgImage() {

@@ -482,8 +482,13 @@ export default Vue.extend({
           break
         }
       }
-      if (tab.icon !== 'crop' && this.isCropping) {
-        imageUtils.setImgControlDefault()
+      if (tab.icon !== 'crop') {
+        if (this.isCropping) {
+          imageUtils.setImgControlDefault()
+        }
+        if (backgroundUtils.backgroundImageControl) {
+          backgroundUtils.setAllBackgroundImageControlDefault()
+        }
       }
 
       if (tab.panelType !== undefined) {
