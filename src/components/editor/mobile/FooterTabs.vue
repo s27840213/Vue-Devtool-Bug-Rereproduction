@@ -87,17 +87,28 @@ export default Vue.extend({
     groupTab(): IFooterTab {
       return { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, hidden: !this.isGroup && this.selectedLayerNum === 1 }
     },
+    photoInGroupTabs(): Array<IFooterTab> {
+      return [
+        this.mainMenu,
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        ...this.genearlLayerTabs,
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+      ]
+    },
     photoTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'set-as-frame', text: `${this.$t('NN0706')}` },
+        { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isFrameImage },
+        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isFrameImage }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -218,7 +229,7 @@ export default Vue.extend({
         /** tmp layer treated as group */
         return this.multiPhotoTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
-        return this.photoTabs
+        return this.photoInGroupTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
         return this.multiFontTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
@@ -276,10 +287,13 @@ export default Vue.extend({
     isInLastStep(): boolean {
       return stepsUtils.isInLastStep
     },
-    isFrameImage(): boolean {
+    isInFrame(): boolean {
       const { layers, types } = this.currSelectedInfo
       const frameLayer = layers[0] as IFrame
       return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
+    },
+    isFrameImg(): boolean {
+      return layerUtils.getCurrLayer.type === LayerType.frame && ((layerUtils.getCurrConfig as IImage).isFrameImg ?? false)
     },
     isSubLayerFrameImage(): boolean {
       const { index } = this.currSubSelectedInfo
@@ -394,6 +408,11 @@ export default Vue.extend({
                     frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
                   }
                   break
+                case 'group':
+                  if (layerUtils.getCurrConfig.type === LayerType.image) {
+                    layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true }, layerUtils.subLayerIdx)
+                  }
+                  break
               }
             }
           } else if (this.inBgSettingMode) {
@@ -406,7 +425,11 @@ export default Vue.extend({
           break
         }
         case 'set-as-frame': {
-          frameUtils.updateImgToFrame()
+          if (layerUtils.getCurrLayer.type === LayerType.frame) {
+            frameUtils.detachImage(layerUtils.layerIndex)
+          } else {
+            frameUtils.updateImgToFrame()
+          }
           break
         }
         case 'main-menu': {
@@ -518,7 +541,7 @@ export default Vue.extend({
         }
       } else {
         if (this.currSelectedInfo.types.has('frame') && type === 'image') {
-          return this.isFrameImage
+          return this.isInFrame
         }
         return this.currSelectedInfo.types.has(type)
       }

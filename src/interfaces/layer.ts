@@ -134,6 +134,7 @@ export interface IImage extends ILayer<IImageStyle> {
   clipPath: string,
   isClipper: boolean,
   isFrame?: boolean,
+  isFrameImg?: boolean,
   imgControl: boolean,
   inProcess: LayerProcessType,
   trace?: number,
