@@ -170,7 +170,8 @@
       div(v-if="(currActivePageIndex === pageIndex && isDetailPage)"
           class="page-resizer"
           ref="pageResizer"
-          @mousedown.left.stop="pageResizeStart($event)"
+          @pointerdown.left.stop="pageResizeStart($event)"
+          @touchstart="disableTouchEvent"
           @mouseenter="toggleResizerHint(true)"
           @mouseleave="toggleResizerHint(false)")
         svg-icon(class="page-resizer__resizer-bar"
@@ -226,6 +227,7 @@ import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import eventUtils from '@/utils/eventUtils'
 
 export default Vue.extend({
   components: {
@@ -637,22 +639,22 @@ export default Vue.extend({
       })
     },
     scrollUpdate() {
-      const event = new MouseEvent('mousemove', {
+      const event = new PointerEvent('pointermove', {
         clientX: this.currentAbsPos.x,
         clientY: this.currentAbsPos.y
       })
-      document.documentElement.dispatchEvent(event)
+      window.dispatchEvent(event)
     },
-    pageResizeStart(e: MouseEvent) {
+    pageResizeStart(e: PointerEvent) {
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      document.documentElement.addEventListener('mousemove', this.pageResizing)
+      eventUtils.addPointerEvent('pointermove', this.pageResizing)
       this.editorView.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      document.documentElement.addEventListener('mouseup', this.pageResizeEnd)
+      eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
     },
-    pageResizing(e: MouseEvent) {
+    pageResizing(e: PointerEvent) {
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
       const isShownScrollbar = (this.editorView.scrollHeight === this.editorView.clientHeight)
@@ -670,7 +672,7 @@ export default Vue.extend({
       }
       this.isShownScrollBar = isShownScrollbar
     },
-    pageResizeEnd(e: MouseEvent) {
+    pageResizeEnd(e: PointerEvent) {
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = false
       pageUtils.updatePageProps({
@@ -678,9 +680,9 @@ export default Vue.extend({
       })
       StepsUtils.record()
       this.$nextTick(() => {
-        document.documentElement.removeEventListener('mousemove', this.pageResizing)
+        eventUtils.removePointerEvent('pointermove', this.pageResizing)
         this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
-        document.documentElement.removeEventListener('mouseup', this.pageResizeEnd)
+        eventUtils.removePointerEvent('pointerup', this.pageResizeEnd)
       })
       pageUtils.findCentralPageIndexInfo()
     },
@@ -700,6 +702,12 @@ export default Vue.extend({
       ShortcutUtils.redo()
       if (!StepsUtils.isInLastStep) {
         this.$emit('stepChange')
+      }
+    },
+    disableTouchEvent(e: TouchEvent) {
+      if (generalUtils.isTouchDevice()) {
+        e.preventDefault()
+        e.stopPropagation()
       }
     }
   }
