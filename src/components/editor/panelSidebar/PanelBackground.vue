@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-bg")
-    tabs(:tabs="['圖片','顏色']" @switchTab="switchTab")
+    tabs(:tabs="[$t('NN0002'),$t('NN0017')]" @switchTab="switchTab")
     search-bar(v-if="showImageTab" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
@@ -60,7 +60,7 @@ import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
@@ -223,7 +223,7 @@ export default Vue.extend({
     ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor',
-      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     colorStyles(color: string) {
       return {
@@ -267,7 +267,7 @@ export default Vue.extend({
     },
     handleColorModal(color: string) {
       if (generalUtils.isTouchDevice()) {
-        this.$emit('openExtraColorModal')
+        this.$emit('openExtraColorModal', ColorEventType.background, MobileColorPanelType.picker)
         return
       }
       colorUtils.setCurrEvent(ColorEventType.background)

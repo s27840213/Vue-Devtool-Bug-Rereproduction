@@ -10,8 +10,8 @@ import { SrcObj } from '@/interfaces/gallery'
 import imageApi from '@/apis/image-api'
 import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
-import pageUtils from '@/utils/pageUtils'
 import generalUtils from './generalUtils'
+import { findIndex } from 'lodash'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
@@ -107,7 +107,7 @@ class ImageUtils {
   }
 
   getSrcSize(srcObj: SrcObj, dimension: number, preload = '') {
-    const { type, maxSize } = srcObj
+    const { type } = srcObj
     if (!type) {
       return 0
     }
@@ -115,10 +115,14 @@ class ImageUtils {
     const sizeMap = (store.state as any).user.imgSizeMap
     if (sizeMap?.length) {
       let i = 0
-      while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
-        i++
+      if (typeof dimension === 'number') {
+        while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
+          i++
+        }
+        i = Math.max(i - 1, 0)
+      } else if (typeof dimension === 'string') {
+        i = Math.max(sizeMap.findIndex((m: { [x: string]: string }) => m[key] === dimension), 0)
       }
-      i = Math.max(i - 1, 0)
       return preload
         ? preload === 'pre' ? sizeMap[i + 1 >= sizeMap.length - 1 ? sizeMap.length - 1 : i + 1][key] : sizeMap[i - 1 <= 0 ? 0 : i - 1][key]
         : sizeMap[i][key]

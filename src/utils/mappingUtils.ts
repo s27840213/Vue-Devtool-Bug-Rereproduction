@@ -6,6 +6,8 @@ import layerUtils from './layerUtils'
 import popupUtils from './popupUtils'
 import flipUtils from './flipUtils'
 import stepsUtils from './stepsUtils'
+import groupUtils from './groupUtils'
+import backgroundUtils from './backgroundUtils'
 
 const iconAlign = ['left-align', 'center-horizontally', 'right-align', 'top-align', 'center-vertically', 'bottom-align']
 const iconDistribute = ['distribute-horizontally', 'distribute-vertically']
@@ -132,19 +134,39 @@ class MappingUtils {
         break
       }
       case 'unlock': {
-        const { index, pageIndex } = layerUtils.currSelectedInfo
-        layerUtils.updateLayerProps(pageIndex, index, { locked: true })
-        stepsUtils.record()
+        if (backgroundUtils.inBgSettingMode) {
+          backgroundUtils.handleLockBackground()
+        } else {
+          const { index, pageIndex } = layerUtils.currSelectedInfo
+          layerUtils.updateLayerProps(pageIndex, index, { locked: true })
+          stepsUtils.record()
+        }
         break
       }
       case 'lock': {
-        const { index, pageIndex } = layerUtils.currSelectedInfo
-        layerUtils.updateLayerProps(pageIndex, index, { locked: false })
-        stepsUtils.record()
+        if (backgroundUtils.inBgSettingMode) {
+          backgroundUtils.handleLockBackground()
+        } else {
+          const { index, pageIndex } = layerUtils.currSelectedInfo
+          layerUtils.updateLayerProps(pageIndex, index, { locked: false })
+          stepsUtils.record()
+        }
+        break
+      }
+      case 'group': {
+        groupUtils.group()
+        break
+      }
+      case 'ungroup': {
+        groupUtils.ungroup()
         break
       }
       case 'trash': {
-        ShortcutUtils.del()
+        if (backgroundUtils.inBgSettingMode) {
+          backgroundUtils.handleDeleteBackground()
+        } else {
+          ShortcutUtils.del()
+        }
         break
       }
       case 'flip-h': {

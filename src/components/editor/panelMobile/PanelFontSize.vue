@@ -1,13 +1,6 @@
 <template lang="pug">
   div(class="panel-font-size")
-    div(class="size-bar relative")
-      div(class="pointer"
-        @touchstart="fontSizeStepping(-step)") -
-      button(class="panel-font-size__range-input-button" @click="handleValueModal")
-        input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-              @change="setSize" :value="fontSize")
-      div(class="pointer"
-        @touchstart="fontSizeStepping(step)") +
+    font-size-selector
     input(class="panel-font-size__range-input input__slider--range"
       v-model.number="fontSize"
       max="144"
@@ -19,6 +12,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
+import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 import layerUtils from '@/utils/layerUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -28,7 +22,8 @@ import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
 export default Vue.extend({
   components: {
-    MobileSlider
+    MobileSlider,
+    FontSizeSelector
   },
   data() {
     return {
@@ -48,9 +43,6 @@ export default Vue.extend({
       layerIndex: 'getCurrSelectedIndex'
     }),
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
-    opacity(): number {
-      return layerUtils.getCurrOpacity
-    },
     scale(): number {
       const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
       if (currLayer && currLayer.layers) {
@@ -85,86 +77,6 @@ export default Vue.extend({
         })
         textPropUtils.updateTextPropsState({ fontSize: value.toString() })
         textEffectUtils.refreshSize()
-      }
-    },
-    step(): number {
-      // const config = LayerUtils.getCurrConfig
-      // return 1 / config.styles.scale
-      const { getCurrLayer: currLayer, subLayerIdx } = layerUtils
-      let scale = currLayer.styles.scale
-      if (subLayerIdx !== -1) {
-        scale *= (currLayer as IGroup).layers[subLayerIdx].styles.scale
-      }
-      return 1 / scale
-    }
-  },
-  methods: {
-    isValidInt(value: string) {
-      return value.match(/^-?\d+$/)
-    },
-    isValidFloat(value: string) {
-      return value.match(/[+-]?\d+(\.\d+)?/)
-    },
-    isValidHexColor(value: string) {
-      return value.match(/^#[0-9A-F]{6}$/)
-    },
-    boundValue(value: number, min: number, max: number): string {
-      if (value < min) return min.toString()
-      else if (value > max) return max.toString()
-      return value.toString()
-    },
-    fontSizeStepping(step: number, tickInterval = 100) {
-      const startTime = new Date().getTime()
-      const interval = setInterval(() => {
-        if (new Date().getTime() - startTime > 500) {
-          try {
-            textPropUtils.fontSizeStepping(step)
-            textEffectUtils.refreshSize()
-          } catch (error) {
-            console.error(error)
-            window.removeEventListener('touchend', onmouseup)
-            clearInterval(interval)
-          }
-        }
-      }, tickInterval)
-
-      const onmouseup = () => {
-        window.removeEventListener('touchend', onmouseup)
-        if (new Date().getTime() - startTime < 500) {
-          textPropUtils.fontSizeStepping(step)
-          textEffectUtils.refreshSize()
-        }
-        clearInterval(interval)
-        tiptapUtils.agent(editor => {
-          if (!editor.state.selection.empty) {
-            layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-          }
-        })
-      }
-
-      window.addEventListener('touchend', onmouseup)
-    },
-    setSize(e: Event) {
-      let { value } = e.target as HTMLInputElement
-      if (this.isValidFloat(value)) {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
-        window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
-          tiptapUtils.agent(editor => {
-            layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-          })
-          textPropUtils.updateTextPropsState({ fontSize: value })
-          textEffectUtils.refreshSize()
-        })
-      }
-    },
-    handleValueModal() {
-      this.openValueSelector = !this.openValueSelector
-      if (this.openValueSelector) {
-        const input = this.$refs['input-fontSize'] as HTMLInputElement
-        input.focus()
-        input.select()
       }
     }
   }

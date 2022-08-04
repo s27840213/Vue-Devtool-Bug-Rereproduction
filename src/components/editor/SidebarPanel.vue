@@ -18,7 +18,7 @@ import Vue from 'vue'
 import PanelTemplate from '@/components/editor/panelSidebar/PanelTemplate.vue'
 import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
-import ColorPanel from '@/components/editor/ColorPanel.vue'
+import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
 import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
@@ -105,7 +105,7 @@ export default Vue.extend({
     position: absolute;
     bottom: 0;
     left: 0;
-    z-index: setZindex('color-panel');
+    z-index: setZindex("color-panel");
   }
 }
 </style>

@@ -20,6 +20,7 @@
         @pointerdown="moveStart"
         @mouseenter="toggleHighlighter(pageIndex,layerIndex, true)"
         @mouseleave="toggleHighlighter(pageIndex,layerIndex, false)"
+        v-press="isTouchDevice? onPress : -1"
         @dblclick="onDblClick")
       //- template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isTouchDevice")
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
@@ -168,6 +169,8 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
+import editorUtils from '@/utils/editorUtils'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -226,6 +229,14 @@ export default Vue.extend({
     if (this.config.active) {
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
     }
+
+    const body = (this.$refs.body as HTMLElement)
+
+    // const bodyAt = new AnyTouch(body)
+    // //  销毁
+    // this.$on('hook:destroyed', () => {
+    //   bodyAt.destroy()
+    // })
   },
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -243,7 +254,7 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currHoveredPageIndex: 'getCurrHoveredPageIndex',
-      inMultiSelectionMode: 'getInMultiSelectionMode',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
@@ -380,7 +391,7 @@ export default Vue.extend({
           editor.setEditable(newVal)
         })
       }
-      StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
+      !generalUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal })
     }
   },
   destroyed() {
@@ -398,8 +409,7 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -548,28 +558,35 @@ export default Vue.extend({
         shown
       })
     },
+    zindex(type: string) {
+      const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
+      const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
+      let offset = 0
+      let zindex
+      if (this.isMoving && LayerUtils.layerIndex !== this.layerIndex) {
+        /** The offset is used for frame enter/leave detection */
+        offset += LayerUtils.getCurrLayer.styles.zindex + 1
+      }
+      if (type === 'control-point') {
+        zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
+      }
+      if (isFrame) {
+        zindex = (this.layerIndex + 1) * 1000
+      }
+      if (this.getLayerType === 'tmp') {
+        /**
+         * @Todo - find the reason why this been set to certain value istead of 0
+         * set to 0 will make the layer below the empty area of tmp layer selectable
+         */
+        zindex = (this.layerIndex + 1) * 1000
+      }
+      if (this.getLayerType === 'text' && this.isActive) {
+        zindex = (this.layerIndex + 1) * 99
+      }
+      return (zindex ?? (this.config.styles.zindex + 1)) + offset
+    },
     styles(type: string) {
-      const zindex = (() => {
-        const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
-        const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
-        if (type === 'control-point') {
-          return (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
-        }
-        if (isFrame || isGroup) {
-          return (this.layerIndex + 1) * 1000
-        }
-        if (this.getLayerType === 'tmp') {
-          /**
-           * @Todo - find the reason why this been set to certain value istead of 0
-           * set to 0 will make the layer below the empty area of tmp layer selectable
-           */
-          return (this.layerIndex + 1) * 1000
-        }
-        if (this.getLayerType === 'text' && this.isActive) {
-          return (this.layerIndex + 1) * 99
-        }
-        return this.config.styles.zindex + 1
-      })()
+      const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
@@ -584,11 +601,53 @@ export default Vue.extend({
          * So, if we want to control the layer, we need to set it to none.
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
-        touchAction: this.isActive ? 'none' : 'initial',
+        // touchAction: this.isActive ? 'none' : 'initial',
+        touchAction: 'none',
         ...textEffectStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
+    // styles(type: string) {
+    //   const zindex = (() => {
+    //     const isFrame = this.getLayerType === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
+    //     const isGroup = (this.getLayerType === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
+    //     if (type === 'control-point') {
+    //       return (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)
+    //     }
+    //     if (isFrame || isGroup) {
+    //       return (this.layerIndex + 1) * 1000
+    //     }
+    //     if (this.getLayerType === 'tmp') {
+    //       /**
+    //        * @Todo - find the reason why this been set to certain value istead of 0
+    //        * set to 0 will make the layer below the empty area of tmp layer selectable
+    //        */
+    //       return (this.layerIndex + 1) * 1000
+    //     }
+    //     if (this.getLayerType === 'text' && this.isActive) {
+    //       return (this.layerIndex + 1) * 99
+    //     }
+    //     return this.config.styles.zindex + 1
+    //   })()
+    //   const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
+    //   const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+    //   return {
+    //     transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
+    //     width: `${width}px`,
+    //     height: `${height}px`,
+    //     outline: this.outlineStyles(),
+    //     opacity: this.isImgControl ? 0 : 1,
+    //     'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
+    //     /**
+    //      * @Note - set touchAction to none because pointer event will be canceled by touch action
+    //      * So, if we want to control the layer, we need to set it to none.
+    //      * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
+    //      */
+    //     touchAction: this.isActive ? 'none' : 'initial',
+    //     ...textEffectStyles,
+    //     '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+    //   }
+    // },
     lineControlPointStyles() {
       const { angle } = shapeUtils.lineDimension(this.config.point)
       const degree = angle / Math.PI * 180
@@ -632,10 +691,13 @@ export default Vue.extend({
       }
     },
     hintStyles() {
-      return `transform: translate(${this.hintTranslation.x}px, ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)
+      const body = (event.target as HTMLElement)
+      body.releasePointerCapture((event as PointerEvent).pointerId)
+
       if (eventType === 'pointer') {
         const pointerEvent = event as PointerEvent
         if (pointerEvent.button !== 0) return
@@ -646,17 +708,16 @@ export default Vue.extend({
       if (eventUtils.checkIsMultiTouch(event)) {
         return
       }
-      // if (this.isProcessImgShadow) {
-      //   return
-      // } else {
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
       ImageUtils.setImgControlDefault(false)
-      // }
 
-      if (this.isTouchDevice && !this.isActive && !this.isLocked) {
-        const body = (this.$refs.body as HTMLElement)
+      /**
+       * @Note - in Mobile version, we can't select the layer directly, we should make it active first
+       * The exception is that we are in multi-selection mode
+       */
+      if (this.isTouchDevice && !this.isActive && !this.isLocked && !this.inMultiSelectionMode) {
         body.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -665,14 +726,21 @@ export default Vue.extend({
       }
 
       this.movingByControlPoint = false
-      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
-      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey]) || this.inMultiSelectionMode) && !this.contentEditable
+      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
+
+      const { inMultiSelectionMode } = this
       if (!this.isLocked) {
         event.stopPropagation()
       }
       formatUtils.applyFormatIfCopied(this.pageIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
       this.initTranslate = this.getLayerPos
+
+      if (inCopyMode) {
+        ShortcutUtils.altDuplicate(this.pageIndex, this.layerIndex, this.config)
+      }
 
       switch (this.getLayerType) {
         case 'text': {
@@ -688,7 +756,7 @@ export default Vue.extend({
             return
           } else if (!this.isActive) {
             let targetIndex = this.layerIndex
-            if (!inSelectionMode) {
+            if (!inSelectionMode && !inMultiSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedLayerIndex(this.layerIndex)
@@ -728,6 +796,9 @@ export default Vue.extend({
           }
       }
 
+      /**
+       * @Note InMultiSelection mode should still can move the layer
+       */
       if (!this.config.locked && !inSelectionMode) {
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -745,7 +816,7 @@ export default Vue.extend({
           // already have selected layer
           if (this.currSelectedInfo.index >= 0) {
             // Did not press shift/cmd/ctrl key -> deselect selected layers first
-            if (!inSelectionMode) {
+            if (!inSelectionMode && !inMultiSelectionMode) {
               GroupUtils.deselect()
               targetIndex = this.config.styles.zindex - 1
               this.setLastSelectedLayerIndex(this.layerIndex)
@@ -903,8 +974,33 @@ export default Vue.extend({
             if (this.movingByControlPoint) {
               LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
             }
+            if (this.config.contentEditable) {
+              tiptapUtils.focus({ scrollIntoView: false })
+            }
           }
           this.isMoved = false
+          if (this.inMultiSelectionMode) {
+            if (this.config.type !== 'tmp') {
+              let targetIndex = this.layerIndex
+              if (this.isActive && this.currSelectedInfo.layers.length === 1) {
+                GroupUtils.deselect()
+                targetIndex = this.config.styles.zindex - 1
+                this.setLastSelectedLayerIndex(this.layerIndex)
+              } else if (!this.isActive) {
+                // already have selected layer
+                if (this.currSelectedInfo.index >= 0) {
+                  // this if statement is used to prevent select the layer in another page
+                  if (this.pageIndex === pageUtils.currFocusPageIndex) {
+                    GroupUtils.select(this.pageIndex, [targetIndex])
+                  }
+                } else {
+                  targetIndex = this.config.styles.zindex - 1
+                  this.setLastSelectedLayerIndex(this.layerIndex)
+                  GroupUtils.select(this.pageIndex, [targetIndex])
+                }
+              }
+            }
+          }
         }
         this.isControlling = false
         this.setCursorStyle('')
@@ -1136,7 +1232,7 @@ export default Vue.extend({
       const { angle, yDiff, xDiff } = shapeUtils.lineDimension(this.config.point)
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = ((angle / Math.PI * 180 + (1 - markerIndex) * 180) + 360) % 360
       this.hintLength = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2))
 
@@ -1165,7 +1261,7 @@ export default Vue.extend({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintLength = lineLength
       this.hintAngle = lineAngle
 
@@ -1404,7 +1500,7 @@ export default Vue.extend({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
       eventUtils.addPointerEvent('pointermove', this.rotating)
@@ -1436,7 +1532,7 @@ export default Vue.extend({
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-        this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
 
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
@@ -1469,7 +1565,7 @@ export default Vue.extend({
 
       const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
       const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-      this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+      this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
       this.hintAngle = (this.initialRotate + 360) % 360
 
       eventUtils.addPointerEvent('pointermove', this.lineRotating)
@@ -1503,7 +1599,7 @@ export default Vue.extend({
 
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
-        this.hintTranslation = { x: mouseActualPos.offsetX + 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
+        this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
 
         ControlUtils.updateShapeLinePoint(this.pageIndex, this.layerIndex, point)
@@ -1588,14 +1684,14 @@ export default Vue.extend({
             replacedImg.crossOrigin = 'anonynous'
             replacedImg.onload = () => {
               const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
-              if (isTransparent) {
-                const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
-                imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
-                imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
-              }
+              const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
+              imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
+              // if (isTransparent) {
+              //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
+              //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
+              // }
             }
-            const size = ['private', 'public', 'background', 'private-logo', 'public-logo'].includes(this.config.srcObj.type)
-              ? 'tiny' : 100
+            const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
             const src = ImageUtils.getSrc(this.config, size)
             replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             return
@@ -1749,7 +1845,7 @@ export default Vue.extend({
     onRightClick(event: MouseEvent) {
       if (this.isTouchDevice) {
         // in touch device, right click will be triggered by long click
-        // this.setInMultiSelectionMode(true)
+        event.preventDefault()
         return
       }
       /**
@@ -1769,6 +1865,19 @@ export default Vue.extend({
       this.$nextTick(() => {
         popupUtils.openPopup('layer', { event, layerIndex: this.layerIndex })
       })
+    },
+    onPress(event: AnyTouchEvent) {
+      if (!this.isActive) {
+        GroupUtils.deselect()
+        GroupUtils.select(this.pageIndex, [this.layerIndex])
+      }
+      if (this.getLayerType === 'text') {
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: false, shown: false, contentEditable: false, isTyping: false })
+      }
+
+      eventUtils.removePointerEvent('pointermove', this.moving)
+      eventUtils.removePointerEvent('pointerup', this.moveEnd)
+      editorUtils.setInMultiSelectionMode(true)
     },
     clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
       if (!this.isActive) {
@@ -1936,6 +2045,7 @@ export default Vue.extend({
     position: absolute;
     box-sizing: border-box;
     transform-style: preserve-3d;
+    touch-action: none;
   }
   &__ctrl-points {
     display: flex;

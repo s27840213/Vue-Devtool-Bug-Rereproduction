@@ -2,6 +2,7 @@ import { IGroup, ILayer, IShape, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import store from '@/store'
 import { IPage } from '@/interfaces/page'
+import pageUtils from './pageUtils'
 
 const STOP_POSTFIX = '_st'
 
@@ -11,6 +12,11 @@ class ColorUtils {
   currEvent: string
   currColor: string
   isColorPickerOpen: boolean
+
+  get currPageBackgroundColor() {
+    return pageUtils.currFocusPage.backgroundColor
+  }
+
   constructor() {
     this.event = new EventEmitter()
     this.eventHash = {}
@@ -51,6 +57,13 @@ class ColorUtils {
 
   setIsColorPickerOpen(bool: boolean) {
     this.isColorPickerOpen = bool
+  }
+
+  setCurrPageBackgroundColor(color: string) {
+    store.commit('SET_backgroundColor', {
+      pageIndex: pageUtils.currFocusPageIndex,
+      color
+    })
   }
 }
 

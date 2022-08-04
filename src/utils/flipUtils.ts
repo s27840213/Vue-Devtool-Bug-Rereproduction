@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 import store from '@/store'
 import LayerUtils from '@/utils/layerUtils'
 import ShapeUtils from '@/utils/shapeUtils'
@@ -10,15 +11,14 @@ class FlipUtils {
     return currSelectedInfo.types.has('group') && currSelectedInfo.layers.length === 1
   }
 
-  checkKey(updateStyle: any):
-  {horizontalFlip: boolean, verticalFlip: boolean} {
+  checkKey(updateStyle: any): { horizontalFlip: boolean, verticalFlip: boolean } {
     return {
       horizontalFlip: 'horizontalFlip' in updateStyle,
       verticalFlip: 'verticalFlip' in updateStyle
     }
   }
 
-  applyFlip(pageIndex: number, layerIndex: number, layer: any, updateStyle: {[key: string]: boolean}) {
+  applyFlip(pageIndex: number, layerIndex: number, layer: any, updateStyle: { [key: string]: boolean }) {
     if (layer.type === 'shape' && layer.category === 'D') {
       const { horizontalFlip, verticalFlip } = this.checkKey(updateStyle)
       const point = ShapeUtils.flipLine(layer.point, horizontalFlip, verticalFlip)
@@ -41,8 +41,8 @@ class FlipUtils {
         LayerUtils.subLayerIdx !== -1 && (() => {
           frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
             , LayerUtils.subLayerIdx, {
-              horizontalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.horizontalFlip
-            })
+            horizontalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.horizontalFlip
+          })
         })()
         LayerUtils.subLayerIdx === -1 && defaultFlip()
         break
@@ -72,8 +72,8 @@ class FlipUtils {
         LayerUtils.subLayerIdx !== -1 && (() => {
           frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
             , LayerUtils.subLayerIdx, {
-              verticalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.verticalFlip
-            })
+            verticalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.verticalFlip
+          })
         })()
         LayerUtils.subLayerIdx === -1 && defaultFlip()
         break

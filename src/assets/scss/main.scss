@@ -13,7 +13,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    touch-action: none;
+    touch-action: manipulation;
 }
 
 [contenteditable] {
@@ -29,4 +29,10 @@ input,
 button,
 select {
     font-family: inherit;
+}
+
+
+.inputNode {
+    position: absolute;
+    visibility: hidden;
 }

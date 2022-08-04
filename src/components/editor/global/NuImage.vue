@@ -92,7 +92,7 @@ export default Vue.extend({
       if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
         const img = new Image()
         img.crossOrigin = 'anonymous'
-        const size = ['private', 'public', 'private-logo', 'public-logo'].includes(this.config.srcObj.type) ? 'tiny' : 128
+        const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
         img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
         img.onload = () => {
           const canvas = document.createElement('canvas')
@@ -561,7 +561,6 @@ export default Vue.extend({
       logUtils.setLog(log)
     },
     async perviewAsLoading() {
-      // console.log(this.config.previewSrc)
       if (this.config.previewSrc) {
         return
       }
@@ -571,7 +570,6 @@ export default Vue.extend({
        **/
       return new Promise<void>((resolve, reject) => {
         this.src = ImageUtils.getSrc(this.config, this.getPreviewSize)
-        // console.log(this.src)
         const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
         const img = new Image()
         img.onload = () => {
@@ -993,7 +991,7 @@ export default Vue.extend({
     top: 0px;
     left: 0px;
     width: 100%;
-    height:100%;
+    height: 100%;
   }
 
   .img-wrapper {

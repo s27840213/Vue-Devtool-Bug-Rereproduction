@@ -5,7 +5,7 @@
     img(class="category-object-item__img"
       draggable="true"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    svg-icon(v-if="item.info || (item.tags && item.tags.length > 0)"
+    svg-icon(v-if="!isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
       class="category-object-item__more"
       @click.native="showSvgInfo"
       :iconName="'more_vertical'"
@@ -21,6 +21,7 @@ import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
 import { mapMutations } from 'vuex'
 import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -29,6 +30,11 @@ export default Vue.extend({
   props: {
     src: String,
     item: Object
+  },
+  computed: {
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
+    }
   },
   created() {
     this.item.db = 'svg'

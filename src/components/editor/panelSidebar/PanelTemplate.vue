@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-template")
+  div(class="panel-template" ref="panel")
     div(v-if="showPrompt && !currentGroup"
       class="panel-template__prompt body-2")
       span {{$t('NN0247')}}
@@ -27,6 +27,7 @@
             @click.native="onAdvancedClicked()")
         popup-theme(v-if="showTheme"
           class="panel-template__theme"
+          :style="themeStyle()"
           :preSelected="theme.split(',')"
           @change="handleTheme"
           @close="showTheme = false")
@@ -153,7 +154,7 @@ export default Vue.extend({
       return (this.role === 0) && this.adminMode
     },
     itemHeight(): number {
-      return this.showTemplateId ? 179 : 155
+      return generalUtils.getListRowItemSize() + (this.showTemplateId ? 34 : 10)
     },
     listCategories(): any[] {
       const { keyword, categories, itemHeight } = this
@@ -173,9 +174,9 @@ export default Vue.extend({
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
         // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 200, 10)
+        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 200, 10)
       } else {
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 140, 10)
+        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
       }
       const idContainerHeight = this.showTemplateId ? 24 : 0
       const result = galleryUtils
@@ -322,6 +323,11 @@ export default Vue.extend({
     },
     isSubsetOf(set: Array<unknown>, subset: Array<unknown>) {
       return new Set([...set, ...subset]).size === set.length
+    },
+    themeStyle(): Record<string, string> {
+      return {
+        maxHeight: `${this.$refs.panel.clientHeight - 80}px`
+      }
     }
   }
 })
@@ -335,6 +341,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
   &__item {
     text-align: center;
     vertical-align: middle;
@@ -361,7 +368,6 @@ export default Vue.extend({
     position: absolute;
     left: 20px;
     right: 20px;
-    max-height: calc(100vh - 85px);
   }
   &__search {
     position: relative;

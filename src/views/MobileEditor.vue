@@ -6,19 +6,19 @@
         :currTab="currActivePanel"
         :inAllPagesMode="inAllPagesMode")
       div(class="mobile-editor__content")
-        mobile-editor-view(v-if="!inAllPagesMode"
-          :currActivePanel="currActivePanel"
-          :isConfigPanelOpen="isConfigPanelOpen"
-          :inAllPagesMode="inAllPagesMode")
-        div(v-else class="mobile-editor__page-preview")
-          page-preview
-      transition(name="panel-up")
-        mobile-panel(v-if="currActivePanel !== 'none' || inMultiSelectionMode"
+        keep-alive
+          component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
+            :currActivePanel="currActivePanel"
+            :isConfigPanelOpen="isConfigPanelOpen"
+            :inAllPagesMode="inAllPagesMode")
+      transition(name="panel-up"
+                @after-enter="afterEnter"
+                @after-leave="afterLeave")
+        mobile-panel(v-show="showMP || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
-          @openExtraColorModal="openExtraColorModal"
           @switchTab="switchTab")
-      //- mobile-panel(v-if="showExtraColorPanel"
+      //- mobile-panel(v-if="currActivePanel !== 'none' && showExtraColorPanel"
       //-   :currActivePanel="'color'"
       //-   :currColorEvent="ColorEventType.background"
       //-   :isExtraPanel="true"
@@ -36,8 +36,7 @@ import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
 import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
 import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
-import MobilePanelTextSetting from '@/components/editor/panelFunction/MobilePanelTextSetting.vue'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
 import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
@@ -46,8 +45,11 @@ import logUtils from '@/utils/logUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
-import PagePreview from '@/components/editor/PagePreview.vue'
+import AllPages from '@/components/editor/mobile/AllPages.vue'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+import editorUtils from '@/utils/editorUtils'
+import pageUtils from '@/utils/pageUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -55,9 +57,8 @@ export default Vue.extend({
     MobileEditorView,
     MobilePanel,
     HeaderTabs,
-    MobilePanelTextSetting,
     FooterTabs,
-    PagePreview
+    AllPages
   },
   data() {
     return {
@@ -66,21 +67,55 @@ export default Vue.extend({
       isConfigPanelOpen: false,
       isLoading: false,
       isSaving: false,
-      currActivePanel: 'none',
       currColorEvent: '',
-      inAllPagesMode: false,
-      showExtraColorPanel: false,
-      ColorEventType
+      ColorEventType,
+      showMP: false
     }
   },
   mounted() {
+    /**
+     * @Note the codes below is used to prevent the zoom in/out effect of mobile phone, especially for the "IOS"
+     * Remember to set passive to "false", or the preventDefault() function won't work.
+     * check the blog below to see some method to prevent this error
+     * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
+     */
+
+    stepsUtils.MAX_STORAGE_COUNT = 15
+    document.addEventListener('touchstart', (event: TouchEvent) => {
+      /**
+       * @param nearHrEdge - is used to prevnt the IOS navagation gesture, this is just a workaround
+       */
+      const nearHrEdge = (event as TouchEvent).touches[0].clientX <= 5 || (event as TouchEvent).touches[0].clientX > window.innerWidth - 5
+
+      if (event.touches.length > 1 || nearHrEdge) {
+        event.preventDefault()
+      }
+    }, { passive: false })
+
+    let lastTouchEnd = 0
+    document.addEventListener('touchend', (event) => {
+      const now = (new Date()).getTime()
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault()
+      }
+      lastTouchEnd = now
+    }, false)
+
     eventUtils.on(PanelEvent.showMobilePhotoShadow, () => {
-      this.currActivePanel = 'photo-shadow'
+      this.setCurrActivePanel('photo-shadow')
     })
+
+    if (process.env.NODE_ENV === 'development') {
+      // const vconsole = new Vconsole()
+      // vconsole.setSwitchPosition(10, 80)
+    }
+
+    brandkitUtils.fetchBrands(this.fetchBrands)
   },
   computed: {
-    ...mapState({
-      closeMobilePanelFlag: 'closeMobilePanelFlag'
+    ...mapState('mobileEditor', {
+      closeMobilePanelFlag: 'closeMobilePanelFlag',
+      inAllPagesMode: 'mobileAllPageMode'
     }),
     ...mapState('user', [
       'role',
@@ -94,7 +129,8 @@ export default Vue.extend({
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
-      inMultiSelectionMode: 'getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      currActivePanel: 'mobileEditor/getCurrActivePanel'
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
@@ -143,9 +179,9 @@ export default Vue.extend({
   watch: {
     closeMobilePanelFlag(newVal) {
       if (newVal) {
+        this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
-        this.currActivePanel = 'none'
-        this.showExtraColorPanel = false
+        this.showMP = false
       }
     }
   },
@@ -168,26 +204,59 @@ export default Vue.extend({
     ...mapMutations({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      setCloseMobilePanelFlag: 'SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
+    ...mapActions({
+      fetchBrands: 'brandkit/fetchBrands'
+    }),
+    /**
+     * There are three case need fitPage:
+     * 1. Panel open => afterEnter
+     * 2. Panel close => afterLeave
+     * 3. Panel switch => switchTab else if(oldCAP!=='none'),
+     *    fitPage should call after setCurrActivePanel, or it will get wrong value.
+    */
     switchTab(panelType: string, props?: IFooterTabProps) {
-      if (this.currActivePanel === panelType) {
-        this.currActivePanel = 'none'
+      if (this.currActivePanel === panelType || panelType === 'none') {
+        this.showMP = false
+        editorUtils.setInMultiSelectionMode(false)
       } else {
-        this.currActivePanel = panelType
+        const oldCAP = this.currActivePanel
+        this.showMP = true
+        this.setCurrActivePanel(panelType)
+        if (oldCAP !== 'none') {
+          this.$nextTick(() => {
+            pageUtils.fitPage()
+          })
+        }
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
             this.currColorEvent = props.currColorEvent
           }
         }
       }
+
+      if (this.currActivePanel !== 'none' && this.inAllPagesMode) {
+        editorUtils.setMobileAllPageMode(false)
+      }
     },
     showAllPages() {
-      this.inAllPagesMode = !this.inAllPagesMode
+      editorUtils.setMobileAllPageMode(!this.inAllPagesMode)
+
+      if (!this.inAllPagesMode) {
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
+      }
     },
-    openExtraColorModal() {
-      console.log('hihi')
-      this.showExtraColorPanel = !this.showExtraColorPanel
+    afterEnter() {
+      pageUtils.fitPage()
+    },
+    afterLeave() {
+      this.setCurrActivePanel('none')
+      pageUtils.fitPage()
     }
   }
 })
@@ -198,7 +267,7 @@ export default Vue.extend({
   @include size(100%, 100%);
   height: 100%;
   display: grid;
-  grid-template-rows: minmax(auto, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   grid-template-columns: 1fr;
 
   &__top {
@@ -206,8 +275,9 @@ export default Vue.extend({
     width: 100%;
     position: relative;
     display: grid;
-    grid-template-rows: auto minmax(auto, 1fr);
+    grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
+    background-color: setColor(gray-5);
   }
   &__bottom {
     z-index: setZindex("footer");
@@ -218,6 +288,7 @@ export default Vue.extend({
     height: 100%;
     width: 100%;
     overflow: scroll;
+    z-index: setZindex("editor-view");
   }
 
   &__page-preview {

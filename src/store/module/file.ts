@@ -8,23 +8,25 @@ import { captureException } from '@sentry/browser'
 import { IAssetPhoto, IUserImageContentData } from '@/interfaces/api'
 import { IFrame, IGroup, IImage } from '@/interfaces/layer'
 import { SrcObj } from '@/interfaces/gallery'
-interface IPhotoState {
+interface IFileState {
   myfileImages: Array<IAssetPhoto>,
   editorViewImages: Record<string, Record<string, string>>,
   checkedAssets: Array<number>,
   pending: boolean,
   initialized: boolean,
+  regenerateGalleryFlag: boolean
   setLayersDone: boolean
   pageIndex: number,
   uploadingAssets: Array<{ id: string, pageIndex: number }>
 }
 
-const getDefaultState = (): IPhotoState => ({
+const getDefaultState = (): IFileState => ({
   myfileImages: [],
   editorViewImages: {},
   checkedAssets: [],
   pending: true,
   initialized: false,
+  regenerateGalleryFlag: false,
   setLayersDone: false,
   pageIndex: 0,
   uploadingAssets: []
@@ -87,7 +89,7 @@ function addMyfile(response: [IUserImageContentData], pageIndex: number): void {
   })
 }
 
-const actions: ActionTree<IPhotoState, unknown> = {
+const actions: ActionTree<IFileState, unknown> = {
   async getMoreMyfiles({ commit }) {
     const { pageIndex } = state
 
@@ -181,13 +183,13 @@ const actions: ActionTree<IPhotoState, unknown> = {
   }
 }
 
-const mutations: MutationTree<IPhotoState> = {
+const mutations: MutationTree<IFileState> = {
   SET_setLayersDone() {
     state.setLayersDone = true
   },
-  SET_STATE(state: IPhotoState, data: Partial<IPhotoState>) {
+  SET_STATE(state: IFileState, data: Partial<IFileState>) {
     const newState = data || getDefaultState()
-    const keys = Object.keys(newState) as Array<keyof IPhotoState>
+    const keys = Object.keys(newState) as Array<keyof IFileState>
     keys
       .forEach(key => {
         if (key in state) {
@@ -195,22 +197,22 @@ const mutations: MutationTree<IPhotoState> = {
         }
       })
   },
-  UPDATE_CHECKED_ASSETS(state: IPhotoState, val) {
+  UPDATE_CHECKED_ASSETS(state: IFileState, val) {
     state.checkedAssets = [...val]
   },
-  ADD_CHECKED_ASSETS(state: IPhotoState, id) {
+  ADD_CHECKED_ASSETS(state: IFileState, id) {
     state.checkedAssets.push(id)
   },
-  DELETE_CHECKED_ASSETS(state: IPhotoState, index: number) {
+  DELETE_CHECKED_ASSETS(state: IFileState, index: number) {
     const targetIndex = state.checkedAssets.findIndex((assetIndex) => {
       return assetIndex === index
     })
     state.checkedAssets.splice(targetIndex, 1)
   },
-  CLEAR_CHECKED_ASSETS(state: IPhotoState) {
+  CLEAR_CHECKED_ASSETS(state: IFileState) {
     state.checkedAssets = []
   },
-  ADD_PREVIEW(state: IPhotoState, { width, height, src, assetId }) {
+  ADD_PREVIEW(state: IFileState, { width, height, src, assetId }) {
     const previewImage = {
       width: width,
       height: height,
@@ -233,18 +235,18 @@ const mutations: MutationTree<IPhotoState> = {
     }
     state.myfileImages.unshift(previewImage)
   },
-  DEL_PREVIEW(state: IPhotoState, { assetId }) {
+  DEL_PREVIEW(state: IFileState, { assetId }) {
     state.myfileImages = state.myfileImages.filter((it: IAssetPhoto) => {
       return it.assetIndex !== assetId
     })
   },
-  UPDATE_PROGRESS(state: IPhotoState, { assetId, progress }) {
+  UPDATE_PROGRESS(state: IFileState, { assetId, progress }) {
     const targetIndex = state.myfileImages.findIndex((img: IAssetPhoto) => {
       return img.id === assetId
     })
     state.myfileImages[targetIndex].progress = progress
   },
-  UPDATE_IMAGE_URLS(state: IPhotoState, { assetId, urls, assetIndex, type = 'private' }) {
+  UPDATE_IMAGE_URLS(state: IFileState, { assetId, urls, assetIndex, type = 'private', width, height }) {
     const { myfileImages } = state
 
     const isAdmin = type === 'public'
@@ -253,8 +255,8 @@ const mutations: MutationTree<IPhotoState> = {
     })
 
     const data = addPerviewUrl([{
-      width: myfileImages[targetIndex].width,
-      height: myfileImages[targetIndex].height,
+      width: width ?? myfileImages[targetIndex].width,
+      height: height ?? myfileImages[targetIndex].height,
       id: isAdmin ? assetId : undefined,
       asset_index: assetIndex ?? assetId,
       signed_url: urls
@@ -265,19 +267,29 @@ const mutations: MutationTree<IPhotoState> = {
     state.myfileImages[targetIndex].urls = data[0].urls
     state.myfileImages[targetIndex].id = isAdmin ? assetId : undefined
     state.myfileImages[targetIndex].assetIndex = assetIndex ?? assetId
+    state.myfileImages[targetIndex].width = width ?? myfileImages[targetIndex].width
+    state.myfileImages[targetIndex].height = height ?? myfileImages[targetIndex].height
+
+    if (width || height) {
+      state.regenerateGalleryFlag = true
+    }
+
     state.editorViewImages[data[0].assetIndex] = data[0].urls
   },
-  SET_UPLOADING_IMGS(state: IPhotoState, { id, adding, pageIndex }) {
+  SET_UPLOADING_IMGS(state: IFileState, { id, adding, pageIndex }) {
     const index = state.uploadingAssets.findIndex(e => e.id === id)
     if (adding) {
       index === -1 && state.uploadingAssets.push({ id, pageIndex })
     } else {
       index !== -1 && state.uploadingAssets.splice(index, 1)
     }
+  },
+  SET_REGENERATE_GALLERY_FLAG(state: IFileState, bool) {
+    state.regenerateGalleryFlag = bool
   }
 }
 
-const getters: GetterTree<IPhotoState, any> = {
+const getters: GetterTree<IFileState, any> = {
   getSetLayersDone(state) {
     return state.setLayersDone
   },
@@ -301,4 +313,4 @@ export default {
   getters,
   mutations,
   actions
-} as ModuleTree<IPhotoState>
+} as ModuleTree<IFileState>

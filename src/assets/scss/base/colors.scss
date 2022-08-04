@@ -17,6 +17,11 @@ $color in $colors {
 
 	.border-#{""+$type} {
 		// add "" to prevent warning 
-		border: 1px solid $color;
+		border: 2px solid $color;
+	}
+
+	.outline-#{""+$type} {
+		// add "" to prevent warning 
+		outline: 2px solid $color;
 	}
 }

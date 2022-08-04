@@ -45,7 +45,7 @@ class StepsUtils {
     this.timers = {}
   }
 
-  filterForShapes(layer: ILayer): any {
+  filterDataForLayer(layer: ILayer): any {
     let typedLayer
     let newLayers
     switch (layer.type) {
@@ -57,7 +57,7 @@ class StepsUtils {
       case 'tmp':
       case 'group':
         typedLayer = layer as IGroup
-        newLayers = typedLayer.layers.map(layer => this.filterForShapes(layer))
+        newLayers = typedLayer.layers.map(layer => this.filterDataForLayer(layer))
         typedLayer.layers = newLayers
         return typedLayer
       case 'frame':
@@ -69,6 +69,11 @@ class StepsUtils {
         if (typedLayer.decorationTop) {
           typedLayer.decorationTop.svg = ''
         }
+        return typedLayer
+      case 'text':
+        if (!GeneralUtils.isTouchDevice()) return layer
+        typedLayer = layer as IText
+        typedLayer.contentEditable = false
         return typedLayer
       default:
         return layer
@@ -184,9 +189,9 @@ class StepsUtils {
     }
   }
 
-  filterForShapesInPages(pages: IPage[]): IPage[] {
+  filterDataForLayersInPages(pages: IPage[]): IPage[] {
     for (const page of pages) {
-      const newLayers = page.layers.map(layer => this.filterForShapes(layer))
+      const newLayers = page.layers.map(layer => this.filterDataForLayer(layer))
       page.layers = newLayers
     }
     return pages
@@ -224,7 +229,7 @@ class StepsUtils {
     //     modified: modifiedPage.modified !== undefined
     //   })
     // }
-    const pages = this.filterForShapesInPages(GeneralUtils.deepCopy(store.getters.getPages))
+    const pages = this.filterDataForLayersInPages(GeneralUtils.deepCopy(store.getters.getPages))
     // Watch out! The deep cody method we use won't work on Set/Map object
     const currSelectedInfo = GeneralUtils.deepCopy(store.getters.getCurrSelectedInfo)
 

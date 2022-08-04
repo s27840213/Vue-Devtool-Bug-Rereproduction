@@ -34,6 +34,10 @@ class LayerUtils {
     return store.getters.getLayers
   }
 
+  get hasSelectedLayer(): boolean {
+    return this.currSelectedInfo.layers.length > 0
+  }
+
   get getCurrOpacity(): number {
     const currLayer = this.getCurrLayer
     const { subLayerIdx } = this

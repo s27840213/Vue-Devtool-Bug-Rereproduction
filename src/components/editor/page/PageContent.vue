@@ -45,6 +45,8 @@ import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import textUtils from '@/utils/textUtils'
+import editorUtils from '@/utils/editorUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -60,6 +62,10 @@ export default Vue.extend({
     isPagePreview: {
       type: Boolean,
       required: false
+    },
+    handleSequentially: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -81,10 +87,10 @@ export default Vue.extend({
   },
   mounted() {
     if (this.setLayersDone) {
-      this.loadLayerImg()
+      this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
     }
     if (this.config.isAutoResizeNeeded) {
-      this.handleFontLoading()
+      this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
     }
   },
   watch: {
@@ -92,12 +98,12 @@ export default Vue.extend({
       // When first page mounted, its layers is not ready,
       // so trigger loadLayerImg when uploadUtils call SET_pages.
       if (newVal) {
-        this.loadLayerImg()
+        this.handleSequentially ? this.$emit('pushAsyncEvent', this.loadLayerImg) : this.loadLayerImg()
       }
     },
     'config.isAutoResizeNeeded'(newVal) {
       if (newVal) {
-        this.handleFontLoading()
+        this.handleSequentially ? this.$emit('pushAsyncEvent', this.handleFontLoading) : this.handleFontLoading()
       }
     }
   },
@@ -109,7 +115,6 @@ export default Vue.extend({
       setDropdown: 'popup/SET_STATE',
       _addPage: 'ADD_page',
       _deletePage: 'DELETE_page',
-      setInMultiSelectionMode: 'SET_inMultiSelectionMode',
       updatePageProps: 'UPDATE_pageProps'
     }),
     ...mapActions({
@@ -158,15 +163,10 @@ export default Vue.extend({
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
     },
-    pageClickHandler(): void {
-      // if (!this.isHandleShadow) {
-      //   groupUtils.deselect()
-      // } else {
-      //   imageUtils.setImgControlDefault(false)
-      // }
+    pageClickHandler(e: PointerEvent): void {
       groupUtils.deselect()
       imageUtils.setImgControlDefault(false)
-      this.setInMultiSelectionMode(false)
+      editorUtils.setInMultiSelectionMode(false)
       this.setCurrActivePageIndex(this.pageIndex)
       const sel = window.getSelection()
       if (sel) {
@@ -175,6 +175,10 @@ export default Vue.extend({
       }
     },
     onRightClick(event: MouseEvent) {
+      if (generalUtils.isTouchDevice()) {
+        return
+      }
+
       this.setCurrActivePageIndex(this.pageIndex)
       if (!this.isHandleShadow) {
         groupUtils.deselect()
@@ -193,13 +197,17 @@ export default Vue.extend({
         this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
     },
-    handleFontLoading() {
-      textUtils.untilFontLoadedForPage(this.config).then(() => {
-        this.updatePageProps({
-          pageIndex: this.pageIndex,
-          props: { isAutoResizeNeeded: false }
+    async handleFontLoading() {
+      if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
+        textUtils.untilFontLoadedForPage(this.config).then(() => {
+          setTimeout(() => {
+            this.updatePageProps({
+              pageIndex: this.pageIndex,
+              props: { isAutoResizeNeeded: false }
+            })
+          }, 500) // for the delay between font loading and dom rendering
         })
-      })
+      }
     }
   }
 })

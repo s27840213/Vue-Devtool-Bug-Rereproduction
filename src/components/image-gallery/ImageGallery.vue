@@ -23,6 +23,7 @@ import GalleryUtils from '@/utils/galleryUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
+import { mapState } from 'vuex'
 
 export default Vue.extend({
   props: {
@@ -49,21 +50,28 @@ export default Vue.extend({
     GalleryPhoto: () => import('@/components/GalleryPhoto.vue')
   },
   computed: {
+    ...mapState('file', ['regenerateGalleryFlag']),
     margin(): number {
       return this.galleryUtils.margin
     }
   },
   data() {
-    console.log(generalUtils.isTouchDevice())
     return {
       nextIndex: 0,
       rows: [] as any[],
       prevLastRow: [],
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 20 : 300, 95, 5)
+      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
   watch: {
-    myfile() { // For panel file
+    // For panel file
+    regenerateGalleryFlag(newVal: boolean) {
+      if (newVal) {
+        this.myfileUpdate()
+        this.galleryUtils.setRegenerateGalleryFlag(false)
+      }
+    },
+    myfile() {
       this.myfileUpdate()
     },
     images(newImages: Array<IPhotoItem[]>) { // For panel unsplash and pexel
@@ -127,6 +135,7 @@ export default Vue.extend({
 }
 
 .image-gallery {
+  overflow-x: hidden;
   &__content {
     height: 100%;
     line-height: 0;

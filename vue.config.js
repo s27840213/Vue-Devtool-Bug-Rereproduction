@@ -103,7 +103,7 @@ module.exports = {
                     // Tell the Pre-SPA plugin not to use index.html as its template file.
                     indexPath: path.join(__dirname, 'dist', 'app.html'),
                     staticDir: path.join(__dirname, 'dist'),
-                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates'],
+                    routes: ['/', '/tw', '/us', '/jp', '/templates', '/tw/templates', '/us/templates', '/jp/templates', '/editor', '/pricing', '/brandkit'],
                     renderer: new Renderer({
                         // The name of the property
                         injectProperty: '__PRERENDER_INJECTED',
@@ -146,9 +146,9 @@ module.exports = {
                         },
                         // 生产环境自动删除console
                         compress: {
-                            drop_debugger: true, // 清除 debugger 语句
-                            drop_console: true, // 清除console语句
-                            pure_funcs: ['console.log']
+                            // drop_debugger: true, // 清除 debugger 语句
+                            // drop_console: true, // 清除console语句
+                            // pure_funcs: ['console.log']
                         }
                     },
                     sourceMap: false,

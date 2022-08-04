@@ -168,7 +168,9 @@ class ImageShadowUtils {
     }
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
-    this.handlerId = handlerId
+    if (!store.getters['shadow/isUploading'] || !params.timeout) {
+      this.handlerId = handlerId
+    }
     if (timeout) {
       setTimeout(() => {
         this.floatingHandler(canvas_s, img, config, handlerId, params)
@@ -304,7 +306,9 @@ class ImageShadowUtils {
     }
     const { timeout = DRAWING_TIMEOUT } = params
     const handlerId = generalUtils.generateRandomString(6)
-    this.handlerId = handlerId
+    if (!store.getters['shadow/isUploading'] || !params.timeout) {
+      this.handlerId = handlerId
+    }
     if (timeout) {
       setTimeout(() => {
         this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
@@ -432,9 +436,13 @@ class ImageShadowUtils {
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
-        logUtils.setLog('Error: drawShadow with wrong effect type:' + currentEffect)
+        const log = 'Error: drawShadow with wrong effect type:' + currentEffect
+        console.log(log)
+        logUtils.setLog(log)
       } else {
-        logUtils.setLog('Error: input canvas is undefined')
+        const log = 'Error: input canvas is undefined'
+        console.log(log)
+        logUtils.setLog(log)
       }
       return
     }
@@ -581,7 +589,9 @@ class ImageShadowUtils {
       logMark('shadow', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
     }
 
-    this.handlerId = handlerId
+    if (!store.getters['shadow/isUploading'] || !params.timeout) {
+      this.handlerId = handlerId
+    }
     if (timeout) {
       this._draw = setTimeout(handler, timeout)
     } else {
@@ -590,8 +600,8 @@ class ImageShadowUtils {
     }
   }
 
-  async asyncProcessing(cb: () => void) {
-    return new Promise<void>(resolve => {
+  async asyncProcessing(cb: () => void, disable = false) {
+    return disable ? cb() : new Promise<void>(resolve => {
       setTimeout(() => {
         cb()
         resolve()

@@ -1,30 +1,32 @@
 <template lang="pug">
-  div(class="header-bar")
+  div(class="header-bar" @pointerdown.stop)
     div(class="header-bar__left")
-      svg-icon(class="header-bar__feature-icon mr-25"
-        :iconName="'chevron-left'"
-        :iconColor="'white'"
-        :iconWidth="'22px'"
-        @click.native="backBtnAction()")
-      svg-icon(class="header-bar__feature-icon mr-20"
-        :class="{'click-disabled': isLocked}"
-        :iconName="'undo'"
-        :iconColor="!isLocked && (!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
-        :iconWidth="'22px'"
-        @click.native="undo()")
-      svg-icon(class="header-bar__feature-icon"
-        :class="{'click-disabled': isLocked}"
-        :iconName="'redo'"
-        :iconColor="!isLocked && (!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
-        :iconWidth="'22px'"
-        @click.native="redo()")
+      div(class="header-bar__feature-icon mr-25"
+          @pointerdown="backBtnAction()")
+        svg-icon(
+          :iconName="'chevron-left'"
+          :iconColor="'white'"
+          :iconWidth="'20px'")
+      div(class="header-bar__feature-icon mr-20"
+          :class="{'click-disabled': stepsUtils.isInFirstStep}"
+          @pointerdown="undo()")
+        svg-icon(:iconName="'undo'"
+          :iconColor="(!stepsUtils.isInFirstStep) ? 'white' : 'gray-2'"
+          :iconWidth="'20px'")
+      div(class="header-bar__feature-icon"
+          :class="{'click-disabled': stepsUtils.isInLastStep}"
+          @pointerdown="redo()")
+        svg-icon(:iconName="'redo'"
+          :iconColor="(!stepsUtils.isInLastStep) ? 'white' : 'gray-2'"
+          :iconWidth="'20px'")
     div(class="header-bar__right")
-      svg-icon(v-for="tab in rightTabs" class="header-bar__feature-icon"
-        :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
-        :iconName="tab.icon"
-        :iconColor="iconColor(tab)"
-        :iconWidth="'22px'"
-        @click.native="handleIconAction(tab.icon)")
+      div(v-for="tab in rightTabs" class="header-bar__feature-icon"
+          :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
+          @pointerdown="handleIconAction(tab.icon)")
+        svg-icon(
+          :iconName="tab.icon"
+          :iconColor="iconColor(tab)"
+          :iconWidth="'20px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -34,6 +36,7 @@ import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import mappingUtils from '@/utils/mappingUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import shotcutUtils from '@/utils/shortcutUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 
 export default Vue.extend({
   components: {
@@ -67,7 +70,8 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
-      InBgRemoveLastStep: 'bgRemove/inLastStep'
+      InBgRemoveLastStep: 'bgRemove/inLastStep',
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
     }),
     stepCount(): number {
       return stepsUtils.steps.length
@@ -79,9 +83,17 @@ export default Vue.extend({
         { icon: 'trash' }
       ]
     },
+    bgSettingTabs(): Array<{ icon: string, disabled?: boolean }> {
+      return [
+        { icon: backgroundUtils.backgroundLocked ? 'lock' : 'unlock' },
+        { icon: 'trash' }
+      ]
+    },
     rightTabs(): Array<{ icon: string, disabled?: boolean }> {
       if (this.selectedLayerNum > 0) {
         return this.layerTabs
+      } else if (this.inBgSettingMode) {
+        return this.bgSettingTabs
       } else {
         return this.homeTabs
       }
@@ -90,7 +102,7 @@ export default Vue.extend({
       return this.currSelectedInfo.layers.length
     },
     isLocked(): boolean {
-      return layerUtils.getTmpLayer().locked
+      return this.inBgSettingMode ? backgroundUtils.backgroundLocked : layerUtils.getTmpLayer().locked
     },
     isGroup(): boolean {
       return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
@@ -179,6 +191,10 @@ export default Vue.extend({
           this.$emit('switchTab', icon)
           break
         }
+        case 'copy': {
+          shotcutUtils.duplicate()
+          break
+        }
         default: {
           mappingUtils.mappingIconAction(icon)
           break
@@ -251,6 +267,18 @@ export default Vue.extend({
   justify-content: space-between;
   padding: 0px 16px;
   box-sizing: border-box;
+  z-index: setZindex("editor-header");
+
+  &__feature-icon {
+    width: 22px;
+    height: 22px;
+    transition: background-color 0.1s;
+    padding: 2px;
+    border-radius: 3px;
+    &:active {
+      background-color: setColor(gray-2);
+    }
+  }
 
   &__left {
     display: flex;
@@ -260,7 +288,7 @@ export default Vue.extend({
     grid-auto-flow: column;
     grid-template-rows: auto;
     grid-auto-columns: auto;
-    column-gap: 24px;
+    column-gap: 18px;
   }
 }
 </style>

@@ -23,6 +23,7 @@ import homeTemplate from '@/store/module/homeTemplate'
 import design from '@/store/module/design'
 import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
+import mobileEditor from '@/store/module/mobileEditor'
 import brandkit from './module/brandkit'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
@@ -104,9 +105,7 @@ const getDefaultState = (): IEditorState => ({
   inGestureToolMode: false,
   isMobile: false,
   isLargeDesktop: false,
-  closeMobilePanelFlag: false,
-  isGlobalLoading: false,
-  inMultiSelectionMode: false
+  isGlobalLoading: false
 })
 
 const state = getDefaultState()
@@ -271,9 +270,6 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsGlobalLoading(state: IEditorState) {
     return state.isGlobalLoading
-  },
-  getInMultiSelectionMode(state: IEditorState) {
-    return state.inMultiSelectionMode
   }
 }
 
@@ -386,9 +382,6 @@ const mutations: MutationTree<IEditorState> = {
     Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config.srcObj, updateInfo.srcObj)
     updateInfo.previewSrc && (state.pages[updateInfo.pageIndex].backgroundImage.config.previewSrc = updateInfo.previewSrc)
     // state.pages[updateInfo.pageIndex].backgroundColor = '#ffffff'
-  },
-  SET_backgroundImageConfig(state: IEditorState, updateInfo: { pageIndex: number, config: IImage }) {
-    Object.assign(state.pages[updateInfo.pageIndex].backgroundImage.config, updateInfo.config)
   },
   SET_backgroundImagePos(state: IEditorState, updateInfo: { pageIndex: number, imagePos: { x: number, y: number } }) {
     state.pages[updateInfo.pageIndex].backgroundImage.posX = updateInfo.imagePos.x
@@ -816,14 +809,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_inGestureMode(state: IEditorState, bool: boolean) {
     state.inGestureToolMode = bool
   },
-  SET_closeMobilePanelFlag(state: IEditorState, bool: boolean) {
-    state.closeMobilePanelFlag = bool
-  },
   SET_isGlobalLoading(state: IEditorState, bool: boolean) {
     state.isGlobalLoading = bool
-  },
-  SET_inMultiSelectionMode(state: IEditorState, bool: boolean) {
-    state.inMultiSelectionMode = bool
   },
   ...imgShadowMutations
 }
@@ -850,6 +837,7 @@ export default new Vuex.Store({
     templates,
     textStock,
     background,
+    mobileEditor,
     modal,
     popup,
     page,
