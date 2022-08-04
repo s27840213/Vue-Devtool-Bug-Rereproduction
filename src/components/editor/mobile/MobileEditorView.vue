@@ -202,7 +202,8 @@ export default Vue.extend({
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         padding: this.isDetailPage ? '0px' : '40px',
         transition: this.mounted ? 'transform 0.3s' : 'none',
-        flexDirection: this.isDetailPage ? 'column' : 'initial'
+        flexDirection: this.isDetailPage ? 'column' : 'initial',
+        overflow: this.isDetailPage ? 'initial' : 'scroll'
       }
     },
     canvasStyle(): { [index: string]: string | number } {
@@ -407,9 +408,7 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    margin: 0 auto;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
-
     // justify-content: center;
   }
 }
