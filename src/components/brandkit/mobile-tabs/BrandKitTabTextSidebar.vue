@@ -133,12 +133,13 @@ export default Vue.extend({
   &__setting {
     text-align: left;
     padding: 0px 16px;
-    background: setColor(gray-2);
+    background: setColor(nav);
     border-radius: 3px;
   }
   &__title {
     font-style: normal;
     --base-stroke: 0px;
+    color: white;
     &.heading {
       font-weight: 800;
       line-height: 40px;

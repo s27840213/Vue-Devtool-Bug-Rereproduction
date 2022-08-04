@@ -50,6 +50,7 @@ import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -114,7 +115,8 @@ export default Vue.extend({
   computed: {
     ...mapState('mobileEditor', {
       closeMobilePanelFlag: 'closeMobilePanelFlag',
-      inAllPagesMode: 'mobileAllPageMode'
+      inAllPagesMode: 'mobileAllPageMode',
+      mobilePanel: 'currActivePanel'
     }),
     ...mapState('user', [
       'role',
@@ -181,6 +183,11 @@ export default Vue.extend({
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
         this.showMP = false
+      }
+    },
+    mobilePanel(newVal, oldVal) {
+      if (oldVal === 'photo-shadow') {
+        imageShadowPanelUtils.handleShadowUpload()
       }
     }
   },

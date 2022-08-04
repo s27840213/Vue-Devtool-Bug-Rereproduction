@@ -319,34 +319,37 @@ export default Vue.extend({
       if (e.button !== 0) return
       const body = this.$refs.body as HTMLElement
       body.addEventListener('touchstart', this.disableTouchEvent)
-      if (!this.dblTabsFlag && this.isActive) {
-        const touchtime = new Date().getTime()
-        const interval = 500
-        const doubleTap = (e: PointerEvent) => {
-          e.preventDefault()
-          if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
-            /**
-             * This is the dbl-click callback block
-             */
-            if (this.getLayerType === LayerType.image) {
-              switch (this.type) {
-                case LayerType.group:
-                  LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
-                  break
-                case LayerType.frame:
-                  FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { imgControl: true })
-                  break
+      if (GeneralUtils.isTouchDevice()) {
+        if (!this.dblTabsFlag && this.isActive) {
+          const touchtime = new Date().getTime()
+          const interval = 500
+          const doubleTap = (e: PointerEvent) => {
+            e.preventDefault()
+            if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+              /**
+               * This is the dbl-click callback block
+               */
+              if (this.getLayerType === LayerType.image) {
+                switch (this.type) {
+                  case LayerType.group:
+                    LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
+                    break
+                  case LayerType.frame:
+                    FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { imgControl: true })
+                    break
+                }
+                eventUtils.emit(PanelEvent.switchTab, 'crop')
               }
-              eventUtils.emit(PanelEvent.switchTab, 'crop')
+              this.dblTabsFlag = true
             }
-            this.dblTabsFlag = true
           }
+          body.addEventListener('pointerdown', doubleTap)
+          setTimeout(() => {
+            body.removeEventListener('pointerdown', doubleTap)
+            this.dblTabsFlag = false
+          }, interval)
         }
-        body.addEventListener('pointerdown', doubleTap)
-        setTimeout(() => {
-          body.removeEventListener('pointerdown', doubleTap)
-          this.dblTabsFlag = false
-        }, interval)
+        this.$emit('pointerDownSubController')
       }
 
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
@@ -515,7 +518,6 @@ export default Vue.extend({
     },
     onClickEvent(e: MouseEvent) {
       if (!this.isPrimaryActive) return
-      // if (!this.isPrimaryActive || this.isMoved) return
       if (this.type === 'tmp') {
         if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
           groupUtils.deselectTargetLayer(this.layerIndex)

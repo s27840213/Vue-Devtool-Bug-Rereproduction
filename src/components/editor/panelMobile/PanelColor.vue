@@ -35,12 +35,13 @@ import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import { IFrame, IGroup, ILayer, IShape } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
 import { ColorEventType, LayerType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import shapeUtils from '@/utils/shapeUtils'
+import imageShadowUtils from '@/utils/imageShadowUtils'
 
 export default Vue.extend({
   data() {
@@ -196,6 +197,13 @@ export default Vue.extend({
 
           const currentEffect = textEffect.name || 'none'
           textEffectUtils.setTextEffect(currentEffect, { color: newColor })
+          break
+        }
+
+        case ColorEventType.photoShadow: {
+          const { styles: { shadow: { currentEffect } } } = layerUtils.getCurrConfig as IImage
+          imageShadowUtils.setEffect(currentEffect, { color: newColor })
+          break
         }
       }
     },

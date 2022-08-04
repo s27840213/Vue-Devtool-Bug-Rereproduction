@@ -16,7 +16,7 @@
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText } from '@/interfaces/layer'
 import stepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, LayerType } from '@/store/types'
@@ -65,6 +65,7 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -91,12 +92,12 @@ export default Vue.extend({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        { icon: 'set-as-frame', text: `${this.$t('NN0706')}` },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isFrameImage },
         ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isFrameImage },
-        { icon: 'set-as-frame', text: `${this.$t('NN0706')}`, hidden: true }
+        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isFrameImage }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
@@ -213,8 +214,11 @@ export default Vue.extend({
     tabs(): Array<IFooterTab> {
       if (this.inAllPagesMode) {
         return this.pageTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && this.singleTargetType()) {
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
+        /** tmp layer treated as group */
         return this.multiPhotoTabs
+      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
+        return this.photoTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('text')) {
         return this.multiFontTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('shape') && this.singleTargetType()) {
@@ -235,6 +239,12 @@ export default Vue.extend({
         return this.homeTabs
       }
     },
+    isWholeGroup(): boolean {
+      /**
+       * Select whole group and no sub-layer selected
+       */
+      return this.isGroup && this.groupTypes.size === 1 && layerUtils.subLayerIdx === -1
+    },
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
@@ -245,7 +255,7 @@ export default Vue.extend({
       return layerUtils.getTmpLayer().locked
     },
     isGroup(): boolean {
-      return this.currSelectedInfo.types.has('group') && this.currSelectedInfo.layers.length === 1
+      return (layerUtils.getCurrLayer.type === LayerType.tmp || this.currSelectedInfo.types.has('group')) && this.currSelectedInfo.layers.length === 1
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
@@ -395,6 +405,10 @@ export default Vue.extend({
           }
           break
         }
+        case 'set-as-frame': {
+          frameUtils.updateImgToFrame()
+          break
+        }
         case 'main-menu': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
@@ -472,7 +486,7 @@ export default Vue.extend({
           break
         }
         case 'effect': {
-          if (this.isHandleShadow) {
+          if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
             Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
             return
           }
