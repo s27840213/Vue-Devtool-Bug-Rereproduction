@@ -1,5 +1,9 @@
 <template lang="pug">
-  div(class="gallery-photo")
+  div(class="gallery-photo" :class="{border: deletable}")
+    div(v-if="deletable"
+        class="gallery-photo__delete"
+        @click.stop.prevent="handleDeletePhoto")
+      svg-icon(iconName="close" iconColor="gray-2" iconWidth="24px")
     circle-checkbox(v-if="inFilePanel"
       class="gallery-photo__checkbox"
       :class="{show: hasCheckedAssets}"
@@ -41,6 +45,7 @@ import { FunctionPanelType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import mouseUtils from '@/utils/mouseUtils'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -52,6 +57,10 @@ export default Vue.extend({
       default: false
     },
     inLogoPanel: {
+      type: Boolean,
+      default: false
+    },
+    deletable: {
       type: Boolean,
       default: false
     }
@@ -295,6 +304,9 @@ export default Vue.extend({
       if (!this.isUploading) {
         this.checkedAssets.includes(assetIndex) ? this.deleteCheckedAssets(assetIndex) : this.addCheckedAssets(assetIndex)
       }
+    },
+    handleDeletePhoto() {
+      brandkitUtils.setMobileDeleteItemFromPhoto(this.photo.assetIndex)
     }
   }
 })
@@ -306,6 +318,24 @@ export default Vue.extend({
   position: relative;
   display: inline-flex;
   justify-content: center;
+  &.border {
+    border: 1px solid #D9DBE1;
+    border-radius: 5px;
+    padding: 6px;
+    box-sizing: border-box;
+  }
+  &__delete {
+    position: absolute;
+    top: -11px;
+    right: -11px;
+    @include size(24px);
+    background: #FFFFFF;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   &__checkbox {
     position: absolute;
     top: 5px;
