@@ -293,7 +293,12 @@ export default Vue.extend({
     position: relative;
     height: 100%;
     width: 100%;
-    overflow: scroll;
+    z-index: setZindex("editor-view");
+
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
     z-index: setZindex("editor-view");
   }
 

@@ -24,7 +24,7 @@
             :ref="`page-${index}`"
             :pageIndex="index"
             :overflowContainer="editorView"
-            :style="{'z-index': `${getPageZIndex(index)}`}"
+            :style="pageStyle(index)"
             :config="page"
             :index="index"
             :isAnyBackgroundImageControl="isBackgroundImageControl")
@@ -193,7 +193,7 @@ export default Vue.extend({
     },
     editorViewStyle(): { [index: string]: string | number } {
       return {
-        overflow: this.isDetailPage ? 'scroll' : 'hidden'
+        overflow: this.isDetailPage ? 'scroll' : 'initial'
       }
     },
     cardStyle(): { [index: string]: string | number } {
@@ -208,8 +208,8 @@ export default Vue.extend({
     },
     canvasStyle(): { [index: string]: string | number } {
       return {
-        width: `${this.cardWidth}px`,
-        padding: this.isDetailPage ? '40px' : '0px'
+        padding: this.isDetailPage ? '40px 40px' : '0px',
+        justifyContent: 'center'
       }
     },
     absContainerStyle(): { [index: string]: string | number } {
@@ -370,6 +370,12 @@ export default Vue.extend({
           })
         }
       }
+    },
+    pageStyle(index: number) {
+      return {
+        'z-index': `${this.getPageZIndex(index)}`,
+        margin: 'auto'
+      }
     }
   }
 })
@@ -384,11 +390,12 @@ $REULER_SIZE: 20px;
   @include size(100%, 100%);
 
   &__abs-container {
-    position: absolute;
     width: 100%;
     min-height: 100%;
     display: grid;
     transition: transform 0.3s;
+    top: 0px;
+    left: 0px;
   }
 
   &__canvas {
@@ -397,7 +404,6 @@ $REULER_SIZE: 20px;
     max-width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     transform-style: preserve-3d;
     transform: scale(1);
     box-sizing: border-box;
@@ -408,6 +414,7 @@ $REULER_SIZE: 20px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
+    @include no-scrollbar;
     // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
     // justify-content: center;
   }
