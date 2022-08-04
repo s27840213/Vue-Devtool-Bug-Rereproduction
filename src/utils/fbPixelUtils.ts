@@ -62,7 +62,7 @@ class FbPixelUtils {
     const eventId = generalUtils.generateRandomString(8)
     // month : 8.99 usd (269 TWD), year: 79.99 usd (2388 TWD)
     const price = isYearlyPlany ? 79.99 : 8.99
-    this.fbq('track', 'Subscribe', { subscription_id: this.userId, value: price, currency: 'USD', predicted_ltv: price }, {
+    this.fbq('track', 'Subscribe', { subscription_id: this.userId, value: 0, currency: 'USD', predicted_ltv: 0 }, {
       eventID: eventId
     })
   }
