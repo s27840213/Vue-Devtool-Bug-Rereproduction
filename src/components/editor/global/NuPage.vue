@@ -269,12 +269,12 @@ export default Vue.extend({
     pageIndex: Number,
     pageScaleRatio: Number,
     isAnyBackgroundImageControl: Boolean,
-    editorView: HTMLElement
+    overflowContainer: HTMLElement
   },
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
-      this.isShownScrollBar = !(this.editorView.scrollHeight === this.editorView.clientHeight)
+      this.isShownScrollBar = !(this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
     })
   },
   watch: {
@@ -293,7 +293,6 @@ export default Vue.extend({
           const target = (layer.type === LayerType.group ? (layer as IGroup).layers.find(l => l.id === subLayerId) : layer) as IImage
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-            console.log(target.styles.shadow.srcObj)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
             imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
@@ -648,25 +647,25 @@ export default Vue.extend({
     pageResizeStart(e: PointerEvent) {
       this.initialPageHeight = (this.config as IPage).height
       this.isResizingPage = true
-      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+      this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
       this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
       eventUtils.addPointerEvent('pointermove', this.pageResizing)
-      this.editorView.addEventListener('scroll', this.scrollUpdate, { capture: true })
+      this.overflowContainer.addEventListener('scroll', this.scrollUpdate, { capture: true })
       eventUtils.addPointerEvent('pointerup', this.pageResizeEnd)
     },
     pageResizing(e: PointerEvent) {
       this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
-      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
-      const isShownScrollbar = (this.editorView.scrollHeight === this.editorView.clientHeight)
+      this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
+      const isShownScrollbar = (this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
 
       if (isShownScrollbar === this.isShownScrollBar) {
-        const multiplier = (this.editorView.scrollHeight === this.editorView.clientHeight) ? 2 : 1
+        const multiplier = isShownScrollbar ? 2 : 1
         const yDiff = (this.currentRelPos.y - this.initialRelPos.y) * multiplier * (100 / this.scaleRatio)
         pageUtils.updatePageProps({
           height: Math.max(Math.trunc(this.initialPageHeight + yDiff), 20)
         })
       } else {
-        this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.editorView as HTMLElement)
+        this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.overflowContainer as HTMLElement)
         this.initialAbsPos = this.currentAbsPos = MouseUtils.getMouseAbsPoint(e)
         this.initialPageHeight = (this.config as IPage).height
       }
@@ -681,7 +680,7 @@ export default Vue.extend({
       StepsUtils.record()
       this.$nextTick(() => {
         eventUtils.removePointerEvent('pointermove', this.pageResizing)
-        this.editorView.removeEventListener('scroll', this.scrollUpdate, { capture: true })
+        this.overflowContainer.removeEventListener('scroll', this.scrollUpdate, { capture: true })
         eventUtils.removePointerEvent('pointerup', this.pageResizeEnd)
       })
       pageUtils.findCentralPageIndexInfo()
