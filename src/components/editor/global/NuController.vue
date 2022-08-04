@@ -577,7 +577,7 @@ export default Vue.extend({
         zindex = (this.layerIndex + 1) * 1000
       } else if (isFrame) {
         zindex = (this.layerIndex + 1) * 1000
-      } else if (this.getLayerType === LayerType.frame) {
+      } else if (this.getLayerType === LayerType.frame && this.isMoving) {
         /**
          * @Todo - find the reason why this been set to certain value instead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
@@ -1904,7 +1904,8 @@ export default Vue.extend({
             }
           }
         }
-        if (!this.config.layers[targetIndex].active) {
+        if ((this.config.type === LayerType.frame && !(this.config as IFrame).clips[targetIndex].active) ||
+          (this.config.type === LayerType.group && !(this.config as IGroup).layers[targetIndex].active)) {
           updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { active: true })
         }
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
