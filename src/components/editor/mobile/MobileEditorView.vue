@@ -8,21 +8,37 @@
       @pinch="pinchHandler"
       ref="editorView")
     div(class="editor-view__canvas"
-        ref="canvas"
-        @swipeup="swipeUpHandler"
-        @swipedown="swipeDownHandler")
-      div(v-for="(page,index) in pages"
-          :key="`page-${index}`"
+        ref="canvas")
+      template(v-if="!isDetailPage")
+        div(v-for="(page,index) in pages"
+            :key="`page-${index}`"
+            class="editor-view__card"
+            :style="cardStyle(index)"
+            @pointerdown.self.prevent="outerClick($event)"
+            ref="card")
+          nu-page(
+            :ref="`page-${index}`"
+            :pageIndex="index"
+            :editorView="editorView"
+            :style="{'z-index': `${getPageZIndex(index)}`}"
+            :config="page"
+            :index="index"
+            :isAnyBackgroundImageControl="isBackgroundImageControl"
+            @stepChange="handleStepChange")
+      div(v-else
           class="editor-view__card"
           :style="cardStyle(index)"
           @pointerdown.self.prevent="outerClick($event)"
           ref="card")
-        nu-page(
+        nu-page(v-for="(page,index) in pages"
+          :key="`page-${index}`"
           :ref="`page-${index}`"
           :pageIndex="index"
           :editorView="editorView"
           :style="{'z-index': `${getPageZIndex(index)}`}"
-          :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
+          :config="page"
+          :index="index"
+          :isAnyBackgroundImageControl="isBackgroundImageControl"
           @stepChange="handleStepChange")
 </template>
 
@@ -202,7 +218,8 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       currFocusPageIndex: 'getCurrFocusPageIndex',
       currCardIndex: 'mobileEditor/getCurrCardIndex',
-      inBgSettingMode: 'mobileEditor/getInBgSettingMode'
+      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
+      groupType: 'getGroupType'
     }),
     isBackgroundImageControl(): boolean {
       const pages = this.pages as IPage[]
@@ -233,6 +250,9 @@ export default Vue.extend({
     },
     minScaleRatio(): number {
       return pageUtils.mobileMinScaleRatio
+    },
+    isDetailPage(): boolean {
+      return this.groupType === 1
     }
   },
   methods: {
@@ -415,7 +435,8 @@ export default Vue.extend({
         width: '100%',
         height: this.editorView ? `${this.cardSize}px` : '100%',
         transform: this.editorView ? `translate3d(0,${index * this.cardSize - this.currCardIndex * this.cardSize}px,0)` : 'translate3d(0,0px,0)',
-        transition: this.mounted ? 'transform 0.3s' : 'none'
+        transition: this.mounted ? 'transform 0.3s' : 'none',
+        flexDirection: this.isDetailPage ? 'column' : 'initial'
       }
     }
   }
