@@ -70,9 +70,13 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
-      this.isLoading = false
-    })
+    if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
+      TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+        setTimeout(() => {
+          this.isLoading = false
+        }, 500) // for the delay between font loading and dom rendering
+      })
+    }
     if (this.currSelectedInfo.layers >= 1) {
       TextPropUtils.updateTextPropsState()
     }
