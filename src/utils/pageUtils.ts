@@ -65,11 +65,13 @@ class PageUtils {
   topBound: number
   bottomBound: number
   mobileMinScaleRatio: number
+  isSwitchingToEditor: boolean
 
   constructor() {
     this.topBound = -1
     this.bottomBound = Number.MAX_SAFE_INTEGER
     this.mobileMinScaleRatio = 0
+    this.isSwitchingToEditor = false
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -166,7 +168,8 @@ class PageUtils {
     //     }
     //   }
     // })
-    FocusUtils.focusElement(`.nu-page-${this.middlemostPageIndex}`, true)
+    const targetIndex = generalUtils.isTouchDevice() && this.isDetailPage ? this.currActivePageIndex : this.middlemostPageIndex
+    FocusUtils.focusElement(`.nu-page-${targetIndex}`, true)
     return this.middlemostPageIndex
   }
 
@@ -268,11 +271,19 @@ class PageUtils {
   findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
+    const showMobilePanel = editorUtils.showMobilePanel || editorUtils.mobileAllPageMode
     const isTouchDevice = generalUtils.isTouchDevice()
+
     // for mobile version
-    if (isTouchDevice && !this.isDetailPage) {
-      store.commit('SET_middlemostPageIndex', this.currCardIndex)
-      return this.currCardIndex
+    if (isTouchDevice) {
+      if (!this.isDetailPage) {
+        store.commit('SET_middlemostPageIndex', this.currCardIndex)
+        return this.currCardIndex
+      } else {
+        if (showMobilePanel) {
+          return this.middlemostPageIndex
+        }
+      }
     }
 
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
@@ -296,6 +307,10 @@ class PageUtils {
     const minDistance = Number.MAX_SAFE_INTEGER
     const targetIndex = this.searchMiddlemostPageIndex(pages, centerLinePos, minDistance, -1)
     store.commit('SET_middlemostPageIndex', targetIndex)
+    if (isTouchDevice && this.isDetailPage) {
+      store.commit('SET_currActivePageIndex', targetIndex)
+    }
+
     if (!preventFocus) this.activeMiddlemostPage()
     this.topBound = this.findBoundary(pages, containerRect, targetIndex - 1, true)
     this.bottomBound = this.findBoundary(pages, containerRect, targetIndex + 1, false)
@@ -355,7 +370,7 @@ class PageUtils {
   }
 
   fitPage(scrollToTop = false) {
-    if (editorUtils.mobileAllPageMode) {
+    if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
       return
     }
 
@@ -388,6 +403,14 @@ class PageUtils {
     }
     if (!this.isDetailPage) {
       pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+    } else {
+      this.isSwitchingToEditor = true
+      Vue.nextTick(() => {
+        setTimeout(() => {
+          this.scrollIntoPage(this.currFocusPageIndex, 'auto')
+          this.isSwitchingToEditor = false
+        }, 0)
+      })
     }
   }
 

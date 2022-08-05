@@ -90,7 +90,7 @@ export default Vue.extend({
     photoInGroupTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
@@ -101,7 +101,7 @@ export default Vue.extend({
     photoTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' },
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
         { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },

@@ -193,7 +193,8 @@ export default Vue.extend({
       this.isMouseOver = false
     },
     clickPage() {
-      if (this.index === this.currFocusPageIndex) {
+      const clickFocusedPreview = this.index === this.currFocusPageIndex
+      if (clickFocusedPreview) {
         editorUtils.setMobileAllPageMode(false)
         editorUtils.setCurrCardIndex(this.index)
       }
@@ -204,8 +205,11 @@ export default Vue.extend({
         pageUtils.jumpIntoPage(this.index)
       }
 
-      if (GeneralUtils.isTouchDevice()) {
+      if (GeneralUtils.isTouchDevice() && clickFocusedPreview) {
         this.$nextTick(() => {
+          if (pageUtils.isDetailPage) {
+            pageUtils.scrollIntoPage(pageUtils.currFocusPageIndex, 'auto')
+          }
           pageUtils.fitPage()
         })
       }
