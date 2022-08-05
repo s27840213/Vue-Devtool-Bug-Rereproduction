@@ -105,7 +105,8 @@ const getDefaultState = (): IEditorState => ({
   inGestureToolMode: false,
   isMobile: false,
   isLargeDesktop: false,
-  isGlobalLoading: false
+  isGlobalLoading: false,
+  useMobileEditor: false
 })
 
 const state = getDefaultState()
@@ -270,6 +271,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsGlobalLoading(state: IEditorState) {
     return state.isGlobalLoading
+  },
+  getUseMobileEditor(state: IEditorState) {
+    return state.useMobileEditor
   }
 }
 
@@ -811,6 +815,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isGlobalLoading(state: IEditorState, bool: boolean) {
     state.isGlobalLoading = bool
+  },
+  SET_useMobileEditor(state: IEditorState, bool: boolean) {
+    state.useMobileEditor = bool
   },
   ...imgShadowMutations
 }

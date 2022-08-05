@@ -72,7 +72,8 @@ export interface IEditorState {
   inGestureToolMode: boolean,
   isMobile: boolean
   isLargeDesktop: boolean,
-  isGlobalLoading: boolean
+  isGlobalLoading: boolean,
+  useMobileEditor: boolean
 }
 
 export enum SidebarPanelType {
