@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="overflow-container"
-    :style="styles()")
-  div(:style="Object.assign(styles(), {transformStyle: 'preserve-3d'})")
+    :style="styles")
+  div(:style="stylesWith3DPreserve")
     div(v-if="imgLoaded"
         :class="['page-content']"
-        :style="styles()"
+        :style="styles"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent
@@ -33,7 +33,6 @@ div(class="overflow-container"
 
 <script lang="ts">
 import Vue from 'vue'
-import imageUtils from '@/utils/imageUtils'
 import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
@@ -84,6 +83,19 @@ export default Vue.extend({
     }),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
+    },
+    styles(): { [index: string]: string } {
+      return {
+        width: `${this.config.width}px`,
+        height: `${this.config.height}px`
+      }
+    },
+    stylesWith3DPreserve(): { [index: string]: string } {
+      return {
+        width: `${this.config.width}px`,
+        height: `${this.config.height}px`,
+        transformStyle: 'preserve-3d'
+      }
     }
   },
   mounted() {
@@ -159,16 +171,11 @@ export default Vue.extend({
         }
       }
     },
-    styles() {
-      return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`
-      }
-    },
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
     },
     pageClickHandler(e: PointerEvent): void {
+      console.log('page click handler')
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)

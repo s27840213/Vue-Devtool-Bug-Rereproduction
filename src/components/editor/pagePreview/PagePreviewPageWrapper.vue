@@ -24,7 +24,8 @@
           :config="config"
           :pageIndex="index"
           :scaleRatio="scaleRatio"
-          :handleSequentially="true")
+          :handleSequentially="true"
+          :isPagePreview="true")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
           :style="hightlighterStyles")
@@ -63,7 +64,6 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
