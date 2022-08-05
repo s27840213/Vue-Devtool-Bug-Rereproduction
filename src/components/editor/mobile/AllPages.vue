@@ -77,12 +77,15 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   width: 100%;
+  max-height: 100%;
+  overflow: scroll;
   grid-template-rows: auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-row-gap: 40px;
   grid-column-gap: 40px;
   padding: 32px;
   box-sizing: border-box;
+  @include no-scrollbar;
 
   &--last {
     // aspect-ratio: 1/1;
