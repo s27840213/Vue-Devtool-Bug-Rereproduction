@@ -288,9 +288,8 @@ export default Vue.extend({
       return stepsUtils.isInLastStep
     },
     isInFrame(): boolean {
-      const { layers, types } = this.currSelectedInfo
-      const frameLayer = layers[0] as IFrame
-      return layers.length === 1 && types.has('frame') && frameLayer.clips[0].srcObj.assetId
+      const layer = layerUtils.getCurrLayer
+      return layer.type === LayerType.frame && (layer as IFrame).clips[0].srcObj.assetId !== ''
     },
     isFrameImg(): boolean {
       return layerUtils.getCurrLayer.type === LayerType.frame && ((layerUtils.getCurrConfig as IImage).isFrameImg ?? false)
