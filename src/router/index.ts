@@ -9,7 +9,6 @@ import Settings from '../views/Settings.vue'
 import TemplateCenter from '../views/TemplateCenter.vue'
 import MobileWarning from '../views/MobileWarning.vue'
 import Preview from '../views/Preview.vue'
-import MobileEditor from '../views/MobileEditor.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import BrandKit from '../views/BrandKit.vue'
 import Pricing from '../views/Pricing.vue'
@@ -86,13 +85,13 @@ const routes: Array<RouteConfig> = [
     component: Editor,
     beforeEnter: editorRouteHandler
   },
-  {
-    path: 'mobile-editor',
-    name: 'MobileEditor',
-    component: MobileEditor,
-    // eslint-disable-next-line space-before-function-paren
-    beforeEnter: editorRouteHandler
-  },
+  // {
+  //   path: 'mobile-editor',
+  //   name: 'MobileEditor',
+  //   component: MobileEditor,
+  //   // eslint-disable-next-line space-before-function-paren
+  //   beforeEnter: editorRouteHandler
+  // },
   {
     path: 'preview',
     name: 'Preview',
