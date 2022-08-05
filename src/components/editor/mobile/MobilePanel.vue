@@ -167,7 +167,8 @@ export default Vue.extend({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel'
+      currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
+      showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -475,6 +476,11 @@ export default Vue.extend({
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = this.initHeightPx()
+    },
+    showMobilePanel(newVal) {
+      if (!newVal) {
+        this.showExtraColorPanel = false
+      }
     }
   },
   mounted() {
