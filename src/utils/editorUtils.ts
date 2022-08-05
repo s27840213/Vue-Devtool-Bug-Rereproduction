@@ -22,6 +22,10 @@ class EditorUtils {
     return store.getters['mobileEditor/getCurrActiveSubPanel']
   }
 
+  get showMobilePanel() {
+    return store.getters['mobileEditor/getShowMobilePanel']
+  }
+
   private setState(props: Partial<IMobileEditorState>) {
     store.commit('mobileEditor/SET_STATE', props)
   }
@@ -68,6 +72,12 @@ class EditorUtils {
   setInBgSettingMode(bool: boolean): void {
     if (generalUtils.isTouchDevice()) {
       this.setState({ inBgSettingMode: bool })
+    }
+  }
+
+  setShowMobilePanel(bool: boolean): void {
+    if (generalUtils.isTouchDevice()) {
+      store.commit('mobileEditor/SET_showMobilePanel', bool)
     }
   }
 }

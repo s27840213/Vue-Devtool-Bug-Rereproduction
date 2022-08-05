@@ -1,7 +1,6 @@
 <template lang="pug">
 div(class="all-pages")
-    template(v-for="(page, idx) in pages")
-      page-preview-page-wrapper(class="m-10 border-box" :index="idx" type="full" :config="page" :showMoreBtn="false")
+    page-preview-page-wrapper(v-for="(page, idx) in pages" :key="page.id" class="m-10 border-box" :index="idx" type="full" :config="page" :showMoreBtn="false")
     div(class="all-pages--last pointer border-box"
       @click="addPage()")
       div
@@ -18,7 +17,6 @@ import PagePreviewPlus from '@/components/editor/pagePreview/PagePreviewPlus.vue
 import pageUtils from '@/utils/pageUtils'
 import { floor } from 'lodash'
 import stepsUtils from '@/utils/stepsUtils'
-import generalUtils from '@/utils/generalUtils'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
@@ -41,7 +39,7 @@ export default Vue.extend({
       allPageMode: 'mobileEditor/getMobileAllPageMode'
     }),
     pages(): IPage[] {
-      const pages = generalUtils.deepCopy(this.getPages)
+      const pages = this.getPages
       pageUtils.setAutoResizeNeededForPages(pages, false)
       return pages
     }
@@ -61,7 +59,9 @@ export default Vue.extend({
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
-      this._addPage(pageUtils.newPage({}))
+      const { width, height } = pageUtils.getPageSize(pageUtils.pageNum - 1)
+      pageUtils.addPage(pageUtils.newPage({ width, height }))
+
       this._setCurrActivePageIndex(pageUtils.pageNum - 1)
       editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
       stepsUtils.record()
@@ -75,12 +75,15 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   width: 100%;
+  max-height: 100%;
+  overflow: scroll;
   grid-template-rows: auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-row-gap: 40px;
   grid-column-gap: 40px;
   padding: 32px;
   box-sizing: border-box;
+  @include no-scrollbar;
 
   &--last {
     // aspect-ratio: 1/1;
