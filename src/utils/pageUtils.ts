@@ -286,7 +286,7 @@ class PageUtils {
     const targetContainer = this.isDetailPage && isTouchDevice ? 'mobile-editor__content' : 'content__editor'
 
     const container = document.getElementsByClassName(targetContainer)[0] as HTMLElement
-    console.log(container)
+
     if (container === undefined) {
       return -1
     }
