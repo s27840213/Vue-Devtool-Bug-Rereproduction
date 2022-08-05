@@ -175,7 +175,6 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(e: PointerEvent): void {
-      console.log('page click handler')
       groupUtils.deselect()
       // imageUtils.setImgControlDefault(false)
       editorUtils.setInMultiSelectionMode(false)

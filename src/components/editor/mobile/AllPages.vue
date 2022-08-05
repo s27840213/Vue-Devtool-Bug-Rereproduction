@@ -61,8 +61,8 @@ export default Vue.extend({
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
-      const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
-      pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
+      const { width, height } = pageUtils.getPageSize(pageUtils.pageNum - 1)
+      pageUtils.addPage(pageUtils.newPage({ width, height }))
 
       this._setCurrActivePageIndex(pageUtils.pageNum - 1)
       editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)

@@ -122,6 +122,10 @@ class PageUtils {
     })
   }
 
+  addPage(newPage: IPage) {
+    store.commit('ADD_page', newPage)
+  }
+
   addPageToPos(newPage: IPage, pos: number) {
     store.commit('ADD_pageToPos', {
       newPage,
