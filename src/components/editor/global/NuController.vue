@@ -196,7 +196,7 @@ export default Vue.extend({
       FrameUtils,
       ShortcutUtils,
       dragUtils: new DragUtils(this.config.id),
-      controlPoints: ControlUtils.getControlPoints(4, 25),
+      controlPoints: generalUtils.isTouchDevice() ? ControlUtils.getControlPoints(6, 25) : ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -416,10 +416,17 @@ export default Vue.extend({
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
+      const isHorizon = resizerStyle.width > resizerStyle.height
+      if (isHorizon) {
+        resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
+      } else {
+        resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
+      }
+      const scalerOffset = generalUtils.isTouchDevice() ? 30 : 20
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height ? `${this.getLayerWidth - 20}px` : resizerStyle.width,
-        height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
+        width: !isHorizon ? `${this.getLayerWidth - scalerOffset}px` : resizerStyle.width,
+        height: isHorizon ? `${this.getLayerHeight - scalerOffset}px` : resizerStyle.height
       }
       return Object.assign(resizerStyle, HW)
     },
