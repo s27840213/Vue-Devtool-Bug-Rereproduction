@@ -320,7 +320,7 @@ router.beforeEach(async (to, from, next) => {
         store.commit('text/UPDATE_DEFAULT_FONT', { font })
       })
   }
-  if (!MOBILE_ROUTES.includes(to.name ?? '') && !localStorage.getItem('not-mobile')) {
+  if (!MOBILE_ROUTES.includes(to.name ?? '') && (to.name === 'Editor' || !localStorage.getItem('not-mobile'))) {
     let isMobile = false
     const userAgent = navigator.userAgent || navigator.vendor
     logUtils.setLog(`Read device width: ${window.screen.width}`)
@@ -341,10 +341,15 @@ router.beforeEach(async (to, from, next) => {
     }
     if (isMobile) {
       logUtils.setLog('=> as mobile')
-      next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
-      return
+      if (to.name !== 'Editor' || !localStorage.getItem('not-mobile')) {
+        next({ name: 'MobileWarning', query: { width: window.screen.width.toString(), url: to.fullPath } })
+        return
+      } else {
+        store.commit('SET_useMobileEditor', true)
+      }
+    } else {
+      logUtils.setLog('=> as non-mobile')
     }
-    logUtils.setLog('=> as non-mobile')
   }
 
   next()
