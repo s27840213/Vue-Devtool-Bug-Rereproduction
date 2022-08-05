@@ -94,6 +94,10 @@ class ImageShadowUtils {
    */
   private canvasT = document.createElement('canvas')
   /**
+   * canvasP used to draw the input image as a input img for canvasT
+   */
+  private canvasP = document.createElement('canvas')
+  /**
    * canvasMaxSize used to handle/draw the parametera as blur or offset...,
    * as a parameter unified canvas for different size of image.
    */
@@ -262,7 +266,7 @@ class ImageShadowUtils {
       ctxMaxSize.fill()
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
-      const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
+      const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
       // const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
 
       if (this.handlerId === handlerId) {
@@ -462,7 +466,7 @@ class ImageShadowUtils {
     const handler = async () => {
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
-      const { canvasT, canvasMaxSize } = this
+      const { canvasT, canvasP, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
       const ctxMaxSize = canvasMaxSize.getContext('2d')
       if (!ctxT || !ctxMaxSize) {
@@ -510,6 +514,12 @@ class ImageShadowUtils {
         canvasT.setAttribute('width', `${canvas.width}`)
         canvasT.setAttribute('height', `${canvas.height}`)
       }
+      if (canvasP.width !== img.naturalWidth || canvasP.height !== img.naturalHeight) {
+        canvasP.setAttribute('width', `${img.naturalWidth}`)
+        canvasP.setAttribute('height', `${img.naturalHeight}`)
+        const ctxP = canvasP.getContext('2d') as CanvasRenderingContext2D
+        ctxP.drawImage(img, 0, 0)
+      }
 
       setMark('shadow', 1)
       let alphaVal = 1
@@ -528,7 +538,7 @@ class ImageShadowUtils {
               }
               if (alphaVal) {
                 ctxT.globalAlpha = alphaVal
-                ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasW as number, drawCanvasH as number)
+                ctxT.drawImage(canvasP, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasW as number, drawCanvasH as number)
               }
             }
           })
@@ -565,7 +575,7 @@ class ImageShadowUtils {
         ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-        const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+        const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
         // const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
         const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0

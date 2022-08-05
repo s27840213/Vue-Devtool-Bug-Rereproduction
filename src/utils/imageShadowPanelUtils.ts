@@ -204,7 +204,6 @@ export default new class ImageShadowPanelUtils {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          console.warn(drawCanvasW, drawCanvasH)
           await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
           break
         }
