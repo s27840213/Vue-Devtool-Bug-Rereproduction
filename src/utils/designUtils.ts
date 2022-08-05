@@ -838,28 +838,9 @@ class DesignUtils {
   }
 
   setDesign(design: IDesign) {
-    uploadUtils.isGettingDesign = true
-    router.push({ name: 'Editor' }).then(() => {
-      pageUtils.setPages()
-      let isPrivate = false
-      if (design.id === undefined && design.signedUrl) {
-        isPrivate = true
-        design.id = this.getPrivateDesignId(design.signedUrl?.['config.json'])
-      }
-      pageUtils.clearPagesInfo()
-      if (this.isLogin) {
-        store.commit('SET_assetId', design.id)
-        if (router.currentRoute.query.design_id !== design.id) {
-          router.replace({ query: Object.assign({}, router.currentRoute.query, { type: 'design', design_id: design.id, team_id: this.teamId }) })
-        }
-      }
-
-      if (isPrivate) {
-        this.fetchDesign(this.teamId, design.id ?? '')
-      } else {
-        this.fetchDesign(this.teamId, design.id ?? '')
-      }
-    })
+    const design_id = design.id ? design.id : this.getPrivateDesignId(design.signedUrl?.['config.json'])
+    const url = router.resolve({ name: 'Editor', query: { type: 'design', design_id, team_id: this.teamId } }).href
+    window.location.href = url
   }
 
   getPrivateDesignId(jsonUrl?: string): string {
