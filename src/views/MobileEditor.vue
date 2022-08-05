@@ -14,7 +14,7 @@
       transition(name="panel-up"
                 @after-enter="afterEnter"
                 @after-leave="afterLeave")
-        mobile-panel(v-show="showMP || inMultiSelectionMode"
+        mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")
@@ -69,8 +69,7 @@ export default Vue.extend({
       isLoading: false,
       isSaving: false,
       currColorEvent: '',
-      ColorEventType,
-      showMP: false
+      ColorEventType
     }
   },
   created() {
@@ -131,7 +130,8 @@ export default Vue.extend({
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
-      currActivePanel: 'mobileEditor/getCurrActivePanel'
+      currActivePanel: 'mobileEditor/getCurrActivePanel',
+      showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
     inPagePanel(): boolean {
       return SidebarPanelType.page === this.currPanel
@@ -182,7 +182,7 @@ export default Vue.extend({
       if (newVal) {
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
-        this.showMP = false
+        editorUtils.setShowMobilePanel(false)
       }
     },
     mobilePanel(newVal, oldVal) {
@@ -226,11 +226,11 @@ export default Vue.extend({
     */
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType || panelType === 'none') {
-        this.showMP = false
+        editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
         const oldCAP = this.currActivePanel
-        this.showMP = true
+        editorUtils.setShowMobilePanel(true)
         this.setCurrActivePanel(panelType)
         if (oldCAP !== 'none') {
           this.$nextTick(() => {
@@ -293,7 +293,12 @@ export default Vue.extend({
     position: relative;
     height: 100%;
     width: 100%;
-    overflow: scroll;
+    z-index: setZindex("editor-view");
+
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
     z-index: setZindex("editor-view");
   }
 

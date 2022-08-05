@@ -5,6 +5,8 @@ import { SidebarPanelType } from '@/store/types'
 import store from '@/store'
 import themeUtils from '@/utils/themeUtils'
 import designUtils from '@/utils/designUtils'
+import generalUtils from '@/utils/generalUtils'
+import pageUtils from '@/utils/pageUtils'
 
 export async function editorRouteHandler(_to: Route, from: Route, next: NavigationGuardNext<Vue>) {
   try {
@@ -45,6 +47,9 @@ export async function editorRouteHandler(_to: Route, from: Route, next: Navigati
       )
       if (themeId === '7') {
         store.commit('SET_groupType', 1)
+        if (generalUtils.isTouchDevice()) {
+          pageUtils.fillPage()
+        }
       }
     } else if (!url && (!from.name || ['Login'].includes(from.name))) {
       // refresh /editor page

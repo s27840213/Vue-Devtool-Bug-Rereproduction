@@ -82,17 +82,17 @@ export default Vue.extend({
       tabNames: brandkitUtils.getTabNames(this.theme),
       tabActions: {
         logo: {
-          text: '上傳圖片',
+          text: this.$t('NN0014'),
           action: () => { console.log('logo') },
           margin: 24
         },
         color: {
-          text: '新增調色盤',
+          text: this.$t('NN0404'),
           action: () => { console.log('color') },
           margin: 16
         },
         text: {
-          text: '上傳字型',
+          text: this.$t('NN0712'),
           action: () => { console.log('text') },
           margin: 16
         }

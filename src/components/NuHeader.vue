@@ -53,7 +53,7 @@
           :iconWidth="'143px'"
           style="height: 45px;"
           @click.native="goToPage('Home')")
-      div(style="width: 25px; height: 25px")
+      div(style="height: 25px")
         template(v-if="!noSearchbar")
           svg-icon(v-if="!isShowSearchPage"
             :iconName="'search'"

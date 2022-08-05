@@ -9,7 +9,8 @@
                 iconColor="gray-3")
       template(v-else)
         brand-kit-color-palette-sidebar-mobile(v-for="colorPalette in colorPalettes"
-                                        :colorPalette="colorPalette")
+                                        :colorPalette="colorPalette"
+                                        :settingmode="settingmode")
 </template>
 
 <script lang="ts">

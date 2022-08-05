@@ -61,7 +61,9 @@ export default Vue.extend({
       _setCurrActivePageIndex: 'SET_currActivePageIndex'
     }),
     addPage() {
-      this._addPage(pageUtils.newPage({}))
+      const { width, height } = pageUtils.getPageSize(pageUtils.pageNum - 1)
+      pageUtils.addPage(pageUtils.newPage({ width, height }))
+
       this._setCurrActivePageIndex(pageUtils.pageNum - 1)
       editorUtils.setCurrCardIndex(pageUtils.pageNum - 1)
       stepsUtils.record()
@@ -75,12 +77,15 @@ export default Vue.extend({
   justify-content: center;
   align-items: center;
   width: 100%;
+  max-height: 100%;
+  overflow: scroll;
   grid-template-rows: auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-row-gap: 40px;
   grid-column-gap: 40px;
   padding: 32px;
   box-sizing: border-box;
+  @include no-scrollbar;
 
   &--last {
     // aspect-ratio: 1/1;
