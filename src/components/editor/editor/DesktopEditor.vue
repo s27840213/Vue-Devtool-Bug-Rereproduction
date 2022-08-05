@@ -37,7 +37,6 @@
         div(v-if="isShowPagePreview" class="content__pages")
           page-preview
     tour-guide(v-if="showEditorGuide")
-    spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
     popup-brand-settings(v-if="isBrandSettingsOpen")
 </template>
 
@@ -55,10 +54,8 @@ import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
-import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
 import rulerUtils from '@/utils/rulerUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import logUtils from '@/utils/logUtils'
 import i18n from '@/i18n'
 import colorUtils from '@/utils/colorUtils'
@@ -84,7 +81,6 @@ export default Vue.extend({
       isSidebarPanelOpen: true,
       inputLocale: i18n.locale,
       isLoading: false,
-      isSaving: false,
       // isColorPanelOpen: false
       colorPanelOpenState: {
         val: false
@@ -197,29 +193,6 @@ export default Vue.extend({
       return i18n.availableLocales
     }
   },
-  beforeRouteLeave(to, from, next) {
-    // const answer = this.confirmLeave()
-    // if (!answer) {
-    //   next(false)
-    //   return
-    // }
-
-    stepsUtils.clearSteps()
-    if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
-      this.isSaving = true
-      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
-        uploadUtils.isGettingDesign = false
-        logUtils.setLog('Leave editor')
-        this.isSaving = false
-        this.clearState()
-        next()
-      })
-    } else {
-      logUtils.setLog('Leave editor')
-      this.clearState()
-      next()
-    }
-  },
   mounted() {
     logUtils.setLog('Editor mounted')
     this.clearBgRemoveState()
@@ -234,7 +207,6 @@ export default Vue.extend({
     ...mapMutations({
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
       _setAdminMode: 'user/SET_ADMIN_MODE',
-      clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
     }),
     ...mapActions({

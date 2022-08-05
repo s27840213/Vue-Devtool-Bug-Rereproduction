@@ -67,7 +67,6 @@ export default Vue.extend({
       isColorPanelOpen: false,
       isConfigPanelOpen: false,
       isLoading: false,
-      isSaving: false,
       currColorEvent: '',
       ColorEventType
     }
@@ -189,21 +188,6 @@ export default Vue.extend({
       if (oldVal === 'photo-shadow') {
         imageShadowPanelUtils.handleShadowUpload()
       }
-    }
-  },
-  beforeRouteLeave(to, from, next) {
-    stepsUtils.clearSteps()
-    if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
-      this.isSaving = true
-      uploadUtils.uploadDesign(uploadUtils.PutAssetDesignType.UPDATE_BOTH).then(() => {
-        uploadUtils.isGettingDesign = false
-        logUtils.setLog('Leave editor')
-        this.isSaving = false
-        next()
-      })
-    } else {
-      logUtils.setLog('Leave editor')
-      next()
     }
   },
   methods: {
