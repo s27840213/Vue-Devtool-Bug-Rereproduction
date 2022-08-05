@@ -24,7 +24,6 @@ import listService from '@/apis/list'
 import designApis from '@/apis/design-info'
 import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
-import heic2any from 'heic2any'
 import networkUtils from './networkUtils'
 import _ from 'lodash'
 
@@ -148,7 +147,6 @@ class UploadUtils {
   chooseAssets(type: 'image' | 'font' | 'avatar' | 'logo') {
     // Because inputNode won't be appended to DOM, so we don't need to release it
     // It will be remove by JS garbage collection system sooner or later
-
     const acceptHash = {
       image: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic',
       font: '.ttf,.ttc,.otf,.woff2',
@@ -156,19 +154,22 @@ class UploadUtils {
       logo: '.jpg,.jpeg,.png,.webp,.gif,.svg,.tiff,.tif,.heic'
     }
     const inputNode = document.createElement('input')
+    document.body.appendChild(inputNode)
+    inputNode.setAttribute('class', 'inputNode')
     inputNode.setAttribute('type', 'file')
     inputNode.setAttribute('accept', acceptHash[type])
     inputNode.setAttribute('multiple', `${type === 'image'}`)
     inputNode.click()
+
     inputNode.addEventListener('change', (evt: Event) => {
-      if (evt) {
-        const files = (<HTMLInputElement>evt.target).files
-        const params: { brandId?: string } = {}
-        if (type === 'logo') {
-          params.brandId = store.getters['brandkit/getCurrentBrandId']
-        }
-        this.uploadAsset(type, files as FileList, params)
+      // const files = (<HTMLInputElement>evt.target).files
+      const files = inputNode.files
+      const params: { brandId?: string } = {}
+      if (type === 'logo') {
+        params.brandId = store.getters['brandkit/getCurrentBrandId']
       }
+      this.uploadAsset(type, files as FileList, params)
+      document.body.removeChild(inputNode)
     }, false)
   }
 
@@ -393,13 +394,14 @@ class UploadUtils {
                     clearInterval(increaseInterval)
                     response.json().then((json: IUploadAssetResponse) => {
                       if (json.flag === 0) {
+                        const { width, height, asset_index } = json.data
                         if (type === 'image') {
                           if (!isShadow) {
                             store.commit('file/UPDATE_PROGRESS', {
                               assetId: assetId,
                               progress: 100
                             })
-                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: json.data.asset_index, type: this.isAdmin ? 'public' : 'private' })
+                            store.commit('file/UPDATE_IMAGE_URLS', { assetId, urls: json.url, assetIndex: asset_index, type: this.isAdmin ? 'public' : 'private', ...(isUnknown && { width, height }) })
                           }
                           store.commit('DELETE_previewSrc', { type: this.isAdmin ? 'public' : 'private', userId: this.userId, assetId, assetIndex: json.data.asset_index })
                           store.commit('file/SET_UPLOADING_IMGS', { id: assetId, adding: false })
@@ -1194,6 +1196,8 @@ class UploadUtils {
                 store.commit('file/SET_setLayersDone')
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
+
+                pageUtils.fitPage()
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {

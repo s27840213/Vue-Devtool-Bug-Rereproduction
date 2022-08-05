@@ -239,7 +239,7 @@ class Controller {
       scale = scale ?? 1
       const { x, y, width, height } = styles
       const ratio = styles.width / styles.initWidth
-      const moverHeight = Math.max(scale, 8) * ratio
+      const moverHeight = Math.max(scale, generalUtils.fixSize(16)) * ratio
       const { xDiff, yDiff } = shapeUtils.lineDimension(point)
       const moverWidth = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)) * ratio
       const degree = Math.atan2(yDiff, xDiff) / Math.PI * 180

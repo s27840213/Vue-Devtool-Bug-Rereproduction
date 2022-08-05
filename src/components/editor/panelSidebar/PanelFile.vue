@@ -3,7 +3,6 @@
       @drop.stop.prevent="onDrop($event)"
       @dragover.prevent,
       @dragenter.prevent)
-    span(class="panel-file__title text-blue-1 label-lg") {{$t('NN0006')}}
     btn(class="full-width mb-20" :type="'primary-mid'"
         @click.native="uploadImage()") {{$t('NN0014')}}
     image-gallery(
@@ -53,7 +52,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth : 300, 75, 5),
       online: true,
       scrollTop: 0
     }
@@ -76,9 +74,6 @@ export default Vue.extend({
     ...mapGetters({
       checkedAssets: 'file/getCheckedAssets'
     }),
-    margin(): number {
-      return this.galleryUtils.margin
-    },
     hasCheckedAssets(): boolean {
       return this.checkedAssets.length !== 0
     }

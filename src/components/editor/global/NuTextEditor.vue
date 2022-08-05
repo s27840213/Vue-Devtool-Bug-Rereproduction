@@ -105,6 +105,9 @@ export default Vue.extend({
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })
+      if (generalUtils.isTouchDevice()) {
+        this.updateLayerProps({ contentEditable: false })
+      }
     })
   },
   destroyed() {

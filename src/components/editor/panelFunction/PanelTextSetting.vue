@@ -8,19 +8,20 @@
         span(v-else class="text-gray-2 text-setting__text-preview") {{ props.font.substr(1) }}
         svg-icon(class="pointer"
           :iconName="'caret-down'" :iconWidth="'10px'" :iconColor="'gray-2'")
-      div(class="size-bar relative")
-        div(class="pointer"
-          @mousedown="fontSizeStepping(-step)") -
-        button(class="text-setting__range-input-button" @click="handleValueModal")
-          input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-                @change="setSize" :value="fontSize")
-        div(class="pointer"
-          @mousedown="fontSizeStepping(step)") +
-        value-selector(v-if="openValueSelector"
-                    :valueArray="fontSelectValue"
-                    class="text-setting__value-selector"
-                    v-click-outside="handleValueModal"
-                    @update="handleValueUpdate")
+      font-size-selector
+      //- div(class="size-bar relative")
+      //-   div(class="pointer"
+      //-     @mousedown="fontSizeStepping(-step)") -
+      //-   button(class="text-setting__range-input-button" @click="handleValueModal")
+      //-     input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
+      //-           @change="setSize" :value="fontSize")
+      //-   div(class="pointer"
+      //-     @mousedown="fontSizeStepping(step)") +
+      //-   value-selector(v-if="openValueSelector"
+      //-               :valueArray="fontSelectValue"
+      //-               class="text-setting__value-selector"
+      //-               v-click-outside="handleValueModal"
+      //-               @update="handleValueUpdate")
     div(class="text-setting__row2")
       div(class="text-setting__color"
           v-hint="$t('NN0099')")
@@ -91,12 +92,14 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import FontSizeSelector from '@/components/input/FontSizeSelector.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     ColorPicker,
-    ValueSelector
+    ValueSelector,
+    FontSizeSelector
   },
   directives: {
     clickOutside: vClickOutside.directive

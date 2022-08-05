@@ -5,11 +5,13 @@ import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
 import designUtils from './designUtils'
+import editorUtils from './editorUtils'
 import FocusUtils from './focusUtils'
 import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
-import uploadUtils from './uploadUtils'
+import { throttle } from 'lodash'
+
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
@@ -17,12 +19,24 @@ class PageUtils {
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
   get getPage(): (pageIndex: number) => IPage { return store.getters.getPage }
   get getPages(): Array<IPage> { return store.getters.getPages }
+  get pageNum(): number { return this.getPages.length }
   get getPageSize(): (pageIndex: number) => { width: number, height: number } { return store.getters.getPageSize }
   get pagesName(): string { return store.getters.getPagesName }
   get scaleRatio() { return store.getters.getPageScaleRatio }
   get currFocusPageSize() { return store.getters.getPageSize(this.currFocusPageIndex) }
+  get isLastPage(): boolean {
+    return this.pageNum - 1 === this.currFocusPageIndex
+  }
+
   get middlemostPageIndex(): number {
     return store.getters.getMiddlemostPageIndex
+  }
+
+  /**
+   * @param currCardIndex - only used in touch device
+   */
+  get currCardIndex(): number {
+    return store.getters['mobileEditor/getCurrCardIndex']
   }
 
   get currActivePageIndex(): number {
@@ -49,10 +63,12 @@ class PageUtils {
 
   topBound: number
   bottomBound: number
+  mobileMinScaleRatio: number
 
   constructor() {
     this.topBound = -1
     this.bottomBound = Number.MAX_SAFE_INTEGER
+    this.mobileMinScaleRatio = 0
   }
 
   newPage(pageData: Partial<IPage>) {
@@ -157,10 +173,10 @@ class PageUtils {
     FocusUtils.focusElement(`.nu-page-${this.currFocusPageIndex}`, true)
   }
 
-  scrollIntoPage(pageIndex: number): void {
+  scrollIntoPage(pageIndex: number, behavior?: 'auto' | 'smooth'): void {
     const currentPage = document.getElementsByClassName('nu-page')[pageIndex] as HTMLElement
     currentPage.scrollIntoView({
-      behavior: 'smooth',
+      behavior: behavior ?? 'smooth',
       block: 'center',
       inline: 'center'
     })
@@ -190,7 +206,6 @@ class PageUtils {
       pagesTmp[index] = json
       store.commit('SET_pages', this.newPages(pagesTmp))
     }
-    console.log('Update spec page')
   }
 
   startBackgroundImageControl(pageIndex: number): void {
@@ -249,7 +264,15 @@ class PageUtils {
     store.commit('SET_pages', currentPagesTmp)
   }
 
-  findCentralPageIndexInfo(preventFocus = false) {
+  findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
+
+  private findCentralPageIndexInfoHandler(preventFocus = false) {
+    // for mobile version
+    if (generalUtils.isTouchDevice()) {
+      store.commit('SET_middlemostPageIndex', this.currCardIndex)
+      return this.currCardIndex
+    }
+
     const pages = [...document.getElementsByClassName('nu-page')].map((page) => {
       const rect = (page as HTMLElement).getBoundingClientRect()
       return {
@@ -292,7 +315,8 @@ class PageUtils {
   }
 
   isOutOfBound(pageIndex: number) {
-    return pageIndex <= this.topBound || pageIndex >= this.bottomBound
+    return generalUtils.isTouchDevice() ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
+      : pageIndex <= this.topBound || pageIndex >= this.bottomBound
   }
 
   // Algorithm: Binary Search
@@ -324,23 +348,39 @@ class PageUtils {
     store.commit('SET_pageScaleRatio', val)
   }
 
-  fitPage() {
-    const editorViewBox = document.getElementsByClassName('editor-view')[0]
-    const targetWidth = this.inBgRemoveMode ? this.autoRemoveResult.width : this.currFocusPageSize.width
-    const targetHeight = this.inBgRemoveMode ? this.autoRemoveResult.height : this.currFocusPageSize.height
-    const resizeRatio = Math.min(editorViewBox.clientWidth / (targetWidth * (this.scaleRatio / 100)), editorViewBox.clientHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
+  fitPage(scrollToTop = false) {
+    if (editorUtils.mobileAllPageMode) {
+      return
+    }
 
+    // Get size of target(design) and editor.
+    // Target size can be pass by param or get according to situation.
+    const editorViewBox = document.getElementsByClassName('editor-view')[0]
+    if (!editorViewBox) return
+    const { clientWidth: editorWidth, clientHeight: editorHeight } = editorViewBox
+    const { width: targetWidth, height: targetHeight }: { width: number, height: number } =
+      (this.inBgRemoveMode ? this.autoRemoveResult
+        : this.currFocusPageSize)
+
+    // Calculate and do resize
+    const resizeRatio = Math.min(editorWidth / (targetWidth * (this.scaleRatio / 100)), editorHeight / (targetHeight * (this.scaleRatio / 100))) * 0.8
+    const newRatio = Math.max(3, Math.round(this.scaleRatio * resizeRatio))
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
-      store.commit('SET_pageScaleRatio', Math.round(this.scaleRatio * resizeRatio))
+      if (newRatio < 2) return
+      store.commit('SET_pageScaleRatio', newRatio)
     }
+
     if (!this.inBgRemoveMode) {
       this.findCentralPageIndexInfo()
     }
-    Vue.nextTick(() => {
-      editorViewBox.scrollTo((editorViewBox.scrollWidth - editorViewBox.clientWidth) / 2, 0)
-    })
+    if (scrollToTop) {
+      Vue.nextTick(() => {
+        editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
+      })
+    }
+    pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
   }
 
   fillPage() {

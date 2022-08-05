@@ -10,7 +10,6 @@ import { SrcObj } from '@/interfaces/gallery'
 import imageApi from '@/apis/image-api'
 import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
-import pageUtils from '@/utils/pageUtils'
 import generalUtils from './generalUtils'
 import { findIndex } from 'lodash'
 

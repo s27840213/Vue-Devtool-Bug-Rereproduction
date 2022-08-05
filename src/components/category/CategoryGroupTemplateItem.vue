@@ -58,12 +58,12 @@ export default Vue.extend({
       return `https://template.vivipic.com/template/${cover.id ?? id}/prev_4x?ver=${ver}`
     },
     previewStyle(): any {
-      const { width, height } = this.item.preview || {}
+      const { width, height } = this.item.preview || { width: GeneralUtils.getListRowItemSize(), height: GeneralUtils.getListRowItemSize() }
       return { width: `${width}px`, height: `${height}px` }
     },
     itemStyle(): any {
-      const { width } = this.item.preview || {}
-      return { width: `${width || 145}px` }
+      const { width } = this.item.preview || { width: GeneralUtils.getListRowItemSize() }
+      return { width: `${width}px` }
     }
   },
   methods: {

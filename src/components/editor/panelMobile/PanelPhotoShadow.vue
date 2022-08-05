@@ -39,7 +39,8 @@ import { IImage, IImageStyle } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import colorUtils from '@/utils/colorUtils'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, MobileColorPanelType } from '@/store/types'
+import generalUtils from '@/utils/generalUtils'
 export default Vue.extend({
   components: {
     MobileSlider
@@ -112,6 +113,9 @@ export default Vue.extend({
       imageShadowPanelUtils.handleEffectUpdate(name, value)
     },
     handleColorModal() {
+      if (generalUtils.isTouchDevice()) {
+        this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
+      }
       // TODO
       // if (tab.panelType !== undefined) {
       //   this.$emit('switchTab', tab.panelType, tab.props)
@@ -145,7 +149,7 @@ export default Vue.extend({
       min-width: 60px;
       box-sizing: border-box;
       margin-top: 10px;
-      border-radius: 3px;
+      border-radius: 5px;
       border: 2px solid transparent;
       &:not(&--selected):hover {
         border-color: setColor(blue-1, 0.5);

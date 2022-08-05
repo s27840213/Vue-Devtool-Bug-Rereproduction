@@ -1,0 +1,155 @@
+<template lang="pug">
+  div(class="brand-kit-tab-text" :style="minHeightStyles()")
+    div(v-for="type in Object.keys(MAPPING)"
+      class="brand-kit-tab-text__setting pointer"
+      draggable="true"
+      @dragstart="standardTextDrag($event, type)"
+      @click="handleAddText(type)")
+      span(class="brand-kit-tab-text__title" :class="type" :style="getFontStyles(type)") {{ MAPPING[type] }}
+      br
+      span(class="brand-kit-tab-text__description") {{ `${getFontFamilyName(type)} / ${getFontSize(type)}px` }}
+      span(style="display: none") {{ MAPPING[type] }}
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import { mapGetters } from 'vuex'
+import brandkitUtils from '@/utils/brandkitUtils'
+import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import textUtils from '@/utils/textUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import assetUtils from '@/utils/assetUtils'
+import DragUtils from '@/utils/dragUtils'
+
+export default Vue.extend({
+  data() {
+    return {
+      MAPPING: {
+        heading: `${this.$t('NN0408')}`,
+        subheading: `${this.$t('NN0409')}`,
+        body: `${this.$t('NN0410')}`
+      } as { [key: string]: string }
+    }
+  },
+  props: {
+    maxheight: {
+      default: window.innerHeight * 0.9,
+      type: Number
+    }
+  },
+  created() {
+    textUtils.loadDefaultFonts(brandkitUtils.extractFonts(this.textStyleSetting))
+  },
+  computed: {
+    ...mapGetters('brandkit', {
+      currentBrand: 'getCurrentBrand'
+    }),
+    textStyleSetting(): IBrandTextStyleSetting {
+      return (this.currentBrand as IBrand).textStyleSetting
+    }
+  },
+  watch: {
+    currentBrand() {
+      textUtils.loadDefaultFonts(brandkitUtils.extractFonts(this.textStyleSetting))
+    }
+  },
+  methods: {
+    minHeightStyles() {
+      return { minHeight: `${this.maxheight}px` }
+    },
+    getTextStyle(type: string): IBrandTextStyle {
+      return (this.textStyleSetting as any)[`${type}Style`]
+    },
+    getFontStyles(type: string): { [key: string]: string } {
+      const textStyle = this.getTextStyle(type)
+      const res = tiptapUtils.textStylesRaw({
+        weight: textStyle.bold ? 'bold' : 'normal',
+        style: textStyle.italic ? 'italic' : 'normal',
+        decoration: textStyle.underline ? 'underline' : 'none',
+        size: textStyle.size
+      })
+      delete res['font-size']
+      res.fontFamily = textStyle.isDefault ? brandkitUtils.getDefaultFontId(this.$i18n.locale) : textStyle.fontId
+      return res
+    },
+    getFontFamilyName(type: string): string {
+      const textStyle = this.getTextStyle(type)
+      return textStyle.isDefault ? brandkitUtils.getDefaultFontName(this.$i18n.locale) : textStyle.fontName
+    },
+    getFontSize(type: string): number {
+      const textStyle = this.getTextStyle(type)
+      return textStyle.size
+    },
+    getSpanStyles(type: string): { [key: string]: string | number } {
+      let styles = {} as { [key: string]: string | number }
+      const textStyle = this.getTextStyle(type)
+      styles = {
+        weight: textStyle.bold ? 'bold' : 'normal',
+        style: textStyle.italic ? 'italic' : 'normal',
+        decoration: textStyle.underline ? 'underline' : 'none',
+        size: textStyle.size
+      }
+      if (!textStyle.isDefault) {
+        Object.assign(styles, {
+          font: textStyle.fontId,
+          type: textStyle.fontType ?? 'public',
+          userId: textStyle.fontUserId ?? '',
+          assetId: textStyle.fontAssetId ?? ''
+        })
+      }
+      return styles
+    },
+    handleAddText(type: string) {
+      assetUtils.addStandardText(type, this.MAPPING[type], this.$i18n.locale, undefined, undefined, this.getSpanStyles(type))
+    },
+    standardTextDrag(e: DragEvent, type: string) {
+      new DragUtils().itemDragStart(e, 'standardText', {
+        textType: type,
+        text: this.MAPPING[type],
+        locale: this.$i18n.locale,
+        spanStyles: this.getSpanStyles(type)
+      }, {
+        offsetX: 20,
+        offsetY: 30
+      })
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.brand-kit-tab-text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  &__setting {
+    text-align: left;
+    padding: 0px 16px;
+    background: setColor(gray-2);
+    border-radius: 3px;
+  }
+  &__title {
+    font-style: normal;
+    --base-stroke: 0px;
+    &.heading {
+      font-weight: 800;
+      line-height: 40px;
+      font-size: 28px;
+    }
+    &.subheading {
+      font-weight: 700;
+      line-height: 28px;
+      font-size: 18px;
+    }
+    &.body {
+      font-weight: 400;
+      line-height: 24px;
+      font-size: 14px;
+    }
+  }
+  &__description {
+    @include body-XS;
+    color: white;
+  }
+}
+</style>

@@ -5,6 +5,7 @@ import {
   LogoRowData,
   RowData
 } from '@/interfaces/gallery'
+import store from '@/store'
 
 export default class GalleryUtils {
   minHeight = 100
@@ -25,6 +26,10 @@ export default class GalleryUtils {
         height: this.minHeight
       }
     }
+  }
+
+  setRegenerateGalleryFlag(bool: boolean): void {
+    store.commit('SET_REGENERATE_GALLERY_FLAG', bool)
   }
 
   createRows(images: GalleryImage[]): RowData[] {

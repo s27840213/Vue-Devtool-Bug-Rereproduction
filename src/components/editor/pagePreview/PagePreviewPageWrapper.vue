@@ -1,71 +1,94 @@
 <template lang="pug">
-  div(class="page-preview-page"
-    :style="styles2()"
-    :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
-    div(class="page-preview-page-content pointer"
-      :style="styles()"
-      @click="clickPage()"
-      @dblclick="dbclickPage()"
-      draggable="true",
-      @dragstart="handleDragStart"
-      @dragend="handleDragEnd"
-      @mouseenter="handleMouseEnter"
-      @mouseleave="handleMouseLeave"
-      ref="content")
-      page-content(:style="contentScaleStyles" :config="config" :pageIndex="index" :scaleRatio="scaleRatio")
-      div(class="page-preview-page__highlighter"
-        :class="{'focused': middlemostPageIndex === index}"
-        :style="hightlighterStyles()")
-      div(v-if="isMouseOver"
-        class="page-preview-page-content-more"
-        @click="toggleMenu()")
-        svg-icon(class="pb-5"
-          :iconName="'more_vertical'"
-          :iconWidth="'25px'")
-      div(v-if="isMenuOpen && middlemostPageIndex === index"
-        class="menu"
-        v-click-outside="closeMenu")
-        template(v-for="menuItem in menuItems")
-          div(class="menu-item"
-            @click="handleMenuAction(menuItem.icon)")
-            div(class="menu-item-icon")
-              svg-icon(:iconName="menuItem.icon"
-                iconWidth="15px"
-                iconColor="gray-2")
-            div(class="menu-item-text")
-              span {{ menuItem.text }}
-      div(v-if="type === 'panel'"
-        class="page-preview-page-icon")
-        span {{index+1}}
-    div(class="page-preview-page__background"
-      :style="styles()")
-    div(v-if="type === 'full'"
-      class="page-preview-page-title")
-      span(:style="{'color': middlemostPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+  observer-sentinel(
+    target=".mobile-editor__page-preview"
+    :threshold="[0,1]"
+    :throttle="false"
+    :handleNotIntersecting="true"
+    @callback="handleCallback")
+    div(class="page-preview-page"
+      :style="styles2()"
+      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
+      div(class="page-preview-page-content pointer"
+          :style="styles()"
+          @click="clickPage"
+          @dblclick="dbclickPage()"
+          draggable="true",
+          @dragstart="handleDragStart"
+          @dragend="handleDragEnd"
+          @mouseenter="handleMouseEnter"
+          @mouseleave="handleMouseLeave"
+          ref="content")
+        page-content(v-if="inTheTarget"
+          class="click-disabled"
+          :style="contentScaleStyles"
+          :config="config"
+          :pageIndex="index"
+          :scaleRatio="scaleRatio"
+          :handleSequentially="true"
+          @pushAsyncEvent="pushAsyncEvent")
+        div(class="page-preview-page__highlighter"
+          :class="{'focused': currFocusPageIndex === index}"
+          :style="hightlighterStyles()")
+        div(v-if="isMouseOver && showMoreBtn"
+          class="page-preview-page-content-more"
+          @click="toggleMenu()")
+          svg-icon(class="pb-5"
+            :iconName="'more_vertical'"
+            :iconWidth="'25px'")
+        div(v-if="isMenuOpen && currFocusPageIndex === index"
+          class="menu"
+          v-click-outside="closeMenu")
+          template(v-for="menuItem in menuItems")
+            div(class="menu-item"
+              @click="handleMenuAction(menuItem.icon)")
+              div(class="menu-item-icon")
+                svg-icon(:iconName="menuItem.icon"
+                  iconWidth="15px"
+                  iconColor="gray-2")
+              div(class="menu-item-text")
+                span {{ menuItem.text }}
+        div(v-if="type === 'panel'"
+          class="page-preview-page-icon")
+          span {{index+1}}
+      div(class="page-preview-page__background"
+        :style="styles()")
+      div(v-if="type === 'full'"
+        class="page-preview-page-title")
+        span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapState, mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
-import PageContent from '@/components/editor/page/PageContent.vue'
 import { IPage } from '@/interfaces/page'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
+import editorUtils from '@/utils/editorUtils'
+import ObserverSentinel from '@/components/ObserverSentinel.vue'
 
 export default Vue.extend({
-  components: {
-    PageContent
-  },
   props: {
     type: String,
     index: Number,
     config: {
       type: Object,
       required: true
+    },
+    showMoreBtn: {
+      default: true,
+      type: Boolean
+    },
+    target: {
+      type: String,
+      default: '.mobile-editor__page-preview'
     }
+  },
+  components: {
+    PageContent: () => import('@/components/editor/page/PageContent.vue'),
+    ObserverSentinel
   },
   data() {
     return {
@@ -81,7 +104,10 @@ export default Vue.extend({
       ],
       isMouseOver: false,
       isMenuOpen: false,
-      contentWidth: 0
+      contentWidth: 0,
+      inTheTarget: true,
+      asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
+      isHandlingAsyncTask: false
     }
   },
   directives: {
@@ -90,6 +116,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       middlemostPageIndex: 'getMiddlemostPageIndex',
+      currFocusPageIndex: 'getCurrFocusPageIndex',
       getPage: 'getPage',
       isDragged: 'page/getIsDragged'
     }),
@@ -124,8 +151,8 @@ export default Vue.extend({
     },
     hightlighterStyles() {
       return {
-        width: `${this.contentWidth}px`,
-        height: `${this.config.height * this.scaleRatio}px`
+        width: `${this.contentWidth + 20}px`,
+        height: `${this.config.height * this.scaleRatio + 20}px`
       }
     },
     ...mapMutations({
@@ -149,10 +176,21 @@ export default Vue.extend({
       this.isMouseOver = false
     },
     clickPage() {
+      if (this.index === this.currFocusPageIndex) {
+        editorUtils.setMobileAllPageMode(false)
+        editorUtils.setCurrCardIndex(this.index)
+      }
+
       this._setmiddlemostPageIndex(this.index)
       this._setCurrActivePageIndex(this.index)
       if (this.type === 'panel') {
         pageUtils.jumpIntoPage(this.index)
+      }
+
+      if (GeneralUtils.isTouchDevice()) {
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
       }
     },
     dbclickPage() {
@@ -219,6 +257,27 @@ export default Vue.extend({
         default:
           break
       }
+    },
+    handleCallback(entries: Array<IntersectionObserverEntry>) {
+      this.inTheTarget = entries[0].isIntersecting
+    },
+    pushAsyncEvent(callback: () => Promise<void>) {
+      this.asyncTaskQueue.push(callback)
+
+      if (!this.isHandlingAsyncTask) {
+        this.handleAsyncTask()
+        this.isHandlingAsyncTask = true
+      }
+    },
+    handleAsyncTask() {
+      const func = this.asyncTaskQueue.shift()
+      typeof func === 'function' && func()
+      typeof func === 'function' && func().then(() => {
+        console.log('mission complete')
+        if (this.asyncTaskQueue.length === 0) {
+          this.isHandlingAsyncTask = false
+        }
+      })
     }
   }
 })
@@ -234,6 +293,7 @@ export default Vue.extend({
   &-content {
     position: relative;
     box-sizing: border-box;
+    box-shadow: 0px 0px 10px setColor(gray-2, 0.4);
     transform-origin: 0 0;
     z-index: 1;
     &-more {
@@ -288,12 +348,15 @@ export default Vue.extend({
   }
   &__highlighter {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    border-radius: 4px;
+    z-index: -1;
   }
   &-title {
     position: absolute;
-    bottom: -30px;
+    bottom: -24px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -328,5 +391,6 @@ export default Vue.extend({
   border: 3px solid setColor(blue-1);
   color: setColor(blue-1);
   box-sizing: border-box;
+  background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
 }
 </style>

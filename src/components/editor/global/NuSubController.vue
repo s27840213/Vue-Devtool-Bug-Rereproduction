@@ -7,10 +7,9 @@
             :layer-index="`${layerIndex}`"
             :style="styles('')"
             @dblclick="onDblClick()"
-            @click.left.stop="onClickEvent($event)"
             @dragenter="onDragEnter($event)"
-            @mouseenter="onFrameMouseEnter($event)"
-            @mousedown="onMousedown($event)")
+            @pointerdown="onMousedown($event)"
+            @click.left.stop="onClick")
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
             g(v-html="!config.isFrameImg ? FrameUtils.frameClipFormatter(config.clipPath) : `<path d='M0,0h${config.styles.width}v${config.styles.height}h${-config.styles.width}z'></path>`"
@@ -117,6 +116,10 @@ export default Vue.extend({
     }, false)
     this.setLastSelectedLayerIndex(this.layerIndex)
     this.parentId = this.primaryLayer.id as string
+
+    if (this.type === LayerType.frame && this.config.type === LayerType.image) {
+      body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
+    }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -128,8 +131,12 @@ export default Vue.extend({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
-      isHandleShadow: 'shadow/isHandling'
+      isHandleShadow: 'shadow/isHandling',
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
     }),
+    isTouchDevice(): boolean {
+      return GeneralUtils.isTouchDevice()
+    },
     getLayerPos(): ICoordinate {
       return {
         x: this.config.styles.x,
@@ -322,24 +329,49 @@ export default Vue.extend({
         else if (!this.isActive) {
           this.isControlling = true
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-          document.addEventListener('mouseup', this.onMouseup)
+          eventUtils.addPointerEvent('pointerup', this.onMouseup)
           return
         }
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: true })
       }
-      document.addEventListener('mouseup', this.onMouseup)
+      eventUtils.addPointerEvent('pointerup', this.onMouseup)
       this.isControlling = true
     },
-    onMouseup() {
+    onMouseup(e: PointerEvent) {
+      e.stopPropagation()
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
         }
+        if (this.config.contentEditable) {
+          tiptapUtils.focus({ scrollIntoView: false })
+        }
       }
-      document.removeEventListener('mouseup', this.onMouseup)
+      eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
+
+      // if (!this.isPrimaryActive || this.isMoved) return
+      // if (this.type === 'tmp') {
+      //   if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+      //     groupUtils.deselectTargetLayer(this.layerIndex)
+      //   }
+      //   return
+      // }
+      // colorUtils.event.emit('closeColorPanel', false)
+      // this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
+    },
+    onClick(e: MouseEvent) {
+      if (!this.isPrimaryActive || this.isMoved) return
+      if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
+        return
+      }
+      colorUtils.event.emit('closeColorPanel', false)
+      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     positionStyles() {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
@@ -411,21 +443,6 @@ export default Vue.extend({
         return 'none'
       }
     },
-    onRightClick(event: MouseEvent) {
-      if (this.isHandleShadow) {
-        return
-      }
-      imageUtils.setImgControlDefault(false)
-      if (!this.isLocked) {
-        this.setIsLayerDropdownsOpened(true)
-        this.$nextTick(() => {
-          const el = document.querySelector('.dropdowns--layer') as HTMLElement
-          const mousePos = MouseUtils.getMouseAbsPoint(event)
-          el.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px,0)`
-          el.focus()
-        })
-      }
-    },
     waitFontLoadingAndRecord() {
       const pageId = LayerUtils.getPage(this.pageIndex).id
       const layerId = this.primaryLayer.id
@@ -471,17 +488,6 @@ export default Vue.extend({
       LayerUtils.updateSubLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, textShapeUtils.getCurveTextPropsByHW(text, curveTextHW))
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
-    },
-    onClickEvent(e: MouseEvent) {
-      if (!this.isPrimaryActive || this.isMoved) return
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey])) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
-      colorUtils.event.emit('closeColorPanel', false)
-      this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
     onDblClick() {
       if (this.type === 'tmp') {
@@ -704,9 +710,9 @@ export default Vue.extend({
           // horizontalFlip: currLayer.styles.horizontalFlip,
           // verticalFlip: currLayer.styles.verticalFlip
         })
-        const controller = this.$refs.body as HTMLElement
-        controller.addEventListener('mouseleave', this.onFrameMouseLeave)
-        controller.addEventListener('mouseup', this.onFrameMouseUp)
+        const body = this.$refs.body as HTMLElement
+        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+        body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
       }
     },
     onFrameMouseLeave(e: MouseEvent) {
@@ -726,9 +732,9 @@ export default Vue.extend({
           ...this.imgBuff.styles
         })
       }
-      const controller = this.$refs.body as HTMLElement
-      controller.removeEventListener('mouseup', this.onFrameMouseUp)
-      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
       if (this.isDraggedPanelPhoto) return
@@ -740,9 +746,9 @@ export default Vue.extend({
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
         StepsUtils.record()
       }
-      const controller = this.$refs.body as HTMLElement
-      controller.removeEventListener('mouseup', this.onFrameMouseUp)
-      controller.removeEventListener('mouseleave', this.onFrameMouseLeave)
+      const body = this.$refs.body as HTMLElement
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
+      body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)
     }
   }
 })
@@ -750,26 +756,21 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .nu-sub-controller {
+  touch-action: none;
   transform-style: preserve-3d;
   &__wrapper {
     top: 0;
     left: 0;
     position: absolute;
+    touch-action: none;
   }
   &__content {
+    touch-action: none;
     display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
     box-sizing: border-box;
-  }
-  &__ctrl-points {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    box-sizing: border-box;
-    pointer-events: "none";
   }
 
   &__lock-icon {
@@ -781,37 +782,6 @@ export default Vue.extend({
     border: 1px solid setColor(red);
     border-radius: 50%;
     background-color: setColor(white);
-  }
-}
-
-.control-point {
-  pointer-events: auto;
-  position: absolute;
-  background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
-  transform-style: preserve-3d;
-
-  &__resize-bar {
-    position: absolute;
-    pointer-events: auto;
-    border: 2.5px solid #00000000;
-    color: "#00000000";
-  }
-  &__rotater-wrapper {
-    position: absolute;
-    top: 100%;
-    padding: 20px;
-  }
-  &__rotater {
-    @include size(20px, 20px);
-    position: relative;
-    left: 0;
-    top: 0;
-    pointer-events: auto;
-    cursor: move;
-  }
-  &__move-bar {
-    cursor: move;
   }
 }
 

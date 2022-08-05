@@ -1134,24 +1134,24 @@ class TextUtils {
     if (GeneralUtils.isValidFloat(_value.toString())) {
       _value = parseFloat(GeneralUtils.boundValue(_value, this.fieldRange[prop].min, this.fieldRange[prop].max))
 
-      let value: number
+      let preprocessedValue: number
       switch (prop) {
         case 'lineHeight':
-          value = _.toNumber((_value).toFixed(2))
+          preprocessedValue = _.toNumber((_value).toFixed(2))
           break
         case 'fontSpacing':
-          value = _value / 1000
+          preprocessedValue = _value / 1000
       }
       const { layerIndex, subLayerIdx, getCurrLayer: currLayer } = LayerUtils
       window.requestAnimationFrame(() => {
         if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx === -1) {
           (currLayer as IGroup | ITmp).layers
             .forEach((l, idx) => {
-              l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, value)
+              l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
               l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
             })
         } else {
-          tiptapUtils.applyParagraphStyle(prop, value, false)
+          tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
           TextPropUtils.updateTextPropsState({ [prop]: _value })
         }
       })

@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="popup-theme text-left"
-    v-click-outside="handleCancel")
+    v-click-outside="vcoConfig")
     div(class="popup-theme__recommend")
       btn(class="full-width body-3 rounded mb-10"
         @click.native="handleRecommend")
@@ -54,6 +54,14 @@ export default Vue.extend({
   },
   data() {
     return {
+      vcoConfig: {
+        handler: () => { this.$emit('close') },
+        middleware: (event: MouseEvent) => {
+          // Prevent v-click-outside if user press advanced svg to close it.
+          // It will cause error because mobile click event call by pointerdown have delay.
+          return ((event.target as HTMLElement).attributes.getNamedItem('xlink:href') as Attr)?.nodeValue !== '#advanced'
+        }
+      },
       selected: {} as { [key: string]: boolean }
     }
   },

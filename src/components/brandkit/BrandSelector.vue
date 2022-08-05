@@ -6,8 +6,8 @@
       :class="`${theme}-theme`")
       span {{ $t('NN0089') }}
     div(v-else
-      class="brand-selector__brand-name hover"
-      :class="`${theme}-theme`")
+      class="brand-selector__brand-name"
+      :class="[`${theme}-theme`, {hover: !isMobile}]")
       input(v-if="isNameEditing"
         ref="brandName"
         v-model="editableName"
@@ -18,8 +18,8 @@
         :title="brandName"
         @click="handleNameClick") {{ brandName }}
     div(class="brand-selector__dropdown pointer"
-      :class="`${theme}-theme`"
-      @click="isBrandListOpen = true")
+      :class="[`${theme}-theme`, {mobile: isMobile}]"
+      @click="handleOpenMenu")
       svg-icon(:class="`${theme}-theme`"
         :style="dropdownStyles()"
         iconName="chevron-down"
@@ -62,6 +62,8 @@ import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import brandkitUtils from '@/utils/brandkitUtils'
 import { IBrand } from '@/interfaces/brandkit'
+import generalUtils from '@/utils/generalUtils'
+import editorUtils from '@/utils/editorUtils'
 
 export default Vue.extend({
   props: {
@@ -94,6 +96,9 @@ export default Vue.extend({
     }),
     brandName(): string {
       return brandkitUtils.getDisplayedBrandName(this.currentBrand)
+    },
+    isMobile(): boolean {
+      return generalUtils.isTouchDevice()
     }
   },
   watch: {
@@ -120,6 +125,7 @@ export default Vue.extend({
       } : {}
     },
     handleNameClick() {
+      if (this.isMobile) return
       this.editableName = this.brandName
       this.isNameEditing = true
       this.$nextTick(() => {
@@ -162,6 +168,13 @@ export default Vue.extend({
         content: brand
       })
     },
+    handleOpenMenu() {
+      if (this.isMobile) {
+        editorUtils.setCurrActiveSubPanel('brand-list')
+      } else {
+        this.isBrandListOpen = true
+      }
+    },
     checkNameEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && this.editableName === this.brandName) {
         this.handleNameEditEnd()
@@ -195,8 +208,16 @@ export default Vue.extend({
   &.editor-theme {
     margin-left: 2px;
   }
+  &.mobile-editor-theme {
+    margin-left: 1px;
+    gap: 10px;
+  }
   &.panel-theme {
     margin-left: 1px;
+  }
+  &.mobile-panel-theme {
+    margin-left: 0px;
+    gap: 16px;
   }
   &__brand-name {
     @include text-H4;
@@ -219,6 +240,17 @@ export default Vue.extend({
         color: setColor(gray-3);
       }
     }
+    &.mobile-editor-theme {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 140%;
+      height: 24px;
+      max-width: calc(50vw);
+      color: white;
+      & > span {
+        padding: 0px;
+      }
+    }
     &.panel-theme {
       @include text-H6;
       max-width: calc(100% - 110px);
@@ -230,12 +262,23 @@ export default Vue.extend({
       }
       & > span {
         padding: 0px;
-        cursor: initial;
       }
       &.hover > span {
         &:hover {
           color: setColor(gray-3);
         }
+      }
+    }
+    &.mobile-panel-theme {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 140%;
+      height: 24px;
+      max-width: calc(100% - 140px);
+      color: setColor(gray-2);
+      & > span {
+        padding: 0px;
+        cursor: initial;
       }
     }
     & > span {
@@ -256,6 +299,21 @@ export default Vue.extend({
       color: inherit;
       font-family: inherit;
     }
+    & > span {
+      display: block;
+      cursor: text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    & > input {
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+      letter-spacing: inherit;
+      color: inherit;
+      font-family: inherit;
+    }
   }
   &__dropdown {
     width: 24px;
@@ -264,18 +322,22 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     border-radius: 4px;
-    &:hover {
+    &:not(.mobile):hover {
       background: setColor(blue-4);
     }
     &.editor-theme > svg,
+    &.mobile-editor-theme > svg,
     &.panel-theme > svg {
       color: white;
+    }
+    &.mobile-panel-theme > svg {
+      color: setColor(gray-2);
     }
     &.brandkit-theme > svg {
       color: setColor(bu);
     }
-    &.editor-theme:hover > svg,
-    &.panel-theme:hover > svg {
+    &.editor-theme:not(.mobile):hover > svg,
+    &.panel-theme:not(.mobile):hover > svg {
       color: setColor(gray-3);
     }
     & > svg {

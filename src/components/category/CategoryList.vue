@@ -50,6 +50,7 @@ export default Vue.extend({
   .category-list {
     @include push-scrollbar10;
     @include hide-scrollbar;
+    overflow-x: hidden;
     &__header {
       line-height: 26px;
       display: flex;
