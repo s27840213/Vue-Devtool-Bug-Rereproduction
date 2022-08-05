@@ -80,7 +80,6 @@ export default Vue.extend({
       FunctionPanelType,
       isSidebarPanelOpen: true,
       inputLocale: i18n.locale,
-      isLoading: false,
       // isColorPanelOpen: false
       colorPanelOpenState: {
         val: false
@@ -92,7 +91,7 @@ export default Vue.extend({
       this.toggleSidebarPanel = this.isShowPagePreview
     },
     async inputLocale() {
-      this.isLoading = true
+      this.$emit('setIsLoading', true)
       const updateValue: { [key: string]: string } = {}
       updateValue.token = this.token
       updateValue.locale = this.inputLocale
@@ -121,8 +120,7 @@ export default Vue.extend({
       isShowPagePreview: 'page/getIsShowPagePreview',
       currPanel: 'getCurrSidebarPanelType',
       groupType: 'getGroupType',
-      inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
-      isGlobalLoading: 'getIsGlobalLoading'
+      inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     ...mapGetters('user', {
       token: 'getToken'
@@ -229,7 +227,7 @@ export default Vue.extend({
     },
     networkError(): void {
       Vue.notify({ group: 'error', text: `${i18n.t('NN0351')}` })
-      this.isLoading = false
+      this.$emit('setIsLoading', false)
     }
   }
 })

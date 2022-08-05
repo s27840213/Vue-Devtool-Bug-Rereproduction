@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="editor")
-    desktop-editor(v-if="!useMobileEditor")
+    desktop-editor(v-if="!useMobileEditor" @setIsLoading="setIsLoading")
     mobile-editor(v-else)
     spinner(v-if="isLoading || isSaving || isGlobalLoading" :textContent="isSaving ? $t('NN0455') : $t('NN0454')")
 </template>
@@ -23,12 +23,14 @@ export default Vue.extend({
   },
   data() {
     return {
-      isSaving: false
+      isSaving: false,
+      isLoading: false
     }
   },
   computed: {
     ...mapGetters({
-      useMobileEditor: 'getUseMobileEditor'
+      useMobileEditor: 'getUseMobileEditor',
+      isGlobalLoading: 'getIsGlobalLoading'
     })
   },
   beforeRouteLeave(to, from, next) {
@@ -61,7 +63,10 @@ export default Vue.extend({
       _setAdminMode: 'user/SET_ADMIN_MODE',
       clearState: 'CLEAR_state',
       clearBgRemoveState: 'bgRemove/CLEAR_bgRemoveState'
-    })
+    }),
+    setIsLoading(bool: boolean) {
+      this.isLoading = true
+    }
   }
 })
 </script>
