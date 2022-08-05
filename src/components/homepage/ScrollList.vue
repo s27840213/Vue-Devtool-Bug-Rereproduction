@@ -35,7 +35,7 @@
             span(class="body-XS text-gray-1") {{$t('NN0023')}}
           div(v-for="item in themeData"
             class="list-content-items__theme-item")
-            router-link(:to="`/${item.id === 7 ? 'mobile-editor' :'editor'}?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
+            router-link(:to="`/editor?type=new-design-size&themeId=${item.id}&width=${item.width}&height=${item.height}`")
               img(class="list-content-items__theme-item-preset"
                 :src="item.url"
                 @error="imgOnerror")
