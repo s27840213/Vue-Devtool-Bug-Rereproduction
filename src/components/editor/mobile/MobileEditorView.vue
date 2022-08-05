@@ -47,6 +47,7 @@ import generalUtils from '@/utils/generalUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import layerUtils from '@/utils/layerUtils'
 import editorUtils from '@/utils/editorUtils'
+import backgroundUtils from '@/utils/backgroundUtils'
 
 export default Vue.extend({
   components: {
@@ -113,7 +114,7 @@ export default Vue.extend({
     this.tmpScaleRatio = pageUtils.scaleRatio
 
     if (generalUtils.isTouchDevice()) {
-      pageUtils.mobileMinScaleRatio = this.tmpScaleRatio
+      pageUtils.mobileMinScaleRatio = this.isDetailPage ? 20 : this.tmpScaleRatio
     }
 
     this.$nextTick(() => {
@@ -133,6 +134,9 @@ export default Vue.extend({
     },
     currFocusPageIndex(newVal) {
       this.setCurrCardIndex(newVal)
+      if (backgroundUtils.inBgSettingMode) {
+        editorUtils.setInBgSettingMode(false)
+      }
     }
   },
 
@@ -208,7 +212,7 @@ export default Vue.extend({
     },
     canvasStyle(): { [index: string]: string | number } {
       return {
-        padding: this.isDetailPage ? '40px 40px' : '0px',
+        padding: this.isDetailPage ? '40px 0px' : '0px',
         justifyContent: 'center'
       }
     },

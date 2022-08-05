@@ -14,6 +14,7 @@ import { throttle } from 'lodash'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
+  get isDetailPage(): boolean { return store.getters.getGroupType === 1 }
   get isLogin(): boolean { return store.getters['user/isLogin'] }
   get inBgRemoveMode(): boolean { return store.getters['bgRemove/getInBgRemoveMode'] }
   get autoRemoveResult(): IBgRemoveInfo { return store.getters['bgRemove/getAutoRemoveResult'] }
@@ -267,8 +268,9 @@ class PageUtils {
   findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
+    const isTouchDevice = generalUtils.isTouchDevice()
     // for mobile version
-    if (generalUtils.isTouchDevice()) {
+    if (isTouchDevice && !this.isDetailPage) {
       store.commit('SET_middlemostPageIndex', this.currCardIndex)
       return this.currCardIndex
     }
@@ -280,7 +282,11 @@ class PageUtils {
         bottom: rect.bottom
       }
     })
-    const container = document.getElementsByClassName('content__editor')[0] as HTMLElement
+
+    const targetContainer = this.isDetailPage && isTouchDevice ? 'mobile-editor__content' : 'content__editor'
+
+    const container = document.getElementsByClassName(targetContainer)[0] as HTMLElement
+    console.log(container)
     if (container === undefined) {
       return -1
     }
@@ -315,7 +321,7 @@ class PageUtils {
   }
 
   isOutOfBound(pageIndex: number) {
-    return generalUtils.isTouchDevice() ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
+    return generalUtils.isTouchDevice() && !this.isDetailPage ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
       : pageIndex <= this.topBound || pageIndex >= this.bottomBound
   }
 
@@ -380,7 +386,9 @@ class PageUtils {
         editorViewBox.scrollTo((editorViewBox.scrollWidth - editorWidth) / 2, 0)
       })
     }
-    pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+    if (!this.isDetailPage) {
+      pageUtils.mobileMinScaleRatio = pageUtils.scaleRatio
+    }
   }
 
   fillPage() {
