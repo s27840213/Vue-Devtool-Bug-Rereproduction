@@ -11,6 +11,7 @@ import MobileEditor from '@/components/editor/editor/MobileEditor.vue'
 import logUtils from '@/utils/logUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import uploadUtils from '@/utils/uploadUtils'
+import editorUtils from '@/utils/editorUtils'
 
 import Vue from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
@@ -37,6 +38,7 @@ export default Vue.extend({
     //   return
     // }
 
+    editorUtils.setCloseMobilePanelFlag(true)
     stepsUtils.clearSteps()
     if (uploadUtils.isLogin && this.$router.currentRoute.query.design_id && this.$router.currentRoute.query.type) {
       this.isSaving = true
