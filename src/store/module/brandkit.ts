@@ -31,6 +31,7 @@ interface IBrandKitState {
   isSettingsOpen: boolean,
   isMobileConfirmOpen: boolean,
   mobileDeleteBuffer: undefined | IDeletingItem,
+  mobileBrandBuffer: undefined | IBrand,
   editorViewLogos: Record<string, Record<string, string>>,
 }
 
@@ -56,6 +57,7 @@ const getDefaultState = (): IBrandKitState => ({
   isSettingsOpen: false,
   isMobileConfirmOpen: false,
   mobileDeleteBuffer: undefined,
+  mobileBrandBuffer: undefined,
   editorViewLogos: {}
 })
 
@@ -286,12 +288,16 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       brand.name = oldName
     }, errorShower)
   },
-  async createBrand({ commit }) {
+  async createBrand({ commit }, name?: string) {
     const brand = brandkitUtils.createDefaultBrand()
+    if (name) {
+      brand.name = name
+    }
     brandkitApi.updateBrandsWrapper({
       type: 'brand',
       update_type: 'create',
-      src: brand.id
+      src: brand.id,
+      target: brand.name
     }, () => {
       commit('UPDATE_addBrand', brand)
       commit('SET_currentBrand', brand)
