@@ -318,17 +318,20 @@ export default Vue.extend({
           })
         }
         case 'brand-list': {
+          const brandDefaultVal = Object.assign(defaultVal, {
+            panelHistory: this.panelHistory
+          })
           if (editorUtils.currActivePanel === 'text') {
-            return Object.assign(defaultVal, {
+            return Object.assign(brandDefaultVal, {
               defaultOption: true
             })
           }
           if (editorUtils.currActivePanel === 'brand') {
-            return Object.assign(defaultVal, {
+            return Object.assign(brandDefaultVal, {
               hasAddBrand: true
             })
           }
-          return defaultVal
+          return brandDefaultVal
         }
         case 'brand': {
           return Object.assign(defaultVal, {
@@ -382,6 +385,16 @@ export default Vue.extend({
             }
           }
         }
+        case 'brand-list': {
+          return {
+            pushHistory: (history: string) => {
+              this.panelHistory.push(history)
+            },
+            back: () => {
+              this.panelHistory.pop()
+            }
+          }
+        }
         default: {
           return {}
         }
@@ -395,7 +408,7 @@ export default Vue.extend({
       }
     },
     rightBtnName(): string {
-      if (this.panelHistory.length > 0 || ['crop', 'resize'].includes(this.currActivePanel)) {
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
         return 'check-circle'
       } else {
         return 'close-circle'

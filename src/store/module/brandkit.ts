@@ -31,7 +31,6 @@ interface IBrandKitState {
   isSettingsOpen: boolean,
   isMobileConfirmOpen: boolean,
   mobileDeleteBuffer: undefined | IDeletingItem,
-  mobileBrandBuffer: undefined | IBrand,
   editorViewLogos: Record<string, Record<string, string>>,
 }
 
@@ -57,7 +56,6 @@ const getDefaultState = (): IBrandKitState => ({
   isSettingsOpen: false,
   isMobileConfirmOpen: false,
   mobileDeleteBuffer: undefined,
-  mobileBrandBuffer: undefined,
   editorViewLogos: {}
 })
 
