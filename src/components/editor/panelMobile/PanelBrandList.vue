@@ -1,20 +1,21 @@
 <template lang="pug">
   div(class="panel-brand-list" :class="{'new-brand': lastHistory === 'new-brand'}")
     template(v-if="inInitialState")
-      div(class="panel-brand-list__brands")
-        div(v-for="brand in brands"
-            class="panel-brand-list__brand-item"
-            :class="{selected: checkSelected(brand)}"
-            @click="handleSetCurrentBrand(brand)")
-          span(class="panel-brand-list__brand-title") {{ getDisplayedBrandName(brand) }}
-          div(class="panel-brand-list__brand-more")
-            svg-icon(iconName="more_vertical" iconColor="gray-2" iconWidth="24px")
-        template(v-if="defaultOption")
-          div(class="horizontal-rule")
-          div(class="panel-brand-list__brand-item"
-            :class="{selected: isDefaultSelected}"
-            @click="handleSelectDefault")
-            span(class="panel-brand-list__brand-title") {{ $t('NN0089') }}
+      div(class="panel-brand-list__brands-wrapper")
+        div(class="panel-brand-list__brands")
+          div(v-for="brand in brands"
+              class="panel-brand-list__brand-item"
+              :class="{selected: checkSelected(brand)}"
+              @click="handleSetCurrentBrand(brand)")
+            span(class="panel-brand-list__brand-title") {{ getDisplayedBrandName(brand) }}
+            div(class="panel-brand-list__brand-more")
+              svg-icon(iconName="more_vertical" iconColor="gray-2" iconWidth="24px")
+      template(v-if="defaultOption")
+        div(class="horizontal-rule")
+        div(class="panel-brand-list__brand-item"
+          :class="{selected: isDefaultSelected}"
+          @click="handleSelectDefault")
+          span(class="panel-brand-list__brand-title") {{ $t('NN0089') }}
       template(v-if="hasAddBrand")
         div(class="horizontal-rule")
         div(class="panel-brand-list__add-brand" @click.stop.prevent="addNewBrand")
@@ -128,13 +129,15 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .panel-brand-list {
   padding: 6px 0 0 0;
+  &__brands-wrapper {
+    @include no-scrollbar;
+    height: 184px;
+    overflow-y: auto;
+  }
   &__brands {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    @include no-scrollbar;
-    height: 184px;
-    overflow-y: auto;
   }
   &__brand-item {
     height: 40px;
