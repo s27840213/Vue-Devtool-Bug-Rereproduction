@@ -416,17 +416,20 @@ export default Vue.extend({
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
-      const isHorizon = resizerStyle.width > resizerStyle.height
+      const width = parseFloat(resizerStyle.width.replace('px', ''))
+      const height = parseFloat(resizerStyle.height.replace('px', ''))
+      const isHorizon = width > height
       if (isHorizon) {
-        resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
-      } else {
         resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
+      } else {
+        resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
       }
-      const scalerOffset = generalUtils.isTouchDevice() ? 30 : 20
+      const scalerOffset = generalUtils.isTouchDevice() ? 35 : 20
+      const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: !isHorizon ? `${this.getLayerWidth - scalerOffset}px` : resizerStyle.width,
-        height: isHorizon ? `${this.getLayerHeight - scalerOffset}px` : resizerStyle.height
+        width: isHorizon ? `${this.getLayerWidth - scalerOffset}px` : `${width * resizeBarScale}px`,
+        height: !isHorizon ? `${this.getLayerHeight - scalerOffset}px` : `${height * resizeBarScale}px`
       }
       return Object.assign(resizerStyle, HW)
     },
