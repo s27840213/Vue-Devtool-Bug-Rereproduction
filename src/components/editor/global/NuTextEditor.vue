@@ -101,7 +101,7 @@ export default Vue.extend({
       }
     })
     tiptapUtils.on('focus', () => {
-      this.updateLayerProps({ isTyping: true })
+      // this.updateLayerProps({ isTyping: true })
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })

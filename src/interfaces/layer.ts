@@ -98,6 +98,7 @@ export interface IText extends ILayer<ITextStyle> {
   isBody?: boolean,
   editing: boolean,
   isEdited: boolean,
+  isTyping: boolean
   contentEditable: boolean
   selection: ITiptapSelection,
 }

@@ -272,6 +272,7 @@ export default Vue.extend({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
+      // @TODO 問 alan 要怎麼測試
       if (this.isTyping || this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })

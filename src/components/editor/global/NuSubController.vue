@@ -188,9 +188,6 @@ export default Vue.extend({
     }
   },
   watch: {
-    'config.imgControl'(val) {
-      console.warn(val)
-    },
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
@@ -238,7 +235,8 @@ export default Vue.extend({
       if (this.isActive) {
         tiptapUtils.agent(editor => {
           editor.setEditable(newVal)
-          editor.commands.blur()
+          // @TODO 問廷安
+          // editor.commands.blur()
         })
         if (newVal) {
           this.$nextTick(() => {
@@ -247,6 +245,9 @@ export default Vue.extend({
         }
       }
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
+      if (!newVal) {
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
+      }
     }
   },
   destroyed() {
@@ -318,9 +319,9 @@ export default Vue.extend({
     onMousedown(e: PointerEvent) {
       if (e.button !== 0) return
       const body = this.$refs.body as HTMLElement
-      body.addEventListener('touchstart', this.disableTouchEvent)
+      // body.addEventListener('touchstart', this.disableTouchEvent)
       if (GeneralUtils.isTouchDevice()) {
-        if (!this.dblTabsFlag && this.isActive) {
+        if (!this.dblTabsFlag && this.isActive && this.config.type === 'image') {
           const touchtime = new Date().getTime()
           const interval = 500
           const doubleTap = (e: PointerEvent) => {
@@ -385,15 +386,11 @@ export default Vue.extend({
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
-        }
-        // else {
-        //   LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
-        //   if (this.config.contentEditable) {
-        //     tiptapUtils.focus({ scrollIntoView: false })
-        //   }
-        // }
-        if (this.config.contentEditable) {
-          tiptapUtils.focus({ scrollIntoView: false })
+        } else {
+          if (this.config.contentEditable) {
+            LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { isTyping: true }, this.layerIndex)
+            tiptapUtils.focus({ scrollIntoView: false })
+          }
         }
       }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
@@ -532,12 +529,6 @@ export default Vue.extend({
         return
       }
       this.$emit('dblSubController', this.layerIndex)
-    },
-    onTextFocus() {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: true })
-    },
-    onTextBlur() {
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     },
     onDragEnter(e: DragEvent) {
       const body = this.$refs.body as HTMLElement
