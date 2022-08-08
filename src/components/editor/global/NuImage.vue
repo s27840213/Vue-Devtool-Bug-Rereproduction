@@ -9,10 +9,10 @@
       canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
     div(v-if="shadowSrc && !config.isFrameImg"
       :id="`nu-image-${config.id}__shadow`"
-      :class="{ 'shadow__picture': true }"
+      class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
-        :class="{'nu-image__picture': true }"
+        class="nu-image__picture"
         draggable="false"
         :src="shadowSrc"
         @error="onError()"
@@ -334,12 +334,14 @@ export default Vue.extend({
       if (this.forRender) {
         return {}
       }
-      const { scale } = this.config.styles
+      const { scale, horizontalFlip, verticalFlip } = this.config.styles
       const { width, height } = this.shadowBuff.canvasSize
+
       return {
         width: `${width}px`,
         height: `${height}px`,
-        transform: `scale(${scale})`
+        // transform: `scale(${scale})`
+        transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
     imgWrapperstyle(): any {
@@ -378,7 +380,6 @@ export default Vue.extend({
         width: imgWidth.toString() + 'px',
         height: imgHeight.toString() + 'px',
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
-        // transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scale(${scale})`
       }
     },
     getImgDimension(): number {

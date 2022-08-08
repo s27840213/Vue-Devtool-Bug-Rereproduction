@@ -23,7 +23,7 @@ export default Vue.extend({
   data() {
     return {
       MappingUtils,
-      destoryCb: undefined as unknown as () => void | undefined
+      destoryCb: undefined as unknown as (() => void | undefined)
     }
   },
   mounted() {
@@ -39,9 +39,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
-    if (this.destoryCb) {
-      this.destoryCb()
-    }
+    this.destoryCb && this.destoryCb()
   },
   methods: {
     popupDatas() {
