@@ -1179,10 +1179,15 @@ class TextUtils {
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<any> {
     const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).split(',')
-    const valid = await store.dispatch('text/checkFontLoaded', fontList[0]) // wait until the css file of user set font is loaded
-    if (!valid) {
-      throw new Error(`Font ${fontList[0]} not added by 'addFont' before timeout`)
-    }
+    await Promise.all([
+      (async (): Promise<void> => {
+        const valid = await store.dispatch('text/checkFontLoaded', fontList[0])
+        if (!valid) {
+          throw new Error(`Font ${fontList[0]} not added by 'addFont' before timeout`)
+        }
+      })(),
+      ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
+    ]) // wait until the css files of fonts are loaded
     const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
     return Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }

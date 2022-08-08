@@ -29,29 +29,39 @@ const FLOATING_SHADOW_SIZE = 100
 const isProduction = process.env.NODE_ENV === 'production'
 const marks = {
   shadow: [
-    'starting',
+    'start drawing shadow',
     'before handle spread',
     'after handle spread; before handle blur',
     'after handle blur; before handle overlay, opacity...',
-    'finishing'
+    'finishing shadow drawing'
   ],
   imageMatched: [
-    'starting',
+    'start drawing imageMatched',
     'before handle blur',
     'after handle blur; before handle offset/overlay',
-    'finishing'
+    'finishing imageMatched drawing'
   ],
   floating: [
-    'starting',
+    'start drawing floating',
     'before handle geometry and blur',
     'after handle geometry and blur; before handle distance/overlay',
-    'finishing'
+    'finishing floating drawing'
+  ],
+  upload: [
+    'start uploading',
+    'before load max size img',
+    'after load max size img, before drawing',
+    'after drawing, before calculate edge',
+    'after calculate edge , before drawing new canvas and convert to png',
+    'png uploading',
+    'finish uploading',
+    'finish whole uploading process'
   ]
 }
-const setMark = function (type: 'shadow' | 'imageMatched' | 'floating', i: number) {
+export const setMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', i: number) {
   performance.mark(marks[type][i])
 }
-const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs: string[]) {
+export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 'upload', ...logs: string[]) {
   logs.forEach(log => {
     logUtils.setLog(log)
   })
@@ -63,6 +73,7 @@ const logMark = function (type: 'shadow' | 'imageMatched' | 'floating', ...logs:
   measures.forEach(measureItem => {
     const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
     logUtils.setLog(log)
+    console.log(log)
   })
   performance.clearMeasures()
 }
@@ -82,6 +93,10 @@ class ImageShadowUtils {
    * as a temporarily operating canvas.
    */
   private canvasT = document.createElement('canvas')
+  /**
+   * canvasP used to draw the input image as a input img for canvasT
+   */
+  private canvasP = document.createElement('canvas')
   /**
    * canvasMaxSize used to handle/draw the parametera as blur or offset...,
    * as a parameter unified canvas for different size of image.
@@ -252,6 +267,7 @@ class ImageShadowUtils {
       const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       // radius: value bar is available in range of 0 ~ 100, which should be mapping to 50 ~ 100 as the actual computation radius
       const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
+      // const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * attrFactor * fieldRange.floating.radius.weighting), handlerId)
 
       if (this.handlerId === handlerId) {
         this.dataBuff.effect = ShadowEffectType.floating
@@ -450,7 +466,7 @@ class ImageShadowUtils {
     const handler = async () => {
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
-      const { canvasT, canvasMaxSize } = this
+      const { canvasT, canvasP, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
       const ctxMaxSize = canvasMaxSize.getContext('2d')
       if (!ctxT || !ctxMaxSize) {
@@ -498,6 +514,12 @@ class ImageShadowUtils {
         canvasT.setAttribute('width', `${canvas.width}`)
         canvasT.setAttribute('height', `${canvas.height}`)
       }
+      if (canvasP.width !== img.naturalWidth || canvasP.height !== img.naturalHeight) {
+        canvasP.setAttribute('width', `${img.naturalWidth}`)
+        canvasP.setAttribute('height', `${img.naturalHeight}`)
+        const ctxP = canvasP.getContext('2d') as CanvasRenderingContext2D
+        ctxP.drawImage(img, 0, 0)
+      }
 
       setMark('shadow', 1)
       let alphaVal = 1
@@ -516,7 +538,7 @@ class ImageShadowUtils {
               }
               if (alphaVal) {
                 ctxT.globalAlpha = alphaVal
-                ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasW as number, drawCanvasH as number)
+                ctxT.drawImage(canvasP, -imgX, -imgY, drawImgWidth, drawImgHeight, x + i, y + j, drawCanvasW as number, drawCanvasH as number)
               }
             }
           })
@@ -554,6 +576,7 @@ class ImageShadowUtils {
         ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
         const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
         const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+        // const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
 
         const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
         const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
