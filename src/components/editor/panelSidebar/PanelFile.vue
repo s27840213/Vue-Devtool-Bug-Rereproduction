@@ -138,7 +138,7 @@ export default Vue.extend({
   display: grid;
   // Use minmax(0, 1fr) instead of 1fr is because when the content is larger than container, 1fr will almost equal to auto.
   // If you wanna to know this problem in detailed, please go to https://stackoverflow.com/questions/52861086/why-does-minmax0-1fr-work-for-long-elements-while-1fr-doesnt
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
   text-align: center;
   &__title {

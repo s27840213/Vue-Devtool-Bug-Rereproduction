@@ -135,7 +135,7 @@ export default Vue.extend({
 }
 
 .image-gallery {
-  overflow-x: hidden;
+  overflow-x: visible;
   &__content {
     height: 100%;
     line-height: 0;
