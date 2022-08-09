@@ -256,8 +256,8 @@ class BrandKitUtils {
     store.dispatch('brandkit/setBrandName', { brand, newName })
   }
 
-  addNewBrand() {
-    store.dispatch('brandkit/createBrand')
+  addNewBrand(name?: string) {
+    store.dispatch('brandkit/createBrand', name)
   }
 
   copyBrand(brand: IBrand) {

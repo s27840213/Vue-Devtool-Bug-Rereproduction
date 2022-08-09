@@ -196,7 +196,7 @@ export default Vue.extend({
       FrameUtils,
       ShortcutUtils,
       dragUtils: new DragUtils(this.config.id),
-      controlPoints: ControlUtils.getControlPoints(4, 25),
+      controlPoints: generalUtils.isTouchDevice() ? ControlUtils.getControlPoints(6, 25) : ControlUtils.getControlPoints(4, 25),
       isControlling: false,
       isLineEndMoving: false,
       isRotating: false,
@@ -224,7 +224,7 @@ export default Vue.extend({
       isMoved: false,
       isDoingGestureAction: false,
       dblTabsFlag: false,
-      isPointerDownSubController: false
+      isPointerDownFromSubController: false
     }
   },
   mounted() {
@@ -416,10 +416,20 @@ export default Vue.extend({
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
+      const width = parseFloat(resizerStyle.width.replace('px', ''))
+      const height = parseFloat(resizerStyle.height.replace('px', ''))
+      const isHorizon = width > height
+      if (isHorizon) {
+        resizerStyle.transform += ` scaleY(${100 / this.scaleRatio})`
+      } else {
+        resizerStyle.transform += ` scaleX(${100 / this.scaleRatio})`
+      }
+      const scalerOffset = generalUtils.isTouchDevice() ? 35 : 20
+      const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height ? `${this.getLayerWidth - 20}px` : resizerStyle.width,
-        height: resizerStyle.width > resizerStyle.height ? `${this.getLayerHeight - 20}px` : resizerStyle.height
+        width: isHorizon ? `${this.getLayerWidth - scalerOffset}px` : `${width * resizeBarScale}px`,
+        height: !isHorizon ? `${this.getLayerHeight - scalerOffset}px` : `${height * resizeBarScale}px`
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -819,11 +829,6 @@ export default Vue.extend({
 
           break
         }
-        case 'group':
-          if ((this.config as IGroup).layers
-            .some(l => l.type === 'text' && l.isTyping)) {
-            return
-          }
       }
 
       /**
@@ -869,6 +874,12 @@ export default Vue.extend({
       const posDiff = {
         x: Math.abs(MouseUtils.getMouseAbsPoint(e).x - this.initialPos.x),
         y: Math.abs(MouseUtils.getMouseAbsPoint(e).y - this.initialPos.y)
+      }
+      switch (this.config.type) {
+        case LayerType.group:
+          if ((this.config as IGroup).layers.some(l => l.active && l.type === LayerType.text && l.contentEditable && l.isTyping)) {
+            return
+          }
       }
 
       if (this.isTouchDevice && !this.isLocked) {
@@ -1034,16 +1045,24 @@ export default Vue.extend({
           }
         }
 
-        if (!this.isPointerDownSubController && !hasActiualMove) {
+        if (generalUtils.isTouchDevice() && !this.isPointerDownFromSubController && !hasActiualMove) {
+          /**
+           * This function is used for mobile-control, as one of the sub-controller is active
+           * tap at the primary-controller should set the sub-controller to non-active
+           */
           if (this.config.type === LayerType.group) {
+            const primary = this.config as IGroup
             for (let i = 0; i < (this.config as IGroup).layers.length; i++) {
-              if ((this.config as IGroup).layers[i].active) {
+              if (primary.layers[i].active) {
+                if (primary.layers[i].type === LayerType.text) {
+                  LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false }, i)
+                }
                 LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: false }, i)
               }
             }
           }
         }
-        this.isPointerDownSubController = false
+        this.isPointerDownFromSubController = false
         this.isControlling = false
         this.setCursorStyle('')
         eventUtils.removePointerEvent('pointerup', this.moveEnd)
@@ -1959,10 +1978,9 @@ export default Vue.extend({
       }
     },
     pointerDownSubController() {
-      this.isPointerDownSubController = true
+      this.isPointerDownFromSubController = true
     },
     dblSubController(targetIndex: number) {
-      console.log('dbl')
       if (this.isHandleShadow) {
         return
       }
