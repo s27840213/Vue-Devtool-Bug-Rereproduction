@@ -212,6 +212,10 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
+      // store.commit('SET_pageToPos', {
+      //   newPage: json,
+      //   pos: index
+      // })
       store.commit('SET_pages', this.newPages(pagesTmp))
     }
   }

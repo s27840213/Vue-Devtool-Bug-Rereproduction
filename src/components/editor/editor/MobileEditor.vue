@@ -245,6 +245,7 @@ export default Vue.extend({
       pageUtils.fitPage()
     },
     afterLeave() {
+      logUtils.setLog(`Panel closed (Nathan), ${(new Date()).getTime()}`)
       this.setCurrActivePanel('none')
       pageUtils.fitPage()
     }
