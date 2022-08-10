@@ -65,7 +65,7 @@
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-center")
-        span {{'COPYRIGHT Vivipic 2021 - TERMS & CONDITIONS  PRIVACY POLICY'}}
+        span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
       div(class="nu-footer__bottom-right")
         a(:href="facebookPage")
           svg-icon(class="pointer"
@@ -79,6 +79,11 @@
           svg-icon(class="pointer"
             iconName="email-black"
             :iconWidth="'25px'")
+      div(class="nu-footer__bottom-info")
+        span {{$t('NN0714')}}
+        span {{$t('NN0715')}}
+        span {{$t('NN0716')}}
+        span {{$t('NN0717')}}
     div(class="nu-footer__bottom-mobile")
       div(class="nu-footer__bottom-mobile-icons")
         a(:href="facebookPage")
@@ -98,7 +103,7 @@
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-mobile-copyright")
-        span {{'COPYRIGHT Vivipic 2021 - TERMS & CONDITIONS  PRIVACY POLICY'}}
+        span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
 </template>
 
 <script lang="ts">
@@ -326,10 +331,10 @@ export default Vue.extend({
       justify-content: center;
     }
     &-center {
+      @include body-XS;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 14px;
       color: black;
     }
     &-right {
@@ -337,6 +342,14 @@ export default Vue.extend({
       grid-auto-flow: column;
       justify-content: center;
       column-gap: 30px;
+    }
+    &-info {
+      @include body-XS;
+      grid-column: 1 / 4;
+      margin-left: 5%;
+      > span + span {
+        margin-left: 10px;
+      }
     }
   }
   &__bottom-mobile {

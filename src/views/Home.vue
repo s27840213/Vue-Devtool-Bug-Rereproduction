@@ -241,7 +241,7 @@ export default Vue.extend({
     &__buttom {
       position: fixed;
       width: 70%;
-      bottom: 30px;
+      bottom: 50px;
       z-index: 1;
     }
   }
