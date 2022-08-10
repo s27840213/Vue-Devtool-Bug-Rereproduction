@@ -147,7 +147,7 @@
         @click="selectColor(index)")
     //- 管理介面
     div(class="shape-setting__info")
-      div(v-if="inAdminMode")
+      div(v-if="inAdminMode && isObjectElement")
         div(class="shape-setting__info__divider pb-10")
         btn(:type="'primary-sm'"
           class="shape-setting__info__button rounded my-5"
@@ -364,6 +364,9 @@ export default Vue.extend({
     },
     focusDesignId(): string {
       return this.currSelectedInfo.layers[0].designId ?? ''
+    },
+    isObjectElement(): boolean {
+      return !(this.currSelectedInfo.layers[0].db === 'text')
     }
   },
   watch: {
