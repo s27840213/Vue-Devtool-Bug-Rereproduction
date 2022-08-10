@@ -102,7 +102,7 @@
         select(class="locale-select" v-model="inputLocale")
           option(v-for="locale in localeOptions" :value="locale.name") {{locale.name}}
       div(class="nu-footer__bottom-mobile-copyright"
-        :style="{ 'margin-bottom': isHome ? '90px' : 0 }")
+        :style="{ 'margin-bottom': isHome ? '70px' : 0 }")
         span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
         div(class="nu-footer__bottom-mobile-info")
           span {{$t('NN0714')}}
