@@ -155,7 +155,16 @@ class ImageAdjustUtil {
     return [
       this.createSvgFilter({
         tag: 'feGaussianBlur',
-        attrs: { stdDeviation: 0.1 * value }
+        attrs: { stdDeviation: 0.275 * value }
+      }),
+      this.createSvgFilter({
+        tag: 'feComponentTransfer',
+        child: [
+          this.createSvgFilter({
+            tag: 'feFuncA',
+            attrs: { type: 'linear', slope: 0, intercept: 1 }
+          })
+        ]
       })
     ]
   }

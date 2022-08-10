@@ -17,28 +17,36 @@
         :src="shadowSrc"
         @error="onError()"
         @load="onLoad()")
-    template(v-if="isAdjustImage")
-      svg(:viewBox="svgViewBox"
-        :width="svgImageWidth"
-        :height="svgImageHeight"
-        preserveAspectRatio="none"
-        role="image")
-        defs
-          filter(:id="filterId"
-            color-interpolation-filters="sRGB")
-            component(v-for="(elm, idx) in svgFilterElms"
-              :key="`svgFilter${idx}`"
-              :is="elm.tag"
-              v-bind="elm.attrs")
-              component(v-for="child in elm.child"
-                :key="child.tag"
-                :is="child.tag"
-                v-bind="child.attrs")
     div(class="img-wrapper"
       :style="imgWrapperstyle")
       div(class='nu-image__picture'
         :style="imgStyles")
-        img(ref="img"
+        svg(v-if="isAdjustImage"
+          :viewBox="svgViewBox"
+          :width="svgImageWidth"
+          :height="svgImageHeight"
+          preserveAspectRatio="none"
+          role="image")
+          defs
+            filter(:id="filterId"
+              color-interpolation-filters="sRGB")
+              component(v-for="(elm, idx) in svgFilterElms"
+                :key="`svgFilter${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
+                component(v-for="child in elm.child"
+                  :key="child.tag"
+                  :is="child.tag"
+                  v-bind="child.attrs")
+          g
+            g(:filter="`url(#${filterId})`")
+              image(:xlink:href="finalSrc" ref="img"
+                :style="flipStyles"
+                :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+                draggable="false"
+                @error="onError()"
+                @load="onLoad ()")
+        img(v-else ref="img"
           :style="flipStyles"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
           :src="finalSrc"
@@ -326,8 +334,8 @@ export default Vue.extend({
         }
       }
       return {
-        transform: `scale(${scaleX}, ${scaleY})`,
-        ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
+        transform: `scale(${scaleX}, ${scaleY})`
+        // ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
       }
     },
     canvasWrapperStyle(): any {
