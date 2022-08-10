@@ -119,7 +119,8 @@
           img(class="control-point__mover"
             :src="require('@/assets/img/svg/move.svg')"
             :style='lineControlPointStyles()'
-            @pointerdown="moveStart")
+            @pointerdown="moveStart"
+            @touchstart="disableTouchEvent")
         template(v-else)
           div(class="control-point__controller-wrapper"
               :style="`transform: scale(${100/scaleRatio})`")
