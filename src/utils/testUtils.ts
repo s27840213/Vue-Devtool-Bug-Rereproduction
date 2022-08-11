@@ -1,18 +1,19 @@
 import Vue from 'vue'
 
 class TestUtils {
-  startTime: number
+  timer: Record<string, number>
   constructor() {
-    this.startTime = 0
+    this.timer = {}
   }
 
-  start() {
-    this.startTime = (new Date()).getTime()
+  start(key: string) {
+    this.timer[key] = (new Date()).getTime()
+    console.log(key + 'start')
   }
 
-  end(msg: string) {
-    const duration = (new Date()).getTime() - this.startTime
-    const result = `${msg}, ${duration}`
+  end(key: string) {
+    const duration = (new Date()).getTime() - this.timer[key]
+    const result = `${key}, ${duration}`
     console.log(result)
     Vue.notify({
       group: 'copy',

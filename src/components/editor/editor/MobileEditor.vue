@@ -51,6 +51,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -245,6 +246,7 @@ export default Vue.extend({
       pageUtils.fitPage()
     },
     afterLeave() {
+      // testUtils.end('addTemp (Nathan, after optimize)')
       this.setCurrActivePanel('none')
       pageUtils.fitPage()
     }
