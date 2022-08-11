@@ -13,7 +13,7 @@
           :src="`https://www.youtube.com/embed/${ytId}?playsinline=1&autoplay=1&mute=${isMobile?0:1}&rel=0`"
           frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture")
         router-link(:to="`/editor?type=new-design-size&width=1080&height=1080`"
-            class="home-top__buttom rounded btn-primary-sm btn-LG")
+            class="home-top__button rounded btn-primary-sm btn-LG")
           span {{$t('NN0391')}}
       div(class="home-list")
         scroll-list(v-if="!isMobile || isLogin"
@@ -181,7 +181,7 @@ export default Vue.extend({
       z-index: -1;
     }
   }
-  &__buttom {
+  &__button {
     margin-top: 25px;
     width: 216px;
     height: 44px;
@@ -238,7 +238,7 @@ export default Vue.extend({
     .oval_yellow1 {
       display: none;
     }
-    &__buttom {
+    &__button {
       position: fixed;
       width: 70%;
       bottom: 30px;

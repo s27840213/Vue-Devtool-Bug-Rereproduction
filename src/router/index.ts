@@ -260,6 +260,10 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   document.title = to.meta?.title || i18n.t('SE0001')
 
+  if ((window as any).__PRERENDER_INJECTED !== undefined) {
+    next()
+    return
+  }
   // Store campaign param to local storage.
   const urlParams = new URLSearchParams(window.location.search)
   const campaign = urlParams.get('campaign')

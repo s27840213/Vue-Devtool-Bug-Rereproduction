@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="category-object-item"
       @click="addSvg"
+      @click.right.prevent="openUpdateDesignPopup()"
       @dragstart="dragStart($event)")
     img(class="category-object-item__img"
       draggable="true"
@@ -16,9 +17,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
 import DragUtils from '@/utils/dragUtils'
 import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapGetters } from 'vuex'
 import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -32,6 +34,9 @@ export default Vue.extend({
     item: Object
   },
   computed: {
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    }),
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
     }
@@ -73,6 +78,14 @@ export default Vue.extend({
         el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
         el.focus()
       })
+    },
+    openUpdateDesignPopup() {
+      if (this.isAdmin) {
+        const isUpdateDesignOpen = true
+        const updateDesignId = this.item.id
+        const updateDesignType = 'svg'
+        store.commit('user/SET_STATE', { isUpdateDesignOpen, updateDesignId, updateDesignType })
+      }
     }
   }
 })
