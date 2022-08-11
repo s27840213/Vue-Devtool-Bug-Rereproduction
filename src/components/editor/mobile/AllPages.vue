@@ -45,9 +45,6 @@ export default Vue.extend({
       return pages
     }
   },
-  created() {
-    resizeUtils.testResizeAllPages()
-  },
   mounted() {
     this.screenWidth = document.body.clientWidth - 130
     this._setPagesPerRow(floor(this.screenWidth / 180))
