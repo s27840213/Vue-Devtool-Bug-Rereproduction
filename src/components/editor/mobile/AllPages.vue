@@ -20,6 +20,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import resizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
   data() {
@@ -43,6 +44,9 @@ export default Vue.extend({
       pageUtils.setAutoResizeNeededForPages(pages, false)
       return pages
     }
+  },
+  created() {
+    resizeUtils.testResizeAllPages()
   },
   mounted() {
     this.screenWidth = document.body.clientWidth - 130

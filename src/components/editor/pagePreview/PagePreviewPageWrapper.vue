@@ -12,7 +12,7 @@
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
         ref="content")
-      page-content(v-if="inTheTarget"
+      page-content(v-if="inTheTarget || contentRiszed"
         class="click-disabled"
         :style="contentScaleStyles"
         :config="config"
@@ -101,7 +101,8 @@ export default Vue.extend({
       contentWidth: 0,
       inTheTarget: true,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
-      isHandlingAsyncTask: false
+      isHandlingAsyncTask: false,
+      contentRiszed: false
     }
   },
   directives: {
@@ -126,7 +127,7 @@ export default Vue.extend({
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
-        transform: `scale(${this.scaleRatio})`
+        // transform: `scale(${this.scaleRatio})`
       }
     },
     styles(): { [index: string]: string } {
@@ -156,6 +157,13 @@ export default Vue.extend({
         width: '100%',
         height: '100%'
       }
+    }
+  },
+  created() {
+    if (GeneralUtils.isTouchDevice()) {
+      this.contentRiszed = true
+    } else {
+
     }
   },
   mounted() {
