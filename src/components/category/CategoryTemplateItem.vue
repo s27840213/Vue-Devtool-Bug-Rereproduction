@@ -77,7 +77,7 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
-      testUtils.start()
+      testUtils.start('addTemp (Nathan, after optimize)')
       if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
       else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
       const { match_cover: matchCover = {} } = this.item
