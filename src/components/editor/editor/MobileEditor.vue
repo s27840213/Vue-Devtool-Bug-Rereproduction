@@ -51,6 +51,7 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -245,7 +246,7 @@ export default Vue.extend({
       pageUtils.fitPage()
     },
     afterLeave() {
-      logUtils.setLog(`Panel closed (Nathan, after optimize), ${(new Date()).getTime()}`)
+      testUtils.end('addTemplate (Nathan, before optimize)')
       this.setCurrActivePanel('none')
       pageUtils.fitPage()
     }
