@@ -246,7 +246,7 @@ export default Vue.extend({
       pageUtils.fitPage()
     },
     afterLeave() {
-      testUtils.end('addTemplate (Nathan, before optimize)')
+      testUtils.end('addTemplate (Nathan, after optimize)')
       this.setCurrActivePanel('none')
       pageUtils.fitPage()
     }
