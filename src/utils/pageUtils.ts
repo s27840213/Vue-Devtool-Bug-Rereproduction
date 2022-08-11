@@ -216,7 +216,6 @@ class PageUtils {
         newPage: json,
         pos: index
       })
-      // store.commit('SET_pages', this.newPages(pagesTmp))
     }
   }
 

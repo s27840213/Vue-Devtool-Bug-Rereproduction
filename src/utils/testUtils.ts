@@ -15,10 +15,10 @@ class TestUtils {
     const duration = (new Date()).getTime() - this.timer[key]
     const result = `${key}, ${duration}`
     console.log(result)
-    // Vue.notify({
-    //   group: 'copy',
-    //   text: result
-    // })
+    Vue.notify({
+      group: 'copy',
+      text: result
+    })
   }
 }
 
