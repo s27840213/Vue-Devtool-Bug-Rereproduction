@@ -40,7 +40,10 @@ export interface IUserModule {
     prev_2x: string,
     prev_4x: string
   },
-  viewGuide: number
+  viewGuide: number,
+  isUpdateDesignOpen: boolean,
+  updateDesignId: string,
+  updateDesignType: string
 }
 
 const getDefaultState = (): IUserModule => ({
@@ -84,7 +87,10 @@ const getDefaultState = (): IUserModule => ({
     prev_2x: '',
     prev_4x: ''
   },
-  viewGuide: +localStorage.guest_view_guide || 0
+  viewGuide: +localStorage.guest_view_guide || 0,
+  isUpdateDesignOpen: false,
+  updateDesignId: '',
+  updateDesignType: ''
 })
 
 const state = getDefaultState()
@@ -164,6 +170,15 @@ const getters: GetterTree<IUserModule, any> = {
   },
   getImgSizeMap(state): Array<{ [key: string]: string | number }> {
     return state.imgSizeMap
+  },
+  getIsUpdateDesignOpen() {
+    return state.isUpdateDesignOpen
+  },
+  getUpdateDesignId() {
+    return state.updateDesignId
+  },
+  getUpdateDesignType() {
+    return state.updateDesignType
   }
 }
 
