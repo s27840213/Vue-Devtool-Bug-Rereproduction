@@ -80,10 +80,7 @@
             iconName="email-black"
             :iconWidth="'25px'")
       div(class="nu-footer__bottom-info")
-        span {{$t('NN0714')}}
-        span {{$t('NN0715')}}
-        span {{$t('NN0716')}}
-        span {{$t('NN0717')}}
+        span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
     div(class="nu-footer__bottom-mobile")
       div(class="nu-footer__bottom-mobile-icons")
         a(:href="facebookPage")
@@ -105,10 +102,7 @@
         :style="{ 'margin-bottom': isHome ? '70px' : 0 }")
         span {{'COPYRIGHT Vivipic 2022 - TERMS & CONDITIONS  PRIVACY POLICY'}}
         div(class="nu-footer__bottom-mobile-info")
-          span {{$t('NN0714')}}
-          span {{$t('NN0715')}}
-          span {{$t('NN0716')}}
-          span {{$t('NN0717')}}
+          span(v-for="index in 5") {{$t(`NN07${13+index}`)}}
 </template>
 
 <script lang="ts">
