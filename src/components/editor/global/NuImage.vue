@@ -17,35 +17,44 @@
         :src="shadowSrc"
         @error="onError()"
         @load="onLoad()")
-    template(v-if="isAdjustImage")
-      svg(:viewBox="svgViewBox"
-        :width="svgImageWidth"
-        :height="svgImageHeight"
-        preserveAspectRatio="none"
-        role="image")
-        defs
-          filter(:id="filterId"
-            color-interpolation-filters="sRGB")
-            component(v-for="(elm, idx) in svgFilterElms"
-              :key="`svgFilter${idx}`"
-              :is="elm.tag"
-              v-bind="elm.attrs")
-              component(v-for="child in elm.child"
-                :key="child.tag"
-                :is="child.tag"
-                v-bind="child.attrs")
     div(class="img-wrapper"
       :style="imgWrapperstyle")
       div(class='nu-image__picture'
         :style="imgStyles")
-        img(ref="img"
+        svg(v-if="isAdjustImage"
+          :style="flipStyles"
+          :class="{'layer-flip': flippedAnimation }"
+          :viewBox="svgViewBox"
+          :width="svgImageWidth"
+          :height="svgImageHeight"
+          preserveAspectRatio="none"
+          role="image")
+          defs
+            filter(:id="filterId"
+              color-interpolation-filters="sRGB")
+              component(v-for="(elm, idx) in svgFilterElms"
+                :key="`svgFilter${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
+                component(v-for="child in elm.child"
+                  :key="child.tag"
+                  :is="child.tag"
+                  v-bind="child.attrs")
+          g
+            g(:filter="`url(#${filterId})`")
+              image(:xlink:href="finalSrc" ref="img"
+                class="nu-image__picture"
+                draggable="false"
+                @error="onError()"
+                @load="onLoad ()")
+        img(v-else ref="img"
           :style="flipStyles"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
           :src="finalSrc"
           draggable="false"
           @error="onError()"
           @load="onLoad ()")
-    template(v-if="isAdjustImage")
+    template(v-if="hasHalation")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
         :is="elm.tag"
@@ -326,8 +335,8 @@ export default Vue.extend({
         }
       }
       return {
-        transform: `scale(${scaleX}, ${scaleY})`,
-        ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
+        transform: `scale(${scaleX}, ${scaleY})`
+        // ...(this.isAdjustImage && this.svgFilterElms.length && { filter: `url(#${this.filterId})` })
       }
     },
     canvasWrapperStyle(): any {
@@ -393,10 +402,12 @@ export default Vue.extend({
         .getSrcSize(this.config.srcObj, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
-      const { styles } = this.config
-      return Object
-        .values(styles.adjust || {})
-        .some(val => typeof val === 'number' && val !== 0)
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([_, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
+    },
+    hasHalation(): boolean {
+      return this.config.styles.adjust.halation
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
