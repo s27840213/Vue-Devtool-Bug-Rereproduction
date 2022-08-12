@@ -53,7 +53,7 @@
           draggable="false"
           @error="onError()"
           @load="onLoad ()")
-    template(v-if="isAdjustImage")
+    template(v-if="hasHalation")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
         :is="elm.tag"
@@ -401,10 +401,12 @@ export default Vue.extend({
         .getSrcSize(this.config.srcObj, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
-      const { styles } = this.config
-      return Object
-        .values(styles.adjust || {})
-        .some(val => typeof val === 'number' && val !== 0)
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([_, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
+    },
+    hasHalation(): boolean {
+      return this.config.styles.adjust.halation
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
