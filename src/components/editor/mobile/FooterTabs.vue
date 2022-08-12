@@ -54,13 +54,9 @@ export default Vue.extend({
       isFontsPanelOpened: false,
       disableTabScroll: false,
       homeTabs: [
-        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
-        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
-        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
-        { icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' }
       ] as Array<IFooterTab>
     }
   },

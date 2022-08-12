@@ -5,12 +5,12 @@
         :currTab="currActivePanel"
         :inAllPagesMode="false")
       div(class="vivisticker__content")
-        keep-alive
-          mobile-editor-view(:currActivePanel="currActivePanel"
-                            :isConfigPanelOpen="isConfigPanelOpen"
-                            :inAllPagesMode="false")
+        //- v-if in main menu or in editor
+        //- mobile-editor-view(:currActivePanel="currActivePanel"
+                          :isConfigPanelOpen="isConfigPanelOpen"
+                          :inAllPagesMode="false")
       transition(name="panel-up")
-        mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
+        mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")
@@ -147,6 +147,7 @@ export default Vue.extend({
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
+        this.setCurrActivePanel('none')
       } else {
         editorUtils.setShowMobilePanel(true)
         this.setCurrActivePanel(panelType)
