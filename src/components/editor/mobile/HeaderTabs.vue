@@ -268,7 +268,6 @@ export default Vue.extend({
     transition: background-color 0.1s;
     padding: 2px;
     border-radius: 3px;
-    background-color: setColor(gray-2);
     &:active {
       background-color: setColor(gray-2);
     }
