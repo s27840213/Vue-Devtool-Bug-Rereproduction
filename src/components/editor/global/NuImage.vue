@@ -22,6 +22,8 @@
       div(class='nu-image__picture'
         :style="imgStyles")
         svg(v-if="isAdjustImage"
+          :style="flipStyles"
+          :class="{'layer-flip': flippedAnimation }"
           :viewBox="svgViewBox"
           :width="svgImageWidth"
           :height="svgImageHeight"
@@ -41,8 +43,7 @@
           g
             g(:filter="`url(#${filterId})`")
               image(:xlink:href="finalSrc" ref="img"
-                :style="flipStyles"
-                :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+                class="nu-image__picture"
                 draggable="false"
                 @error="onError()"
                 @load="onLoad ()")
