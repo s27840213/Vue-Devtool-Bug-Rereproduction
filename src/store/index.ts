@@ -11,20 +11,15 @@ import color from '@/store/module/color'
 import bgRemove from '@/store/module/bgRemove'
 import text from '@/store/text'
 import objects from '@/store/module/objects'
-import templates from '@/store/module/templates'
 import textStock from '@/store/module/text'
 import shadow from '@/store/module/shadow'
 import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
-import page from '@/store/module/page'
-import homeTemplate from '@/store/module/homeTemplate'
-import design from '@/store/module/design'
-import layouts from '@/store/module/layouts'
 import markers from '@/store/module/markers'
 import mobileEditor from '@/store/module/mobileEditor'
-import brandkit from './module/brandkit'
+import vivisticker from '@/store/module/vivisticker'
 import groupUtils from '@/utils/groupUtils'
 import { ICurrSubSelectedInfo } from '@/interfaces/editor'
 import { SrcObj } from '@/interfaces/gallery'
@@ -32,11 +27,8 @@ import pageUtils from '@/utils/pageUtils'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
-import unsplash from '@/store/module/photo'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
-import file from '@/store/module/file'
-import payment from '@/store/module/payment'
 
 Vue.use(Vuex)
 
@@ -841,22 +833,14 @@ export default new Vuex.Store({
     font,
     color,
     objects,
-    templates,
     textStock,
     background,
     mobileEditor,
     modal,
     popup,
-    page,
-    homeTemplate,
-    design,
-    layouts,
     markers,
-    brandkit,
-    unsplash,
     bgRemove,
-    file,
-    payment,
-    shadow
+    shadow,
+    vivisticker
   }
 })

@@ -5,27 +5,24 @@
         :currTab="currActivePanel"
         :inAllPagesMode="false")
       div(class="vivisticker__content")
-        //- v-if in main menu or in editor
-        //- mobile-editor-view(:currActivePanel="currActivePanel"
-                          :isConfigPanelOpen="isConfigPanelOpen"
-                          :inAllPagesMode="false")
-      transition(name="panel-up")
+        main-menu(v-if="!isInEditor")
+      //- transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")
     footer-tabs(class="vivisticker__bottom"
-      @switchTab="switchTab"
-      :currTab="currActivePanel"
+      @switchTab="switchMainTab"
+      :currTab="currActiveTab"
       :inAllPagesMode="false")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import MobileEditorView from '@/components/editor/mobile/MobileEditorView.vue'
-import MobilePanel from '@/components/editor/mobile/MobilePanel.vue'
-import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
-import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
+import MainMenu from '@/components/vivisticker/MainMenu.vue'
+import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
+import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
+import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -36,16 +33,15 @@ import editorUtils from '@/utils/editorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 
 export default Vue.extend({
-  name: 'MobileEditor',
+  name: 'ViviSticker',
   components: {
-    MobileEditorView,
+    MainMenu,
     MobilePanel,
     HeaderTabs,
     FooterTabs
   },
   data() {
     return {
-      isConfigPanelOpen: false,
       currColorEvent: ''
     }
   },
@@ -94,7 +90,9 @@ export default Vue.extend({
       groupType: 'getGroupType',
       isSidebarPanelOpen: 'getMobileSidebarPanelOpen',
       currActivePanel: 'mobileEditor/getCurrActivePanel',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      currActiveTab: 'vivisticker/getCurrActiveTab',
+      isInEditor: 'vivisticker/getIsInEditor'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
@@ -142,7 +140,8 @@ export default Vue.extend({
       setMobileSidebarPanelOpen: 'SET_mobileSidebarPanelOpen',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
-      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
+      setCurrActiveTab: 'vivisticker/SET_currActiveTab'
     }),
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType || panelType === 'none') {
@@ -157,6 +156,9 @@ export default Vue.extend({
           }
         }
       }
+    },
+    switchMainTab(panelType: string) {
+      this.setCurrActiveTab(panelType)
     }
   }
 })
