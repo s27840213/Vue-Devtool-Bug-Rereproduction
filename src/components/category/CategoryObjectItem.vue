@@ -1,16 +1,9 @@
 <template lang="pug">
   div(class="category-object-item"
-      @click="addSvg"
-      @dragstart="dragStart($event)")
+      @click="addSvg")
     img(class="category-object-item__img"
-      draggable="true"
+      draggable="false"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    svg-icon(v-if="!isTouchDevice && (item.info || (item.tags && item.tags.length > 0))"
-      class="category-object-item__more"
-      @click.native="showSvgInfo"
-      :iconName="'more_vertical'"
-      :iconColor="'gray-2'"
-      :iconWidth="'20px'")
     pro-item(v-if="item.plan")
 </template>
 
@@ -22,6 +15,7 @@ import { mapMutations } from 'vuex'
 import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   components: {
@@ -40,39 +34,10 @@ export default Vue.extend({
     this.item.db = 'svg'
   },
   methods: {
-    ...mapMutations({
-      _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
-    }),
-    dragStart(e: DragEvent) {
-      if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      const type = assetUtils.getLayerType(this.item.type)
-      new DragUtils().itemDragStart(e, type || '', {
-        ...this.item
-      }, {
-        resizeRatio: RESIZE_RATIO_SVG
-      })
-    },
     addSvg() {
       if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      assetUtils.addAsset(this.item)
-    },
-    showSvgInfo(evt: Event) {
-      const { info = {}, tags } = this.item
-      this._setCurrSelectedResInfo({
-        type: 'object',
-        userName: info.author?.name ?? '',
-        userLink: info.author?.url ?? '',
-        authorCompany: info.author?.company ?? '',
-        tags,
-        licenseName: info.license?.name ?? '',
-        licenseLink: info.license?.url ?? ''
-      })
-      this.$nextTick(() => {
-        const el = document.querySelector('.res-info') as HTMLElement
-        const { top, left, height } = (evt.target as HTMLElement).getBoundingClientRect()
-        el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
-        el.focus()
-      })
+      // assetUtils.addAsset(this.item)
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
     }
   }
 })

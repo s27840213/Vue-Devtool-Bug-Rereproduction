@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
 import ViviSticker from '../views/ViviSticker.vue'
+import Screenshot from '../views/Screenshot.vue'
 import SvgIconView from '../views/SvgIconView.vue'
 import store from '@/store'
 import i18n from '@/i18n'
@@ -44,6 +45,18 @@ const routes: Array<RouteConfig> = [
     path: '',
     name: 'ViviSticker',
     component: ViviSticker,
+    beforeEnter: async (to, from, next) => {
+      try {
+        next()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  {
+    path: 'screenshot',
+    name: 'Screenshot',
+    component: Screenshot,
     beforeEnter: async (to, from, next) => {
       try {
         next()

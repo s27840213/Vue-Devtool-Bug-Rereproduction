@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="nu-shape" :style="styles()")
-    svg(:view-box.camel="viewBoxFormatter" :style="styles()")
+    svg(:view-box.camel="viewBoxFormatter" :style="styles()" @load="onload")
       defs(v-if="config.category === 'E'" v-html="svgFormatter")
       defs
         filter(v-if="config.category === 'C'" :id="className" v-html="filterFormatter")
@@ -538,6 +538,9 @@ export default Vue.extend({
       <feMerge>
         <feMergeNode in="rgbf"/>${mergeNodeF}
       </feMerge>`
+    },
+    onload() {
+      this.$emit('load')
     }
   }
 })
