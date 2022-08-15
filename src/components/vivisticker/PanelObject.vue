@@ -4,6 +4,8 @@
       :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
       :defaultKeyword="keywordLabel"
+      vivisticker
+      :color="{close: 'white', search: 'white'}"
       @search="handleSearch")
     div(v-if="isAdmin" class="panel-objects-2html")
       input(type="text" placeholder="項目網址" v-model="panelParams")

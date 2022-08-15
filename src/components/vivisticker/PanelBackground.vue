@@ -5,6 +5,8 @@
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keywordLabel"
+      vivisticker
+      :color="{close: 'white', search: 'white'}"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"

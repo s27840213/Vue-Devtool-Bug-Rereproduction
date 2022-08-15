@@ -6,11 +6,11 @@
             class="footer-tabs__item"
             :class="{'click-disabled': (tab.disabled || isLocked)}"
             @click="handleTabAction(tab)")
-          svg-icon(class="mb-5 click-disabled"
+          svg-icon(class="click-disabled"
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
             :iconWidth="'24px'")
-          span(class="text-body-4 no-wrap click-disabled"
+          span(class="body-4 no-wrap click-disabled"
           :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
@@ -564,6 +564,7 @@ export default Vue.extend({
   overflow: hidden;
   background-color: setColor(gray-5);
   &__container {
+    height: 49px;
     overflow: scroll;
     display: grid;
     grid-template-rows: auto;
@@ -571,7 +572,7 @@ export default Vue.extend({
     grid-auto-columns: 65px;
     column-gap: 32px;
     background-color: setColor(nav);
-    padding: 8px 12px;
+    padding: 0 12px;
     @include no-scrollbar;
     transition: transform 0.3s, opacity 0.4s;
     &.main {
@@ -579,7 +580,6 @@ export default Vue.extend({
       display: flex;
       align-items: center;
       justify-content: space-evenly;
-      padding: 8px 16px;
     }
   }
 
@@ -591,8 +591,8 @@ export default Vue.extend({
     box-sizing: border-box;
     padding: 0px 4px;
     > span {
-      transform: scale(0.8);
       transition: background-color 0.2s, color 0.2s;
+      line-height: 20px;
     }
   }
 }
