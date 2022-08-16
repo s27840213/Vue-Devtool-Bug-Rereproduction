@@ -4,14 +4,16 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
-    div(class="layer-scale" ref="scale"
-        :style="scaleStyles()")
-      nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
-        component(:is="`nu-${config.type}`"
-          class="transition-none"
-          :config="config"
-          :imgControl="imgControl"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+    div(class="layer-translate posAbs"
+        :style="translateStyles")
+      div(class="layer-scale posAbs" ref="scale"
+          :style="scaleStyles")
+        nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
+          component(:is="`nu-${config.type}`"
+            class="transition-none"
+            :config="config"
+            :imgControl="imgControl"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
@@ -28,11 +30,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import layerUtils from '@/utils/layerUtils'
-import imageUtils from '@/utils/imageUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import SquareLoading from '@/components/global/SqureLoading.vue'
-import generalUtils from '@/utils/generalUtils'
 import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
@@ -50,14 +48,6 @@ export default Vue.extend({
   data() {
     return {
       LayerType
-    }
-  },
-  mounted() {
-    if (this.config.type === 'shape') {
-      const scaleLayer = this.$refs.scale as HTMLElement
-      if (scaleLayer) {
-        scaleLayer.classList.add('shape')
-      }
     }
   },
   computed: {
@@ -121,6 +111,30 @@ export default Vue.extend({
       const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
+    },
+    translateStyles() {
+      const { zindex } = this.config.styles
+      const { type } = this.config
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+      const transform = isImgType ? 'none' : 'translateZ(0)'
+      /**
+      * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
+      * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
+      */
+      return {
+        transform,
+        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
+      }
+    },
+    scaleStyles() {
+      const { scale, scaleX, scaleY } = this.config.styles
+      const { type } = this.config
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+
+      const styles = {
+        transform: isImgType ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+      }
+      return styles
     }
   },
   methods: {
@@ -149,35 +163,6 @@ export default Vue.extend({
     //   }
     //   return styles
     // },
-    scaleStyles() {
-      let { width, height } = this.config.styles
-      const { scale, scaleX, scaleY, zindex, shadow } = this.config.styles
-      const { type } = this.config
-      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
-      width /= (isImgType ? 1 : scale)
-      height /= isImgType ? 1 : scale
-
-      const transform = isImgType ? 'none' : `translateZ(0) scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
-      // if (type === LayerType.image && shadow.currentEffect === 'shadow') {
-      //   transform = `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
-      // }
-
-      /**
-       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
-       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
-       */
-      const styles = {
-        width: this.config.type === 'shape' ? '' : `${width}px`,
-        height: this.config.type === 'shape' ? '' : `${height}px`,
-        transform,
-        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
-      }
-      return styles
-    },
-    flipStyles() {
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      return CssConveter.convertFlipStyle(horizontalFlip, verticalFlip)
-    },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       e.stopPropagation()
@@ -230,7 +215,7 @@ export default Vue.extend({
   border-radius: 100px/50px;
 }
 
-.shape {
+.posAbs {
   position: absolute;
   transform-origin: top left;
   top: 0;

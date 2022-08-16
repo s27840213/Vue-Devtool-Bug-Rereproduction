@@ -127,7 +127,7 @@ export default Vue.extend({
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
-        // transform: `scale(${this.scaleRatio})`
+        transform: `scale(${this.scaleRatio})`
       }
     },
     styles(): { [index: string]: string } {
