@@ -76,7 +76,6 @@ export default Vue.extend({
             styles,
             textEffectStyles,
             {
-              background: 'rgba(0, 0, 255, 0)',
               willChange: 'text-shadow',
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
             }

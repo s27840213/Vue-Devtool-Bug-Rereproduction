@@ -150,7 +150,8 @@ export default Vue.extend({
         lift: ['spread'],
         hollow: ['stroke'],
         splice: ['stroke', 'distance', 'angle', 'color'],
-        echo: ['distance', 'angle', 'color']
+        echo: ['distance', 'angle', 'color'],
+        textbox: ['bStroke', 'bOpacity', 'bColor', 'bRadius', 'pStroke', 'pOpacity', 'pColor']
       } as { [key: string]: string[] },
       effectI18nMap: {
         distance: 'NN0063',
@@ -161,7 +162,12 @@ export default Vue.extend({
         spread: 'NN0068',
         stroke: 'NN0069',
         shape: 'NN0070',
-        bend: 'NN0071'
+        bend: 'NN0071',
+        bStroke: '邊框寬度',
+        pStroke: '填滿寬度',
+        bOpacity: '邊框透明度',
+        pOpacity: '填滿透明度',
+        bRadius: '邊框圓角'
       },
       shapes: {
         none: [],
@@ -174,7 +180,12 @@ export default Vue.extend({
         opacity: { max: 100, min: 0 },
         spread: { max: 100, min: 0 },
         stroke: { max: 100, min: 0 },
-        bend: { max: 100, min: -100 }
+        bend: { max: 100, min: -100 },
+        bOpacity: { max: 100, min: 0 },
+        pOpacity: { max: 100, min: 0 },
+        bStroke: { max: 100, min: 0 },
+        pStroke: { max: 100, min: 0 },
+        bRadius: { max: 100, min: 0 }
       },
       hintMap: {
         'shadow-none': `${this.$t('NN0111')}`,
@@ -197,7 +208,7 @@ export default Vue.extend({
     },
     shadowFields(): string[] {
       const { effects, currentEffect } = this
-      return effects[currentEffect].filter(field => field !== 'color')
+      return effects[currentEffect].filter(field => !field.toLowerCase().includes('color'))
     },
     shapeFields(): string[] {
       const { shapes, currentShape } = this
@@ -205,7 +216,7 @@ export default Vue.extend({
     },
     canChangeColor(): boolean {
       const { effects, currentEffect } = this
-      return effects[currentEffect].includes('color')
+      return effects[currentEffect].includes('color') || effects[currentEffect].includes('pColor')
     },
     currentStyle(): any {
       const { styles } = TextEffectUtils.getCurrentLayer()

@@ -604,7 +604,9 @@ export default Vue.extend({
         // touchAction: this.isActive ? 'none' : 'initial',
         touchAction: 'none',
         ...textEffectStyles,
-        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`,
+        backgroundColor: 'transparent',
+        borderRadius: 0
       }
     },
     // styles(type: string) {
@@ -2043,7 +2045,6 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     position: absolute;
-    box-sizing: border-box;
     transform-style: preserve-3d;
     touch-action: none;
   }
@@ -2052,7 +2053,6 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     position: absolute;
-    box-sizing: border-box;
     &:hover {
       cursor: pointer;
     }
