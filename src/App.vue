@@ -192,7 +192,6 @@ export default Vue.extend({
   overflow: hidden;
   z-index: setZindex(popup);
   pointer-events: none;
-  display: none;
   > div {
     pointer-events: initial;
   }
