@@ -73,7 +73,7 @@ export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 
   measures.forEach(measureItem => {
     const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
     logUtils.setLog(log)
-    console.log(log)
+    // console.log(log)
   })
   performance.clearMeasures()
 }
