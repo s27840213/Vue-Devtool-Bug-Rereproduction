@@ -104,7 +104,6 @@ class CssConveter {
   }
 
   convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false): { [key: string]: string } {
-    console.log(cancel3D)
     const result: { [key: string]: string } = {}
     Object.assign(result,
       { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width}px` : 'initial' },

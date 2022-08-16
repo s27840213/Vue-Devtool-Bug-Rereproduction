@@ -22,7 +22,7 @@
           div(v-if="isSelected"
             class="folder-item__checkbox-checked"
             @click.stop="emitDeselect")
-            svg-icon(iconName="check-large"
+            svg-icon(iconName="done"
                     iconWidth="10px"
                     iconHeight="8px"
                     iconColor="white")
@@ -122,7 +122,7 @@ export default Vue.extend({
   },
   watch: {
     'config.name': {
-      handler: function(newVal) {
+      handler: function (newVal) {
         this.editableName = newVal
       }
     }
@@ -145,7 +145,7 @@ export default Vue.extend({
       if (this.isTempFolder) return
       this.$emit('goto')
     },
-    draggedFolderStyles(): {[key: string]: string} {
+    draggedFolderStyles(): { [key: string]: string } {
       if (this.isDragged) {
         return {
           left: `${this.draggedFolderCoordinate.x}px`,
@@ -156,7 +156,7 @@ export default Vue.extend({
         return {}
       }
     },
-    hintStyles(): {[key: string]: string} {
+    hintStyles(): { [key: string]: string } {
       const nameblock = (this.$refs.nameblock as HTMLElement)
       if (nameblock) {
         const rect = nameblock.getBoundingClientRect()
@@ -559,10 +559,12 @@ export default Vue.extend({
 }
 
 .fade {
-  &-enter-active, &-leave-active {
-    transition: .2s;
+  &-enter-active,
+  &-leave-active {
+    transition: 0.2s;
   }
-  &-enter, &-leave-to {
+  &-enter,
+  &-leave-to {
     opacity: 0;
   }
 }

@@ -274,7 +274,7 @@ export default Vue.extend({
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
-      this.isShownScrollBar = !(this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
+      this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
     })
   },
   watch: {
