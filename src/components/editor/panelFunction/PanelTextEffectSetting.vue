@@ -1,92 +1,50 @@
 <template lang="pug">
   div(class="text-effect-setting mt-25")
     div(class="action-bar")
-      div(class="flex-between text-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
-          :key="`shadow-${icon}`"
-          :iconName="`text-effect-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="hintMap[`shadow-${icon}`]"
-        )
-      div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
-        class="w-full text-effect-setting__form")
-        div(v-for="field in shadowFields"
-          :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input input__slider--range"
-            :value="currentStyle.textEffect[field]"
-            :max="fieldRange[field].max"
-            :min="fieldRange[field].min"
-            :name="field"
-            @input="handleEffectUpdate"
-            @mouseup="recordChange"
-            v-ratio-change
-            type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textEffect[field]"
-            :name="field"
-            @change="handleEffectUpdate"
-            @blur="recordChange"
-            type="number")
-        div(v-if="canChangeColor"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="text-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.textEffect.color }"
-            @click="handleColorModal")
-          color-picker(v-if="openColorPicker"
-            class="text-effect-setting__color-picker"
-            v-click-outside="handleColorModal"
-            :currentColor="currentStyle.textEffect.color"
-            @update="handleColorUpdate")
-      div(class="flex-between text-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
-          :key="`shadow-${icon}`"
-          :iconName="`text-effect-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="hintMap[`shadow-${icon}`]"
-        )
-      div(v-if="shadowOption.slice(3).includes(currentEffect)"
-        class="w-full text-effect-setting__form")
-        div(v-for="field in shadowFields"
-          :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
-          input(class="text-effect-setting__range-input input__slider--range"
-            :value="currentStyle.textEffect[field]"
-            :max="fieldRange[field].max"
-            :min="fieldRange[field].min"
-            :name="field"
-            @input="handleEffectUpdate"
-            @mouseup="recordChange"
-            v-ratio-change
-            type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textEffect[field]"
-            :name="field"
-            @change="handleEffectUpdate"
-            @blur="recordChange"
-            type="number")
-        div(v-if="canChangeColor"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="text-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.textEffect.color }"
-            @click="handleColorModal")
-          color-picker(v-if="openColorPicker"
-            class="text-effect-setting__color-picker"
-            v-click-outside="handleColorModal"
-            :currentColor="currentStyle.textEffect.color"
-            @update="handleColorUpdate")
+      template(v-for="shadowOption1d in shadowOption2d")
+        div(class="flex-between text-effect-setting__options mb-10")
+          svg-icon(v-for="(icon, idx) in shadowOption1d"
+            :key="`shadow-${icon}`"
+            :iconName="`text-effect-${icon}`"
+            @click.native="onEffectClick(icon)"
+            class="text-effect-setting__option pointer"
+            :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
+            iconWidth="60px"
+            iconColor="white"
+            v-hint="hintMap[`shadow-${icon}`]"
+          )
+        div(v-if="shadowOption1d.includes(currentEffect)"
+          class="w-full text-effect-setting__form")
+          div(v-for="field in shadowFields"
+            :key="field"
+            class="text-effect-setting__field")
+            div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
+            input(class="text-effect-setting__range-input input__slider--range"
+              :value="currentStyle.textEffect[field]"
+              :max="fieldRange[field].max"
+              :min="fieldRange[field].min"
+              :name="field"
+              @input="handleEffectUpdate"
+              @mouseup="recordChange"
+              v-ratio-change
+              type="range")
+            input(class="text-effect-setting__value-input"
+              :value="currentStyle.textEffect[field]"
+              :name="field"
+              @change="handleEffectUpdate"
+              @blur="recordChange"
+              type="number")
+          div(v-if="canChangeColor"
+            class="text-effect-setting__field")
+            div(class="text-effect-setting__field-name") {{$t('NN0017')}}
+            div(class="text-effect-setting__value-input"
+              :style="{ backgroundColor: currentStyle.textEffect.color }"
+              @click="handleColorModal")
+            color-picker(v-if="openColorPicker"
+              class="text-effect-setting__color-picker"
+              v-click-outside="handleColorModal"
+              :currentColor="currentStyle.textEffect.color"
+              @update="handleColorUpdate")
       div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{$t('NN0070')}}
       div(class="flex-start text-effect-setting__options mb-10")
         svg-icon(v-for="(icon, idx) in shapeOption"
@@ -200,8 +158,11 @@ export default Vue.extend({
     }
   },
   computed: {
-    shadowOption(): string[] {
-      return Object.keys(this.effects)
+    shadowOption2d(): string[][] {
+      const original = Object.keys(this.effects)
+      const newArr = []
+      while (original.length) newArr.push(original.splice(0, 3))
+      return newArr
     },
     shapeOption(): string[] {
       return Object.keys(this.shapes)
