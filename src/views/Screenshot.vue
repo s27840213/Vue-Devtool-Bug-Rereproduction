@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="screenshot")
     nu-shape(v-if="config !== undefined"
-              id="target"
+              ref="target"
               :config="config"
               :pageIndex="0"
               :layerIndex="0"
@@ -41,7 +41,9 @@ export default Vue.extend({
   methods: {
     onload() {
       console.log('loaded')
-      vivistickerUtils.sendDoneLoading()
+      const target = (this.$refs.target as Vue).$el
+      const { width, height } = target.getBoundingClientRect()
+      vivistickerUtils.sendDoneLoading(width, height)
     }
   }
 })

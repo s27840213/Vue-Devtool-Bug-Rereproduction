@@ -17,8 +17,9 @@ class ViviStickerUtils {
     }
   }
 
-  sendDoneLoading() {
-    this.sendToIOS('DONE_LOADING', '{}')
+  sendDoneLoading(width: number, height: number) {
+    console.log(width, height)
+    this.sendToIOS('DONE_LOADING', JSON.stringify({ width, height }))
   }
 
   sendScreenshotUrl(url: string) {
