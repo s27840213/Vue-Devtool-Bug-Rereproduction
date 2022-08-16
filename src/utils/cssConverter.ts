@@ -58,7 +58,7 @@ const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpaci
 ]
 
 class CssConveter {
-  convertTransformStyle(x: number, y: number, zindex: number, rotate: number): { transform: string } {
+  convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false): { transform: string } {
     //  The scale feature only applied on "layer-scale" as a child-container of the layer
 
     // if (scale !== 0 && scale !== undefined) {
@@ -71,7 +71,7 @@ class CssConveter {
     //   tmpArr.push(`scaleY(${scaleY})`)
     // }
     return {
-      transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`
+      transform: cancel3D ? `translate(${x}px, ${y}px) rotate(${rotate}deg)` : `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`
     }
   }
 
@@ -103,13 +103,14 @@ class CssConveter {
     return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
-  convertDefaultStyle(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {
+  convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false): { [key: string]: string } {
+    console.log(cancel3D)
     const result: { [key: string]: string } = {}
     Object.assign(result,
       { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width}px` : 'initial' },
       { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height}px` : 'initial' },
       { opacity: `${sourceStyles.opacity / 100}` },
-      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate))
+      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D))
     return result
   }
 
@@ -140,7 +141,7 @@ class CssConveter {
   //   return this.getKeyByValue(styleMap, propInCss)
   // }
 
-  convertTextShadow (x:number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
+  convertTextShadow(x: number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
     return {
       textShadow: `${color} ${x}px ${y}px ${blur || 0}px`
     }

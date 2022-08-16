@@ -334,7 +334,7 @@ export default Vue.extend({
     },
     containerStyles(): { [index: string]: any } {
       return {
-        transform: `translate3d(0,${this.contentEditable ? 100 : 0}%,0)`,
+        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`
       }
     },

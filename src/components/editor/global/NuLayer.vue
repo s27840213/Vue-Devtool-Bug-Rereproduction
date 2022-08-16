@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-layer" :style="styles" ref="body"
+  div(class="nu-layer" :style="layerStyles" ref="body"
       @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
@@ -32,6 +32,7 @@ import TextEffectUtils from '@/utils/textEffectUtils'
 import layerUtils from '@/utils/layerUtils'
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
+import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   components: {
@@ -43,7 +44,11 @@ export default Vue.extend({
     layerIndex: Number,
     subLayerIndex: Number,
     flip: Object,
-    imgControl: Boolean
+    imgControl: Boolean,
+    inGroup: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -51,9 +56,15 @@ export default Vue.extend({
     }
   },
   computed: {
-    styles(): any {
+    ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo'
+    }),
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
+    },
+    layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -112,7 +123,7 @@ export default Vue.extend({
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
     },
-    translateStyles() {
+    translateStyles(): { [index: string]: string } {
       const { zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
@@ -126,7 +137,7 @@ export default Vue.extend({
         'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
     },
-    scaleStyles() {
+    scaleStyles(): { [index: string]: string } {
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))

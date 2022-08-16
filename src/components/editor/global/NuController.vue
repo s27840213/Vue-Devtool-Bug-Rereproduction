@@ -12,7 +12,7 @@
     div(class="nu-controller__content"
         ref="body"
         :layer-index="`${layerIndex}`"
-        :style="styles(getLayerType)"
+        :style="contentStyles(getLayerType)"
         @dragenter="dragEnter($event)"
         @dragover.prevent
         @click.right.stop="onRightClick"
@@ -74,7 +74,7 @@
           @click.native="MappingUtils.mappingIconAction('lock')")
     div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
         class="nu-controller__ctrl-points"
-        :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+        :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
         div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -601,7 +601,7 @@ export default Vue.extend({
       }
       return (zindex ?? (this.config.styles.zindex)) + offset
     },
-    styles(type: string) {
+    contentStyles(type: string) {
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)

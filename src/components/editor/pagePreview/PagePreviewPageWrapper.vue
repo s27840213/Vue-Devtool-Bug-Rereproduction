@@ -355,14 +355,14 @@ export default Vue.extend({
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate3d(-50%, -50%, 0);
+    transform: translate(-50%, -50%);
     border-radius: 4px;
     z-index: -1;
   }
   &-title {
     position: absolute;
     bottom: -8px;
-    transform: translate3d(0, 100%, 0);
+    transform: translate(0, 100%);
     z-index: 100;
     display: flex;
     justify-content: center;

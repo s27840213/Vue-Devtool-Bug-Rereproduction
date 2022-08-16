@@ -293,7 +293,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         const el = document.querySelector('.res-info') as HTMLElement
         const { top, left, height } = (evt.target as HTMLElement).getBoundingClientRect()
-        el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
+        el.style.transform = `translate(${left}px, ${top + height + 5}px)`
         el.focus()
       })
     },
@@ -319,7 +319,7 @@ export default Vue.extend({
   display: inline-flex;
   justify-content: center;
   &.border {
-    border: 1px solid #D9DBE1;
+    border: 1px solid #d9dbe1;
     border-radius: 5px;
     padding: 6px;
     box-sizing: border-box;
@@ -329,7 +329,7 @@ export default Vue.extend({
     top: -11px;
     right: -11px;
     @include size(24px);
-    background: #FFFFFF;
+    background: #ffffff;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 50%;
     display: flex;
