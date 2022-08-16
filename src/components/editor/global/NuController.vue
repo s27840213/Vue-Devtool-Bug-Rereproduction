@@ -589,15 +589,17 @@ export default Vue.extend({
       } else if (isFrame) {
         zindex = (this.layerIndex + 1) * 1000
       } else if (this.getLayerType === LayerType.frame && this.isMoving) {
+        zindex = (this.layerIndex + 1) * 1000
+      } else if (this.getLayerType === 'tmp') {
         /**
-         * @Todo - find the reason why this been set to certain value instead of 0
+         * @Todo - find the reason why this been set to certain value istead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
-        zindex = (this.layerIndex + 1) * 1000
+        return 0
       } else if (this.getLayerType === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
-      return (zindex ?? (this.config.styles.zindex + 1)) + offset
+      return (zindex ?? (this.config.styles.zindex)) + offset
     },
     styles(type: string) {
       const zindex = this.zindex(type)
@@ -2058,13 +2060,6 @@ export default Vue.extend({
         e.stopPropagation()
       }
     }
-    // scrollUpdate() {
-    //   const event = new MouseEvent('mousemove', {
-    //     clientX: this.initialPos.x,
-    //     clientY: this.initialPos.y
-    //   })
-    //   window.dispatchEvent(event)
-    // }
   }
 })
 </script>
