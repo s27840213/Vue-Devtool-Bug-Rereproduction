@@ -134,16 +134,16 @@ Vue.directive('header-border', {
 
 Vue.directive('press', longpress)
 
-const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
-const req = require.context('@/assets/icon', true, /\.svg$/)
+// const requireAll = (requireContext: __WebpackModuleApi.RequireContext) => requireContext.keys().map(requireContext)
+// const req = require.context('@/assets/icon', true, /\.svg$/)
 
-if (process.env.NODE_ENV !== 'production') {
-  svgIconUtils.setIcons(requireAll(req).map((context: any) => {
-    return context.default.id
-  }))
-} else {
-  requireAll(req)
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   svgIconUtils.setIcons(requireAll(req).map((context: any) => {
+//     return context.default.id
+//   }))
+// } else {
+//   requireAll(req)
+// }
 
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {
