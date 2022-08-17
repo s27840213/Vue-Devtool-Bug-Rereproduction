@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-text")
-    search-bar(class="mb-15"
+    search-bar(class="panel-text__searchbar"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -213,6 +213,9 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  &__searchbar {
+    margin-bottom: 14px;
+  }
   &__brand-header {
     margin-top: 10px;
     margin-bottom: 13px;

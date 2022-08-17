@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="panel-bg")
-    tabs(v-if="!isInCategory" :tabs="[$t('NN0002'),$t('NN0017')]" @switchTab="switchTab")
+    tabs(v-if="!isInCategory" :tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
     div(v-if="isInCategory" class="space")
-    search-bar(v-if="showImageTab && !isInCategory" class="mb-15"
+    search-bar(v-if="showImageTab && !isInCategory" class="panel-bg__searchbar"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -302,6 +302,9 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  &__searchbar {
+    margin-bottom: 14px;
+  }
   &__item {
     width: 145px;
     height: 145px;

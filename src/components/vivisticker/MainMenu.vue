@@ -1,10 +1,10 @@
 <template lang="pug">
-  div(class="main-menu p-15"
+  div(class="main-menu"
       ref="panel")
     div(class="main-menu__bottom-section")
       keep-alive(:include="['panel-object', 'panel-background', 'panel-text']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-        component(class="border-box p-2"
+        component(class="border-box"
                   :is="`panel-${this.currActiveTab}`")
 </template>
 
@@ -44,11 +44,7 @@ export default Vue.extend({
   width: 100%;
   box-sizing: border-box;
   background-color: setColor(nav-active);
-  row-gap: 10px;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto minmax(0, 1fr);
-  justify-items: center;
+  padding: 24px 24px 0 24px;
 
   &__bottom-section {
     width: 100%;
