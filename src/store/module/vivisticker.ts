@@ -2,12 +2,14 @@ import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IViviStickerState {
   currActiveTab: string,
-  isInEditor: boolean
+  isInEditor: boolean,
+  isInCategory: boolean
 }
 
 const getDefaultState = (): IViviStickerState => ({
   currActiveTab: 'object',
-  isInEditor: false
+  isInEditor: false,
+  isInCategory: false
 })
 
 const state = getDefaultState()
@@ -17,6 +19,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInEditor(state: IViviStickerState): boolean {
     return state.isInEditor
+  },
+  getIsInCategory(state: IViviStickerState): boolean {
+    return state.isInCategory
   }
 }
 
@@ -26,6 +31,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInEditor(state: IViviStickerState, bool: boolean) {
     state.isInEditor = bool
+  },
+  SET_isInCategory(state: IViviStickerState, bool: boolean) {
+    state.isInCategory = bool
   }
 }
 

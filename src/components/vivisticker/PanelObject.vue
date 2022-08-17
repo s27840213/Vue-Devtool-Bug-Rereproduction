@@ -1,6 +1,8 @@
 <template lang="pug">
   div(class="panel-objects")
-    search-bar(class="mb-15"
+    div(v-if="isInCategory" class="space")
+    search-bar(v-else
+      class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -47,6 +49,7 @@ import { IListServiceContentData, IListServiceContentDataItem } from '@/interfac
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import constantData from '@/utils/constantData'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   components: {
@@ -64,7 +67,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin'
+      isAdmin: 'user/isAdmin',
+      isInCategory: 'vivisticker/getIsInCategory'
     }),
     ...mapState('objects', [
       'categories',
@@ -162,6 +166,7 @@ export default Vue.extend({
       if (keyword) {
         this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getContent({ keyword, locale })
+        vivistickerUtils.setIsInCategory(true)
       } else {
         this.getRecAndCate()
       }
@@ -212,5 +217,9 @@ export default Vue.extend({
     border: 1px solid black;
   }
   > button { margin: 10px auto; }
+}
+
+.space {
+  margin-bottom: 33px;
 }
 </style>

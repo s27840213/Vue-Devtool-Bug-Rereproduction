@@ -1,4 +1,5 @@
 import { IAsset } from '@/interfaces/module'
+import store from '@/store'
 
 class ViviStickerUtils {
   sendToIOS(messageType: string, message: string) {
@@ -37,6 +38,10 @@ class ViviStickerUtils {
       default:
         return ''
     }
+  }
+
+  setIsInCategory(bool: boolean) {
+    store.commit('vivisticker/SET_isInCategory', bool)
   }
 }
 

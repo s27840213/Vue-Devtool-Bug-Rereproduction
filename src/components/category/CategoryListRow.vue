@@ -1,15 +1,13 @@
 <template lang="pug">
   div(class="category-row")
     div(v-if="prevIcon"
-      class="category-row__move category-row__move--left"
-      @click="handlePrev")
+      class="category-row__move category-row__move--left")
       div(class="category-row__icon")
-        svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
+        //- svg-icon(iconName="arrow-left" iconWidth="20px" iconColor="gray-1")
     div(v-if="nextIcon"
-      class="category-row__move category-row__move--right"
-      @click="handleNext")
+      class="category-row__move category-row__move--right")
       div(class="category-row__icon")
-        svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
+        //- svg-icon(iconName="arrow-right" iconWidth="20px" iconColor="gray-1")
     div(class="category-row__items" ref="items" @scroll.passive="handleScroll")
       slot
 </template>
@@ -82,6 +80,7 @@ export default Vue.extend({
     border-radius: 50%;
     position: relative;
     box-shadow: 0px 3px 10px rgba(78, 171, 230, 0.3);
+    width: 20px;
   }
   &__move {
     position: absolute;

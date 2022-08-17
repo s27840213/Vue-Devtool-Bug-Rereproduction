@@ -49,9 +49,8 @@ export default Vue.extend({
       const activeMode = tabIndex === this.currActiveTabIndex ? 'active' : 'inactive'
       return {
         color: this.colors[activeMode],
-        borderBottom: `2px solid ${this.colors[activeMode]}`,
-        width: `${100 / this.tabs.length / 2}%`
-
+        width: `${100 / this.tabs.length / 2}%`,
+        ...(activeMode === 'active' ? { borderBottom: `2px solid ${this.colors[activeMode]}` } : {})
       }
     },
     switchTab(tabIndex: number) {

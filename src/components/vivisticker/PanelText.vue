@@ -9,13 +9,11 @@
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
-      div(class="panel-text__text-button-wrapper" v-for="config in listDefaultText"
-          :key="config.type")
-        btn(
-          class="panel-text__text-button mb-10"
-          :type="`text-${config.type.toLowerCase()}`"
-          :fontFamily="localeFont()"
-          @click.native="handleAddText(config)") {{ config.text }}
+      div(class="panel-text__text-button-title py-10 text-white") {{ $t('NN0089') }}
+      div(class="panel-text__text-button-wrapper"
+          :style="`font-family: ${localeFont()}`"
+          @click="handleAddText")
+        span {{ $t('STK0001') }}
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -246,14 +244,25 @@ export default Vue.extend({
     padding: 10px 0;
     text-align: left;
   }
+  &__text-button-title {
+    line-height: 26px;
+    text-align: left;
+    margin-bottom: 12px;
+  }
   &__text-button-wrapper {
     text-align: left;
-  }
-  &__text-button {
     width: 100%;
-    background-color: setColor(gray-2);
-    border-radius: 3px;
-    --base-stroke: 0px;
+    margin-bottom: 14px;
+    padding: 14px 0 14px 16px;
+    box-sizing: border-box;
+    background-color: setColor(gray-3);
+    border-radius: 10px;
+    & > span {
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 28px;
+      color: white;
+    }
   }
 }
 </style>

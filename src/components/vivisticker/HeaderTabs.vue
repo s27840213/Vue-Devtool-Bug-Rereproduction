@@ -1,36 +1,79 @@
 <template lang="pug">
-  div(class="header-bar" @pointerdown.stop)
+  div(class="header-bar relative" @pointerdown.stop)
     div(class="header-bar__left")
-      template(v-if="!isInCategory && !isInEditor")
+      template(v-if="isInEditor")
+      template(v-else-if="isInCategory")
+        div(style="width: 24px; height: 24px" @click.prevent.stop="clearCategory")
+          svg-icon(iconName="chevron-left" iconWidth="24px" iconColor="white")
+      template(v-else)
         div(style="width: 20px; height: 20px")
           svg-icon(iconName="vivisticker_logo" iconWidth="20px" iconColor="white")
         div(style="width: 100px; height: 18px")
           svg-icon(iconName="vivisticker_title" iconWidth="100px" iconHeight="18px" iconColor="white")
+    div(class="header-bar__center")
+      template(v-if="isInCategory")
+        span {{ keyword }}
     div(class="header-bar__right")
-      template(v-if="!isInCategory && !isInEditor")
+      template(v-if="isInEditor")
+      template(v-else-if="isInCategory")
+      template(v-else)
         div(class="header-bar__feature-icon" style="width: 24px; height: 24px")
           svg-icon(iconName="more" iconWidth="24px" iconColor="white")
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
-  components: {
-  },
   data() {
     return {
     }
   },
   computed: {
-    ...mapGetters({
-      isInEditor: 'vivisticker/getIsInEditor'
+    ...mapState('objects', {
+      objectsKeyword: 'keyword'
     }),
-    isInCategory(): boolean {
-      return false
+    ...mapState('background', {
+      backgroundKeyword: 'keyword'
+    }),
+    ...mapGetters({
+      isInEditor: 'vivisticker/getIsInEditor',
+      isInCategory: 'vivisticker/getIsInCategory',
+      currActiveTab: 'vivisticker/getCurrActiveTab'
+    }),
+    keyword(): string {
+      switch (this.currActiveTab) {
+        case 'object':
+          return this.objectsKeyword
+        case 'background':
+          return this.backgroundKeyword
+      }
+      return ''
     }
   },
   methods: {
+    ...mapActions({
+      resetObjects: 'objects/resetContent',
+      refetchObjects: 'objects/getRecAndCate',
+      resetBackgrounds: 'background/resetContent',
+      refetchBackgrounds: 'background/getRecAndCate'
+    }),
+    ...mapMutations({
+      setIsInCategory: 'vivisticker/SET_isInCategory'
+    }),
+    clearCategory() {
+      this.setIsInCategory(false)
+      switch (this.currActiveTab) {
+        case 'object':
+          this.resetObjects()
+          this.refetchObjects()
+          break
+        case 'background':
+          this.resetBackgrounds()
+          this.refetchBackgrounds()
+          break
+      }
+    }
   }
 })
 </script>
@@ -65,6 +108,18 @@ export default Vue.extend({
       justify-content: center;
     }
   }
+
+  &__center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 140%;
+    color: white;
+  }
+
   &__right {
     display: flex;
     align-items: center;

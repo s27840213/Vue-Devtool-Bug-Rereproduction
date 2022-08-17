@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="panel-bg")
-    tabs(:tabs="[$t('NN0002'),$t('NN0017')]" @switchTab="switchTab")
-    search-bar(v-if="showImageTab" class="mb-15"
+    tabs(v-if="!isInCategory" :tabs="[$t('NN0002'),$t('NN0017')]" @switchTab="switchTab")
+    div(v-if="isInCategory" class="space")
+    search-bar(v-if="showImageTab && !isInCategory" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -67,6 +68,7 @@ import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 export default Vue.extend({
   components: {
     SearchBar,
@@ -104,7 +106,8 @@ export default Vue.extend({
     ...mapGetters({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultBgColors',
-      getBackgroundColor: 'getBackgroundColor'
+      getBackgroundColor: 'getBackgroundColor',
+      isInCategory: 'vivisticker/getIsInCategory'
     }),
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
@@ -260,6 +263,7 @@ export default Vue.extend({
       this.resetContent()
       if (keyword) {
         this.getContent({ keyword, locale })
+        vivistickerUtils.setIsInCategory(true)
       } else {
         this.getRecAndCate()
       }
@@ -347,5 +351,9 @@ export default Vue.extend({
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;
   }
+}
+
+.space {
+  margin-bottom: 10px;
 }
 </style>
