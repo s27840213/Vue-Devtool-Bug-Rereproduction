@@ -14,6 +14,10 @@
         class="body"
         @error="onError"
         ref="body")
+    component(v-for="(elm, idx) in cssFilterElms"
+      :key="`cssFilter${idx}`"
+      :is="elm.tag"
+      v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -26,6 +30,8 @@ import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import editorUtils from '@/utils/editorUtils'
+import pageUtils from '@/utils/pageUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default Vue.extend({
   props: {
@@ -149,6 +155,19 @@ export default Vue.extend({
         backgroundPosition: image.posX === -1 ? 'center center' : `${image.posX}px ${image.posY}px`,
         ...this.flipStyles
       }
+    },
+    cssFilterElms(): any[] {
+      const { adjust } = this.image.config.styles
+      const { width, height } = pageUtils.getPage(this.pageIndex)
+      if (Number.isNaN(adjust.halation) || !adjust.halation) {
+        return []
+      }
+      const position = {
+        width: width / 2,
+        x: width / 2,
+        y: height / 2
+      }
+      return imageAdjustUtil.getHalation(adjust.halation, position)
     }
   },
   methods: {

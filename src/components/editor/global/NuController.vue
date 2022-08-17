@@ -823,7 +823,7 @@ export default Vue.extend({
               GroupUtils.select(this.pageIndex, [targetIndex])
             } else {
               // this if statement is used to prevent select the layer in another page
-              if (this.pageIndex === pageUtils.currFocusPageIndex) {
+              if (this.pageIndex === pageUtils.currFocusPageIndex && !this.config.locked) {
                 GroupUtils.select(this.pageIndex, [targetIndex])
               }
             }
