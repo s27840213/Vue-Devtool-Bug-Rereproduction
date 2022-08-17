@@ -11,7 +11,8 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
-      :config="layer")
+      :config="layer"
+      :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
@@ -28,7 +29,11 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   async created() {
     if (this.config.needFetch && this.config.designId) {

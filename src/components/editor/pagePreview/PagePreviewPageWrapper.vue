@@ -17,7 +17,7 @@
         :style="contentScaleStyles"
         :config="config"
         :pageIndex="index"
-        :scaleRatio="scaleRatio"
+        :contentScaleRatio="scaleRatio"
         :handleSequentially="true"
         :isPagePreview="true")
       div(class="page-preview-page__highlighter"
@@ -127,7 +127,7 @@ export default Vue.extend({
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
-        transform: `scale(${this.scaleRatio})`
+        // transform: `scale(${this.scaleRatio})`
       }
     },
     styles(): { [index: string]: string } {

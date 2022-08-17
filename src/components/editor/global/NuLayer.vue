@@ -8,11 +8,12 @@
         :style="translateStyles")
       div(class="layer-scale posAbs" ref="scale"
           :style="scaleStyles")
-        nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
+        nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :config="config"
             :imgControl="imgControl"
+            :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
@@ -48,6 +49,10 @@ export default Vue.extend({
     inGroup: {
       type: Boolean,
       default: false
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -64,7 +69,7 @@ export default Vue.extend({
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer, this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -143,7 +148,7 @@ export default Vue.extend({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? 'none' : `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? 'none' : `scale(${scale * this.contentScaleRatio}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
       return styles
     }

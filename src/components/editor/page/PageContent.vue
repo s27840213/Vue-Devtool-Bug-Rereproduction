@@ -1,10 +1,10 @@
 <template lang="pug">
 div(class="overflow-container"
-    :style="styles")
+    :style="pageStyles")
   div(:style="stylesWith3DPreserve")
     div(v-if="imgLoaded"
         :class="['page-content']"
-        :style="styles"
+        :style="pageStyles"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent
@@ -18,7 +18,8 @@ div(class="overflow-container"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id"
-        @mousedown.native.left="pageClickHandler()")
+        @mousedown.native.left="pageClickHandler()"
+        :contentScaleRatio="contentScaleRatio")
       nu-layer(v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
@@ -26,7 +27,8 @@ div(class="overflow-container"
         :data-pindex="`${pageIndex}`"
         :layerIndex="index"
         :pageIndex="pageIndex"
-        :config="layer")
+        :config="layer"
+        :contentScaleRatio="contentScaleRatio")
     template(v-else)
       div(class='pages-loading')
 </template>
@@ -66,6 +68,10 @@ export default Vue.extend({
     handleSequentially: {
       type: Boolean,
       default: false
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -84,16 +90,16 @@ export default Vue.extend({
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
-    styles(): { [index: string]: string } {
+    pageStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: 'preserve-3d'
       }
     }
