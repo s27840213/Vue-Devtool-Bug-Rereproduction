@@ -2,7 +2,7 @@ import { IAsset } from '@/interfaces/module'
 import store from '@/store'
 
 class ViviStickerUtils {
-  sendToIOS(messageType: string, message: string) {
+  sendToIOS(messageType: string, message: any) {
     try {
       const webkit = (window as any).webkit
       if (!webkit) {
@@ -20,12 +20,12 @@ class ViviStickerUtils {
 
   sendDoneLoading(width: number, height: number) {
     console.log(width, height)
-    this.sendToIOS('DONE_LOADING', JSON.stringify({ width, height }))
+    this.sendToIOS('DONE_LOADING', { width, height })
   }
 
   sendScreenshotUrl(url: string) {
     console.log(url)
-    this.sendToIOS('SCREENSHOT', JSON.stringify({ url }))
+    this.sendToIOS('SCREENSHOT', { url })
     window.open(url, '_blank')
   }
 
