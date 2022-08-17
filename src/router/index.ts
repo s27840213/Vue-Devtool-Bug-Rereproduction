@@ -90,7 +90,8 @@ const router = new VueRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        let locale = localStorage.getItem('locale')
+        // let locale = localStorage.getItem('locale')
+        let locale = 'us'
         // if local storage is empty
         if (locale === '' || !locale) {
           locale = to.params.locale
