@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="screenshot")
-    nu-shape(v-if="config !== undefined"
+    nu-layer(v-if="config !== undefined"
               ref="target"
               :config="config"
               :pageIndex="0"
@@ -25,18 +25,27 @@ export default Vue.extend({
     const type = urlParams.get('type')
     const id = urlParams.get('id')
     const ver = urlParams.get('ver')
-    const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
-    this.config = layerFactary.newShape({
-      ...json,
-      styles: {
-        width: json.vSize[0],
-        height: json.vSize[1],
-        initWidth: json.vSize[0],
-        initHeight: json.vSize[1],
-        color: json.color,
-        vSize: json.vSize
-      }
-    })
+    if (type === 'svg') {
+      const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
+      const vSize = json.vSize as number[]
+      const pageAspectRatio = window.innerWidth / window.innerHeight
+      const svgAspectRatio = vSize[0] / vSize[1]
+      const svgWidth = svgAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * svgAspectRatio
+      const svgHeight = svgAspectRatio > pageAspectRatio ? window.innerWidth / svgAspectRatio : window.innerHeight
+      json.ratio = 1
+      this.config = layerFactary.newShape({
+        ...json,
+        styles: {
+          width: svgWidth,
+          height: svgHeight,
+          initWidth: vSize[0],
+          initHeight: vSize[1],
+          scale: svgWidth / vSize[0],
+          color: json.color,
+          vSize: json.vSize
+        }
+      })
+    }
   },
   methods: {
     onload() {
