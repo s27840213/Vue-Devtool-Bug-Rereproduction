@@ -8,6 +8,7 @@ interface IColorState {
   defaultColors: Array<string>,
   brandColors: Array<string>,
   defaultBgColors: Array<string>,
+  defaultViviStickerBgColors: Array<string>,
   documentColors: Array<string>,
   recentlyColors: Array<string>
 }
@@ -57,6 +58,29 @@ const getDefaultState = (): IColorState => ({
     '#505760',
     '#000000'
   ],
+  defaultViviStickerBgColors: [
+    '#EB5757',
+    '#F76C83',
+    '#FFA89E',
+    '#F2994A',
+    '#F0AF53',
+    '#FECD56',
+    '#FFD79A',
+    '#B23871',
+    '#782B76',
+    '#363F78',
+    '#007ABE',
+    '#006977',
+    '#00C6C5',
+    '#C0E1D8',
+    '#FFFFFF',
+    '#E4E8EB',
+    '#C9D0D8',
+    '#8D97A4',
+    '#646C77',
+    '#505760',
+    '#000000'
+  ],
   brandColors: [],
   documentColors: [
     '#2D9CDB',
@@ -76,6 +100,9 @@ const getters: GetterTree<IColorState, IEditorState> = {
   },
   getDefaultBgColors(state): Array<string> {
     return state.defaultBgColors
+  },
+  getDefaultViviStickerBgColors(state): Array<string> {
+    return state.defaultViviStickerBgColors
   },
   getBrandColors(state): Array<string> {
     return state.brandColors

@@ -20,16 +20,12 @@
             iconWidth="20px")
       template(v-slot:default-background-colors)
         div(ref="colorBlock")
-          div(class="text-left py-5 text-white") {{$t('NN0017')}}
+          div(class="text-left py-5 text-white") {{$t('NN0089')}}
           div(class="panel-bg__colors")
-            div(class="panel-bg__color"
-              @click="handleColorModal(currBackgroundColor)")
             div(v-for="color in defaultBgColor"
               class="panel-bg__color"
               :style="colorStyles(color)"
               @click="setBgColor(color)")
-            div(class="panel-bg__color"
-              @click="setBgColor('#ffffff00')")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -105,7 +101,7 @@ export default Vue.extend({
     }),
     ...mapGetters({
       getPage: 'getPage',
-      defaultBgColor: 'color/getDefaultBgColors',
+      defaultBgColor: 'color/getDefaultViviStickerBgColors',
       getBackgroundColor: 'getBackgroundColor',
       isInCategory: 'vivisticker/getIsInCategory'
     }),
@@ -334,22 +330,16 @@ export default Vue.extend({
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     column-gap: 12px;
-    row-gap: 10px;
+    row-gap: 12px;
     position: relative;
+    padding: 0 12px;
+    margin-top: 16px;
   }
   &__color {
     padding-top: 100%;
     border-radius: 4px;
     cursor: pointer;
     position: relative;
-    &:nth-child(1) {
-      background-image: url("~@/assets/img/svg/addColor.svg");
-      background-size: cover;
-    }
-    &:last-child {
-      background-image: url("~@/assets/img/svg/transparent.svg");
-      background-size: cover;
-    }
   }
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;
