@@ -114,7 +114,7 @@ export default Vue.extend({
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 18px;
     line-height: 140%;
     color: white;

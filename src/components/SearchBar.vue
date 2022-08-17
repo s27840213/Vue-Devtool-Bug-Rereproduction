@@ -3,6 +3,7 @@
     :class="{ vivisticker: vivisticker }"
     @submit="onSearch")
     input(class="search-bar__input body-2"
+      :class="{ vivisticker: vivisticker }"
       type="text"
       v-model="keyword"
       @input="onUpdate"
@@ -116,6 +117,9 @@ export default Vue.extend({
     flex: 1;
     margin-right: 10px;
     background-color: transparent;
+    &.vivisticker {
+      @include body-SM;
+    }
   }
   & > svg.vivisticker {
     margin-right: 12px;

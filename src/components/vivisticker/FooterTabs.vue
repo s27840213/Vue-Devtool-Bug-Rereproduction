@@ -10,8 +10,8 @@
             :iconName="tab.icon"
             :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
             :iconWidth="'24px'")
-          span(class="body-4 no-wrap click-disabled"
-          :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+          span(class="no-wrap click-disabled"
+            :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -592,6 +592,7 @@ export default Vue.extend({
     padding: 0px 4px;
     > span {
       transition: background-color 0.2s, color 0.2s;
+      @include body-XXS;
       line-height: 20px;
     }
   }
