@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="category-list-rows")
-    div(class="category-list-rows__header py-10 text-bold text-white")
+    div(class="category-list-rows__header py-10 text-white")
       div {{title}}
       div(class="category-list-rows__action pointer"
         @click="onAction(title)")
@@ -34,11 +34,13 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .category-list-rows {
   &__header {
+    @include body-MD;
     line-height: 26px;
     display: flex;
     justify-content: space-between;
   }
   &__action {
+    @include body-SM;
     &:hover {
       color: #4eabe6;
     }
