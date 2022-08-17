@@ -11,8 +11,7 @@
           class="transition-none"
           :config="config"
           :imgControl="imgControl"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-          @load="onload")
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
@@ -191,9 +190,6 @@ export default Vue.extend({
       layerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
-    },
-    onload() {
-      this.$emit('load')
     }
   }
 })

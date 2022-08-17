@@ -4,8 +4,7 @@
               ref="target"
               :config="config"
               :pageIndex="0"
-              :layerIndex="0"
-              @load="onload")
+              :layerIndex="0")
 </template>
 
 <script lang="ts">
@@ -45,6 +44,7 @@ export default Vue.extend({
           vSize: json.vSize
         }
       })
+      setTimeout(() => { this.onload() }, 100)
     }
   },
   methods: {
