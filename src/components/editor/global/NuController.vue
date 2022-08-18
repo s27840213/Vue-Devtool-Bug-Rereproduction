@@ -1696,7 +1696,7 @@ export default Vue.extend({
             replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             return
           } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
         GroupUtils.deselect()

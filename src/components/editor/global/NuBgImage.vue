@@ -159,15 +159,18 @@ export default Vue.extend({
     cssFilterElms(): any[] {
       const { adjust } = this.image.config.styles
       const { width, height } = pageUtils.getPage(this.pageIndex)
-      if (Number.isNaN(adjust.halation) || !adjust.halation) {
-        return []
+      if (!adjust) return []
+
+      const elms = []
+      if (adjust.halation) {
+        const position = {
+          width: width / 2,
+          x: width / 2,
+          y: height / 2
+        }
+        elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
-      const position = {
-        width: width / 2,
-        x: width / 2,
-        y: height / 2
-      }
-      return imageAdjustUtil.getHalation(adjust.halation, position)
+      return elms
     }
   },
   methods: {
