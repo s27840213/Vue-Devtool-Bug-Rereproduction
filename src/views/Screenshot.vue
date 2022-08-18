@@ -8,9 +8,12 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue'
 import layerFactary from '@/utils/layerFactary'
 import vivistickerUtils from '@/utils/vivistickerUtils'
-import Vue from 'vue'
+import { CustomWindow } from '@/interfaces/customWindow'
+
+declare let window: CustomWindow
 
 export default Vue.extend({
   name: 'ScreenShot',
@@ -23,7 +26,7 @@ export default Vue.extend({
     this.fetchDesign(window.location.search)
   },
   created() {
-    (window as any).fetchDesign = this.fetchDesign
+    window.fetchDesign = this.fetchDesign
   },
   methods: {
     async fetchDesign(query: string) {
