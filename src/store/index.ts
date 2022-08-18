@@ -299,7 +299,7 @@ const mutations: MutationTree<IEditorState> = {
     state.pages.push(newPage)
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
-    state.pages.splice(updateInfo.pos, 0, updateInfo.newPage)
+    state.pages = state.pages.slice(0, updateInfo.pos).concat(updateInfo.newPage, state.pages.slice(updateInfo.pos))
   },
   DELETE_page(state: IEditorState, pageIndex: number) {
     state.pages.splice(pageIndex, 1)

@@ -451,18 +451,12 @@ export default Vue.extend({
           break
         }
         case 'duplicate-page': {
-          console.time()
           const { currFocusPageIndex } = pageUtils
           const page = generalUtils.deepCopy(pageUtils.getPage(currFocusPageIndex))
-          console.timeEnd()
           page.designId = ''
-          console.time()
           page.id = generalUtils.generateRandomString(8)
-          console.timeEnd()
-          console.time()
           pageUtils.addPageToPos(page, currFocusPageIndex + 1)
           this._setCurrActivePageIndex(currFocusPageIndex + 1)
-          console.timeEnd()
           break
         }
         case 'trash': {
