@@ -25,8 +25,8 @@
           div(class="panel-bg__colors")
             div(v-for="color in defaultBgColor"
               class="panel-bg__color"
-              :style="colorStyles(color)"
               @click="setBgColor(color)")
+              div(class="panel-bg__color-inner" :style="colorStyles(color)")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -47,6 +47,20 @@
             :item="item"
             :locked="currentPageBackgroundLocked")
     div(v-if="!showImageTab" class="panel-bg__color-controller")
+      div(class="panel-bg__color-controller__header")
+        div(class="panel-bg__color-controller__opacity-title") {{ $t('NN0030') }}
+        div(class="panel-bg__color-controller__opacity-value")
+          input(type="number" v-model.number="opacity")
+      div(class="panel-bg__color-controller__slider-container")
+        input(class="panel-bg__color-controller__slider"
+              :style="progressStyles()"
+              type="range"
+              min="0"
+              max="100"
+              v-model.number="opacity")
+      div(class="panel-bg__color-controller__hint")
+        p(class="panel-bg__color-controller__hint-text") Click to copy
+        p(class="panel-bg__color-controller__hint-text") Press and hold to save
 </template>
 
 <script lang="ts">
@@ -83,7 +97,13 @@ export default Vue.extend({
     return {
       openColorPicker: false,
       scrollTop: 0,
-      currActiveTabIndex: 0
+      currActiveTabIndex: 0,
+      opacity: 100
+    }
+  },
+  watch: {
+    opacity(newVal) {
+      this.opacity = Math.max(Math.min(newVal, 100), 0)
     }
   },
   computed: {
@@ -229,8 +249,17 @@ export default Vue.extend({
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     colorStyles(color: string) {
+      let hexOpacity = Math.round(this.opacity * 255 / 100).toString(16).toUpperCase()
+      if (hexOpacity.length === 1) {
+        hexOpacity = '0' + hexOpacity
+      }
       return {
-        backgroundColor: color
+        backgroundColor: `${color}${hexOpacity}`
+      }
+    },
+    progressStyles() {
+      return {
+        '--progress': `${this.opacity}%`
       }
     },
     setBgColor(color: string) {
@@ -345,6 +374,14 @@ export default Vue.extend({
     border-radius: 4px;
     cursor: pointer;
     position: relative;
+    background-color: white;
+  }
+  &__color-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    @include size(100%);
+    border-radius: 4px;
   }
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;
@@ -352,6 +389,71 @@ export default Vue.extend({
   &__color-controller {
     height: 190px;
     flex-shrink: 0;
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &__opacity-title {
+      font-size: 16px;
+      height: 24px;
+      line-height: 24px;
+      color: white;
+    }
+    &__opacity-value {
+      border: 1px solid #D9DBE1;
+      border-radius: 4px;
+      width: 54px;
+      height: 24px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      & > input {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+        text-align: center;
+        width: 100%;
+        height: 22px;
+        @include body-SM;
+        line-height: 22px;
+        color: white;
+      }
+    }
+    &__slider-container {
+      margin-top: 26px;
+    }
+    &__slider {
+      --lower-color: #{setColor(blue-1)};
+      --upper-color: white;
+      @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
+      margin: 0;
+      &::-webkit-slider-thumb {
+        box-shadow: none;
+        border: 3px solid setColor(blue-1);
+        position: relative;
+      }
+      &::-moz-range-thumb {
+        box-shadow: none;
+        border: 3px solid setColor(blue-1);
+        position: relative;
+      }
+    }
+    &__hint {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 127px;
+    }
+    &__hint-text {
+      margin: 0;
+      @include body-SM;
+      color: setColor(gray-3);
+    }
   }
 }
 
