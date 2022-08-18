@@ -11,6 +11,7 @@
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
+      class="panel-bg__list"
       :list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -45,6 +46,7 @@
             :key="item.id"
             :item="item"
             :locked="currentPageBackgroundLocked")
+    div(v-if="!showImageTab" class="panel-bg__color-controller")
 </template>
 
 <script lang="ts">
@@ -301,6 +303,9 @@ export default Vue.extend({
   &__searchbar {
     margin-bottom: 14px;
   }
+  &__list {
+    flex-grow: 1;
+  }
   &__item {
     width: 145px;
     height: 145px;
@@ -343,6 +348,10 @@ export default Vue.extend({
   }
   &::v-deep .vue-recycle-scroller__item-view:first-child {
     z-index: 1;
+  }
+  &__color-controller {
+    height: 190px;
+    flex-shrink: 0;
   }
 }
 
