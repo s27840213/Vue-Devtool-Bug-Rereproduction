@@ -302,7 +302,11 @@ const mutations: MutationTree<IEditorState> = {
     state.pages = state.pages.slice(0, updateInfo.pos).concat(updateInfo.newPage, state.pages.slice(updateInfo.pos))
   },
   DELETE_page(state: IEditorState, pageIndex: number) {
-    state.pages.splice(pageIndex, 1)
+    state.pages = state.pages.slice(0, pageIndex).concat(state.pages.slice(pageIndex + 1))
+    /**
+     * @Note the reason why I replace the splice method is bcz its low performance
+     */
+    //  state.pages.splice(pageIndex, 1)
   },
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
