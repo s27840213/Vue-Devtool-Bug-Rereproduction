@@ -232,22 +232,16 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      if (this.isActive) {
+      if (this.config.type !== 'text') return
+      if (this.config.active) {
+        if (!newVal || !this.config.isEdited) {
+          tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+        }
         tiptapUtils.agent(editor => {
           editor.setEditable(newVal)
-          // @TODO 問廷安
-          // editor.commands.blur()
         })
-        if (newVal) {
-          this.$nextTick(() => {
-            tiptapUtils.focus({ scrollIntoView: false })
-          })
-        }
       }
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
-      if (!newVal) {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
-      }
+      !GeneralUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
     }
   },
   destroyed() {
@@ -322,11 +316,11 @@ export default Vue.extend({
       // body.addEventListener('touchstart', this.disableTouchEvent)
       if (GeneralUtils.isTouchDevice()) {
         if (!this.dblTabsFlag && this.isActive && this.config.type === 'image') {
-          const touchtime = new Date().getTime()
+          const touchtime = Date.now()
           const interval = 500
           const doubleTap = (e: PointerEvent) => {
             e.preventDefault()
-            if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+            if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
               /**
                * This is the dbl-click callback block
                */
