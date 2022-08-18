@@ -1,12 +1,6 @@
 <template lang="pug">
-  observer-sentinel(
-    target=".mobile-editor__page-preview"
-    :threshold="[0,1]"
-    :throttle="false"
-    :handleNotIntersecting="true"
-    @callback="handleCallback")
-    div(v-if="!allPageMode" :style="loadingStyle")
-    div(v-else class="page-preview-page"
+  div(v-if="!allPageMode" :style="loadingStyle")
+  div(v-else class="page-preview-page"
       :style="styles2"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
       ref="pagePreview")
