@@ -30,6 +30,7 @@ export default Vue.extend({
   },
   methods: {
     async fetchDesign(query: string) {
+      this.config = undefined
       const urlParams = new URLSearchParams(query)
       const type = urlParams.get('type')
       const id = urlParams.get('id')
