@@ -37,6 +37,7 @@ class FormatUtils {
       spanStyle: generalUtils.deepCopy(lastSpan.styles),
       scale: text.styles.scale,
       textEffect: generalUtils.deepCopy((text as any).styles.textEffect),
+      textBox: generalUtils.deepCopy((text as any).styles.textBox),
       textShape: generalUtils.deepCopy((text as any).styles.textShape)
     }
   }
@@ -98,7 +99,7 @@ class FormatUtils {
         layers = subLayers
       }
       if (type === 'text') {
-        const { scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
+        const { scale, textEffect, textBox, textShape } = this.copiedFormat.content as ITextFormat
         for (const targetLayerIndex in layers) {
           const idx = subLayerIndex >= 0 ? subLayerIndex : +targetLayerIndex
           const targetLayer = layers[targetLayerIndex]
@@ -113,6 +114,7 @@ class FormatUtils {
             type: ['text'],
             styles: {
               textEffect: { ...textEffect },
+              textBox: { ...textBox },
               textShape: { ...textShape },
               scale
             },
@@ -188,13 +190,14 @@ class FormatUtils {
       if (!this.isApplicableType(type, layer.type)) return
       if (type === 'text') {
         const preParams = textShapeUtils.getPreParams(layer)
-        const { scale, textEffect, textShape } = this.copiedFormat.content as ITextFormat
+        const { scale, textEffect, textBox, textShape } = this.copiedFormat.content as ITextFormat
         const paragraphs = this.applyTextStyles(layer.paragraphs)
         layerUtils.updateSpecLayerData({
           pageIndex,
           layerIndex,
           styles: {
             textEffect: { ...textEffect },
+            textBox: { ...textBox },
             textShape: { ...textShape },
             scale
           },

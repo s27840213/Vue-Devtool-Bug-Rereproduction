@@ -28,6 +28,7 @@ export interface ITextbox {
 
 export interface ITextFormat {
   textEffect: ITextEffect | {},
+  textBox: ITextEffect | {},
   textShape: ITextShape | {},
   scale: number,
   paragraphStyle: IParagraphStyle,

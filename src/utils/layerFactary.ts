@@ -237,7 +237,7 @@ class LayerFactary {
         align: 'center',
         horizontalFlip: false,
         verticalFlip: false,
-        textShadow: { name: 'none' },
+        textEffect: { name: 'none' },
         textBox: { name: 'none' },
         textShape: { name: 'none' }
       },

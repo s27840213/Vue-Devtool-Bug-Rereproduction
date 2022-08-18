@@ -25,7 +25,6 @@ class Textbox {
   }
 
   convertTextEffect(effect: any) {
-    console.log('effect', effect)
     switch (effect.name) {
       case 'test':
         return {

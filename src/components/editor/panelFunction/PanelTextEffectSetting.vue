@@ -85,10 +85,10 @@ export default Vue.extend({
     currentStyle(): { shadow: ITextEffect, box: ITextbox, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
-        shadow: styles.textEffect as ITextEffect,
+        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
         box: styles.textBox as ITextbox,
-        shape: Object.assign(styles.textShape as ITextShape, { name: styles.textShape.name || 'none' })
-      } || {}
+        shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
+      }
     },
     currentShadow(): string {
       return this.currentStyle.shadow?.name || 'none'
