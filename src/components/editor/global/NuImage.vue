@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-image"
     :id="`nu-image-${config.id}`"
-    :style="styles"
+    :style="containerStyles"
     draggable="false")
     div(v-if="showCanvas"
       class="shadow__canvas-wrapper"
@@ -22,6 +22,8 @@
       div(class='nu-image__picture'
         :style="imgStyles")
         svg(v-if="isAdjustImage"
+          :style="flipStyles"
+          :class="{'layer-flip': flippedAnimation }"
           :viewBox="svgViewBox"
           :width="svgImageWidth"
           :height="svgImageHeight"
@@ -41,8 +43,7 @@
           g
             g(:filter="`url(#${filterId})`")
               image(:xlink:href="finalSrc" ref="img"
-                :style="flipStyles"
-                :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+                class="nu-image__picture"
                 draggable="false"
                 @error="onError()"
                 @load="onLoad ()")
@@ -53,7 +54,7 @@
           draggable="false"
           @error="onError()"
           @load="onLoad ()")
-    template(v-if="isAdjustImage")
+    template(v-if="hasHalation")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
         :is="elm.tag"
@@ -66,7 +67,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IGroup, IImage, ILayerIdentifier } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
@@ -90,7 +91,11 @@ export default Vue.extend({
     subLayerIndex: Number,
     inheritStyle: Object,
     isBgImgControl: Boolean,
-    imgControl: Boolean
+    imgControl: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   async created() {
     this.handleInitLoad()
@@ -277,8 +282,25 @@ export default Vue.extend({
         subLayerIdx: this.subLayerIndex
       }
     },
-    styles(): any {
-      const { width, height } = this.config.styles
+    isInFrame(): boolean {
+      return this.primaryLayerType === 'frame'
+    },
+    _contentScaleRatio(): number {
+      return this.config.isFrameImg || !this.isInFrame ? this.contentScaleRatio : 1
+    },
+    scaledConfig(): { [index: string]: string | number } {
+      const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
+      return {
+        width: width * this._contentScaleRatio,
+        height: height * this._contentScaleRatio,
+        imgWidth: imgWidth * this._contentScaleRatio,
+        imgHeight: imgHeight * this._contentScaleRatio,
+        imgX: imgX * this._contentScaleRatio,
+        imgY: imgY * this._contentScaleRatio
+      }
+    },
+    containerStyles(): any {
+      const { width, height } = this.scaledConfig
       const { inheritStyle = {} } = this
       return this.showCanvas ? {
         width: `${width}px`,
@@ -292,11 +314,11 @@ export default Vue.extend({
     },
     svgImageWidth(): number {
       const { imgWidth } = this.adjustImgStyles
-      return imgWidth
+      return imgWidth * this._contentScaleRatio
     },
     svgImageHeight(): number {
       const { imgHeight } = this.adjustImgStyles
-      return imgHeight
+      return imgHeight * this._contentScaleRatio
     },
     svgViewBox(): string {
       return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
@@ -354,7 +376,7 @@ export default Vue.extend({
       }
     },
     imgWrapperstyle(): any {
-      const { height, width } = this.config.styles
+      const { height, width } = this.scaledConfig
       let clipPath = ''
       if (!this.imgControl && !this.isBgImgControl) {
         clipPath = `path('M0,0h${width}v${height}h${-width}z`
@@ -364,7 +386,7 @@ export default Vue.extend({
       }
     },
     imgStyles(): any {
-      const { imgX, imgY, imgHeight, imgWidth } = this.config.styles
+      const { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig
       return {
         transform: `translate(${imgX}px, ${imgY}px)`,
         width: `${imgWidth}px`,
@@ -402,10 +424,12 @@ export default Vue.extend({
         .getSrcSize(this.config.srcObj, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
-      const { styles } = this.config
-      return Object
-        .values(styles.adjust || {})
-        .some(val => typeof val === 'number' && val !== 0)
+      const { styles: { adjust = {} } } = this.config
+      const arr = Object.entries(adjust).filter(([_, v]) => typeof v === 'number' && v !== 0)
+      return arr.length !== 0 && !(arr.length === 1 && arr[0][0] === 'halation')
+    },
+    hasHalation(): boolean {
+      return this.config.styles.adjust.halation
     },
     showCanvas(): boolean {
       const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this

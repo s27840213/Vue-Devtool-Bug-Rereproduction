@@ -16,7 +16,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    imgControl: Boolean
+    imgControl: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   data() {
     return {

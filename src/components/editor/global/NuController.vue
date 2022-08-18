@@ -12,7 +12,7 @@
     div(class="nu-controller__content"
         ref="body"
         :layer-index="`${layerIndex}`"
-        :style="styles(getLayerType)"
+        :style="contentStyles(getLayerType)"
         @dragenter="dragEnter($event)"
         @dragover.prevent
         @click.right.stop="onRightClick"
@@ -74,7 +74,7 @@
           @click.native="MappingUtils.mappingIconAction('lock')")
     div(v-if="isActive && !isControlling && !isLocked && !isImgControl"
         class="nu-controller__ctrl-points"
-        :style="Object.assign(styles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+        :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
         div(v-for="(end, index) in isLine ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -589,17 +589,19 @@ export default Vue.extend({
       } else if (isFrame) {
         zindex = (this.layerIndex + 1) * 1000
       } else if (this.getLayerType === LayerType.frame && this.isMoving) {
+        zindex = (this.layerIndex + 1) * 1000
+      } else if (this.getLayerType === 'tmp') {
         /**
-         * @Todo - find the reason why this been set to certain value instead of 0
+         * @Todo - find the reason why this been set to certain value istead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
-        zindex = (this.layerIndex + 1) * 1000
+        return 0
       } else if (this.getLayerType === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
-      return (zindex ?? (this.config.styles.zindex + 1)) + offset
+      return (zindex ?? (this.config.styles.zindex)) + offset
     },
-    styles(type: string) {
+    contentStyles(type: string) {
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
@@ -2060,13 +2062,6 @@ export default Vue.extend({
         e.stopPropagation()
       }
     }
-    // scrollUpdate() {
-    //   const event = new MouseEvent('mousemove', {
-    //     clientX: this.initialPos.x,
-    //     clientY: this.initialPos.y
-    //   })
-    //   window.dispatchEvent(event)
-    // }
   }
 })
 </script>

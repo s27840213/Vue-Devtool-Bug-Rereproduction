@@ -12,12 +12,12 @@
         @mouseenter="handleMouseEnter"
         @mouseleave="handleMouseLeave"
         ref="content")
-      page-content(v-if="inTheTarget"
+      page-content(v-if="inTheTarget || contentRiszed"
         class="click-disabled"
         :style="contentScaleStyles"
         :config="config"
         :pageIndex="index"
-        :scaleRatio="scaleRatio"
+        :contentScaleRatio="scaleRatio"
         :handleSequentially="true"
         :isPagePreview="true")
       div(class="page-preview-page__highlighter"
@@ -101,7 +101,8 @@ export default Vue.extend({
       contentWidth: 0,
       inTheTarget: true,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
-      isHandlingAsyncTask: false
+      isHandlingAsyncTask: false,
+      contentRiszed: false
     }
   },
   directives: {
@@ -126,7 +127,7 @@ export default Vue.extend({
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
-        transform: `scale(${this.scaleRatio})`
+        // transform: `scale(${this.scaleRatio})`
       }
     },
     styles(): { [index: string]: string } {
@@ -156,6 +157,13 @@ export default Vue.extend({
         width: '100%',
         height: '100%'
       }
+    }
+  },
+  created() {
+    if (GeneralUtils.isTouchDevice()) {
+      this.contentRiszed = true
+    } else {
+
     }
   },
   mounted() {
@@ -347,14 +355,14 @@ export default Vue.extend({
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate3d(-50%, -50%, 0);
+    transform: translate(-50%, -50%);
     border-radius: 4px;
     z-index: -1;
   }
   &-title {
     position: absolute;
     bottom: -8px;
-    transform: translate3d(0, 100%, 0);
+    transform: translate(0, 100%);
     z-index: 100;
     display: flex;
     justify-content: center;

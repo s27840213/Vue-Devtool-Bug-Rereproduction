@@ -334,7 +334,7 @@ export default Vue.extend({
     },
     containerStyles(): { [index: string]: any } {
       return {
-        transform: `translate3d(0,${this.contentEditable ? 100 : 0}%,0)`,
+        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`
       }
     },
@@ -389,6 +389,7 @@ export default Vue.extend({
       setBgImageControl: 'SET_backgroundImageControl'
     }),
     handleTabAction(tab: IFooterTab) {
+      console.time('out')
       switch (tab.icon) {
         case 'crop': {
           if (this.selectedLayerNum > 0) {
@@ -450,12 +451,18 @@ export default Vue.extend({
           break
         }
         case 'duplicate-page': {
+          console.time()
           const { currFocusPageIndex } = pageUtils
           const page = generalUtils.deepCopy(pageUtils.getPage(currFocusPageIndex))
+          console.timeEnd()
           page.designId = ''
+          console.time()
           page.id = generalUtils.generateRandomString(8)
+          console.timeEnd()
+          console.time()
           pageUtils.addPageToPos(page, currFocusPageIndex + 1)
           this._setCurrActivePageIndex(currFocusPageIndex + 1)
+          console.timeEnd()
           break
         }
         case 'trash': {
@@ -529,6 +536,7 @@ export default Vue.extend({
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
+      console.timeEnd('out')
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {

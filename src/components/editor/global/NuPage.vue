@@ -274,7 +274,7 @@ export default Vue.extend({
   mounted() {
     this.initialPageHeight = (this.config as IPage).height
     this.$nextTick(() => {
-      this.isShownScrollBar = !(this.overflowContainer.scrollHeight === this.overflowContainer.clientHeight)
+      this.isShownScrollBar = !(this.overflowContainer?.scrollHeight === this.overflowContainer?.clientHeight)
     })
   },
   watch: {
@@ -822,7 +822,7 @@ export default Vue.extend({
     position: absolute;
     top: calc(-100% - 15px);
     left: 50%;
-    transform: translate3d(-50%, 0, 0);
+    transform: translate(-50%, 0);
     color: setColor(white);
     font-size: 0.8rem;
     padding: 4px 8px;

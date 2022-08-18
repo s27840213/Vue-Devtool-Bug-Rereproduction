@@ -28,24 +28,24 @@
       template(v-if="showRuler")
         ruler-hr(:canvasRect="canvasRect"
           :editorView="editorView"
-          @mousedown.native.stop="dragStartH($event)")
+          @pointerdown.native.stop="dragStartH($event)")
         ruler-vr(:canvasRect="canvasRect"
           :editorView="editorView"
-          @mousedown.native.stop="dragStartV($event)")
+          @pointerdown.native.stop="dragStartV($event)")
         div(class="corner-block")
     div(v-if="!inBgRemoveMode"
         class="editor-view__guidelines-area"
         ref="guidelinesArea")
       div(v-if="isShowGuidelineV" class="guideline guideline--v" ref="guidelineV"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-v.svg')}) 16 16, pointer`}"
-        @mousedown.stop="lockGuideline ? null: dragStartV($event)"
+        @pointerdown.stop="lockGuideline ? null: dragStartV($event)"
         @mouseout.stop="closeGuidelineV()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--v" ref="guidelinePosV")
           span {{rulerVPos}}
       div(v-if="isShowGuidelineH" class="guideline guideline--h" ref="guidelineH"
         :style="{'cursor': `url(${require('@/assets/img/svg/ruler-h.svg')}) 16 16, pointer`}"
-        @mousedown.stop="lockGuideline ? null : dragStartH($event)"
+        @pointerdown.stop="lockGuideline ? null : dragStartH($event)"
         @mouseout.stop="closeGuidelineH()"
         @click.right.stop.prevent="openGuidelinePopup($event)")
         div(class="guideline__pos guideline__pos--h" ref="guidelinePosH")
@@ -304,7 +304,7 @@ export default Vue.extend({
     },
     scrollUpdate() {
       if (this.isSelecting || RulerUtils.isDragging) {
-        const event = new MouseEvent('mousemove', {
+        const event = new PointerEvent('pointermove', {
           clientX: this.currentAbsPos.x,
           clientY: this.currentAbsPos.y
         })
@@ -420,20 +420,20 @@ export default Vue.extend({
         return pageUtils.currFocusPageIndex === index ? this.pageNum + 1 : this.pageNum - index
       }
     },
-    dragStartV(e: MouseEvent) {
+    dragStartV(e: PointerEvent) {
       RulerUtils.setIsDragging(true)
       this.isShowGuidelineV = true
       this.initialRelPos = this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
-      window.addEventListener('mousemove', this.draggingV)
+      eventUtils.addPointerEvent('pointermove', this.draggingV)
       window.addEventListener('scroll', this.scrollUpdate, { capture: true })
-      window.addEventListener('mouseup', this.dragEndV)
+      eventUtils.addPointerEvent('pointerup', this.dragEndV)
     },
-    draggingV(e: MouseEvent) {
+    draggingV(e: PointerEvent) {
       this.rulerVPos = Math.trunc(this.mapGuidelineToPage('v').pos)
       this.currentRelPos = MouseUtils.getMouseRelPoint(e, this.guidelinesArea)
       this.renderGuidelineV(this.currentRelPos)
     },
-    dragEndV(e: MouseEvent) {
+    dragEndV(e: PointerEvent) {
       RulerUtils.setIsDragging(false)
       if (this.mapGuidelineToPage('v').outOfPage) {
         this.isShowGuidelineV = false
@@ -442,9 +442,9 @@ export default Vue.extend({
         this.closeGuidelineV(true)
       }
       this.$nextTick(() => {
-        window.removeEventListener('mousemove', this.draggingV)
+        eventUtils.removePointerEvent('pointermove', this.draggingV)
         window.removeEventListener('scroll', this.scrollUpdate)
-        window.removeEventListener('mouseup', this.dragEndV)
+        eventUtils.removePointerEvent('pointerup', this.dragEndV)
       })
     },
     renderGuidelineV(pos: { x: number, y: number }) {

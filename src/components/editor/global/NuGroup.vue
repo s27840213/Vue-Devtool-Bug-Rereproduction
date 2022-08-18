@@ -6,7 +6,8 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
-      :config="layer")
+      :config="layer"
+      :inGroup="true")
 </template>
 
 <script lang="ts">

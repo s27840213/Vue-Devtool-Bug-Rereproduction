@@ -8,7 +8,7 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @dragenter="onDragEnter($event)"
-            @pointerdown="onMousedown($event)")
+            @pointerdown="onPointerdown($event)")
           //- @click.left.stop="onClickEvent($event)"
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -310,7 +310,7 @@ export default Vue.extend({
         e.stopPropagation()
       }
     },
-    onMousedown(e: PointerEvent) {
+    onPointerdown(e: PointerEvent) {
       if (e.button !== 0) return
       const body = this.$refs.body as HTMLElement
       // body.addEventListener('touchstart', this.disableTouchEvent)
@@ -357,7 +357,12 @@ export default Vue.extend({
       this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
-      if (this.type === 'tmp') return
+      if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
+        return
+      }
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x
         this.posDiff.y = this.primaryLayer.styles.y
@@ -434,6 +439,7 @@ export default Vue.extend({
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
+        transform: `translateZ(${this.config.styles.zindex}px)`,
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -509,12 +515,7 @@ export default Vue.extend({
     },
     onClickEvent(e: MouseEvent) {
       if (!this.isPrimaryActive) return
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
+
       colorUtils.event.emit('closeColorPanel', false)
       this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
@@ -786,6 +787,7 @@ export default Vue.extend({
     left: 0;
     position: absolute;
     touch-action: none;
+    transform-style: preserve-3d;
   }
   &__content {
     touch-action: none;

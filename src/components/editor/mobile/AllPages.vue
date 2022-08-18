@@ -20,6 +20,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import { IPage } from '@/interfaces/page'
 import editorUtils from '@/utils/editorUtils'
 import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import resizeUtils from '@/utils/resizeUtils'
 
 export default Vue.extend({
   data() {

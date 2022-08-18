@@ -20,7 +20,7 @@ class GeneralUtils {
   }
 
   deepCopy(el: unknown) {
-    return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
+    return typeof el === 'undefined' ? {} : _.cloneDeep(el)
   }
 
   objHasOwnProperty(obj: { [index: string]: any }, property: string) {

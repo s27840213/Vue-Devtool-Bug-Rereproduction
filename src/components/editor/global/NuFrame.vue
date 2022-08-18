@@ -11,7 +11,8 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
-      :config="layer")
+      :config="layer"
+      :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
@@ -28,7 +29,11 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   async created() {
     if (this.config.needFetch && this.config.designId) {
@@ -144,7 +149,7 @@ export default Vue.extend({
     },
     shadowSrc() {
       const shadow = this.config.styles.shadow
-      if (shadow && shadow.srcObj.type) {
+      if (shadow && shadow.srcObj?.type) {
         const { width, height } = this.config.styles
         const size = ImageUtils.getSrcSize(shadow.srcObj, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
@@ -153,7 +158,7 @@ export default Vue.extend({
     },
     shadowWrapperStyles() {
       const shadow = this.config.styles.shadow
-      if (shadow && shadow.srcObj.type) {
+      if (shadow && shadow.srcObj?.type) {
         const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
         const { horizontalFlip, verticalFlip, scale } = this.config.styles
         return {
@@ -187,7 +192,7 @@ export default Vue.extend({
   }
   &__img {
     width: 100%;
-    height: 100%
+    height: 100%;
   }
 }
 </style>

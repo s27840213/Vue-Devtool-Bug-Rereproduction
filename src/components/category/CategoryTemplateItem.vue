@@ -23,6 +23,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import modalUtils from '@/utils/modalUtils'
 import pageUtils from '@/utils/pageUtils'
 import paymentUtils from '@/utils/paymentUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: {
@@ -76,6 +77,7 @@ export default Vue.extend({
         : this.item))
     },
     addTemplate() {
+      // testUtils.start('addTemp (Nathan, after optimize)')
       if (this.groupItem && !paymentUtils.checkProGroupTemplate(this.groupItem, this.item)) return
       else if (!this.groupItem && !paymentUtils.checkProTemplate(this.item)) return
       const { match_cover: matchCover = {} } = this.item
