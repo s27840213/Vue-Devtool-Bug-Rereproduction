@@ -15,6 +15,7 @@ import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 
 import { mapGetters } from 'vuex'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   name: 'main-menu',
@@ -22,6 +23,12 @@ export default Vue.extend({
     PanelObject,
     PanelBackground,
     PanelText
+  },
+  mounted() {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('debug') === 'true') {
+      vivistickerUtils.debugMode()
+    }
   },
   data() {
     return {

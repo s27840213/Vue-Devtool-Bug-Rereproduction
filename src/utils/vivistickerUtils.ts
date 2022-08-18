@@ -2,6 +2,8 @@ import { IAsset } from '@/interfaces/module'
 import store from '@/store'
 
 class ViviStickerUtils {
+  inDebugMode = false
+
   sendToIOS(messageType: string, message: any) {
     try {
       const webkit = (window as any).webkit
@@ -27,7 +29,9 @@ class ViviStickerUtils {
     console.log(query)
     const url = `${window.location.origin}/screenshot/?${query}`
     this.sendToIOS('SCREENSHOT', { url, params: query })
-    window.open(url, '_blank')
+    if (this.inDebugMode) {
+      window.open(url, '_blank')
+    }
   }
 
   createUrl(item: IAsset): string {
@@ -43,6 +47,10 @@ class ViviStickerUtils {
 
   setIsInCategory(bool: boolean) {
     store.commit('vivisticker/SET_isInCategory', bool)
+  }
+
+  debugMode() {
+    this.inDebugMode = true
   }
 }
 
