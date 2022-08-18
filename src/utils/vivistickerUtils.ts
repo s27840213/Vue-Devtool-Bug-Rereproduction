@@ -23,9 +23,10 @@ class ViviStickerUtils {
     this.sendToIOS('DONE_LOADING', { width, height })
   }
 
-  sendScreenshotUrl(url: string) {
-    console.log(url)
-    this.sendToIOS('SCREENSHOT', { url })
+  sendScreenshotUrl(query: string) {
+    console.log(query)
+    const url = `${window.location.origin}/screenshot/?${query}`
+    this.sendToIOS('SCREENSHOT', { url, params: query })
     window.open(url, '_blank')
   }
 
@@ -34,7 +35,7 @@ class ViviStickerUtils {
     switch (item.type) {
       case 5:
       case 11:
-        return `${window.location.origin}/screenshot/?type=svg&id=${item.id}&ver=${item.ver}`
+        return `type=svg&id=${item.id}&ver=${item.ver}`
       default:
         return ''
     }

@@ -12,9 +12,9 @@ export interface FontFaceSetLoadEventInit extends EventInit {
 }
 
 export interface FontFaceSetEventMap {
-    "loading": (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
-    "loadingdone": (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
-    "loadingerror": (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
+    'loading': (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
+    'loadingdone': (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
+    'loadingerror': (this: FontFaceSet, event: FontFaceSetLoadEvent) => any;
 }
 
 export interface FontFaceSet extends Set<FontFace>, EventTarget {
@@ -72,19 +72,19 @@ declare global {
         readonly loaded: Promise<FontFace>;
     }
 
-    var FontFace: {
+    const FontFace: {
         prototype: FontFace;
         new(family: string, source: string | BinaryData, descriptors?: FontFaceDescriptors): FontFace;
-    };
+    }
 
     interface FontFaceSetLoadEvent extends Event {
         readonly fontfaces: ReadonlyArray<FontFace>;
     }
 
-    var FontFaceSetLoadEvent: {
+    const FontFaceSetLoadEvent: {
         prototype: FontFaceSetLoadEvent;
         new(type: string, eventInitDict?: FontFaceSetLoadEventInit): FontFaceSetLoadEvent;
-    };
+    }
 
     interface Document {
         fonts: FontFaceSet;
