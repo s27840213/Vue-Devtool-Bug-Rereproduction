@@ -1,10 +1,9 @@
 import store from '@/store'
 import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
-import brandkitUtils from './brandkitUtils'
-import _ from 'lodash'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from './themeUtils'
+import _ from 'lodash'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -14,8 +13,8 @@ interface BillingInfoInput {
   error?: string
 }
 
-class PaymentData {
-  isLogin(): boolean {
+class ConstantData {
+  get isLogin(): boolean {
     return store.getters['user/isLogin']
   }
 
@@ -177,12 +176,12 @@ class PaymentData {
       url: '/pricing',
       label: i18n.t('NN0643')
     }, {
-      hidden: !this.isLogin(),
+      hidden: !this.isLogin,
       name: 'MyDesign',
       url: '/mydesign',
       label: i18n.t('NN0080')
     }, {
-      hidden: !this.isLogin(),
+      hidden: !this.isLogin,
       name: 'BrandKit',
       url: '/brandkit',
       label: i18n.t('NN0007')
@@ -190,6 +189,138 @@ class PaymentData {
     themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it: Record<string, string>) => !['BrandKit'].includes(it.name))
     else return list
+  }
+
+  // For TextEffectSetting
+  textEffects() {
+    interface Option {
+      key: string
+      label: string
+      type: 'range' | 'color'
+      min?: number
+      max?: number
+    }
+    interface Effect {
+      key: string
+      label: string
+      options: Option[]
+    }
+    interface EffectCategory {
+      name: string
+      label: string
+      effects2d: Effect[][]
+    }
+
+    function arrTo2darr(arr: Array<unknown>) {
+      const newArr = []
+      while (arr.length) newArr.push(arr.splice(0, 3))
+      return newArr
+    }
+
+    function toOptions(array: string[]) {
+      const effectI18nMap = {
+        distance: i18n.tc('NN0063'),
+        angle: i18n.tc('NN0064'),
+        blur: i18n.tc('NN0065'),
+        opacity: i18n.tc('NN0066'),
+        color: i18n.tc('NN0067'),
+        spread: i18n.tc('NN0068'),
+        stroke: i18n.tc('NN0069'),
+        shape: i18n.tc('NN0070'),
+        bend: i18n.tc('NN0071'),
+        bStroke: '邊框寬度',
+        bOpacity: '邊框透明度',
+        bColor: '邊框顏色',
+        bRadius: '邊框圓角',
+        pStroke: '填滿寬度',
+        pOpacity: '填滿透明度',
+        pColor: '填滿顏色'
+      }
+
+      return array.map((name: string) => {
+        const option = {
+          key: name,
+          label: effectI18nMap[name as keyof typeof effectI18nMap]
+        } as Option
+
+        switch (name) {
+          case 'color':
+          case 'bColor':
+          case 'pColor':
+            option.type = 'color'
+            break
+          case 'angle':
+            option.type = 'range'
+            option.max = 180
+            option.min = -180
+            break
+          case 'bend': // For curve
+            option.type = 'range'
+            option.max = 100
+            option.min = -100
+            break
+          default:
+            /* distance, blur, opacity, spread, stroke,
+             * bOpacity, pOpacity, bStroke, pStroke, bRadius */
+            option.type = 'range'
+            option.max = 100
+            option.min = 0
+            break
+        }
+        return option
+      })
+    }
+
+    const categories = [{
+      name: 'shadow',
+      label: i18n.t('NN0112'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'shadow',
+        label: i18n.t('NN0112'),
+        options: toOptions(['distance', 'angle', 'blur', 'opacity', 'color'])
+      }, {
+        key: 'lift',
+        label: i18n.t('NN0113'),
+        options: toOptions(['spread'])
+      }, {
+        key: 'hollow',
+        label: i18n.t('NN0114'),
+        options: toOptions(['stroke'])
+      }, {
+        key: 'splice',
+        label: i18n.t('NN0115'),
+        options: toOptions(['stroke', 'distance', 'angle', 'color'])
+      }, {
+        key: 'echo',
+        label: i18n.t('NN0116'),
+        options: toOptions(['distance', 'angle', 'color'])
+      }])
+    // }, {
+    //   name: 'textbox',
+    //   label: '邊框與填滿',
+    //   effects2d: arrTo2darr([{
+    //     key: 'textbox',
+    //     label: '文字框',
+    //     options: toOptions(['bStroke', 'bOpacity', 'bColor', 'bRadius', 'pStroke', 'pOpacity', 'pColor'])
+    //   }])
+    }, {
+      name: 'shape',
+      label: i18n.t('NN0070'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0117'),
+        options: toOptions([])
+      }, {
+        key: 'curve',
+        label: i18n.t('NN0118'),
+        options: toOptions(['bend'])
+      }])
+    }]
+    return categories as EffectCategory[]
   }
 
   // For Settings
@@ -748,4 +879,4 @@ class PaymentData {
   }
 }
 
-export default new PaymentData()
+export default new ConstantData()
