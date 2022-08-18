@@ -27,12 +27,9 @@ import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
 import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
+import textBoxUtils from '@/utils/textBoxUtils'
 import layerUtils from '@/utils/layerUtils'
-import imageUtils from '@/utils/imageUtils'
-import imageShadowUtils from '@/utils/imageShadowUtils'
-import { ShadowEffectType } from '@/interfaces/imgShadow'
 import SquareLoading from '@/components/global/SqureLoading.vue'
-import generalUtils from '@/utils/generalUtils'
 import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
@@ -71,10 +68,12 @@ export default Vue.extend({
       )
       switch (this.config.type) {
         case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+          const textBoxStyles = textBoxUtils.convertTextEffect(this.config.styles.textBox)
           Object.assign(
             styles,
             textEffectStyles,
+            textBoxStyles,
             {
               willChange: 'text-shadow',
               '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`

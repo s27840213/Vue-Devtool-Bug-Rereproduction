@@ -40,15 +40,7 @@ class Controller {
         distance: 50,
         angle: 45,
         color: ''
-      }, // 雙重陰影
-      textbox: {
-        bStroke: 20,
-        bOpacity: 50,
-        bRadius: 10,
-        pStroke: 20,
-        pOpacity: 50,
-        pColor: ''
-      }
+      } // 雙重陰影
     }
   }
 
@@ -180,16 +172,6 @@ class Controller {
               ).textShadow
             )
             .join(',')
-        }
-      case 'textbox':
-        return {
-          borderWidth: `${effect.bStroke}px`,
-          borderStyle: 'solid',
-          borderColor: `${this.convertColor2rgba('#000000', effect.bOpacity * 0.01)}`,
-          borderRadius: `${effect.bRadius}px`,
-          padding: `${effect.pStroke}px`,
-          backgroundColor: this.convertColor2rgba(effect.color, effect.pOpacity * 0.01),
-          textShadow: 'none'
         }
       default:
         return { textShadow: 'none' }

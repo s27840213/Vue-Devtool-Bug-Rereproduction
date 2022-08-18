@@ -15,6 +15,17 @@ export interface ITextShape {
   name: string
 }
 
+export interface ITextbox {
+  name: string
+  bStroke: number
+  bOpacity: number
+  bRadius: number
+  bColor: string
+  pStroke: number
+  pOpacity: number
+  pColor: string
+}
+
 export interface ITextFormat {
   textEffect: ITextEffect | {},
   textShape: ITextShape | {},

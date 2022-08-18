@@ -171,6 +171,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import textBoxUtils from '@/utils/textBoxUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -589,6 +590,7 @@ export default Vue.extend({
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textBoxStyles = textBoxUtils.convertTextEffect(this.config.styles.textBox)
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
@@ -604,6 +606,7 @@ export default Vue.extend({
         // touchAction: this.isActive ? 'none' : 'initial',
         touchAction: 'none',
         ...textEffectStyles,
+        ...textBoxStyles,
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`,
         backgroundColor: 'transparent',
         borderRadius: 0

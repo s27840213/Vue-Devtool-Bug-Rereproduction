@@ -232,7 +232,7 @@ class ConstantData {
         bOpacity: '邊框透明度',
         bColor: '邊框顏色',
         bRadius: '邊框圓角',
-        pStroke: '填滿寬度',
+        pStroke: '填滿高度',
         pOpacity: '填滿透明度',
         pColor: '填滿顏色'
       }
@@ -299,14 +299,18 @@ class ConstantData {
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
       }])
-    // }, {
-    //   name: 'textbox',
-    //   label: '邊框與填滿',
-    //   effects2d: arrTo2darr([{
-    //     key: 'textbox',
-    //     label: '文字框',
-    //     options: toOptions(['bStroke', 'bOpacity', 'bColor', 'bRadius', 'pStroke', 'pOpacity', 'pColor'])
-    //   }])
+    }, {
+      name: 'box',
+      label: '邊框與填滿',
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'test',
+        label: '文字框',
+        options: toOptions(['bStroke', 'bOpacity', 'bColor', 'bRadius', 'pStroke', 'pOpacity', 'pColor'])
+      }])
     }, {
       name: 'shape',
       label: i18n.t('NN0070'),

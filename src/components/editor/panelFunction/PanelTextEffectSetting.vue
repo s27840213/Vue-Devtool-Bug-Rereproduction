@@ -6,7 +6,7 @@
         template(v-for="effects1d in category.effects2d")
           div(class="text-effect-setting__options mb-10")
             svg-icon(v-for="effect in effects1d"
-              :key="`shadow-${effect.key}`"
+              :key="`${category.name}-${effect.key}`"
               :iconName="`text-${category.name}-${effect.key}`"
               @click.native="onEffectClick(category.name, effect.key)"
               class="text-effect-setting__option pointer"
@@ -56,15 +56,16 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import TextShapeUtils from '@/utils/textShapeUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
+import textboxUtils from '@/utils/textBoxUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import constantData from '@/utils/constantData'
-import { ITextEffect, ITextShape } from '@/interfaces/format'
+import { ITextbox, ITextEffect, ITextShape } from '@/interfaces/format'
 
 export default Vue.extend({
   components: {
@@ -81,20 +82,22 @@ export default Vue.extend({
     }
   },
   computed: {
-    currentStyle(): { shadow: ITextEffect, shape: ITextShape } {
-      const { styles } = TextEffectUtils.getCurrentLayer()
+    currentStyle(): { shadow: ITextEffect, box: ITextbox, shape: ITextShape } {
+      const { styles } = textEffectUtils.getCurrentLayer()
       return {
         shadow: styles.textEffect as ITextEffect,
+        box: styles.textBox as ITextbox,
         shape: Object.assign(styles.textShape as ITextShape, { name: styles.textShape.name || 'none' })
       } || {}
     },
     currentShadow(): string {
-      const { shadow } = this.currentStyle
-      return shadow?.name || 'none'
+      return this.currentStyle.shadow?.name || 'none'
+    },
+    currentTextbox(): string {
+      return this.currentStyle.box.name
     },
     currentShape(): string {
-      const { shape } = this.currentStyle
-      return shape?.name || 'none'
+      return this.currentStyle.shape?.name || 'none'
     }
   },
   mounted() {
@@ -114,10 +117,13 @@ export default Vue.extend({
     onEffectClick(category: string, effectName: string): void {
       switch (category) {
         case 'shadow':
-          TextEffectUtils.setTextEffect(effectName, { ver: 'v1' })
+          textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
+          break
+        case 'box':
+          textboxUtils.setTextbox(effectName)
           break
         case 'shape':
-          TextShapeUtils.setTextShape(effectName)
+          textShapeUtils.setTextShape(effectName)
           TextPropUtils.updateTextPropsState()
           break
       }
@@ -133,27 +139,30 @@ export default Vue.extend({
 
       switch (category) {
         case 'shadow':
-          TextEffectUtils.setTextEffect(this.currentShadow, newVal)
+          textEffectUtils.setTextEffect(this.currentShadow, newVal)
+          break
+        case 'box':
+          textboxUtils.setTextbox(this.currentTextbox, newVal)
           break
         case 'shape':
-          TextShapeUtils.setTextShape(this.currentShape, newVal)
+          textShapeUtils.setTextShape(this.currentShape, newVal)
           break
       }
     },
     handleRangeMouseup(category: string) {
       if (category === 'shape') {
-        TextShapeUtils.setTextShape(this.currentShape, { focus: false })
+        textShapeUtils.setTextShape(this.currentShape, { focus: false })
       }
       this.recordChange()
     },
     handleRangeMousedown(category: string) {
       if (category === 'shape') {
-        TextShapeUtils.setTextShape(this.currentShape, { focus: true })
+        textShapeUtils.setTextShape(this.currentShape, { focus: true })
       }
     },
     handleColorUpdate(color: string, key = 'color'): void {
       // console.log('color update', key)
-      TextEffectUtils.setTextEffect(this.currentShadow, { [key]: color })
+      textEffectUtils.setTextEffect(this.currentShadow, { [key]: color })
     },
     recordChange() {
       stepsUtils.record()
