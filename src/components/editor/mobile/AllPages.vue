@@ -1,6 +1,11 @@
 <template lang="pug">
 div(class="all-pages")
-    page-preview-page-wrapper(v-for="(page, idx) in pages" :key="page.id" class="m-10 border-box" :index="idx" type="full" :config="page" :showMoreBtn="false")
+    page-preview-page-wrapper(v-for="(page, idx) in pages"
+      :key="page.id"
+      class="m-10 border-box"
+      :index="idx" type="full"
+      :config="page"
+      :showMoreBtn="false")
     div(class="all-pages--last pointer border-box"
       @click="addPage()")
       div

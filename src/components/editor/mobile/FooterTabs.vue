@@ -457,6 +457,14 @@ export default Vue.extend({
           page.id = generalUtils.generateRandomString(8)
           pageUtils.addPageToPos(page, currFocusPageIndex + 1)
           this._setCurrActivePageIndex(currFocusPageIndex + 1)
+          const targetPreviewPage = document.querySelector(`.page-preview_${currFocusPageIndex}`)
+
+          // eslint-disable-next-line no-unused-expressions
+          targetPreviewPage?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          })
           break
         }
         case 'trash': {

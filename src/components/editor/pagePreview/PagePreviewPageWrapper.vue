@@ -5,9 +5,11 @@
     :throttle="false"
     :handleNotIntersecting="true"
     @callback="handleCallback")
-    div(v-if="allPageMode" class="page-preview-page"
+    div(v-if="!allPageMode" :style="loadingStyle")
+    div(v-else class="page-preview-page"
       :style="styles2"
-      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
+      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
+      ref="pagePreview")
       div(class="page-preview-page-content pointer"
           :style="styles"
           @click="clickPage"
@@ -55,7 +57,6 @@
       div(v-if="type === 'full'"
         class="page-preview-page-title")
         span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
-    div(v-else :style="loadingStyle")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -105,7 +106,7 @@ export default Vue.extend({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      inTheTarget: true,
+      inTheTarget: false,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
       isHandlingAsyncTask: false
     }
