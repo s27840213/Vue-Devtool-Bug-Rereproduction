@@ -174,9 +174,22 @@ class ImageShadowUtils {
       const x = (canvas.width - drawCanvasW) * 0.5
       const y = (canvas.height - drawCanvasH) * 0.5
       const unifiedScale = Math.max(drawCanvasW, drawCanvasH) / Math.max(width, height) * scale
+      console.log(scaleRatio, imgX)
       // const mappingScale = imgWidth > imgHeight ? (params.MAXSIZE || 1600) / drawCanvasW : (params.MAXSIZE || 1600) / drawCanvasH
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-      ctxT.drawImage(img, imgX * scaleRatio, imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      // Show test canvas
+      // const canvasTest = document.createElement('canvas')
+      // canvasTest.setAttribute('width', canvasT.width.toString())
+      // canvasTest.setAttribute('height', canvasT.height.toString())
+      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
+      // ctxText.drawImage(canvasT, 0, 0)
+      // document.body.appendChild(canvasTest)
+      // setTimeout(() => document.body.removeChild(canvasTest), 10000)
+      // canvasTest.style.position = 'absolute'
+      // canvasTest.style.top = '0'
+      // canvasTest.style.zIndex = '10000'
+
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
       this.dilate = getDilate(imageData, unifiedScale)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
@@ -498,17 +511,6 @@ class ImageShadowUtils {
       }
 
       setMark('shadow', 1)
-      // Show test canvas
-      // const canvasTest = document.createElement('canvas')
-      // canvasTest.setAttribute('width', canvasT.width.toString())
-      // canvasTest.setAttribute('height', canvasT.height.toString())
-      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
-      // ctxText.drawImage(canvasT, 0, 0)
-      // document.body.appendChild(canvasTest)
-      // setTimeout(() => document.body.removeChild(canvasTest), 10000)
-      // canvasTest.style.position = 'absolute'
-      // canvasTest.style.top = '0'
-      // canvasTest.style.zIndex = '10000'
       const start1 = Date.now()
       const _imageData = new ImageData(this.dilate(spread), canvasT.width, canvasT.height)
       ctxT.putImageData(_imageData, 0, 0)

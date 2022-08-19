@@ -135,8 +135,9 @@ function manhattan (imageData: ImageData) {
 }
 
 export function getDilate(imageData: ImageData, unifiedScale: number) {
-	console.warn('get dilate')
+	const start = Date.now()
 	const { mapX, mapY } = manhattan(imageData)
+	console.warn('handle manhanttan calculation: ', Date.now() - start)
 	const { data: pixels, width, height } = imageData
 
 	const SPREAD_RADIUS = 5
@@ -154,10 +155,8 @@ export function getDilate(imageData: ImageData, unifiedScale: number) {
 				pixels[pos] = 0
 				pixels[pos + 1] = 0
 				pixels[pos + 2] = 0
-				if (dist >= r + unifiedSpreadRadius) {
+				if (dist > r) {
 					pixels[pos + 3] = 0
-				} else if (dist >= r) {
-					pixels[pos + 3] = 255 * (1 - (dist - r) * _uni_spread_rad)
 				}	else {
 					pixels[pos + 3] = 255
 				}
@@ -166,3 +165,10 @@ export function getDilate(imageData: ImageData, unifiedScale: number) {
 		return pixels
 	}
 }
+// if (dist > r + unifiedSpreadRadius) {
+// 	pixels[pos + 3] = 0
+// } else if (dist >= r) {
+// 	pixels[pos + 3] = 255 * (1 - (dist - r) * _uni_spread_rad)
+// }	else {
+// 	pixels[pos + 3] = 255
+// }

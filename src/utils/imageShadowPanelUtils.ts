@@ -200,18 +200,21 @@ export default new class ImageShadowPanelUtils {
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
 
+      const params = { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE }
+      imageShadowUtils.drawingInit(updateCanvas, img, config, params)
+
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE })
+          await imageShadowUtils.drawShadow([updateCanvas], img, config, params)
           break
         }
         case ShadowEffectType.imageMatched:
-          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE })
+          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
           break
         case ShadowEffectType.floating: {
-          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE })
+          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, params)
           break
         }
         case ShadowEffectType.none:
@@ -321,6 +324,7 @@ export default new class ImageShadowPanelUtils {
             imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
+            console.warn('shadow upload finish')
           })
         }
       })

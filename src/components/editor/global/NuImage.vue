@@ -218,13 +218,13 @@ export default Vue.extend({
         this.$nextTick(() => this.handleNewShadowEffect())
       }
     },
-    // showCanvas(val) {
-    //   if (val) {
-    //     setTimeout(() => {
-    //       this.handleNewShadowEffect(false)
-    //     })
-    //   }
-    // },
+    showCanvas(val) {
+      if (val && (this.config as IImage).styles.shadow.srcObj.type) {
+        setTimeout(() => {
+          this.handleNewShadowEffect(false)
+        })
+      }
+    },
     'config.imgControl'() {
       if (this.forRender) {
         return
