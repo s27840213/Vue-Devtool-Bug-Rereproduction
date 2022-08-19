@@ -170,7 +170,7 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import { AnyTouchEvent } from 'any-touch'
 import textBoxUtils from '@/utils/textBoxUtils'
 
 const LAYER_SIZE_MIN = 10

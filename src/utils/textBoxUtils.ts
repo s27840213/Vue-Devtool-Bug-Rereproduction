@@ -13,12 +13,11 @@ class Textbox {
     return {
       none: {},
       test: {
+        opacity: 50,
         bStroke: 20,
-        bOpacity: 50,
         bRadius: 10,
         bColor: '',
         pStroke: 20,
-        pOpacity: 50,
         pColor: ''
       }
     }
@@ -26,18 +25,18 @@ class Textbox {
 
   convertTextEffect(effect: any) {
     switch (effect.name) {
-      case 'test':
+      case 'none':
+        return {}
+      default:
         return {
           borderWidth: `${effect.bStroke}px`,
           borderStyle: 'solid',
-          borderColor: `${textEffectUtils.convertColor2rgba(effect.bColor, effect.bOpacity * 0.01)}`,
+          borderColor: `${textEffectUtils.convertColor2rgba(effect.bColor, effect.opacity * 0.01)}`,
           borderRadius: `${effect.bRadius}px`,
           padding: `${effect.pStroke}px 0`,
-          backgroundColor: textEffectUtils.convertColor2rgba(effect.pColor, effect.pOpacity * 0.01),
+          backgroundColor: textEffectUtils.convertColor2rgba(effect.pColor, effect.opacity * 0.01),
           textShadow: 'none'
         }
-      default:
-        return {}
     }
   }
 

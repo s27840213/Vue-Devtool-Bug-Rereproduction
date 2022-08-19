@@ -229,11 +229,9 @@ class ConstantData {
         shape: i18n.tc('NN0070'),
         bend: i18n.tc('NN0071'),
         bStroke: '邊框寬度',
-        bOpacity: '邊框透明度',
         bColor: '邊框顏色',
         bRadius: '邊框圓角',
         pStroke: '填滿高度',
-        pOpacity: '填滿透明度',
         pColor: '填滿顏色'
       }
 
@@ -261,7 +259,7 @@ class ConstantData {
             break
           default:
             /* distance, blur, opacity, spread, stroke,
-             * bOpacity, pOpacity, bStroke, pStroke, bRadius */
+             * bStroke, pStroke, bRadius */
             option.type = 'range'
             option.max = 100
             option.min = 0
@@ -309,7 +307,7 @@ class ConstantData {
       }, {
         key: 'test',
         label: '文字框',
-        options: toOptions(['bStroke', 'bOpacity', 'bColor', 'bRadius', 'pStroke', 'pOpacity', 'pColor'])
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'bRadius', 'pStroke', 'pColor'])
       }])
     }, {
       name: 'shape',

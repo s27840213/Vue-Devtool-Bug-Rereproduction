@@ -45,7 +45,7 @@
                 div(class="text-effect-setting__field-name") {{option.label}}
                 div(class="text-effect-setting__value-input"
                   :style="{ backgroundColor: currentStyle[category.name][option.key] }"
-                  @click="handleColorModal")
+                  @click="handleColorModal(category.name, option.key)")
                 color-picker(v-if="openColorPicker"
                   class="text-effect-setting__color-picker"
                   v-click-outside="handleColorModal"
@@ -76,9 +76,12 @@ export default Vue.extend({
   },
   data() {
     return {
-      openModal: false,
       openColorPicker: false,
-      textEffects: constantData.textEffects()
+      textEffects: constantData.textEffects(),
+      colorTarget: {
+        category: '',
+        key: ''
+      }
     }
   },
   computed: {
@@ -89,15 +92,6 @@ export default Vue.extend({
         box: styles.textBox as ITextbox,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
-    },
-    currentShadow(): string {
-      return this.currentStyle.shadow?.name || 'none'
-    },
-    currentTextbox(): string {
-      return this.currentStyle.box.name
-    },
-    currentShape(): string {
-      return this.currentStyle.shape?.name || 'none'
     }
   },
   mounted() {
@@ -109,7 +103,8 @@ export default Vue.extend({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    handleColorModal() {
+    handleColorModal(category: string, key: string) {
+      this.colorTarget = { category, key }
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
@@ -129,6 +124,9 @@ export default Vue.extend({
       }
       this.recordChange()
     },
+    getEffectName(category: 'shadow' | 'box' | 'shape') {
+      return this.currentStyle[category].name || 'none'
+    },
     handleRangeInput(event: Event, category: string, opiton: ReturnType<typeof constantData.textEffects>[0]['effects2d'][0][0]['options'][0]) {
       const name = (event.target as HTMLInputElement).name
       const value = (event.target as HTMLInputElement).value as unknown as number
@@ -139,30 +137,37 @@ export default Vue.extend({
 
       switch (category) {
         case 'shadow':
-          textEffectUtils.setTextEffect(this.currentShadow, newVal)
+          textEffectUtils.setTextEffect(this.getEffectName('shadow'), newVal)
           break
         case 'box':
-          textboxUtils.setTextbox(this.currentTextbox, newVal)
+          textboxUtils.setTextbox(this.getEffectName('box'), newVal)
           break
         case 'shape':
-          textShapeUtils.setTextShape(this.currentShape, newVal)
+          textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
           break
       }
     },
     handleRangeMouseup(category: string) {
       if (category === 'shape') {
-        textShapeUtils.setTextShape(this.currentShape, { focus: false })
+        textShapeUtils.setTextShape(this.getEffectName('shape'), { focus: false })
       }
       this.recordChange()
     },
     handleRangeMousedown(category: string) {
       if (category === 'shape') {
-        textShapeUtils.setTextShape(this.currentShape, { focus: true })
+        textShapeUtils.setTextShape(this.getEffectName('shape'), { focus: true })
       }
     },
-    handleColorUpdate(color: string, key = 'color'): void {
-      // console.log('color update', key)
-      textEffectUtils.setTextEffect(this.currentShadow, { [key]: color })
+    handleColorUpdate(color: string): void {
+      const key = this.colorTarget.key
+      switch (this.colorTarget.category) {
+        case 'shadow':
+          textEffectUtils.setTextEffect(this.getEffectName('shadow'), { [key]: color })
+          break
+        case 'box':
+          textboxUtils.setTextbox(this.getEffectName('box'), { [key]: color })
+          break
+      }
     },
     recordChange() {
       stepsUtils.record()

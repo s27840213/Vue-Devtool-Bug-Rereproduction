@@ -17,12 +17,11 @@ export interface ITextShape {
 
 export interface ITextbox {
   name: string
+  opacity: number
   bStroke: number
-  bOpacity: number
   bRadius: number
   bColor: string
   pStroke: number
-  pOpacity: number
   pColor: string
 }
 
