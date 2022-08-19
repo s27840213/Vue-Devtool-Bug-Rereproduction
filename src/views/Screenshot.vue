@@ -5,6 +5,9 @@
               :config="config"
               :pageIndex="0"
               :layerIndex="0")
+    div(v-if="backgroundImage !== ''" class="screenshot__bg-img")
+      img(:src="backgroundImage")
+    div(v-if="backgroundColor !== ''" class="screenshot__bg-color" :style="bgColorStyles()")
 </template>
 
 <script lang="ts">
@@ -15,11 +18,19 @@ import { CustomWindow } from '@/interfaces/customWindow'
 
 declare let window: CustomWindow
 
+enum ScreenShotMode {
+  LAYER,
+  BG_IMG,
+  BG_COLOR
+}
+
 export default Vue.extend({
   name: 'ScreenShot',
   data() {
     return {
-      config: undefined as any
+      config: undefined as any,
+      backgroundImage: '',
+      backgroundColor: ''
     }
   },
   async mounted() {
@@ -28,9 +39,20 @@ export default Vue.extend({
   created() {
     window.fetchDesign = this.fetchDesign
   },
+  computed: {
+    mode(): ScreenShotMode {
+      if (this.backgroundImage !== '') {
+        return ScreenShotMode.BG_IMG
+      } else if (this.backgroundColor !== '') {
+        return ScreenShotMode.BG_COLOR
+      } else {
+        return ScreenShotMode.LAYER
+      }
+    }
+  },
   methods: {
     async fetchDesign(query: string) {
-      this.config = undefined
+      this.clearBuffers()
       const urlParams = new URLSearchParams(query)
       const type = urlParams.get('type')
       const id = urlParams.get('id')
@@ -57,12 +79,32 @@ export default Vue.extend({
         })
         setTimeout(() => { this.onload() }, 100)
       }
+      if (type === 'background') {
+        this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
+      }
+      if (type === 'backgroundColor') {
+        this.backgroundColor = id ?? '#FFFFFFFF'
+      }
+    },
+    bgColorStyles() {
+      return {
+        backgroundColor: `#${this.backgroundColor}`
+      }
+    },
+    clearBuffers() {
+      this.config = undefined
+      this.backgroundImage = ''
+      this.backgroundColor = ''
     },
     onload() {
       console.log('loaded')
-      const target = (this.$refs.target as Vue).$el
-      const { width, height } = target.getBoundingClientRect()
-      vivistickerUtils.sendDoneLoading(width, height)
+      if (this.mode === ScreenShotMode.LAYER) {
+        const target = (this.$refs.target as Vue).$el
+        const { width, height } = target.getBoundingClientRect()
+        vivistickerUtils.sendDoneLoading(width, height)
+      } else {
+        vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight)
+      }
     }
   }
 })
@@ -71,5 +113,14 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .screenshot {
   @include size(100%, 100%);
+  &__bg-img, &__bg-color {
+    @include size(100%, 100%);
+  }
+  &__bg-img > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    vertical-align: middle;
+  }
 }
 </style>

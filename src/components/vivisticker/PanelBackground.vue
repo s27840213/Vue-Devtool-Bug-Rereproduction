@@ -39,7 +39,7 @@
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
               :item="item"
-              :locked="currentPageBackgroundLocked")
+              :locked="false")
       template(v-slot:category-background-item="{ list, title }")
         div(class="panel-bg__items")
           div(v-if="title"
@@ -48,7 +48,7 @@
             class="panel-bg__item"
             :key="item.id"
             :item="item"
-            :locked="currentPageBackgroundLocked")
+            :locked="false")
     div(v-if="!showImageTab" class="panel-bg__color-controller")
       div(class="panel-bg__color-controller__header")
         div(class="panel-bg__color-controller__opacity-title") {{ $t('NN0030') }}
@@ -62,8 +62,8 @@
               max="100"
               v-model.number="opacity")
       div(class="panel-bg__color-controller__hint")
-        p(class="panel-bg__color-controller__hint-text") Click to copy
-        p(class="panel-bg__color-controller__hint-text") Press and hold to save
+        p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
+        p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
 </template>
 
 <script lang="ts">
@@ -197,10 +197,6 @@ export default Vue.extend({
       const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
       return backgroundColor || ''
     },
-    currentPageBackgroundLocked(): boolean {
-      const { backgroundImage } = this.getPage(pageUtils.currFocusPageIndex) || {}
-      return backgroundImage && backgroundImage.config.locked
-    },
     emptyResultMessage(): string {
       return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0004', 1) })}` : ''
     },
@@ -248,16 +244,11 @@ export default Vue.extend({
       'getMoreContent'
     ]),
     ...mapMutations({
-      _setBgColor: 'SET_backgroundColor',
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     colorStyles(color: string) {
-      let hexOpacity = Math.round(this.opacity * 255 / 100).toString(16).toUpperCase()
-      if (hexOpacity.length === 1) {
-        hexOpacity = '0' + hexOpacity
-      }
       return {
-        backgroundColor: `${color}${hexOpacity}`
+        backgroundColor: this.getColorWithOpacity(color)
       }
     },
     progressStyles() {
@@ -266,20 +257,14 @@ export default Vue.extend({
       }
     },
     setBgColor(color: string) {
-      // if (colorUtils.isColorPickerOpen) {
-      //   colorUtils.setIsColorPickerOpen(false)
-      // }
-      if (this.currentPageBackgroundLocked) {
-        return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
+      vivistickerUtils.sendScreenshotUrl(`type=backgroundColor&id=${this.getColorWithOpacity(color).substring(1)}`)
+    },
+    getColorWithOpacity(color: string) {
+      let hexOpacity = Math.round(this.opacity * 255 / 100).toString(16).toUpperCase()
+      if (hexOpacity.length === 1) {
+        hexOpacity = '0' + hexOpacity
       }
-      this._setBgColor({
-        pageIndex: pageUtils.currFocusPageIndex,
-        color: color
-      })
-
-      if (generalUtils.isTouchDevice()) {
-        this.setCloseMobilePanelFlag(true)
-      }
+      return `${color}${hexOpacity}`
     },
     async handleSearch(keyword: string) {
       this.resetContent()

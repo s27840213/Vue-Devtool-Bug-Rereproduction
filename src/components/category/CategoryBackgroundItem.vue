@@ -13,6 +13,7 @@
 import Vue from 'vue'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   props: {
@@ -31,7 +32,7 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addBackground() {
-      console.log('copy background', this.item)
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
     },
     handleDownload() {
       console.log('start downloading', this.item)

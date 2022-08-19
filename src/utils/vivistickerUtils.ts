@@ -40,6 +40,8 @@ class ViviStickerUtils {
       case 5:
       case 11:
         return `type=svg&id=${item.id}&ver=${item.ver}`
+      case 1:
+        return `type=background&id=${item.id}&ver=${item.ver}`
       default:
         return ''
     }
