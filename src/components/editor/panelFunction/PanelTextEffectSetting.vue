@@ -2,15 +2,15 @@
   div(class="text-effect-setting mt-25")
     div(class="action-bar")
       template(v-for="category in textEffects")
-        div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{category.label}}
+        div(class="w-full text-left mt-10 text-blue-1 text-effect-setting__title") {{category.label}}
         template(v-for="effects1d in category.effects2d")
-          div(class="text-effect-setting__options mb-10")
+          div(class="text-effect-setting__effects mb-10")
             svg-icon(v-for="effect in effects1d"
               :key="`${category.name}-${effect.key}`"
               :iconName="`text-${category.name}-${effect.key}`"
               @click.native="onEffectClick(category.name, effect.key)"
-              class="text-effect-setting__option pointer"
-              :class="{'text-effect-setting__option--selected': currentStyle[category.name].name === effect.key }"
+              class="text-effect-setting__effect pointer"
+              :class="{'text-effect-setting__effect--selected': currentStyle[category.name].name === effect.key }"
               iconWidth="60px"
               iconColor="white"
               v-hint="effect.label")
@@ -46,11 +46,6 @@
                 div(class="text-effect-setting__value-input"
                   :style="{ backgroundColor: currentStyle[category.name][option.key] }"
                   @click="handleColorModal(category.name, option.key)")
-                color-picker(v-if="openColorPicker"
-                  class="text-effect-setting__color-picker"
-                  v-click-outside="handleColorModal"
-                  :currentColor="currentStyle[category.name][option.key]"
-                  @update="(c)=>handleColorUpdate(c, option.key)")
 </template>
 
 <script lang="ts">
@@ -115,7 +110,7 @@ export default Vue.extend({
           textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
           break
         case 'box':
-          textboxUtils.setTextbox(effectName)
+          textboxUtils.setTextBox(effectName)
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName)
@@ -140,7 +135,7 @@ export default Vue.extend({
           textEffectUtils.setTextEffect(this.getEffectName('shadow'), newVal)
           break
         case 'box':
-          textboxUtils.setTextbox(this.getEffectName('box'), newVal)
+          textboxUtils.setTextBox(this.getEffectName('box'), newVal)
           break
         case 'shape':
           textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
@@ -165,7 +160,7 @@ export default Vue.extend({
           textEffectUtils.setTextEffect(this.getEffectName('shadow'), { [key]: color })
           break
         case 'box':
-          textboxUtils.setTextbox(this.getEffectName('box'), { [key]: color })
+          textboxUtils.setTextBox(this.getEffectName('box'), { [key]: color })
           break
       }
     },
@@ -179,20 +174,20 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .text-effect-setting {
   font-size: 14px;
+  &__title {
+    font-size: 16px;
+    font-weight: bold;
+  }
   &__form {
     background: #fff;
   }
-  &__name {
-    flex: 1;
-    padding: 0 12px;
-  }
-  &__options {
+  &__effects {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     column-gap: 16px;
     width: 212px;
   }
-  &__option {
+  &__effect {
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
@@ -238,11 +233,6 @@ export default Vue.extend({
     margin-left: 10px;
     text-align: center;
   }
-  &__color-picker {
-    position: absolute;
-    right: 0px;
-    bottom: 0px;
-  }
 }
 .action-bar {
   padding: 10px;
@@ -251,13 +241,5 @@ export default Vue.extend({
 }
 .w-full {
   @include size(100%, 100%);
-}
-.mx-16 {
-  margin-left: 16px;
-  margin-right: 16px;
-}
-.text-shape-title {
-  font-size: 16px;
-  font-weight: bold;
 }
 </style>

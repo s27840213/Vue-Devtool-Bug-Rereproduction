@@ -70,7 +70,7 @@ class Textbox {
   //   }
   // }
 
-  setTextbox(effect: string, attrs?: any): void {
+  setTextBox(effect: string, attrs?: any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
