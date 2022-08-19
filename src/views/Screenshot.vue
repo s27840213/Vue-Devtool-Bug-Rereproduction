@@ -51,41 +51,43 @@ export default Vue.extend({
     }
   },
   methods: {
-    async fetchDesign(query: string) {
+    fetchDesign(query: string) {
       this.clearBuffers()
-      const urlParams = new URLSearchParams(query)
-      const type = urlParams.get('type')
-      const id = urlParams.get('id')
-      const ver = urlParams.get('ver')
-      if (type === 'svg') {
-        const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
-        const vSize = json.vSize as number[]
-        const pageAspectRatio = window.innerWidth / window.innerHeight
-        const svgAspectRatio = vSize[0] / vSize[1]
-        const svgWidth = svgAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * svgAspectRatio
-        const svgHeight = svgAspectRatio > pageAspectRatio ? window.innerWidth / svgAspectRatio : window.innerHeight
-        json.ratio = 1
-        this.config = layerFactary.newShape({
-          ...json,
-          styles: {
-            width: svgWidth,
-            height: svgHeight,
-            initWidth: vSize[0],
-            initHeight: vSize[1],
-            scale: svgWidth / vSize[0],
-            color: json.color,
-            vSize: json.vSize
-          }
-        })
-        setTimeout(() => { this.onload() }, 100)
-      }
-      if (type === 'background') {
-        this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
-      }
-      if (type === 'backgroundColor') {
-        this.backgroundColor = id ?? '#FFFFFFFF'
-        setTimeout(() => { this.onload() }, 100)
-      }
+      this.$nextTick(async () => {
+        const urlParams = new URLSearchParams(query)
+        const type = urlParams.get('type')
+        const id = urlParams.get('id')
+        const ver = urlParams.get('ver')
+        if (type === 'svg') {
+          const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
+          const vSize = json.vSize as number[]
+          const pageAspectRatio = window.innerWidth / window.innerHeight
+          const svgAspectRatio = vSize[0] / vSize[1]
+          const svgWidth = svgAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * svgAspectRatio
+          const svgHeight = svgAspectRatio > pageAspectRatio ? window.innerWidth / svgAspectRatio : window.innerHeight
+          json.ratio = 1
+          this.config = layerFactary.newShape({
+            ...json,
+            styles: {
+              width: svgWidth,
+              height: svgHeight,
+              initWidth: vSize[0],
+              initHeight: vSize[1],
+              scale: svgWidth / vSize[0],
+              color: json.color,
+              vSize: json.vSize
+            }
+          })
+          setTimeout(() => { this.onload() }, 100)
+        }
+        if (type === 'background') {
+          this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
+        }
+        if (type === 'backgroundColor') {
+          this.backgroundColor = id ?? '#FFFFFFFF'
+          setTimeout(() => { this.onload() }, 100)
+        }
+      })
     },
     bgColorStyles() {
       return {
