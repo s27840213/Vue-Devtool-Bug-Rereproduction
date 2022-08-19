@@ -137,10 +137,9 @@ class Textbox {
           Object.assign(textBox, defaultAttrs, attrs, { name: effect })
         }
 
-        const mainColor = textEffectUtils.getLayerMainColor(paragraphs)
         Object.assign(textBox, {
-          bColor: textBox.bColor || mainColor,
-          pColor: textBox.pColor || mainColor
+          bColor: textBox.bColor || '#FF0000',
+          pColor: textBox.pColor || '#00FF00'
         })
         store.commit('UPDATE_specLayerData', {
           pageIndex,
