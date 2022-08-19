@@ -60,7 +60,7 @@ import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import constantData from '@/utils/constantData'
-import { ITextbox, ITextEffect, ITextShape } from '@/interfaces/format'
+import { ITextBox, ITextEffect, ITextShape } from '@/interfaces/format'
 
 export default Vue.extend({
   components: {
@@ -80,11 +80,11 @@ export default Vue.extend({
     }
   },
   computed: {
-    currentStyle(): { shadow: ITextEffect, box: ITextbox, shape: ITextShape } {
+    currentStyle(): { shadow: ITextEffect, box: ITextBox, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
         shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
-        box: styles.textBox as ITextbox,
+        box: styles.textBox as ITextBox,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
     }
@@ -124,7 +124,7 @@ export default Vue.extend({
     },
     handleRangeInput(event: Event, category: string, opiton: ReturnType<typeof constantData.textEffects>[0]['effects2d'][0][0]['options'][0]) {
       const name = (event.target as HTMLInputElement).name
-      const value = (event.target as HTMLInputElement).value as unknown as number
+      const value = parseInt((event.target as HTMLInputElement).value)
       const [max, min] = [opiton.max as number, opiton.min as number]
       const newVal = {
         [name]: value > max ? max : (value < min ? min : value)

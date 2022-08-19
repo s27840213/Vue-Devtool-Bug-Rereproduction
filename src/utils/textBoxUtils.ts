@@ -2,28 +2,73 @@ import LayerUtils from '@/utils/layerUtils'
 import { IText } from '@/interfaces/layer'
 import store from '@/store'
 import textEffectUtils from './textEffectUtils'
+import { ITextBox } from '@/interfaces/format'
 
 class Textbox {
-  effects = {} as { [key: string]: any }
+  effects = {} as Record<string, Record<string, string | number>>
   constructor() {
     this.effects = this.getDefaultEffects()
   }
 
+  rgba = (color: string, opacity: number) =>
+    textEffectUtils.convertColor2rgba(color, opacity)
+
   getDefaultEffects() {
     return {
       none: {},
-      test: {
-        opacity: 50,
-        bStroke: 20,
-        bRadius: 10,
-        bColor: '',
-        pStroke: 20,
-        pColor: ''
+      'square-borderless': {
+        opacity: 50, // adjustable
+        bStroke: 0,
+        bRadius: 0,
+        bColor: 'transparent',
+        pStroke: 20, // adjustable
+        pColor: '' // adjustable
+      },
+      'rounded-borderless': {
+        opacity: 50, // adjustable
+        bStroke: 0,
+        bRadius: 20, // adjustable
+        bColor: 'transparent',
+        pStroke: 20, // adjustable
+        pColor: '' // adjustable
+      },
+      'square-hollow': {
+        opacity: 50, // adjustable
+        bStroke: 20, // adjustable
+        bRadius: 0,
+        bColor: '', // adjustable
+        pStroke: 0,
+        pColor: 'transparent'
+      },
+      'rounded-hollow': {
+        opacity: 50, // adjustable
+        bStroke: 20, // adjustable
+        bRadius: 20, // adjustable
+        bColor: '', // adjustable
+        pStroke: 0,
+        pColor: 'transparent'
+      },
+      'square-both': {
+        opacity: 50, // adjustable
+        bStroke: 20, // adjustable
+        bRadius: 0,
+        bColor: '', // adjustable
+        pStroke: 20, // adjustable
+        pColor: '' // adjustable
+      },
+      'rounded-both': {
+        opacity: 50, // adjustable
+        bStroke: 20, // adjustable
+        bRadius: 20, // adjustable
+        bColor: '', // adjustable
+        pStroke: 20, // adjustable
+        pColor: '' // adjustable
       }
     }
   }
 
-  convertTextEffect(effect: any) {
+  convertTextEffect(effect: ITextBox) {
+    const opacity = effect.opacity * 0.01
     switch (effect.name) {
       case 'none':
         return {}
@@ -31,11 +76,14 @@ class Textbox {
         return {
           borderWidth: `${effect.bStroke}px`,
           borderStyle: 'solid',
-          borderColor: `${textEffectUtils.convertColor2rgba(effect.bColor, effect.opacity * 0.01)}`,
+          borderColor: this.rgba(effect.bColor, opacity),
           borderRadius: `${effect.bRadius}px`,
           padding: `${effect.pStroke}px 0`,
-          backgroundColor: textEffectUtils.convertColor2rgba(effect.pColor, effect.opacity * 0.01),
-          textShadow: 'none'
+          backgroundColor: this.rgba(effect.pColor, opacity),
+          // Prevent BGcolor overflow to border
+          backgroundClip: 'padding-box',
+          // Only for Contorller
+          controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke}px`
         }
     }
   }
@@ -70,7 +118,7 @@ class Textbox {
   //   }
   // }
 
-  setTextBox(effect: string, attrs?: any): void {
+  setTextBox(effect: string, attrs?: Record<string, string | number>): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
@@ -82,8 +130,8 @@ class Textbox {
       const { type, styles: { textBox: layerTextbox }, paragraphs } = layers[idx] as IText
 
       if (type === 'text') {
-        const textBox = {} as any
-        if (layerTextbox && (layerTextbox as any).name === effect) {
+        const textBox = {} as ITextBox
+        if (layerTextbox && (layerTextbox as ITextBox).name === effect) {
           Object.assign(textBox, layerTextbox, attrs)
         } else {
           Object.assign(textBox, defaultAttrs, attrs, { name: effect })

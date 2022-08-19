@@ -305,9 +305,29 @@ class ConstantData {
         label: i18n.t('NN0111'),
         options: toOptions([])
       }, {
-        key: 'test',
-        label: '文字框',
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'bRadius', 'pStroke', 'pColor'])
+        key: 'square-borderless',
+        label: '方形底無邊框',
+        options: toOptions(['opacity', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-borderless',
+        label: '圓矩形底無邊框',
+        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
+      }, {
+        key: 'square-hollow',
+        label: '方形空心框',
+        options: toOptions(['opacity', 'bStroke', 'bColor'])
+      }, {
+        key: 'rounded-hollow',
+        label: '圓矩形底空心框',
+        options: toOptions(['opacity', 'bStroke', 'bRadius', 'bColor'])
+      }, {
+        key: 'square-both',
+        label: '方形有邊框有填色',
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-both',
+        label: '圓矩形有邊框有填色',
+        options: toOptions(['opacity', 'bStroke', 'bRadius', 'bColor', 'pStroke', 'pColor'])
       }])
     }, {
       name: 'shape',

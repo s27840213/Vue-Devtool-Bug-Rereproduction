@@ -607,9 +607,11 @@ export default Vue.extend({
         touchAction: 'none',
         ...textEffectStyles,
         ...textBoxStyles,
-        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`,
+        borderWidth: 0,
+        borderColor: 'transparent',
+        padding: textBoxStyles.controllerPadding,
         backgroundColor: 'transparent',
-        borderRadius: 0
+        '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
     // styles(type: string) {

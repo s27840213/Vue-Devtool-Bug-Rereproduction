@@ -15,7 +15,7 @@ export interface ITextShape {
   name: string
 }
 
-export interface ITextbox {
+export interface ITextBox {
   name: string
   opacity: number
   bStroke: number

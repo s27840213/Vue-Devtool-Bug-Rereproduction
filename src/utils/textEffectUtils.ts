@@ -96,6 +96,7 @@ class Controller {
   }
 
   convertColor2rgba(colorStr: string, alpha?: number) {
+    if (colorStr === 'transparent') return 'transparent'
     if (colorStr.startsWith('#')) {
       return this.convertHex2rgba(colorStr, alpha)
     }

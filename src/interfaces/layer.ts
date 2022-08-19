@@ -3,7 +3,7 @@ import { ITiptapSelection } from './text'
 import { IAdjustJsonProps } from '@/interfaces/adjust'
 import { IShadowProps, IShadowStyles } from './imgShadow'
 import { LayerProcessType } from '@/store/types'
-import { ITextbox, ITextEffect, ITextShape } from './format'
+import { ITextBox, ITextEffect, ITextShape } from './format'
 
 export const jsonVer = '1.0.7'
 export interface ILayerIdentifier {
@@ -55,7 +55,7 @@ export interface ITextStyle extends IStyle {
   writingMode: string
   textShape: ITextShape | Record<string, never>
   textEffect: ITextEffect | Record<string, never>
-  textBox: ITextbox | Record<string, never>
+  textBox: ITextBox | Record<string, never>
 }
 
 export interface IParagraphStyle {
