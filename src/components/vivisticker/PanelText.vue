@@ -215,6 +215,7 @@ export default Vue.extend({
   flex-direction: column;
   overflow-x: hidden;
   &__searchbar {
+    margin-top: 24px;
     margin-bottom: 14px;
   }
   &__brand-header {

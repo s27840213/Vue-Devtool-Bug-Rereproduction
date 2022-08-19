@@ -1,7 +1,6 @@
 <template lang="pug">
-  div(class="panel-objects")
-    div(v-if="isInCategory" class="space")
-    search-bar(v-else
+  div(class="panel-objects" :class="{'in-category': isInCategory}")
+    search-bar(v-if="!isInCategory"
       class="panel-objects__searchbar"
       :placeholder="$t('NN0092', {target: $tc('NN0003',1)})"
       clear
@@ -201,6 +200,7 @@ export default Vue.extend({
   flex-direction: column;
   overflow-x: hidden;
   &__searchbar {
+    margin-top: 24px;
     margin-bottom: 14px;
   }
   &__item {
@@ -211,6 +211,9 @@ export default Vue.extend({
   &__items {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+  }
+  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+    margin-top: 48px;
   }
 }
 

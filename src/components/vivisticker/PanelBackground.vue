@@ -1,7 +1,10 @@
 <template lang="pug">
-  div(class="panel-bg")
-    tabs(v-if="!isInCategory" :tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
-    div(v-if="isInCategory" class="space")
+  div(class="panel-bg" :class="{'in-category': isInCategory}")
+    tabs(v-if="!isInCategory"
+          class="panel-bg__tabs"
+          :tabs="[$tc('NN0002', 2),$t('NN0017')]"
+          :defaultTab="currActiveTabIndex"
+          @switchTab="switchTab")
     search-bar(v-if="showImageTab && !isInCategory" class="panel-bg__searchbar"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
@@ -329,6 +332,9 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  &__tabs {
+    margin-top: 24px;
+  }
   &__searchbar {
     margin-bottom: 14px;
   }
@@ -383,8 +389,8 @@ export default Vue.extend({
     @include size(100%);
     border-radius: 4px;
   }
-  &::v-deep .vue-recycle-scroller__item-view:first-child {
-    z-index: 1;
+  &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
+    margin-top: 24px;
   }
   &__color-controller {
     height: 190px;
@@ -455,9 +461,5 @@ export default Vue.extend({
       color: setColor(gray-3);
     }
   }
-}
-
-.space {
-  margin-bottom: 10px;
 }
 </style>

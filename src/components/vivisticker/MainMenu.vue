@@ -51,7 +51,7 @@ export default Vue.extend({
   width: 100%;
   box-sizing: border-box;
   background-color: setColor(nav-active);
-  padding: 24px 24px 0 24px;
+  padding: 0 24px;
 
   &__bottom-section {
     width: 100%;
