@@ -6,7 +6,7 @@
               :pageIndex="0"
               :layerIndex="0")
     div(v-if="backgroundImage !== ''" class="screenshot__bg-img")
-      img(:src="backgroundImage")
+      img(:src="backgroundImage" @load="onload")
     div(v-if="backgroundColor !== ''" class="screenshot__bg-color" :style="bgColorStyles()")
 </template>
 
@@ -84,6 +84,7 @@ export default Vue.extend({
       }
       if (type === 'backgroundColor') {
         this.backgroundColor = id ?? '#FFFFFFFF'
+        setTimeout(() => { this.onload() }, 100)
       }
     },
     bgColorStyles() {
