@@ -183,7 +183,11 @@ export default Vue.extend({
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
-    snapUtils: Object
+    snapUtils: Object,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   components: {
     NuTextEditor
@@ -606,9 +610,9 @@ export default Vue.extend({
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
-        transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
-        width: `${width}px`,
-        height: `${height}px`,
+        transform: `translate3d(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`,
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`,
         outline: this.outlineStyles(),
         opacity: this.isImgControl ? 0 : 1,
         'pointer-events': this.isImgControl || this.isMoving ? 'none' : 'initial',
@@ -698,16 +702,16 @@ export default Vue.extend({
         return 'none'
       } else if (this.isShown || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
-          return `${2 * (100 / this.scaleRatio)}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio)}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
       }
     },
     hintStyles() {
-      return `transform: translate(calc(${this.hintTranslation.x}px - 100%), ${this.hintTranslation.y}px) scale(${100 / this.scaleRatio})`
+      return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
       const eventType = eventUtils.getEventType(event)

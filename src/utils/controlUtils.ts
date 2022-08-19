@@ -4,6 +4,7 @@ import { IShape } from '@/interfaces/layer'
 import shapeUtils from '@/utils/shapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from './layerUtils'
+import editorUtils from './editorUtils'
 class Controller {
   getLength(vect: ICoordinate): number {
     const sqareSum = Math.pow(vect.x, 2) + Math.pow(vect.y, 2)
@@ -26,9 +27,10 @@ class Controller {
   }
 
   getControlPoints = (resizerShort: number, resizerLong: number) => {
+    const contentScaleRatio = editorUtils.contentScaleRatio
     const scaleRatio = store.getters.getPageScaleRatio
     const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 : 8
+    const scalerSize = isMobile ? 12 * contentScaleRatio : 8 * contentScaleRatio
     const getScalers = (scalerSize: number, cursors?: Array<number | string>) => [
       {
         cursor: cursors?.[0] ?? 0,

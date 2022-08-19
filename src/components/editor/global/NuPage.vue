@@ -103,8 +103,8 @@
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")
         div(class="scale-container relative"
-            :style="`transform: scale(${scaleRatio/100})`")
-          page-content(:config="config" :pageIndex="pageIndex")
+            :style="scaleContainerStyles")
+          page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
           div(class="page-control" :style="styles('control')")
             template(v-for="(layer, index) in config.layers")
               component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
@@ -114,6 +114,7 @@
                 :pageIndex="pageIndex"
                 :config="layer"
                 :snapUtils="snapUtils"
+                :contentScaleRatio="contentScaleRatio"
                 @setFocus="setFocus()"
                 @getClosestSnaplines="getClosestSnaplines"
                 @clearSnap="clearSnap")
@@ -125,10 +126,12 @@
                 :layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
                 :imgControl="true"
-                :config="getCurrSubSelectedLayerShown")
+                :config="getCurrSubSelectedLayerShown"
+                :contentScaleRatio="contentScaleRatio")
               nu-layer(:layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
-                :config="getCurrSubSelectedLayerShown")
+                :config="getCurrSubSelectedLayerShown"
+                :contentScaleRatio="contentScaleRatio")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                                     :pageIndex="pageIndex"
@@ -141,10 +144,12 @@
                 :layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
                 :imgControl="true"
-                :config="Object.assign(getCurrLayer, { forRender: true })")
+                :config="Object.assign(getCurrLayer, { forRender: true })"
+                :contentScaleRatio="contentScaleRatio")
               nu-layer(:layerIndex="currSelectedIndex"
                 :pageIndex="pageIndex"
-                :config="Object.assign(getCurrLayer, { forRender: true })")
+                :config="Object.assign(getCurrLayer, { forRender: true })"
+                :contentScaleRatio="contentScaleRatio")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSelectedIndex"
                                     :pageIndex="pageIndex"
@@ -319,6 +324,15 @@ export default Vue.extend({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       isProcessingShadow: 'shadow/isProcessing'
     }),
+    contentScaleRatio(): number {
+      return 0.4
+    },
+    scaleContainerStyles(): { [index: string]: string } {
+      return {
+        // transform: `scale(${1})`
+        transform: `scale(${this.scaleRatio / 100 / 0.4})`
+      }
+    },
     getCurrLayer(): ILayer {
       return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
     },

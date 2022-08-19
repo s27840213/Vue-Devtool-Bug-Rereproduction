@@ -24,8 +24,9 @@ class QueueUtils {
         this.isHandlingAsyncTask = false
         return
       }
-
-      this.handleAsyncTask()
+      setTimeout(() => {
+        this.handleAsyncTask()
+      }, 300)
     })
   }
 }

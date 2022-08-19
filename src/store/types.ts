@@ -73,7 +73,8 @@ export interface IEditorState {
   isMobile: boolean
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
-  useMobileEditor: boolean
+  useMobileEditor: boolean,
+  defaultContentScaleRatio: number
 }
 
 export enum SidebarPanelType {

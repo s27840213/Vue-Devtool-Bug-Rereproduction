@@ -106,7 +106,8 @@ const getDefaultState = (): IEditorState => ({
   isMobile: false,
   isLargeDesktop: false,
   isGlobalLoading: false,
-  useMobileEditor: false
+  useMobileEditor: false,
+  defaultContentScaleRatio: 0.4
 })
 
 const state = getDefaultState()
@@ -274,6 +275,9 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getUseMobileEditor(state: IEditorState) {
     return state.useMobileEditor
+  },
+  getContentScaleRatio(state: IEditorState) {
+    return state.defaultContentScaleRatio
   }
 }
 
