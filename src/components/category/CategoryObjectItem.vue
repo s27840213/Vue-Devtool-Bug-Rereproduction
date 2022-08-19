@@ -5,13 +5,12 @@
       draggable="false"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
     pro-item(v-if="item.plan")
+    div(v-if="item.type !== 8" class="category-object-item__edit" @click.stop.prevent="handleEditObject")
+      svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import DragUtils from '@/utils/dragUtils'
-import assetUtils, { RESIZE_RATIO_SVG } from '@/utils/assetUtils'
-import { mapMutations } from 'vuex'
 import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
@@ -36,8 +35,14 @@ export default Vue.extend({
   methods: {
     addSvg() {
       if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      // assetUtils.addAsset(this.item)
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
+      if (this.item.type === 8) {
+        this.handleEditObject()
+      } else {
+        vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
+      }
+    },
+    handleEditObject() {
+      console.log('start editing', this.item)
     }
   }
 })
@@ -67,6 +72,17 @@ export default Vue.extend({
     &:hover {
       background-color: setColor(white, 1);
     }
+  }
+  &__edit {
+    @include size(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    background: rgba(24, 25, 31, 0.5);
+    border-radius: 5px;
   }
   &:hover {
     #{$this}__more {

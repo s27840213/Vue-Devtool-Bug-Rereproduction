@@ -1,9 +1,7 @@
 <template lang="pug">
   img(class="pointer"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-    draggable="true"
     style="object-fit: contain;"
-    @dragstart="dragStart($event)"
     @click="addText"
     @error="handleNotFound")
 </template>
@@ -32,16 +30,12 @@ export default Vue.extend({
     handleNotFound(event: Event) {
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
-    dragStart(e: DragEvent) {
-      new DragUtils().itemDragStart(e, 'group', {
-        ...this.item
-      })
-    },
     addText() {
-      AssetUtils.addAsset(this.item)
-        .then(() => {
-          textPropUtils.updateTextPropsState()
-        })
+      // AssetUtils.addAsset(this.item)
+      //   .then(() => {
+      //     textPropUtils.updateTextPropsState()
+      //   })
+      console.log('start editing', this.item)
     }
   }
 })
