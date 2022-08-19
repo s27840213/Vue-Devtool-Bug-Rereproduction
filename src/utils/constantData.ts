@@ -232,7 +232,10 @@ class ConstantData {
         bColor: '邊框顏色',
         bRadius: '邊框圓角',
         pStroke: '填滿高度',
-        pColor: '填滿顏色'
+        pColor: '填滿顏色',
+        height: '高度',
+        width: '寬度',
+        yOffset: '垂直位移'
       }
 
       return array.map((name: string) => {
@@ -296,6 +299,10 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
+      }, {
+        key: 'bold-underline',
+        label: '粗底線',
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
       }])
     }, {
       name: 'box',

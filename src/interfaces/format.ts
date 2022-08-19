@@ -4,8 +4,8 @@ import { IAdjustJsonProps } from './adjust'
 import { IParagraphStyle, ISpanStyle } from './layer'
 
 export interface ITextEffect {
-  name: string,
-  ver?: string,
+  name: string
+  ver?: string
   [key: string]: string | number | undefined
 }
 

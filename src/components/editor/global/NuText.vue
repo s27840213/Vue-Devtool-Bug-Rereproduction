@@ -15,7 +15,7 @@
           span(class="nu-text__span"
             :data-sindex="sIndex"
             :key="span.id",
-            :style="styles(span.styles)") {{ span.text }}
+            :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
             br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans"
@@ -28,14 +28,15 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { IGroup, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { IGroup, ISpan, IText } from '@/interfaces/layer'
+import { mapState, mapGetters } from 'vuex'
 import TextUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 
@@ -150,6 +151,9 @@ export default Vue.extend({
     },
     isAutoResizeNeeded(): boolean {
       return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
+    },
+    spanEffect(): Record<string, string|never> {
+      return textEffectUtils.converTextSpanEffect(this.config.styles.textEffect)
     }
   },
   watch: {

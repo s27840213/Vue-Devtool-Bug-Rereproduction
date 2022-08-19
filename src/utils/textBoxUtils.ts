@@ -150,60 +150,6 @@ class Textbox {
       }
     }
   }
-
-  // refreshColor() {
-  //   const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-  //   const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-  //   const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-
-  //   for (const idx in layers) {
-  //     const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-  //     const textEffect = generalUtils.deepCopy(layerTextEffect)
-  //     if (type === 'text') {
-  //       const mainColor = this.getLayerMainColor(paragraphs)
-  //       const effectName = textEffect.name
-  //       if (effectName && effectName !== 'none') {
-  //         switch (effectName) {
-  //           case 'hollow':
-  //             Object.assign(textEffect, { color: mainColor })
-  //             break
-  //           case 'splice':
-  //             Object.assign(textEffect, { strokeColor: mainColor })
-  //             break
-  //         }
-  //         store.commit('UPDATE_specLayerData', {
-  //           pageIndex,
-  //           layerIndex,
-  //           subLayerIndex: +idx,
-  //           styles: { textEffect }
-  //         })
-  //       }
-  //     }
-  //   }
-  // }
-
-  // refreshSize() {
-  //   const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-  //   const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-  //   const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-
-  //   for (const idx in layers) {
-  //     const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-  //     const textEffect = layerTextEffect as any
-  //     if (type === 'text') {
-  //       const mainFontSize = this.getLayerFontSize(paragraphs)
-  //       Object.assign(textEffect, {
-  //         fontSize: mainFontSize
-  //       })
-  //       store.commit('UPDATE_specLayerData', {
-  //         pageIndex,
-  //         layerIndex,
-  //         subLayerIndex: +idx,
-  //         styles: { textEffect }
-  //       })
-  //     }
-  //   }
-  // }
 }
 
 export default new Textbox()

@@ -40,7 +40,13 @@ class Controller {
         distance: 50,
         angle: 45,
         color: ''
-      } // 雙重陰影
+      }, // 雙重陰影
+      'bold-underline': {
+        height: 20,
+        yOffset: -2,
+        opacity: 100,
+        color: ''
+      }
     }
   }
 
@@ -176,6 +182,34 @@ class Controller {
         }
       default:
         return { textShadow: 'none' }
+    }
+  }
+
+  converTextSpanEffect(effect: Record<string, string|number>): Record<string, string | never> {
+    function triangleBG(direction: string, color: string) {
+      return `linear-gradient(to ${direction}, #fff 0%, #fff 50%, ${color} 50%, ${color} 100%)`
+    }
+
+    const underlineWidthScale = effect.height as number / 8
+    const color = this.convertHex2rgba(effect.color as string, effect.opacity as number * 0.01)
+    switch (effect.name) {
+      case 'bold-underline':
+        return {
+          boxDecorationBreak: 'clone',
+          backgroundRepeat: 'no-repeat',
+          backgroundImage: `
+            linear-gradient(180deg, ${color}, ${color}),
+            ${triangleBG('bottom right', color)},
+            ${triangleBG('top left', color)}`,
+          backgroundSize: `
+            calc(100% - ${underlineWidthScale * 8}px) ${effect.height}px,
+            ${effect.height as number / 2}px ${effect.height}px,
+            ${effect.height as number / 2}px ${effect.height}px`,
+          backgroundPositionX: `${underlineWidthScale * 4}px, 0, 100%`,
+          backgroundPositionY: `calc(100% - ${effect.yOffset}%)`
+        }
+      default:
+        return {}
     }
   }
 
