@@ -102,22 +102,22 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setUploadProcess(true)
       imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
-      // if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
-      //   /**
-      //    * Check if the state of the shadow is the same
-      //    */
-      //   const { shadowSrcObj } = config.styles.shadow.srcState
-      //   const layerInfo = {
-      //     pageIndex: _pageIndex,
-      //     layerIndex: _layerIndex,
-      //     subLayerIdx: _subLayerIdx
-      //   }
-      //   imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
-      //   imageShadowUtils.setUploadProcess(false)
-      //   imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-      //   imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-      //   return
-      // }
+      if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
+        /**
+         * Check if the state of the shadow is the same
+         */
+        const { shadowSrcObj } = config.styles.shadow.srcState
+        const layerInfo = {
+          pageIndex: _pageIndex,
+          layerIndex: _layerIndex,
+          subLayerIdx: _subLayerIdx
+        }
+        imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
+        imageShadowUtils.setUploadProcess(false)
+        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        return
+      }
       if (primarylayerId) {
         this.setIsUploading(pageId, primarylayerId, config.id as string, true)
       } else {
@@ -145,7 +145,7 @@ export default new class ImageShadowPanelUtils {
       const img = new Image()
       let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config.srcObj, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
+      img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve, reject) => {
         img.onload = async () => {
@@ -204,14 +204,14 @@ export default new class ImageShadowPanelUtils {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE })
           break
         }
         case ShadowEffectType.imageMatched:
-          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE })
           break
         case ShadowEffectType.floating: {
-          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE })
           break
         }
         case ShadowEffectType.none:
