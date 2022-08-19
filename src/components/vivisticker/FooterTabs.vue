@@ -577,9 +577,9 @@ export default Vue.extend({
     transition: transform 0.3s, opacity 0.4s;
     &.main {
       overflow: hidden;
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       align-items: center;
-      justify-content: space-evenly;
     }
   }
 
