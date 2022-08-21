@@ -128,8 +128,11 @@ export default Vue.extend({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultViviStickerBgColors',
       getBackgroundColor: 'getBackgroundColor',
-      isInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory'
     }),
+    isInCategory(): boolean {
+      return this.isTabInCategory('background')
+    },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
@@ -278,7 +281,7 @@ export default Vue.extend({
       this.resetContent()
       if (keyword) {
         this.getContent({ keyword, locale })
-        vivistickerUtils.setIsInCategory(true)
+        vivistickerUtils.setIsInCategory('background', true)
       } else {
         this.getRecAndCate()
       }

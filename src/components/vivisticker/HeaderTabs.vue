@@ -38,9 +38,12 @@ export default Vue.extend({
     }),
     ...mapGetters({
       isInEditor: 'vivisticker/getIsInEditor',
-      isInCategory: 'vivisticker/getIsInCategory',
+      isCurrentInCategory: 'vivisticker/getIsInCategory',
       currActiveTab: 'vivisticker/getCurrActiveTab'
     }),
+    isInCategory(): boolean {
+      return this.isCurrentInCategory(this.currActiveTab)
+    },
     keyword(): string {
       switch (this.currActiveTab) {
         case 'object':
@@ -62,7 +65,7 @@ export default Vue.extend({
       setIsInCategory: 'vivisticker/SET_isInCategory'
     }),
     clearCategory() {
-      this.setIsInCategory(false)
+      this.setIsInCategory({ tab: this.currActiveTab, bool: false })
       switch (this.currActiveTab) {
         case 'object':
           this.resetObjects()

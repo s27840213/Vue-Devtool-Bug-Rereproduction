@@ -47,8 +47,8 @@ class ViviStickerUtils {
     }
   }
 
-  setIsInCategory(bool: boolean) {
-    store.commit('vivisticker/SET_isInCategory', bool)
+  setIsInCategory(tab: string, bool: boolean) {
+    store.commit('vivisticker/SET_isInCategory', { tab, bool })
   }
 
   debugMode() {

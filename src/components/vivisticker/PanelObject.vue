@@ -67,7 +67,7 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       isAdmin: 'user/isAdmin',
-      isInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory'
     }),
     ...mapState('objects', [
       'categories',
@@ -75,7 +75,10 @@ export default Vue.extend({
       'pending',
       'keyword'
     ]),
-    keywordLabel():string {
+    isInCategory(): boolean {
+      return this.isTabInCategory('object')
+    },
+    keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     listCategories(): any[] {
@@ -165,7 +168,7 @@ export default Vue.extend({
       if (keyword) {
         this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getContent({ keyword, locale })
-        vivistickerUtils.setIsInCategory(true)
+        vivistickerUtils.setIsInCategory('object', true)
       } else {
         this.getRecAndCate()
       }
