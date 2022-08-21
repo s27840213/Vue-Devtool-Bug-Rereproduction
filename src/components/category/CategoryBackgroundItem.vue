@@ -3,6 +3,7 @@
     img(class="pointer"
       :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
       draggable="false"
+      v-press="handleShare"
       @click="addBackground"
       @error="handleNotFound")
     div(class="category-background-item__share" @click.stop.prevent="handleShare")
@@ -35,7 +36,7 @@ export default Vue.extend({
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
     },
     handleShare() {
-      console.log('start sharing', this.item)
+      this.$emit('share', this.item)
     }
   }
 })
@@ -49,6 +50,8 @@ export default Vue.extend({
     height: 100%;
     object-fit: cover;
     vertical-align: middle;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
   &__share {
     position: absolute;

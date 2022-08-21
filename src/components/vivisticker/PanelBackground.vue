@@ -28,6 +28,7 @@
           div(class="panel-bg__colors")
             div(v-for="color in defaultBgColor"
               class="panel-bg__color"
+              v-press="() => handleShareColor(color)"
               @click="setBgColor(color)")
               div(class="panel-bg__color-inner" :style="colorStyles(color)")
       template(v-slot:category-list-rows="{ list, title }")
@@ -39,7 +40,8 @@
           template(v-slot:preview="{ item }")
             category-background-item(class="panel-bg__item"
               :item="item"
-              :locked="false")
+              :locked="false"
+              @share="handleShareImage")
       template(v-slot:category-background-item="{ list, title }")
         div(class="panel-bg__items")
           div(v-if="title"
@@ -48,7 +50,8 @@
             class="panel-bg__item"
             :key="item.id"
             :item="item"
-            :locked="false")
+            :locked="false"
+            @share="handleShareImage")
     div(v-if="!showImageTab" class="panel-bg__color-controller")
       div(class="panel-bg__color-controller__header")
         div(class="panel-bg__color-controller__opacity-title") {{ $t('NN0030') }}
@@ -64,6 +67,18 @@
       div(class="panel-bg__color-controller__hint")
         p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
         p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
+    div(v-if="isInBgShare" class="panel-bg__share")
+      div(class="panel-bg__share__screen" :style="shareBgSizeStyles()")
+        div(class="panel-bg__share__screen-inner" :style="shareBgStyles()")
+      div(class="panel-bg__share__buttons")
+        div(class="panel-bg__share__button")
+          div(class="panel-bg__share__button-icon" @click.stop.prevent="handleSave")
+            svg-icon(iconName="download_flat" iconColor="white" iconWidth="24px" iconHeight="26.76px")
+          div(class="panel-bg__share__button-text") {{ $t('STK0004') }}
+        div(class="panel-bg__share__button")
+          div(class="panel-bg__share__button-icon" @click.stop.prevent="handleStory")
+            svg-icon(iconName="ig_story" iconColor="white" iconWidth="28px")
+          div(class="panel-bg__share__button-text") {{ $t('STK0005') }}
 </template>
 
 <script lang="ts">
@@ -84,6 +99,7 @@ import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IAsset } from '@/interfaces/module'
 export default Vue.extend({
   components: {
     SearchBar,
@@ -128,7 +144,10 @@ export default Vue.extend({
       getPage: 'getPage',
       defaultBgColor: 'color/getDefaultViviStickerBgColors',
       getBackgroundColor: 'getBackgroundColor',
-      isTabInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isInBgShare: 'vivisticker/getIsInBgShare',
+      shareItem: 'vivisticker/getShareItem',
+      shareColor: 'vivisticker/getShareColor'
     }),
     isInCategory(): boolean {
       return this.isTabInCategory('background')
@@ -247,7 +266,10 @@ export default Vue.extend({
       'getMoreContent'
     ]),
     ...mapMutations({
-      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
+      setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
+      setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setShareItem: 'vivisticker/SET_shareItem',
+      setShareColor: 'vivisticker/SET_shareColor'
     }),
     colorStyles(color: string) {
       return {
@@ -259,8 +281,24 @@ export default Vue.extend({
         '--progress': `${this.opacity}%`
       }
     },
+    shareBgSizeStyles() {
+      const screenWidth = window.innerWidth
+      const screenHeight = window.innerHeight
+      const height = (screenHeight - 44) * 0.73
+      return {
+        width: `${height * screenWidth / screenHeight}px`,
+        height: `${height}px`
+      }
+    },
+    shareBgStyles() {
+      return this.shareItem ? {
+        backgroundImage: `url(https://template.vivipic.com/background/${this.shareItem.id}/larg?ver=${this.shareItem.ver}})`
+      } : {
+        backgroundColor: `${this.getColorWithOpacity(this.shareColor)}`
+      }
+    },
     setBgColor(color: string) {
-      vivistickerUtils.sendScreenshotUrl(`type=backgroundColor&id=${this.getColorWithOpacity(color).substring(1)}`)
+      vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color))
     },
     getColorWithOpacity(color: string) {
       let hexOpacity = Math.round(this.opacity * 255 / 100).toString(16).toUpperCase()
@@ -268,6 +306,9 @@ export default Vue.extend({
         hexOpacity = '0' + hexOpacity
       }
       return `${color}${hexOpacity}`
+    },
+    getColorUrl(color: string) {
+      return `type=backgroundColor&id=${this.getColorWithOpacity(color).substring(1)}`
     },
     async handleSearch(keyword: string) {
       this.resetContent()
@@ -306,6 +347,26 @@ export default Vue.extend({
     },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
+    },
+    handleShareImage(item: IAsset) {
+      this.setShareItem(item)
+      this.setIsInBgShare(true)
+    },
+    handleShareColor(color: string) {
+      this.setShareColor(color)
+      this.setIsInBgShare(true)
+    },
+    handleSave() {
+      vivistickerUtils.sendToIOS('SHARE', {
+        params: this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
+        action: 'download'
+      })
+    },
+    handleStory() {
+      vivistickerUtils.sendToIOS('SHARE', {
+        params: this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
+        action: 'IGStory'
+      })
     }
   }
 })
@@ -320,6 +381,8 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding: 0 24px;
+  position: relative;
   &__tabs {
     margin-top: 24px;
   }
@@ -369,6 +432,8 @@ export default Vue.extend({
     cursor: pointer;
     position: relative;
     background-color: white;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
   &__color-inner {
     position: absolute;
@@ -447,6 +512,48 @@ export default Vue.extend({
       margin: 0;
       @include body-SM;
       color: setColor(gray-3);
+    }
+  }
+  &__share {
+    position: absolute;
+    top: 0;
+    left: 0;
+    @include size(100%);
+    background: setColor(nav);
+    &__screen {
+      margin-top: 25px;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 10px;
+      background: white;
+    }
+    &__screen-inner {
+      @include size(100%);
+      border-radius: 10px;
+      background-position: center center;
+      background-size: cover;
+    }
+    &__buttons {
+      position: absolute;
+      left: 50%;
+      bottom: 44px;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 70px;
+    }
+    &__button-icon {
+      @include size(40px);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &:active {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+    &__button-text {
+      @include body-XS;
+      color: white;
     }
   }
 }

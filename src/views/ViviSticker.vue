@@ -11,7 +11,7 @@
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")
-    footer-tabs(class="vivisticker__bottom"
+    footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
       @switchTab="switchMainTab"
       :currTab="currActiveTab"
       :inAllPagesMode="false")
@@ -92,7 +92,8 @@ export default Vue.extend({
       currActivePanel: 'mobileEditor/getCurrActivePanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       currActiveTab: 'vivisticker/getCurrActiveTab',
-      isInEditor: 'vivisticker/getIsInEditor'
+      isInEditor: 'vivisticker/getIsInEditor',
+      isInBgShare: 'vivisticker/getIsInBgShare'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked

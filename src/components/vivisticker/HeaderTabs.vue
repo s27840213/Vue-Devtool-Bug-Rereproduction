@@ -5,6 +5,9 @@
       template(v-else-if="isInCategory")
         div(style="width: 24px; height: 24px" @click.prevent.stop="clearCategory")
           svg-icon(iconName="chevron-left" iconWidth="24px" iconColor="white")
+      template(v-else-if="isInBgShare")
+        div(style="width: 24px; height: 24px" @click.prevent.stop="clearBgShare")
+          svg-icon(iconName="chevron-left" iconWidth="24px" iconColor="white")
       template(v-else)
         div(style="width: 20px; height: 20px")
           svg-icon(iconName="vivisticker_logo" iconWidth="20px" iconColor="white")
@@ -13,9 +16,12 @@
     div(class="header-bar__center")
       template(v-if="isInCategory")
         span {{ keyword }}
+      template(v-else-if="isInBgShare")
+        span {{ $t('NN0214') }}
     div(class="header-bar__right")
       template(v-if="isInEditor")
       template(v-else-if="isInCategory")
+      template(v-else-if="isInBgShare")
       template(v-else)
         div(class="header-bar__feature-icon" style="width: 24px; height: 24px")
           svg-icon(iconName="more" iconWidth="24px" iconColor="white")
@@ -39,7 +45,8 @@ export default Vue.extend({
     ...mapGetters({
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
-      currActiveTab: 'vivisticker/getCurrActiveTab'
+      currActiveTab: 'vivisticker/getCurrActiveTab',
+      isInBgShare: 'vivisticker/getIsInBgShare'
     }),
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
@@ -62,7 +69,10 @@ export default Vue.extend({
       refetchBackgrounds: 'background/getRecAndCate'
     }),
     ...mapMutations({
-      setIsInCategory: 'vivisticker/SET_isInCategory'
+      setIsInCategory: 'vivisticker/SET_isInCategory',
+      setIsInBgShare: 'vivisticker/SET_isInBgShare',
+      setShareItem: 'vivisticker/SET_shareItem',
+      setShareColor: 'vivisticker/SET_shareColor'
     }),
     clearCategory() {
       this.setIsInCategory({ tab: this.currActiveTab, bool: false })
@@ -76,6 +86,11 @@ export default Vue.extend({
           this.refetchBackgrounds()
           break
       }
+    },
+    clearBgShare() {
+      this.setIsInBgShare(false)
+      this.setShareItem(undefined)
+      this.setShareColor('')
     }
   }
 })

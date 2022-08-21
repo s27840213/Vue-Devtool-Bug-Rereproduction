@@ -202,6 +202,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  padding: 0 24px;
   &__searchbar {
     margin-top: 24px;
     margin-bottom: 14px;
