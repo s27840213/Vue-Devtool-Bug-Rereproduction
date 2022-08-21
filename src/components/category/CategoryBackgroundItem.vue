@@ -5,8 +5,8 @@
       draggable="false"
       @click="addBackground"
       @error="handleNotFound")
-    div(class="category-background-item__download" @click.stop.prevent="handleDownload")
-      svg-icon(iconName="download_flat" iconColor="white" iconWidth="16px" iconHeight="18px")
+    div(class="category-background-item__share" @click.stop.prevent="handleShare")
+      svg-icon(iconName="share" iconColor="white" iconWidth="16px")
 </template>
 
 <script lang="ts">
@@ -34,8 +34,8 @@ export default Vue.extend({
     addBackground() {
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
     },
-    handleDownload() {
-      console.log('start downloading', this.item)
+    handleShare() {
+      console.log('start sharing', this.item)
     }
   }
 })
@@ -50,7 +50,7 @@ export default Vue.extend({
     object-fit: cover;
     vertical-align: middle;
   }
-  &__download {
+  &__share {
     position: absolute;
     @include size(24px);
     display: flex;
@@ -59,8 +59,14 @@ export default Vue.extend({
     position: absolute;
     right: 4px;
     bottom: 4px;
-    background: rgba(24, 25, 31, 0.5);
     border-radius: 5px;
+    background: rgba(24, 25, 31, 0.3);
+    &:active {
+      background: rgba(24, 25, 31, 0.6);
+    }
+    & > svg {
+      opacity: 0.5;
+    }
   }
 }
 </style>

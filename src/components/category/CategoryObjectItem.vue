@@ -50,9 +50,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .category-object-item {
-  $this: &;
   position: relative;
-  cursor: pointer;
   &__img {
     width: 100%;
     height: 100%;
@@ -81,13 +79,13 @@ export default Vue.extend({
     position: absolute;
     right: 2px;
     bottom: 2px;
-    background: rgba(24, 25, 31, 0.5);
     border-radius: 5px;
-  }
-  &:hover {
-    #{$this}__more {
-      opacity: 1;
-      z-index: 1;
+    background: rgba(24, 25, 31, 0.3);
+    &:active {
+      background: rgba(24, 25, 31, 0.6);
+    }
+    & > svg {
+      opacity: 0.5;
     }
   }
 }
