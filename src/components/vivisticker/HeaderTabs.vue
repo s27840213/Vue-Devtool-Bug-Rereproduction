@@ -1,34 +1,41 @@
 <template lang="pug">
   div(class="header-bar relative" @pointerdown.stop)
     div(class="header-bar__left")
-      template(v-if="isInEditor")
-      template(v-else-if="isInCategory")
-        div(style="width: 24px; height: 24px" @click.prevent.stop="clearCategory")
-          svg-icon(iconName="chevron-left" iconWidth="24px" iconColor="white")
-      template(v-else-if="isInBgShare")
-        div(style="width: 24px; height: 24px" @click.prevent.stop="clearBgShare")
-          svg-icon(iconName="chevron-left" iconWidth="24px" iconColor="white")
-      template(v-else)
-        div(style="width: 20px; height: 20px")
-          svg-icon(iconName="vivisticker_logo" iconWidth="20px" iconColor="white")
-        div(style="width: 100px; height: 18px")
-          svg-icon(iconName="vivisticker_title" iconWidth="100px" iconHeight="18px" iconColor="white")
+      div(v-for="tab in leftTabs"
+          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled}"
+          :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
+          @click.prevent.stop="handleTabAction(tab.action)")
+        svg-icon(:iconName="tab.icon"
+                  :iconWidth="`${tab.width}px`"
+                  :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
+                  :iconColor="tab.disabled ? 'gray-2' : 'white'")
     div(class="header-bar__center")
-      template(v-if="isInCategory")
-        span {{ keyword }}
-      template(v-else-if="isInBgShare")
-        span {{ $t('NN0214') }}
+      span(v-if="centerTitle") {{ centerTitle }}
     div(class="header-bar__right")
-      template(v-if="isInEditor")
-      template(v-else-if="isInCategory")
-      template(v-else-if="isInBgShare")
-      template(v-else)
-        div(class="header-bar__feature-icon" style="width: 24px; height: 24px")
-          svg-icon(iconName="more" iconWidth="24px" iconColor="white")
+      div(v-for="tab in rightTabs"
+          :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled}"
+          :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
+          @click.prevent.stop="handleTabAction(tab.action)")
+        svg-icon(:iconName="tab.icon"
+                  :iconWidth="`${tab.width}px`"
+                  :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
+                  :iconColor="tab.disabled ? 'gray-2' : 'white'")
 </template>
 <script lang="ts">
+import imageUtils from '@/utils/imageUtils'
+import stepsUtils from '@/utils/stepsUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue from 'vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
+type TabConfig = {
+  icon: string,
+  logo?: boolean,
+  disabled?: boolean,
+  width: number,
+  height?: number,
+  action?: () => void
+}
 
 export default Vue.extend({
   data() {
@@ -51,6 +58,33 @@ export default Vue.extend({
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
     },
+    isCropping(): boolean {
+      return imageUtils.isImgControl()
+    },
+    stepCount(): number {
+      return stepsUtils.steps.length
+    },
+    leftTabs(): TabConfig[] {
+      if (this.isInEditor) {
+        return this.stepCount > 0 ? [
+          { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24 },
+          { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24 }
+        ] : []
+      } else if (this.isInCategory) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.clearCategory }
+        ]
+      } else if (this.isInBgShare) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.clearBgShare }
+        ]
+      } else {
+        return [
+          { icon: 'vivisticker_logo', logo: true, width: 20 },
+          { icon: 'vivisticker_title', logo: true, width: 100, height: 18 }
+        ]
+      }
+    },
     keyword(): string {
       switch (this.currActiveTab) {
         case 'object':
@@ -59,6 +93,29 @@ export default Vue.extend({
           return this.backgroundKeyword
       }
       return ''
+    },
+    centerTitle(): string {
+      if (this.isInCategory) {
+        return this.keyword
+      } else if (this.isInBgShare) {
+        return `${this.$t('NN0214')}`
+      } else {
+        return ''
+      }
+    },
+    rightTabs(): TabConfig[] {
+      if (this.isInEditor) {
+        return [
+          { icon: 'copy', width: 24 },
+          { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
+        ]
+      } else if (this.isInCategory || this.isInBgShare) {
+        return []
+      } else {
+        return [
+          { icon: 'more', width: 24 }
+        ]
+      }
     }
   },
   methods: {
@@ -74,6 +131,11 @@ export default Vue.extend({
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor'
     }),
+    handleTabAction(action?: () => void) {
+      if (action) {
+        action()
+      }
+    },
     clearCategory() {
       this.setIsInCategory({ tab: this.currActiveTab, bool: false })
       switch (this.currActiveTab) {
@@ -91,6 +153,9 @@ export default Vue.extend({
       this.setIsInBgShare(false)
       this.setShareItem(undefined)
       this.setShareColor('')
+    },
+    handleEndEditing() {
+      vivistickerUtils.endEditing()
     }
   }
 })
@@ -142,6 +207,7 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 12px;
   }
 }
 </style>

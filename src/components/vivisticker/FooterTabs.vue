@@ -47,10 +47,9 @@ export default Vue.extend({
     }
   },
   data() {
-    const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
+    // const mainMenu = { icon: 'main-menu', text: `${this.$t('NN0489')}` }
 
     return {
-      mainMenu,
       isFontsPanelOpened: false,
       disableTabScroll: false,
       homeTabs: [
@@ -81,7 +80,6 @@ export default Vue.extend({
     },
     photoInGroupTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         // { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
@@ -93,7 +91,6 @@ export default Vue.extend({
     },
     photoTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
         // { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
@@ -155,7 +152,6 @@ export default Vue.extend({
     },
     objectTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         {
           icon: 'color',
           text: `${this.$t('NN0495')}`,
@@ -183,7 +179,6 @@ export default Vue.extend({
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
-        this.mainMenu,
         this.groupTab,
         // { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
         // { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
@@ -205,13 +200,15 @@ export default Vue.extend({
       } else if (this.showPhotoTabs) {
         return this.photoTabs
       } else if (this.showFontTabs) {
-        return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs]
+        return [...this.fontTabs, ...this.genearlLayerTabs]
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
       } else if (this.showGeneralTabs) {
-        return [this.mainMenu, ...this.genearlLayerTabs]
-      } else {
+        return [...this.genearlLayerTabs]
+      } else if (!this.isInEditor) {
         return this.homeTabs
+      } else {
+        return []
       }
     },
     isWholeGroup(): boolean {
@@ -433,7 +430,11 @@ export default Vue.extend({
       }
 
       if (tab.panelType !== undefined) {
-        this.$emit('switchTab', tab.panelType, tab.props)
+        if (this.isInEditor) {
+          this.$emit('switchTab', tab.panelType, tab.props)
+        } else {
+          this.$emit('switchMainTab', tab.panelType, tab.props)
+        }
       }
     },
     targetIs(type: string): boolean {

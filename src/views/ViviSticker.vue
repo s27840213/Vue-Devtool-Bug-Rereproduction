@@ -5,21 +5,24 @@
         :currTab="currActivePanel"
         :inAllPagesMode="false")
       div(class="vivisticker__content")
-        main-menu(v-if="!isInEditor")
+        vvstk-editor(v-show="isInEditor")
+        main-menu(v-show="!isInEditor")
       //- transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
           @switchTab="switchTab")
     footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
-      @switchTab="switchMainTab"
-      :currTab="currActiveTab"
+      @switchTab="switchTab"
+      @switchMainTab="switchMainTab"
+      :currTab="isInEditor ? currActivePanel : currActiveTab"
       :inAllPagesMode="false")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import MainMenu from '@/components/vivisticker/MainMenu.vue'
+import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
@@ -36,6 +39,7 @@ export default Vue.extend({
   name: 'ViviSticker',
   components: {
     MainMenu,
+    VvstkEditor,
     MobilePanel,
     HeaderTabs,
     FooterTabs
@@ -144,6 +148,13 @@ export default Vue.extend({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setCurrActiveTab: 'vivisticker/SET_currActiveTab'
     }),
+    handleSwitchTab(panelType: string, props?: IFooterTabProps) {
+      if (this.isInEditor) {
+        this.switchTab(panelType, props)
+      } else {
+        this.switchMainTab(panelType)
+      }
+    },
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)

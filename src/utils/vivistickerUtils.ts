@@ -1,5 +1,8 @@
 import { IAsset } from '@/interfaces/module'
 import store from '@/store'
+import assetUtils from './assetUtils'
+import groupUtils from './groupUtils'
+import pageUtils from './pageUtils'
 
 class ViviStickerUtils {
   inDebugMode = false
@@ -53,6 +56,23 @@ class ViviStickerUtils {
 
   debugMode() {
     this.inDebugMode = true
+  }
+
+  startEditing(asset: IAsset) {
+    console.log('start editing', asset)
+    pageUtils.setPages([pageUtils.newPage({
+      width: window.innerWidth,
+      height: Math.round(window.innerWidth * 422 / 390),
+      backgroundColor: '#F8F8F8'
+    })])
+    assetUtils.addAsset(asset)
+    store.commit('vivisticker/SET_isInEditor', true)
+  }
+
+  endEditing() {
+    groupUtils.deselect()
+    pageUtils.setPages()
+    store.commit('vivisticker/SET_isInEditor', false)
   }
 }
 

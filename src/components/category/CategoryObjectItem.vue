@@ -42,7 +42,7 @@ export default Vue.extend({
       }
     },
     handleEditObject() {
-      console.log('start editing', this.item)
+      vivistickerUtils.startEditing(this.item)
     }
   }
 })

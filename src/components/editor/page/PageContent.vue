@@ -2,8 +2,7 @@
 div(class="overflow-container"
     :style="styles")
   div(:style="stylesWith3DPreserve")
-    div(v-if="imgLoaded"
-        :class="['page-content']"
+    div(:class="['page-content']"
         :style="styles"
         ref="page-content"
         @drop.prevent="onDrop"
@@ -27,8 +26,6 @@ div(class="overflow-container"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer")
-    template(v-else)
-      div(class='pages-loading')
 </template>
 
 <script lang="ts">
@@ -70,14 +67,11 @@ export default Vue.extend({
   },
   data() {
     return {
-      imgLoaded: false,
-      imgLoading: false,
       pageIsHover: false
     }
   },
   computed: {
     ...mapGetters({
-      setLayersDone: 'file/getSetLayersDone',
       isProcessImgShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading'
     }),
@@ -99,24 +93,12 @@ export default Vue.extend({
     }
   },
   mounted() {
-    if (this.setLayersDone) {
-      // this.loadLayerImg()
-      this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
-    }
     if (this.config.isAutoResizeNeeded) {
       // this.handleFontLoading()
       this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
     }
   },
   watch: {
-    setLayersDone(newVal: boolean) {
-      // When first page mounted, its layers is not ready,
-      // so trigger loadLayerImg when uploadUtils call SET_pages.
-      if (newVal) {
-        // this.loadLayerImg()
-        this.handleSequentially ? queueUtils.push(this.loadLayerImg) : this.loadLayerImg()
-      }
-    },
     'config.isAutoResizeNeeded'(newVal) {
       if (newVal) {
         // this.handleFontLoading()
@@ -134,23 +116,6 @@ export default Vue.extend({
       _deletePage: 'DELETE_page',
       updatePageProps: 'UPDATE_pageProps'
     }),
-    ...mapActions({
-      updatePageImages: 'file/updatePageImages',
-      updatePageFonts: 'brandkit/updatePageFonts',
-      updatePageLogos: 'brandkit/updatePageLogos'
-    }),
-    async loadLayerImg() {
-      if (this.setLayersDone && !this.imgLoaded && !this.imgLoading) {
-        this.imgLoading = true
-        await Promise.all([
-          this.updatePageImages({ pageIndex: this.pageIndex }),
-          this.updatePageFonts({ pageIndex: this.pageIndex }),
-          this.updatePageLogos({ pageIndex: this.pageIndex })
-        ])
-        this.imgLoaded = true
-        this.imgLoading = false
-      }
-    },
     onDrop(e: DragEvent) {
       if (!navigator.onLine) {
         networkUtils.notifyNetworkError()
