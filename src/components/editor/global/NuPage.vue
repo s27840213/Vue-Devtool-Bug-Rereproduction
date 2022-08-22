@@ -128,8 +128,10 @@
                 :imgControl="true"
                 :config="getCurrSubSelectedLayerShown"
                 :contentScaleRatio="contentScaleRatio")
-              nu-layer(:layerIndex="currSubSelectedInfo.index"
+              nu-layer(style="overflow: hidden"
+                :layerIndex="currSubSelectedInfo.index"
                 :pageIndex="pageIndex"
+                :imgControl="true"
                 :config="getCurrSubSelectedLayerShown"
                 :contentScaleRatio="contentScaleRatio")
               div(class="page-control" :style="Object.assign(styles('control'))")

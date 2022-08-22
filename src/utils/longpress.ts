@@ -8,6 +8,7 @@ const start = (callback: (e: PointerEvent) => void) => {
     if (pressTimer === -1) {
       pressTimer = setTimeout((e: PointerEvent) => {
         callback(e)
+        pressTimer = -1
       }, 800)
     }
   }

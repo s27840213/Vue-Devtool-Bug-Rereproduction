@@ -82,7 +82,11 @@ export default Vue.extend({
     primaryLayer: Object,
     snapUtils: Object,
     type: String,
-    isMoved: Boolean
+    isMoved: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   components: {
     NuTextEditor
@@ -272,10 +276,10 @@ export default Vue.extend({
     },
     textWrapperStyle() {
       return {
-        width: `${this.getLayerWidth / this.getLayerScale}px`,
-        height: `${this.getLayerHeight / this.getLayerScale}px`,
+        width: `${this.getLayerWidth / this.getLayerScale * this.contentScaleRatio}px`,
+        height: `${this.getLayerHeight / this.getLayerScale * this.contentScaleRatio}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
+        transform: `scaleX(${this.getLayerScale * this.contentScaleRatio}) scaleY(${this.getLayerScale * this.contentScaleRatio})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
@@ -283,8 +287,8 @@ export default Vue.extend({
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
-        width: `${this.getLayerWidth / this.getLayerScale}px`,
-        height: `${this.getLayerHeight / this.getLayerScale}px`,
+        width: `${this.getLayerWidth / this.getLayerScale * this.contentScaleRatio}px`,
+        height: `${this.getLayerHeight / this.getLayerScale * this.contentScaleRatio}px`,
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
@@ -412,10 +416,10 @@ export default Vue.extend({
       }
 
       return {
-        transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)` +
+        transform: `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)` + `rotate(${this.config.styles.rotate}deg)` +
           `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`,
+        width: `${this.config.styles.width * this.contentScaleRatio}px`,
+        height: `${this.config.styles.height * this.contentScaleRatio}px`,
         'pointer-events': 'none'
       }
     },
@@ -447,11 +451,11 @@ export default Vue.extend({
       const { isFrameImg } = this.config
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth}px`
-        height = `${this.config.styles.initHeight}px`
+        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
+        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
       } else {
-        width = `${this.config.styles.width}px`
-        height = `${this.config.styles.height}px`
+        width = `${this.config.styles.width * this.contentScaleRatio}px`
+        height = `${this.config.styles.height * this.contentScaleRatio}px`
       }
       return { width, height }
     },
@@ -459,9 +463,9 @@ export default Vue.extend({
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / this.primaryScale}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px dashed ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) / this.primaryScale}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'

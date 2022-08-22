@@ -449,12 +449,15 @@ export default Vue.extend({
       if (!tooSmall) {
         resizerStyle.transform += ` scale(${100 / this.scaleRatio})`
       }
+      const width = parseFloat(resizerStyle.width.replace('px', ''))
+      const height = parseFloat(resizerStyle.height.replace('px', ''))
+
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: resizerStyle.width < resizerStyle.height && tooSmall ? `${this.getLayerWidth - 10}px`
-          : (tooSmall ? `${(this.getLayerHeight - 10) * 0.16}px` : resizerStyle.width),
-        height: resizerStyle.width > resizerStyle.height && tooSmall ? `${this.getLayerHeight - 10}px`
-          : (tooSmall ? `${(this.getLayerWidth - 10) * 0.16}px` : resizerStyle.height)
+        width: width > height && tooSmall ? `${this.getLayerWidth * this.contentScaleRatio - 10}px`
+          : (tooSmall ? `${(this.getLayerHeight * this.contentScaleRatio - 10) * 0.16}px` : resizerStyle.width),
+        height: width < height && tooSmall ? `${this.getLayerHeight * this.contentScaleRatio - 10}px`
+          : (tooSmall ? `${(this.getLayerWidth * this.contentScaleRatio - 10) * 0.16}px` : resizerStyle.height)
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -492,7 +495,7 @@ export default Vue.extend({
             resizers = []
           } else {
             const shadow = this.config.styles.shadow
-            if (shadow && shadow.srcObj.type) {
+            if (shadow && shadow.srcObj?.type) {
               resizers = []
             }
           }
@@ -1721,7 +1724,7 @@ export default Vue.extend({
       if (this.getLayerType === 'image') {
         const shadow = (this.config as IImage).styles.shadow
         const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
-        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
+        const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj?.type && shadow.srcObj?.type !== 'upload'
         const handleWithNoCanvas = this.config.inProcess === 'imgShadow' && !hasShadowSrc
         if (!handleWithNoCanvas && (!this.isHandleShadow || (this.handleId.layerId !== this.config.id && !shadowEffectNeedRedraw))) {
           this.dragUtils.onImageDragEnter(e, this.pageIndex, this.config as IImage)
