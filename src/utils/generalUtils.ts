@@ -141,6 +141,18 @@ class GeneralUtils {
     return true
   }
 
+  createGroups(arr: any[], numPerGroupGroups: number) {
+    const numOfArr = arr.length
+    if (numOfArr < numPerGroupGroups) {
+      return [arr.slice(0)]
+    }
+
+    const groupNum = Math.ceil(arr.length / numPerGroupGroups)
+    return new Array(groupNum)
+      .fill('')
+      .map((_, i) => arr.slice(i * numPerGroupGroups, (i + 1) * numPerGroupGroups))
+  }
+
   fixSize(size: number) {
     return size * (100 / this.scaleRatio)
   }

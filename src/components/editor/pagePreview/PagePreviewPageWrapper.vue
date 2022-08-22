@@ -1,10 +1,4 @@
 <template lang="pug">
-  observer-sentinel(
-    target=".mobile-editor__page-preview"
-    :threshold="[0,1]"
-    :throttle="false"
-    :handleNotIntersecting="true"
-    @callback="handleCallback")
     div(v-if="!allPageMode" :style="loadingStyle")
     div(v-else class="page-preview-page"
         :style="styles2"
@@ -106,7 +100,7 @@ export default Vue.extend({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      inTheTarget: false,
+      inTheTarget: true,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
       isHandlingAsyncTask: false
     }
@@ -360,7 +354,7 @@ export default Vue.extend({
   }
   &-title {
     position: absolute;
-    bottom: -8px;
+    bottom: 0px;
     transform: translate(0, 100%);
     z-index: 100;
     display: flex;
