@@ -187,11 +187,14 @@ class Controller {
 
   converTextSpanEffect(effect: Record<string, string|number>): Record<string, string | never> {
     function triangleBG(direction: string, color: string) {
+      // How to draw a triangle in BG, https://stackoverflow.com/a/39854065
       return `linear-gradient(to ${direction}, #fff 0%, #fff 50%, ${color} 50%, ${color} 100%)`
     }
 
     const underlineWidthScale = effect.height as number / 8
-    const color = this.convertHex2rgba(effect.color as string, effect.opacity as number * 0.01)
+    const color = effect.color
+      ? this.convertHex2rgba(effect.color as string, effect.opacity as number * 0.01)
+      : ''
     switch (effect.name) {
       case 'bold-underline':
         return {
