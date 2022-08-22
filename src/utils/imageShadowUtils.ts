@@ -476,16 +476,15 @@ class ImageShadowUtils {
     const handler = () => {
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
-      const { canvasT, canvasMaxSize } = this
+      const { canvasT } = this
       const ctxT = canvasT.getContext('2d')
-      const ctxMaxSize = canvasMaxSize.getContext('2d')
+      // const ctxMaxSize = canvasMaxSize.getContext('2d')
       if (!this.dilate) return
-      if (!ctxT || !ctxMaxSize) {
+      if (!ctxT) {
         logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
         return
       }
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-      ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
       let { layerInfo } = params || {}
       if (!layerInfo || !Object.keys(layerInfo)) {
@@ -514,28 +513,18 @@ class ImageShadowUtils {
       console.log('1: handle spread time: ', Date.now() - start1)
       setMark('shadow', 2)
 
-      const mappingScale = _imgWidth > _imgHeight
-        ? MAXSIZE / drawCanvasW
-        : MAXSIZE / drawCanvasH
       const arrtFactor = MAXSIZE / 1600
 
-      canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${Math.ceil(canvas.width * mappingScale)}`)
-      canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${Math.ceil(canvas.height * mappingScale)}`)
-
-      ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
-      ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-
       const start2 = Date.now()
-      const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-      const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
+      const bluredData = imageDataAChannel(imageData, canvasT.width, canvasT.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
       console.log('2: handle blur time: ', Date.now() - start2)
 
       const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
       const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-      ctxMaxSize.putImageData(bluredData, offsetX, offsetY)
+      ctxT.putImageData(bluredData, offsetX, offsetY)
 
       setMark('shadow', 3)
-      ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
       ctxT.globalCompositeOperation = 'source-in'
       ctxT.globalAlpha = opacity * 0.01
@@ -555,7 +544,7 @@ class ImageShadowUtils {
       this.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
       cb && cb()
       setMark('shadow', 4)
-      logMark('shadow', `CANVAS_MAX_SIZE: (${canvasMaxSize.width}, ${canvasMaxSize.height})`, `CANVANST: (${canvasT.width}, ${canvasT.height}) `)
+      logMark('shadow')
     }
 
     if (!store.getters['shadow/isUploading'] || !params.timeout) {
