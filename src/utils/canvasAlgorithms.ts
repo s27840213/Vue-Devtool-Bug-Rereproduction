@@ -140,9 +140,9 @@ export function getDilate(imageData: ImageData, unifiedScale: number) {
 	console.warn('handle manhanttan calculation: ', Date.now() - start)
 	const { data: pixels, width, height } = imageData
 
-	const SPREAD_RADIUS = 5
-	const unifiedSpreadRadius = SPREAD_RADIUS * unifiedScale
-	const _uni_spread_rad = 1 / unifiedSpreadRadius
+	// const SPREAD_RADIUS = 5
+	// const unifiedSpreadRadius = SPREAD_RADIUS * unifiedScale
+	// const _uni_spread_rad = 1 / unifiedSpreadRadius
 
 	return (r: number): Uint8ClampedArray => {
 		r *= unifiedScale

@@ -1,7 +1,7 @@
 import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
-import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
 import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
 import store from '@/store'
@@ -179,8 +179,8 @@ export default new class ImageShadowPanelUtils {
       setMark('upload', 2)
       const updateCanvas = document.createElement('canvas')
       const { width, height, imgWidth, imgHeight } = config.styles
-      const drawCanvasW = width / imgWidth * img.naturalWidth
-      const drawCanvasH = height / imgHeight * img.naturalHeight
+      const drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
+      const drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
       let spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
       const _canvasW = (width + CANVAS_SPACE * spaceScale)
       const _canvasH = (height + CANVAS_SPACE * spaceScale)
@@ -195,8 +195,8 @@ export default new class ImageShadowPanelUtils {
         ? (width / imgWidth) * MAXSIZE / drawCanvasWOri
         : (height / imgHeight) * MAXSIZE / drawCanvasHOri
 
-      const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
-      const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
+      const canvasW = Math.round(drawCanvasW + CANVAS_SPACE * spaceScale)
+      const canvasH = Math.round(drawCanvasH + CANVAS_SPACE * spaceScale)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
 
@@ -351,7 +351,7 @@ export default new class ImageShadowPanelUtils {
           container.innerHTML = data
           const svg = container.getElementsByTagName('svg')[0]
           if (svg) {
-            const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+            const pngScaleRation = CANVAS_MAX_SIZE / Math.max(img.naturalWidth, img.naturalHeight)
             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })

@@ -17,8 +17,6 @@ import { imageDataAChannel, imageDataRGBA } from './stackblur'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
-export const HALO_SPREAD_LIMIT = 80
-export const CANVAS_SCALE = 1.8
 export const CANVAS_SIZE = 510
 export const CANVAS_MAX_SIZE = 1600
 export const CANVAS_SPACE = 400
@@ -174,7 +172,6 @@ class ImageShadowUtils {
       const x = (canvas.width - drawCanvasW) * 0.5
       const y = (canvas.height - drawCanvasH) * 0.5
       const unifiedScale = Math.max(drawCanvasW, drawCanvasH) / Math.max(width, height) * scale
-      console.log(scaleRatio, imgX)
       // const mappingScale = imgWidth > imgHeight ? (params.MAXSIZE || 1600) / drawCanvasW : (params.MAXSIZE || 1600) / drawCanvasH
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
@@ -479,7 +476,7 @@ class ImageShadowUtils {
     const handler = () => {
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
-      const { canvasT, canvasP, canvasMaxSize } = this
+      const { canvasT, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
       const ctxMaxSize = canvasMaxSize.getContext('2d')
       if (!this.dilate) return
