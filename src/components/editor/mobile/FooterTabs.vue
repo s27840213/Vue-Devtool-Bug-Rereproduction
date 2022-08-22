@@ -54,9 +54,13 @@ export default Vue.extend({
       isFontsPanelOpened: false,
       disableTabScroll: false,
       homeTabs: [
+        { icon: 'template', text: `${this.$tc('NN0001', 2)}`, panelType: 'template' },
+        { icon: 'photo', text: `${this.$tc('NN0002', 2)}`, panelType: 'photo' },
         { icon: 'objects', text: `${this.$tc('NN0003', 2)}`, panelType: 'object' },
+        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
-        { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' }
+        { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
+        { icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }
       ] as Array<IFooterTab>
     }
   },
@@ -330,7 +334,7 @@ export default Vue.extend({
     },
     containerStyles(): { [index: string]: any } {
       return {
-        transform: `translate3d(0,${this.contentEditable ? 100 : 0}%,0)`,
+        transform: `translate(0,${this.contentEditable ? 100 : 0}%)`,
         opacity: `${this.contentEditable ? 0 : 1}`
       }
     },
@@ -385,6 +389,7 @@ export default Vue.extend({
       setBgImageControl: 'SET_backgroundImageControl'
     }),
     handleTabAction(tab: IFooterTab) {
+      console.time('out')
       switch (tab.icon) {
         case 'crop': {
           if (this.selectedLayerNum > 0) {
@@ -452,6 +457,14 @@ export default Vue.extend({
           page.id = generalUtils.generateRandomString(8)
           pageUtils.addPageToPos(page, currFocusPageIndex + 1)
           this._setCurrActivePageIndex(currFocusPageIndex + 1)
+          const targetPreviewPage = document.querySelector(`.page-preview_${currFocusPageIndex}`)
+
+          // eslint-disable-next-line no-unused-expressions
+          targetPreviewPage?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          })
           break
         }
         case 'trash': {
@@ -525,6 +538,7 @@ export default Vue.extend({
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
+      console.timeEnd('out')
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {

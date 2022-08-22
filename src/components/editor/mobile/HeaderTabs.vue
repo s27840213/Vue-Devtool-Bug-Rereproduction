@@ -1,7 +1,32 @@
 <template lang="pug">
   div(class="header-bar" @pointerdown.stop)
     div(class="header-bar__left")
+      div(class="header-bar__feature-icon mr-25"
+          @pointerdown="backBtnAction()")
+        svg-icon(
+          :iconName="'chevron-left'"
+          :iconColor="'white'"
+          :iconWidth="'20px'")
+      div(class="header-bar__feature-icon mr-20"
+          :class="{'click-disabled': stepsUtils.isInFirstStep || isCropping}"
+          @pointerdown="undo()")
+        svg-icon(:iconName="'undo'"
+          :iconColor="(!stepsUtils.isInFirstStep && !isCropping) ? 'white' : 'gray-2'"
+          :iconWidth="'20px'")
+      div(class="header-bar__feature-icon"
+          :class="{'click-disabled': stepsUtils.isInLastStep || isCropping}"
+          @pointerdown="redo()")
+        svg-icon(:iconName="'redo'"
+          :iconColor="(!stepsUtils.isInLastStep && !isCropping) ? 'white' : 'gray-2'"
+          :iconWidth="'20px'")
     div(class="header-bar__right")
+      div(v-for="tab in rightTabs" class="header-bar__feature-icon"
+          :class="{'click-disabled': ((tab.disabled || isLocked) && tab.icon !== 'lock')}"
+          @pointerdown="handleIconAction(tab.icon)")
+        svg-icon(
+          :iconName="tab.icon"
+          :iconColor="iconColor(tab)"
+          :iconWidth="'20px'")
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -243,6 +268,7 @@ export default Vue.extend({
     transition: background-color 0.1s;
     padding: 2px;
     border-radius: 3px;
+    background-color: setColor(gray-2);
     &:active {
       background-color: setColor(gray-2);
     }
