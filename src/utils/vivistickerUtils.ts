@@ -3,6 +3,7 @@ import store from '@/store'
 import assetUtils from './assetUtils'
 import groupUtils from './groupUtils'
 import pageUtils from './pageUtils'
+import stepsUtils from './stepsUtils'
 
 class ViviStickerUtils {
   inDebugMode = false
@@ -65,8 +66,10 @@ class ViviStickerUtils {
       height: Math.round(window.innerWidth * 422 / 390),
       backgroundColor: '#F8F8F8'
     })])
-    assetUtils.addAsset(asset)
-    store.commit('vivisticker/SET_isInEditor', true)
+    assetUtils.addAsset(asset).then(() => {
+      stepsUtils.reset()
+      store.commit('vivisticker/SET_isInEditor', true)
+    })
   }
 
   endEditing() {

@@ -582,11 +582,11 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          await this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
-          this.addTemplate(asset.jsonData, attrs)
+          await this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
           this.addText(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
@@ -595,10 +595,10 @@ class AssetUtils {
           this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
           break
         case 10:
-          this.addLine(asset.jsonData, attrs)
+          await this.addLine(asset.jsonData, attrs)
           break
         case 11:
-          this.addBasicShape(asset.jsonData, attrs)
+          await this.addBasicShape(asset.jsonData, attrs)
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)

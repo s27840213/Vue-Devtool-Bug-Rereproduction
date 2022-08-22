@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="header-bar relative" @pointerdown.stop)
-    div(class="header-bar__left")
+    div(class="header-bar__left" :class="{ editor: isInEditor }")
       div(v-for="tab in leftTabs"
           :class="{'header-bar__feature-icon': !tab.logo, 'click-disabled': tab.disabled}"
           :style="`width: ${tab.width}px; height: ${tab.height !== undefined ? tab.height : tab.width}px`"
@@ -23,6 +23,7 @@
 </template>
 <script lang="ts">
 import imageUtils from '@/utils/imageUtils'
+import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue from 'vue'
@@ -40,6 +41,16 @@ type TabConfig = {
 export default Vue.extend({
   data() {
     return {
+      stepCount: stepsUtils.steps.length,
+      stepsUtils
+    }
+  },
+  watch: {
+    'stepsUtils.steps': {
+      handler(newVal) {
+        this.stepCount = newVal.length
+      },
+      deep: true
     }
   },
   computed: {
@@ -61,14 +72,11 @@ export default Vue.extend({
     isCropping(): boolean {
       return imageUtils.isImgControl()
     },
-    stepCount(): number {
-      return stepsUtils.steps.length
-    },
     leftTabs(): TabConfig[] {
       if (this.isInEditor) {
-        return this.stepCount > 0 ? [
-          { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24 },
-          { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24 }
+        return this.stepCount > 1 ? [
+          { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
+          { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: shortcutUtils.redo }
         ] : []
       } else if (this.isInCategory) {
         return [
@@ -185,6 +193,9 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     gap: 8px;
+    &.editor {
+      gap: 24px;
+    }
     & > div {
       display: flex;
       align-items: center;
@@ -207,7 +218,7 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 24px;
   }
 }
 </style>

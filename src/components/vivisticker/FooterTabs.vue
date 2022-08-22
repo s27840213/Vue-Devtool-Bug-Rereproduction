@@ -477,7 +477,7 @@ export default Vue.extend({
     grid-template-rows: auto;
     grid-auto-flow: column;
     grid-auto-columns: 65px;
-    column-gap: 32px;
+    column-gap: 20px;
     background-color: setColor(nav);
     padding: 0 12px;
     @include no-scrollbar;
