@@ -750,7 +750,7 @@ export default Vue.extend({
           if (!shadowBuff.canvasShadowImg.shadow) {
             img.crossOrigin = 'anonymous'
             img.src = ImageUtils.getSrc(this.config,
-              ['unsplah', 'pixels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
+              ['unsplah', 'pixels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'larg') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
               img.onload = async () => {

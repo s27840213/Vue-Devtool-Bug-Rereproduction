@@ -134,18 +134,14 @@ function manhattan (imageData: ImageData) {
 	return { mapX, mapY }
 }
 
-export function getDilate(imageData: ImageData, unifiedScale: number) {
+export function getDilate(imageData: ImageData) {
 	const start = Date.now()
 	const { mapX, mapY } = manhattan(imageData)
 	console.warn('handle manhanttan calculation: ', Date.now() - start)
 	const { data: pixels, width, height } = imageData
 
-	// const SPREAD_RADIUS = 5
-	// const unifiedSpreadRadius = SPREAD_RADIUS * unifiedScale
-	// const _uni_spread_rad = 1 / unifiedSpreadRadius
-
 	return (r: number): Uint8ClampedArray => {
-		r *= unifiedScale
+		console.log('r: ', r)
 		for (let y = 0; y < height; y++) {
 			const yy = y * width
 			for (let x = 0; x < width; x++) {

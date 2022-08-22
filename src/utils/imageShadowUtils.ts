@@ -171,10 +171,14 @@ class ImageShadowUtils {
       const scaleRatio = img.naturalWidth / imgWidth
       const x = (canvas.width - drawCanvasW) * 0.5
       const y = (canvas.height - drawCanvasH) * 0.5
-      const unifiedScale = Math.max(drawCanvasW, drawCanvasH) / Math.max(width, height) * scale
       // const mappingScale = imgWidth > imgHeight ? (params.MAXSIZE || 1600) / drawCanvasW : (params.MAXSIZE || 1600) / drawCanvasH
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-      ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      console.log(drawCanvasW, drawCanvasH)
+      console.log(img.src)
+      console.log(x, y)
+      ctxT.drawImage(img, 0, 0, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      // ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+
       // Show test canvas
       // const canvasTest = document.createElement('canvas')
       // canvasTest.setAttribute('width', canvasT.width.toString())
@@ -188,7 +192,7 @@ class ImageShadowUtils {
       // canvasTest.style.zIndex = '10000'
 
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      this.dilate = getDilate(imageData, unifiedScale)
+      this.dilate = getDilate(imageData)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
     if (params) {
@@ -515,14 +519,14 @@ class ImageShadowUtils {
 
       const arrtFactor = MAXSIZE / 1600
 
-      const start2 = Date.now()
-      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      const bluredData = imageDataAChannel(imageData, canvasT.width, canvasT.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
-      console.log('2: handle blur time: ', Date.now() - start2)
+      // const start2 = Date.now()
+      // const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
+      // const bluredData = imageDataAChannel(imageData, canvasT.width, canvasT.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+      // console.log('2: handle blur time: ', Date.now() - start2)
 
-      const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-      const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-      ctxT.putImageData(bluredData, offsetX, offsetY)
+      // const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
+      // const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
+      // ctxT.putImageData(bluredData, offsetX, offsetY)
 
       setMark('shadow', 3)
 
