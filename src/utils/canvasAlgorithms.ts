@@ -8,7 +8,7 @@ function manhattan (imageData: ImageData) {
 		for (let x = 0; x < width; x++) {
 			const pos0 = yy + x
 			const pos = pos0 * 4
-			if (pixels[pos + 3] > 0) {
+			if (pixels[pos + 3] > 32) {
 				mapX[pos0] = 0
 				mapY[pos0] = 0
 			} else {
@@ -134,14 +134,16 @@ function manhattan (imageData: ImageData) {
 	return { mapX, mapY }
 }
 
-export function getDilate(imageData: ImageData) {
+export function getDilate(imageData: ImageData, scale = 1) {
 	const start = Date.now()
 	const { mapX, mapY } = manhattan(imageData)
 	console.warn('handle manhanttan calculation: ', Date.now() - start)
 	const { data: pixels, width, height } = imageData
+	const trasition_r = 1
+	const _trasition_r = 1 / trasition_r
 
 	return (r: number): Uint8ClampedArray => {
-		console.log('r: ', r)
+		r *= scale
 		for (let y = 0; y < height; y++) {
 			const yy = y * width
 			for (let x = 0; x < width; x++) {
@@ -151,8 +153,10 @@ export function getDilate(imageData: ImageData) {
 				pixels[pos] = 0
 				pixels[pos + 1] = 0
 				pixels[pos + 2] = 0
-				if (dist > r) {
+				if (dist > r + trasition_r) {
 					pixels[pos + 3] = 0
+				} else if (dist >= r) {
+					pixels[pos + 3] = 255 * (1 - (dist - r) * _trasition_r)
 				}	else {
 					pixels[pos + 3] = 255
 				}
@@ -161,10 +165,3 @@ export function getDilate(imageData: ImageData) {
 		return pixels
 	}
 }
-// if (dist > r + unifiedSpreadRadius) {
-// 	pixels[pos + 3] = 0
-// } else if (dist >= r) {
-// 	pixels[pos + 3] = 255 * (1 - (dist - r) * _uni_spread_rad)
-// }	else {
-// 	pixels[pos + 3] = 255
-// }

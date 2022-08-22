@@ -151,7 +151,7 @@ export default new class ImageShadowPanelUtils {
         img.onload = async () => {
           const isSVG = await this.isSVG(img, config)
           if (isSVG) {
-            await this.svgImageSizeFormatter(img, () => {
+            await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
               img.onload = () => {
                 MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
                 resolve()
@@ -181,22 +181,9 @@ export default new class ImageShadowPanelUtils {
       const { width, height, imgWidth, imgHeight } = config.styles
       const drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
       const drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
-      let spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
-      const _canvasW = (width + CANVAS_SPACE * spaceScale)
-      const _canvasH = (height + CANVAS_SPACE * spaceScale)
-      const canvasRatio = _canvasH / _canvasW
-      const canvasWOri = _canvasW >= _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
-      const canvasHOri = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
-      const drawCanvasWOri = width * canvasWOri / _canvasW
-      const drawCanvasHOri = height * canvasHOri / _canvasH
 
-      spaceScale *= width > height ? CANVAS_SIZE / _canvasW : CANVAS_SIZE / _canvasH
-      spaceScale *= imgWidth > imgHeight
-        ? (width / imgWidth) * MAXSIZE / drawCanvasWOri
-        : (height / imgHeight) * MAXSIZE / drawCanvasHOri
-
-      const canvasW = Math.round(drawCanvasW + CANVAS_SPACE * spaceScale)
-      const canvasH = Math.round(drawCanvasH + CANVAS_SPACE * spaceScale)
+      const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
+      const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
 
@@ -342,7 +329,7 @@ export default new class ImageShadowPanelUtils {
     } else return false
   }
 
-  async svgImageSizeFormatter(img: HTMLImageElement, cb?: () => void) {
+  async svgImageSizeFormatter(img: HTMLImageElement, size = CANVAS_MAX_SIZE, cb?: () => void) {
     return new Promise<void>((resolve) => {
       fetch(img.src)
         .then(async (response) => {
@@ -351,7 +338,7 @@ export default new class ImageShadowPanelUtils {
           container.innerHTML = data
           const svg = container.getElementsByTagName('svg')[0]
           if (svg) {
-            const pngScaleRation = CANVAS_MAX_SIZE / Math.max(img.naturalWidth, img.naturalHeight)
+            const pngScaleRation = size / Math.max(img.naturalWidth, img.naturalHeight)
             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })
