@@ -31,7 +31,11 @@ import generalUtils from '@/utils/generalUtils'
 export default Vue.extend({
   props: {
     config: Object,
-    pageIndex: Number
+    pageIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   data() {
     return {
@@ -91,9 +95,9 @@ export default Vue.extend({
       // const pos = this.imgControllerPosHandler()
       // transform: `translate(${pos.x}px, ${pos.y}px) rotate(${this.config.styles.rotate}deg)`
       return {
-        width: `${this.config.styles.imgWidth * this.getPageScale}px`,
-        height: `${this.config.styles.imgHeight * this.getPageScale}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`
+        width: `${this.config.styles.imgWidth * this.getPageScale * this.contentScaleRatio}px`,
+        height: `${this.config.styles.imgHeight * this.getPageScale * this.contentScaleRatio}px`,
+        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed #7190CC`
       }
     },
     imgControllerPosHandler(): ICoordinate {
@@ -130,11 +134,12 @@ export default Vue.extend({
     },
     controllerStyles() {
       // rotate(${this.config.styles.rotate}deg)
+      console.log(this.contentScaleRatio)
       return {
-        transform: `translate(${-this.page.backgroundImage.posX}px, ${-this.page.backgroundImage.posY}px)`,
-        width: `${this.page.width}px`,
-        height: `${this.page.height}px`,
-        outline: `${3 * (100 / this.scaleRatio)}px solid #7190CC`,
+        transform: `translate(${-this.page.backgroundImage.posX * this.contentScaleRatio}px, ${-this.page.backgroundImage.posY * this.contentScaleRatio}px)`,
+        width: `${this.page.width * this.contentScaleRatio}px`,
+        height: `${this.page.height * this.contentScaleRatio}px`,
+        outline: `${3 * (100 / this.scaleRatio) * this.contentScaleRatio}px solid #7190CC`,
         'pointer-events': 'none'
       }
     },

@@ -38,6 +38,7 @@
               :config="getLayerType === 'frame' && !FrameUtils.isImageFrame(config) ? frameLayerMapper(layer) : layer"
               :type="config.type"
               :isMoved="isMoved"
+              :contentScaleRatio="contentScaleRatio"
               @onSubDrop="onSubDrop"
               @clickSubController="clickSubController"
               @dblSubController="dblSubController"
@@ -109,7 +110,7 @@
               :style="resizerBarStyles(resizer.styles)")
         div(class="control-point__line-controller-wrapper"
             v-if="isLine"
-            :style="`transform: scale(${100/scaleRatio})`")
+            :style="`transform: scale(${100/scaleRatio * contentScaleRatio})`")
           svg-icon(class="control-point__rotater"
             :iconName="'rotate'" :iconWidth="`${20}px`"
             :src="require('@/assets/img/svg/rotate.svg')"
@@ -123,7 +124,7 @@
             @touchstart="disableTouchEvent")
         template(v-else)
           div(class="control-point__controller-wrapper"
-              :style="`transform: scale(${100/scaleRatio})`")
+              :style="`transform: scale(${100/scaleRatio  * contentScaleRatio})`")
             svg-icon(class="control-point__rotater"
               :iconName="'rotate'" :iconWidth="`${20}px`"
               :src="require('@/assets/img/svg/rotate.svg')"
@@ -433,8 +434,8 @@ export default Vue.extend({
       const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth - scalerOffset}px` : `${width * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight - scalerOffset}px` : `${height * resizeBarScale}px`
+        width: isHorizon ? `${this.getLayerWidth * 0.4 - scalerOffset}px` : `${width * 0.4 * resizeBarScale}px`,
+        height: !isHorizon ? `${this.getLayerHeight * 0.4 - scalerOffset}px` : `${height * 0.4 * resizeBarScale}px`
       }
       return Object.assign(resizerStyle, HW)
     },
@@ -540,7 +541,7 @@ export default Vue.extend({
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
+        transform: `scaleX(${this.getLayerScale * this.contentScaleRatio}) scaleY(${this.getLayerScale * this.contentScaleRatio})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }

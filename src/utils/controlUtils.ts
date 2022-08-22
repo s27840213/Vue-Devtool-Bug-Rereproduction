@@ -31,6 +31,9 @@ class Controller {
     const scaleRatio = store.getters.getPageScaleRatio
     const isMobile = generalUtils.isTouchDevice()
     const scalerSize = isMobile ? 12 * contentScaleRatio : 8 * contentScaleRatio
+    resizerLong *= contentScaleRatio
+    resizerShort *= contentScaleRatio
+
     const getScalers = (scalerSize: number, cursors?: Array<number | string>) => [
       {
         cursor: cursors?.[0] ?? 0,

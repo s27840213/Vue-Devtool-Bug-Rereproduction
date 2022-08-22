@@ -29,7 +29,7 @@ import generalUtils from '@/utils/generalUtils'
 import eventUtils from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
-import { IImage } from '@/interfaces/layer'
+import { IImage, IImageStyle } from '@/interfaces/layer'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 
 export default Vue.extend({
@@ -42,6 +42,10 @@ export default Vue.extend({
     forRender: {
       type: Boolean,
       default: false
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -123,6 +127,17 @@ export default Vue.extend({
     getImgHeight(): number {
       return this.config.styles.imgHeight
     },
+    scaledConfig(): { [index: string]: string | number } {
+      const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
+      return {
+        width: width * this.contentScaleRatio,
+        height: height * this.contentScaleRatio,
+        imgWidth: imgWidth * this.contentScaleRatio,
+        imgHeight: imgHeight * this.contentScaleRatio,
+        imgX: imgX * this.contentScaleRatio,
+        imgY: imgY * this.contentScaleRatio
+      }
+    },
     primaryLayerType(): string {
       return this.primaryLayer.type
     },
@@ -176,20 +191,20 @@ export default Vue.extend({
       const zindex = (this.layerIndex + 1) * 1000
       const pos = this.imgControllerPosHandler()
       return {
-        transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
-        height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
+        transform: `translate3d(${pos.x * this.contentScaleRatio}px, ${pos.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.imgWidth * this.getLayerScale * this.contentScaleRatio}px`,
+        height: `${this.config.styles.imgHeight * this.getLayerScale * this.contentScaleRatio}px`,
+        outline: `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed #7190CC`,
         'pointer-events': this.pointerEvents ?? 'initial'
       }
     },
     controllerStyles() {
       const zindex = 0
       return {
-        transform: `translate3d(${this.config.styles.x}px, ${this.config.styles.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px solid #7190CC`
+        transform: `translate3d(${this.config.styles.x * this.contentScaleRatio}px, ${this.config.styles.y * this.contentScaleRatio}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.width * this.contentScaleRatio}px`,
+        height: `${this.config.styles.height * this.contentScaleRatio}px`,
+        outline: `${2 * (100 / this.scaleRatio * this.contentScaleRatio)}px solid #7190CC`
       }
     },
     imgControllerPosHandler(): ICoordinate {

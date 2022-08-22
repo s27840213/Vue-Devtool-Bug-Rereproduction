@@ -18,7 +18,7 @@
                   :ref="`page-${index}`"
                   :key="`page-${index}`"
                   :pageIndex="index"
-                  :editorView="editorView"
+                  :overflowContainer="editorView"
                   :style="{'z-index': `${getPageZIndex(index)}`}"
                   :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")

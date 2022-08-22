@@ -134,11 +134,12 @@
                 :contentScaleRatio="contentScaleRatio")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
-                                    :pageIndex="pageIndex"
-                                    :primaryLayerIndex="currSelectedInfo.index"
-                                    :primaryLayer="getCurrLayer"
-                                    :forRender="true"
-                                    :config="getCurrSubSelectedLayerShown")
+                    :pageIndex="pageIndex"
+                    :primaryLayerIndex="currSelectedInfo.index"
+                    :primaryLayer="getCurrLayer"
+                    :forRender="true"
+                    :config="getCurrSubSelectedLayerShown"
+                    :contentScaleRatio="contentScaleRatio")
             template(v-else-if="getCurrLayer.type === 'image'")
               nu-layer(:style="'opacity: 0.45'"
                 :layerIndex="currSelectedIndex"
@@ -152,16 +153,19 @@
                 :contentScaleRatio="contentScaleRatio")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSelectedIndex"
-                                    :pageIndex="pageIndex"
-                                    :forRender="true"
-                                    :config="getCurrLayer")
+                    :pageIndex="pageIndex"
+                    :forRender="true"
+                    :config="getCurrLayer"
+                    :contentScaleRatio="contentScaleRatio")
           div(v-if="isBackgroundImageControl"
               class="background-control"
               :style="backgroundControlStyles()")
-            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
-            nu-background-controller(:config="config.backgroundImage.config" :pageIndex="pageIndex")
+            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+            nu-background-controller(:config="config.backgroundImage.config"
+              :pageIndex="pageIndex"
+              :contentScaleRatio="contentScaleRatio")
             div(:style="backgroundContorlClipStyles()")
-              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true")
+              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
               component(v-for="(elm, idx) in getHalation"
                 :key="idx"
                 :is="elm.tag"
@@ -464,16 +468,16 @@ export default Vue.extend({
     }),
     styles(type: string) {
       return type === 'content' ? {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
         backgroundColor: this.config.backgroundColor,
         backgroundImage: `url(${ImageUtils.getSrc(this.config.backgroundImage.config)})`,
         backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
           : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
         backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
       } : {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
         overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
       }
     },
@@ -618,16 +622,16 @@ export default Vue.extend({
     backgroundControlStyles() {
       const backgroundImage = this.config.backgroundImage
       return {
-        width: `${backgroundImage.config.styles.imgWidth}px`,
-        height: `${backgroundImage.config.styles.imgHeight}px`,
-        left: `${backgroundImage.posX}px`,
-        top: `${backgroundImage.posY}px`
+        width: `${backgroundImage.config.styles.imgWidth * this.contentScaleRatio}px`,
+        height: `${backgroundImage.config.styles.imgHeight * this.contentScaleRatio}px`,
+        left: `${backgroundImage.posX * this.contentScaleRatio}px`,
+        top: `${backgroundImage.posY * this.contentScaleRatio}px`
       }
     },
     backgroundContorlClipStyles() {
       const { posX, posY } = this.config.backgroundImage
       return {
-        clipPath: `path('M${-posX},${-posY}h${this.config.width}v${this.config.height}h${-this.config.width}z`,
+        clipPath: `path('M${-posX * this.contentScaleRatio},${-posY * this.contentScaleRatio}h${this.config.width * this.contentScaleRatio}v${this.config.height * this.contentScaleRatio}h${-this.config.width * this.contentScaleRatio}z`,
         'pointer-events': 'none'
       }
     },
