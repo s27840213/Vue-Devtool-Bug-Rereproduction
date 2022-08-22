@@ -460,7 +460,7 @@ export default Vue.extend({
       color: white;
     }
     &__opacity-value {
-      border: 1px solid #D9DBE1;
+      border: 1px solid setColor(gray-4);
       border-radius: 4px;
       width: 54px;
       height: 24px;

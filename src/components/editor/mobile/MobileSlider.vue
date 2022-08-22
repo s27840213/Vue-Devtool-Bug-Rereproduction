@@ -1,13 +1,14 @@
 <template lang="pug">
   div(class="mobile-slider")
     div
-      span(class="mobile-slider__name text-gray-3 body-2 no-wrap") {{title}}
-      input(class="mobile-slider__text body-2 text-gray-2"
-        type="number"
-        v-model.number="propsVal"
-        :name="name"
-        @change="handleChangeStop")
-    input(class="mobile-slider__range-input input__slider--range"
+      span(class="mobile-slider__name text-gray-2 no-wrap") {{title}}
+      div(class="mobile-slider__text text-gray-2")
+        input(type="number"
+          v-model.number="propsVal"
+          :name="name"
+          @change="handleChangeStop")
+    input(class="mobile-slider__range-input"
+      :style="progressStyles()"
       v-model.number="propsVal"
       :name="name"
       :max="max"
@@ -69,6 +70,11 @@ export default Vue.extend({
     }
   },
   methods: {
+    progressStyles() {
+      return {
+        '--progress': `${(this.value - this.min) / (this.max - this.min) * 100}%`
+      }
+    },
     handleChangeStop() {
       stepsUtils.record()
     }
@@ -82,8 +88,8 @@ export default Vue.extend({
   display: grid;
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
-  row-gap: 10px;
-  padding: 0.375rem 0.625rem;
+  row-gap: 20px;
+  padding: 0 8px;
   box-sizing: border-box;
 
   > div:nth-child(1) {
@@ -92,16 +98,48 @@ export default Vue.extend({
     align-items: center;
   }
 
+  &__name {
+    @include body-SM;
+  }
+
   &__text {
-    text-align: center;
     border: 1px solid setColor(gray-4);
-    color: setColor(gray-3);
-    border-radius: 0.25rem;
-    width: 60px;
+    border-radius: 4px;
+    width: 54px;
+    height: 24px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & > input {
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      border-radius: 0;
+      text-align: center;
+      width: 100%;
+      height: 22px;
+      @include body-SM;
+      line-height: 22px;
+      color: setColor(gray-2);
+    }
   }
 
   &__range-input {
-    margin-top: 12px;
+    margin: 0;
+    --lower-color: #{setColor(blue-1)};
+    --upper-color: #{setColor(gray-4)};
+    @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
+    &::-webkit-slider-thumb {
+      box-shadow: none;
+      border: 3px solid setColor(blue-1);
+      position: relative;
+    }
+    &::-moz-range-thumb {
+      box-shadow: none;
+      border: 3px solid setColor(blue-1);
+      position: relative;
+    }
   }
 }
 </style>

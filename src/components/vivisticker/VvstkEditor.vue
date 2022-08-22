@@ -10,7 +10,6 @@
           :pageIndex="pageIndex"
           :config="layer"
           :snapUtils="snapUtils"
-          @setFocus="setFocus()"
           @getClosestSnaplines="getClosestSnaplines"
           @clearSnap="clearSnap")
     div(v-if="imageUtils.isImgControl(pageIndex)"

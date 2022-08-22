@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="mobile-panel"
-      :class="{'p-15': !noPaddingTheme}"
+      :class="{'panel-padding': !noPaddingTheme}"
       :style="panelStyle"
       v-click-outside="vcoConfig()"
       ref="panel")
@@ -42,8 +42,8 @@
     div(class="mobile-panel__bottom-section")
       keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-        component(v-if="!isShowPagePreview && !bgRemoveMode && !hideDynamicComp"
-          class="border-box p-2"
+        component(v-if="!bgRemoveMode && !hideDynamicComp"
+          class="border-box"
           v-bind="dynamicBindProps"
           v-on="dynamicBindMethod"
           @close="closeMobilePanel"
@@ -613,6 +613,10 @@ export default Vue.extend({
   grid-template-columns: 1fr;
   grid-template-rows: auto minmax(0, 1fr);
   justify-items: center;
+
+  &.panel-padding {
+    padding: 16px;
+  }
 
   &__top-section {
     display: flex;
