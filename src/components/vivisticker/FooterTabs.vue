@@ -66,17 +66,12 @@ export default Vue.extend({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
-      isShowPagePreview: 'page/getIsShowPagePreview',
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode',
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
-      inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor'
     }),
-    backgroundImgControl(): boolean {
-      return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
-    },
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
       return locked
@@ -89,10 +84,11 @@ export default Vue.extend({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
-        ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        // { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        // { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        ...this.genearlLayerTabs
+        // ...this.genearlLayerTabs,
+        // { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
       ]
     },
     photoTabs(): Array<IFooterTab> {
@@ -100,18 +96,20 @@ export default Vue.extend({
         this.mainMenu,
         { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
-        { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
-        { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
-        { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
-        ...this.genearlLayerTabs,
-        { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
+        // { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
+        // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
+        // { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        // { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
+        ...this.genearlLayerTabs
+        // ...this.genearlLayerTabs,
+        // { icon: 'bg-separate', text: `${this.$t('NN0707')}`, hidden: this.isInFrame }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
     fontTabs(): Array<IFooterTab> {
       return [
         { icon: 'edit', text: `${this.$t('NN0504')}`, hidden: this.selectMultiple || this.hasSubSelectedLayer || this.isGroup },
+        { icon: 'plus-square', text: `${this.$t('STK0006')}` },
         { icon: 'font', text: generalUtils.capitalize(`${this.$tc('NN0353', 2)}`), panelType: 'fonts' },
         { icon: 'font-size', text: `${this.$t('NN0492')}`, panelType: 'font-size' },
         {
@@ -128,30 +126,11 @@ export default Vue.extend({
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
     },
-    bgSettingTab(): Array<IFooterTab> {
-      const { hasBgImage } = backgroundUtils
-      return [
-        this.mainMenu,
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity', disabled: this.backgroundLocked },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust', hidden: !hasBgImage, disabled: this.backgroundLocked },
-        {
-          icon: 'color',
-          text: `${this.$t('NN0495')}`,
-          panelType: 'color',
-          props: {
-            currColorEvent: ColorEventType.background
-          },
-          disabled: this.backgroundLocked
-        },
-        { icon: 'bg-separate', text: `${this.$t('NN0708')}`, hidden: !hasBgImage, disabled: this.backgroundLocked }
-      ]
-    },
     multiPhotoTabs(): Array<IFooterTab> {
       return [
-        ...this.multiGeneralTabs,
-        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
+        ...this.multiGeneralTabs
+        // ...this.multiGeneralTabs,
+        // { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' }
       ]
     },
     multiFontTabs(): Array<IFooterTab> {
@@ -189,39 +168,30 @@ export default Vue.extend({
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
       ]
     },
-    pageTabs(): Array<IFooterTab> {
-      return [
-        this.mainMenu,
-        { icon: 'add-page', text: `${this.$t('NN0139')}` },
-        { icon: 'duplicate-page', text: `${this.$t('NN0140')}` },
-        // { icon: 'select-page', text: `${this.$tc('NN0124', 2)}` },
-        { icon: 'trash', text: `${this.$t('NN0141')}`, hidden: pageUtils.getPages.length <= 1 }
-        // { icon: 'adjust-order', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
-      ]
-    },
     genearlLayerTabs(): Array<IFooterTab> {
+      // return [
+      //   { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
+      //   { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+      //   { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', disabled: this.currSelectedInfo.types.has(LayerType.frame) },
+      //   { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
+      //   { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
+      //   { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
+      // ]
       return [
-        { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', disabled: this.currSelectedInfo.types.has(LayerType.frame) },
-        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
-        { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
+        { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
     multiGeneralTabs(): Array<IFooterTab> {
       return [
         this.mainMenu,
         this.groupTab,
-        { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
+        // { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
+        // { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order', hidden: this.hasSubSelectedLayer },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' }
       ]
     },
     tabs(): Array<IFooterTab> {
-      if (this.inAllPagesMode) {
-        return this.pageTabs
-      } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
+      if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && (this.isWholeGroup || layerUtils.getCurrLayer.type === LayerType.tmp)) {
         /** tmp layer treated as group */
         return this.multiPhotoTabs
       } else if ((this.selectMultiple || this.isGroup) && this.targetIs('image') && layerUtils.subLayerIdx !== -1) {
@@ -240,8 +210,6 @@ export default Vue.extend({
         return this.objectTabs.concat(this.genearlLayerTabs)
       } else if (this.showGeneralTabs) {
         return [this.mainMenu, ...this.genearlLayerTabs]
-      } else if (this.inBgSettingMode) {
-        return this.bgSettingTab
       } else {
         return this.homeTabs
       }
@@ -266,7 +234,7 @@ export default Vue.extend({
     },
     groupTypes(): Set<string> {
       const groupLayer = this.currSelectedInfo.layers[0] as IGroup
-      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup, index: number) => {
+      const types = groupLayer.layers.map((layer: IImage | IText | IShape | IGroup) => {
         return layer.type
       })
       return new Set(types)
@@ -375,16 +343,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    ...mapMutations({
-      _addPage: 'ADD_page',
-      _addPageToPos: 'ADD_pageToPos',
-      _deletePage: 'DELETE_page',
-      _setmiddlemostPageIndex: 'SET_middlemostPageIndex',
-      _setCurrActivePageIndex: 'SET_currActivePageIndex',
-      _setIsDragged: 'page/SET_IsDragged',
-      _setIsShowPagePreview: 'page/SET_isShowPagePreview',
-      setBgImageControl: 'SET_backgroundImageControl'
-    }),
     handleTabAction(tab: IFooterTab) {
       switch (tab.icon) {
         case 'crop': {
@@ -410,12 +368,6 @@ export default Vue.extend({
                   break
               }
             }
-          } else if (this.inBgSettingMode) {
-            if (this.backgroundLocked) return this.handleLockedNotify()
-            this.setBgImageControl({
-              pageIndex: pageUtils.currFocusPageIndex,
-              imgControl: !this.backgroundImgControl
-            })
           }
           break
         }
@@ -430,38 +382,6 @@ export default Vue.extend({
         case 'main-menu': {
           groupUtils.deselect()
           this.$emit('switchTab', 'none')
-          if (this.inAllPagesMode) {
-            this.$emit('showAllPages')
-          }
-
-          if (this.inBgSettingMode) {
-            editorUtils.setInBgSettingMode(false)
-          }
-          break
-        }
-        case 'add-page': {
-          const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
-          pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
-          this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
-          stepsUtils.record()
-          break
-        }
-        case 'duplicate-page': {
-          const { currFocusPageIndex } = pageUtils
-          const page = generalUtils.deepCopy(pageUtils.getPage(currFocusPageIndex))
-          page.designId = ''
-          page.id = generalUtils.generateRandomString(8)
-          pageUtils.addPageToPos(page, currFocusPageIndex + 1)
-          this._setCurrActivePageIndex(currFocusPageIndex + 1)
-          break
-        }
-        case 'trash': {
-          groupUtils.deselect()
-          const tmpIndex = pageUtils.currActivePageIndex
-          this._setCurrActivePageIndex(pageUtils.isLastPage ? tmpIndex - 1 : tmpIndex)
-          editorUtils.setCurrCardIndex(pageUtils.currActivePageIndex)
-          this._deletePage(tmpIndex)
-          stepsUtils.record()
           break
         }
         case 'text-format': {
@@ -495,14 +415,6 @@ export default Vue.extend({
           mappingUtils.mappingIconAction(tab.icon)
           break
         }
-        case 'bg-separate': {
-          if (this.inBgSettingMode) {
-            backgroundUtils.detachBgImage()
-          } else {
-            backgroundUtils.setBgImageSrc()
-          }
-          break
-        }
         case 'effect': {
           if (this.isHandleShadow && this.mobilePanel !== 'photo-shadow') {
             Vue.notify({ group: 'copy', text: `${i18n.t('NN0665')}` })
@@ -517,9 +429,6 @@ export default Vue.extend({
       if (tab.icon !== 'crop') {
         if (this.isCropping) {
           imageUtils.setImgControlDefault()
-        }
-        if (backgroundUtils.backgroundImageControl) {
-          backgroundUtils.setAllBackgroundImageControlDefault()
         }
       }
 
@@ -551,9 +460,6 @@ export default Vue.extend({
       } else {
         return this.currSelectedInfo.types.size === 1
       }
-    },
-    handleLockedNotify() {
-      this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
     }
   }
 })
