@@ -25,27 +25,6 @@
             :style="colorStyles(color)"
             @click="handleColorEvent(color)")
       template(v-if="!showAllRecentlyColor")
-        //- Brandkit select
-        div(class="relative")
-          brand-selector(theme="mobile-panel")
-          div(class="color-panel__brand-settings pointer"
-              @click="handleOpenSettings")
-            svg-icon(iconName="settings" iconColor="gray-2" iconWidth="24px")
-        //- Brandkit palettes
-        div(v-if="isPalettesLoading" class="color-panel__colors")
-          svg-icon(iconName="loading"
-                  iconWidth="20px"
-                  iconColor="white")
-        div(v-else v-for="palette in currentPalettes"
-            class="color-panel__colors"
-            :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
-            span {{getDisplayedPaletteName(palette)}}
-          div
-            div(v-for="color in palette.colors"
-              class="color-panel__color"
-              :style="colorStyles(color.color)"
-              @click="handleColorEvent(color.color)")
         //- Document colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
@@ -78,15 +57,12 @@
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import colorUtils from '@/utils/colorUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import layerUtils from '@/utils/layerUtils'
 import mouseUtils from '@/utils/mouseUtils'
-import { LayerType, SidebarPanelType } from '@/store/types'
-import brandkitUtils from '@/utils/brandkitUtils'
-import { IBrand, IBrandColorPalette } from '@/interfaces/brandkit'
+import { LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
@@ -116,8 +92,7 @@ export default Vue.extend({
     }
   },
   components: {
-    ColorPicker,
-    BrandSelector
+    ColorPicker
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -147,21 +122,11 @@ export default Vue.extend({
   mounted() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setIsColorPanelOpened(true)
-    if (this.isColorPanelHandling) {
-      brandkitUtils.fetchPalettes(this.fetchPalettes)
-    }
     this.initRecentlyColors()
   },
   destroyed() {
     this.updateDocumentColors({ pageIndex: layerUtils.pageIndex, color: colorUtils.currColor })
     this.setIsColorPanelOpened(false)
-  },
-  watch: {
-    currentBrand() {
-      if (this.isColorPanelHandling) {
-        brandkitUtils.fetchPalettes(this.fetchPalettes)
-      }
-    }
   },
   computed: {
     ...mapGetters({
@@ -169,18 +134,9 @@ export default Vue.extend({
       defaultColors: 'color/getDefaultColors',
       allRecentlyColors: 'color/getRecentlyColors',
       currSelectedInfo: 'getCurrSelectedInfo',
-      currentBrand: 'brandkit/getCurrentBrand',
-      selectedTab: 'brandkit/getSelectedTab',
-      isPalettesLoading: 'brandkit/getIsPalettesLoading',
       currPanel: 'getCurrSidebarPanelType',
       getCurrFunctionPanelType: 'getCurrFunctionPanelType'
     }),
-    isBrandkitAvailable(): boolean {
-      return brandkitUtils.isBrandkitAvailable
-    },
-    isColorPanelHandling(): boolean {
-      return this.isBrandkitAvailable && (this.currPanel !== SidebarPanelType.brand || this.selectedTab !== 'color')
-    },
     isShape(): boolean {
       return layerUtils.getCurrConfig.type === LayerType.shape
     },
@@ -192,9 +148,6 @@ export default Vue.extend({
     },
     isColorPickerOpen(): boolean {
       return colorUtils.isColorPickerOpen
-    },
-    currentPalettes(): IBrandColorPalette[] {
-      return (this.currentBrand as IBrand).colorPalettes
     },
     showAllRecentlyColor(): boolean {
       return this.allRecentlyControl ?? this.showAllRecently
@@ -212,24 +165,16 @@ export default Vue.extend({
     ...mapMutations({
       updateDocumentColors: 'UPDATE_documentColors',
       setCurrFunctionPanel: 'SET_currFunctionPanelType',
-      setSettingsOpen: 'brandkit/SET_isSettingsOpen',
       setIsColorPanelOpened: 'SET_isColorPanelOpened'
     }),
     ...mapActions({
-      fetchPalettes: 'brandkit/fetchPalettes',
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors'
     }),
-    handleOpenSettings() {
-      this.setSettingsOpen(true)
-    },
     colorStyles(color: string) {
       return {
         backgroundColor: color
       }
-    },
-    getDisplayedPaletteName(colorPalette: IBrandColorPalette): string {
-      return brandkitUtils.getDisplayedPaletteName(colorPalette)
     },
     handleColorEvent(color: string) {
       colorUtils.event.emit(colorUtils.currEvent, color)

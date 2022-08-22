@@ -161,8 +161,6 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      isShowPagePreview: 'page/getIsShowPagePreview',
-      showPagePanel: 'page/getShowPagePanel',
       bgRemoveMode: 'bgRemove/getInBgRemoveMode',
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -448,12 +446,6 @@ export default Vue.extend({
                     break
                 }
               }
-            } else if (this.inBgSettingMode) {
-              if (this.backgroundLocked) return this.handleLockedNotify()
-              this.setBgImageControl({
-                pageIndex: pageUtils.currFocusPageIndex,
-                imgControl: !this.backgroundImgControl
-              })
             }
             break
           }
@@ -501,11 +493,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setBgImageControl: 'SET_backgroundImageControl',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
     }),
     ...mapActions({
-      fetchPalettes: 'brandkit/fetchPalettes',
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors'
     }),

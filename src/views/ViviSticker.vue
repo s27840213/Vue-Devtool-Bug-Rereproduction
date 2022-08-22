@@ -7,7 +7,7 @@
       div(class="vivisticker__content")
         vvstk-editor(v-show="isInEditor")
         main-menu(v-show="!isInEditor")
-      //- transition(name="panel-up")
+      transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
           :currColorEvent="currColorEvent"
@@ -191,7 +191,7 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
-    background-color: setColor(gray-5);
+    background-color: setColor(nav-active);
   }
   &__bottom {
     z-index: setZindex("footer");
