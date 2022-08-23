@@ -30,7 +30,8 @@ export default Vue.extend({
     return {
       config: undefined as any,
       backgroundImage: '',
-      backgroundColor: ''
+      backgroundColor: '',
+      options: ''
     }
   },
   async mounted() {
@@ -51,8 +52,9 @@ export default Vue.extend({
     }
   },
   methods: {
-    fetchDesign(query: string) {
+    fetchDesign(query: string, options = '') {
       this.clearBuffers()
+      this.options = options
       this.$nextTick(async () => {
         const urlParams = new URLSearchParams(query)
         const type = urlParams.get('type')
@@ -104,9 +106,9 @@ export default Vue.extend({
       if (this.mode === ScreenShotMode.LAYER) {
         const target = (this.$refs.target as Vue).$el
         const { width, height } = target.getBoundingClientRect()
-        vivistickerUtils.sendDoneLoading(width, height)
+        vivistickerUtils.sendDoneLoading(width, height, this.options)
       } else {
-        vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight)
+        vivistickerUtils.sendDoneLoading(window.innerWidth, window.innerHeight, this.options)
       }
     }
   }
