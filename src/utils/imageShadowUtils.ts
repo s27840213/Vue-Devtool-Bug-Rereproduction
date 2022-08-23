@@ -21,7 +21,7 @@ export const CANVAS_SIZE = 510
 export const CANVAS_MAX_SIZE = 1600
 export const CANVAS_SPACE = 400
 export const CANVAS_FLOATING_SCALE = 2.2
-export const DRAWING_TIMEOUT = 300
+export const DRAWING_TIMEOUT = 30
 const FLOATING_SHADOW_SIZE = 100
 
 /** These attrs are used to indicate the performance of each shadow effect */
