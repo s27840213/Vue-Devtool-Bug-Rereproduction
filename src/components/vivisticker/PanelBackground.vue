@@ -357,16 +357,16 @@ export default Vue.extend({
       this.setIsInBgShare(true)
     },
     handleSave() {
-      vivistickerUtils.sendToIOS('SHARE', {
-        params: this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
-        action: 'download'
-      })
+      vivistickerUtils.sendScreenshotUrl(
+        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
+        'download'
+      )
     },
     handleStory() {
-      vivistickerUtils.sendToIOS('SHARE', {
-        params: this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
-        action: 'IGStory'
-      })
+      vivistickerUtils.sendScreenshotUrl(
+        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
+        'IGStory'
+      )
     }
   }
 })
