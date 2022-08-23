@@ -19,7 +19,7 @@ type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedE
 
 export const CANVAS_SIZE = 510
 export const CANVAS_MAX_SIZE = 1600
-export const CANVAS_SPACE = 400
+export const CANVAS_SPACE = 800
 export const CANVAS_FLOATING_SCALE = 2.2
 export const DRAWING_TIMEOUT = 30
 const FLOATING_SHADOW_SIZE = 100
@@ -185,7 +185,12 @@ class ImageShadowUtils {
       // canvasTest.style.zIndex = '10000'
 
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      this.dilate = getDilate(imageData, !timeout ? maxsize / middsize : 1)
+      this.dilate = getDilate(imageData, {
+        top: y,
+        left: x,
+        width: drawCanvasW,
+        height: drawCanvasH
+      }, !timeout ? maxsize / middsize : 1)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
     if (params && params.timeout) {
@@ -653,69 +658,124 @@ class ImageShadowUtils {
     }
   }
 
-  async getImgEdgeWidth(canvas: HTMLCanvasElement) {
+  getImgEdgeWidth(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const ROW_PIXELS = imageData.data.length / canvas.height
     const COL_PIXELS = imageData.data.length / canvas.width
 
     let reach = false
-    let top = 0
-    await this.asyncProcessing(() => {
-      while (!reach && top <= COL_PIXELS / 4) {
-        for (let i = top * ROW_PIXELS + 3; i <= (top + 1) * ROW_PIXELS + 3; i += 4) {
-          if (imageData.data[i]) {
-            reach = true
-            break
-          }
+    let top = -1
+    while (!reach && top < COL_PIXELS) {
+      top++
+      for (let i = top * ROW_PIXELS + 3; i < (top + 1) * ROW_PIXELS + 3; i += 4) {
+        if (imageData.data[i]) {
+          reach = true
+          break
         }
-        top++
       }
-    })
+    }
 
     reach = false
-    let bottom = 0
-    await this.asyncProcessing(() => {
-      while (!reach && bottom <= COL_PIXELS / 4) {
-        for (let i = bottom * ROW_PIXELS; i <= (bottom + 1) * ROW_PIXELS; i += 4) {
-          if (imageData.data[imageData.data.length - i - 1]) {
-            reach = true
-            break
-          }
+    let bottom = -1
+    while (!reach && bottom < COL_PIXELS) {
+      bottom++
+      for (let i = bottom * ROW_PIXELS; i < (bottom + 1) * ROW_PIXELS; i += 4) {
+        if (imageData.data[imageData.data.length - i - 1]) {
+          reach = true
+          break
         }
-        bottom++
       }
-    })
+    }
 
     reach = false
-    let left = 0
-    await this.asyncProcessing(() => {
-      while (!reach && left <= ROW_PIXELS / 4) {
-        for (let j = left * 4 + 3; j <= imageData.data.length; j += ROW_PIXELS) {
-          if (imageData.data[j]) {
-            reach = true
-            break
-          }
+    let left = -1
+    while (!reach && left < ROW_PIXELS) {
+      left++
+      for (let j = left * 4 + 3; j < imageData.data.length; j += ROW_PIXELS) {
+        if (imageData.data[j]) {
+          reach = true
+          break
         }
-        left++
       }
-    })
+    }
 
     reach = false
-    let right = 0
-    await this.asyncProcessing(() => {
-      while (!reach && right <= ROW_PIXELS / 4) {
-        for (let j = right * 4; j <= imageData.data.length; j += ROW_PIXELS) {
-          if (imageData.data[imageData.data.length - j - 1]) {
-            reach = true
-            break
-          }
+    let right = -1
+    while (!reach && right < ROW_PIXELS) {
+      right++
+      for (let j = right * 4; j < imageData.data.length; j += ROW_PIXELS) {
+        if (imageData.data[imageData.data.length - j - 1]) {
+          reach = true
+          break
         }
-        right++
       }
-    })
+    }
     return { right, left, top, bottom }
   }
+  // async getImgEdgeWidth(canvas: HTMLCanvasElement) {
+  //   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+  //   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  //   const ROW_PIXELS = imageData.data.length / canvas.height
+  //   const COL_PIXELS = imageData.data.length / canvas.width
+
+  //   let reach = false
+  //   let top = 0
+  //   await this.asyncProcessing(() => {
+  //     while (!reach && top < COL_PIXELS) {
+  //       for (let i = top * ROW_PIXELS + 3; i < (top + 1) * ROW_PIXELS + 3; i += 4) {
+  //         if (imageData.data[i]) {
+  //           reach = true
+  //           break
+  //         }
+  //       }
+  //       top++
+  //     }
+  //   })
+
+  //   reach = false
+  //   let bottom = 0
+  //   await this.asyncProcessing(() => {
+  //     while (!reach && bottom < COL_PIXELS) {
+  //       for (let i = bottom * ROW_PIXELS; i < (bottom + 1) * ROW_PIXELS; i += 4) {
+  //         if (imageData.data[imageData.data.length - i - 1]) {
+  //           reach = true
+  //           break
+  //         }
+  //       }
+  //       bottom++
+  //     }
+  //   })
+
+  //   reach = false
+  //   let left = 0
+  //   await this.asyncProcessing(() => {
+  //     while (!reach && left < ROW_PIXELS) {
+  //       for (let j = left * 4 + 3; j < imageData.data.length; j += ROW_PIXELS) {
+  //         if (imageData.data[j]) {
+  //           reach = true
+  //           break
+  //         }
+  //       }
+  //       left++
+  //     }
+  //   })
+
+  //   reach = false
+  //   let right = 0
+  //   await this.asyncProcessing(() => {
+  //     while (!reach && right < ROW_PIXELS) {
+  //       for (let j = right * 4; j < imageData.data.length; j += ROW_PIXELS) {
+  //         if (imageData.data[imageData.data.length - j - 1]) {
+  //           reach = true
+  //           break
+  //         }
+  //       }
+  //       right++
+  //     }
+  //   })
+  //   return { right, left, top, bottom }
+  // }
 
   getOptimizeWin(n: number) {
     const window = new Array(2 * n + 1)

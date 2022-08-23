@@ -186,7 +186,6 @@ export default new class ImageShadowPanelUtils {
       const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
-
       const params = { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE }
       imageShadowUtils.drawingInit(updateCanvas, img, config, params)
 
@@ -210,9 +209,10 @@ export default new class ImageShadowPanelUtils {
           logUtils.setLog('Error: effect type error: ' + config.styles.shadow.currentEffect)
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
+
       logUtils.setLog('phase: finish drawing')
       setMark('upload', 3)
-      const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
+      const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
       logUtils.setLog('phase: finish calculate edge')
@@ -222,7 +222,18 @@ export default new class ImageShadowPanelUtils {
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
       uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
-      ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
+      ctxUpload.drawImage(updateCanvas, left, top, uploadCanvas.width, uploadCanvas.height, 0, 0, uploadCanvas.width, uploadCanvas.height)
+
+      // const canvasTest = document.createElement('canvas')
+      // canvasTest.setAttribute('width', uploadCanvas.width.toString())
+      // canvasTest.setAttribute('height', uploadCanvas.height.toString())
+      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
+      // ctxText.drawImage(uploadCanvas, 0, 0)
+      // document.body.appendChild(canvasTest)
+      // // setTimeout(() => document.body.removeChild(canvasTest), 10000)
+      // canvasTest.style.position = 'absolute'
+      // canvasTest.style.top = '0'
+      // canvasTest.style.zIndex = '10000'
 
       logUtils.setLog('phase: start uploading result')
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 1)]
