@@ -309,7 +309,11 @@ export default Vue.extend({
           break
         }
         case 'move': {
-          pageUtils.setScaleRatio(this.tmpScaleRatio * event.scale)
+          const limitMultiplier = 4
+          if (pageUtils.mobileMinScaleRatio * limitMultiplier <= pageUtils.scaleRatio) {
+            return
+          }
+          pageUtils.setScaleRatio(Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier))
           break
         }
 
