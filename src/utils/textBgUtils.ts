@@ -18,6 +18,7 @@ class TextBg {
       none: {},
       'square-borderless': {
         opacity: 100, // adjustable
+        yOffset: 0,
         bStroke: 0,
         bRadius: 0,
         bColor: 'transparent',
@@ -26,6 +27,7 @@ class TextBg {
       },
       'rounded-borderless': {
         opacity: 100, // adjustable
+        yOffset: 0,
         bStroke: 0,
         bRadius: 35, // adjustable
         bColor: 'transparent',
@@ -34,6 +36,7 @@ class TextBg {
       },
       'square-hollow': {
         opacity: 100, // adjustable
+        yOffset: 0,
         bStroke: 8, // adjustable
         bRadius: 0,
         bColor: '#F1D289', // adjustable
@@ -42,6 +45,7 @@ class TextBg {
       },
       'rounded-hollow': {
         opacity: 100, // adjustable
+        yOffset: 0,
         bStroke: 8, // adjustable
         bRadius: 35, // adjustable
         bColor: '#F1D289', // adjustable
@@ -50,6 +54,7 @@ class TextBg {
       },
       'square-both': {
         opacity: 100, // adjustable
+        yOffset: 0,
         bStroke: 8, // adjustable
         bRadius: 0,
         bColor: '#979B9B', // adjustable
@@ -58,6 +63,7 @@ class TextBg {
       },
       'rounded-both': {
         opacity: 100, // adjustable
+        yOffset: 0,
         bStroke: 8, // adjustable
         bRadius: 35, // adjustable
         bColor: '#979B9B', // adjustable
@@ -89,17 +95,18 @@ class TextBg {
     if (!isITextBox(effect)) return {}
 
     const opacity = effect.opacity * 0.01
+    const [pTop, pBottom] = [effect.pStroke - effect.yOffset, effect.pStroke + effect.yOffset]
     return {
       borderWidth: `${effect.bStroke}px`,
       borderStyle: 'solid',
       borderColor: this.rgba(effect.bColor, opacity),
       borderRadius: `${effect.bRadius}px`,
-      padding: `${effect.pStroke}px 20px`,
+      padding: `${pTop}px 20px ${pBottom}px 20px`,
       backgroundColor: this.rgba(effect.pColor, opacity),
       // Prevent BGcolor overflow to border
       backgroundClip: 'padding-box',
       // Only for Contorller
-      controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`
+      controllerPadding: `${effect.bStroke + pTop}px ${effect.bStroke + 20}px ${effect.bStroke + pBottom}px ${effect.bStroke + 20}px`
     }
   }
 
@@ -175,8 +182,9 @@ class TextBg {
         }
 
         if (isITextBox(textBg)) {
-          textBg.bColor = textBg.bColor || '#FF0000'
-          textBg.pColor = textBg.pColor || '#00FF00'
+          // textBg.bColor = textBg.bColor || '#FF0000'
+          // textBg.pColor = textBg.pColor || '#00FF00'
+          textBg.yOffset = Math.max(Math.min(textBg.yOffset, textBg.pStroke), -textBg.pStroke)
         } else if (isITextUnderline(textBg)) {
           textBg.color = textBg.color || '#0000FF'
         }
