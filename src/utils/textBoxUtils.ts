@@ -17,52 +17,52 @@ class Textbox {
     return {
       none: {},
       'square-borderless': {
-        opacity: 50, // adjustable
+        opacity: 100, // adjustable
         bStroke: 0,
         bRadius: 0,
         bColor: 'transparent',
         pStroke: 20, // adjustable
-        pColor: '' // adjustable
+        pColor: '#F1D289' // adjustable
       },
       'rounded-borderless': {
-        opacity: 50, // adjustable
+        opacity: 100, // adjustable
         bStroke: 0,
-        bRadius: 20, // adjustable
+        bRadius: 35, // adjustable
         bColor: 'transparent',
         pStroke: 20, // adjustable
-        pColor: '' // adjustable
+        pColor: '#F1D289' // adjustable
       },
       'square-hollow': {
-        opacity: 50, // adjustable
-        bStroke: 20, // adjustable
+        opacity: 100, // adjustable
+        bStroke: 8, // adjustable
         bRadius: 0,
-        bColor: '', // adjustable
-        pStroke: 0,
+        bColor: '#F1D289', // adjustable
+        pStroke: 20,
         pColor: 'transparent'
       },
       'rounded-hollow': {
-        opacity: 50, // adjustable
-        bStroke: 20, // adjustable
-        bRadius: 20, // adjustable
-        bColor: '', // adjustable
-        pStroke: 0,
+        opacity: 100, // adjustable
+        bStroke: 8, // adjustable
+        bRadius: 35, // adjustable
+        bColor: '#F1D289', // adjustable
+        pStroke: 20,
         pColor: 'transparent'
       },
       'square-both': {
-        opacity: 50, // adjustable
-        bStroke: 20, // adjustable
+        opacity: 100, // adjustable
+        bStroke: 8, // adjustable
         bRadius: 0,
-        bColor: '', // adjustable
-        pStroke: 20, // adjustable
-        pColor: '' // adjustable
+        bColor: '#979B9B', // adjustable
+        pStroke: 10, // adjustable
+        pColor: '#F1D289' // adjustable
       },
       'rounded-both': {
-        opacity: 50, // adjustable
-        bStroke: 20, // adjustable
-        bRadius: 20, // adjustable
-        bColor: '', // adjustable
-        pStroke: 20, // adjustable
-        pColor: '' // adjustable
+        opacity: 100, // adjustable
+        bStroke: 8, // adjustable
+        bRadius: 35, // adjustable
+        bColor: '#979B9B', // adjustable
+        pStroke: 10, // adjustable
+        pColor: '#F1D289' // adjustable
       },
       'underline-triangle': {
         height: 20,
@@ -94,12 +94,12 @@ class Textbox {
       borderStyle: 'solid',
       borderColor: this.rgba(effect.bColor, opacity),
       borderRadius: `${effect.bRadius}px`,
-      padding: `${effect.pStroke}px 0`,
+      padding: `${effect.pStroke}px 20px`,
       backgroundColor: this.rgba(effect.pColor, opacity),
       // Prevent BGcolor overflow to border
       backgroundClip: 'padding-box',
       // Only for Contorller
-      controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke}px`
+      controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`
     }
   }
 

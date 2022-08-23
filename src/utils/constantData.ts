@@ -228,10 +228,10 @@ class ConstantData {
         stroke: i18n.tc('NN0069'),
         shape: i18n.tc('NN0070'),
         bend: i18n.tc('NN0071'),
-        bStroke: '邊框寬度',
-        bColor: '邊框顏色',
-        bRadius: '邊框圓角',
-        pStroke: '填滿高度',
+        bStroke: '外框粗細',
+        bColor: '外框顏色',
+        bRadius: i18n.tc('NN0086'),
+        pStroke: '擴展',
         pColor: '填滿顏色',
         height: '高度',
         width: '寬度',
@@ -309,11 +309,11 @@ class ConstantData {
         options: toOptions([])
       }, {
         key: 'square-borderless',
-        label: '方形底無邊框',
+        label: '方形底無外框',
         options: toOptions(['opacity', 'pStroke', 'pColor'])
       }, {
         key: 'rounded-borderless',
-        label: '圓矩形底無邊框',
+        label: '圓矩形底無外框',
         options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
       }, {
         key: 'square-hollow',
@@ -322,15 +322,15 @@ class ConstantData {
       }, {
         key: 'rounded-hollow',
         label: '圓矩形底空心框',
-        options: toOptions(['opacity', 'bStroke', 'bRadius', 'bColor'])
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor'])
       }, {
         key: 'square-both',
-        label: '方形有邊框有填色',
+        label: '方形有外框有填色',
         options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
       }, {
         key: 'rounded-both',
-        label: '圓矩形有邊框有填色',
-        options: toOptions(['opacity', 'bStroke', 'bRadius', 'bColor', 'pStroke', 'pColor'])
+        label: '圓矩形有外框有填色',
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
       }, {
         key: 'underline-triangle',
         label: '粗底線(三角)',
