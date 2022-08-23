@@ -725,11 +725,12 @@ export default Vue.extend({
         return
       }
       const { currentEffect } = this.shadow
+      const hasShadowSrc = this.shadow.srcObj.type && this.shadow.srcObj.type !== 'upload' && this.shadow.srcObj.assetId
       if (currentEffect !== ShadowEffectType.none) {
         const { id } = this
         imageShadowUtils.setHandleId(id)
         imageShadowUtils.setProcessId(id)
-        imageShadowUtils.setIsProcess(layerInfo, true)
+        !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo, true)
       }
       clearShadowSrc && this.clearShadowSrc()
 
@@ -890,22 +891,25 @@ export default Vue.extend({
         cb: this.clearShadowSrc
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)
-      switch (currentEffect) {
-        case ShadowEffectType.shadow:
-        case ShadowEffectType.frame:
-        case ShadowEffectType.blur:
-          imageShadowUtils.drawShadow(canvasList, img, this.config, params)
-          break
-        case ShadowEffectType.imageMatched:
-          imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
-          break
-        case ShadowEffectType.floating: {
-          imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
-          break
+      if (!hasShadowSrc) {
+        switch (currentEffect) {
+          case ShadowEffectType.shadow:
+          case ShadowEffectType.frame:
+          case ShadowEffectType.blur:
+            imageShadowUtils.drawShadow(canvasList, img, this.config, params)
+            break
+          case ShadowEffectType.imageMatched:
+            imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
+            break
+          case ShadowEffectType.floating: {
+            imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
+            break
+          }
         }
-        case ShadowEffectType.none:
-          imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
-          imageShadowUtils.clearLayerData()
+      }
+      if (currentEffect === ShadowEffectType.none) {
+        imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
+        imageShadowUtils.clearLayerData()
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
@@ -932,7 +936,6 @@ export default Vue.extend({
             ...effects
           }
         })
-        this.clearShadowSrc()
         switch (this.currentShadowEffect) {
           case ShadowEffectType.shadow:
           case ShadowEffectType.blur:
@@ -941,7 +944,8 @@ export default Vue.extend({
               imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: () => this.shadow.srcObj.type && this.clearShadowSrc()
               })
             }
             break
@@ -950,7 +954,8 @@ export default Vue.extend({
               imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: () => this.shadow.srcObj.type && this.clearShadowSrc()
               })
             }
             break
@@ -959,7 +964,8 @@ export default Vue.extend({
               imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg.floating as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: () => this.shadow.srcObj.type && this.clearShadowSrc()
               })
             }
             break

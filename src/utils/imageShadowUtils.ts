@@ -455,7 +455,7 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
-    const { effects, currentEffect, maxsize = 1600, middsize } = shadow
+    const { effects, currentEffect, maxsize = 1600 } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
@@ -486,13 +486,6 @@ class ImageShadowUtils {
       if (!layerInfo || !Object.keys(layerInfo)) {
         layerInfo = this.layerData?.options?.layerInfo
       }
-
-      let { drawCanvasW, drawCanvasH } = params || {}
-      if (!drawCanvasH || !drawCanvasW) {
-        drawCanvasH = this.layerData?.options?.drawCanvasH ?? 0
-        drawCanvasW = this.layerData?.options?.drawCanvasW ?? 0
-      }
-
       /**
        * Show the process icon as:
        * 1. this drawing is not an uploading draw -> timeout !== 0
@@ -512,7 +505,12 @@ class ImageShadowUtils {
 
       const start2 = Date.now()
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      const bluredData = imageDataAChannel(imageData, canvasT.width, canvasT.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+      let bluredData
+      if (radius > 0) {
+        bluredData = imageDataAChannel(imageData, canvasT.width, canvasT.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+      } else {
+        bluredData = imageData
+      }
       console.log('2: handle blur time: ', Date.now() - start2)
 
       const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0

@@ -9,8 +9,8 @@ function manhattan (imageData: ImageData) {
 			const pos0 = yy + x
 			const pos = pos0 * 4
 			if (pixels[pos + 3] > 32) {
-				mapX[pos0] = 0
-				mapY[pos0] = 0
+				mapX[pos0] = 1 - pixels[pos + 3] / 255
+				mapY[pos0] = mapX[pos0]
 			} else {
 				mapX[pos0] = width > DIST_MAX ? DIST_MAX : width
 				mapY[pos0] = height > DIST_MAX ? DIST_MAX : height
