@@ -31,6 +31,8 @@ const longpress = {
       return
     }
 
+    console.log(window.PointerEvent)
+
     const handler = (e: PointerEvent) => {
       binding.value(e)
     }
