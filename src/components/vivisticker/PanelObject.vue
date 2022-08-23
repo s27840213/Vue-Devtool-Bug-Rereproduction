@@ -13,7 +13,6 @@
       btn(@click.native="downloadAll") Download all
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
-      class="panel-objects__list"
       :list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -207,9 +206,6 @@ export default Vue.extend({
   &__searchbar {
     margin-top: 24px;
     margin-bottom: 14px;
-  }
-  &__list {
-    @include no-scrollbar;
   }
   &__item {
     width: 80px;

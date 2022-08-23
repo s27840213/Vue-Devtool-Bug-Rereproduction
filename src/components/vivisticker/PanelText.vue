@@ -15,7 +15,6 @@
           @click="handleAddText")
         span {{ $t('STK0001') }}
     category-list(ref="list"
-      class="panel-text__list"
       :list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -220,8 +219,17 @@ export default Vue.extend({
     margin-top: 24px;
     margin-bottom: 14px;
   }
-  &__list {
-    @include no-scrollbar;
+  &__brand-header {
+    margin-top: 10px;
+    margin-bottom: 13px;
+  }
+  &__brand-settings {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
   }
   &__item {
     width: 145px;
