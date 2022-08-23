@@ -85,33 +85,27 @@ class Textbox {
     }
   }
 
-  convertTextEffect(effect: ITextBox) {
+  convertTextEffect(effect: ITextBox|ITextUnderline) {
+    if (!isITextBox(effect)) return {}
+
     const opacity = effect.opacity * 0.01
-    switch (effect.name) {
-      case 'square-borderless':
-      case 'rounded-borderless':
-      case 'square-hollow':
-      case 'rounded-hollow':
-      case 'square-both':
-      case 'rounded-both':
-        return {
-          borderWidth: `${effect.bStroke}px`,
-          borderStyle: 'solid',
-          borderColor: this.rgba(effect.bColor, opacity),
-          borderRadius: `${effect.bRadius}px`,
-          padding: `${effect.pStroke}px 0`,
-          backgroundColor: this.rgba(effect.pColor, opacity),
-          // Prevent BGcolor overflow to border
-          backgroundClip: 'padding-box',
-          // Only for Contorller
-          controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke}px`
-        }
-      default:
-        return {}
+    return {
+      borderWidth: `${effect.bStroke}px`,
+      borderStyle: 'solid',
+      borderColor: this.rgba(effect.bColor, opacity),
+      borderRadius: `${effect.bRadius}px`,
+      padding: `${effect.pStroke}px 0`,
+      backgroundColor: this.rgba(effect.pColor, opacity),
+      // Prevent BGcolor overflow to border
+      backgroundClip: 'padding-box',
+      // Only for Contorller
+      controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke}px`
     }
   }
 
-  converTextSpanEffect(effect: Record<string, string|number>): Record<string, string | never> {
+  converTextSpanEffect(effect: ITextBox|ITextUnderline): Record<string, string | never> {
+    if (!isITextUnderline(effect)) return {}
+
     function underlineBorder(type: string, color: string) {
       function semiCircle(right: boolean) {
         return `url("data:image/svg+xml; utf8,
@@ -141,29 +135,23 @@ class Textbox {
       }
     }
 
-    const underlineWidthScale = effect.height as number / 8
+    const underlineWidthScale = effect.height / 8
     const color = effect.color
-      ? this.rgba(effect.color as string, effect.opacity as number * 0.01)
+      ? this.rgba(effect.color, effect.opacity * 0.01)
       : ''
-    switch (effect.name) {
-      case 'underline-triangle':
-      case 'underline-circle':
-      case 'underline-square':
-        return {
-          boxDecorationBreak: 'clone',
-          backgroundRepeat: 'no-repeat',
-          backgroundImage: `
-            linear-gradient(180deg, ${color}, ${color}),
-            ${underlineBorder(effect.name, color)}`,
-          backgroundSize: `
-            calc(100% - ${underlineWidthScale * 8}px) ${effect.height}px,
-            ${effect.height as number / 2}px ${effect.height}px,
-            ${effect.height as number / 2}px ${effect.height}px`,
-          backgroundPositionX: `${underlineWidthScale * 4}px, 0, 100%`,
-          backgroundPositionY: `${100 - (effect.yOffset as number)}%`
-        }
-      default:
-        return {}
+
+    return {
+      boxDecorationBreak: 'clone',
+      backgroundRepeat: 'no-repeat',
+      backgroundImage: `
+        linear-gradient(180deg, ${color}, ${color}),
+        ${underlineBorder(effect.name, color)}`,
+      backgroundSize: `
+        calc(100% - ${underlineWidthScale * 8}px) ${effect.height}px,
+        ${effect.height / 2}px ${effect.height}px,
+        ${effect.height / 2}px ${effect.height}px`,
+      backgroundPositionX: `${underlineWidthScale * 4}px, 0, 100%`,
+      backgroundPositionY: `${100 - (effect.yOffset)}%`
     }
   }
 
@@ -176,11 +164,11 @@ class Textbox {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
-      const { type, styles: { textBox: layerTextbox }, paragraphs } = layers[idx] as IText
+      const { type, styles: { textBox: layerTextbox } } = layers[idx] as IText
 
       if (type === 'text') {
         const textBox = {} as ITextBox | ITextUnderline
-        if (layerTextbox && (layerTextbox as ITextBox).name === effect) {
+        if (layerTextbox && layerTextbox.name === effect) {
           Object.assign(textBox, layerTextbox, attrs)
         } else {
           Object.assign(textBox, defaultAttrs, attrs, { name: effect })
