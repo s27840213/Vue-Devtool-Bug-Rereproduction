@@ -391,6 +391,7 @@ export default Vue.extend({
   }
   &__list {
     flex-grow: 1;
+    @include no-scrollbar;
   }
   &__item {
     width: 145px;
