@@ -301,7 +301,7 @@ class ConstantData {
         options: toOptions(['distance', 'angle', 'color'])
       }])
     }, {
-      name: 'box',
+      name: 'bg',
       label: '文字背景樣式',
       effects2d: arrTo2darr([{
         key: 'none',

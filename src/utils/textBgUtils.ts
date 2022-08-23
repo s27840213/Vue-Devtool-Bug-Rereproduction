@@ -4,7 +4,7 @@ import store from '@/store'
 import textEffectUtils from './textEffectUtils'
 import { ITextBox, ITextUnderline, isITextBox, isITextUnderline } from '@/interfaces/format'
 
-class Textbox {
+class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -155,7 +155,7 @@ class Textbox {
     }
   }
 
-  setTextBox(effect: string, attrs?: Record<string, string | number>): void {
+  setTextBg(effect: string, attrs?: Record<string, string | number>): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
@@ -164,32 +164,32 @@ class Textbox {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
-      const { type, styles: { textBox: layerTextbox } } = layers[idx] as IText
+      const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
 
       if (type === 'text') {
-        const textBox = {} as ITextBox | ITextUnderline
-        if (layerTextbox && layerTextbox.name === effect) {
-          Object.assign(textBox, layerTextbox, attrs)
+        const textBg = {} as ITextBox | ITextUnderline
+        if (layerTextBg && layerTextBg.name === effect) {
+          Object.assign(textBg, layerTextBg, attrs)
         } else {
-          Object.assign(textBox, defaultAttrs, attrs, { name: effect })
+          Object.assign(textBg, defaultAttrs, attrs, { name: effect })
         }
 
-        if (isITextBox(textBox)) {
-          textBox.bColor = textBox.bColor || '#FF0000'
-          textBox.pColor = textBox.pColor || '#00FF00'
-        } else if (isITextUnderline(textBox)) {
-          textBox.color = textBox.color || '#0000FF'
+        if (isITextBox(textBg)) {
+          textBg.bColor = textBg.bColor || '#FF0000'
+          textBg.pColor = textBg.pColor || '#00FF00'
+        } else if (isITextUnderline(textBg)) {
+          textBg.color = textBg.color || '#0000FF'
         }
 
         store.commit('UPDATE_specLayerData', {
           pageIndex,
           layerIndex,
           subLayerIndex: +idx,
-          styles: { textBox }
+          styles: { textBg }
         })
       }
     }
   }
 }
 
-export default new Textbox()
+export default new TextBg()

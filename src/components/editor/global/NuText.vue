@@ -39,7 +39,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
-import textBoxUtils from '@/utils/textBoxUtils'
+import textBgUtils from '@/utils/textBgUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -154,7 +154,7 @@ export default Vue.extend({
       return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
     },
     spanEffect(): Record<string, string|never> {
-      return textBoxUtils.converTextSpanEffect(this.config.styles.textBox)
+      return textBgUtils.converTextSpanEffect(this.config.styles.textBg)
     }
   },
   watch: {

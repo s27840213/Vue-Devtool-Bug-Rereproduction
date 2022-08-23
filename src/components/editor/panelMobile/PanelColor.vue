@@ -197,14 +197,6 @@ export default Vue.extend({
           const currentEffect = textEffect.name || 'none'
           textEffectUtils.setTextEffect(currentEffect, { color: newColor })
         }
-        // TODO
-        // case ColorEventType.textBox: {
-        //   const { styles } = textEffectUtils.getCurrentLayer()
-        //   const { textEffect = {} } = styles
-
-        //   const currentEffect = textEffect.name || 'none'
-        //   textEffectUtils.setTextEffect(currentEffect, { color: newColor })
-        // }
       }
     },
     handleFrameColorUpdate(newColor: string) {

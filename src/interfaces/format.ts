@@ -47,7 +47,7 @@ export function isITextUnderline(object: ITextBox|ITextUnderline): object is ITe
 
 export interface ITextFormat {
   textEffect: ITextEffect | {},
-  textBox: ITextEffect | {},
+  textBg: ITextBox | ITextUnderline | {},
   textShape: ITextShape | {},
   scale: number,
   paragraphStyle: IParagraphStyle,

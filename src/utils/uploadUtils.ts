@@ -1300,7 +1300,7 @@ class UploadUtils {
           writingMode: styles.writingMode,
           align: styles.align,
           textEffect: styles.textEffect,
-          textBox: styles.textBox,
+          textBg: styles.textBg,
           textShape: styles.textShape,
           type: styles.type,
           userId: styles.userId

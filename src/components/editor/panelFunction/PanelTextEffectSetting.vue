@@ -53,14 +53,14 @@ import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-import textboxUtils from '@/utils/textBoxUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import constantData from '@/utils/constantData'
-import { ITextBox, ITextEffect, ITextShape } from '@/interfaces/format'
+import { ITextBox, ITextEffect, ITextShape, ITextUnderline } from '@/interfaces/format'
 
 export default Vue.extend({
   components: {
@@ -80,11 +80,11 @@ export default Vue.extend({
     }
   },
   computed: {
-    currentStyle(): { shadow: ITextEffect, box: ITextBox, shape: ITextShape } {
+    currentStyle(): { shadow: ITextEffect, bg: ITextBox|ITextUnderline, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
         shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
-        box: styles.textBox as ITextBox,
+        bg: styles.textBg as ITextBox | ITextUnderline,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
     }
@@ -109,8 +109,8 @@ export default Vue.extend({
         case 'shadow':
           textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
           break
-        case 'box':
-          textboxUtils.setTextBox(effectName)
+        case 'bg':
+          textBgUtils.setTextBg(effectName)
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName)
@@ -119,7 +119,7 @@ export default Vue.extend({
       }
       this.recordChange()
     },
-    getEffectName(category: 'shadow' | 'box' | 'shape') {
+    getEffectName(category: 'shadow' | 'bg' | 'shape') {
       return this.currentStyle[category].name || 'none'
     },
     handleRangeInput(event: Event, category: string, opiton: ReturnType<typeof constantData.textEffects>[0]['effects2d'][0][0]['options'][0]) {
@@ -134,8 +134,8 @@ export default Vue.extend({
         case 'shadow':
           textEffectUtils.setTextEffect(this.getEffectName('shadow'), newVal)
           break
-        case 'box':
-          textboxUtils.setTextBox(this.getEffectName('box'), newVal)
+        case 'bg':
+          textBgUtils.setTextBg(this.getEffectName('bg'), newVal)
           break
         case 'shape':
           textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
@@ -159,8 +159,8 @@ export default Vue.extend({
         case 'shadow':
           textEffectUtils.setTextEffect(this.getEffectName('shadow'), { [key]: color })
           break
-        case 'box':
-          textboxUtils.setTextBox(this.getEffectName('box'), { [key]: color })
+        case 'bg':
+          textBgUtils.setTextBg(this.getEffectName('bg'), { [key]: color })
           break
       }
     },
