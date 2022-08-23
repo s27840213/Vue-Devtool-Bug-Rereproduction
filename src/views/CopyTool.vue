@@ -49,6 +49,8 @@ export default Vue.extend({
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  height: 100%;
+  background-color: rgba(181, 181, 181, 0.92);
   > * {
     width: 80%;
   }

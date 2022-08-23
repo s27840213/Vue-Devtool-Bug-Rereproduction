@@ -299,14 +299,10 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
-      }, {
-        key: 'bold-underline',
-        label: '粗底線',
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
       }])
     }, {
       name: 'box',
-      label: '邊框與填滿',
+      label: '文字背景樣式',
       effects2d: arrTo2darr([{
         key: 'none',
         label: i18n.t('NN0111'),
@@ -335,6 +331,18 @@ class ConstantData {
         key: 'rounded-both',
         label: '圓矩形有邊框有填色',
         options: toOptions(['opacity', 'bStroke', 'bRadius', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'underline-triangle',
+        label: '粗底線(三角)',
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'underline-circle',
+        label: '粗底線(圓)',
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'underline-square',
+        label: '粗底線(方)',
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
       }])
     }, {
       name: 'shape',

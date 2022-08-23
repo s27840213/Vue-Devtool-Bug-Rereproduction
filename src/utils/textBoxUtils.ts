@@ -2,7 +2,7 @@ import LayerUtils from '@/utils/layerUtils'
 import { IText } from '@/interfaces/layer'
 import store from '@/store'
 import textEffectUtils from './textEffectUtils'
-import { ITextBox } from '@/interfaces/format'
+import { ITextBox, ITextUnderline, isITextBox, isITextUnderline } from '@/interfaces/format'
 
 class Textbox {
   effects = {} as Record<string, Record<string, string | number>>
@@ -63,6 +63,24 @@ class Textbox {
         bColor: '', // adjustable
         pStroke: 20, // adjustable
         pColor: '' // adjustable
+      },
+      'underline-triangle': {
+        height: 20,
+        yOffset: -2,
+        opacity: 100,
+        color: ''
+      },
+      'underline-circle': {
+        height: 20,
+        yOffset: -2,
+        opacity: 100,
+        color: ''
+      },
+      'underline-square': {
+        height: 20,
+        yOffset: -2,
+        opacity: 100,
+        color: ''
       }
     }
   }
@@ -70,9 +88,12 @@ class Textbox {
   convertTextEffect(effect: ITextBox) {
     const opacity = effect.opacity * 0.01
     switch (effect.name) {
-      case 'none':
-        return {}
-      default:
+      case 'square-borderless':
+      case 'rounded-borderless':
+      case 'square-hollow':
+      case 'rounded-hollow':
+      case 'square-both':
+      case 'rounded-both':
         return {
           borderWidth: `${effect.bStroke}px`,
           borderStyle: 'solid',
@@ -85,38 +106,66 @@ class Textbox {
           // Only for Contorller
           controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke}px`
         }
+      default:
+        return {}
     }
   }
 
-  // updateTextEffect(pageIndex: number, layerIndex: number, attrs = {}) {
-  //   const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-  //   const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-  //   for (const idx in layers) {
-  //     const { type, styles: { textEffect }, paragraphs } = layers[idx] as IText
-  //     if (type === 'text') {
-  //       const mainColor = this.getLayerMainColor(paragraphs)
-  //       const mainFontSize = this.getLayerFontSize(paragraphs)
-  //       const effectName = (textEffect as any).name
-  //       if (effectName && effectName !== 'none') {
-  //         switch (effectName) {
-  //           case 'hollow':
-  //             Object.assign(textEffect, { color: mainColor })
-  //             break
-  //           case 'splice':
-  //             Object.assign(textEffect, { strokeColor: mainColor })
-  //             break
-  //         }
-  //         Object.assign(textEffect, { fontSize: mainFontSize })
-  //         store.commit('UPDATE_specLayerData', {
-  //           pageIndex,
-  //           layerIndex,
-  //           subLayerIndex: +idx,
-  //           styles: { textEffect }
-  //         })
-  //       }
-  //     }
-  //   }
-  // }
+  converTextSpanEffect(effect: Record<string, string|number>): Record<string, string | never> {
+    function underlineBorder(type: string, color: string) {
+      function semiCircle(right: boolean) {
+        return `url("data:image/svg+xml; utf8,
+          <svg width='4' height='8' viewBox='0 0 4 8' fill='none' xmlns='http://www.w3.org/2000/svg'>
+            <g clip-path='url(%23clip0)'>
+              <line ${right ? "transform='matrix(-1 0 0 1 4 8)'" : ''} x1='4' y1='${right ? -4 : 4}' x2='152' y2='${right ? -4 : 4}' stroke='${color}' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/>
+            </g>
+            <defs>
+              <clipPath id='clip0'>
+                <rect ${right ? "transform='matrix(-1 0 0 1 4 0)'" : ''} width='4' height='8' fill='white'/>
+              </clipPath>
+            </defs>
+          </svg>")`.replace(/\n/g, '')
+      }
+
+      type = type.split('-')[1]
+      switch (type) {
+        case 'triangle':
+          // How to draw a triangle in BG, https://stackoverflow.com/a/39854065
+          return `
+            linear-gradient(to bottom right, transparent 0%, transparent 50%, ${color} 50%, ${color} 100%),
+            linear-gradient(to top left, transparent 0%, transparent 50%, ${color} 50%, ${color} 100%)`
+        case 'circle':
+          return `${semiCircle(false)}, ${semiCircle(true)}`
+        case 'square':
+          return `linear-gradient(${color}, ${color}), linear-gradient(${color}, ${color})`
+      }
+    }
+
+    const underlineWidthScale = effect.height as number / 8
+    const color = effect.color
+      ? this.rgba(effect.color as string, effect.opacity as number * 0.01)
+      : ''
+    switch (effect.name) {
+      case 'underline-triangle':
+      case 'underline-circle':
+      case 'underline-square':
+        return {
+          boxDecorationBreak: 'clone',
+          backgroundRepeat: 'no-repeat',
+          backgroundImage: `
+            linear-gradient(180deg, ${color}, ${color}),
+            ${underlineBorder(effect.name, color)}`,
+          backgroundSize: `
+            calc(100% - ${underlineWidthScale * 8}px) ${effect.height}px,
+            ${effect.height as number / 2}px ${effect.height}px,
+            ${effect.height as number / 2}px ${effect.height}px`,
+          backgroundPositionX: `${underlineWidthScale * 4}px, 0, 100%`,
+          backgroundPositionY: `${100 - (effect.yOffset as number)}%`
+        }
+      default:
+        return {}
+    }
+  }
 
   setTextBox(effect: string, attrs?: Record<string, string | number>): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
@@ -130,17 +179,20 @@ class Textbox {
       const { type, styles: { textBox: layerTextbox }, paragraphs } = layers[idx] as IText
 
       if (type === 'text') {
-        const textBox = {} as ITextBox
+        const textBox = {} as ITextBox | ITextUnderline
         if (layerTextbox && (layerTextbox as ITextBox).name === effect) {
           Object.assign(textBox, layerTextbox, attrs)
         } else {
           Object.assign(textBox, defaultAttrs, attrs, { name: effect })
         }
 
-        Object.assign(textBox, {
-          bColor: textBox.bColor || '#FF0000',
-          pColor: textBox.pColor || '#00FF00'
-        })
+        if (isITextBox(textBox)) {
+          textBox.bColor = textBox.bColor || '#FF0000'
+          textBox.pColor = textBox.pColor || '#00FF00'
+        } else if (isITextUnderline(textBox)) {
+          textBox.color = textBox.color || '#0000FF'
+        }
+
         store.commit('UPDATE_specLayerData', {
           pageIndex,
           layerIndex,
