@@ -26,7 +26,9 @@ class ViviStickerUtils {
 
   sendDoneLoading(width: number, height: number, options: string) {
     console.log(width, height, options)
-    this.sendToIOS('DONE_LOADING', { width, height, options })
+    // this.sendToIOS('DONE_LOADING', { width, height, options })
+    // TODO: send options after APP's modification
+    this.sendToIOS('DONE_LOADING', { width, height })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
