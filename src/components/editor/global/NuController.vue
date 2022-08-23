@@ -729,7 +729,6 @@ export default Vue.extend({
       // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
       const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
       const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
-
       const { inMultiSelectionMode } = this
       if (!this.isLocked) {
         event.stopPropagation()
@@ -824,7 +823,9 @@ export default Vue.extend({
             } else {
               // this if statement is used to prevent select the layer in another page
               if (this.pageIndex === pageUtils.currFocusPageIndex && !this.config.locked) {
-                GroupUtils.select(this.pageIndex, [targetIndex])
+                if (!LayerUtils.getCurrLayer.locked) {
+                  GroupUtils.select(this.pageIndex, [targetIndex])
+                }
               }
             }
           } else {
