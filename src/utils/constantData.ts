@@ -60,7 +60,7 @@ class PaymentData {
         ]
       }, {
         label: i18n.t('NN0669'),
-        content: [[16, 17], 20, 18, 22].map((id) => themeItem(id))
+        content: [[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
       }],
       us: [{
         label: i18n.t('NN0667'),
