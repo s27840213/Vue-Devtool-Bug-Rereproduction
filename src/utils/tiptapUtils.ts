@@ -125,10 +125,12 @@ class TiptapUtils {
           // const spans = this.splitLastWhiteSpaces(p.spans)
           const spans = p.spans
           pObj.content = spans.map(s => {
+            // To prevent safari tiptap space issue, we need to replace space with
+            // other char. There are five char can work, choose other if something happens.
             // const newText = s.text
-            const newText = s.text.replace(' ', '\u2006')
-            // const newText = s.text.replace(' ', '\u2009')
-            // const newText = s.text.replace(' ', '\u200A') // 髮寬空格能用 但是寬度非常窄
+            // const newText = s.text.replace(' ', '\u2006')
+            const newText = s.text.replace(' ', '\u2009')
+            // const newText = s.text.replace(' ', '\u200A') // 髮寬空格 能用但是寬度非常窄
             // const newText = s.text.replace(' ', '\u202F')
             // const newText = s.text.replace(' ', '\u205F')
             return {
