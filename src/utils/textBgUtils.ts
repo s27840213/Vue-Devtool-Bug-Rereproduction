@@ -76,19 +76,19 @@ class TextBg {
         height: 20,
         yOffset: -2,
         opacity: 100,
-        color: ''
+        color: '#F1D289'
       },
       'underline-circle': {
         height: 20,
         yOffset: -2,
         opacity: 100,
-        color: ''
+        color: '#F1D289'
       },
       'underline-square': {
         height: 20,
         yOffset: -2,
         opacity: 100,
-        color: ''
+        color: '#F1D289'
       },
       gooey: {
         bRadius: 20,
@@ -118,6 +118,12 @@ class TextBg {
   }
 
   converTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
+    const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
+    let color = ''
+    if (isITextUnderline(effect) || isITextGooey(effect)) {
+      color = this.rgba(effect.color, effect.opacity * 0.01)
+    }
+
     if (isITextUnderline(effect)) {
       const underlineBorder = (type: string, color: string) => {
         function semiCircle(right: boolean) {
@@ -149,9 +155,6 @@ class TextBg {
       }
 
       const underlineWidthScale = effect.height / 8
-      const color = effect.color
-        ? this.rgba(effect.color, effect.opacity * 0.01)
-        : ''
       return {
         boxDecorationBreak: 'clone',
         backgroundRepeat: 'no-repeat',
@@ -166,11 +169,8 @@ class TextBg {
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
-      const color = effect.color
-        ? this.rgba(effect.color, effect.opacity * 0.01)
-        : ''
-      const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
       return {
+        padding: '0 20px',
         backgroundColor: color,
         filter: `url(#${svgId})`,
         svgId: svgId,
@@ -180,7 +180,7 @@ class TextBg {
             attrs: {
               in: 'SourceGraphic',
               result: 'blur',
-              stdDeviation: effect.bRadius
+              stdDeviation: effect.bRadius / 4
             }
           }),
           imageAdjustUtil.createSvgFilter({

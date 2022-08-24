@@ -15,6 +15,7 @@ import router from '@/router'
 import _ from 'lodash'
 import cssConverter from './cssConverter'
 import stepsUtils from './stepsUtils'
+import textBgUtils from './textBgUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -597,7 +598,8 @@ class TextUtils {
               [s.split(':')[0].trim()]: s.split(': ')[1].trim()
             })
           })
-        Object.assign(span.style, spanStyleObject)
+        const textBgSpanEffect = textBgUtils.converTextSpanEffect(content.styles.textBg)
+        Object.assign(span.style, spanStyleObject, textBgSpanEffect)
 
         span.classList.add('nu-text__span')
         p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)

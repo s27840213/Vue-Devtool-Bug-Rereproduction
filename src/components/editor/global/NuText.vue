@@ -40,7 +40,7 @@
 import Vue from 'vue'
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
 import { mapState, mapGetters } from 'vuex'
-import TextUtils from '@/utils/textUtils'
+import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
@@ -50,6 +50,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import { isITextGooey } from '@/interfaces/format'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -73,8 +74,8 @@ export default Vue.extend({
     }
   },
   created() {
-    // TextUtils.loadAllFonts(this.config, 1)
-    TextUtils.loadAllFonts(this.config)
+    // textUtils.loadAllFonts(this.config, 1)
+    textUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true
@@ -83,7 +84,7 @@ export default Vue.extend({
   },
   mounted() {
     if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-      TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+      textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
           this.isLoading = false
         }, 500) // for the delay between font loading and dom rendering
@@ -108,11 +109,11 @@ export default Vue.extend({
 
       let widthLimit
       if (this.isLoading && this.isAutoResizeNeeded) {
-        widthLimit = TextUtils.autoResize(config, this.initSize)
+        widthLimit = textUtils.autoResize(config, this.initSize)
       } else {
         widthLimit = config.widthLimit
       }
-      const textHW = TextUtils.getTextHW(config, widthLimit)
+      const textHW = textUtils.getTextHW(config, widthLimit)
       if (typeof this.subLayerIndex === 'undefined') {
         let x = config.styles.x
         let y = config.styles.y
@@ -164,6 +165,14 @@ export default Vue.extend({
       return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
     },
     spanEffect(): Record<string, unknown> {
+      // May cause performance issue
+      if (isITextGooey(this.config.styles.textBg)) {
+        textUtils.updateTextLayerSizeByShape(
+          this.pageIndex,
+          this.layerIndex,
+          this.subLayerIndex ?? -1
+        )
+      }
       return textBgUtils.converTextSpanEffect(this.config.styles.textBg)
     }
   },
