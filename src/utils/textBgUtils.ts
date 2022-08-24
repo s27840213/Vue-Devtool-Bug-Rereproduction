@@ -180,7 +180,7 @@ class TextBg {
             attrs: {
               in: 'SourceGraphic',
               result: 'blur',
-              stdDeviation: effect.bRadius / 4
+              stdDeviation: effect.bRadius * 0.3
             }
           }),
           imageAdjustUtil.createSvgFilter({

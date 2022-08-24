@@ -122,11 +122,18 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          const spans = this.splitLastWhiteSpaces(p.spans)
+          // const spans = this.splitLastWhiteSpaces(p.spans)
+          const spans = p.spans
           pObj.content = spans.map(s => {
+            // const newText = s.text
+            const newText = s.text.replace(' ', '\u2006')
+            // const newText = s.text.replace(' ', '\u2009')
+            // const newText = s.text.replace(' ', '\u200A') // 髮寬空格能用 但是寬度非常窄
+            // const newText = s.text.replace(' ', '\u202F')
+            // const newText = s.text.replace(' ', '\u205F')
             return {
               type: 'text',
-              text: s.text,
+              text: newText,
               marks: [{
                 type: 'textStyle',
                 attrs: this.makeSpanStyle(s.styles)
@@ -139,21 +146,21 @@ class TiptapUtils {
     }
   }
 
-  splitLastWhiteSpaces(spans: ISpan[]): ISpan[] {
-    const lastSpan = spans[spans.length - 1]
-    if (!lastSpan.text.endsWith(' ')) return spans
-    const copiedSpans = generalUtils.deepCopy(spans)
-    const lastWhiteSpaces = lastSpan.text.match(/ +$/)?.[0] ?? ''
-    const prevText = lastSpan.text.substring(0, lastSpan.text.length - lastWhiteSpaces.length)
-    if (prevText === '') {
-      copiedSpans[copiedSpans.length - 1].styles.pre = true
-      return copiedSpans
-    } else {
-      copiedSpans[copiedSpans.length - 1].text = prevText
-      copiedSpans.push({ text: lastWhiteSpaces, styles: { ...lastSpan.styles, pre: true } })
-      return copiedSpans
-    }
-  }
+  // splitLastWhiteSpaces(spans: ISpan[]): ISpan[] {
+  //   const lastSpan = spans[spans.length - 1]
+  //   if (!lastSpan.text.endsWith(' ')) return spans
+  //   const copiedSpans = generalUtils.deepCopy(spans)
+  //   const lastWhiteSpaces = lastSpan.text.match(/ +$/)?.[0] ?? ''
+  //   const prevText = lastSpan.text.substring(0, lastSpan.text.length - lastWhiteSpaces.length)
+  //   if (prevText === '') {
+  //     copiedSpans[copiedSpans.length - 1].styles.pre = true
+  //     return copiedSpans
+  //   } else {
+  //     copiedSpans[copiedSpans.length - 1].text = prevText
+  //     copiedSpans.push({ text: lastWhiteSpaces, styles: { ...lastSpan.styles, pre: true } })
+  //     return copiedSpans
+  //   }
+  // }
 
   makeParagraphStyle(attributes: any): IParagraphStyle {
     const { font, lineHeight, fontSpacing, size, align, type, userId, assetId } = attributes
@@ -245,6 +252,9 @@ class TiptapUtils {
           if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
+        if (span.text.includes(' ')) {
+          isSetContentRequired = true
+        }
       }
       if (spans.length === 0) {
         if (paragraph.attrs.spanStyle) {
@@ -277,10 +287,10 @@ class TiptapUtils {
         if (paragraph.attrs.spanStyle) {
           isSetContentRequired = true
         }
-        const lastSpanText = spans[spans.length - 1].text
-        if (lastSpanText.endsWith(' ') && !lastSpanText.match(/^ +$/)) {
-          isSetContentRequired = true
-        }
+        // const lastSpanText = spans[spans.length - 1].text
+        // if (lastSpanText.endsWith(' ') && !lastSpanText.match(/^ +$/)) {
+        //   isSetContentRequired = true
+        // }
         result.push({ spans, styles: pStyles })
       }
     }
