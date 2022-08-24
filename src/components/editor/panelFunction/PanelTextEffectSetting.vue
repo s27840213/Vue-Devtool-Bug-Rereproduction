@@ -111,10 +111,13 @@ export default Vue.extend({
           break
         case 'bg':
           textBgUtils.setTextBg(effectName)
+          textShapeUtils.setTextShape('none')
+          TextPropUtils.updateTextPropsState()
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName)
           TextPropUtils.updateTextPropsState()
+          textBgUtils.setTextBg('none')
           break
       }
       this.recordChange()

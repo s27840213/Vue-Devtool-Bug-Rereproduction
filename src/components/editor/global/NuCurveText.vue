@@ -6,7 +6,7 @@
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
       :key="sIndex",
-      :style="Object.assign(styles(span.styles, sIndex), spanEffect)") {{ span.text }}
+      :style="styles(span.styles, sIndex)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -17,7 +17,6 @@ import { ISpan } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import TextUtils from '@/utils/textUtils'
-import textBgUtils from '@/utils/textBgUtils'
 
 export default Vue.extend({
   props: {
@@ -117,9 +116,6 @@ export default Vue.extend({
     },
     transforms(): string[] {
       return TextShapeUtils.convertTextShape(this.textWidth, this.bend)
-    },
-    spanEffect(): Record<string, unknown> {
-      return textBgUtils.converTextSpanEffect(this.config.styles.textBg)
     }
   },
   watch: {
