@@ -73,7 +73,7 @@ export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 
   measures.forEach(measureItem => {
     const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
     logUtils.setLog(log)
-    console.log(log)
+    // console.log(log)
   })
   performance.clearMeasures()
 }
@@ -683,7 +683,7 @@ class ImageShadowUtils {
     }
 
     let _layer = layerUtils.getLayer(pageIndex, layerIndex)
-    if (subLayerIdx === -1) {
+    if (subLayerIdx !== -1) {
       if (_layer.type === LayerType.group) {
         _layer = (layerUtils.getLayer(pageIndex, layerIndex) as IGroup).layers[subLayerIdx] as IImage
       } else if (_layer.type === LayerType.frame) {
@@ -693,7 +693,7 @@ class ImageShadowUtils {
     const layer = _layer as IImage
 
     if (layer.type === LayerType.image) {
-      const { shadow, width, height } = layer.styles
+      const { shadow } = layer.styles
       const { effects } = shadow
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
 
@@ -710,8 +710,6 @@ class ImageShadowUtils {
           imgY
         })
         layerUtils.updateLayerStyles(pageIndex, layerIndex, {
-          // initWidth: width,
-          // initHeight: height,
           scale: 1
         }, subLayerIdx)
       }
