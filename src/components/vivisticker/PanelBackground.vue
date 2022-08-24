@@ -77,7 +77,7 @@
           div(class="panel-bg__share__button-text") {{ $t('STK0004') }}
         div(class="panel-bg__share__button")
           div(class="panel-bg__share__button-icon" @click.stop.prevent="handleStory")
-            svg-icon(iconName="ig_story" iconColor="white" iconWidth="28px")
+            svg-icon(iconName="ig_story" iconColor="white" iconWidth="30px")
           div(class="panel-bg__share__button-text") {{ $t('STK0005') }}
 </template>
 
