@@ -42,10 +42,22 @@ class PaymentData {
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [1, 8, 2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        content: [
+          ...[1].map((id) => themeItem(id)), {
+            label: 'FB 粉絲頁封面',
+            url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+          },
+          ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ]
       }, {
         label: i18n.t('NN0668'),
-        content: [5, 6, 7].map((id) => themeItem(id))
+        content: [
+          ...[5].map((id) => themeItem(id)), {
+            label: '電商 Banner',
+            url: 'https://blog.vivipic.com/tw/ec-banner/'
+          },
+          ...[7].map((id) => themeItem(id))
+        ]
       }, {
         label: i18n.t('NN0669'),
         content: [[16, 17], 20, 18, 22].map((id) => themeItem(id))
@@ -53,13 +65,11 @@ class PaymentData {
       us: [{
         label: i18n.t('NN0667'),
         content: [
-          ...[1].map((id) => themeItem(id)),
-          {
+          ...[1].map((id) => themeItem(id)), {
             label: 'Facebook Cover',
             url: 'https://blog.vivipic.com/us/facebook-cover/'
           },
-          ...[2, 3].map((id) => themeItem(id)),
-          {
+          ...[2, 3].map((id) => themeItem(id)), {
             label: 'Youtube Thumbnail',
             url: 'https://blog.vivipic.com/us/youtube-thumbnail/'
           }, {
