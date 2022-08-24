@@ -88,7 +88,7 @@ export default Vue.extend({
           setTimeout(() => { this.onload() }, 100)
         }
         if (type === 'background') {
-          const url = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
+          const url = `https://template.vivipic.com/${type}/${id}/full?ver=${ver}`
           imageUtils.getImageSize(url, 0, 0).then(({ width, height }) => {
             this.backgroundSize = { width, height }
             this.backgroundImage = url
