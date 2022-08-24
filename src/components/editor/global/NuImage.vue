@@ -735,12 +735,12 @@ export default Vue.extend({
       clearShadowSrc && this.clearShadowSrc()
 
       let img = new Image()
-      if (!['unsplah', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
+      if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
         const res = await ImageUtils.getImgSize(this.config.srcObj, false)
         if (res) {
           this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
         }
-      } else if (['unsplah', 'pixels'].includes(this.config.srcObj.type)) {
+      } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
         this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
       }
 
@@ -751,7 +751,7 @@ export default Vue.extend({
           if (!shadowBuff.canvasShadowImg.shadow) {
             img.crossOrigin = 'anonymous'
             img.src = ImageUtils.getSrc(this.config,
-              ['unsplah', 'pixels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
+              ['unsplash', 'pixels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
               img.onload = async () => {

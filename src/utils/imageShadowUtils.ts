@@ -4,16 +4,14 @@ import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/laye
 import store from '@/store'
 import { IUploadShadowImg } from '@/store/module/shadow'
 import { ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
-import _ from 'lodash'
 import { getDilate } from './canvasAlgorithms'
 import generalUtils from './generalUtils'
-import imageShadowPanelUtils from './imageShadowPanelUtils'
-import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import logUtils from './logUtils'
 import mathUtils from './mathUtils'
 import pageUtils from './pageUtils'
 import { imageDataAChannel, imageDataRGBA } from './stackblur'
+import _ from 'lodash'
 
 type ShadowEffects = IBlurEffect | IShadowEffect | IFrameEffect | IImageMatchedEffect | IFloatingEffect
 
@@ -988,7 +986,7 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 3 },
+    distance: { max: 100, min: 0, weighting: 2 },
     angle: { max: 180, min: -180, weighting: 1 },
     radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 1 },
