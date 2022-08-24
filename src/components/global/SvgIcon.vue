@@ -56,7 +56,6 @@ export default Vue.extend({
   width: 100%;
   transition: background-color 0.2s, color 0.2s;
   fill: currentColor;
-  shape-rendering: geometricPrecision;
   &:focus {
     outline: none;
   }
