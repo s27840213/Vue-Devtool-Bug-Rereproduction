@@ -17,7 +17,7 @@ export interface ITextShape {
 
 export interface ITextBox {
   name: 'square-borderless'|'rounded-borderless'|'square-hollow'|
-        'rounded-hollow'|'square-both'|'rounded-both'
+  'rounded-hollow'|'square-both'|'rounded-both'
   opacity: number
   yOffset: number
   bStroke: number
@@ -35,15 +35,27 @@ export interface ITextUnderline {
   color: string
 }
 
-export function isITextBox(object: ITextBox|ITextUnderline): object is ITextBox {
+export interface ITextGooey {
+  name: 'gooey'
+  bRadius: number
+  opacity: number
+  color: string
+}
+
+export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | Record<string, never>
+
+export function isITextBox(object: ITextBgEffect): object is ITextBox {
   return object && object.name &&
     ['square-borderless', 'rounded-borderless', 'square-hollow',
       'rounded-hollow', 'square-both', 'rounded-both'].includes(object.name)
 }
-export function isITextUnderline(object: ITextBox|ITextUnderline): object is ITextUnderline {
+export function isITextUnderline(object: ITextBgEffect): object is ITextUnderline {
   return object && object.name &&
     ['underline-triangle', 'underline-circle', 'underline-square'
     ].includes(object.name)
+}
+export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
+  return object && object.name && object.name === 'gooey'
 }
 
 export interface ITextFormat {

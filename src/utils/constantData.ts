@@ -319,11 +319,11 @@ class ConstantData {
       }, {
         key: 'square-hollow',
         label: '方形空心框',
-        options: toOptions(['opacity', 'yOffset', 'bStroke', 'bColor'])
+        options: toOptions(['opacity', 'yOffset', 'bStroke', 'bColor', 'pStroke'])
       }, {
         key: 'rounded-hollow',
         label: '圓矩形底空心框',
-        options: toOptions(['opacity', 'yOffset', 'bRadius', 'bStroke', 'bColor'])
+        options: toOptions(['opacity', 'yOffset', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
       }, {
         key: 'square-both',
         label: '方形有外框有填色',
@@ -344,6 +344,10 @@ class ConstantData {
         key: 'underline-square',
         label: '粗底線(方)',
         options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'gooey',
+        label: '黏糊糊文字背景',
+        options: toOptions(['bRadius', 'opacity', 'color'])
       }])
     }, {
       name: 'shape',

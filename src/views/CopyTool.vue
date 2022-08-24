@@ -5,6 +5,11 @@ div(class="tool")
           placeholder="background-color: #414d70;\nborder-radius: 5px;")
   textarea(:value="vueCss" rows="5"
           placeholder="backgroundColor: '#414d70',\nborderRadius: '5px',")
+  h1 html replace " with '
+  textarea(v-model="htmlQ" rows="5"
+          placeholder="background-color: #414d70;\nborder-radius: 5px;")
+  textarea(:value="htmlQ2" rows="5"
+          placeholder="backgroundColor: '#414d70',\nborderRadius: '5px',")
 </template>
 
 <script lang="ts">
@@ -14,7 +19,8 @@ import _ from 'lodash'
 export default Vue.extend({
   data() {
     return {
-      css: ''
+      css: '',
+      htmlQ: ''
     }
   },
   computed: {
@@ -38,6 +44,9 @@ export default Vue.extend({
         rt.push(`${key}: ${value},`)
       }
       return rt.join('\n')
+    },
+    htmlQ2():string {
+      return this.htmlQ.replace(/"/g, "'")
     }
   }
 })

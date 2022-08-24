@@ -24,6 +24,16 @@
         :data-sindex="sIndex"
         :key="sIndex",
         :style="styles(span.styles, sIndex)") {{ span.text }}
+    svg(v-if="spanEffect.svgFilter")
+      filter(:id="spanEffect.svgId")
+        component(v-for="(elm, idx) in spanEffect.svgFilter"
+                  :key="`svgFilter${idx}`"
+                  :is="elm.tag"
+                  v-bind="elm.attrs")
+          component(v-for="child in elm.child"
+                    :key="child.tag"
+                    :is="child.tag"
+                    v-bind="child.attrs")
 </template>
 
 <script lang="ts">
@@ -153,7 +163,7 @@ export default Vue.extend({
     isAutoResizeNeeded(): boolean {
       return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
     },
-    spanEffect(): Record<string, string|never> {
+    spanEffect(): Record<string, unknown> {
       return textBgUtils.converTextSpanEffect(this.config.styles.textBg)
     }
   },
