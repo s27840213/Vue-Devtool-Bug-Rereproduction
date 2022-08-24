@@ -106,8 +106,8 @@ export default Vue.extend({
       }
     },
     imageStyles() {
-      const screenWidth = window.innerWidth * 2
-      const screenHeight = window.innerHeight * 2
+      const screenWidth = window.innerWidth
+      const screenHeight = window.innerHeight
       const { width, height } = this.backgroundSize
       if (screenWidth / screenHeight > width / height) {
         return {
@@ -145,7 +145,7 @@ export default Vue.extend({
 .screenshot {
   @include size(100%, 100%);
   &__bg-img, &__bg-color {
-    @include size(200%, 200%);
+    @include size(100%, 100%);
   }
 }
 </style>
