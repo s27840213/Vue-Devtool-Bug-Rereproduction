@@ -232,7 +232,7 @@ export default new class ImageShadowPanelUtils {
       // document.body.appendChild(canvasTest)
       // // setTimeout(() => document.body.removeChild(canvasTest), 10000)
       // canvasTest.style.position = 'absolute'
-      // canvasTest.style.top = '0'
+      // canvasTest.style.top = '-100px'
       // canvasTest.style.zIndex = '10000'
 
       logUtils.setLog('phase: start uploading result')
@@ -254,8 +254,8 @@ export default new class ImageShadowPanelUtils {
           }
           const _width = config.styles.width / config.styles.scale
           const _height = config.styles.height / config.styles.scale
-          const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
-          const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
+          const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
+          const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })

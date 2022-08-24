@@ -829,38 +829,20 @@ export default Vue.extend({
           imageShadowUtils.clearLayerData()
       }
 
+      imageShadowUtils.updateEffectProps(this.layerInfo, {
+          maxsize: shadowBuff.MAXSIZE,
+          middsize: Math.max(img.naturalWidth, img.naturalHeight)
+        }
+      )
+
       /**
        * Calculate canvas parameters
        */
-      // large size preview
-      // const { width, height, imgWidth, imgHeight } = this.config.styles
-      // const drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
-      // const drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
-      // let spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
-      // const _canvasW = (width + CANVAS_SPACE * spaceScale)
-      // const _canvasH = (height + CANVAS_SPACE * spaceScale)
-      // const canvasRatio = _canvasH / _canvasW
-      // const canvasWOri = _canvasW >= _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
-      // const canvasHOri = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
-      // const drawCanvasWOri = width * canvasWOri / _canvasW
-      // const drawCanvasHOri = height * canvasHOri / _canvasH
-      // spaceScale *= width > height ? CANVAS_SIZE / _canvasW : CANVAS_SIZE / _canvasH
-      // spaceScale *= imgWidth > imgHeight
-      //   ? (width / imgWidth) * this.shadowBuff.MAXSIZE / drawCanvasWOri
-      //   : (height / imgHeight) * this.shadowBuff.MAXSIZE / drawCanvasHOri
-      // const canvasW = Math.round(drawCanvasW + CANVAS_SPACE * spaceScale)
-      // const canvasH = Math.round(drawCanvasH + CANVAS_SPACE * spaceScale)
-      // this.shadowBuff.drawCanvasW = Math.round(width * canvasW / _canvasW)
-      // this.shadowBuff.drawCanvasH = Math.round(height * canvasH / _canvasH)
-      // this.shadowBuff.canvasSize.width = Math.round(_canvasW)
-      // this.shadowBuff.canvasSize.height = Math.round(_canvasH)
-      // canvas.setAttribute('width', `${canvasW}`)
-      // canvas.setAttribute('height', `${canvasH}`)
-
       // small size preview
-      const { width, height, imgWidth, imgHeight } = this.config.styles
-      const _canvasW = img.naturalWidth + CANVAS_SPACE
-      const _canvasH = img.naturalHeight + CANVAS_SPACE
+      const { width, height, imgWidth, imgHeight, shadow } = this.config.styles
+      const _mappingScale = shadow.middsize / shadow.maxsize
+      const _canvasW = img.naturalWidth + CANVAS_SPACE * _mappingScale
+      const _canvasH = img.naturalHeight + CANVAS_SPACE * _mappingScale
       this.shadowBuff.drawCanvasW = Math.round(img.naturalWidth * width / imgWidth)
       this.shadowBuff.drawCanvasH = Math.round(img.naturalHeight * height / imgHeight)
       this.shadowBuff.canvasSize.width = _canvasW * width / this.shadowBuff.drawCanvasW
@@ -876,12 +858,6 @@ export default Vue.extend({
             .querySelectorAll(`.shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`)
         ] as HTMLCanvasElement[]
       }
-
-      imageShadowUtils.updateEffectProps(this.layerInfo, {
-          maxsize: shadowBuff.MAXSIZE,
-          middsize: Math.max(img.naturalWidth, img.naturalHeight)
-        }
-      )
 
       const params = {
         pageId: pageUtils.getPage(this.pageIndex).id,

@@ -137,10 +137,25 @@ class ImageShadowUtils {
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
-    const { canvasT } = this
+    const { canvasT, canvasMaxSize } = this
+    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow: { maxsize = 1600, middsize = 510 } } } = config
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
+    }
+    if (params.timeout !== 0) {
+      const imgRatio = img.naturalWidth / img.naturalHeight
+      const maxW = imgRatio > 1 ? maxsize : maxsize * imgRatio
+      const maxH = imgRatio < 1 ? maxsize : maxsize / imgRatio
+      const drawCanvasW = Math.round(width / imgWidth * maxW)
+      const drawCanvasH = Math.round(height / imgHeight * maxH)
+      const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
+      const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
+      canvasMaxSize.setAttribute('width', canvasW.toString())
+      canvasMaxSize.setAttribute('height', canvasH.toString())
+    } else {
+      canvasMaxSize.setAttribute('width', canvas.width.toString())
+      canvasMaxSize.setAttribute('height', canvas.height.toString())
     }
     this._layerData = { ...this._layerData, config, pageId: params.pageId || pageUtils.currFocusPage.id }
     const { layerInfo } = params || {}
@@ -161,7 +176,6 @@ class ImageShadowUtils {
     if ([ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
       const ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
       const { drawCanvasW, drawCanvasH, timeout = DRAWING_TIMEOUT } = params
-      const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow: { maxsize = 1600, middsize = 510 } } } = config
       const drawImgWidth = width / imgWidth * img.naturalWidth
       const drawImgHeight = height / imgHeight * img.naturalHeight
       const scaleRatio = img.naturalWidth / imgWidth
@@ -183,15 +197,10 @@ class ImageShadowUtils {
       // canvasTest.style.zIndex = '10000'
 
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      this.dilate = getDilate(imageData, {
-        top: y,
-        left: x,
-        width: drawCanvasW,
-        height: drawCanvasH
-      }, !timeout ? maxsize / middsize : 1)
+      this.dilate = getDilate(imageData, undefined, !timeout ? maxsize / middsize : 1)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
-    if (params && params.timeout) {
+    if (params && params.timeout !== 0) {
       this._layerData.options = {
         ...this._layerData.options,
         ...params
@@ -458,7 +467,7 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
-    const { effects, currentEffect, maxsize = 1600 } = shadow
+    const { effects, currentEffect, maxsize = 1600, middsize = 510 } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
@@ -476,14 +485,16 @@ class ImageShadowUtils {
     const handler = () => {
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
-      const { canvasT } = this
+      const { canvasT, canvasMaxSize } = this
       const ctxT = canvasT.getContext('2d')
+      const ctxMax = canvasMaxSize.getContext('2d') as CanvasRenderingContext2D
       if (!this.dilate) return
       if (!ctxT) {
         logUtils.setLog('Error: ' + (ctxT ? 'canvasMaxSize' : 'ctxT') + 'is undefined')
         return
       }
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+      ctxMax.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
 
       let { layerInfo } = params || {}
       if (!layerInfo || !Object.keys(layerInfo)) {
@@ -504,21 +515,37 @@ class ImageShadowUtils {
       ctxT.putImageData(_imageData, 0, 0)
       console.log('1: handle spread time: ', Date.now() - start1)
       setMark('shadow', 2)
-      const arrtFactor = maxsize / 1600
 
+      const attrFactor = timeout ? 1 : maxsize / middsize
+      ctxMax.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
+      const imageData = ctxMax.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
       const start2 = Date.now()
-      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
       let bluredData
       if (radius > 0) {
-        bluredData = imageDataAChannel(imageData, canvasT.width, canvasT.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
+        bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5), handlerId)
       } else {
         bluredData = imageData
       }
+      ctxMax.putImageData(bluredData, 0, 0)
+      ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       console.log('2: handle blur time: ', Date.now() - start2)
 
-      const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-      const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-      ctxT.putImageData(bluredData, offsetX, offsetY)
+      // Show test canvas
+      // const canvasTest = document.createElement('canvas')
+      // canvasTest.setAttribute('width', canvasMaxSize.width.toString())
+      // canvasTest.setAttribute('height', canvasMaxSize.height.toString())
+      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
+      // ctxText.drawImage(canvasMaxSize, 0, 0)
+      // document.body.appendChild(canvasTest)
+      // setTimeout(() => document.body.removeChild(canvasTest), 10000)
+      // canvasTest.style.position = 'absolute'
+      // canvasTest.style.top = '0'
+      // canvasTest.style.zIndex = '10000'
+
+      const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * attrFactor * fieldRange.shadow.distance.weighting : 0
+      const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * attrFactor * fieldRange.shadow.distance.weighting : 0
+      // ctxT.putImageData(bluredData, offsetX, offsetY)
+      ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, offsetX, offsetY, canvasT.width, canvasT.height)
 
       setMark('shadow', 3)
 
@@ -657,17 +684,17 @@ class ImageShadowUtils {
   }
 
   getImgEdgeWidth(canvas: HTMLCanvasElement) {
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const ROW_PIXELS = imageData.data.length / canvas.height
-    const COL_PIXELS = imageData.data.length / canvas.width
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const ROW_PIXELS = imageData.data.length / imageData.height
+    const COL_PIXELS = imageData.data.length / imageData.width
 
     let reach = false
     let top = -1
     while (!reach && top < COL_PIXELS) {
       top++
       for (let i = top * ROW_PIXELS + 3; i < (top + 1) * ROW_PIXELS + 3; i += 4) {
-        if (imageData.data[i]) {
+        if (imageData.data[i] !== 0) {
           reach = true
           break
         }
@@ -679,7 +706,7 @@ class ImageShadowUtils {
     while (!reach && bottom < COL_PIXELS) {
       bottom++
       for (let i = bottom * ROW_PIXELS; i < (bottom + 1) * ROW_PIXELS; i += 4) {
-        if (imageData.data[imageData.data.length - i - 1]) {
+        if (imageData.data[imageData.data.length - i - 1] !== 0) {
           reach = true
           break
         }
@@ -691,7 +718,7 @@ class ImageShadowUtils {
     while (!reach && left < ROW_PIXELS) {
       left++
       for (let j = left * 4 + 3; j < imageData.data.length; j += ROW_PIXELS) {
-        if (imageData.data[j]) {
+        if (imageData.data[j] !== 0) {
           reach = true
           break
         }
@@ -703,77 +730,18 @@ class ImageShadowUtils {
     while (!reach && right < ROW_PIXELS) {
       right++
       for (let j = right * 4; j < imageData.data.length; j += ROW_PIXELS) {
-        if (imageData.data[imageData.data.length - j - 1]) {
+        if (imageData.data[imageData.data.length - j - 1] !== 0) {
           reach = true
           break
         }
       }
     }
-    return { right, left, top, bottom }
+    top--
+    right--
+    left--
+    bottom--
+    return { top, right, bottom, left }
   }
-  // async getImgEdgeWidth(canvas: HTMLCanvasElement) {
-  //   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-  //   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  //   const ROW_PIXELS = imageData.data.length / canvas.height
-  //   const COL_PIXELS = imageData.data.length / canvas.width
-
-  //   let reach = false
-  //   let top = 0
-  //   await this.asyncProcessing(() => {
-  //     while (!reach && top < COL_PIXELS) {
-  //       for (let i = top * ROW_PIXELS + 3; i < (top + 1) * ROW_PIXELS + 3; i += 4) {
-  //         if (imageData.data[i]) {
-  //           reach = true
-  //           break
-  //         }
-  //       }
-  //       top++
-  //     }
-  //   })
-
-  //   reach = false
-  //   let bottom = 0
-  //   await this.asyncProcessing(() => {
-  //     while (!reach && bottom < COL_PIXELS) {
-  //       for (let i = bottom * ROW_PIXELS; i < (bottom + 1) * ROW_PIXELS; i += 4) {
-  //         if (imageData.data[imageData.data.length - i - 1]) {
-  //           reach = true
-  //           break
-  //         }
-  //       }
-  //       bottom++
-  //     }
-  //   })
-
-  //   reach = false
-  //   let left = 0
-  //   await this.asyncProcessing(() => {
-  //     while (!reach && left < ROW_PIXELS) {
-  //       for (let j = left * 4 + 3; j < imageData.data.length; j += ROW_PIXELS) {
-  //         if (imageData.data[j]) {
-  //           reach = true
-  //           break
-  //         }
-  //       }
-  //       left++
-  //     }
-  //   })
-
-  //   reach = false
-  //   let right = 0
-  //   await this.asyncProcessing(() => {
-  //     while (!reach && right < ROW_PIXELS) {
-  //       for (let j = right * 4; j < imageData.data.length; j += ROW_PIXELS) {
-  //         if (imageData.data[imageData.data.length - j - 1]) {
-  //           reach = true
-  //           break
-  //         }
-  //       }
-  //       right++
-  //     }
-  //   })
-  //   return { right, left, top, bottom }
-  // }
 
   getOptimizeWin(n: number) {
     const window = new Array(2 * n + 1)
@@ -986,7 +954,7 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 2 },
+    distance: { max: 100, min: 0, weighting: 0.6 },
     angle: { max: 180, min: -180, weighting: 1 },
     radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 1 },
