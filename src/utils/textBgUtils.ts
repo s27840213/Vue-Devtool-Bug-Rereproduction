@@ -118,7 +118,6 @@ class TextBg {
   }
 
   converTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
-    const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
     let color = ''
     if (isITextUnderline(effect) || isITextGooey(effect)) {
       color = this.rgba(effect.color, effect.opacity * 0.01)
@@ -169,6 +168,7 @@ class TextBg {
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
+      const svgId = `svgFilter_googey_${effect.color}${effect.opacity}${effect.bRadius}`
       return {
         padding: '0 20px',
         backgroundColor: color,
