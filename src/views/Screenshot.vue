@@ -6,7 +6,7 @@
               :pageIndex="0"
               :layerIndex="0")
     div(v-if="backgroundImage !== ''" class="screenshot__bg-img")
-      img(:src="backgroundImage" @load="onload")
+      img(ref="target" :src="backgroundImage" :style="imageStyles()" @load="onload")
     div(v-if="backgroundColor !== ''" class="screenshot__bg-color" :style="bgColorStyles()")
 </template>
 
@@ -15,6 +15,7 @@ import Vue from 'vue'
 import layerFactary from '@/utils/layerFactary'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
+import imageUtils from '@/utils/imageUtils'
 
 declare let window: CustomWindow
 
@@ -30,6 +31,10 @@ export default Vue.extend({
     return {
       config: undefined as any,
       backgroundImage: '',
+      backgroundSize: {
+        width: 0,
+        height: 0
+      },
       backgroundColor: '',
       options: ''
     }
@@ -83,7 +88,11 @@ export default Vue.extend({
           setTimeout(() => { this.onload() }, 100)
         }
         if (type === 'background') {
-          this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
+          const url = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
+          imageUtils.getImageSize(url, 0, 0).then(({ width, height }) => {
+            this.backgroundSize = { width, height }
+            this.backgroundImage = url
+          })
         }
         if (type === 'backgroundColor') {
           this.backgroundColor = id ?? '#FFFFFFFF'
@@ -96,6 +105,22 @@ export default Vue.extend({
         backgroundColor: `#${this.backgroundColor}`
       }
     },
+    imageStyles() {
+      const screenWidth = window.innerWidth * 2
+      const screenHeight = window.innerHeight * 2
+      const { width, height } = this.backgroundSize
+      if (screenWidth / screenHeight > width / height) {
+        return {
+          width: `${screenHeight * width / height}px`,
+          height: `${screenHeight}px`
+        }
+      } else {
+        return {
+          width: `${screenWidth}px`,
+          height: `${screenWidth * height / width}px`
+        }
+      }
+    },
     clearBuffers() {
       this.config = undefined
       this.backgroundImage = ''
@@ -103,8 +128,9 @@ export default Vue.extend({
     },
     onload() {
       console.log('loaded')
-      if (this.mode === ScreenShotMode.LAYER) {
-        const target = (this.$refs.target as Vue).$el
+      if (this.mode === ScreenShotMode.LAYER || this.mode === ScreenShotMode.BG_IMG) {
+        const element = (this.$refs.target as Vue)
+        const target = element.$el ?? element
         const { width, height } = target.getBoundingClientRect()
         vivistickerUtils.sendDoneLoading(width, height, this.options)
       } else {
@@ -119,13 +145,7 @@ export default Vue.extend({
 .screenshot {
   @include size(100%, 100%);
   &__bg-img, &__bg-color {
-    @include size(100%, 100%);
-  }
-  &__bg-img > img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    vertical-align: middle;
+    @include size(200%, 200%);
   }
 }
 </style>
