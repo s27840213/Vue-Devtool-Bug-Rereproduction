@@ -164,9 +164,9 @@ class TextBg {
           linear-gradient(180deg, ${color}, ${color}),
           ${underlineBorder(effect.name, color)}`,
         backgroundSize: `
-          calc(100% - ${borderWidth * 2}px) ${effect.height}px,
-          ${borderWidth}px ${effect.height}px,
-          ${borderWidth}px ${effect.height}px`,
+          calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
+          ${borderWidth}px ${borderWidth * 2}px,
+          ${borderWidth}px ${borderWidth * 2}px`,
         backgroundPositionX: `${borderWidth}px, 0, 100%`,
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
