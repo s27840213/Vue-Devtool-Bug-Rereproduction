@@ -34,6 +34,7 @@ import { IFooterTabProps } from '@/interfaces/editor'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
+import textUtils from '@/utils/textUtils'
 
 export default Vue.extend({
   name: 'ViviSticker',
@@ -51,6 +52,7 @@ export default Vue.extend({
   },
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
+    textUtils.loadDefaultFonts()
   },
   mounted() {
     /**

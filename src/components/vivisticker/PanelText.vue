@@ -9,11 +9,11 @@
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
-      div(class="panel-text__text-button-title py-10 text-white") {{ $t('NN0089') }}
       div(class="panel-text__text-button-wrapper"
           :style="`font-family: ${localeFont()}`"
           @click="handleAddText")
         span {{ $t('STK0001') }}
+        svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
     category-list(ref="list"
       :list="list"
       @loadMore="handleLoadMore")
@@ -145,7 +145,6 @@ export default Vue.extend({
       async () => {
         this.getRecently()
         this.getContent()
-        textUtils.loadDefaultFonts()
       })
   },
   activated() {
@@ -250,19 +249,21 @@ export default Vue.extend({
     padding: 10px 0;
     text-align: left;
   }
-  &__text-button-title {
-    line-height: 26px;
-    text-align: left;
-    margin-bottom: 12px;
-  }
   &__text-button-wrapper {
-    text-align: left;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
     margin-bottom: 14px;
-    padding: 14px 0 14px 16px;
+    padding: 14px 0;
     box-sizing: border-box;
-    background-color: setColor(gray-3);
+    background-color: setColor(dark-bg);
     border-radius: 10px;
+    &:active {
+      background-color: setColor(dark-bg-active);
+    }
     & > span {
       font-weight: 700;
       font-size: 20px;
