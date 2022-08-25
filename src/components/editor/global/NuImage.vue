@@ -117,8 +117,9 @@ export default Vue.extend({
     }
   },
   mounted() {
+    if (this.isBgImgControl) return
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
-    eventUtils.on(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id, () => {
+    eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
         const isFloatingEffect = this.currentShadowEffect === ShadowEffectType.floating
         const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent)
@@ -150,10 +151,12 @@ export default Vue.extend({
     })
   },
   beforeDestroy() {
-    if (this.config.inProcess) {
-      this.setIsProcessing(LayerProcessType.none)
+    if (!this.isBgImgControl) {
+      if (this.config.inProcess) {
+        this.setIsProcessing(LayerProcessType.none)
+      }
+      eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
-    eventUtils.off(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
   },
   data() {
     return {
@@ -302,7 +305,7 @@ export default Vue.extend({
       return `0 0 ${this.svgImageWidth} ${this.svgImageHeight}`
     },
     cssFilterElms(): any[] {
-      const { adjustImgStyles: { adjust, width, imgX, imgY, height } } = this
+      const { adjustImgStyles: { adjust, width, height } } = this
       // @TODO: only for halation now
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []

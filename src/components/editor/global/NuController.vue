@@ -729,7 +729,6 @@ export default Vue.extend({
       // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
       const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
       const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
-
       const { inMultiSelectionMode } = this
       if (!this.isLocked) {
         event.stopPropagation()
@@ -823,8 +822,10 @@ export default Vue.extend({
               GroupUtils.select(this.pageIndex, [targetIndex])
             } else {
               // this if statement is used to prevent select the layer in another page
-              if (this.pageIndex === pageUtils.currFocusPageIndex) {
-                GroupUtils.select(this.pageIndex, [targetIndex])
+              if (this.pageIndex === pageUtils.currFocusPageIndex && !this.config.locked) {
+                if (!LayerUtils.getCurrLayer.locked) {
+                  GroupUtils.select(this.pageIndex, [targetIndex])
+                }
               }
             }
           } else {
@@ -966,7 +967,9 @@ export default Vue.extend({
             }
             // The layerUtils.addLayers will trigger a record function, so we don't need to record the extra step here
           } else {
-            StepsUtils.record()
+            if (!(this.config as IImage).isHoveringFrame) {
+              StepsUtils.record()
+            }
           }
         } else {
           if (this.getLayerType === 'text') {
@@ -1696,7 +1699,7 @@ export default Vue.extend({
             replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             return
           } else {
-            eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
+            eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
         GroupUtils.deselect()

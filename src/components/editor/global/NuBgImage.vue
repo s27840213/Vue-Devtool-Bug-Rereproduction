@@ -14,6 +14,10 @@
         class="body"
         @error="onError"
         ref="body")
+    component(v-for="(elm, idx) in cssFilterElms"
+      :key="`cssFilter${idx}`"
+      :is="elm.tag"
+      v-bind="elm.attrs")
 </template>
 
 <script lang="ts">
@@ -26,6 +30,8 @@ import generalUtils from '@/utils/generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import editorUtils from '@/utils/editorUtils'
+import pageUtils from '@/utils/pageUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 
 export default Vue.extend({
   props: {
@@ -49,6 +55,9 @@ export default Vue.extend({
           this.perviewAsLoading()
         }
       }
+    },
+    getImgDimension(newVal, oldVal) {
+      this.handleDimensionUpdate(newVal, oldVal)
     }
   },
   async created() {
@@ -101,7 +110,8 @@ export default Vue.extend({
       return !srcObj || srcObj.assetId === ''
     },
     getImgDimension(): number {
-      return ImageUtils.getSignificantDimension(this.image.config.styles.width, this.image.config.styles.height) * (this.scaleRatio / 100)
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
+      return ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
@@ -149,6 +159,22 @@ export default Vue.extend({
         backgroundPosition: image.posX === -1 ? 'center center' : `${image.posX}px ${image.posY}px`,
         ...this.flipStyles
       }
+    },
+    cssFilterElms(): any[] {
+      const { adjust } = this.image.config.styles
+      const { width, height } = pageUtils.getPage(this.pageIndex)
+      if (!adjust) return []
+
+      const elms = []
+      if (adjust.halation) {
+        const position = {
+          width: width / 2,
+          x: width / 2,
+          y: height / 2
+        }
+        elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
+      }
+      return elms
     }
   },
   methods: {
@@ -213,6 +239,39 @@ export default Vue.extend({
     },
     setInBgSettingMode() {
       editorUtils.setInBgSettingMode(true)
+    },
+    handleDimensionUpdate(newVal: number, oldVal: number) {
+      const imgElement = this.$refs.body as HTMLImageElement
+      if (this.image.config.previewSrc === undefined && imgElement) {
+        imgElement.onload = async () => {
+          if (newVal > oldVal) {
+            await this.preLoadImg('next', newVal)
+            this.preLoadImg('pre', newVal)
+          } else {
+            await this.preLoadImg('pre', newVal)
+            this.preLoadImg('next', newVal)
+          }
+        }
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, newVal))
+      }
+    },
+    async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => resolve()
+        img.onerror = () => {
+          reject(new Error(`cannot preLoad the ${preLoadType}-image`))
+          // fetch(img.src)
+          //   .then(res => {
+          //     const { status, statusText } = res
+          //     this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+          //   })
+          //   .catch((e) => {
+          //     this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+          //   })
+        }
+        img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(this.image.config.srcObj, val, preLoadType)))
+      })
     }
   }
 })
