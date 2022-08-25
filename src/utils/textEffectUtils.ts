@@ -46,6 +46,11 @@ class Controller {
         angleFunky: 45,
         opacity: 100,
         color: '#F1D289'
+      },
+      boost: {
+        distance: 40,
+        opacity: 100,
+        color: '#F1D289'
       }
     }
   }
@@ -193,6 +198,15 @@ class Controller {
         }
       case 'funky':
         return this.funky(distance, effect.angleFunky, colorWithOpacity)
+      case 'boost':
+        return {
+          ...CssConverter.convertTextStorke(1, 'black', 'none'),
+          textShadow: `${colorWithOpacity} ${effect.distance * 0.1}px 0px,
+            #000000 ${effect.distance * 0.1 + 1}px 0px,
+            #000000 ${effect.distance * 0.1 - 1}px 0px,
+            #000000 ${effect.distance * 0.1}px -1px,
+            #000000 ${effect.distance * 0.1}px 1px`
+        }
       default:
         return { textShadow: 'none' }
     }

@@ -306,6 +306,10 @@ class ConstantData {
         key: 'funky',
         label: 'Funky',
         options: toOptions(['distance', 'angleFunky', 'opacity', 'color'])
+      }, {
+        key: 'boost',
+        label: 'Boost',
+        options: toOptions(['distance', 'opacity', 'color'])
       }])
     }, {
       name: 'bg',
