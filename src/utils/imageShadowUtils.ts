@@ -736,10 +736,6 @@ class ImageShadowUtils {
         }
       }
     }
-    top--
-    right--
-    left--
-    bottom--
     return { top, right, bottom, left }
   }
 

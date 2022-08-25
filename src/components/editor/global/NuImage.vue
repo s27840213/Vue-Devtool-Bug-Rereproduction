@@ -1030,7 +1030,7 @@ export default Vue.extend({
   align-items: center;
 
   &__picture {
-    object-fit: cover;
+    // object-fit: cover;
     position: absolute;
     top: 0px;
     left: 0px;
