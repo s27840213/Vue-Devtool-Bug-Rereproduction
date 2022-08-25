@@ -56,7 +56,7 @@ export default Vue.extend({
         }
       }
     },
-    getImgDimension(oldVal, newVal) {
+    getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     }
   },
@@ -111,7 +111,7 @@ export default Vue.extend({
     },
     getImgDimension(): number {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.image.config as IImage
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
+      return ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100))
     },
     srcObj(): SrcObj {
       return this.image.config.srcObj
