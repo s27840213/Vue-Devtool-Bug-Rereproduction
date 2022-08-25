@@ -409,7 +409,7 @@ export default Vue.extend({
     },
     rightBtnName(): string {
       if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
-        return 'check-circle'
+        return 'check-mobile-circle'
       } else {
         return 'close-circle'
       }
