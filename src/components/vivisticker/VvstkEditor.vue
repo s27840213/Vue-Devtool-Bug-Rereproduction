@@ -1,50 +1,51 @@
 <template lang="pug">
   div(class="vvstk-editor")
-    page-content(:config="config" :pageIndex="pageIndex")
-    div(class="page-control" :style="styles('control')")
-      template(v-for="(layer, index) in config.layers")
-        component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
-          data-identifier="controller"
-          :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-          :layerIndex="index"
-          :pageIndex="pageIndex"
-          :config="layer"
-          :snapUtils="snapUtils"
-          @getClosestSnaplines="getClosestSnaplines"
-          @clearSnap="clearSnap")
-    div(v-if="imageUtils.isImgControl(pageIndex)"
-        class="dim-background"
-        :style="styles('control')")
-      template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
-        nu-layer(style="opacity: 0.45"
-          :layerIndex="currSubSelectedInfo.index"
-          :pageIndex="pageIndex"
-          :imgControl="true"
-          :config="getCurrSubSelectedLayerShown")
-        nu-layer(:layerIndex="currSubSelectedInfo.index"
-          :pageIndex="pageIndex"
-          :config="getCurrSubSelectedLayerShown")
-        div(class="page-control" :style="Object.assign(styles('control'))")
-            nu-img-controller(:layerIndex="currSubSelectedInfo.index"
-                              :pageIndex="pageIndex"
-                              :primaryLayerIndex="currSelectedInfo.index"
-                              :primaryLayer="getCurrLayer"
-                              :forRender="true"
-                              :config="getCurrSubSelectedLayerShown")
-      template(v-else-if="getCurrLayer.type === 'image'")
-        nu-layer(:style="'opacity: 0.45'"
-          :layerIndex="currSelectedIndex"
-          :pageIndex="pageIndex"
-          :imgControl="true"
-          :config="Object.assign(getCurrLayer, { forRender: true })")
-        nu-layer(:layerIndex="currSelectedIndex"
-          :pageIndex="pageIndex"
-          :config="Object.assign(getCurrLayer, { forRender: true })")
-        div(class="page-control" :style="Object.assign(styles('control'))")
-            nu-img-controller(:layerIndex="currSelectedIndex"
-                              :pageIndex="pageIndex"
-                              :forRender="true"
-                              :config="getCurrLayer")
+    div(class="vvstk-editor__pseudo-page" :style="styles('page')")
+      page-content(:config="config" :pageIndex="pageIndex" :noBg="true")
+      div(class="page-control" :style="styles('control')")
+        template(v-for="(layer, index) in config.layers")
+          component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
+            data-identifier="controller"
+            :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
+            :layerIndex="index"
+            :pageIndex="pageIndex"
+            :config="layer"
+            :snapUtils="snapUtils"
+            @getClosestSnaplines="getClosestSnaplines"
+            @clearSnap="clearSnap")
+      div(v-if="imageUtils.isImgControl(pageIndex)"
+          class="dim-background"
+          :style="styles('control')")
+        template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
+          nu-layer(style="opacity: 0.45"
+            :layerIndex="currSubSelectedInfo.index"
+            :pageIndex="pageIndex"
+            :imgControl="true"
+            :config="getCurrSubSelectedLayerShown")
+          nu-layer(:layerIndex="currSubSelectedInfo.index"
+            :pageIndex="pageIndex"
+            :config="getCurrSubSelectedLayerShown")
+          div(class="page-control" :style="Object.assign(styles('control'))")
+              nu-img-controller(:layerIndex="currSubSelectedInfo.index"
+                                :pageIndex="pageIndex"
+                                :primaryLayerIndex="currSelectedInfo.index"
+                                :primaryLayer="getCurrLayer"
+                                :forRender="true"
+                                :config="getCurrSubSelectedLayerShown")
+        template(v-else-if="getCurrLayer.type === 'image'")
+          nu-layer(:style="'opacity: 0.45'"
+            :layerIndex="currSelectedIndex"
+            :pageIndex="pageIndex"
+            :imgControl="true"
+            :config="Object.assign(getCurrLayer, { forRender: true })")
+          nu-layer(:layerIndex="currSelectedIndex"
+            :pageIndex="pageIndex"
+            :config="Object.assign(getCurrLayer, { forRender: true })")
+          div(class="page-control" :style="Object.assign(styles('control'))")
+              nu-img-controller(:layerIndex="currSelectedIndex"
+                                :pageIndex="pageIndex"
+                                :forRender="true"
+                                :config="getCurrLayer")
 </template>
 
 <script lang="ts">
@@ -81,7 +82,8 @@ export default Vue.extend({
       currSubSelectedInfo: 'getCurrSubSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
-      getLayer: 'getLayer'
+      getLayer: 'getLayer',
+      editorBg: 'vivisticker/getEditorBg'
     }),
     config(): IPage {
       return this.pages[this.pageIndex]
@@ -136,18 +138,29 @@ export default Vue.extend({
   },
   methods: {
     styles(type: string) {
-      return type === 'content' ? {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
-        backgroundColor: this.config.backgroundColor,
-        backgroundImage: `url(${imageUtils.getSrc(this.config.backgroundImage.config)})`,
-        backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
-          : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
-        backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
-      } : {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
-        overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
+      switch (type) {
+        case 'content':
+          return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
+            backgroundColor: this.config.backgroundColor,
+            backgroundImage: `url(${imageUtils.getSrc(this.config.backgroundImage.config)})`,
+            backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
+              : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
+            backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
+          }
+        case 'control':
+          return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
+            overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
+          }
+        case 'page':
+          return {
+            width: `${this.config.width}px`,
+            height: `${this.config.height}px`,
+            backgroundColor: this.editorBg
+          }
       }
     },
     getClosestSnaplines() {
@@ -167,9 +180,14 @@ export default Vue.extend({
 .vvstk-editor {
   @include size(100%);
   background: setColor(nav-active);
-  position: relative;
-  transform-style: preserve-3d;
-  user-select: none;
+  &__pseudo-page {
+    position: relative;
+    transform-style: preserve-3d;
+    user-select: none;
+    margin: 16px auto 0 auto;
+    box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+    border-radius: 10px;
+  }
 }
 
 .page-control {

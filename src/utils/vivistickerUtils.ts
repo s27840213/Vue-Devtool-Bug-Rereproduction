@@ -69,9 +69,10 @@ class ViviStickerUtils {
 
   startEditing(asset: IAsset) {
     console.log('start editing', asset)
+    const pageWidth = window.innerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
-      width: window.innerWidth,
-      height: Math.round(window.innerWidth * 422 / 390),
+      width: pageWidth,
+      height: Math.round(pageWidth * 420 / 358),
       backgroundColor: '#F8F8F8'
     })])
     assetUtils.addAsset(asset).then(() => {

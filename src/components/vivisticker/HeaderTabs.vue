@@ -114,6 +114,7 @@ export default Vue.extend({
     rightTabs(): TabConfig[] {
       if (this.isInEditor) {
         return [
+          { icon: 'bg', width: 24, action: this.handleSwitchBg },
           { icon: 'copy', width: 24, action: this.handleCopy },
           { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
         ]
@@ -137,7 +138,8 @@ export default Vue.extend({
       setIsInCategory: 'vivisticker/SET_isInCategory',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setShareItem: 'vivisticker/SET_shareItem',
-      setShareColor: 'vivisticker/SET_shareColor'
+      setShareColor: 'vivisticker/SET_shareColor',
+      switchBg: 'vivisticker/UPDATE_switchBg'
     }),
     handleTabAction(action?: () => void) {
       if (action) {
@@ -162,10 +164,14 @@ export default Vue.extend({
       this.setShareItem(undefined)
       this.setShareColor('')
     },
+    handleSwitchBg() {
+      this.switchBg()
+    },
     handleEndEditing() {
       vivistickerUtils.endEditing()
     },
     handleCopy() {
+      // TODO: use sendScreenshotUrl to call App after /screenshot for json is well implemented.
       console.log(vivistickerUtils.createUrlForJSON())
     }
   }
@@ -185,7 +191,7 @@ export default Vue.extend({
 
   &__feature-icon {
     transition: background-color 0.1s;
-    padding: 2px;
+    padding: 4px;
     border-radius: 3px;
     &:active {
       background-color: setColor(gray-2);
@@ -221,7 +227,7 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    gap: 12px;
   }
 }
 </style>

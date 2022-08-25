@@ -7,8 +7,14 @@ interface IViviStickerState {
   isInCategoryDict: {[key: string]: boolean},
   isInBgShare: boolean,
   shareItem: IAsset | undefined,
-  shareColor: string
+  shareColor: string,
+  editorBgIndex: number
 }
+
+const EDITOR_BGS = [
+  '#3D4256',
+  '#F4F5F7'
+]
 
 const getDefaultState = (): IViviStickerState => ({
   currActiveTab: 'object',
@@ -19,7 +25,8 @@ const getDefaultState = (): IViviStickerState => ({
   },
   isInBgShare: false,
   shareItem: undefined,
-  shareColor: ''
+  shareColor: '',
+  editorBgIndex: 0
 })
 
 const state = getDefaultState()
@@ -41,6 +48,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getShareColor(state: IViviStickerState): string {
     return state.shareColor
+  },
+  getEditorBg(state: IViviStickerState): string {
+    return EDITOR_BGS[state.editorBgIndex] ?? EDITOR_BGS[0]
   }
 }
 
@@ -62,6 +72,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_shareColor(state: IViviStickerState, shareColor: string) {
     state.shareColor = shareColor
+  },
+  UPDATE_switchBg(state: IViviStickerState) {
+    state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
   }
 }
 

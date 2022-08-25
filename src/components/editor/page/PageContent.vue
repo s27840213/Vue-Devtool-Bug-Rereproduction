@@ -13,7 +13,8 @@ div(class="overflow-container"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
-      nu-bg-image(:image="this.config.backgroundImage"
+      nu-bg-image(v-if="!noBg"
+        :image="this.config.backgroundImage"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
         :key="this.config.backgroundImage.id")
@@ -60,6 +61,10 @@ export default Vue.extend({
       required: false
     },
     handleSequentially: {
+      type: Boolean,
+      default: false
+    },
+    noBg: {
       type: Boolean,
       default: false
     }
