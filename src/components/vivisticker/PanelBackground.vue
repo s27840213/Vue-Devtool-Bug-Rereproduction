@@ -10,7 +10,7 @@
       clear
       :defaultKeyword="keywordLabel"
       vivisticker
-      :color="{close: 'white', search: 'white'}"
+      :color="{close: 'gray-4', search: 'gray-4'}"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"

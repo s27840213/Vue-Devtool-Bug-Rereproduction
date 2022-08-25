@@ -6,7 +6,7 @@
       clear
       :defaultKeyword="keywordLabel"
       vivisticker
-      :color="{close: 'white', search: 'white'}"
+      :color="{close: 'gray-4', search: 'gray-4'}"
       @search="handleSearch")
     div(v-if="isAdmin" class="panel-objects-2html")
       input(type="text" placeholder="項目網址" v-model="panelParams")

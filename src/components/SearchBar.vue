@@ -100,7 +100,7 @@ export default Vue.extend({
   border-radius: 3px;
   &.vivisticker {
     padding: 8px 12px 8px 16px;
-    background: setColor(gray-4, 0.2);
+    background: setColor(dark-bg);
     border-radius: 10px;
     & > input {
       padding: 0;
