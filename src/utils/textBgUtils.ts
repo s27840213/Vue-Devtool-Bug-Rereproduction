@@ -156,7 +156,7 @@ class TextBg {
         }
       }
 
-      const underlineWidthScale = effect.height / 8
+      const borderWidth = Math.round(effect.height / 2)
       return {
         boxDecorationBreak: 'clone',
         backgroundRepeat: 'no-repeat',
@@ -164,10 +164,10 @@ class TextBg {
           linear-gradient(180deg, ${color}, ${color}),
           ${underlineBorder(effect.name, color)}`,
         backgroundSize: `
-          calc(100% - ${underlineWidthScale * 8}px) ${effect.height}px,
-          ${effect.height / 2}px ${effect.height}px,
-          ${effect.height / 2}px ${effect.height}px`,
-        backgroundPositionX: `${underlineWidthScale * 4}px, 0, 100%`,
+          calc(100% - ${borderWidth * 2}px) ${effect.height}px,
+          ${borderWidth}px ${effect.height}px,
+          ${borderWidth}px ${effect.height}px`,
+        backgroundPositionX: `${borderWidth}px, 0, 100%`,
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
