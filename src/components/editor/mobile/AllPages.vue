@@ -1,50 +1,35 @@
 <template lang="pug">
-recycle-scroller(class="all-pages" id="recycle" :items="pagesRows" :itemSize="itemSize")
-    template(v-slot="{ item, index:rowIndex }")
-      div(class="all-pages__row")
-        page-preview-page-wrapper(v-for="(page, index) in item.pages"
-          :key="page.id"
-          class="m-10 border-box"
-          :index="rowIndex*2 + index" type="full"
-          :config="page"
-          :showMoreBtn="false")
-        div(v-if="oddNumGroup && rowIndex === pagesRows.length -1" class="all-pages--last pointer border-box"
-          @click="addPage()")
-          div
-            svg-icon(class="pb-5"
-              :iconColor="'gray-2'"
-              :iconName="'plus-origin'"
-              :iconWidth="'25px'")
-      //- div(class="all-pages--last pointer border-box"
-      //-   @click="addPage()")
-      //-   div
-      //-     svg-icon(class="pb-5"
-      //-       :iconColor="'gray-2'"
-      //-       :iconName="'plus-origin'"
-      //-       :iconWidth="'25px'")
-//- div(class="all-pages")
-//-     div(class="all-pages__row" v-for="(pageRow, rowIndex) in pagesRows")
-//-       page-preview-page-wrapper(v-for="(page, index) in pageRow"
-//-         :key="page.id"
-//-         class="m-10 border-box"
-//-         :index="rowIndex*2 + index" type="full"
-//-         :config="page"
-//-         :showMoreBtn="false")
-//-       div(v-if="oddNumGroup && rowIndex === pagesRows.length -1" class="all-pages--last pointer border-box"
-//-         @click="addPage()")
-//-         div
-//-           svg-icon(class="pb-5"
-//-             :iconColor="'gray-2'"
-//-             :iconName="'plus-origin'"
-//-             :iconWidth="'25px'")
-//-     div(class="all-pages__row")
-//-       div(v-if="!oddNumGroup" class="all-pages--last pointer border-box"
-//-         @click="addPage()")
-//-         div
-//-           svg-icon(class="pb-5"
-//-             :iconColor="'gray-2'"
-//-             :iconName="'plus-origin'"
-//-             :iconWidth="'25px'")
+div(class="all-pages")
+    page-preview-page-wrapper(v-for="(page, idx) in pages"
+      :key="page.id"
+      class="m-10 border-box"
+      :index="idx" type="full"
+      :config="page"
+      :showMoreBtn="false")
+    div(class="all-pages--last pointer border-box"
+      @click="addPage()")
+      div
+        svg-icon(class="pb-5"
+          :iconColor="'gray-2'"
+          :iconName="'plus-origin'"
+          :iconWidth="'25px'")
+
+//- recycle-scroller(class="all-pages" id="recycle" :items="pagesRows" :itemSize="itemSize")
+//-     template(v-slot="{ item, index:rowIndex }")
+//-       div(class="all-pages__row")
+//-         page-preview-page-wrapper(v-for="(page, index) in item.pages"
+//-           :key="page.id"
+//-           class="m-10 border-box"
+//-           :index="rowIndex*2 + index" type="full"
+//-           :config="page"
+//-           :showMoreBtn="false")
+//-         div(v-if="oddNumGroup && rowIndex === pagesRows.length -1" class="all-pages--last pointer border-box"
+//-           @click="addPage()")
+//-           div
+//-             svg-icon(class="pb-5"
+//-               :iconColor="'gray-2'"
+//-               :iconName="'plus-origin'"
+//-               :iconWidth="'25px'")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -87,6 +72,11 @@ export default Vue.extend({
         }
       })
     },
+    pages(): IPage[] {
+      const pages = this.getPages
+      pageUtils.setAutoResizeNeededForPages(pages, false)
+      return pages
+    },
     oddNumGroup(): boolean {
       return pageUtils.getPages.length % 2 !== 0
     }
@@ -119,36 +109,37 @@ export default Vue.extend({
 })
 </script>
 <style lang="scss" scoped>
-#recycle {
-  // For overwrite vue-recycle setting
-  overflow-y: overlay;
-}
+// #recycle {
+//   // For overwrite vue-recycle setting
+//   overflow-y: overlay;
+// }
 
 .all-pages {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-height: 100%;
   overflow: scroll;
-  // width: 100%;
-  // max-height: 100%;
-  grid-template-rows: 1fr;
-  grid-template-columns: 1fr;
-  // grid-row-gap: 40px;
-  // grid-column-gap: 40px;
-  // @include no-scrollbar;
-
-  &__row {
-    width: 100%;
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr 1fr;
-    grid-row-gap: 40px;
-    padding: 32px;
-    box-sizing: border-box;
-    grid-column-gap: 40px;
-    align-items: center;
-    justify-content: center;
-  }
+  grid-template-rows: auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-row-gap: 40px;
+  grid-column-gap: 40px;
+  padding: 32px;
+  box-sizing: border-box;
+  @include no-scrollbar;
+  // &__row {
+  //   width: 100%;
+  //   display: grid;
+  //   grid-template-rows: 1fr;
+  //   grid-template-columns: 1fr 1fr;
+  //   grid-row-gap: 40px;
+  //   padding: 32px;
+  //   box-sizing: border-box;
+  //   grid-column-gap: 40px;
+  //   align-items: center;
+  //   justify-content: center;
+  // }
   &--last {
     // aspect-ratio: 1/1;
     position: relative;

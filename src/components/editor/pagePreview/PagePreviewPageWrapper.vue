@@ -1,56 +1,61 @@
 <template lang="pug">
+  lazy-load(
+      target=".mobile-editor__page-preview"
+      :threshold="[0,1]"
+      :minHeight="contentWidth"
+      @loaded="handleLoaded")
     div(v-if="!allPageMode" :style="loadingStyle")
     div(v-else class="page-preview-page"
-        :style="styles2"
-        :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
-        ref="pagePreview")
-        div(class="page-preview-page-content pointer"
-            :style="styles"
-            @click="clickPage"
-            @dblclick="dbclickPage()"
-            draggable="true",
-            @dragstart="handleDragStart"
-            @dragend="handleDragEnd"
-            @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave"
-            ref="content")
-          page-content(v-if="inTheTarget"
-            class="click-disabled"
-            :style="contentScaleStyles"
-            :config="config"
-            :pageIndex="index"
-            :contentScaleRatio="scaleRatio"
-            :handleSequentially="true"
-            :isPagePreview="true")
-          div(class="page-preview-page__highlighter"
-            :class="{'focused': currFocusPageIndex === index}"
-            :style="hightlighterStyles")
-          div(v-if="isMouseOver && showMoreBtn"
-            class="page-preview-page-content-more"
-            @click="toggleMenu()")
-            svg-icon(class="pb-5"
-              :iconName="'more_vertical'"
-              :iconWidth="'25px'")
-          div(v-if="isMenuOpen && currFocusPageIndex === index"
-            class="menu"
-            v-click-outside="closeMenu")
-            template(v-for="menuItem in menuItems")
-              div(class="menu-item"
-                @click="handleMenuAction(menuItem.icon)")
-                div(class="menu-item-icon")
-                  svg-icon(:iconName="menuItem.icon"
-                    iconWidth="15px"
-                    iconColor="gray-2")
-                div(class="menu-item-text")
-                  span {{ menuItem.text }}
-          div(v-if="type === 'panel'"
-            class="page-preview-page-icon")
-            span {{index+1}}
-        div(class="page-preview-page__background"
-          :style="styles")
-        div(v-if="type === 'full'"
-          class="page-preview-page-title")
-          span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
+      :style="styles2"
+      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
+      ref="pagePreview")
+      div(class="page-preview-page-content pointer"
+          :style="styles"
+          @click="clickPage"
+          @dblclick="dbclickPage()"
+          draggable="true",
+          @dragstart="handleDragStart"
+          @dragend="handleDragEnd"
+          @mouseenter="handleMouseEnter"
+          @mouseleave="handleMouseLeave"
+          ref="content")
+        page-content(
+          class="click-disabled"
+          :style="contentScaleStyles"
+          :config="config"
+          :pageIndex="index"
+          :contentScaleRatio="scaleRatio"
+          :handleSequentially="true"
+          :isPagePreview="true")
+        div(class="page-preview-page__highlighter"
+          :class="{'focused': currFocusPageIndex === index}"
+          :style="hightlighterStyles")
+        div(v-if="isMouseOver && showMoreBtn"
+          class="page-preview-page-content-more"
+          @click="toggleMenu()")
+          svg-icon(class="pb-5"
+            :iconName="'more_vertical'"
+            :iconWidth="'25px'")
+        div(v-if="isMenuOpen && currFocusPageIndex === index"
+          class="menu"
+          v-click-outside="closeMenu")
+          template(v-for="menuItem in menuItems")
+            div(class="menu-item"
+              @click="handleMenuAction(menuItem.icon)")
+              div(class="menu-item-icon")
+                svg-icon(:iconName="menuItem.icon"
+                  iconWidth="15px"
+                  iconColor="gray-2")
+              div(class="menu-item-text")
+                span {{ menuItem.text }}
+        div(v-if="type === 'panel'"
+          class="page-preview-page-icon")
+          span {{index+1}}
+      div(class="page-preview-page__background"
+        :style="styles")
+      div(v-if="type === 'full'"
+        class="page-preview-page-title")
+        span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -62,7 +67,7 @@ import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
 
 export default Vue.extend({
   props: {
@@ -83,7 +88,7 @@ export default Vue.extend({
   },
   components: {
     PageContent: () => import('@/components/editor/page/PageContent.vue'),
-    ObserverSentinel
+    LazyLoad
   },
   data() {
     return {
@@ -100,7 +105,6 @@ export default Vue.extend({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      inTheTarget: true,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
       isHandlingAsyncTask: false
     }
@@ -158,13 +162,6 @@ export default Vue.extend({
         height: '100%'
       }
     }
-  },
-  mounted() {
-    const contentRef = (this.$refs.content as HTMLElement)
-    this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
-  },
-  activated() {
-    this.contentWidth = (this.$refs.content as HTMLElement).offsetWidth
   },
   methods: {
     ...mapMutations({
@@ -274,8 +271,11 @@ export default Vue.extend({
           break
       }
     },
-    handleCallback(entries: Array<IntersectionObserverEntry>) {
-      this.inTheTarget = entries[0].isIntersecting
+    handleLoaded() {
+      this.$nextTick(() => {
+        const contentRef = (this.$refs.content as HTMLElement)
+        this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
+      })
     }
   }
 })
@@ -354,7 +354,7 @@ export default Vue.extend({
   }
   &-title {
     position: absolute;
-    bottom: 0px;
+    bottom: -8px;
     transform: translate(0, 100%);
     z-index: 100;
     display: flex;
