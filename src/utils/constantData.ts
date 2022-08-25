@@ -257,7 +257,6 @@ class ConstantData {
             option.min = -180
             break
           case 'bend': // For curve
-          case 'yOffset':
             option.max = 100
             option.min = -100
             break
@@ -318,27 +317,27 @@ class ConstantData {
       }, {
         key: 'square-borderless',
         label: '方形底無外框',
-        options: toOptions(['opacity', 'yOffset', 'pStroke', 'pColor'])
+        options: toOptions(['opacity', 'pStroke', 'pColor'])
       }, {
         key: 'rounded-borderless',
         label: '圓矩形底無外框',
-        options: toOptions(['opacity', 'yOffset', 'bRadius', 'pStroke', 'pColor'])
+        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
       }, {
         key: 'square-hollow',
         label: '方形空心框',
-        options: toOptions(['opacity', 'yOffset', 'bStroke', 'bColor', 'pStroke'])
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
       }, {
         key: 'rounded-hollow',
         label: '圓矩形底空心框',
-        options: toOptions(['opacity', 'yOffset', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
       }, {
         key: 'square-both',
         label: '方形有外框有填色',
-        options: toOptions(['opacity', 'yOffset', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
       }, {
         key: 'rounded-both',
         label: '圓矩形有外框有填色',
-        options: toOptions(['opacity', 'yOffset', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
       }, {
         key: 'underline-triangle',
         label: '粗底線(三角)',

@@ -74,24 +74,24 @@ class TextBg {
       },
       'underline-triangle': {
         height: 20,
-        yOffset: -2,
+        yOffset: 10,
         opacity: 100,
         color: '#F1D289'
       },
       'underline-circle': {
         height: 20,
-        yOffset: -2,
+        yOffset: 10,
         opacity: 100,
         color: '#F1D289'
       },
       'underline-square': {
         height: 20,
-        yOffset: -2,
+        yOffset: 10,
         opacity: 100,
         color: '#F1D289'
       },
       gooey: {
-        bRadius: 20,
+        bRadius: 48,
         opacity: 100,
         color: '#F1D289'
       }
@@ -120,8 +120,10 @@ class TextBg {
   converTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
     const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
     let color = ''
-    if (isITextUnderline(effect) || isITextGooey(effect)) {
+    if (isITextUnderline(effect)) {
       color = this.rgba(effect.color, effect.opacity * 0.01)
+    } else if (isITextGooey(effect)) {
+      color = this.rgba(effect.color, effect.opacity * 0.006 + 0.4)
     }
 
     if (isITextUnderline(effect)) {
@@ -180,7 +182,7 @@ class TextBg {
             attrs: {
               in: 'SourceGraphic',
               result: 'blur',
-              stdDeviation: effect.bRadius * 0.3
+              stdDeviation: effect.bRadius * 0.5
             }
           }),
           imageAdjustUtil.createSvgFilter({
