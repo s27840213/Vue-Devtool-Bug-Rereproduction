@@ -147,7 +147,8 @@ class Controller {
     const effectSpreadBlur = spread * 1.6 * 0.01 * unit
     const effectOpacity = opacity * 0.01
     const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
-    const colorWithOpacity = this.convertColor2rgba(color, effectOpacity)
+    const colorWithOpacity = color ? this.convertColor2rgba(color, effectOpacity) : ''
+
     switch (name) {
       case 'shadow':
         return CssConverter.convertTextShadow(
