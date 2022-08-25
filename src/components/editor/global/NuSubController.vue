@@ -697,6 +697,7 @@ export default Vue.extend({
           srcObj: { ...currLayer.srcObj }
         })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+        LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: true })
 
         const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
           .clipperHandler(LayerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
@@ -724,6 +725,7 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: false })
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
         })
