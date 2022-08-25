@@ -170,7 +170,7 @@ export default Vue.extend({
           icon: 'color',
           text: `${this.$t('NN0495')}`,
           panelType: 'color',
-          hidden: shapeUtils.getSingleColorObjNum === 0,
+          hidden: shapeUtils.getSingleColorObjNum === 0 && !this.hasSubSelectedLayer,
           props: {
             currColorEvent: ColorEventType.shape
           }
@@ -389,7 +389,6 @@ export default Vue.extend({
       setBgImageControl: 'SET_backgroundImageControl'
     }),
     handleTabAction(tab: IFooterTab) {
-      console.time('out')
       switch (tab.icon) {
         case 'crop': {
           if (this.selectedLayerNum > 0) {
@@ -538,7 +537,6 @@ export default Vue.extend({
       if (tab.panelType !== undefined) {
         this.$emit('switchTab', tab.panelType, tab.props)
       }
-      console.timeEnd('out')
     },
     targetIs(type: string): boolean {
       if (this.isGroup) {
