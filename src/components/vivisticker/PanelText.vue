@@ -102,7 +102,7 @@ export default Vue.extend({
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
         .map(category => ({
-          size: 201,
+          size: 140,
           id: `rows_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
@@ -112,17 +112,17 @@ export default Vue.extend({
     listResult(): any[] {
       const { keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 2))
+      const result = new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 2, idx * 2 + 2)
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
           const title = !keyword && !idx ? `${this.$t('NN0340')}` : ''
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-text-item',
             list: rowItems,
             title,
-            size: title ? (155 + 46) : 155
+            size: title ? (90 + 46) : 90
           }
         })
       if (result.length) {
@@ -231,19 +231,19 @@ export default Vue.extend({
     transform: translateY(-50%);
   }
   &__item {
-    width: 145px;
-    height: 145px;
+    width: 80px;
+    height: 80px;
     margin: 0 auto;
     object-fit: contain;
     vertical-align: middle;
   }
   &__items {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 0px;
   }
   &__header {
-    grid-column: 1 / 3;
+    grid-column: 1 / 4;
     line-height: 26px;
     color: #ffffff;
     padding: 10px 0;
