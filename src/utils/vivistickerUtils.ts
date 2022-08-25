@@ -1,12 +1,15 @@
 import { IAsset } from '@/interfaces/module'
+import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import assetUtils from './assetUtils'
 import groupUtils from './groupUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
+import uploadUtils from './uploadUtils'
 
 class ViviStickerUtils {
   inDebugMode = false
+  loadingFlags = {}
 
   sendToIOS(messageType: string, message: any) {
     try {
@@ -51,6 +54,11 @@ class ViviStickerUtils {
     }
   }
 
+  createUrlForJSON(): string {
+    const page = pageUtils.getPage(0)
+    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page)))}`
+  }
+
   setIsInCategory(tab: string, bool: boolean) {
     store.commit('vivisticker/SET_isInCategory', { tab, bool })
   }
@@ -76,6 +84,10 @@ class ViviStickerUtils {
     groupUtils.deselect()
     pageUtils.setPages()
     store.commit('vivisticker/SET_isInEditor', false)
+  }
+
+  initLoadingFlags(page: IPage) {
+    this.loadingFlags = {}
   }
 }
 

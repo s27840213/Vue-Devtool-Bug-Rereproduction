@@ -1512,6 +1512,11 @@ class UploadUtils {
     return pagesJSON
   }
 
+  getSinglePageJson(page: IPage): any {
+    const pagesJSON = this.getPageJson([page])
+    return pagesJSON[0]
+  }
+
   makeXhrRequest(method: string, url: string, data: FormData) {
     return new Promise(function (resolve, reject) {
       const xhr = new XMLHttpRequest()

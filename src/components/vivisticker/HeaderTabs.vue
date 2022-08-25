@@ -114,7 +114,7 @@ export default Vue.extend({
     rightTabs(): TabConfig[] {
       if (this.isInEditor) {
         return [
-          { icon: 'copy', width: 24 },
+          { icon: 'copy', width: 24, action: this.handleCopy },
           { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
         ]
       } else if (this.isInCategory || this.isInBgShare) {
@@ -164,6 +164,9 @@ export default Vue.extend({
     },
     handleEndEditing() {
       vivistickerUtils.endEditing()
+    },
+    handleCopy() {
+      console.log(vivistickerUtils.createUrlForJSON())
     }
   }
 })
