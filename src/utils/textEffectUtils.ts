@@ -1,9 +1,9 @@
-import TextUtils from '@/utils/textUtils'
 import LayerUtils from '@/utils/layerUtils'
 import { IParagraph, IText } from '@/interfaces/layer'
-import CssConverter from './cssConverter'
+import CssConverter from '@/utils/cssConverter'
 import store from '@/store'
-import generalUtils from './generalUtils'
+import generalUtils from '@/utils/generalUtils'
+import mathUtils from '@/utils/mathUtils'
 
 class Controller {
   private shadowScale = 0.2
@@ -40,7 +40,13 @@ class Controller {
         distance: 50,
         angle: 45,
         color: ''
-      } // 雙重陰影
+      }, // 雙重陰影
+      funky: {
+        distance: 40,
+        angleFunky: 45,
+        opacity: 100,
+        color: '#F1D289'
+      }
     }
   }
 
@@ -113,7 +119,17 @@ class Controller {
     return `rgba(${hexList.map(x => parseInt(x, 16)).join(',')}, ${opacity})`
   }
 
-  convertTextEffect(effect: any) {
+  funky(distance: number, angle: number, color: string) {
+    const distanceInverse = -distance / 40 * 6
+    const shadow = []
+    for (let d = distanceInverse; d < distance; d++) {
+      const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
+      shadow.push(`${color} ${x}px ${y}px`)
+    }
+    return { textShadow: shadow.join(',') }
+  }
+
+  convertTextEffect(effect: any): Record<string, any> {
     const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor, ver } = effect || {}
     const unit = this.shadowScale * fontSize
     let strokeWidth = this.strokeScale * fontSize
@@ -126,12 +142,13 @@ class Controller {
     const effectSpreadBlur = spread * 1.6 * 0.01 * unit
     const effectOpacity = opacity * 0.01
     const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
+    const colorWithOpacity = this.convertColor2rgba(color, effectOpacity)
     switch (name) {
       case 'shadow':
         return CssConverter.convertTextShadow(
           effectShadowOffset * Math.cos(angle * Math.PI / 180),
           effectShadowOffset * Math.sin(angle * Math.PI / 180),
-          this.convertColor2rgba(color, effectOpacity),
+          colorWithOpacity,
           effectBlur
         )
       case 'lift':
@@ -174,6 +191,8 @@ class Controller {
             )
             .join(',')
         }
+      case 'funky':
+        return this.funky(distance, effect.angleFunky, colorWithOpacity)
       default:
         return { textShadow: 'none' }
     }

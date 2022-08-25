@@ -220,6 +220,7 @@ class ConstantData {
     function toOptions(array: string[]) {
       const effectI18nMap = {
         distance: i18n.tc('NN0063'),
+        angleFunky: i18n.tc('NN0064'),
         angle: i18n.tc('NN0064'),
         blur: i18n.tc('NN0065'),
         opacity: i18n.tc('NN0066'),
@@ -244,6 +245,7 @@ class ConstantData {
           label: effectI18nMap[name as keyof typeof effectI18nMap]
         } as Option
 
+        option.type = 'range'
         switch (name) {
           case 'color':
           case 'bColor':
@@ -251,20 +253,21 @@ class ConstantData {
             option.type = 'color'
             break
           case 'angle':
-            option.type = 'range'
             option.max = 180
             option.min = -180
             break
           case 'bend': // For curve
           case 'yOffset':
-            option.type = 'range'
             option.max = 100
             option.min = -100
+            break
+          case 'angleFunky':
+            option.max = 45
+            option.min = 0
             break
           default:
             /* distance, blur, opacity, spread, stroke,
              * bStroke, pStroke, bRadius, width, height */
-            option.type = 'range'
             option.max = 100
             option.min = 0
             break
@@ -300,6 +303,10 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
+      }, {
+        key: 'funky',
+        label: 'Funky',
+        options: toOptions(['distance', 'angleFunky', 'opacity', 'color'])
       }])
     }, {
       name: 'bg',
