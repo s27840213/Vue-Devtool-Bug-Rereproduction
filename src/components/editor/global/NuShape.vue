@@ -68,8 +68,7 @@ export default Vue.extend({
       filterTemplate: '',
       paramsReady: false,
       styleTextContent: '',
-      transTextContent: '',
-      testStyle: '<svg:style type="text/css"> .test { fill: white } </svg:style>'
+      transTextContent: ''
     }
   },
   async created() {
