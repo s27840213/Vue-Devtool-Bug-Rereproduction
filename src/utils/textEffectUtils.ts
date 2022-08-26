@@ -43,6 +43,7 @@ class Controller {
       }, // 雙重陰影
       funky: {
         distance: 40,
+        distanceInverse: 60,
         angleFunky: 45,
         opacity: 100,
         color: '#F1D289'
@@ -50,6 +51,7 @@ class Controller {
       boost: {
         distance: 40,
         opacity: 100,
+        bColor: '#000000',
         color: '#F1D289'
       }
     }
@@ -124,14 +126,29 @@ class Controller {
     return `rgba(${hexList.map(x => parseInt(x, 16)).join(',')}, ${opacity})`
   }
 
-  funky(distance: number, angle: number, color: string) {
-    const distanceInverse = -distance / 40 * 6
+  funky(distance: number, distanceInverse: number, angle: number, color: string) {
     const shadow = []
-    for (let d = distanceInverse; d < distance; d++) {
+    for (let d = -distanceInverse / 10; d < distance; d++) {
       const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
       shadow.push(`${color} ${x}px ${y}px`)
     }
     return { textShadow: shadow.join(',') }
+  }
+
+  boost(color: string, bColor: string, distance: number) {
+    const shadow = []
+    for (const dist of [0, distance * 0.1]) {
+      for (let x = -1; x <= 1; x++) {
+        for (let y = -1; y <= 1; y++) {
+          shadow.push(`${bColor} ${dist + x}px ${y}px`)
+        }
+      }
+      shadow.push(`${color} ${distance * 0.1}px 0px`)
+    }
+
+    return {
+      textShadow: shadow.join(',')
+    }
   }
 
   convertTextEffect(effect: any): Record<string, any> {
@@ -198,16 +215,13 @@ class Controller {
             .join(',')
         }
       case 'funky':
-        return this.funky(distance, effect.angleFunky, colorWithOpacity)
+        return this.funky(distance, effect.distanceInverse, effect.angleFunky, colorWithOpacity)
       case 'boost':
-        return {
-          ...CssConverter.convertTextStorke(1, 'black', 'none'),
-          textShadow: `${colorWithOpacity} ${effect.distance * 0.1}px 0px,
-            #000000 ${effect.distance * 0.1 + 1}px 0px,
-            #000000 ${effect.distance * 0.1 - 1}px 0px,
-            #000000 ${effect.distance * 0.1}px -1px,
-            #000000 ${effect.distance * 0.1}px 1px`
-        }
+        return this.boost(
+          colorWithOpacity,
+          this.convertColor2rgba(effect.bColor, effectOpacity),
+          effect.distance
+        )
       default:
         return { textShadow: 'none' }
     }

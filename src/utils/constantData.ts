@@ -234,7 +234,8 @@ class ConstantData {
         pStroke: i18n.tc('NN0734'),
         pColor: i18n.tc('NN0735'),
         height: i18n.tc('NN0736'),
-        yOffset: i18n.tc('NN0737')
+        yOffset: i18n.tc('NN0737'),
+        distanceInverse: i18n.tc('NN0738')
       }
 
       return array.map((name: string) => {
@@ -259,8 +260,8 @@ class ConstantData {
             option.min = -100
             break
           case 'angleFunky':
-            option.max = 45
-            option.min = 0
+            option.max = 60
+            option.min = -60
             break
           default:
             /* distance, blur, opacity, spread, stroke,
@@ -303,11 +304,11 @@ class ConstantData {
       }, {
         key: 'funky',
         label: i18n.tc('NN0730'),
-        options: toOptions(['distance', 'angleFunky', 'opacity', 'color'])
+        options: toOptions(['distance', 'distanceInverse', 'angleFunky', 'opacity', 'color'])
       }, {
         key: 'boost',
         label: i18n.tc('NN0731'),
-        options: toOptions(['distance', 'opacity', 'color'])
+        options: toOptions(['distance', 'opacity', 'bColor', 'color'])
       }])
     }, {
       name: 'shape',
