@@ -53,8 +53,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel-opacity {
-  margin-top: 3px;
-  margin-bottom: 8px;
+  padding-top: 3px;
   width: 100%;
 }
 </style>

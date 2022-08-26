@@ -89,7 +89,7 @@ export default Vue.extend({
   grid-template-rows: auto auto;
   grid-template-columns: 1fr;
   row-gap: 20px;
-  padding: 0 8px;
+  padding: 0 8px 8px 8px;
   box-sizing: border-box;
 
   > div:nth-child(1) {
