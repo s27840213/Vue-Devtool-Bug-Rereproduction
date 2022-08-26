@@ -29,39 +29,52 @@ class PaymentData {
         templateName = templateName?.split('(')?.[0]
         return {
           label: templateName,
-          url: `/templates?themes=${id.join(',')}`
+          url: `/templates?themes=${id.join(',')}&sort=recent`
         }
       } else {
         const template = _.filter(store.getters.getEditThemes, ['id', id])?.[0]
         return {
           label: template?.title,
-          url: `/templates?themes=${id}`
+          url: `/templates?themes=${id}&sort=recent`
         }
       }
     }
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [1, 8, 2, 3, 9, 4, [14, 15]].map((id) => themeItem(id))
+        content: [
+          ...[1].map((id) => themeItem(id)), {
+            label: 'FB 粉絲頁封面',
+            url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+          },
+          ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ]
       }, {
         label: i18n.t('NN0668'),
-        content: [5, 6, 7].map((id) => themeItem(id))
+        content: [
+          ...[5].map((id) => themeItem(id)), {
+            label: '電商 Banner',
+            url: 'https://blog.vivipic.com/tw/ec-banner/'
+          },
+          ...[7].map((id) => themeItem(id))
+        ]
       }, {
         label: i18n.t('NN0669'),
-        content: [[16, 17]].map((id) => themeItem(id))
+        content: [[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
       }],
       us: [{
         label: i18n.t('NN0667'),
         content: [
-          ...[1].map((id) => themeItem(id)),
-          {
+          ...[1].map((id) => themeItem(id)), {
             label: 'Facebook Cover',
             url: 'https://blog.vivipic.com/us/facebook-cover/'
           },
-          ...[2, 3].map((id) => themeItem(id)),
-          {
+          ...[2, 3].map((id) => themeItem(id)), {
             label: 'Youtube Thumbnail',
             url: 'https://blog.vivipic.com/us/youtube-thumbnail/'
+          }, {
+            label: 'Profile Picture (PFP)',
+            url: 'https://blog.vivipic.com/us/pfp-profile-pictures/'
           }]
       }, {
         label: i18n.t('NN0668'),
@@ -78,7 +91,7 @@ class PaymentData {
       }],
       jp: [{
         label: i18n.t('NN0667'),
-        content: [1, 8, 2, 3, 4, 9].map((id) => themeItem(id))
+        content: [1, 8, 2, 3, 4, 9, 21].map((id) => themeItem(id))
       }, {
         label: i18n.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))

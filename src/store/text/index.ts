@@ -214,13 +214,20 @@ const actions: ActionTree<ITextState, unknown> = {
   async checkFontLoaded({ state }, face: string): Promise<boolean> {
     return Promise.race([
       new Promise<boolean>(resolve => {
-        const checkLoaded = setInterval(() => {
+        const check = () => {
           const font = state.fontStore.find(font => font.face === face)
-          if (font?.loaded) {
-            clearInterval(checkLoaded)
-            resolve(true)
-          }
-        }, 100)
+          return font?.loaded
+        }
+        if (check()) {
+          resolve(true)
+        } else {
+          const checkLoaded = setInterval(() => {
+            if (check()) {
+              clearInterval(checkLoaded)
+              resolve(true)
+            }
+          }, 100)
+        }
       }),
       new Promise<boolean>(resolve => {
         setTimeout(() => {

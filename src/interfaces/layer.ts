@@ -141,6 +141,7 @@ export interface IImage extends ILayer<IImageStyle> {
   trace?: number,
   isUploading?: boolean,
   parentLayerStyles?: IStyle
+  isHoveringFrame?: boolean
 }
 
 export interface IFrameStyle extends IStyle {

@@ -292,6 +292,10 @@ const mutations: MutationTree<IEditorState> = {
   },
   DELETE_page(state: IEditorState, pageIndex: number) {
     state.pages.splice(pageIndex, 1)
+    console.log(state.currActivePageIndex, state.pages.length - 1)
+    console.log(Math.min(state.currActivePageIndex, state.pages.length - 1))
+    state.currActivePageIndex = Math.min(state.currActivePageIndex, state.pages.length - 1)
+    console.log(state.currActivePageIndex)
   },
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
