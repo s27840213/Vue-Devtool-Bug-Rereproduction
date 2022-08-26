@@ -1,14 +1,25 @@
-<template lang="pug">
-  div(class="nu-shape" :style="styles()")
-    svg(:view-box.camel="viewBoxFormatter" :style="styles()")
-      defs(v-if="config.category === 'E'" v-html="svgFormatter")
-      defs
-        filter(v-if="config.category === 'C'" :id="className" v-html="filterFormatter")
-        clipPath(v-if="config.category === 'E'" :id="clipPathId")
-          use(:xlink:href="svgId")
-      g(v-if="config.category === 'E'")
-        use(:xlink:href="svgId" :clip-path="'url(#' + clipPathId + ')'" :class="className + 'S0'")
-      g(v-else :filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter")
+<template lang="html">
+  <!-- <template> svg:style cannot be used in pug syntax, so use html instead </template> -->
+  <div class="nu-shape" :style="styles()">
+    <svg :view-box.camel="viewBoxFormatter" :style="styles()">
+      <svg:style v-html="styleTextContent">
+      </svg:style>
+      <svg:style v-html="transTextContent">
+      </svg:style>
+      <defs v-if="config.category === 'E'" v-html="svgFormatter"></defs>
+      <defs>
+        <filter v-if="config.category === 'C'" :id="className" v-html="filterFormatter"></filter>
+        <clipPath v-if="config.category === 'E'" :id="clipPathId">
+          <use :xlink:href="svgId"></use>
+        </clipPath>
+      </defs>
+      <g v-if="config.category === 'E'">
+        <use :xlink:href="svgId" :clip-path="'url(#' + clipPathId + ')'" :class="className + 'S0'"></use>
+      </g>
+      <g v-else :filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter">
+      </g>
+    </svg>
+  </div>
 </template>
 
 <script lang="ts">
@@ -55,7 +66,10 @@ export default Vue.extend({
       styleNode: null as any,
       transNode: null as any,
       filterTemplate: '',
-      paramsReady: false
+      paramsReady: false,
+      styleTextContent: '',
+      transTextContent: '',
+      testStyle: '<svg:style type="text/css"> .test { fill: white } </svg:style>'
     }
   },
   async created() {
@@ -292,18 +306,20 @@ export default Vue.extend({
       }
     },
     updateStyleNode(styleText: string) {
-      if (this.styleNode) {
-        this.styleNode.textContent = styleText
-      } else {
-        this.styleNode = shapeUtils.addStyleTag(styleText)
-      }
+      // if (this.styleNode) {
+      //   this.styleNode.textContent = styleText
+      // } else {
+      //   this.styleNode = shapeUtils.addStyleTag(styleText)
+      // }
+      this.styleTextContent = styleText
     },
     updateTransNode(transText: string) {
-      if (this.transNode) {
-        this.transNode.textContent = transText
-      } else {
-        this.transNode = shapeUtils.addStyleTag(transText)
-      }
+      // if (this.transNode) {
+      //   this.transNode.textContent = transText
+      // } else {
+      //   this.transNode = shapeUtils.addStyleTag(transText)
+      // }
+      this.transTextContent = transText
     },
     async checkAndFetchSvg(useConfig = true) {
       const svg = useConfig ? this.config.svg : undefined
