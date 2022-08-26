@@ -1,51 +1,53 @@
 <template lang="pug">
   div(class="text-effect-setting mt-25")
+    div(class="text-effect-setting-tabs")
+      span(v-for="category in textEffects"
+          :selected="currTab===category.name"
+          @click="switchTab(category.name)") {{category.label}}
     div(class="action-bar")
-      template(v-for="category in textEffects")
-        div(class="w-full text-left mt-10 text-blue-1 text-effect-setting__title") {{category.label}}
-        template(v-for="effects1d in category.effects2d")
-          div(class="text-effect-setting__effects mb-10")
-            svg-icon(v-for="effect in effects1d"
-              :key="`${category.name}-${effect.key}`"
-              :iconName="`text-${category.name}-${effect.key}`"
-              @click.native="onEffectClick(category.name, effect.key)"
-              class="text-effect-setting__effect pointer"
-              :class="{'text-effect-setting__effect--selected': currentStyle[category.name].name === effect.key }"
-              iconWidth="60px"
-              iconColor="white"
-              v-hint="effect.label")
-          template(v-for="effect in effects1d")
-            div(v-if="effect.key === currentStyle[category.name].name"
-                v-for="option in effect.options"
-                class="w-full text-effect-setting__form")
-              div(v-if="option.type === 'range'"
-                  :key="option.key"
-                  class="text-effect-setting__field")
-                div(class="text-effect-setting__field-name") {{option.label}}
-                input(class="text-effect-setting__range-input input__slider--range"
-                  :value="currentStyle[category.name][option.key]"
-                  @input="(e)=>handleRangeInput(e, category.name, option)"
-                  :max="option.max"
-                  :min="option.min"
-                  :name="option.key"
-                  @mousedown="handleRangeMousedown(category.name)"
-                  @mouseup="handleRangeMouseup(category.name)"
-                  v-ratio-change
-                  type="range")
-                input(class="text-effect-setting__value-input"
-                  :value="currentStyle[category.name][option.key]"
-                  @change="(e)=>handleRangeInput(e, category.name, option)"
-                  :max="option.max"
-                  :min="option.min"
-                  :name="option.key"
-                  @blur="recordChange"
-                  type="number")
-              div(v-if="option.type === 'color'"
-                  class="text-effect-setting__field")
-                div(class="text-effect-setting__field-name") {{option.label}}
-                div(class="text-effect-setting__value-input"
-                  :style="{ backgroundColor: currentStyle[category.name][option.key] }"
-                  @click="handleColorModal(category.name, option.key)")
+      template(v-for="effects1d in currEffect.effects2d")
+        div(class="text-effect-setting__effects mb-10")
+          svg-icon(v-for="effect in effects1d"
+            :key="`${currEffect.name}-${effect.key}`"
+            :iconName="`text-${currEffect.name}-${effect.key}`"
+            @click.native="onEffectClick(currEffect.name, effect.key)"
+            class="text-effect-setting__effect pointer"
+            :class="{'text-effect-setting__effect--selected': currentStyle[currEffect.name].name === effect.key }"
+            iconWidth="60px"
+            iconColor="white"
+            v-hint="effect.label")
+        template(v-for="effect in effects1d")
+          div(v-if="effect.key === currentStyle[currEffect.name].name"
+              v-for="option in effect.options"
+              class="w-full text-effect-setting__form")
+            div(v-if="option.type === 'range'"
+                :key="option.key"
+                class="text-effect-setting__field")
+              div(class="text-effect-setting__field-name") {{option.label}}
+              input(class="text-effect-setting__range-input input__slider--range"
+                :value="currentStyle[currEffect.name][option.key]"
+                @input="(e)=>handleRangeInput(e, currEffect.name, option)"
+                :max="option.max"
+                :min="option.min"
+                :name="option.key"
+                @mousedown="handleRangeMousedown(currEffect.name)"
+                @mouseup="handleRangeMouseup(currEffect.name)"
+                v-ratio-change
+                type="range")
+              input(class="text-effect-setting__value-input"
+                :value="currentStyle[currEffect.name][option.key]"
+                @change="(e)=>handleRangeInput(e, currEffect.name, option)"
+                :max="option.max"
+                :min="option.min"
+                :name="option.key"
+                @blur="recordChange"
+                type="number")
+            div(v-if="option.type === 'color'"
+                class="text-effect-setting__field")
+              div(class="text-effect-setting__field-name") {{option.label}}
+              div(class="text-effect-setting__value-input"
+                :style="{ backgroundColor: currentStyle[currEffect.name][option.key] }"
+                @click="handleColorModal(currEffect.name, option.key)")
 </template>
 
 <script lang="ts">
@@ -59,8 +61,8 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import constantData from '@/utils/constantData'
-import { ITextBox, ITextEffect, ITextShape, ITextUnderline } from '@/interfaces/format'
+import constantData, { IEffectCategory, IEffectOption } from '@/utils/constantData'
+import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 
 export default Vue.extend({
   components: {
@@ -72,6 +74,7 @@ export default Vue.extend({
   data() {
     return {
       openColorPicker: false,
+      currTab: 'shadow',
       textEffects: constantData.textEffects(),
       colorTarget: {
         category: '',
@@ -80,11 +83,14 @@ export default Vue.extend({
     }
   },
   computed: {
-    currentStyle(): { shadow: ITextEffect, bg: ITextBox|ITextUnderline, shape: ITextShape } {
+    currEffect():IEffectCategory {
+      return this.textEffects.filter((eff) => eff.name === this.currTab)[0]
+    },
+    currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
       return {
         shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
-        bg: styles.textBg as ITextBox | ITextUnderline,
+        bg: styles.textBg as ITextBgEffect,
         shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
       }
     }
@@ -103,6 +109,9 @@ export default Vue.extend({
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
+    },
+    switchTab(category: string) {
+      this.currTab = category
     },
     onEffectClick(category: string, effectName: string): void {
       switch (category) {
@@ -125,7 +134,7 @@ export default Vue.extend({
     getEffectName(category: 'shadow' | 'bg' | 'shape') {
       return this.currentStyle[category].name || 'none'
     },
-    handleRangeInput(event: Event, category: string, opiton: ReturnType<typeof constantData.textEffects>[0]['effects2d'][0][0]['options'][0]) {
+    handleRangeInput(event: Event, category: string, opiton: IEffectOption) {
       const name = (event.target as HTMLInputElement).name
       const value = parseInt((event.target as HTMLInputElement).value)
       const [max, min] = [opiton.max as number, opiton.min as number]
@@ -177,6 +186,22 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .text-effect-setting {
   font-size: 14px;
+  &-tabs {
+    @include caption-MD;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 2.5px;
+    height: 36px;
+    > span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      &[selected] {
+        background-color: setColor(gray-6);
+      }
+    }
+  }
   &__title {
     font-size: 16px;
     font-weight: bold;

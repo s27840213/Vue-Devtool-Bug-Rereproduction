@@ -12,6 +12,23 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
+export interface IEffectOption {
+  key: string
+  label: string
+  type: 'range' | 'color'
+  min?: number
+  max?: number
+}
+export interface IEffect {
+  key: string
+  label: string
+  options: IEffectOption[]
+}
+export interface IEffectCategory {
+  name: string
+  label: string
+  effects2d: IEffect[][]
+}
 
 class ConstantData {
   get isLogin(): boolean {
@@ -193,24 +210,6 @@ class ConstantData {
 
   // For TextEffectSetting
   textEffects() {
-    interface Option {
-      key: string
-      label: string
-      type: 'range' | 'color'
-      min?: number
-      max?: number
-    }
-    interface Effect {
-      key: string
-      label: string
-      options: Option[]
-    }
-    interface EffectCategory {
-      name: string
-      label: string
-      effects2d: Effect[][]
-    }
-
     function arrTo2darr(arr: Array<unknown>) {
       const newArr = []
       while (arr.length) newArr.push(arr.splice(0, 3))
@@ -229,21 +228,20 @@ class ConstantData {
         stroke: i18n.tc('NN0069'),
         shape: i18n.tc('NN0070'),
         bend: i18n.tc('NN0071'),
-        bStroke: '外框粗細',
-        bColor: '外框顏色',
+        bStroke: i18n.tc('NN0732'),
+        bColor: i18n.tc('NN0733'),
         bRadius: i18n.tc('NN0086'),
-        pStroke: '擴展',
-        pColor: '填滿顏色',
-        height: '高度',
-        width: '寬度',
-        yOffset: '垂直位移'
+        pStroke: i18n.tc('NN0734'),
+        pColor: i18n.tc('NN0735'),
+        height: i18n.tc('NN0736'),
+        yOffset: i18n.tc('NN0737')
       }
 
       return array.map((name: string) => {
         const option = {
           key: name,
           label: effectI18nMap[name as keyof typeof effectI18nMap]
-        } as Option
+        } as IEffectOption
 
         option.type = 'range'
         switch (name) {
@@ -266,7 +264,7 @@ class ConstantData {
             break
           default:
             /* distance, blur, opacity, spread, stroke,
-             * bStroke, pStroke, bRadius, width, height */
+             * bStroke, pStroke, bRadius, height */
             option.max = 100
             option.min = 0
             break
@@ -304,60 +302,12 @@ class ConstantData {
         options: toOptions(['distance', 'angle', 'color'])
       }, {
         key: 'funky',
-        label: 'Funky',
+        label: i18n.tc('NN0730'),
         options: toOptions(['distance', 'angleFunky', 'opacity', 'color'])
       }, {
         key: 'boost',
-        label: 'Boost',
+        label: i18n.tc('NN0731'),
         options: toOptions(['distance', 'opacity', 'color'])
-      }])
-    }, {
-      name: 'bg',
-      label: '文字背景樣式',
-      effects2d: arrTo2darr([{
-        key: 'none',
-        label: i18n.t('NN0111'),
-        options: toOptions([])
-      }, {
-        key: 'square-borderless',
-        label: '方形底無外框',
-        options: toOptions(['opacity', 'pStroke', 'pColor'])
-      }, {
-        key: 'rounded-borderless',
-        label: '圓矩形底無外框',
-        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
-      }, {
-        key: 'square-hollow',
-        label: '方形空心框',
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
-      }, {
-        key: 'rounded-hollow',
-        label: '圓矩形底空心框',
-        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
-      }, {
-        key: 'square-both',
-        label: '方形有外框有填色',
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-      }, {
-        key: 'rounded-both',
-        label: '圓矩形有外框有填色',
-        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-      }, {
-        key: 'underline-triangle',
-        label: '粗底線(三角)',
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'underline-circle',
-        label: '粗底線(圓)',
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'underline-square',
-        label: '粗底線(方)',
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'gooey',
-        label: '黏糊糊文字背景',
-        options: toOptions(['bRadius', 'opacity', 'color'])
       }])
     }, {
       name: 'shape',
@@ -371,8 +321,56 @@ class ConstantData {
         label: i18n.t('NN0118'),
         options: toOptions(['bend'])
       }])
+    }, {
+      name: 'bg',
+      label: i18n.tc('NN0719'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'square-borderless',
+        label: i18n.tc('NN0720'),
+        options: toOptions(['opacity', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-borderless',
+        label: i18n.tc('NN0721'),
+        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
+      }, {
+        key: 'square-hollow',
+        label: i18n.tc('NN0722'),
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
+      }, {
+        key: 'rounded-hollow',
+        label: i18n.tc('NN0723'),
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+      }, {
+        key: 'square-both',
+        label: i18n.tc('NN0724'),
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-both',
+        label: i18n.tc('NN0725'),
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'gooey',
+        label: i18n.tc('NN0726'),
+        options: toOptions(['bRadius', 'opacity', 'color'])
+      }, {
+        key: 'underline-triangle',
+        label: i18n.tc('NN0727'),
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'underline-circle',
+        label: i18n.tc('NN0728'),
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'underline-square',
+        label: i18n.tc('NN0729'),
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }])
     }]
-    return categories as EffectCategory[]
+    return categories as IEffectCategory[]
   }
 
   // For Settings

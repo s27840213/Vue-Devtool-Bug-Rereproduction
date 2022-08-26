@@ -60,7 +60,7 @@ export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
 
 export interface ITextFormat {
   textEffect: ITextEffect | {},
-  textBg: ITextBox | ITextUnderline | {},
+  textBg: ITextBgEffect,
   textShape: ITextShape | {},
   scale: number,
   paragraphStyle: IParagraphStyle,
