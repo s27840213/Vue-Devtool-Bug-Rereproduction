@@ -30,7 +30,8 @@
               class="panel-bg__color"
               v-press="() => handleShareColor(color)"
               @click="setBgColor(color)")
-              div(class="panel-bg__color-inner" :style="colorStyles(color)")
+              div(class="panel-bg__color-back")
+                div(class="panel-bg__color-inner" :style="colorStyles(color)")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -432,19 +433,22 @@ export default Vue.extend({
   }
   &__color {
     padding-top: 100%;
-    border-radius: 4px;
     cursor: pointer;
     position: relative;
-    background-color: white;
     -webkit-touch-callout: none;
     user-select: none;
   }
-  &__color-inner {
+  &__color-back {
     position: absolute;
     top: 0;
     left: 0;
     @include size(100%);
     border-radius: 4px;
+    background: white;
+    overflow: hidden;
+  }
+  &__color-inner {
+    @include size(100%);
   }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
