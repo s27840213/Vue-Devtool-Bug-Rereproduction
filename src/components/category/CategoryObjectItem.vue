@@ -25,9 +25,6 @@ export default Vue.extend({
     item: Object
   },
   computed: {
-    ...mapGetters('user', {
-      isAdmin: 'isAdmin'
-    }),
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
     }
