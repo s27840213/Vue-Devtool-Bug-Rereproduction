@@ -246,7 +246,9 @@ class GroupUtils {
 
   selectAll() {
     this.deselect()
-    this.select(pageUtils.currFocusPageIndex, [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()])
+    const indices = [...Array(store.getters.getLayersNum(pageUtils.currFocusPageIndex)).keys()]
+      .filter(i => !pageUtils.currFocusPage.layers[i].locked)
+    this.select(pageUtils.currFocusPageIndex, indices)
   }
 
   deselect() {

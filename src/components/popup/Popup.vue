@@ -81,7 +81,7 @@ export default Vue.extend({
       return (this.popupComponent as IPopupComponent).props
     },
     hasDesignId(): boolean {
-      return this.getPage(pageUtils.currFocusPageIndex).designId !== ''
+      return this.getPage(pageUtils.currFocusPageIndex)?.designId !== ''
     },
     inAdminMode(): boolean {
       return this.role === 0 && this.adminMode === true

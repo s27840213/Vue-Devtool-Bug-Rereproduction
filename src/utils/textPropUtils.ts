@@ -1225,7 +1225,7 @@ class TextPropUtils {
           break
         }
         case 'color': {
-          value = typeof this.propReader('color') === 'string' ? this.propReader('color') as string : '--'
+          value = typeof this.propReader('color') === 'string' ? (this.propReader('color') as string).toUpperCase() : '--'
           break
         }
         case 'decoration': {

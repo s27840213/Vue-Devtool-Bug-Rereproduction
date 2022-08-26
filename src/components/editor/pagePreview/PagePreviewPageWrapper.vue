@@ -60,7 +60,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import i18n from '@/i18n'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import GeneralUtils from '@/utils/generalUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -90,6 +90,14 @@ export default Vue.extend({
     PageContent: () => import('@/components/editor/page/PageContent.vue'),
     LazyLoad
   },
+  created() {
+    console.log(this.currFocusPageIndex)
+  },
+  watch: {
+    currActivePageIndex: function(val) {
+      console.warn(val)
+    }
+  },
   data() {
     return {
       menuItems: [
@@ -113,6 +121,9 @@ export default Vue.extend({
     clickOutside: vClickOutside.directive
   },
   computed: {
+    ...mapState({
+      currActivePageIndex: 'currActivePageIndex'
+    }),
     ...mapGetters({
       middlemostPageIndex: 'getMiddlemostPageIndex',
       currFocusPageIndex: 'getCurrFocusPageIndex',

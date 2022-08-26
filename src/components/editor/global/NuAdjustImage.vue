@@ -19,10 +19,10 @@
       image(:xlink:href="src"
         v-bind="style"
         :filter="imageFilter")
-    component(v-for="(elm, idx) in cssFilterElms"
-      :key="`cssFilter${idx}`"
-      :is="elm.tag"
-      v-bind="elm.attrs")
+    //- component(v-for="(elm, idx) in cssFilterElms"
+    //-   :key="`cssFilter${idx}`"
+    //-   :is="elm.tag"
+    //-   v-bind="elm.attrs")
 </template>
 
 <script lang="ts">

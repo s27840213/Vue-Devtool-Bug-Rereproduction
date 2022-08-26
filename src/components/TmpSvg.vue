@@ -22,7 +22,10 @@ import pageUtils from '@/utils/pageUtils'
 
 export default Vue.extend({
   data() {
-    return {}
+    return {
+      styleTextContent: [] as string[],
+      transTextContent: [] as string[]
+    }
   },
   async mounted() {
     const body = this.$refs.body as [HTMLElement]
@@ -32,7 +35,7 @@ export default Vue.extend({
 
       const className = shapeUtils.classGenerator()
       const styleText = shapeUtils.styleFormatter(className, this.contents[i].styleArray, this.contents[i].color, this.contents[i].size ?? [], this.contents[i].point)
-      shapeUtils.addStyleTag(styleText)
+      this.updateStyleNode(styleText)
 
       if (this.contents[i].category === 'C') {
         const transText = shapeUtils.transFormatter(className, this.contents[i].transArray ?? [], {
@@ -41,12 +44,12 @@ export default Vue.extend({
           pDiff: [0, 0],
           pOfst: 10
         })
-        shapeUtils.addStyleTag(transText)
+        this.updateTransNode(transText)
       } else if (this.contents[i].category === 'D') {
         const transText = shapeUtils.markerTransFormatter(className, this.contents[i].markerTransArray ?? [], this.contents[i].size ?? [], this.contents[i].point ?? [], this.contents[i].markerWidth ?? [4, 4])
-        shapeUtils.addStyleTag(transText)
+        this.updateTransNode(transText)
       }
-      svg.innerHTML = shapeUtils.svgFormatter(this.contents[i].svg, className, this.contents[i].styleArray.length, this.contents[i].transArray?.length ?? 0, this.contents[i].markerTransArray?.length ?? 0, this.contents[i].point)
+      svg.innerHTML = shapeUtils.svgFormatter(this.contents[i].svg, className, this.styleTextContent, this.transTextContent, this.contents[i].point)
       body[i].appendChild(svg)
     }
   },
@@ -126,6 +129,12 @@ export default Vue.extend({
       }
       Object.assign(config, svgData)
       layerUtils.addLayers(pageUtils.currFocusPageIndex, [layerFactary.newShape(config)])
+    },
+    updateStyleNode(styleTextContent: string[]) {
+      this.styleTextContent = styleTextContent
+    },
+    updateTransNode(transTextContent: string[]) {
+      this.transTextContent = transTextContent
     }
   }
 })

@@ -7,7 +7,7 @@
         clipPath(v-if="config.category === 'E'" :id="clipPathId")
           use(:xlink:href="svgId")
       g(v-if="config.category === 'E'")
-        use(:xlink:href="svgId" :clip-path="'url(#' + clipPathId + ')'" :class="className + 'S0'")
+        use(:xlink:href="svgId" :clip-path="'url(#' + clipPathId + ')'" :style="styleTextContent[0]")
       g(v-else :filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter")
 </template>
 
@@ -52,22 +52,14 @@ const CROP_Y_REG = new RegExp(`\\${CROP_Y}`, 'g')
 export default Vue.extend({
   data() {
     return {
-      styleNode: null as any,
-      transNode: null as any,
       filterTemplate: '',
-      paramsReady: false
+      paramsReady: false,
+      styleTextContent: [] as string[],
+      transTextContent: [] as string[]
     }
   },
   async created() {
     await this.checkAndFetchSvg()
-  },
-  destroyed() {
-    if (this.styleNode && this.styleNode.parentElement) {
-      this.styleNode.parentElement.remove()
-    }
-    if (this.transNode && this.transNode.parentElement) {
-      this.transNode.parentElement.remove()
-    }
   },
   watch: {
     'config.color': {
@@ -195,7 +187,7 @@ export default Vue.extend({
       if (this.paramsReady) {
         const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0], this.config.linecap, this.config.trimOffset) : this.config.point
         const svgParameters = (this.config.category === 'E') ? shapeUtils.svgParameters(this.config.shapeType, this.config.vSize, this.config.size) : []
-        return shapeUtils.svgFormatter(this.config.svg, this.className, this.config.styleArray.length, this.config.transArray?.length ?? 0, this.config.markerTransArray?.length ?? 0, point, svgParameters, this.config.pDiff)
+        return shapeUtils.svgFormatter(this.config.svg, this.className, this.styleTextContent, this.transTextContent, point, svgParameters, this.config.pDiff)
       } else {
         return ''
       }
@@ -295,19 +287,11 @@ export default Vue.extend({
         }
       }
     },
-    updateStyleNode(styleText: string) {
-      if (this.styleNode) {
-        this.styleNode.textContent = styleText
-      } else {
-        this.styleNode = shapeUtils.addStyleTag(styleText)
-      }
+    updateStyleNode(styleTextContent: string[]) {
+      this.styleTextContent = styleTextContent
     },
-    updateTransNode(transText: string) {
-      if (this.transNode) {
-        this.transNode.textContent = transText
-      } else {
-        this.transNode = shapeUtils.addStyleTag(transText)
-      }
+    updateTransNode(transTextContent: string[]) {
+      this.transTextContent = transTextContent
     },
     async checkAndFetchSvg(useConfig = true) {
       const svg = useConfig ? this.config.svg : undefined

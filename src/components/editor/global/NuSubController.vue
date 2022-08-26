@@ -597,7 +597,7 @@ export default Vue.extend({
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
-                eventUtils.emit(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
+                eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
               } else {
                 // const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
                 // const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
@@ -725,6 +725,7 @@ export default Vue.extend({
           srcObj: { ...currLayer.srcObj }
         })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
+        LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: true })
 
         const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
           .clipperHandler(LayerUtils.getCurrLayer as IImage, clip.clipPath, clip.styles).styles
@@ -752,6 +753,7 @@ export default Vue.extend({
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving) {
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 100 })
+        LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: false })
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
           srcObj: { ...this.imgBuff.srcObj }
         })
