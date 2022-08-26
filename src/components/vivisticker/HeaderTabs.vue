@@ -103,7 +103,9 @@ export default Vue.extend({
       return ''
     },
     centerTitle(): string {
-      if (this.isInCategory) {
+      if (this.isInEditor) {
+        return ''
+      } else if (this.isInCategory) {
         return this.keyword
       } else if (this.isInBgShare) {
         return `${this.$t('NN0214')}`
