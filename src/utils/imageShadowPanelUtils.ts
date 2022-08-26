@@ -182,8 +182,10 @@ export default new class ImageShadowPanelUtils {
       const drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
       const drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
 
-      const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
-      const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
+      const canvasW = Math.round(img.naturalWidth + CANVAS_SPACE)
+      const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
+      // const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
+      // const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
       updateCanvas.setAttribute('width', `${canvasW}`)
       updateCanvas.setAttribute('height', `${canvasH}`)
       const params = { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE }

@@ -724,6 +724,7 @@ export default Vue.extend({
         }
         return
       }
+      clearShadowSrc && this.clearShadowSrc()
       const { currentEffect } = this.shadow
       const hasShadowSrc = this.shadow.srcObj.type && this.shadow.srcObj.type !== 'upload' && this.shadow.srcObj.assetId
       if (currentEffect !== ShadowEffectType.none) {
@@ -732,7 +733,6 @@ export default Vue.extend({
         imageShadowUtils.setProcessId(id)
         !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo, true)
       }
-      clearShadowSrc && this.clearShadowSrc()
 
       let img = new Image()
       if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
@@ -745,6 +745,8 @@ export default Vue.extend({
       }
 
       switch (currentEffect) {
+        case ShadowEffectType.imageMatched:
+        case ShadowEffectType.floating:
         case ShadowEffectType.shadow:
         case ShadowEffectType.frame:
         case ShadowEffectType.blur: {
@@ -779,51 +781,51 @@ export default Vue.extend({
           }
           break
         }
-        case ShadowEffectType.imageMatched: {
-          if (!shadowBuff.canvasShadowImg.imageMatched) {
-            img.crossOrigin = 'anonymous'
-            img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            await new Promise<void>((resolve) => {
-              img.onload = async () => {
-                this.shadowBuff.canvasShadowImg.imageMatched = img
-                const isSVG = await imageShadowPanelUtils.isSVG(img, this.config)
-                if (isSVG) {
-                  imageShadowPanelUtils.svgImageSizeFormatter(img, 510, () => {
-                    /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
-                    img.onload = () => {
-                      this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
-                      resolve()
-                    }
-                    img.onerror = () => {
-                      console.log('img load error')
-                      resolve()
-                    }
-                  })
-                } else {
-                  resolve()
-                }
-              }
-            })
-          } else {
-            img = shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement
-          }
-          break
-        }
-        case ShadowEffectType.floating: {
-          if (!shadowBuff.canvasShadowImg.floating) {
-            img.crossOrigin = 'anonymous'
-            img.onload = () => {
-              if (!imageShadowUtils.inUploadProcess) {
-                imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
-                this.shadowBuff.canvasShadowImg.floating = img
-              }
-            }
-            img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-          } else {
-            img = shadowBuff.canvasShadowImg.floating
-          }
-          break
-        }
+        // case ShadowEffectType.imageMatched: {
+        //   if (!shadowBuff.canvasShadowImg.imageMatched) {
+        //     img.crossOrigin = 'anonymous'
+        //     img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        //     await new Promise<void>((resolve) => {
+        //       img.onload = async () => {
+        //         this.shadowBuff.canvasShadowImg.imageMatched = img
+        //         const isSVG = await imageShadowPanelUtils.isSVG(img, this.config)
+        //         if (isSVG) {
+        //           imageShadowPanelUtils.svgImageSizeFormatter(img, 510, () => {
+        //             /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
+        //             img.onload = () => {
+        //               this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
+        //               resolve()
+        //             }
+        //             img.onerror = () => {
+        //               console.log('img load error')
+        //               resolve()
+        //             }
+        //           })
+        //         } else {
+        //           resolve()
+        //         }
+        //       }
+        //     })
+        //   } else {
+        //     img = shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement
+        //   }
+        //   break
+        // }
+        // case ShadowEffectType.floating: {
+        //   if (!shadowBuff.canvasShadowImg.floating) {
+        //     img.crossOrigin = 'anonymous'
+        //     img.onload = () => {
+        //       if (!imageShadowUtils.inUploadProcess) {
+        //         imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
+        //         this.shadowBuff.canvasShadowImg.floating = img
+        //       }
+        //     }
+        //     img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        //   } else {
+        //     img = shadowBuff.canvasShadowImg.floating
+        //   }
+        //   break
+        // }
         case ShadowEffectType.none:
           imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
           imageShadowUtils.clearLayerData()
@@ -926,8 +928,8 @@ export default Vue.extend({
             }
             break
           case ShadowEffectType.imageMatched:
-            if (shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement) {
-              imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement, this.config, {
+            if (shadowBuff.canvasShadowImg.shadow as HTMLImageElement) {
+              imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,
@@ -936,8 +938,8 @@ export default Vue.extend({
             }
             break
           case ShadowEffectType.floating:
-            if (shadowBuff.canvasShadowImg.floating as HTMLImageElement) {
-              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg.floating as HTMLImageElement, this.config, {
+            if (shadowBuff.canvasShadowImg.shadow as HTMLImageElement) {
+              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
                 drawCanvasH,
