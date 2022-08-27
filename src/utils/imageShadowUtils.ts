@@ -251,6 +251,7 @@ class ImageShadowUtils {
     }
     ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+    ctxMaxSize.beginPath()
 
     const { styles } = config
     const { timeout = DRAWING_TIMEOUT, cb } = params
@@ -267,47 +268,39 @@ class ImageShadowUtils {
       layerInfo = this.layerData?.options?.layerInfo
     }
 
-    const mappingScale = _imgWidth > _imgHeight
-    ? maxsize / drawCanvasW
-    : maxsize / drawCanvasH
+    // const mappingScale = maxsize / middsize
+    // const mappingScale = _imgWidth > _imgHeight
+    // ? maxsize / drawCanvasW
+    // : maxsize / drawCanvasH
 
-    const canvasMaxW = canvas.width * mappingScale
-    const ellipseX = canvasMaxW * 0.5
-    const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
-    const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}`
-    const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.floating &&
-      this.dataBuff.radius === radius && this.dataBuff.size === size &&
-      this.dataBuff.layerIdentifier === layerIdentifier && this.dataBuff.thinkness === thinkness
+    const ratio = _imgWidth / _imgHeight
+    const maxCanvasDrawH = (ratio > 1 ? maxsize / ratio : maxsize) * layerHeight / _imgHeight
+    const ellipseX = canvasMaxSize.width * 0.5
+    const ellipseY = ((canvasMaxSize.height - maxCanvasDrawH) * 0.5 + maxCanvasDrawH)
+    // const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
+    // const canvasMaxW = canvasMaxSize.width
 
-    if (layerInfo && timeout && !hasBuffRecorded) {
+    if (layerInfo && timeout) {
       this.setIsProcess(layerInfo, true)
     }
 
-    const offsetX = x * fieldRange.floating.x.weighting
-    const offsetY = y * fieldRange.floating.y.weighting
+    const xFactor = layerWidth / _imgWidth
+    const yFactor = layerHeight / _imgHeight
+    const offsetX = x * fieldRange.floating.x.weighting * xFactor
+    const offsetY = y * fieldRange.floating.y.weighting * yFactor
 
-    canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
-    canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-
-    const ratio = _imgWidth / _imgHeight
-    console.log(maxsize)
-    const shadowWidth = maxsize * (ratio > 1 ? 1 : ratio) * (size * 0.01) * 0.5
-    // const shadowWidth = config.styles.initWidth * (size * 0.01)
-    const shadowHeight = FLOATING_SHADOW_SIZE * (thinkness * 0.01)
+    const shadowWidth = maxsize * (ratio > 1 ? 1 : ratio) * (size * 0.01) * 0.5 * xFactor
+    const shadowHeight = FLOATING_SHADOW_SIZE * (thinkness * 0.01) * yFactor
+    ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, shadowWidth, shadowHeight, 0, 0, Math.PI * 2 + 20)
     ctxMaxSize.fill()
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('floating', 1)
     const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor((radius * 0.5) * fieldRange.floating.radius.weighting), handlerId)
     setMark('floating', 2)
-    this.dataBuff.data = bluredData
-    this.dataBuff.effect = ShadowEffectType.floating
-    this.dataBuff.radius = radius
-    this.dataBuff.size = size
-    this.dataBuff.layerIdentifier = layerIdentifier
-    this.dataBuff.thinkness = thinkness
 
-    ctxMaxSize.putImageData(this.dataBuff.data, 0, 0)
+    ctxMaxSize.putImageData(bluredData, 0, 0)
+
     ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
     ctxT.globalCompositeOperation = 'source-in'
     ctxT.globalAlpha = opacity * 0.01
@@ -400,9 +393,6 @@ class ImageShadowUtils {
     }
 
     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
-    // canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${canvas.width * mappingScale}`)
-    // canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${canvas.height * mappingScale}`)
-    // console.log(canvasMaxSize.width, canvas.width * mappingScale)
 
     ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
@@ -411,9 +401,11 @@ class ImageShadowUtils {
     const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1, handlerId)
     console.log('image-matched blur handling time: ', Date.now() - start)
     setMark('imageMatched', 2)
+    const xFactor = layerWidth / _imgWidth
+    const yFactor = layerHeight / _imgHeight
     const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.imageMatched.distance.weighting : 0
     const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.imageMatched.distance.weighting : 0
-    ctxMaxSize.putImageData(bluredData, offsetX, offsetY)
+    ctxMaxSize.putImageData(bluredData, offsetX * xFactor, offsetY * yFactor)
     // const canvasTest = document.createElement('canvas')
     // canvasTest.setAttribute('width', canvasMaxSize.width.toString())
     // canvasTest.setAttribute('height', canvasMaxSize.height.toString())
