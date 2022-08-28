@@ -640,7 +640,8 @@ export default Vue.extend({
               imgX: clip.styles.imgX,
               imgY: clip.styles.imgY,
               imgWidth: clip.styles.imgWidth,
-              imgHeight: clip.styles.imgHeight
+              imgHeight: clip.styles.imgHeight,
+              adjust: clip.styles.adjust
             }
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
@@ -715,7 +716,8 @@ export default Vue.extend({
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
             imgWidth: clip.styles.imgWidth,
-            imgHeight: clip.styles.imgHeight
+            imgHeight: clip.styles.imgHeight,
+            adjust: clip.styles.adjust
             // horizontalFlip: clip.styles.horizontalFlip,
             // verticalFlip: clip.styles.verticalFlip
           }
