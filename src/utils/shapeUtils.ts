@@ -88,12 +88,8 @@ class ShapeUtils {
     return className
   }
 
-  styleFormatter(className: string, styleArray: string[], colorArray: string[], sizeArray?: number[], dashArray?: number[], linecap?: string, filled?: boolean): string {
-    let style = ''
-    for (let i = 0; i < styleArray.length; i++) {
-      const tmpStyle = `.${className}S${i}{${styleArray[i]}}`
-      style += `${tmpStyle} `
-    }
+  styleFormatter(className: string, styleArray: string[], colorArray: string[], sizeArray?: number[], dashArray?: number[], linecap?: string, filled?: boolean): string[] {
+    let style = styleArray.join('!!')
     if (colorArray) {
       for (let j = 0; j < colorArray.length; j++) {
         const reg = new RegExp('\\$color\\[' + j + '\\]', 'g')
@@ -119,15 +115,11 @@ class ShapeUtils {
       const reg = new RegExp('\\$fillcolor', 'g')
       style = style.replace(reg, fillcolor)
     }
-    return style
+    return style.split('!!')
   }
 
-  transFormatter(className: string, transArray: string[], param: any): string {
-    let style = ''
-    for (let i = 0; i < transArray.length; i++) {
-      const tmpStyle = `.${className}T${i}{${transArray[i]}}`
-      style += `${tmpStyle} `
-    }
+  transFormatter(className: string, transArray: string[], param: any): string[] {
+    let style = transArray.join('!!')
 
     const cSize = param.cSize
     const pSize = param.pSize
@@ -152,22 +144,25 @@ class ShapeUtils {
     const regTransYC = new RegExp('\\$tyc', 'g')
     style = style.replace(regTransYC, translateYC.toString())
 
-    return style
+    return style.split('!!')
   }
 
-  svgFormatter(svgIn: string, className: string, styleNum: number, transNum: number, mTransNum: number, point?: number[], svgParameters?: number[], pDiff?: number[]): string {
+  svgFormatter(svgIn: string, className: string, styleTextContent: string[], transTextContent: string[], point?: number[], svgParameters?: number[], pDiff?: number[]): string {
     let svgOut = svgIn
-    for (let i = 0; i < styleNum; i++) {
+    svgOut = svgOut.replace(/class/g, 'style')
+    for (let i = 0; i < styleTextContent.length; i++) {
+      const regId = new RegExp('\\$style\\[' + i + '\\]_ID', 'g')
+      svgOut = svgOut.replace(regId, `${className}S${i}_ID`)
       const reg = new RegExp('\\$style\\[' + i + '\\]', 'g')
-      svgOut = svgOut.replace(reg, `${className}S${i}`)
+      svgOut = svgOut.replace(reg, `${styleTextContent[i]}`)
     }
-    for (let i = 0; i < transNum; i++) {
+    for (let i = 0; i < transTextContent.length; i++) {
       const reg = new RegExp('\\$trans\\[' + i + '\\]', 'g')
-      svgOut = svgOut.replace(reg, `${className}T${i}`)
+      svgOut = svgOut.replace(reg, `${transTextContent[i]}`)
     }
-    for (let i = 0; i < mTransNum; i++) {
+    for (let i = 0; i < transTextContent.length; i++) {
       const reg = new RegExp('\\$mtrans\\[' + i + '\\]', 'g')
-      svgOut = svgOut.replace(reg, `${className}T${i}`)
+      svgOut = svgOut.replace(reg, `${transTextContent[i]}`)
     }
     const svgReg = new RegExp('\\$svgId', 'g')
     svgOut = svgOut.replace(svgReg, `${className}SVG`)
@@ -260,12 +255,8 @@ class ShapeUtils {
     }
   }
 
-  markerTransFormatter(className: string, markerTransArray: string[], sizeArray: number[], point: number[], markerWidth: number[]): string {
-    let style = ''
-    for (let i = 0; i < markerTransArray.length; i++) {
-      const tmpStyle = `.${className}T${i}{${markerTransArray[i]}}`
-      style += `${tmpStyle} `
-    }
+  markerTransFormatter(className: string, markerTransArray: string[], sizeArray: number[], point: number[], markerWidth: number[]): string[] {
+    let style = markerTransArray.join('!!')
 
     const quadrant = this.getLineQuadrant(point)
 
@@ -321,7 +312,7 @@ class ShapeUtils {
       style = style.replace(regFineTuneE, `translate(-${markerWidth[1] * scale}px, -${2 * scale}px)`)
     }
 
-    return style
+    return style.split('!!')
   }
 
   lineViewBoxFormatter(point: number[], scale: number): string {
