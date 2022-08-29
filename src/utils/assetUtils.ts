@@ -590,7 +590,7 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          await this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
@@ -620,6 +620,7 @@ class AssetUtils {
       }
       editorUtils.setCloseMobilePanelFlag(true)
       this.addAssetToRecentlyUsed(asset)
+      return asset.jsonData
     } catch (error) {
       console.log(error)
       captureException(error)

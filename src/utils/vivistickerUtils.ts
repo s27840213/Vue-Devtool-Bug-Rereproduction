@@ -6,6 +6,8 @@ import groupUtils from './groupUtils'
 import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
+import eventUtils, { PanelEvent } from './eventUtils'
+import { ColorEventType } from '@/store/types'
 
 class ViviStickerUtils {
   inDebugMode = false
@@ -75,9 +77,18 @@ class ViviStickerUtils {
       height: Math.round(pageWidth * 420 / 358),
       backgroundColor: '#F8F8F8'
     })])
-    assetUtils.addAsset(asset).then(() => {
-      stepsUtils.reset()
-      store.commit('vivisticker/SET_isInEditor', true)
+    assetUtils.addAsset(asset).then((jsonData?: any) => {
+      if (jsonData) {
+        stepsUtils.reset()
+        store.commit('vivisticker/SET_isInEditor', true)
+        if ([5, 11].includes(asset.type)) {
+          if (jsonData.color && jsonData.color.length > 0) {
+            eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
+          } else {
+            eventUtils.emit(PanelEvent.switchTab, 'opacity')
+          }
+        }
+      }
     })
   }
 
