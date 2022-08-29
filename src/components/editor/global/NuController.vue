@@ -355,7 +355,7 @@ export default Vue.extend({
     lockIconStyles(): { [index: string]: string } {
       const zindex = (this.layerIndex + 1) * 100
       return {
-        transform: `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio})`
+        transform: `translate3d(0px, 0px, ${zindex}px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
       }
     },
     textHtml(): any {
