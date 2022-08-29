@@ -108,7 +108,7 @@ export default Vue.extend({
       },
       dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false,
-      dblTabsFlag: false
+      dblTapFlag: false
     }
   },
   mounted() {
@@ -319,12 +319,12 @@ export default Vue.extend({
       const body = this.$refs.body as HTMLElement
       // body.addEventListener('touchstart', this.disableTouchEvent)
       if (GeneralUtils.isTouchDevice()) {
-        if (!this.dblTabsFlag && this.isActive && this.config.type === 'image') {
+        if (!this.dblTapFlag && this.isActive && this.config.type === 'image') {
           const touchtime = Date.now()
           const interval = 500
           const doubleTap = (e: PointerEvent) => {
             e.preventDefault()
-            if (Date.now() - touchtime < interval && !this.dblTabsFlag) {
+            if (Date.now() - touchtime < interval && !this.dblTapFlag) {
               /**
                * This is the dbl-click callback block
                */
@@ -339,13 +339,13 @@ export default Vue.extend({
                 }
                 eventUtils.emit(PanelEvent.switchTab, 'crop')
               }
-              this.dblTabsFlag = true
+              this.dblTapFlag = true
             }
           }
           body.addEventListener('pointerdown', doubleTap)
           setTimeout(() => {
             body.removeEventListener('pointerdown', doubleTap)
-            this.dblTabsFlag = false
+            this.dblTapFlag = false
           }, interval)
         }
         this.$emit('pointerDownSubController')
