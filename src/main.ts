@@ -19,6 +19,7 @@ import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
+import imageShadowUtils from './utils/imageShadowUtils'
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
