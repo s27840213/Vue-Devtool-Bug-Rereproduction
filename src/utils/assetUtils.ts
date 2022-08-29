@@ -600,6 +600,13 @@ class AssetUtils {
         case 11:
           this.addBasicShape(asset.jsonData, attrs)
           break
+        case 14: {
+          // console.log(asset.jsonData)
+          const { srcObj, styles } = asset.jsonData as IImage
+          const src = ImageUtils.getSrc(srcObj, Math.max(styles.imgWidth, styles.imgHeight))
+          this.addImage(src, styles.imgWidth / styles.imgHeight, { styles })
+        }
+          break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
