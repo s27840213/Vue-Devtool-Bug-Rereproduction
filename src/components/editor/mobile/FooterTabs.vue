@@ -475,7 +475,7 @@ export default Vue.extend({
           break
         }
         case 'add-page': {
-          const { width, height } = pageUtils.getPageSize(pageUtils.currActivePageIndex)
+          const { width, height } = pageUtils.getPageSize(pageUtils.currFocusPageIndex)
           pageUtils.addPageToPos(pageUtils.newPage({ width, height }), pageUtils.currActivePageIndex + 1)
           this._setCurrActivePageIndex(pageUtils.currFocusPageIndex + 1)
           stepsUtils.record()

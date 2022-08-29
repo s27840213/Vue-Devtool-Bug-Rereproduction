@@ -22,6 +22,7 @@ import gtmUtils from './gtmUtils'
 import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
+import { SrcObj } from '@/interfaces/gallery'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -440,7 +441,7 @@ class AssetUtils {
       })
   }
 
-  addImage(url: string, photoAspectRatio: number, attrs: IAssetProps = {}) {
+  addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}) {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
@@ -450,10 +451,22 @@ class AssetUtils {
 
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
-    const allLayers = this.getLayers(targePageIndex)
-    const type = ImageUtils.getSrcType(url)
-    const assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
+    let srcObj
+    let assetId = '' as string | undefined
+    if (typeof url === 'string') {
+      const type = ImageUtils.getSrcType(url)
+      assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
+      srcObj = {
+        type,
+        userId: ImageUtils.getUserId(url, type),
+        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type)),
+        brandId: ImageUtils.getBrandId(url, type)
+      }
+    } else {
+      srcObj = url as SrcObj
+    }
 
+    const allLayers = this.getLayers(targePageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
       if (layer.type !== 'image') return false
@@ -467,12 +480,7 @@ class AssetUtils {
 
     const config = {
       ...(isPreview && { previewSrc: url }),
-      srcObj: {
-        type,
-        userId: ImageUtils.getUserId(url, type),
-        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type)),
-        brandId: ImageUtils.getBrandId(url, type)
-      },
+      srcObj,
       styles: {
         ...styles,
         x,
@@ -599,6 +607,13 @@ class AssetUtils {
           break
         case 11:
           this.addBasicShape(asset.jsonData, attrs)
+          break
+        case 14: {
+          console.log(asset.jsonData)
+          const { srcObj, styles } = asset.jsonData as IImage
+          // const src = ImageUtils.getSrc(srcObj, Math.max(styles.imgWidth, styles.imgHeight))
+          this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
+        }
           break
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)

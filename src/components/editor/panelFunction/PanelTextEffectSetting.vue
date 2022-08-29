@@ -1,137 +1,68 @@
 <template lang="pug">
   div(class="text-effect-setting mt-25")
+    div(class="text-effect-setting-tabs")
+      span(v-for="category in textEffects"
+          :selected="currTab===category.name"
+          @click="switchTab(category.name)") {{category.label}}
     div(class="action-bar")
-      div(class="flex-between text-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shadowOption.slice(0, 3)"
-          :key="`shadow-${icon}`"
-          :iconName="`text-effect-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="hintMap[`shadow-${icon}`]"
-        )
-      div(v-if="shadowOption.slice(0, 3).includes(currentEffect)"
-        class="w-full text-effect-setting__form")
-        div(v-for="field in shadowFields"
-          :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input input__slider--range"
-            :value="currentStyle.textEffect[field]"
-            :max="fieldRange[field].max"
-            :min="fieldRange[field].min"
-            :name="field"
-            @input="handleEffectUpdate"
-            @mouseup="recordChange"
-            v-ratio-change
-            type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textEffect[field]"
-            :name="field"
-            @change="handleEffectUpdate"
-            @blur="recordChange"
-            type="number")
-        div(v-if="canChangeColor"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="text-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.textEffect.color }"
-            @click="handleColorModal")
-          color-picker(v-if="openColorPicker"
-            class="text-effect-setting__color-picker"
-            v-click-outside="handleColorModal"
-            :currentColor="currentStyle.textEffect.color"
-            @update="handleColorUpdate")
-      div(class="flex-between text-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shadowOption.slice(3)"
-          :key="`shadow-${icon}`"
-          :iconName="`text-effect-${icon}`"
-          @click.native="onEffectClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentEffect === icon }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="hintMap[`shadow-${icon}`]"
-        )
-      div(v-if="shadowOption.slice(3).includes(currentEffect)"
-        class="w-full text-effect-setting__form")
-        div(v-for="field in shadowFields"
-          :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{ $t(`${effectI18nMap[field]}`) }}
-          input(class="text-effect-setting__range-input input__slider--range"
-            :value="currentStyle.textEffect[field]"
-            :max="fieldRange[field].max"
-            :min="fieldRange[field].min"
-            :name="field"
-            @input="handleEffectUpdate"
-            @mouseup="recordChange"
-            v-ratio-change
-            type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textEffect[field]"
-            :name="field"
-            @change="handleEffectUpdate"
-            @blur="recordChange"
-            type="number")
-        div(v-if="canChangeColor"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t('NN0017')}}
-          div(class="text-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.textEffect.color }"
-            @click="handleColorModal")
-          color-picker(v-if="openColorPicker"
-            class="text-effect-setting__color-picker"
-            v-click-outside="handleColorModal"
-            :currentColor="currentStyle.textEffect.color"
-            @update="handleColorUpdate")
-      div(class="w-full text-left mt-10 text-blue-1 text-shape-title") {{$t('NN0070')}}
-      div(class="flex-start text-effect-setting__options mb-10")
-        svg-icon(v-for="(icon, idx) in shapeOption"
-          :key="`shape-${icon}`"
-          :iconName="`text-shape-${icon}`"
-          @click.native="onShapeClick(icon)"
-          class="text-effect-setting__option pointer"
-          :class="{ 'text-effect-setting__option--selected': currentShape === icon, 'mx-16': idx % 3 === 1 }"
-          iconWidth="60px"
-          iconColor="white"
-          v-hint="hintMap[`shape-${icon}`]"
-        )
-      div(class="w-full text-effect-setting__form")
-        div(v-for="field in shapeFields"
-          :key="field"
-          class="text-effect-setting__field")
-          div(class="text-effect-setting__field-name") {{$t(`${effectI18nMap[field]}`)}}
-          input(class="text-effect-setting__range-input input__slider--range"
-            :value="currentStyle.textShape[field]"
-            :max="fieldRange[field].max"
-            :min="fieldRange[field].min"
-            :name="field"
-            @input="handleShapeUpdate"
-            @mousedown="handleShapeStatus(true)"
-            @mouseup="handleShapeStatus(false)"
-            v-ratio-change
-            type="range")
-          input(class="text-effect-setting__value-input"
-            :value="currentStyle.textShape[field]"
-            :name="field"
-            @change="handleShapeUpdate"
-            @blur="recordChange"
-            type="number")
+      template(v-for="effects1d in currEffect.effects2d")
+        div(class="text-effect-setting__effects mb-10")
+          svg-icon(v-for="effect in effects1d"
+            :key="`${currEffect.name}-${effect.key}`"
+            :iconName="`text-${currEffect.name}-${effect.key}`"
+            @click.native="onEffectClick(currEffect.name, effect.key)"
+            class="text-effect-setting__effect pointer"
+            :class="{'text-effect-setting__effect--selected': currentStyle[currEffect.name].name === effect.key }"
+            iconWidth="60px"
+            iconColor="white"
+            v-hint="effect.label")
+        template(v-for="effect in effects1d")
+          div(v-if="effect.key === currentStyle[currEffect.name].name"
+              v-for="option in effect.options"
+              class="w-full text-effect-setting__form")
+            div(v-if="option.type === 'range'"
+                :key="option.key"
+                class="text-effect-setting__field")
+              div(class="text-effect-setting__field-name") {{option.label}}
+              input(class="text-effect-setting__range-input input__slider--range"
+                :value="currentStyle[currEffect.name][option.key]"
+                @input="(e)=>handleRangeInput(e, currEffect.name, option)"
+                :max="option.max"
+                :min="option.min"
+                :name="option.key"
+                @mousedown="handleRangeMousedown(currEffect.name)"
+                @mouseup="handleRangeMouseup(currEffect.name)"
+                v-ratio-change
+                type="range")
+              input(class="text-effect-setting__value-input"
+                :value="currentStyle[currEffect.name][option.key]"
+                @change="(e)=>handleRangeInput(e, currEffect.name, option)"
+                :max="option.max"
+                :min="option.min"
+                :name="option.key"
+                @blur="recordChange"
+                type="number")
+            div(v-if="option.type === 'color'"
+                class="text-effect-setting__field")
+              div(class="text-effect-setting__field-name") {{option.label}}
+              div(class="text-effect-setting__value-input"
+                :style="{ backgroundColor: currentStyle[currEffect.name][option.key] }"
+                @click="handleColorModal(currEffect.name, option.key)")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import vClickOutside from 'v-click-outside'
-import TextEffectUtils from '@/utils/textEffectUtils'
-import TextShapeUtils from '@/utils/textShapeUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textShapeUtils from '@/utils/textShapeUtils'
+import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
+import constantData, { IEffectCategory, IEffectOption } from '@/utils/constantData'
+import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 
 export default Vue.extend({
   components: {
@@ -142,82 +73,26 @@ export default Vue.extend({
   },
   data() {
     return {
-      openModal: false,
       openColorPicker: false,
-      effects: {
-        none: [],
-        shadow: ['distance', 'angle', 'blur', 'opacity', 'color'],
-        lift: ['spread'],
-        hollow: ['stroke'],
-        splice: ['stroke', 'distance', 'angle', 'color'],
-        echo: ['distance', 'angle', 'color']
-      } as { [key: string]: string[] },
-      effectI18nMap: {
-        distance: 'NN0063',
-        angle: 'NN0064',
-        blur: 'NN0065',
-        opacity: 'NN0066',
-        color: 'NN0067',
-        spread: 'NN0068',
-        stroke: 'NN0069',
-        shape: 'NN0070',
-        bend: 'NN0071'
-      },
-      shapes: {
-        none: [],
-        curve: ['bend']
-      } as { [key: string]: string[] },
-      fieldRange: {
-        distance: { max: 100, min: 0 },
-        angle: { max: 180, min: -180 },
-        blur: { max: 100, min: 0 },
-        opacity: { max: 100, min: 0 },
-        spread: { max: 100, min: 0 },
-        stroke: { max: 100, min: 0 },
-        bend: { max: 100, min: -100 }
-      },
-      hintMap: {
-        'shadow-none': `${this.$t('NN0111')}`,
-        'shadow-shadow': `${this.$t('NN0112')}`,
-        'shadow-lift': `${this.$t('NN0113')}`,
-        'shadow-hollow': `${this.$t('NN0114')}`,
-        'shadow-splice': `${this.$t('NN0115')}`,
-        'shadow-echo': `${this.$t('NN0116')}`,
-        'shape-none': `${this.$t('NN0117')}`,
-        'shape-curve': `${this.$t('NN0118')}`
+      currTab: 'shadow',
+      textEffects: constantData.textEffects(),
+      colorTarget: {
+        category: '',
+        key: ''
       }
     }
   },
   computed: {
-    shadowOption(): string[] {
-      return Object.keys(this.effects)
+    currEffect():IEffectCategory {
+      return this.textEffects.filter((eff) => eff.name === this.currTab)[0]
     },
-    shapeOption(): string[] {
-      return Object.keys(this.shapes)
-    },
-    shadowFields(): string[] {
-      const { effects, currentEffect } = this
-      return effects[currentEffect].filter(field => field !== 'color')
-    },
-    shapeFields(): string[] {
-      const { shapes, currentShape } = this
-      return shapes[currentShape]
-    },
-    canChangeColor(): boolean {
-      const { effects, currentEffect } = this
-      return effects[currentEffect].includes('color')
-    },
-    currentStyle(): any {
-      const { styles } = TextEffectUtils.getCurrentLayer()
-      return styles || {}
-    },
-    currentEffect(): string {
-      const { textEffect = {} } = this.currentStyle
-      return textEffect.name || 'none'
-    },
-    currentShape(): string {
-      const { textShape = {} } = this.currentStyle
-      return textShape.name || 'none'
+    currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
+      const { styles } = textEffectUtils.getCurrentLayer()
+      return {
+        shadow: Object.assign({ name: 'none' }, styles.textEffect as ITextEffect),
+        bg: styles.textBg as ITextBgEffect,
+        shape: Object.assign({ name: 'none' }, styles.textShape as ITextShape)
+      }
     }
   },
   mounted() {
@@ -229,50 +104,77 @@ export default Vue.extend({
     colorUtils.offStop(ColorEventType.textEffect, this.recordChange)
   },
   methods: {
-    optionStyle(idx: number) {
-      return { 'ml-auto': idx % 3 === 0, 'mx-16': idx % 3 === 1, 'mr-auto': idx % 3 === 2 }
-    },
-    handleStyleModal() {
-      this.openModal = !this.openModal
-    },
-    handleColorModal() {
+    handleColorModal(category: string, key: string) {
+      this.colorTarget = { category, key }
       this.$emit('toggleColorPanel', true)
       colorUtils.setCurrEvent(ColorEventType.textEffect)
-      colorUtils.setCurrColor(this.currentStyle.textEffect.color)
+      colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
     },
-    onEffectClick(effectName: string): void {
-      TextEffectUtils.setTextEffect(effectName, { ver: 'v1' })
+    switchTab(category: string) {
+      this.currTab = category
+    },
+    onEffectClick(category: string, effectName: string): void {
+      switch (category) {
+        case 'shadow':
+          textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
+          break
+        case 'bg':
+          textBgUtils.setTextBg(effectName)
+          textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
+          TextPropUtils.updateTextPropsState()
+          break
+        case 'shape':
+          textShapeUtils.setTextShape(effectName)
+          TextPropUtils.updateTextPropsState()
+          textBgUtils.setTextBg('none') // Bg & shape are exclusive.
+          break
+      }
       this.recordChange()
     },
-    onShapeClick(shapeName: string): void {
-      TextShapeUtils.setTextShape(shapeName)
-      TextPropUtils.updateTextPropsState()
+    getEffectName(category: 'shadow' | 'bg' | 'shape') {
+      return this.currentStyle[category].name || 'none'
+    },
+    handleRangeInput(event: Event, category: string, opiton: IEffectOption) {
+      const name = (event.target as HTMLInputElement).name
+      const value = parseInt((event.target as HTMLInputElement).value)
+      const [max, min] = [opiton.max as number, opiton.min as number]
+      const newVal = {
+        [name]: value > max ? max : (value < min ? min : value)
+      }
+
+      switch (category) {
+        case 'shadow':
+          textEffectUtils.setTextEffect(this.getEffectName('shadow'), newVal)
+          break
+        case 'bg':
+          textBgUtils.setTextBg(this.getEffectName('bg'), newVal)
+          break
+        case 'shape':
+          textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
+          break
+      }
+    },
+    handleRangeMouseup(category: string) {
+      if (category === 'shape') {
+        textShapeUtils.setTextShape(this.getEffectName('shape'), { focus: false })
+      }
       this.recordChange()
     },
-    handleEffectUpdate(event: Event): void {
-      const { currentEffect, fieldRange } = this
-      const { name, value } = event.target as HTMLInputElement
-      const { max, min } = (fieldRange as any)[name]
-      TextEffectUtils.setTextEffect(currentEffect, {
-        [name]: value > max ? max : (value < min ? min : value)
-      })
-    },
-    handleShapeUpdate(event: Event): void {
-      const { currentShape, fieldRange } = this
-      const { name, value } = event.target as HTMLInputElement
-      const { max, min } = (fieldRange as any)[name]
-      TextShapeUtils.setTextShape(currentShape, {
-        [name]: value > max ? max : (value < min ? min : value)
-      })
-    },
-    handleShapeStatus(focus: boolean): void {
-      const { currentShape } = this
-      TextShapeUtils.setTextShape(currentShape, { focus })
-      !focus && this.recordChange()
+    handleRangeMousedown(category: string) {
+      if (category === 'shape') {
+        textShapeUtils.setTextShape(this.getEffectName('shape'), { focus: true })
+      }
     },
     handleColorUpdate(color: string): void {
-      const { currentEffect } = this
-      TextEffectUtils.setTextEffect(currentEffect, { color })
+      const key = this.colorTarget.key
+      switch (this.colorTarget.category) {
+        case 'shadow':
+          textEffectUtils.setTextEffect(this.getEffectName('shadow'), { [key]: color })
+          break
+        case 'bg':
+          textBgUtils.setTextBg(this.getEffectName('bg'), { [key]: color })
+          break
+      }
     },
     recordChange() {
       stepsUtils.record()
@@ -284,18 +186,36 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .text-effect-setting {
   font-size: 14px;
+  &-tabs {
+    @include caption-MD;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 2.5px;
+    height: 36px;
+    > span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      &[selected] {
+        background-color: setColor(gray-6);
+      }
+    }
+  }
+  &__title {
+    font-size: 16px;
+    font-weight: bold;
+  }
   &__form {
     background: #fff;
   }
-  &__name {
-    flex: 1;
-    padding: 0 12px;
-  }
-  &__options {
-    display: flex;
+  &__effects {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 16px;
     width: 212px;
   }
-  &__option {
+  &__effect {
     box-sizing: border-box;
     margin-top: 10px;
     border-radius: 3px;
@@ -341,11 +261,6 @@ export default Vue.extend({
     margin-left: 10px;
     text-align: center;
   }
-  &__color-picker {
-    position: absolute;
-    right: 0px;
-    bottom: 0px;
-  }
 }
 .action-bar {
   padding: 10px;
@@ -354,13 +269,5 @@ export default Vue.extend({
 }
 .w-full {
   @include size(100%, 100%);
-}
-.mx-16 {
-  margin-left: 16px;
-  margin-right: 16px;
-}
-.text-shape-title {
-  font-size: 16px;
-  font-weight: bold;
 }
 </style>
