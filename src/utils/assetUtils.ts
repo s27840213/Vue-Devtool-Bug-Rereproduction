@@ -451,6 +451,21 @@ class AssetUtils {
 
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
+    let srcObj
+    let assetId = '' as string | undefined
+    if (typeof url === 'string') {
+      const type = ImageUtils.getSrcType(url)
+      assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
+      srcObj = {
+        type,
+        userId: ImageUtils.getUserId(url, type),
+        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type)),
+        brandId: ImageUtils.getBrandId(url, type)
+      }
+    } else {
+      srcObj = url as SrcObj
+    }
+
     const allLayers = this.getLayers(targePageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
@@ -463,19 +478,6 @@ class AssetUtils {
     const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
     const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
 
-    let srcObj
-    if (typeof url === 'string') {
-      const type = ImageUtils.getSrcType(url)
-      const assetId = isPreview ? previewAssetId : ImageUtils.getAssetId(url, type)
-      srcObj = {
-        type,
-        userId: ImageUtils.getUserId(url, type),
-        assetId: assetIndex ?? (previewAssetId ?? ImageUtils.getAssetId(url, type)),
-        brandId: ImageUtils.getBrandId(url, type)
-      }
-    } else {
-      srcObj = url as SrcObj
-    }
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
