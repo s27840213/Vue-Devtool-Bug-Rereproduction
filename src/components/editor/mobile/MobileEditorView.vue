@@ -137,6 +137,9 @@ export default Vue.extend({
       if (backgroundUtils.inBgSettingMode) {
         editorUtils.setInBgSettingMode(false)
       }
+    },
+    currActivePanel(newVal) {
+      this.cardHeight = this.editorView?.clientHeight
     }
   },
 
@@ -212,8 +215,7 @@ export default Vue.extend({
     },
     canvasStyle(): { [index: string]: string | number } {
       return {
-        padding: this.isDetailPage ? '40px 0px' : '0px',
-        justifyContent: 'center'
+        padding: this.isDetailPage ? '40px 0px' : '0px'
       }
     },
     absContainerStyle(): { [index: string]: string | number } {
@@ -398,8 +400,10 @@ $REULER_SIZE: 20px;
   @include size(100%, 100%);
 
   &__abs-container {
+    @include size(100%, 100%);
     width: 100%;
     min-height: 100%;
+    max-height: 100%;
     display: grid;
     transition: transform 0.3s;
     top: 0px;
@@ -408,8 +412,11 @@ $REULER_SIZE: 20px;
 
   &__canvas {
     position: relative;
-    width: 100%;
+    @include size(100%, 100%);
+
     max-width: 100%;
+    min-height: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     transform-style: preserve-3d;
@@ -419,6 +426,7 @@ $REULER_SIZE: 20px;
 
   &__card {
     width: 100%;
+    min-height: 100%;
     box-sizing: border-box;
     display: flex;
     align-items: center;
