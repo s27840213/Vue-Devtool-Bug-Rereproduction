@@ -172,7 +172,7 @@ export default Vue.extend({
           this.subLayerIndex ?? -1
         )
       }
-      return textBgUtils.converTextSpanEffect(this.config.styles)
+      return textBgUtils.convertTextSpanEffect(this.config.styles)
     }
   },
   watch: {

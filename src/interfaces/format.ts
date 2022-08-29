@@ -19,7 +19,6 @@ export interface ITextBox {
   name: 'square-borderless'|'rounded-borderless'|'square-hollow'|
   'rounded-hollow'|'square-both'|'rounded-both'
   opacity: number
-  yOffset: number
   bStroke: number
   bRadius: number
   bColor: string

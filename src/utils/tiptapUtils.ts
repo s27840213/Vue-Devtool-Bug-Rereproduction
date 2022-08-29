@@ -122,9 +122,7 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          // const spans = this.splitLastWhiteSpaces(p.spans)
-          const spans = p.spans
-          pObj.content = spans.map(s => {
+          pObj.content = p.spans.map(s => {
             // To prevent safari tiptap space issue, we need to replace space with
             // other char. There are five char can work, choose other if something happens.
             // const newText = s.text
@@ -147,22 +145,6 @@ class TiptapUtils {
       })
     }
   }
-
-  // splitLastWhiteSpaces(spans: ISpan[]): ISpan[] {
-  //   const lastSpan = spans[spans.length - 1]
-  //   if (!lastSpan.text.endsWith(' ')) return spans
-  //   const copiedSpans = generalUtils.deepCopy(spans)
-  //   const lastWhiteSpaces = lastSpan.text.match(/ +$/)?.[0] ?? ''
-  //   const prevText = lastSpan.text.substring(0, lastSpan.text.length - lastWhiteSpaces.length)
-  //   if (prevText === '') {
-  //     copiedSpans[copiedSpans.length - 1].styles.pre = true
-  //     return copiedSpans
-  //   } else {
-  //     copiedSpans[copiedSpans.length - 1].text = prevText
-  //     copiedSpans.push({ text: lastWhiteSpaces, styles: { ...lastSpan.styles, pre: true } })
-  //     return copiedSpans
-  //   }
-  // }
 
   makeParagraphStyle(attributes: any): IParagraphStyle {
     const { font, lineHeight, fontSpacing, size, align, type, userId, assetId } = attributes
@@ -289,10 +271,6 @@ class TiptapUtils {
         if (paragraph.attrs.spanStyle) {
           isSetContentRequired = true
         }
-        // const lastSpanText = spans[spans.length - 1].text
-        // if (lastSpanText.endsWith(' ') && !lastSpanText.match(/^ +$/)) {
-        //   isSetContentRequired = true
-        // }
         result.push({ spans, styles: pStyles })
       }
     }
