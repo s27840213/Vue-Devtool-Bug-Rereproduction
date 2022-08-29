@@ -276,8 +276,8 @@ export default Vue.extend({
     },
     textWrapperStyle() {
       return {
-        width: `${this.getLayerWidth / this.getLayerScale * this.contentScaleRatio}px`,
-        height: `${this.getLayerHeight / this.getLayerScale * this.contentScaleRatio}px`,
+        width: `${this.getLayerWidth / this.getLayerScale}px`,
+        height: `${this.getLayerHeight / this.getLayerScale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
         transform: `scaleX(${this.getLayerScale * this.contentScaleRatio}) scaleY(${this.getLayerScale * this.contentScaleRatio})`,
         textAlign: this.config.styles.align,
@@ -287,8 +287,8 @@ export default Vue.extend({
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
-        width: `${this.getLayerWidth / this.getLayerScale * this.contentScaleRatio}px`,
-        height: `${this.getLayerHeight / this.getLayerScale * this.contentScaleRatio}px`,
+        width: `${this.getLayerWidth / this.getLayerScale}px`,
+        height: `${this.getLayerHeight / this.getLayerScale}px`,
         userSelect: this.contentEditable ? 'text' : 'none',
         opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
