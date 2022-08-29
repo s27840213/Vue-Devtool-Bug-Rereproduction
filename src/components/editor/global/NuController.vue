@@ -2176,13 +2176,13 @@ export default Vue.extend({
   pointer-events: auto;
   position: absolute;
   background-color: setColor(white);
-  border: 1.5px solid setColor(blue-2);
+  border: 1px solid setColor(blue-2);
   transform-style: preserve-3d;
 
   &__resize-bar {
     position: absolute;
     pointer-events: auto;
-    border: 2.5px solid #00000000;
+    border: 2px solid #00000000;
     color: "#00000000";
   }
   &__rotater-wrapper {
