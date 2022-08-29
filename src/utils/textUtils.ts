@@ -598,7 +598,7 @@ class TextUtils {
               [s.split(':')[0].trim()]: s.split(': ')[1].trim()
             })
           })
-        const textBgSpanEffect = textBgUtils.converTextSpanEffect(content.styles.textBg)
+        const textBgSpanEffect = textBgUtils.converTextSpanEffect(content.styles)
         Object.assign(span.style, spanStyleObject, textBgSpanEffect)
 
         span.classList.add('nu-text__span')

@@ -1,5 +1,5 @@
 import store from '@/store'
-import { IText } from '@/interfaces/layer'
+import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils//textEffectUtils'
@@ -117,7 +117,8 @@ class TextBg {
     }
   }
 
-  converTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
+  converTextSpanEffect(styles: IStyle): Record<string, unknown> {
+    const effect = styles.textBg as ITextBgEffect
     const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
     let color = ''
     if (isITextUnderline(effect)) {
@@ -127,47 +128,35 @@ class TextBg {
     }
 
     if (isITextUnderline(effect)) {
-      const underlineBorder = (type: string, color: string) => {
-        function semiCircle(right: boolean) {
-          return `url("data:image/svg+xml; utf8,
-            <svg width='4' height='8' viewBox='0 0 4 8' fill='none' xmlns='http://www.w3.org/2000/svg'>
-              <g clip-path='url(%23clip0)'>
-                <line ${right ? "transform='matrix(-1 0 0 1 4 8)'" : ''} x1='4' y1='${right ? -4 : 4}' x2='152' y2='${right ? -4 : 4}' stroke='${color}' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/>
-              </g>
-              <defs>
-                <clipPath id='clip0'>
-                  <rect ${right ? "transform='matrix(-1 0 0 1 4 0)'" : ''} width='4' height='8' fill='white'/>
-                </clipPath>
-              </defs>
+      let underlineSvg = ''
+      const capWidth = styles.height * 0.005 * effect.height
+      const type = effect.name.split('-')[1]
+      switch (type) {
+        case 'triangle':
+          underlineSvg = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m${capWidth} 0h${styles.width - capWidth}l-${capWidth} ${capWidth * 2}h-${styles.width - capWidth}z'/>
             </svg>")`.replace(/\n[ ]*/g, '')
-        }
-
-        type = type.split('-')[1]
-        switch (type) {
-          case 'triangle':
-            // How to draw a triangle in BG, https://stackoverflow.com/a/39854065
-            return `
-              linear-gradient(to bottom right, transparent 0%, transparent 50%, ${color} 50%, ${color} 100%),
-              linear-gradient(to top left, transparent 0%, transparent 50%, ${color} 50%, ${color} 100%)`
-          case 'circle':
-            return `${semiCircle(false)}, ${semiCircle(true)}`
-          case 'square':
-            return `linear-gradient(${color}, ${color}), linear-gradient(${color}, ${color})`
-        }
+          break
+        case 'circle':
+          underlineSvg = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m${capWidth} 0a1 1 0 000 ${capWidth * 2}h${styles.width - capWidth * 2}a1 1 0 000 -${capWidth * 2}z'/>
+            </svg>")`.replace(/\n[ ]*/g, '')
+          break
+        case 'square':
+          underlineSvg = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${styles.width}v${capWidth * 2}h-${styles.width}z'/>
+            </svg>")`.replace(/\n[ ]*/g, '')
+          break
       }
 
-      const borderWidth = Math.round(effect.height / 2)
       return {
         boxDecorationBreak: 'clone',
         backgroundRepeat: 'no-repeat',
-        backgroundImage: `
-          linear-gradient(180deg, ${color}, ${color}),
-          ${underlineBorder(effect.name, color)}`,
-        backgroundSize: `
-          calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
-          ${borderWidth}px ${borderWidth * 2}px,
-          ${borderWidth}px ${borderWidth * 2}px`,
-        backgroundPositionX: `${borderWidth}px, 0, 100%`,
+        backgroundImage: underlineSvg,
+        backgroundSize: '100%',
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {

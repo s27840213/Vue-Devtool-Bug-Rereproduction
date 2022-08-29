@@ -215,7 +215,12 @@ class Controller {
             .join(',')
         }
       case 'funky':
-        return this.funky(distance, effect.distanceInverse, effect.angleFunky, colorWithOpacity)
+        return this.funky(
+          distance,
+          effect.distanceInverse,
+          effect.angleFunky,
+          colorWithOpacity
+        )
       case 'boost':
         return this.boost(
           colorWithOpacity,
