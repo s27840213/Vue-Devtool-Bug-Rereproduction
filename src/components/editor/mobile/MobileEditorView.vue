@@ -81,7 +81,9 @@ export default Vue.extend({
       tmpScaleRatio: 0,
       mounted: false,
       cardHeight: 0,
-      cardWidth: 0
+      cardWidth: 0,
+      editorViewResizeObserver: null as unknown as ResizeObserver,
+      isSwiping: false
     }
   },
   mounted() {
@@ -122,6 +124,15 @@ export default Vue.extend({
     })
     this.scrollHeight = this.editorView.scrollHeight
     document.addEventListener('blur', this.detectBlur, true)
+
+    this.editorViewResizeObserver = new ResizeObserver(() => {
+      this.cardHeight = this.editorView.clientHeight
+    })
+
+    this.editorViewResizeObserver.observe(this.editorView as HTMLElement)
+  },
+  beforeDestroy() {
+    this.editorViewResizeObserver.disconnect()
   },
   watch: {
     pageScaleRatio() {
@@ -139,7 +150,9 @@ export default Vue.extend({
       }
     },
     currActivePanel(newVal) {
-      this.cardHeight = this.editorView?.clientHeight
+      this.$nextTick(() => {
+        this.cardHeight = this.editorView?.clientHeight
+      })
     }
   },
 
@@ -208,7 +221,6 @@ export default Vue.extend({
         width: `${this.cardWidth}px`,
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         padding: this.isDetailPage ? '0px' : '40px',
-        transition: this.mounted ? 'transform 0.3s' : 'none',
         flexDirection: this.isDetailPage ? 'column' : 'initial',
         overflow: this.isDetailPage ? 'initial' : 'scroll'
       }
@@ -219,8 +231,10 @@ export default Vue.extend({
       }
     },
     absContainerStyle(): { [index: string]: string | number } {
+      // const transformDuration = this.isSwiping ? 0.3 : 0
       return {
         transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`
+        // transition: `transform ${transformDuration}s`
       }
     }
   },
@@ -339,6 +353,7 @@ export default Vue.extend({
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
+        this.isSwiping = true
         e.stopImmediatePropagation()
         if (this.pageNum - 1 !== this.currCardIndex) {
           this.setCurrCardIndex(this.currCardIndex + 1)
@@ -361,6 +376,7 @@ export default Vue.extend({
           })
           StepsUtils.record()
         }
+        this.isSwiping = false
       }
     },
     swipeDownHandler(e: AnyTouchEvent) {
@@ -368,6 +384,7 @@ export default Vue.extend({
         if (pageUtils.scaleRatio > pageUtils.mobileMinScaleRatio) {
           return
         }
+        this.isSwiping = true
         e.stopImmediatePropagation()
         if (this.currCardIndex !== 0) {
           this.setCurrCardIndex(this.currCardIndex - 1)
@@ -379,6 +396,7 @@ export default Vue.extend({
             }, 300)
           })
         }
+        this.isSwiping = false
       }
     },
     pageStyle(index: number) {
@@ -405,7 +423,6 @@ $REULER_SIZE: 20px;
     min-height: 100%;
     max-height: 100%;
     display: grid;
-    transition: transform 0.3s;
     top: 0px;
     left: 0px;
   }
