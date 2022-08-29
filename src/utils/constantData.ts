@@ -1,10 +1,9 @@
 import store from '@/store'
 import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
-import brandkitUtils from './brandkitUtils'
-import _ from 'lodash'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from './themeUtils'
+import _ from 'lodash'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -13,9 +12,26 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
+export interface IEffectOption {
+  key: string
+  label: string
+  type: 'range' | 'color'
+  min?: number
+  max?: number
+}
+export interface IEffect {
+  key: string
+  label: string
+  options: IEffectOption[]
+}
+export interface IEffectCategory {
+  name: string
+  label: string
+  effects2d: IEffect[][]
+}
 
-class PaymentData {
-  isLogin(): boolean {
+class ConstantData {
+  get isLogin(): boolean {
     return store.getters['user/isLogin']
   }
 
@@ -187,12 +203,12 @@ class PaymentData {
       url: '/pricing',
       label: i18n.t('NN0643')
     }, {
-      hidden: !this.isLogin(),
+      hidden: !this.isLogin,
       name: 'MyDesign',
       url: '/mydesign',
       label: i18n.t('NN0080')
     }, {
-      hidden: !this.isLogin(),
+      hidden: !this.isLogin,
       name: 'BrandKit',
       url: '/brandkit',
       label: i18n.t('NN0007')
@@ -200,6 +216,172 @@ class PaymentData {
     themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it: Record<string, string>) => !['BrandKit'].includes(it.name))
     else return list
+  }
+
+  // For TextEffectSetting
+  textEffects() {
+    function arrTo2darr(arr: Array<unknown>) {
+      const newArr = []
+      while (arr.length) newArr.push(arr.splice(0, 3))
+      return newArr
+    }
+
+    function toOptions(array: string[]) {
+      const effectI18nMap = {
+        distance: i18n.tc('NN0063'),
+        angleFunky: i18n.tc('NN0064'),
+        angle: i18n.tc('NN0064'),
+        blur: i18n.tc('NN0065'),
+        opacity: i18n.tc('NN0066'),
+        color: i18n.tc('NN0067'),
+        spread: i18n.tc('NN0068'),
+        stroke: i18n.tc('NN0069'),
+        shape: i18n.tc('NN0070'),
+        bend: i18n.tc('NN0071'),
+        bStroke: i18n.tc('NN0732'),
+        bColor: i18n.tc('NN0733'),
+        bRadius: i18n.tc('NN0086'),
+        pStroke: i18n.tc('NN0734'),
+        pColor: i18n.tc('NN0735'),
+        height: i18n.tc('NN0736'),
+        yOffset: i18n.tc('NN0737'),
+        distanceInverse: i18n.tc('NN0738')
+      }
+
+      return array.map((name: string) => {
+        const option = {
+          key: name,
+          label: effectI18nMap[name as keyof typeof effectI18nMap]
+        } as IEffectOption
+
+        option.type = 'range'
+        switch (name) {
+          case 'color':
+          case 'bColor':
+          case 'pColor':
+            option.type = 'color'
+            break
+          case 'angle':
+            option.max = 180
+            option.min = -180
+            break
+          case 'bend': // For curve
+            option.max = 100
+            option.min = -100
+            break
+          case 'angleFunky':
+            option.max = 60
+            option.min = -60
+            break
+          default:
+            /* distance, blur, opacity, spread, stroke,
+             * bStroke, pStroke, bRadius, height */
+            option.max = 100
+            option.min = 0
+            break
+        }
+        return option
+      })
+    }
+
+    const categories = [{
+      name: 'shadow',
+      label: i18n.t('NN0112'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'shadow',
+        label: i18n.t('NN0112'),
+        options: toOptions(['distance', 'angle', 'blur', 'opacity', 'color'])
+      }, {
+        key: 'lift',
+        label: i18n.t('NN0113'),
+        options: toOptions(['spread'])
+      }, {
+        key: 'hollow',
+        label: i18n.t('NN0114'),
+        options: toOptions(['stroke'])
+      }, {
+        key: 'splice',
+        label: i18n.t('NN0115'),
+        options: toOptions(['stroke', 'distance', 'angle', 'color'])
+      }, {
+        key: 'echo',
+        label: i18n.t('NN0116'),
+        options: toOptions(['distance', 'angle', 'color'])
+      }, {
+        key: 'funky',
+        label: i18n.tc('NN0730'),
+        options: toOptions(['distance', 'distanceInverse', 'angleFunky', 'opacity', 'color'])
+      }, {
+        key: 'boost',
+        label: i18n.tc('NN0731'),
+        options: toOptions(['distance', 'opacity', 'bColor', 'color'])
+      }])
+    }, {
+      name: 'shape',
+      label: i18n.t('NN0070'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0117'),
+        options: toOptions([])
+      }, {
+        key: 'curve',
+        label: i18n.t('NN0118'),
+        options: toOptions(['bend'])
+      }])
+    }, {
+      name: 'bg',
+      label: i18n.tc('NN0719'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'square-borderless',
+        label: i18n.tc('NN0720'),
+        options: toOptions(['opacity', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-borderless',
+        label: i18n.tc('NN0721'),
+        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
+      }, {
+        key: 'square-hollow',
+        label: i18n.tc('NN0722'),
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
+      }, {
+        key: 'rounded-hollow',
+        label: i18n.tc('NN0723'),
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+      }, {
+        key: 'square-both',
+        label: i18n.tc('NN0724'),
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-both',
+        label: i18n.tc('NN0725'),
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'gooey',
+        label: i18n.tc('NN0726'),
+        options: toOptions(['bRadius', 'opacity', 'color'])
+      }, {
+        key: 'underline-triangle',
+        label: i18n.tc('NN0727'),
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'underline-circle',
+        label: i18n.tc('NN0728'),
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }, {
+        key: 'underline-square',
+        label: i18n.tc('NN0729'),
+        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+      }])
+    }]
+    return categories as IEffectCategory[]
   }
 
   // For Settings
@@ -758,4 +940,4 @@ class PaymentData {
   }
 }
 
-export default new PaymentData()
+export default new ConstantData()

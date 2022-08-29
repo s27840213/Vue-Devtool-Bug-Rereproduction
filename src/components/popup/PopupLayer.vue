@@ -98,7 +98,6 @@ import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import { IPopupOptions } from '@/interfaces/popup'
 import tiptapUtils from '@/utils/tiptapUtils'
-import { LayerType } from '@/store/types'
 
 export default Vue.extend({
   props: {
@@ -215,7 +214,7 @@ export default Vue.extend({
         {
           icon: 'copy',
           text: '上傳 元素群組',
-          condition: this.inAdminMode && this.isLogin && this.isGroup,
+          condition: this.inAdminMode && this.isLogin,
           shortcutText: '',
           action: () => {
             uploadUtils.uploadLayer('shape')
@@ -224,7 +223,7 @@ export default Vue.extend({
         {
           icon: 'copy',
           text: '上傳 元素群組 + ID',
-          condition: this.inAdminMode && this.isLogin && this.isGroup,
+          condition: this.inAdminMode && this.isLogin,
           shortcutText: '',
           action: (event?: MouseEvent) => {
             setTimeout(() => {
