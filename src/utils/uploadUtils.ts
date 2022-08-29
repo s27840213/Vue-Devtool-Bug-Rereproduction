@@ -775,6 +775,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
+        navigator.clipboard.writeText(designId)
         modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }
@@ -843,6 +844,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
+        navigator.clipboard.writeText(designId)
         modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }
@@ -1299,8 +1301,9 @@ class UploadUtils {
           ...general,
           writingMode: styles.writingMode,
           align: styles.align,
-          textShape: styles.textShape,
           textEffect: styles.textEffect,
+          textBg: styles.textBg,
+          textShape: styles.textShape,
           type: styles.type,
           userId: styles.userId
         }

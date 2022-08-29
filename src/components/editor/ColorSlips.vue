@@ -66,6 +66,7 @@ import { LayerType } from '@/store/types'
 import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
+  name: 'ColorSlips',
   props: {
     whiteTheme: {
       type: Boolean,
