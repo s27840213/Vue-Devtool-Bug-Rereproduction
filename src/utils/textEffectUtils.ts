@@ -128,7 +128,7 @@ class Controller {
 
   funky(distance: number, distanceInverse: number, angle: number, color: string) {
     const shadow = []
-    for (let d = -distanceInverse / 10; d < distance; d++) {
+    for (let d = -distanceInverse / 10; d < distance; d += 0.5) {
       const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
       shadow.push(`${color} ${x}px ${y}px`)
     }
@@ -146,9 +146,7 @@ class Controller {
       shadow.push(`${color} ${distance * 0.1}px 0px`)
     }
 
-    return {
-      textShadow: shadow.join(',')
-    }
+    return { textShadow: shadow.join(',') }
   }
 
   convertTextEffect(effect: any): Record<string, any> {
