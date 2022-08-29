@@ -173,7 +173,8 @@ import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
-import AnyTouch, { AnyTouchEvent } from 'any-touch'
+import { AnyTouchEvent } from 'any-touch'
+import textBgUtils from '@/utils/textBgUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -473,7 +474,7 @@ export default Vue.extend({
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
               : resizers.slice(2, 4)
-          } else if (this.config.styles.textShape && this.config.styles.textShape.name) {
+          } else if (this.config.styles.textShape && this.config.styles.textShape.name !== 'none') {
             resizers = []
           } else {
             resizers = this.config.styles.writingMode.includes('vertical') ? (
@@ -613,6 +614,7 @@ export default Vue.extend({
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
       return {
         transform: `translate3d(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width * this.contentScaleRatio}px`,
@@ -628,6 +630,11 @@ export default Vue.extend({
         // touchAction: this.isActive ? 'none' : 'initial',
         touchAction: 'none',
         ...textEffectStyles,
+        ...textBgStyles,
+        borderWidth: 0,
+        borderColor: 'transparent',
+        padding: textBgStyles.controllerPadding,
+        backgroundColor: 'transparent',
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
@@ -2121,7 +2128,6 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     position: absolute;
-    box-sizing: border-box;
     transform-style: preserve-3d;
     touch-action: none;
   }
@@ -2130,7 +2136,6 @@ export default Vue.extend({
     justify-content: center;
     align-items: center;
     position: absolute;
-    box-sizing: border-box;
     &:hover {
       cursor: pointer;
     }
