@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="panel-bg")
-    tabs(:tabs="[$t('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
+    tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
     search-bar(v-if="showImageTab" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear

@@ -119,7 +119,7 @@ export default Vue.extend({
   mounted() {
     if (this.isBgImgControl) return
     this.src = this.config.previewSrc === undefined ? this.src : this.config.previewSrc
-    eventUtils.on(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id, () => {
+    eventUtils.on(ImageEvent.redrawCanvasShadow + this.config.id, () => {
       if (this.currentShadowEffect !== ShadowEffectType.none) {
         const isFloatingEffect = this.currentShadowEffect === ShadowEffectType.floating
         const redrawImmediately = !isFloatingEffect && (this.currentShadowEffect === ShadowEffectType.imageMatched || this.shadow.isTransparent)
@@ -155,7 +155,7 @@ export default Vue.extend({
       if (this.config.inProcess) {
         this.setIsProcessing(LayerProcessType.none)
       }
-      eventUtils.off(ImageEvent.redrawCanvasShadow + pageUtils.getPage(this.pageIndex).id + this.config.id)
+      eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
   data() {

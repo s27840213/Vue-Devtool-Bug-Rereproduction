@@ -47,11 +47,11 @@
         svg-icon(class="pointer record-selection btn-lh feature-button p-5"
           :iconName="'font-height'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openLineHeightSliderPopup('.btn-lh')"
-          v-hint="$t('NN0109')")
+          v-hint="$t('NN0110')")
         svg-icon(class="pointer record-selection btn-ls feature-button p-5"
           :iconName="'font-spacing'" :iconWidth="'20px'" :iconColor="'gray-2'"
           @click.native="openSpacingSliderPopup('.btn-ls')"
-          v-hint="$t('NN0110')")
+          v-hint="$t('NN0109')")
     div(class="action-bar flex-evenly")
       svg-icon(v-for="(icon,index) in mappingIcons('font')"
         class="record-selection feature-button p-5"
