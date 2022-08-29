@@ -90,14 +90,6 @@ export default Vue.extend({
     PageContent: () => import('@/components/editor/page/PageContent.vue'),
     LazyLoad
   },
-  created() {
-    console.log(this.currFocusPageIndex)
-  },
-  watch: {
-    currActivePageIndex: function(val) {
-      console.warn(val)
-    }
-  },
   data() {
     return {
       menuItems: [

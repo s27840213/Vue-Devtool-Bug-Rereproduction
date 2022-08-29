@@ -3,12 +3,14 @@
       :style="styles"
       ref="observer")
     transition(name="fade-in")
-      slot(v-if="shoudeBeRendered")
+      slot(v-if="shoudBeRendered")
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from 'vue'
 import { some } from 'lodash'
+import generalUtils from '@/utils/generalUtils'
+import queueUtils from '@/utils/queueUtils'
 
 export default Vue.extend({
   props: {
@@ -40,9 +42,11 @@ export default Vue.extend({
   data() {
     return {
       intersectionObserver: null as unknown as IntersectionObserver,
-      shoudeBeRendered: false,
+      shoudBeRendered: false,
       unrenderTimer: -1,
-      renderTimer: -1
+      renderTimer: -1,
+      unrenderEventId: '',
+      renderEventId: ''
     }
   },
   mounted() {
@@ -58,33 +62,49 @@ export default Vue.extend({
       (entries) => {
         if (some(entries, ['isIntersecting', true])) {
           // perhaps the user re-scrolled to a component that was set to unrender. In that case stop the unrendering timer
-          console.log('State: intersecting')
-          console.log('clear unreder timer')
+          queueUtils.deleteEvent(this.unrenderEventId)
           clearTimeout(this.unrenderTimer)
-          if (this.shoudeBeRendered) {
-            return
-          }
+
           /**
            *  if we're dealing underndering lets add a waiting period of 200ms before rendering.
            *  If a component enters the viewport and also leaves it within 200ms it will not render at all.
            *  This saves work and improves performance when user scrolls very fast
            */
-
           this.renderTimer = setTimeout(
             () => {
-              this.shoudeBeRendered = true
-              this.handleLoaded()
+              this.renderEventId = generalUtils.generateRandomString(3)
+              queueUtils.push(this.renderEventId, async () => {
+                this.shoudBeRendered = true
+                this.handleLoaded()
+              })
             },
             this.handleUnrender ? 200 : 0
           )
+
+          // this.renderTimer = setTimeout(
+          //   () => {
+          //     this.shoudBeRendered = true
+          //     this.handleLoaded()
+          //   },
+          //   this.handleUnrender ? 200 : 0
+          // )
           if (!this.handleUnrender) {
             this.intersectionObserver && this.intersectionObserver.disconnect()
           }
         } else {
+          queueUtils.deleteEvent(this.renderEventId)
           clearTimeout(this.renderTimer)
+
           this.unrenderTimer = setTimeout(() => {
-            this.shoudeBeRendered = false
+            this.unrenderEventId = generalUtils.generateRandomString(3)
+            queueUtils.push(this.unrenderEventId, async () => {
+              this.shoudBeRendered = false
+            })
           }, this.unrenderDelay)
+
+          // this.unrenderTimer = setTimeout(() => {
+          //   this.shoudBeRendered = false
+          // }, this.unrenderDelay)
         }
       }, options
     )
