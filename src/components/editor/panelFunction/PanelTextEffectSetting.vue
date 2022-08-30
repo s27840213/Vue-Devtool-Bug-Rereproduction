@@ -1,11 +1,13 @@
 <template lang="pug">
   div(class="text-effect-setting mt-25")
+    //- Tabs to choose effect category: shadow, shape and bg.
     div(class="text-effect-setting-tabs")
       span(v-for="category in textEffects"
           :selected="currTab===category.name"
           @click="switchTab(category.name)") {{category.label}}
     div(class="action-bar")
       template(v-for="effects1d in currCategory.effects2d")
+        //- To choose effect, ex: hollow, splice or echo.
         div(class="text-effect-setting__effects mb-10")
           svg-icon(v-for="effect in effects1d"
             :key="`${currCategory.name}-${effect.key}`"
@@ -16,14 +18,20 @@
             iconWidth="60px"
             iconColor="white"
             v-hint="effect.label")
+        //- Effect option UI.
         div(v-if="getOptions(effects1d) && getOptions(effects1d).length !== 0"
             class="text-effect-setting-options")
-          template(v-for="option in getOptions(effects1d)")
-            div(v-if="option.type === 'range'"
-                :key="option.key"
-                class="text-effect-setting-options__range")
-              div(class="text-effect-setting-options__range--name") {{option.label}}
-              input(class="text-effect-setting-options__range--number"
+          div(v-for="option in getOptions(effects1d)"
+              :key="option.key"
+              class="text-effect-setting-options__field")
+            div(class="text-effect-setting-options__field--name") {{option.label}}
+            //- Effect type select
+            template(v-if="option.type === 'select'")
+              options(class="text-effect-setting-options__field--options"
+                      v-model="currentStyle[currCategory.name][option.key]"
+                      :options="option.selectOptions")
+            template(v-if="option.type === 'range'")
+              input(class="text-effect-setting-options__field--number"
                 :value="currentStyle[currCategory.name][option.key]"
                 :name="option.key"
                 :max="option.max"
@@ -31,7 +39,7 @@
                 @change="(e)=>handleRangeInput(e, currCategory.name, option)"
                 @blur="recordChange"
                 type="number")
-              input(class="text-effect-setting-options__range--range input__slider--range"
+              input(class="text-effect-setting-options__field--range input__slider--range"
                 :value="currentStyle[currCategory.name][option.key]"
                 :name="option.key"
                 :max="option.max"
@@ -41,10 +49,9 @@
                 @mouseup="handleRangeMouseup(currCategory.name)"
                 v-ratio-change
                 type="range")
-            div(v-if="option.type === 'color'"
-                class="text-effect-setting-options__color")
-              div(class="text-effect-setting-options__color--name") {{option.label}}
-              div(class="text-effect-setting-options__color--btn"
+            //- Effect type color
+            template(v-if="option.type === 'color'")
+              div(class="text-effect-setting-options__field--btn"
                 :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
                 @click="handleColorModal(currCategory.name, option.key)")
 </template>
@@ -56,6 +63,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
+import Options from '@/components/global/Options.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
@@ -66,7 +74,8 @@ import _ from 'lodash'
 
 export default Vue.extend({
   components: {
-    ColorPicker
+    ColorPicker,
+    Options
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -232,12 +241,18 @@ export default Vue.extend({
     background: #fff;
     box-shadow: 0 0 4px rgba(0,0,0,.25);
   }
-  &-options__range,
-  &-options__color {
+  &-options__field {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     justify-items: start;
     row-gap: 10px;
+    &--options {
+      justify-self: end;
+      box-sizing: border-box;
+      width: 70px;
+      height: 25px;
+      padding: 0;
+    }
     &--number,
     &--btn {
       justify-self: end;

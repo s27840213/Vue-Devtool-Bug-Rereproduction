@@ -18,7 +18,7 @@ export interface IEffectOption {
   type: 'range' | 'color' | 'select'
   min?: number
   max?: number
-  seletcOptions: {key: string, label: string}[]
+  selectOptions: {value: string, label: string}[]
 }
 export interface IEffect {
   key: string
@@ -245,7 +245,8 @@ class ConstantData {
         pColor: i18n.tc('NN0735'),
         height: i18n.tc('NN0319'),
         yOffset: i18n.tc('NN0736'),
-        distanceInverse: i18n.tc('NN0737')
+        distanceInverse: i18n.tc('NN0737'),
+        endpoint: i18n.tc('NN0738')
       }
 
       return array.map((name: string) => {
@@ -258,14 +259,14 @@ class ConstantData {
         switch (name) {
           case 'endpoint':
             option.type = 'select'
-            option.seletcOptions = [{
-              key: 'triangle',
+            option.selectOptions = [{
+              value: 'triangle',
               label: i18n.tc('NN0730')
             }, {
-              key: 'circle',
+              value: 'circle',
               label: i18n.tc('NN0731')
             }, {
-              key: 'square',
+              value: 'square',
               label: i18n.tc('NN0732')
             }]
             break
