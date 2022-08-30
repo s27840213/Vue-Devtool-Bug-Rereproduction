@@ -145,8 +145,11 @@ class ConstantData {
         }]
       }],
       us: [{
-        label: i18n.t('NN0671'),
-        url: 'https://blog.vivipic.com/us/'
+        label: 'Features',
+        content: [{
+          label: 'Objects',
+          url: 'https://blog.vivipic.com/us/objects/'
+        }]
       }, {
         label: i18n.t('NN0672'),
         content: [{
@@ -157,7 +160,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/us/us-faq/'
         }]
       }, {
-        label: i18n.t('NN0674'),
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/',
         content: [{
           label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'
