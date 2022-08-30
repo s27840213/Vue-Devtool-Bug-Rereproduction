@@ -16,9 +16,9 @@
             iconWidth="60px"
             iconColor="white"
             v-hint="effect.label")
-        div(v-if="currEffect(effects1d)"
+        div(v-if="getOptions(effects1d) && getOptions(effects1d).length !== 0"
             class="text-effect-setting-options")
-          template(v-for="option in currEffect(effects1d).options")
+          template(v-for="option in getOptions(effects1d)")
             div(v-if="option.type === 'range'"
                 :key="option.key"
                 class="text-effect-setting-options__range")
@@ -113,9 +113,9 @@ export default Vue.extend({
     switchTab(category: string) {
       this.currTab = category
     },
-    currEffect(effects1d: IEffect[]) {
+    getOptions(effects1d: IEffect[]) {
       return _.find(effects1d, ['key',
-        this.currentStyle[this.currCategory.name as 'shadow'|'bg'|'shape'].name])
+        this.currentStyle[this.currCategory.name as 'shadow'|'bg'|'shape'].name])?.options
     },
     onEffectClick(category: string, effectName: string): void {
       switch (category) {
@@ -138,10 +138,10 @@ export default Vue.extend({
     getEffectName(category: 'shadow' | 'bg' | 'shape') {
       return this.currentStyle[category].name || 'none'
     },
-    handleRangeInput(event: Event, category: string, opiton: IEffectOption) {
+    handleRangeInput(event: Event, category: string, option: IEffectOption) {
       const name = (event.target as HTMLInputElement).name
       const value = parseInt((event.target as HTMLInputElement).value)
-      const [max, min] = [opiton.max as number, opiton.min as number]
+      const [max, min] = [option.max as number, option.min as number]
       const newVal = {
         [name]: value > max ? max : (value < min ? min : value)
       }

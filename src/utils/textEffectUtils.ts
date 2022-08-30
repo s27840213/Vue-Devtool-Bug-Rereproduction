@@ -44,7 +44,7 @@ class Controller {
       funky: {
         distance: 40,
         distanceInverse: 0,
-        angleFunky: 45,
+        angle: 45,
         opacity: 100,
         color: '#F1D289'
       },
@@ -216,7 +216,7 @@ class Controller {
         return this.funky(
           distance,
           effect.distanceInverse,
-          effect.angleFunky,
+          effect.angle,
           colorWithOpacity
         )
       case 'boost':

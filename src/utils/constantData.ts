@@ -230,7 +230,6 @@ class ConstantData {
     function toOptions(array: string[]) {
       const effectI18nMap = {
         distance: i18n.tc('NN0063'),
-        angleFunky: i18n.tc('NN0064'),
         angle: i18n.tc('NN0064'),
         blur: i18n.tc('NN0065'),
         opacity: i18n.tc('NN0066'),
@@ -283,10 +282,6 @@ class ConstantData {
             option.max = 100
             option.min = -100
             break
-          case 'angleFunky':
-            option.max = 180
-            option.min = -180
-            break
           default:
             /* distance, blur, opacity, spread, stroke,
              * bStroke, pStroke, bRadius, height */
@@ -328,7 +323,7 @@ class ConstantData {
       }, {
         key: 'funky',
         label: i18n.tc('NN0728'),
-        options: toOptions(['distance', 'distanceInverse', 'angleFunky', 'opacity', 'color'])
+        options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
       }, {
         key: 'boost',
         label: i18n.tc('NN0729'),
