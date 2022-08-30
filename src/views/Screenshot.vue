@@ -20,6 +20,7 @@ import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
 import pageUtils from '@/utils/pageUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
+import { IPage } from '@/interfaces/page'
 
 declare let window: CustomWindow
 
@@ -118,13 +119,13 @@ export default Vue.extend({
             break
           }
           case 'json': {
-            const page = JSON.parse(decodeURIComponent(id ?? ''))
+            const page = JSON.parse(decodeURIComponent(id ?? '')) as IPage
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
-            const { x, y, width, height } = calcTmpProps(page.layers)
+            const { x, y, width, height } = calcTmpProps(page.layers as any[])
             this.pageTranslate = { x: -x, y: -y }
-            this.pageScale = this.fitPageToScreen(width, height)
+            this.pageScale = this.fitPageToScreen(...this.clipSize(x, y, width, height, page.width, page.height))
             pageUtils.setPages([page])
             this.usingJSON = true
             break
@@ -177,7 +178,13 @@ export default Vue.extend({
         vivistickerUtils.sendDoneLoading(width, height, this.options)
       }
     },
-    fitPageToScreen(width: number, height: number) {
+    clipSize(x: number, y: number, width: number, height: number, pageWidth: number, pageHeight: number): [number, number] {
+      return [
+        Math.min(pageWidth - x, width),
+        Math.min(pageHeight - y, height)
+      ]
+    },
+    fitPageToScreen(width: number, height: number): number {
       const screenWidth = window.innerWidth
       const screenHeight = window.innerHeight
       const screenRatio = screenWidth / screenHeight
