@@ -58,12 +58,14 @@ class ConstantData {
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [
-          ...[1].map((id) => themeItem(id)), {
-            label: 'FB 粉絲頁封面',
-            url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
-          },
-          ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        content: [{
+          label: 'FB 貼文',
+          url: 'https://blog.vivipic.com/tw/facebook-post/'
+        }, {
+          label: 'FB 粉絲頁封面',
+          url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+        },
+        ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0668'),
