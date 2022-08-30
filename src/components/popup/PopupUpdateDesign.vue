@@ -16,11 +16,13 @@
           class="popup-updateDesign__image"
           :style="backgroundStyle()"
           :src="`https://template.vivipic.com/${type}/${focusDesignId}/prev?ver=${imgRandQuery}`")
-        div(class="popup-updateDesign__checkbox")
+        div(v-if="!isBackgroundType"
+          class="popup-updateDesign__checkbox")
           input(type="checkbox" v-model="isGrayBackground")
           span 灰背景
         div(v-if="isGetObjectInfo")
-          div(class="popup-updateDesign__line")
+          div(v-if="!isBackgroundType"
+            class="popup-updateDesign__line")
             span(class="body-1") 語系
             select(class="popup-updateDesign__select"
               v-model="objectInfo.locale")
@@ -98,8 +100,14 @@ export default Vue.extend({
         case 'text':
           titleText = '文字'
           break
+        case 'background':
+          titleText = '背景'
+          break
       }
       return titleText
+    },
+    isBackgroundType(): boolean {
+      return this.type === 'background'
     }
   },
   async mounted() {
