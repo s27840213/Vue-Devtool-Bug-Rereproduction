@@ -174,7 +174,8 @@ export default Vue.extend({
     },
     handleCopy() {
       // TODO: use sendScreenshotUrl to call App after /screenshot for json is well implemented.
-      console.log(vivistickerUtils.createUrlForJSON())
+      // console.log(vivistickerUtils.createUrlForJSON())
+      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
     }
   }
 })

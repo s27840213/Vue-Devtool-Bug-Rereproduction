@@ -16,6 +16,7 @@ import Vue from 'vue'
 import shapeUtils from '@/utils/shapeUtils'
 import { IShape } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 const FILTER_X = '$fx'
 const FILTER_Y = '$fy'
@@ -355,6 +356,7 @@ export default Vue.extend({
       const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
+      vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
     },
     getFilterTemplate(): string {
       if (this.config.category === 'C') {

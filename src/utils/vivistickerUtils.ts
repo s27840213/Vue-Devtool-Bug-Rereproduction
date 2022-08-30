@@ -7,11 +7,13 @@ import pageUtils from './pageUtils'
 import stepsUtils from './stepsUtils'
 import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
-import { ColorEventType } from '@/store/types'
+import { ColorEventType, LayerType } from '@/store/types'
+import { IGroup, ILayer } from '@/interfaces/layer'
 
 class ViviStickerUtils {
   inDebugMode = false
-  loadingFlags = {}
+  loadingFlags = {} as { [key: string]: boolean }
+  loadingCallback = undefined as (() => void) | undefined
 
   sendToIOS(messageType: string, message: any) {
     try {
@@ -98,8 +100,35 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_isInEditor', false)
   }
 
-  initLoadingFlags(page: IPage) {
+  initLoadingFlags(page: IPage, callback?: () => void) {
     this.loadingFlags = {}
+    this.loadingCallback = callback
+    for (const [index, layer] of page.layers.entries()) {
+      this.initLoadingFlagsForLayer(layer, index)
+    }
+  }
+
+  makeFlagKey(layerIndex: number, subLayerIndex = -1) {
+    return subLayerIndex === -1 ? `i${layerIndex}` : `i${layerIndex}_s${subLayerIndex}`
+  }
+
+  initLoadingFlagsForLayer(layer: ILayer, layerIndex: number, subLayerIndex = -1) {
+    switch (layer.type) {
+      case LayerType.group:
+        for (const [subIndex, subLayer] of (layer as IGroup).layers.entries()) {
+          this.initLoadingFlagsForLayer(subLayer, layerIndex, subIndex)
+        }
+        break
+      default:
+        this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
+    }
+  }
+
+  setLoadingFlag(layerIndex: number, subLayerIndex = -1) {
+    this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = true
+    if (!Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
+      this.loadingCallback()
+    }
   }
 }
 

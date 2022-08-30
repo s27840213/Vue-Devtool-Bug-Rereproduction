@@ -8,7 +8,7 @@
     div(v-if="backgroundImage !== ''" ref="target" class="screenshot__bg-img" :style="bgStyles()")
       img(:src="backgroundImage" @load="onload")
     div(v-if="backgroundColor !== ''" ref="target" class="screenshot__bg-color" :style="bgColorStyles()")
-    page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0")
+    page-content(v-if="usingJSON" :config="pages[0]" :pageIndex="0" :noBg="true" :style="pageTransforms()")
 </template>
 
 <script lang="ts">
@@ -19,6 +19,7 @@ import layerFactary from '@/utils/layerFactary'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
 import pageUtils from '@/utils/pageUtils'
+import { calcTmpProps } from '@/utils/groupUtils'
 
 declare let window: CustomWindow
 
@@ -37,6 +38,15 @@ export default Vue.extend({
       backgroundImage: '',
       backgroundColor: '',
       usingJSON: false,
+      pageTranslate: {
+        x: 0,
+        y: 0
+      },
+      pageScale: 1,
+      JSONcontentSize: {
+        width: 0,
+        height: 0
+      },
       options: ''
     }
   },
@@ -109,7 +119,12 @@ export default Vue.extend({
           }
           case 'json': {
             const page = JSON.parse(decodeURIComponent(id ?? ''))
-            vivistickerUtils.initLoadingFlags(page)
+            vivistickerUtils.initLoadingFlags(page, () => {
+              this.onload()
+            })
+            const { x, y, width, height } = calcTmpProps(page.layers)
+            this.pageTranslate = { x: -x, y: -y }
+            this.pageScale = this.fitPageToScreen(width, height)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
@@ -137,18 +152,49 @@ export default Vue.extend({
         backgroundColor: `#${this.backgroundColor}`
       }
     },
+    pageTransforms() {
+      return {
+        transform: `translate(${this.pageScale * this.pageTranslate.x}px, ${this.pageScale * this.pageTranslate.y}px) scale(${this.pageScale})`
+      }
+    },
     clearBuffers() {
       this.config = undefined
       this.backgroundImage = ''
       this.backgroundColor = ''
       this.usingJSON = false
+      this.pageTranslate = { x: 0, y: 0 }
+      this.pageScale = 1
+      this.JSONcontentSize = { width: 0, height: 0 }
     },
     onload() {
       console.log('loaded')
-      const element = this.$refs.target
-      const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
-      const { width, height } = target.getBoundingClientRect()
-      vivistickerUtils.sendDoneLoading(width, height, this.options)
+      if (this.mode === ScreenShotMode.PAGE) {
+        vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options)
+      } else {
+        const element = this.$refs.target
+        const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
+        const { width, height } = target.getBoundingClientRect()
+        vivistickerUtils.sendDoneLoading(width, height, this.options)
+      }
+    },
+    fitPageToScreen(width: number, height: number) {
+      const screenWidth = window.innerWidth
+      const screenHeight = window.innerHeight
+      const screenRatio = screenWidth / screenHeight
+      const objectRatio = width / height
+      if (screenRatio > objectRatio) {
+        this.JSONcontentSize = {
+          width: screenHeight * objectRatio,
+          height: screenHeight
+        }
+        return screenHeight / height
+      } else {
+        this.JSONcontentSize = {
+          width: screenWidth,
+          height: screenWidth / objectRatio
+        }
+        return screenWidth / width
+      }
     }
   }
 })
