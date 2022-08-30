@@ -26,7 +26,7 @@
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
-            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
+            nu-sub-controller(v-if="layer.type !== 'image' || !layer.imgControl"
               class="relative"
               data-identifier="controller"
               :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
@@ -410,7 +410,8 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      setImgConfig: 'imgControl/SET_CONFIG'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -1848,6 +1849,7 @@ export default Vue.extend({
           const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
           if (!(this.isHandleShadow && needRedrawShadow)) {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
+            this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex })
           }
         }
       }

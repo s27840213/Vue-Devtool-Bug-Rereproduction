@@ -37,6 +37,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
 import payment from '@/store/module/payment'
+import imgControl from '@/store/module/imgControl'
 
 Vue.use(Vuex)
 
@@ -854,6 +855,7 @@ export default new Vuex.Store({
     bgRemove,
     file,
     payment,
-    shadow
+    shadow,
+    imgControl
   }
 })

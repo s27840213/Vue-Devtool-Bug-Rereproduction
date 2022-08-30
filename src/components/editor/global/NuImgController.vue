@@ -90,6 +90,7 @@ export default Vue.extend({
         stepsUtils.record()
       }
     }
+    this.setImgConfig(undefined)
   },
   computed: {
     ...mapGetters({
@@ -171,6 +172,10 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
+    }),
+    ...mapMutations({
+      setImgConfig: 'imgControl/SET_CONFIG',
+      updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     styles() {
       const zindex = (this.layerIndex + 1) * 1000
@@ -305,7 +310,11 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height * reLayerScale - this.getImgHeight
       }
-      this.updateLayerStyles({
+      // this.updateLayerStyles({
+      //   imgX: imgPos.x,
+      //   imgY: imgPos.y
+      // })
+      this.updateConfig({
         imgX: imgPos.x,
         imgY: imgPos.y
       })

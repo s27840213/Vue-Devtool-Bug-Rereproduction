@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-image"
+  div(v-if="!isImgControl" class="nu-image"
     :id="`nu-image-${config.id}`"
     :style="styles"
     draggable="false")
@@ -224,7 +224,10 @@ export default Vue.extend({
         })
       }
     },
-    'config.imgControl'() {
+    'config.imgControl'(val) {
+      if (!val) {
+        this.setImgControl(undefined)
+      }
       if (this.forRender) {
         return
       }
@@ -273,6 +276,9 @@ export default Vue.extend({
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    isImgControl(): boolean {
+      return this.config.imgControl
+    },
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
@@ -515,7 +521,8 @@ export default Vue.extend({
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setImgControl: 'imgControl/SET_CONFIG'
     }),
     onError() {
       this.isOnError = true
@@ -1034,8 +1041,4 @@ canvas {
   width: 100%;
   height: 100%;
 }
-
-// .layer-flip {
-//   transition: transform 0.2s linear;
-// }
 </style>
