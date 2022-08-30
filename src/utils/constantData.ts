@@ -15,9 +15,10 @@ interface BillingInfoInput {
 export interface IEffectOption {
   key: string
   label: string
-  type: 'range' | 'color'
+  type: 'range' | 'color' | 'select'
   min?: number
   max?: number
+  seletcOptions: {key: string, label: string}[]
 }
 export interface IEffect {
   key: string
@@ -238,14 +239,14 @@ class ConstantData {
         stroke: i18n.tc('NN0069'),
         shape: i18n.tc('NN0070'),
         bend: i18n.tc('NN0071'),
-        bStroke: i18n.tc('NN0732'),
-        bColor: i18n.tc('NN0733'),
+        bStroke: i18n.tc('NN0733'),
+        bColor: i18n.tc('NN0734'),
         bRadius: i18n.tc('NN0086'),
-        pStroke: i18n.tc('NN0734'),
+        pStroke: i18n.tc('NN0319'),
         pColor: i18n.tc('NN0735'),
-        height: i18n.tc('NN0736'),
-        yOffset: i18n.tc('NN0737'),
-        distanceInverse: i18n.tc('NN0738')
+        height: i18n.tc('NN0319'),
+        yOffset: i18n.tc('NN0736'),
+        distanceInverse: i18n.tc('NN0737')
       }
 
       return array.map((name: string) => {
@@ -256,6 +257,19 @@ class ConstantData {
 
         option.type = 'range'
         switch (name) {
+          case 'endpoint':
+            option.type = 'select'
+            option.seletcOptions = [{
+              key: 'triangle',
+              label: i18n.tc('NN0730')
+            }, {
+              key: 'circle',
+              label: i18n.tc('NN0731')
+            }, {
+              key: 'square',
+              label: i18n.tc('NN0732')
+            }]
+            break
           case 'color':
           case 'bColor':
           case 'pColor':
@@ -270,8 +284,8 @@ class ConstantData {
             option.min = -100
             break
           case 'angleFunky':
-            option.max = 60
-            option.min = -60
+            option.max = 180
+            option.min = -180
             break
           default:
             /* distance, blur, opacity, spread, stroke,
@@ -313,11 +327,11 @@ class ConstantData {
         options: toOptions(['distance', 'angle', 'color'])
       }, {
         key: 'funky',
-        label: i18n.tc('NN0730'),
+        label: i18n.tc('NN0728'),
         options: toOptions(['distance', 'distanceInverse', 'angleFunky', 'opacity', 'color'])
       }, {
         key: 'boost',
-        label: i18n.tc('NN0731'),
+        label: i18n.tc('NN0729'),
         options: toOptions(['distance', 'opacity', 'bColor', 'color'])
       }])
     }, {
@@ -368,17 +382,9 @@ class ConstantData {
         label: i18n.tc('NN0726'),
         options: toOptions(['bRadius', 'opacity', 'color'])
       }, {
-        key: 'underline-triangle',
+        key: 'underline',
         label: i18n.tc('NN0727'),
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'underline-circle',
-        label: i18n.tc('NN0728'),
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-      }, {
-        key: 'underline-square',
-        label: i18n.tc('NN0729'),
-        options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+        options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
       }])
     }]
     return categories as IEffectCategory[]

@@ -43,7 +43,7 @@ class Controller {
       }, // 雙重陰影
       funky: {
         distance: 40,
-        distanceInverse: 60,
+        distanceInverse: 0,
         angleFunky: 45,
         opacity: 100,
         color: '#F1D289'
@@ -128,7 +128,7 @@ class Controller {
 
   funky(distance: number, distanceInverse: number, angle: number, color: string) {
     const shadow = []
-    for (let d = -distanceInverse / 10; d < distance; d += 0.5) {
+    for (let d = -distanceInverse / 50; d < distance * 1.5; d += 0.5) {
       const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
       shadow.push(`${color} ${x}px ${y}px`)
     }
