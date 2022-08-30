@@ -484,8 +484,8 @@ class ImageShadowUtils {
 
       setMark('shadow', 1)
       const start1 = Date.now()
-      const _imageData = new ImageData(this.dilate(spread), canvasT.width, canvasT.height)
-      // const _imageData = new ImageData(this.dilate(spread * Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)), canvasT.width, canvasT.height)
+      // const _imageData = new ImageData(this.dilate(spread), canvasT.width, canvasT.height)
+      const _imageData = new ImageData(this.dilate(spread * Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)), canvasT.width, canvasT.height)
       ctxT.putImageData(_imageData, 0, 0)
       console.log('1: handle spread time: ', Date.now() - start1)
       setMark('shadow', 2)
@@ -923,7 +923,7 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 1.5 },
+    distance: { max: 100, min: 0, weighting: 1.8 },
     angle: { max: 180, min: -180, weighting: 1 },
     radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 1 },
@@ -935,7 +935,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   imageMatched: {
-    distance: { max: 100, min: 0, weighting: 1.5 },
+    distance: { max: 100, min: 0, weighting: 1.8 },
     angle: { max: 180, min: -180, weighting: 1 },
     size: { max: 110, min: 70, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 1.5 },
