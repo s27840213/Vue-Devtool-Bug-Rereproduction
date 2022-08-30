@@ -39,7 +39,7 @@
             div(class="panel-text-effect__color-name") {{option.label}}
             div(class="panel-text-effect__color-slip"
                 :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
-                @click="openColorPanel()")
+                @click="openColorPanel(option.key)")
 </template>
 
 <script lang="ts">
@@ -67,11 +67,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      textEffects: constantData.textEffects(),
-      colorTarget: {
-        category: '',
-        key: ''
-      }
+      textEffects: constantData.textEffects()
     }
   },
   computed: {
@@ -104,8 +100,12 @@ export default Vue.extend({
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
     },
-    openColorPanel() {
-      this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
+    openColorPanel(key: string) {
+      const eventType = this.currCategory.name === 'shadow' ? ColorEventType.textEffect
+        : key === 'bColor' ? ColorEventType.textBgBorder
+        : key === 'pColor' ? ColorEventType.textBgPadding
+        : ColorEventType.textBg
+      this.$emit('openExtraColorModal', eventType, MobileColorPanelType.palette)
     },
     onEffectClick(category: string, effectName: string): void {
       switch (category) {
@@ -147,17 +147,6 @@ export default Vue.extend({
           break
         case 'shape':
           textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
-          break
-      }
-    },
-    handleColorUpdate(color: string): void {
-      const key = this.colorTarget.key
-      switch (this.colorTarget.category) {
-        case 'shadow':
-          textEffectUtils.setTextEffect(this.getEffectName('shadow'), { [key]: color })
-          break
-        case 'bg':
-          textBgUtils.setTextBg(this.getEffectName('bg'), { [key]: color })
           break
       }
     }

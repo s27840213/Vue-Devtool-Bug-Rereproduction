@@ -103,6 +103,9 @@ export enum FunctionPanelType {
 export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
+  textBg = 'setTextBg',
+  textBgBorder = 'setTextBgBorder',
+  textBgPadding = 'setTextBgPadding',
   shape = 'setShapeColor',
   background = 'setBackgroundColor',
   photoShadow = 'setPhotoEffectColor'
