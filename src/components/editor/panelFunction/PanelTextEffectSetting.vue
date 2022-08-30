@@ -5,49 +5,48 @@
           :selected="currTab===category.name"
           @click="switchTab(category.name)") {{category.label}}
     div(class="action-bar")
-      template(v-for="effects1d in currEffect.effects2d")
+      template(v-for="effects1d in currCategory.effects2d")
         div(class="text-effect-setting__effects mb-10")
           svg-icon(v-for="effect in effects1d"
-            :key="`${currEffect.name}-${effect.key}`"
-            :iconName="`text-${currEffect.name}-${effect.key}`"
-            @click.native="onEffectClick(currEffect.name, effect.key)"
+            :key="`${currCategory.name}-${effect.key}`"
+            :iconName="`text-${currCategory.name}-${effect.key}`"
+            @click.native="onEffectClick(currCategory.name, effect.key)"
             class="text-effect-setting__effect pointer"
-            :class="{'text-effect-setting__effect--selected': currentStyle[currEffect.name].name === effect.key }"
+            :class="{'text-effect-setting__effect--selected': currentStyle[currCategory.name].name === effect.key }"
             iconWidth="60px"
             iconColor="white"
             v-hint="effect.label")
-        template(v-for="effect in effects1d")
-          div(v-if="effect.key === currentStyle[currEffect.name].name"
-              v-for="option in effect.options"
-              class="w-full text-effect-setting__form")
+        div(v-if="currEffect(effects1d)"
+            class="text-effect-setting-options")
+          template(v-for="option in currEffect(effects1d).options")
             div(v-if="option.type === 'range'"
                 :key="option.key"
-                class="text-effect-setting__field")
-              div(class="text-effect-setting__field-name") {{option.label}}
-              input(class="text-effect-setting__range-input input__slider--range"
-                :value="currentStyle[currEffect.name][option.key]"
-                @input="(e)=>handleRangeInput(e, currEffect.name, option)"
+                class="text-effect-setting-options__range")
+              div(class="text-effect-setting-options__range--name") {{option.label}}
+              input(class="text-effect-setting-options__range--number"
+                :value="currentStyle[currCategory.name][option.key]"
+                :name="option.key"
                 :max="option.max"
                 :min="option.min"
-                :name="option.key"
-                @mousedown="handleRangeMousedown(currEffect.name)"
-                @mouseup="handleRangeMouseup(currEffect.name)"
-                v-ratio-change
-                type="range")
-              input(class="text-effect-setting__value-input"
-                :value="currentStyle[currEffect.name][option.key]"
-                @change="(e)=>handleRangeInput(e, currEffect.name, option)"
-                :max="option.max"
-                :min="option.min"
-                :name="option.key"
+                @change="(e)=>handleRangeInput(e, currCategory.name, option)"
                 @blur="recordChange"
                 type="number")
+              input(class="text-effect-setting-options__range--range input__slider--range"
+                :value="currentStyle[currCategory.name][option.key]"
+                :name="option.key"
+                :max="option.max"
+                :min="option.min"
+                @input="(e)=>handleRangeInput(e, currCategory.name, option)"
+                @mousedown="handleRangeMousedown(currCategory.name)"
+                @mouseup="handleRangeMouseup(currCategory.name)"
+                v-ratio-change
+                type="range")
             div(v-if="option.type === 'color'"
-                class="text-effect-setting__field")
-              div(class="text-effect-setting__field-name") {{option.label}}
-              div(class="text-effect-setting__value-input"
-                :style="{ backgroundColor: currentStyle[currEffect.name][option.key] }"
-                @click="handleColorModal(currEffect.name, option.key)")
+                class="text-effect-setting-options__color")
+              div(class="text-effect-setting-options__color--name") {{option.label}}
+              div(class="text-effect-setting-options__color--btn"
+                :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
+                @click="handleColorModal(currCategory.name, option.key)")
 </template>
 
 <script lang="ts">
@@ -61,8 +60,9 @@ import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
-import constantData, { IEffectCategory, IEffectOption } from '@/utils/constantData'
+import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: {
@@ -83,8 +83,8 @@ export default Vue.extend({
     }
   },
   computed: {
-    currEffect():IEffectCategory {
-      return this.textEffects.filter((eff) => eff.name === this.currTab)[0]
+    currCategory():IEffectCategory {
+      return _.find(this.textEffects, ['name', this.currTab])
     },
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
@@ -112,6 +112,10 @@ export default Vue.extend({
     },
     switchTab(category: string) {
       this.currTab = category
+    },
+    currEffect(effects1d: IEffect[]) {
+      return _.find(effects1d, ['key',
+        this.currentStyle[this.currCategory.name as 'shadow'|'bg'|'shape'].name])
     },
     onEffectClick(category: string, effectName: string): void {
       switch (category) {
@@ -189,7 +193,7 @@ export default Vue.extend({
   &-tabs {
     @include caption-MD;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     column-gap: 2.5px;
     height: 36px;
     > span {
@@ -201,13 +205,6 @@ export default Vue.extend({
         background-color: setColor(gray-6);
       }
     }
-  }
-  &__title {
-    font-size: 16px;
-    font-weight: bold;
-  }
-  &__form {
-    background: #fff;
   }
   &__effects {
     display: grid;
@@ -227,47 +224,37 @@ export default Vue.extend({
       border-color: setColor(blue-1);
     }
   }
-  &__field {
-    flex: 1;
-    display: flex;
+  &-options {
+    display: grid;
+    gap: 10px;
+    width: 100%;
     padding: 10px;
-    align-items: center;
-    position: relative;
+    background: #fff;
+    box-shadow: 0 0 4px rgba(0,0,0,.25);
   }
-  &__field-name {
-    flex: 1;
-    color: #18191f;
-    text-align: left;
-    text-transform: capitalize;
-    white-space: nowrap;
-  }
-  &__range-input {
-    width: 90px;
-    margin: 0;
-    &::-webkit-slider-thumb {
-      width: 12px;
-      height: 12px;
-      border: 2px solid setColor(blue-1);
-      margin-top: -5px;
+  &-options__range,
+  &-options__color {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: start;
+    row-gap: 10px;
+    &--number,
+    &--btn {
+      justify-self: end;
+      box-sizing: border-box;
+      width: 30px;
+      height: 25px;
+      border: 1px solid setColor(gray-4);;
+      border-radius: 3px;
     }
-  }
-  &__value-input {
-    border: 1px solid #d9dbe1;
-    width: 32px;
-    height: 24px;
-    box-sizing: border-box;
-    line-height: 20px;
-    border-radius: 3px;
-    margin-left: 10px;
-    text-align: center;
+    &--range {
+      grid-column: 1/3;
+    }
   }
 }
 .action-bar {
   padding: 10px;
   flex-wrap: wrap;
   justify-content: center;
-}
-.w-full {
-  @include size(100%, 100%);
 }
 </style>
