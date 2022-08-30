@@ -123,9 +123,9 @@ export default Vue.extend({
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
-            const { x, y, width, height } = calcTmpProps(page.layers as any[])
+            const { x, y, width, height } = this.clipObject(calcTmpProps(page.layers as any[]), page.width, page.height)
             this.pageTranslate = { x: -x, y: -y }
-            this.pageScale = this.fitPageToScreen(...this.clipSize(x, y, width, height, page.width, page.height))
+            this.pageScale = this.fitPageToScreen(width, height)
             pageUtils.setPages([page])
             this.usingJSON = true
             break
@@ -178,11 +178,14 @@ export default Vue.extend({
         vivistickerUtils.sendDoneLoading(width, height, this.options)
       }
     },
-    clipSize(x: number, y: number, width: number, height: number, pageWidth: number, pageHeight: number): [number, number] {
-      return [
-        Math.min(pageWidth - x, width),
-        Math.min(pageHeight - y, height)
-      ]
+    clipObject({ x, y, width, height }: { x: number, y: number, width: number, height: number }, pageWidth: number, pageHeight: number): {
+      x: number, y: number, width: number, height: number
+    } {
+      const x_ = Math.max(x, 0)
+      const y_ = Math.max(y, 0)
+      const width_ = Math.min(pageWidth - x_, Math.min(width + x, width))
+      const height_ = Math.min(pageHeight - y_, Math.min(height + y, height))
+      return { x: x_, y: y_, width: width_, height: height_ }
     },
     fitPageToScreen(width: number, height: number): number {
       const screenWidth = window.innerWidth
