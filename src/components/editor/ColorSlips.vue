@@ -10,13 +10,13 @@
       //- Recently colors
       div(class="color-panel__colors"
           :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-        div(class="text-left mb-5")
+        div(class="text-left")
           div(class="flex-center")
             svg-icon(v-if="showAllRecentlyColor && !isTouchDevice" iconName="chevron-left"
                   iconWidth="24px" :iconColor="whiteTheme ? 'gray-1' : 'white'"
                   class="mr-5" @click.native="lessRecently()")
             span {{$t('NN0679')}}
-          span(v-if="!showAllRecentlyColor" class="btn-LG" @click="moreRecently()") {{$t('NN0082')}}
+          span(v-if="!showAllRecentlyColor" class="btn-XS" @click="moreRecently()") {{$t('NN0082')}}
         div
           div(class="color-panel__add-color pointer"
             @click="openColorPanel($event)")
@@ -28,7 +28,7 @@
         //- Document colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
+          div(class="text-left")
             span {{$t('NN0091')}}
           div
             div(v-for="color in documentColors"
@@ -38,7 +38,7 @@
         //- Preset Colors
         div(class="color-panel__colors"
             :style="{'color': whiteTheme ? '#000000' : '#ffffff'}")
-          div(class="text-left mb-5")
+          div(class="text-left")
             span {{$t('NN0089')}}
           div
             div(v-for="color in defaultColors"
@@ -283,7 +283,7 @@ export default Vue.extend({
     height: 100%;
     padding: 20px 14px;
     > div + div {
-      margin-top: 8px;
+      margin-top: 20px;
     }
   }
   &__brand-settings {
@@ -304,35 +304,39 @@ export default Vue.extend({
       width: 100%;
       display: flex;
       justify-content: space-between;
+      @include body-SM;
+      color: setColor(gray-2);
+      margin-bottom: 16px;
     }
     > div:nth-child(2) {
       width: 100%;
       display: grid;
       grid-auto-rows: auto;
       grid-template-columns: repeat(7, 1fr);
-      row-gap: 5px;
-      column-gap: 5px;
+      column-gap: 12px;
+      row-gap: 12px;
+      padding: 0 12px 4px 12px;
       justify-content: center;
       align-items: center;
+      box-sizing: border-box;
     }
   }
 
   &__add-color {
     width: 100%;
-    // height: 100%;
     padding-top: 100%;
     background-image: url("~@/assets/img/svg/addColor.png");
     background-size: cover;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
   }
 
   &__color {
     width: 100%;
     padding-top: 100%;
-    border-radius: 2px;
-    border: 1px solid setColor(gray-4, 0.3);
+    border-radius: 4px;
     box-sizing: border-box;
-    box-shadow: 0px 1px 4px setColor(gray-1-5, 0.2);
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
   }
 

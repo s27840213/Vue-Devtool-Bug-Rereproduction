@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-color px-5")
+  div(class="panel-color")
     color-picker(
       v-if="showColorPicker"
       :isMobile="true" :aspectRatio="40"
@@ -246,8 +246,7 @@ export default Vue.extend({
     },
     colorStyles(color: string, index: number) {
       return {
-        backgroundColor: color,
-        boxShadow: index === this.currSelectedColorIndex ? '0 0 0 2px #808080, inset 0 0 0 1.5px #fff' : ''
+        backgroundColor: color
       }
     },
     groupColorStyles() {
@@ -288,6 +287,7 @@ export default Vue.extend({
   width: 100%;
   overflow-y: scroll;
   box-sizing: border-box;
+  padding: 0 8px;
 
   &__document-colors {
     width: 100%;
@@ -295,19 +295,17 @@ export default Vue.extend({
     display: grid;
     grid-auto-rows: auto;
     grid-template-columns: repeat(7, 1fr);
-    row-gap: 5px;
-    column-gap: 5px;
+    column-gap: 12px;
+    row-gap: 12px;
+    padding: 0 12px 4px 12px;
     box-sizing: border-box;
   }
   &__document-color {
     width: 100%;
-    padding-top: calc(100% - 3px);
-    border: 1.5px solid setColor(gray-4);
+    padding-top: 100%;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
     border-radius: 4px;
     box-sizing: border-box;
-    &:hover {
-      box-shadow: 0 0 0 2px #808080, inset 0 0 0 1.5px #fff;
-    }
     // transition: box-shadow 0.2s ease-in-out;
   }
 }

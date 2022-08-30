@@ -437,6 +437,7 @@ export default Vue.extend({
     position: relative;
     -webkit-touch-callout: none;
     user-select: none;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
   }
   &__color-back {
     position: absolute;

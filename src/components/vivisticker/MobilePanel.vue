@@ -406,11 +406,12 @@ export default Vue.extend({
       }
     },
     rightBtnName(): string {
-      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
-        return 'check-circle'
-      } else {
-        return 'close-circle'
-      }
+      return 'close-circle'
+      // if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+      //   return 'check-circle'
+      // } else {
+      //   return 'close-circle'
+      // }
     },
     leftButtonAction(): (e: PointerEvent) => void {
       if (this.showExtraColorPanel) {
