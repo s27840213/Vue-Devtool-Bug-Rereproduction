@@ -151,6 +151,8 @@ class ShapeUtils {
     let svgOut = svgIn
     svgOut = svgOut.replace(/class/g, 'style')
     for (let i = 0; i < styleTextContent.length; i++) {
+      const regId = new RegExp('\\$style\\[' + i + '\\]_ID', 'g')
+      svgOut = svgOut.replace(regId, `${className}S${i}_ID`)
       const reg = new RegExp('\\$style\\[' + i + '\\]', 'g')
       svgOut = svgOut.replace(reg, `${styleTextContent[i]}`)
     }
