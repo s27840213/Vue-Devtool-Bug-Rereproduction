@@ -82,6 +82,7 @@ import groupUtils from '@/utils/groupUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import logUtils from '@/utils/logUtils'
 import { AxiosError } from 'axios'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   props: {
@@ -372,8 +373,8 @@ export default Vue.extend({
       const { width, height } = this.shadowBuff.canvasSize
 
       return {
-        width: `${width}px`,
-        height: `${height}px`,
+        width: `${width * this._contentScaleRatio}px`,
+        height: `${height * this._contentScaleRatio}px`,
         // transform: `scale(${scale})`
         transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
@@ -408,11 +409,11 @@ export default Vue.extend({
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow.styles
       const { scale, horizontalFlip, verticalFlip } = this.config.styles
-      const xFactor = horizontalFlip ? -1 : 1
-      const yFactor = verticalFlip ? -1 : 1
+      const xFactor = (horizontalFlip ? -1 : 1) * this._contentScaleRatio
+      const yFactor = (verticalFlip ? -1 : 1) * this._contentScaleRatio
       return {
-        width: imgWidth.toString() + 'px',
-        height: imgHeight.toString() + 'px',
+        width: (imgWidth * this._contentScaleRatio).toString() + 'px',
+        height: (imgHeight * this._contentScaleRatio).toString() + 'px',
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
@@ -778,6 +779,11 @@ export default Vue.extend({
               ['unsplash', 'pixels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
             await new Promise<void>((resolve) => {
+              img.onerror = () => {
+                console.log('img load error')
+                Vue.notify({ group: 'copy', text: `${i18n.t('NN0351')}` })
+                resolve()
+              }
               img.onload = async () => {
                 this.shadowBuff.canvasShadowImg.shadow = img
                 const isSVG = await imageShadowPanelUtils.isSVG(img, this.config)
@@ -786,10 +792,6 @@ export default Vue.extend({
                     /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
                     img.onload = () => {
                       this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
-                      resolve()
-                    }
-                    img.onerror = () => {
-                      console.log('img load error')
                       resolve()
                     }
                   })

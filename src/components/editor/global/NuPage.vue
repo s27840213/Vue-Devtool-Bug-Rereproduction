@@ -122,18 +122,20 @@
               class="dim-background"
               :style="styles('control')")
             template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
-              nu-layer(style="opacity: 0.45"
-                :layerIndex="currSubSelectedInfo.index"
-                :pageIndex="pageIndex"
-                :imgControl="true"
-                :config="getCurrSubSelectedLayerShown"
-                :contentScaleRatio="contentScaleRatio")
-              nu-layer(style="overflow: hidden"
-                :layerIndex="currSubSelectedInfo.index"
-                :pageIndex="pageIndex"
-                :imgControl="true"
-                :config="getCurrSubSelectedLayerShown"
-                :contentScaleRatio="contentScaleRatio")
+              div(style="opacity: 0.45")
+                nu-layer(
+                  :layerIndex="currSubSelectedInfo.index"
+                  :pageIndex="pageIndex"
+                  :imgControl="true"
+                  :config="getCurrSubSelectedLayerShown"
+                  :contentScaleRatio="contentScaleRatio")
+              div
+                nu-layer(style="overflow: hidden"
+                  :layerIndex="currSubSelectedInfo.index"
+                  :pageIndex="pageIndex"
+                  :imgControl="true"
+                  :config="getCurrSubSelectedLayerShown"
+                  :contentScaleRatio="contentScaleRatio")
               div(class="page-control" :style="Object.assign(styles('control'))")
                   nu-img-controller(:layerIndex="currSubSelectedInfo.index"
                     :pageIndex="pageIndex"
