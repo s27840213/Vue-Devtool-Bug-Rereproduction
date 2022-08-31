@@ -246,6 +246,8 @@ class ConstantData {
         height: i18n.tc('NN0319'),
         yOffset: i18n.tc('NN0736'),
         distanceInverse: i18n.tc('NN0737'),
+        textStrokeColor: i18n.tc('NN0739'),
+        shadowStrokeColor: i18n.tc('NN0740'),
         endpoint: i18n.tc('NN0738')
       }
 
@@ -256,6 +258,9 @@ class ConstantData {
         } as IEffectOption
 
         option.type = 'range'
+        if (name.toLocaleLowerCase().endsWith('color')) {
+          option.type = 'color'
+        }
         switch (name) {
           case 'endpoint':
             option.type = 'select'
@@ -269,11 +274,6 @@ class ConstantData {
               value: 'square',
               label: i18n.tc('NN0732')
             }]
-            break
-          case 'color':
-          case 'bColor':
-          case 'pColor':
-            option.type = 'color'
             break
           case 'angle':
             option.max = 180
@@ -328,7 +328,7 @@ class ConstantData {
       }, {
         key: 'boost',
         label: i18n.tc('NN0729'),
-        options: toOptions(['distance', 'opacity', 'bColor', 'color'])
+        options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',

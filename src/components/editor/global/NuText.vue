@@ -181,13 +181,14 @@ export default Vue.extend({
     },
     // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
     extraCss(): string {
+      console.log('extra')
       const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
       return `
         .nu-text__span[data-id="${this.uid}"]::before {
-          ${rules.before}
+          ${rules?.before}
         }
         .nu-text__span[data-id="${this.uid}"]::after {
-          ${rules.after}
+          ${rules?.after}
         }
       `
     }

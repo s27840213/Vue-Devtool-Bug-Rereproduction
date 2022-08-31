@@ -51,7 +51,8 @@ class Controller {
       boost: {
         distance: 40,
         opacity: 100,
-        bColor: '#000000',
+        textStrokeColor: '#000000',
+        shadowStrokeColor: '#FDA830',
         color: '#F1D289'
       }
     }
@@ -207,7 +208,7 @@ class Controller {
         )
       case 'boost':
         return {
-          webkitTextStroke: `1px ${this.convertColor2rgba(effect.bColor, effectOpacity)}`,
+          webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
           extraCss: {
             before: `
             content: attr(data-text);
@@ -215,7 +216,7 @@ class Controller {
             word-break: keep-all;
             left: ${effect.distance * 0.1}px;
             z-index: -1;
-            -webkit-text-stroke: 1px ${this.convertColor2rgba(effect.bColor, effectOpacity)};
+            -webkit-text-stroke: 1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)};
             color: ${colorWithOpacity};
           `
           }
