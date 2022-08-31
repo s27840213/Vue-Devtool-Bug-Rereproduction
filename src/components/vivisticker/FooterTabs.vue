@@ -471,7 +471,7 @@ export default Vue.extend({
   overflow: hidden;
   background-color: setColor(gray-5);
   &__container {
-    height: 49px;
+    height: 53px;
     overflow: scroll;
     display: grid;
     grid-template-rows: auto;
@@ -500,6 +500,7 @@ export default Vue.extend({
     > span {
       transition: background-color 0.2s, color 0.2s;
       @include body-XXS;
+      transform: scale(0.8);
       line-height: 20px;
     }
   }
