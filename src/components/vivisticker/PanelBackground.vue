@@ -9,7 +9,7 @@
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keywordLabel"
-      vivisticker
+      vivisticker="dark"
       :color="{close: 'gray-4', search: 'gray-4'}"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}

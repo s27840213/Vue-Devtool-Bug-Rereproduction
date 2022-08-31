@@ -181,10 +181,10 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .vivisticker {
   @include size(100%, 100%);
-  height: 100%;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-columns: 1fr;
+  overflow: hidden;
 
   &__top {
     height: 100%;

@@ -1,9 +1,9 @@
 <template lang="pug">
   form(class="search-bar bg-gray-6"
-    :class="{ vivisticker: vivisticker }"
+    :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
     @submit="onSearch")
     input(class="search-bar__input body-2"
-      :class="{ vivisticker: vivisticker }"
+      :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
       type="text"
       v-model="keyword"
       @input="onUpdate"
@@ -11,7 +11,7 @@
       :style="inputStyles()")
     svg-icon(v-if="clear && keyword"
       class="pointer mr-5"
-      :class="{ vivisticker: vivisticker }"
+      :class="[{ vivisticker: vivisticker !== 'none' }, vivisticker]"
       iconName="close"
       :iconColor="color.close || 'gray-3'"
       iconWidth="20px"
@@ -57,7 +57,8 @@ export default Vue.extend({
       }
     },
     vivisticker: {
-      type: Boolean
+      type: String,
+      default: 'none'
     }
   },
   data() {
@@ -100,8 +101,13 @@ export default Vue.extend({
   border-radius: 3px;
   &.vivisticker {
     padding: 8px 12px 8px 16px;
-    background: setColor(dark-bg);
     border-radius: 10px;
+    &.dark {
+      background: setColor(dark-bg);
+    }
+    &.white {
+      background: setColor(gray-6);
+    }
     & > input {
       padding: 0;
       margin-top: 0;
