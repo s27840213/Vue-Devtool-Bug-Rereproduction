@@ -71,25 +71,37 @@ class ViviStickerUtils {
     this.inDebugMode = true
   }
 
-  startEditing(asset: IAsset) {
-    console.log('start editing', asset)
+  getAssetInitiator(asset: IAsset): () => Promise<any> {
+    return async () => {
+      console.log('start editing', asset)
+      return await assetUtils.addAsset(asset)
+    }
+  }
+
+  getAssetCallback(asset: IAsset): (jsonData: any) => void {
+    return (jsonData: any) => {
+      if ([5, 11].includes(asset.type)) {
+        if (jsonData.color && jsonData.color.length > 0) {
+          eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
+        } else {
+          eventUtils.emit(PanelEvent.switchTab, 'opacity')
+        }
+      }
+    }
+  }
+
+  startEditing(initiator: () => Promise<any>, callback: (jsonData: any) => void) {
     const pageWidth = window.innerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
       height: Math.round(pageWidth * 420 / 358),
       backgroundColor: '#F8F8F8'
     })])
-    assetUtils.addAsset(asset).then((jsonData?: any) => {
+    initiator().then((jsonData?: any) => {
       if (jsonData) {
         stepsUtils.reset()
         store.commit('vivisticker/SET_isInEditor', true)
-        if ([5, 11].includes(asset.type)) {
-          if (jsonData.color && jsonData.color.length > 0) {
-            eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
-          } else {
-            eventUtils.emit(PanelEvent.switchTab, 'opacity')
-          }
-        }
+        callback(jsonData)
       }
     })
   }
