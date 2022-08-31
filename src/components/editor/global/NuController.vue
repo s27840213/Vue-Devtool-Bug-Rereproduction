@@ -1849,7 +1849,6 @@ export default Vue.extend({
           const needRedrawShadow = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
           if (!(this.isHandleShadow && needRedrawShadow)) {
             ControlUtils.updateLayerProps(this.pageIndex, this.layerIndex, { imgControl: true })
-            this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex })
           }
         }
       }

@@ -457,7 +457,13 @@ export default Vue.extend({
         width = offsetSize.width + initWidth
       }
 
-      this.updateLayerStyles({
+      // this.updateLayerStyles({
+      //   imgWidth: width,
+      //   imgHeight: height,
+      //   imgX: imgPos.x,
+      //   imgY: imgPos.y
+      // })
+      this.updateConfig({
         imgWidth: width,
         imgHeight: height,
         imgX: imgPos.x,

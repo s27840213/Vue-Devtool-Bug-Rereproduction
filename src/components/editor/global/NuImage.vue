@@ -225,8 +225,11 @@ export default Vue.extend({
       }
     },
     'config.imgControl'(val) {
-      if (!val) {
-        this.setImgControl(undefined)
+      if (val) {
+        this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex })
+      } else {
+        this.setImgConfig(undefined)
+        this.handleDimensionUpdate()
       }
       if (this.forRender) {
         return
@@ -522,7 +525,7 @@ export default Vue.extend({
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
       setIsProcessing: 'bgRemove/SET_isProcessing',
-      setImgControl: 'imgControl/SET_CONFIG'
+      setImgConfig: 'imgControl/SET_CONFIG'
     }),
     onError() {
       this.isOnError = true
@@ -617,13 +620,13 @@ export default Vue.extend({
         img.src = src
       })
     },
-    handleDimensionUpdate(newVal: number, oldVal: number) {
+    handleDimensionUpdate(newVal = 1, oldVal = -1) {
       const imgElement = this.$refs.img as HTMLImageElement
-      if (!this.isOnError && this.config.previewSrc === undefined && imgElement) {
+      if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
 
-        imgElement.onload = async () => {
+        imgElement && (imgElement.onload = async () => {
           if (newVal > oldVal) {
             await this.preLoadImg('next', newVal)
             this.preLoadImg('pre', newVal)
@@ -631,7 +634,7 @@ export default Vue.extend({
             await this.preLoadImg('pre', newVal)
             this.preLoadImg('next', newVal)
           }
-        }
+        })
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, newVal))
       }
     },

@@ -5,10 +5,10 @@
     //- template(v-if="primaryLayerType === 'group' || primaryLayerType === 'frame'")
     //-   div
     //-     nu-layer(style="opacity: 0.45"
-    //-       :layerIndex="currSubSelectedInfo.index"
+    //-       :layerIndex="layerIndex"
     //-       :pageIndex="pageIndex"
     //-       :imgControl="true"
-    //-       :config="getCurrSubSelectedLayerShown")
+    //-       :config="image")
     //-   div
     //-     nu-layer(:layerIndex="currSubSelectedInfo.index"
     //-       :pageIndex="pageIndex"
@@ -20,22 +20,22 @@
     //-                         :primaryLayer="getCurrLayer"
     //-                         :forRender="true"
     //-                         :config="getCurrSubSelectedLayerShown")
-    template(v-if="primaryLayer.type === 'image'")
-      div
-        nu-layer(:style="'opacity: 0.45'"
-          :layerIndex="layerIndex"
-          :pageIndex="pageIndex"
-          :imgControl="true"
-          :config="image")
-      div
-        nu-layer(:layerIndex="layerIndex"
-          :pageIndex="pageIndex"
-          :config="image")
-      div(class="page-control" :style="styles")
-          nu-img-controller(:layerIndex="layerIndex"
-                            :pageIndex="pageIndex"
-                            :config="image")
-                            //- :forRender="true"
+    //- template(v-if="primaryLayer.type === 'image'")
+    div
+      nu-layer(:style="'opacity: 0.45'"
+        :layerIndex="layerIndex"
+        :pageIndex="pageIndex"
+        :imgControl="true"
+        :config="image")
+    div
+      nu-layer(:layerIndex="layerIndex"
+        :pageIndex="pageIndex"
+        :config="image")
+    div(class="page-control" :style="styles")
+        nu-img-controller(:layerIndex="layerIndex"
+                          :pageIndex="pageIndex"
+                          :forRender="true"
+                          :config="image")
 </template>
 <script lang="ts">
 import Vue from 'vue'
