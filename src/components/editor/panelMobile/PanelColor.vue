@@ -205,7 +205,7 @@ export default Vue.extend({
             const currentEffect = textBg.name || 'none'
             const key = this.currEvent === ColorEventType.textBgBorder ? 'bColor'
               : this.currEvent === ColorEventType.textBgPadding ? 'pColor'
-              : 'color'
+                : 'color'
             textBgUtils.setTextBg(currentEffect, { [key]: newColor })
           }
           break

@@ -71,15 +71,15 @@ export default Vue.extend({
     }
   },
   computed: {
-    currCategory():IEffectCategory {
+    currCategory(): IEffectCategory {
       return _.find(this.textEffects, ['name', this.panelHistory[this.historySize - 1]])
     },
-    effectList():IEffect[] {
+    effectList(): IEffect[] {
       return _.flatten(this.currCategory.effects2d)
     },
-    currEffect():IEffect {
+    currEffect(): IEffect {
       return _.find(this.effectList, ['key',
-        this.currentStyle[this.currCategory.name as 'shadow'|'bg'|'shape'].name])
+        this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name])
     },
     currentStyle(): { shadow: ITextEffect, bg: ITextBgEffect, shape: ITextShape } {
       const { styles } = textEffectUtils.getCurrentLayer()
@@ -103,8 +103,8 @@ export default Vue.extend({
     openColorPanel(key: string) {
       const eventType = this.currCategory.name === 'shadow' ? ColorEventType.textEffect
         : key === 'bColor' ? ColorEventType.textBgBorder
-        : key === 'pColor' ? ColorEventType.textBgPadding
-        : ColorEventType.textBg
+          : key === 'pColor' ? ColorEventType.textBgPadding
+            : ColorEventType.textBg
       this.$emit('openExtraColorModal', eventType, MobileColorPanelType.palette)
     },
     onEffectClick(category: string, effectName: string): void {
