@@ -185,10 +185,10 @@ export default Vue.extend({
       const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
       return `
         .nu-text__span[data-id="${this.uid}"]::before {
-          ${rules?.before}
+          ${rules?.before ?? ''}
         }
         .nu-text__span[data-id="${this.uid}"]::after {
-          ${rules?.after}
+          ${rules?.after ?? ''}
         }
       `
     }
@@ -263,7 +263,6 @@ export default Vue.extend({
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    position: relative;
     // line-break: anywhere;
   }
   &__observee {
