@@ -181,7 +181,6 @@ export default Vue.extend({
     },
     // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
     extraCss(): string {
-      console.log('extra')
       const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
       return `
         .nu-text__span[data-id="${this.uid}"]::before {
@@ -260,6 +259,7 @@ export default Vue.extend({
     margin: 0;
   }
   &__span {
+    position: relative;
     text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
