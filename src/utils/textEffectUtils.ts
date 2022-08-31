@@ -211,13 +211,14 @@ class Controller {
           webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
           extraCss: {
             before: `
-            content: attr(data-text);
-            position: absolute;
-            word-break: keep-all;
-            left: ${effect.distance * 0.1}px;
-            z-index: -1;
-            -webkit-text-stroke: 1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)};
-            color: ${colorWithOpacity};
+              content: attr(data-text);
+              position: absolute;
+              top: 2px;
+              left: ${effect.distance * 0.1}px;
+              z-index: -1;
+              word-break: keep-all;
+              -webkit-text-stroke: 1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)};
+              color: ${colorWithOpacity};
           `
           }
         }
