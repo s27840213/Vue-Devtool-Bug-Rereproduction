@@ -56,6 +56,7 @@ import textUtils from '@/utils/textUtils'
 import VueI18n from 'vue-i18n'
 import tiptapUtils from '@/utils/tiptapUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   components: {
@@ -190,8 +191,19 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
-    async handleAddText() {
+    handleAddText() {
       // await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale, undefined, undefined)
+      vivistickerUtils.startEditing(
+        async () => {
+          await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
+            size: 18,
+            color: '#FFFFFF',
+            weight: 'bold'
+          })
+          return true
+        },
+        vivistickerUtils.getEmptyCallback()
+      )
       console.log('start editing standard text')
     },
     localeFont() {

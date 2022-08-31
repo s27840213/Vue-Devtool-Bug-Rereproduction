@@ -90,6 +90,11 @@ class ViviStickerUtils {
     }
   }
 
+  getEmptyCallback(): (jsonData: any) => void {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    return (jsonData: any) => {}
+  }
+
   startEditing(initiator: () => Promise<any>, callback: (jsonData: any) => void) {
     const pageWidth = window.innerWidth - 32
     pageUtils.setPages([pageUtils.newPage({

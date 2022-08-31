@@ -407,38 +407,37 @@ class AssetUtils {
     LayerUtils.addLayers(targePageIndex, [newLayer])
   }
 
-  addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
+  async addStandardText(type: string, text?: string, locale = 'tw', pageIndex?: number, attrs: IAssetProps = {}, spanStyles: Partial<ISpanStyle> = {}) {
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    return import(`@/assets/json/${type}.json`)
-      .then(jsonData => {
-        const fieldMap = {
-          heading: 'isHeading',
-          subheading: 'isSubheading',
-          body: 'isBody'
-        } as { [key: string]: string }
-        const field = fieldMap[type]
-        const textLayer = generalUtils.deepCopy(jsonData.default)
-        textLayer.paragraphs[0].spans[0].text = text
-        if (locale === 'tw') {
-          textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
-        }
-        textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
+    try {
+      const jsonData = await import(`@/assets/json/${type}.json`)
+      const fieldMap = {
+        heading: 'isHeading',
+        subheading: 'isSubheading',
+        body: 'isBody'
+      } as { [key: string]: string}
+      const field = fieldMap[type]
+      const textLayer = generalUtils.deepCopy(jsonData.default)
+      textLayer.paragraphs[0].spans[0].text = text
+      if (locale === 'tw') {
+        textLayer.paragraphs[0].spans[0].styles.weight = 'normal'
+      }
+      textLayer.paragraphs[0].spans[0].styles.font = STANDARD_TEXT_FONT[locale]
 
-        if (attrs.styles) {
-          Object.assign(textLayer.styles, attrs.styles)
-        }
+      if (attrs.styles) {
+        Object.assign(textLayer.styles, attrs.styles)
+      }
 
-        if (spanStyles) {
-          Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
-        }
+      if (spanStyles) {
+        Object.assign(textLayer.paragraphs[0].spans[0].styles, spanStyles)
+      }
 
-        TextUtils.resetTextField(textLayer, targePageIndex, field)
-        LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
-        editorUtils.setCloseMobilePanelFlag(true)
-      })
-      .catch(() => {
-        console.log('Cannot find the file')
-      })
+      TextUtils.resetTextField(textLayer, targePageIndex, field)
+      LayerUtils.addLayers(targePageIndex, [LayerFactary.newText(Object.assign(textLayer, { editing: false }))])
+      editorUtils.setCloseMobilePanelFlag(true)
+    } catch {
+      console.log('Cannot find the file')
+    }
   }
 
   addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}) {

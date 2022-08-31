@@ -50,6 +50,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import { isITextGooey } from '@/interfaces/format'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -82,14 +83,13 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-      textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
-        setTimeout(() => {
-          this.resizeCallback()
-          this.isLoading = false
-        }, 500) // for the delay between font loading and dom rendering
-      })
-    }
+    textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+      setTimeout(() => {
+        this.resizeCallback()
+        this.isLoading = false
+        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      }, 500) // for the delay between font loading and dom rendering
+    })
     if (this.currSelectedInfo.layers >= 1) {
       TextPropUtils.updateTextPropsState()
     }

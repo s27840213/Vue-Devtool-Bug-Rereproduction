@@ -197,6 +197,7 @@ export default Vue.extend({
   }
   &__bottom {
     z-index: setZindex("footer");
+    background-color: setColor(nav-active);
   }
 
   &__content {
