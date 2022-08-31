@@ -29,8 +29,9 @@
             div(v-for="color in defaultBgColor"
               class="panel-bg__color"
               v-press="() => handleShareColor(color)"
+              :style="colorStyles(color)"
               @click="setBgColor(color)")
-              div(class="panel-bg__color-back")
+              //- div(class="panel-bg__color-back")
                 div(class="panel-bg__color-inner" :style="colorStyles(color)")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
@@ -305,12 +306,23 @@ export default Vue.extend({
     setBgColor(color: string) {
       vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color))
     },
-    getColorWithOpacity(color: string) {
-      let hexOpacity = Math.round(this.opacity * 255 / 100).toString(16).toUpperCase()
-      if (hexOpacity.length === 1) {
-        hexOpacity = '0' + hexOpacity
+    getColorWithOpacity(color: string): string {
+      const R1 = parseInt(color.substring(1, 3), 16)
+      const G1 = parseInt(color.substring(3, 5), 16)
+      const B1 = parseInt(color.substring(5, 7), 16)
+      const R = this.combineColors(R1, 255).toString(16)
+      const G = this.combineColors(G1, 255).toString(16)
+      const B = this.combineColors(B1, 255).toString(16)
+      return `#${this.paddingStringFor2(R)}${this.paddingStringFor2(G)}${this.paddingStringFor2(B)}`
+    },
+    combineColors(a: number, b: number): number {
+      return Math.round(b + (a - b) * this.opacity / 100)
+    },
+    paddingStringFor2(str: string) {
+      if (str.length === 1) {
+        return '0' + str
       }
-      return `${color}${hexOpacity}`
+      return str
     },
     getColorUrl(color: string) {
       return `type=backgroundColor&id=${this.getColorWithOpacity(color).substring(1)}`
@@ -437,19 +449,20 @@ export default Vue.extend({
     position: relative;
     -webkit-touch-callout: none;
     user-select: none;
-  }
-  &__color-back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    @include size(100%);
     border-radius: 4px;
-    background: white;
-    overflow: hidden;
   }
-  &__color-inner {
-    @include size(100%);
-  }
+  // &__color-back {
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   @include size(100%);
+  //   border-radius: 4px;
+  //   background: white;
+  //   overflow: hidden;
+  // }
+  // &__color-inner {
+  //   @include size(100%);
+  // }
   &.in-category::v-deep .vue-recycle-scroller__item-wrapper {
     margin-top: 24px;
   }
