@@ -135,20 +135,6 @@ class Controller {
     return { textShadow: shadow.join(',') }
   }
 
-  boost(color: string, bColor: string, distance: number) {
-    const shadow = []
-    for (const dist of [0, distance * 0.1]) {
-      for (let x = -1; x <= 1; x++) {
-        for (let y = -1; y <= 1; y++) {
-          shadow.push(`${bColor} ${dist + x}px ${y}px`)
-        }
-      }
-      shadow.push(`${color} ${distance * 0.1}px 0px`)
-    }
-
-    return { textShadow: shadow.join(',') }
-  }
-
   convertTextEffect(effect: any): Record<string, any> {
     const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor, ver } = effect || {}
     const unit = this.shadowScale * fontSize
@@ -220,11 +206,20 @@ class Controller {
           colorWithOpacity
         )
       case 'boost':
-        return this.boost(
-          colorWithOpacity,
-          this.convertColor2rgba(effect.bColor, effectOpacity),
-          effect.distance
-        )
+        return {
+          webkitTextStroke: `1px ${this.convertColor2rgba(effect.bColor, effectOpacity)}`,
+          extraCss: {
+            before: `
+            content: attr(data-text);
+            position: absolute;
+            word-break: keep-all;
+            left: ${effect.distance * 0.1}px;
+            z-index: -1;
+            -webkit-text-stroke: 1px ${this.convertColor2rgba(effect.bColor, effectOpacity)};
+            color: ${colorWithOpacity};
+          `
+          }
+        }
       default:
         return { textShadow: 'none' }
     }
