@@ -1,7 +1,8 @@
 <template lang="pug">
   div(class="panel-font-size")
     font-size-selector
-    input(class="panel-font-size__range-input input__slider--range"
+    input(class="panel-font-size__range-input"
+      :style="progressStyles()"
       v-model.number="fontSize"
       max="144"
       min="1"
@@ -79,6 +80,14 @@ export default Vue.extend({
         textEffectUtils.refreshSize()
       }
     }
+  },
+  methods: {
+    progressStyles() {
+      const finalFontSize = (this.fontSize === '--') ? 0 : this.fontSize as number
+      return {
+        '--progress': `${(finalFontSize - 1) / (143) * 100}%`
+      }
+    }
   }
 })
 </script>
@@ -90,6 +99,23 @@ export default Vue.extend({
   grid-template-rows: auto;
   grid-template-columns: 3fr 7fr;
   column-gap: 20px;
+  align-items: center;
+
+  &__range-input {
+    --lower-color: #{setColor(blue-1)};
+    --upper-color: #{setColor(gray-4)};
+    @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
+    &::-webkit-slider-thumb {
+      box-shadow: none;
+      border: 3px solid setColor(blue-1);
+      position: relative;
+    }
+    &::-moz-range-thumb {
+      box-shadow: none;
+      border: 3px solid setColor(blue-1);
+      position: relative;
+    }
+  }
 
   &__range-input-button {
     width: fit-content;

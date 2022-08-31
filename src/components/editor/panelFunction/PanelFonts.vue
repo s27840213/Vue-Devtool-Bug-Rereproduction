@@ -200,7 +200,7 @@ export default Vue.extend({
   > div {
     margin-top: 15px;
     &:nth-child(1) {
-      margin-top: unset;
+      margin-top: 0px;
     }
   }
   &__search {

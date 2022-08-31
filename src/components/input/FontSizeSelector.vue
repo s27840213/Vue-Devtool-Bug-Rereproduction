@@ -1,18 +1,15 @@
 <template lang="pug">
-  div(class="font-size-selector size-bar relative")
-    div(class="pointer"
-      @pointerdown="fontSizeStepping(-step)"
-      @contextmenu.prevent) -
-    button(class="font-size-selector__range-input-button" @click="handleValueModal")
-      input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-            @change="setSize" :value="fontSize")
-    div(class="pointer"
-      @pointerdown="fontSizeStepping(step)"
-      @contextmenu.prevent) +
-    value-selector(v-if="openValueSelector"
-                :valueArray="fontSelectValue"
-                class="font-size-selector__value-selector"
-                @update="handleValueUpdate")
+  div(class="font-size-selector relative")
+    div(class="font-size-selector__number")
+      div(class="pointer"
+        @pointerdown="fontSizeStepping(-step)"
+        @contextmenu.prevent) -
+      button(class="font-size-selector__range-input-button")
+        input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
+              @change="setSize" :value="fontSize")
+      div(class="pointer"
+        @pointerdown="fontSizeStepping(step)"
+        @contextmenu.prevent) +
 </template>
 
 <script lang="ts">
@@ -37,7 +34,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      openValueSelector: false,
       fontSelectValue,
       fieldRange: {
         fontSize: { min: 6, max: 800 },
@@ -122,14 +118,6 @@ export default Vue.extend({
       else if (value > max) return max.toString()
       return value.toString()
     },
-    handleValueModal() {
-      this.openValueSelector = !this.openValueSelector
-      if (this.openValueSelector) {
-        const input = this.$refs['input-fontSize'] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
-    },
     handleValueUpdate(value: number) {
       layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
       tiptapUtils.spanStyleHandler('size', value)
@@ -191,8 +179,39 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .font-size-selector {
   user-select: none;
+  &__number {
+    border: 1px solid setColor(gray-4);
+    border-radius: 3px;
+    width: 132px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    > div {
+      width: 58px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: setColor(gray-2);
+
+      &:nth-child(1) {
+        border-right: 1px solid setColor(gray-4);
+      }
+
+      &:nth-child(3) {
+        border-left: 1px solid setColor(gray-4);
+      }
+    }
+  }
+
   &__range-input-button {
-    width: fit-content;
+    width: 58px;
+    & > input {
+      padding: 0;
+      @include body-MD;
+      text-align: center;
+    }
   }
 
   &__value-selector {
