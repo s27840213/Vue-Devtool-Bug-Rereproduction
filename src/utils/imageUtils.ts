@@ -100,6 +100,8 @@ class ImageUtils {
         }
         return ''
       }
+      case 'svg':
+        return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
       default:
         return ''
     }
@@ -137,6 +139,7 @@ class ImageUtils {
     if (src.includes('unsplash')) return 'unsplash'
     if (src.includes('pexels')) return 'pexels'
     if (src.includes('template.vivipic.com/background')) return 'background'
+    if (src.includes('template.vivipic.com/svg')) return 'svg'
     if (src.includes('template.vivipic.com/admin')) {
       return src.includes('logo') ? 'logo-public' : 'public'
     }
@@ -187,6 +190,10 @@ class ImageUtils {
       }
       case 'background': {
         const keyStart = 'background/'
+        return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
+      }
+      case 'svg': {
+        const keyStart = 'svg/'
         return src.substring(src.indexOf(keyStart) + keyStart.length, src.indexOf('/prev') === -1 ? src.indexOf('/larg') : src.indexOf('/prev'))
       }
       case 'logo-private':

@@ -118,6 +118,9 @@ class AssetUtils {
         store.commit('SET_assetJson', { [id]: asset })
         return Promise.resolve(asset)
       }
+      case 14:
+      case 15:
+        return Promise.resolve(asset)
       default: {
         return Promise.race([
           fetch(asset.urls.json + `?ver=${ver}`),
@@ -465,7 +468,6 @@ class AssetUtils {
     } else {
       srcObj = url as SrcObj
     }
-
     const allLayers = this.getLayers(targePageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
@@ -609,12 +611,14 @@ class AssetUtils {
           this.addBasicShape(asset.jsonData, attrs)
           break
         case 14: {
-          console.log(asset.jsonData)
           const { srcObj, styles } = asset.jsonData as IImage
-          // const src = ImageUtils.getSrc(srcObj, Math.max(styles.imgWidth, styles.imgHeight))
           this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
-        }
           break
+        }
+        case 15: {
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          break
+        }
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
