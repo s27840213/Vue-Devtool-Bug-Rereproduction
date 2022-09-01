@@ -185,6 +185,7 @@ export default Vue.extend({
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-columns: 1fr;
   overflow: hidden;
+  background-color: setColor(nav-active);
 
   &__top {
     height: 100%;
