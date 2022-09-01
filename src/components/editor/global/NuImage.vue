@@ -796,7 +796,7 @@ export default Vue.extend({
                 })
             }
             img.src = ImageUtils.getSrc(this.config,
-              ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE) +
+              ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
               `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
           }
           break
