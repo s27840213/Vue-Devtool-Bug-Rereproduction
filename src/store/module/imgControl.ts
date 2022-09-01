@@ -5,6 +5,8 @@ import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
 import { functionsIn } from 'lodash'
 import groupUtils from '@/utils/groupUtils'
+import { ICalculatedGroupStyle } from '@/interfaces/group'
+import frameUtils from '@/utils/frameUtils'
 
 const SET_CONFIG = 'SET_CONFIG' as const
 const UPDATE_CONFIG = 'UPDATE_CONFIG' as const
@@ -31,45 +33,6 @@ const getters: GetterTree<IImgControlState, IEditorState> = {
   }
 }
 
-// getCurrSubSelectedLayerShown(): IImage | undefined {
-//   const layer = this.getCurrLayer
-//   if (layer.type === 'group') {
-//     const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-//     const scale = subLayer.styles.scale
-//     subLayer.styles.scale = 1
-//     subLayer.styles.x *= layer.styles.scale
-//     subLayer.styles.y *= layer.styles.scale
-//     const mappedLayer = GroupUtils
-//       .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-//     mappedLayer.styles.scale = scale
-//     return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
-//   } else if (layer.type === 'frame') {
-//     if (frameUtils.isImageFrame(layer as IFrame)) {
-//       const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
-//       image.styles.x = layer.styles.x
-//       image.styles.y = layer.styles.y
-//       image.styles.scale = 1
-//       // image.styles.imgWidth *= layer.styles.scale
-//       // image.styles.imgHeight *= layer.styles.scale
-//       return Object.assign(image, { forRender: true })
-//     }
-//     const primaryLayer = this.getCurrLayer as IFrame
-//     const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-//     image.styles.x *= primaryLayer.styles.scale
-//     image.styles.y *= primaryLayer.styles.scale
-//     if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-//       const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-//       const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-//       const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-//       image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-//       image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-//     }
-//     Object.assign(image, { forRender: true })
-//     return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
-//   }
-//   return undefined
-// },
-
 const mutations: MutationTree<IImgControlState> = {
   [SET_CONFIG] (state, layerInfo?: ILayerInfo) {
     const { pageIndex = -1, layerIndex = -1, subLayerIdx = -1 } = layerInfo || {}
@@ -82,7 +45,7 @@ const mutations: MutationTree<IImgControlState> = {
       }
     } else {
       if (state.image) {
-        handleImgLayerUpdate(state.layerInfo, state.image)
+        handleImgLayerUpdate(state.layerInfo, state.image, state.primaryLayer)
       }
       state.image = undefined
       state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
@@ -93,7 +56,7 @@ const mutations: MutationTree<IImgControlState> = {
     if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
       if (state.primaryLayer.type === LayerType.group) {
         layer = (state.primaryLayer as IGroup).layers[subLayerIdx]
-      } else if (state.primaryLayer.type === LayerType.group) {
+      } else if (state.primaryLayer.type === LayerType.frame) {
         layer = (state.primaryLayer as IFrame).clips[subLayerIdx]
       }
     } else {
@@ -117,8 +80,26 @@ const mutations: MutationTree<IImgControlState> = {
 
 const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: IImage): IImage {
   switch (primaryLayer.type) {
-    case LayerType.frame:
-      return image
+    case LayerType.frame: {
+      if (frameUtils.isImageFrame(primaryLayer as IFrame)) {
+        image.styles.x = primaryLayer.styles.x
+        image.styles.y = primaryLayer.styles.y
+        image.styles.scale = 1
+        // image.styles.imgWidth *= layer.styles.scale
+        // image.styles.imgHeight *= layer.styles.scale
+        return image
+      }
+      image.styles.x *= primaryLayer.styles.scale
+      image.styles.y *= primaryLayer.styles.scale
+      if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
+        const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
+        const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
+        const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
+        image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
+        image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
+      }
+      return groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
+    }
     case LayerType.group: {
       const scale = image.styles.scale
       image.styles.scale = 1
@@ -136,27 +117,35 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
   return image
 }
 
-const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage) {
+const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage, _primaryLayer?: IGroup | IFrame | IImage) {
   const { layerIndex, pageIndex, subLayerIdx } = layerInfo
-  const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex)
+  const primaryLayer = _primaryLayer ?? layerUtils.getLayer(pageIndex, layerIndex)
   switch (primaryLayer.type) {
-    case LayerType.frame:
-    case LayerType.group:
-      // const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-      // const scale = subLayer.styles.scale
-      // subLayer.styles.scale = 1
-      // subLayer.styles.x *= layer.styles.scale
-      // subLayer.styles.y *= layer.styles.scale
-      // const mappedLayer = GroupUtils
-      //   .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-      // mappedLayer.styles.scale = scale
-      // return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
+    case LayerType.frame: {
+      const subLayer = groupUtils.mapLayersToTmp([image], primaryLayer.styles as ICalculatedGroupStyle)[0] as IImage
+      let { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
+      imgX /= primaryLayer.styles.scale
+      imgY /= primaryLayer.styles.scale
+      imgWidth /= primaryLayer.styles.scale
+      imgHeight /= primaryLayer.styles.scale
+      frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx ?? 0, {
+        imgX, imgY, imgHeight: imgHeight, imgWidth
+      })
       break
+    }
+    case LayerType.group: {
+      const subLayer = groupUtils.mapLayersToTmp([image], primaryLayer.styles as ICalculatedGroupStyle)[0] as IImage
+      const { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
+      layerUtils.updateLayerStyles(pageIndex, layerIndex, {
+        imgX, imgY, imgHeight, imgWidth
+      }, subLayerIdx)
+      break
+    }
     case LayerType.image: {
       const { styles: { imgX, imgY, imgWidth, imgHeight } } = image
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         imgX, imgY, imgHeight, imgWidth
-      }, subLayerIdx)
+      })
     }
   }
 }

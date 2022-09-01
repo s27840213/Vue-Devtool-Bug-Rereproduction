@@ -1839,6 +1839,7 @@ export default Vue.extend({
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
     },
     onDblClick() {
+      console.log('dbl')
       if (this.getLayerType !== 'image' || this.isLocked) return
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
@@ -1922,7 +1923,9 @@ export default Vue.extend({
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
     },
-    dblSubController(targetIndex: number) {
+    dblSubController(e: MouseEvent, targetIndex: number) {
+      e.stopPropagation()
+      console.log('dbl sub')
       if (this.isHandleShadow) {
         return
       }
@@ -1948,7 +1951,9 @@ export default Vue.extend({
         default:
           return
       }
-      target.type === LayerType.image && !target.inProcess && updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      if (target.type === LayerType.image && !target.inProcess) {
+        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      }
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)

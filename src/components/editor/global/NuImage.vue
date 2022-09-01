@@ -91,13 +91,15 @@ export default Vue.extend({
     subLayerIndex: Number,
     inheritStyle: Object,
     isBgImgControl: Boolean,
-    imgControl: Boolean
+    imgControl: Boolean,
+    /** This prop is used to present if this image-component is
+     *  only used for rendering as image controlling */
+    forRender: Boolean
   },
   async created() {
     this.handleInitLoad()
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender) {
       this.handleShadowInit()
-
       if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
         const img = new Image()
         img.crossOrigin = 'anonymous'
@@ -226,7 +228,7 @@ export default Vue.extend({
     },
     'config.imgControl'(val) {
       if (val) {
-        this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex })
+        this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex, subLayerIdx: this.subLayerIndex })
       } else {
         this.setImgConfig(undefined)
         this.handleDimensionUpdate()
@@ -479,11 +481,6 @@ export default Vue.extend({
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
     },
-    /** This prop is used to present if this image-component is
-     *  only used for rendering as image controlling */
-    forRender(): boolean {
-      return (this.config.forRender || this.imgControl) ?? false
-    },
     inProcess(): boolean {
       return this.config.inProcess
     },
@@ -696,6 +693,7 @@ export default Vue.extend({
       }
     },
     handleShadowInit() {
+      if (this.forRender) return
       const { shadow } = this
       switch (shadow.srcObj.type) {
         case 'shadow-private':

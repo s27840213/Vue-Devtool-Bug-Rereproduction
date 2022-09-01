@@ -26,16 +26,18 @@
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
         :imgControl="true"
+        :forRender="true"
         :config="image")
     div
       nu-layer(:layerIndex="layerIndex"
         :pageIndex="pageIndex"
+        :forRender="true"
         :config="image")
     div(class="page-control" :style="styles")
         nu-img-controller(:layerIndex="layerIndex"
                           :pageIndex="pageIndex"
-                          :forRender="true"
                           :config="image")
+                          //- :forRender="true"
 </template>
 <script lang="ts">
 import Vue from 'vue'

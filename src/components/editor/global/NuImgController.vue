@@ -62,7 +62,7 @@ export default Vue.extend({
       return
     }
     const shadow = (this.config as IImage).styles.shadow
-    if (shadow.currentEffect !== ShadowEffectType.none) {
+    if (shadow && shadow.currentEffect !== ShadowEffectType.none) {
       if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
         imageShadowUtils.setProcessId({
           pageId: pageUtils.currFocusPage.id,
@@ -79,17 +79,17 @@ export default Vue.extend({
     }
   },
   destroyed() {
-    const shadow = (this.config as IImage).styles.shadow
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
-    if (!this.forRender) {
-      if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
-        stepsUtils.record()
-      }
-    }
+    // const shadow = (this.config as IImage).styles.shadow
+    // if (!this.forRender) {
+    //   if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
+    //     stepsUtils.record()
+    //   }
+    // }
     this.setImgConfig(undefined)
   },
   computed: {
