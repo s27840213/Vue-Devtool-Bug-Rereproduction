@@ -249,7 +249,6 @@ export default Vue.extend({
     &--options {
       justify-self: end;
       box-sizing: border-box;
-      width: 70px;
       height: 25px;
       padding: 0;
     }
