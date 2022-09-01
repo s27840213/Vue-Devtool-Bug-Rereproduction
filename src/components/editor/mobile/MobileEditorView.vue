@@ -125,7 +125,7 @@ export default Vue.extend({
     this.scrollHeight = this.editorView.scrollHeight
     document.addEventListener('blur', this.detectBlur, true)
 
-    this.editorViewResizeObserver = new ResizeObserver(() => {
+    this.editorViewResizeObserver = new (window as any).ResizeObserver(() => {
       this.cardHeight = this.editorView.clientHeight
     })
 

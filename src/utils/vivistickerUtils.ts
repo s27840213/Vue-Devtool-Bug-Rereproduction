@@ -95,7 +95,7 @@ class ViviStickerUtils {
     return (jsonData: any) => {}
   }
 
-  startEditing(initiator: () => Promise<any>, callback: (jsonData: any) => void) {
+  startEditing(editorType: string, initiator: () => Promise<any>, callback: (jsonData: any) => void) {
     const pageWidth = window.innerWidth - 32
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
@@ -105,7 +105,7 @@ class ViviStickerUtils {
     initiator().then((jsonData?: any) => {
       if (jsonData) {
         stepsUtils.reset()
-        store.commit('vivisticker/SET_isInEditor', true)
+        store.commit('vivisticker/SET_editorType', editorType)
         callback(jsonData)
       }
     })
@@ -114,7 +114,7 @@ class ViviStickerUtils {
   endEditing() {
     groupUtils.deselect()
     pageUtils.setPages()
-    store.commit('vivisticker/SET_isInEditor', false)
+    store.commit('vivisticker/SET_editorType', 'none')
   }
 
   initLoadingFlags(page: IPage, callback?: () => void) {

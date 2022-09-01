@@ -64,7 +64,8 @@ export default Vue.extend({
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
       currActiveTab: 'vivisticker/getCurrActiveTab',
-      isInBgShare: 'vivisticker/getIsInBgShare'
+      isInBgShare: 'vivisticker/getIsInBgShare',
+      editorType: 'vivisticker/getEditorType'
     }),
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
@@ -117,6 +118,7 @@ export default Vue.extend({
       if (this.isInEditor) {
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
+          ...(this.editorType === 'text' ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
           { icon: 'copy', width: 24, action: this.handleCopy },
           { icon: 'vivisticker_close', width: 24, action: this.handleEndEditing }
         ]
@@ -173,8 +175,6 @@ export default Vue.extend({
       vivistickerUtils.endEditing()
     },
     handleCopy() {
-      // TODO: use sendScreenshotUrl to call App after /screenshot for json is well implemented.
-      // console.log(vivistickerUtils.createUrlForJSON())
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
     }
   }

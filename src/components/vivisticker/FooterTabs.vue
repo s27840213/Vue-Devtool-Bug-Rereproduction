@@ -69,7 +69,8 @@ export default Vue.extend({
       InBgRemoveFirstStep: 'bgRemove/inFirstStep',
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
-      isInEditor: 'vivisticker/getIsInEditor'
+      isInEditor: 'vivisticker/getIsInEditor',
+      editorType: 'vivisticker/getEditorType'
     }),
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
@@ -207,6 +208,8 @@ export default Vue.extend({
         return [...this.genearlLayerTabs]
       } else if (!this.isInEditor) {
         return this.homeTabs
+      } else if (this.editorType === 'text') {
+        return [{ icon: 'plus-square', text: `${this.$t('STK0006')}` }]
       } else {
         return []
       }

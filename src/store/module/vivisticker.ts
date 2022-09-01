@@ -3,12 +3,12 @@ import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IViviStickerState {
   currActiveTab: string,
-  isInEditor: boolean,
   isInCategoryDict: {[key: string]: boolean},
   isInBgShare: boolean,
   shareItem: IAsset | undefined,
   shareColor: string,
-  editorBgIndex: number
+  editorBgIndex: number,
+  editorType: string
 }
 
 const EDITOR_BGS = [
@@ -18,7 +18,6 @@ const EDITOR_BGS = [
 
 const getDefaultState = (): IViviStickerState => ({
   currActiveTab: 'object',
-  isInEditor: false,
   isInCategoryDict: {
     object: false,
     background: false
@@ -26,7 +25,8 @@ const getDefaultState = (): IViviStickerState => ({
   isInBgShare: false,
   shareItem: undefined,
   shareColor: '',
-  editorBgIndex: 0
+  editorBgIndex: 0,
+  editorType: 'none'
 })
 
 const state = getDefaultState()
@@ -35,7 +35,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return state.currActiveTab
   },
   getIsInEditor(state: IViviStickerState): boolean {
-    return state.isInEditor
+    return state.editorType !== 'none'
   },
   getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
     return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
@@ -51,15 +51,15 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getEditorBg(state: IViviStickerState): string {
     return EDITOR_BGS[state.editorBgIndex] ?? EDITOR_BGS[0]
+  },
+  getEditorType(state: IViviStickerState): string {
+    return state.editorType
   }
 }
 
 const mutations: MutationTree<IViviStickerState> = {
   SET_currActiveTab(state: IViviStickerState, panel: string) {
     state.currActiveTab = panel
-  },
-  SET_isInEditor(state: IViviStickerState, bool: boolean) {
-    state.isInEditor = bool
   },
   SET_isInCategory(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
     state.isInCategoryDict[updateInfo.tab] = updateInfo.bool
@@ -72,6 +72,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_shareColor(state: IViviStickerState, shareColor: string) {
     state.shareColor = shareColor
+  },
+  SET_editorType(state: IViviStickerState, editorType: string) {
+    state.editorType = editorType
   },
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
