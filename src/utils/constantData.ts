@@ -268,7 +268,7 @@ class ConstantData {
               value: 'triangle',
               label: i18n.tc('NN0730')
             }, {
-              value: 'circle',
+              value: 'rounded',
               label: i18n.tc('NN0731')
             }, {
               value: 'square',
@@ -322,11 +322,11 @@ class ConstantData {
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
       }, {
-        key: 'funky',
+        key: 'funky3d',
         label: i18n.tc('NN0728'),
         options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
       }, {
-        key: 'boost',
+        key: 'bold3d',
         label: i18n.tc('NN0729'),
         options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])

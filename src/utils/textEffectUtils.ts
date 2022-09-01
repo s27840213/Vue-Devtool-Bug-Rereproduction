@@ -41,14 +41,14 @@ class Controller {
         angle: 45,
         color: ''
       }, // 雙重陰影
-      funky: {
+      funky3d: {
         distance: 40,
         distanceInverse: 0,
         angle: 45,
         opacity: 100,
         color: '#F1D289'
       },
-      boost: {
+      bold3d: {
         distance: 40,
         opacity: 100,
         textStrokeColor: '#000000',
@@ -127,9 +127,9 @@ class Controller {
     return `rgba(${hexList.map(x => parseInt(x, 16)).join(',')}, ${opacity})`
   }
 
-  funky(distance: number, distanceInverse: number, angle: number, color: string) {
+  funky3d(distance: number, distanceInverse: number, angle: number, color: string) {
     const shadow = []
-    for (let d = -distanceInverse / 50; d < distance * 1.5; d += 0.5) {
+    for (let d = -distanceInverse * 0.06; d < distance * 1.5; d += 0.5) {
       const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
       shadow.push(`${color} ${x}px ${y}px`)
     }
@@ -199,14 +199,14 @@ class Controller {
             )
             .join(',')
         }
-      case 'funky':
-        return this.funky(
+      case 'funky3d':
+        return this.funky3d(
           distance,
           effect.distanceInverse,
           effect.angle,
           colorWithOpacity
         )
-      case 'boost':
+      case 'bold3d':
         return {
           webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
           extraCss: {

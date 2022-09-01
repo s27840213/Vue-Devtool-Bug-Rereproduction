@@ -67,7 +67,7 @@ class TextBg {
         pColor: '#F1D289'
       },
       underline: {
-        endpoint: 'circle',
+        endpoint: 'rounded',
         height: 20,
         yOffset: 10,
         opacity: 100,
@@ -119,7 +119,7 @@ class TextBg {
               <path d='m${capWidth} 0h${styles.width - capWidth}l-${capWidth} ${capWidth * 2}h-${styles.width - capWidth}z'/>
             </svg>")`.replace(/\n[ ]*/g, '')
           break
-        case 'circle':
+        case 'rounded':
           underlineSvg = `url("data:image/svg+xml;utf8,
             <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
               <path d='m${capWidth} 0a1 1 0 000 ${capWidth * 2}h${styles.width - capWidth * 2}a1 1 0 000 -${capWidth * 2}z'/>
