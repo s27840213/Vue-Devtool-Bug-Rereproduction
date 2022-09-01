@@ -259,8 +259,6 @@ export default Vue.extend({
     margin: 0;
   }
   &__span {
-    position: relative;
-    text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     // line-break: anywhere;

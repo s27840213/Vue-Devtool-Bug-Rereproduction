@@ -213,14 +213,13 @@ class Controller {
             before: `
               content: attr(data-text);
               position: absolute;
-              top: 2px;
               left: 0;
               z-index: -1;
-              text-align: center;
+              width: 100%;
               transform: translateX(${effect.distance * 0.1}px);
               -webkit-text-stroke: 1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)};
               color: ${colorWithOpacity};
-          `
+            `
           }
         }
       default:
