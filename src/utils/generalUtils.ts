@@ -20,7 +20,7 @@ class GeneralUtils {
   }
 
   deepCopy(el: unknown) {
-    return typeof el === 'undefined' ? {} : JSON.parse(JSON.stringify(el))
+    return typeof el === 'undefined' ? {} : _.cloneDeep(el)
   }
 
   objHasOwnProperty(obj: { [index: string]: any }, property: string) {
@@ -139,6 +139,18 @@ class GeneralUtils {
       if (a[i] !== b[i]) return false
     }
     return true
+  }
+
+  createGroups(arr: any[], numPerGroupGroups: number) {
+    const numOfArr = arr.length
+    if (numOfArr < numPerGroupGroups) {
+      return [arr.slice(0)]
+    }
+
+    const groupNum = Math.ceil(arr.length / numPerGroupGroups)
+    return new Array(groupNum)
+      .fill('')
+      .map((_, i) => arr.slice(i * numPerGroupGroups, (i + 1) * numPerGroupGroups))
   }
 
   fixSize(size: number) {

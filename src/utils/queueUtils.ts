@@ -1,31 +1,44 @@
-import Vue from 'vue'
+import { EventEmitter } from 'events'
 
 class QueueUtils {
-  queue: Array<() => Promise<void>>
+  eventIds: Array<string>
+  eventMap: Map<string, () => Promise<void | number>>
   isHandlingAsyncTask: boolean
 
   constructor() {
-    this.queue = []
+    this.eventIds = []
+    this.eventMap = new Map()
     this.isHandlingAsyncTask = false
   }
 
-  push(callback: () => Promise<void>) {
-    this.queue.push(callback)
+  push(id: string, callback: () => Promise<void | number>) {
+    this.eventMap.set(id, callback)
+    this.eventIds.push(id)
+
     if (!this.isHandlingAsyncTask) {
       this.isHandlingAsyncTask = true
       this.handleAsyncTask()
     }
   }
 
-  handleAsyncTask() {
-    const func = this.queue.shift()
-    typeof func === 'function' && func().then(() => {
-      if (this.queue.length === 0) {
-        this.isHandlingAsyncTask = false
-        return
-      }
+  deleteEvent(eventId: string) {
+    if (this.eventMap.has(eventId)) {
+      this.eventMap.delete(eventId)
+    }
+  }
 
+  handleAsyncTask() {
+    if (this.eventIds.length === 0) {
+      this.isHandlingAsyncTask = false
+      return
+    }
+    const targetId = this.eventIds.shift() as string
+    const targetFunc = this.eventMap.get(targetId)
+    typeof targetFunc === 'function' && targetFunc().then(() => {
+      // setTimeout(() => {
+      this.eventMap.delete(targetId)
       this.handleAsyncTask()
+      // }, 100)
     })
   }
 }

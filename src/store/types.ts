@@ -73,7 +73,8 @@ export interface IEditorState {
   isMobile: boolean
   isLargeDesktop: boolean,
   isGlobalLoading: boolean,
-  useMobileEditor: boolean
+  useMobileEditor: boolean,
+  defaultContentScaleRatio: number
 }
 
 export enum SidebarPanelType {
@@ -102,6 +103,9 @@ export enum FunctionPanelType {
 export enum ColorEventType {
   text = 'setTextColor',
   textEffect = 'setTextEffectColor',
+  textBg = 'setTextBg',
+  textBgBorder = 'setTextBgBorder',
+  textBgPadding = 'setTextBgPadding',
   shape = 'setShapeColor',
   background = 'setBackgroundColor',
   photoShadow = 'setPhotoEffectColor'

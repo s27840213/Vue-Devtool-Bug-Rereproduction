@@ -1,9 +1,9 @@
 <template lang="pug">
 div(class="overflow-container"
-    :style="styles")
+    :style="pageStyles")
   div(:style="stylesWith3DPreserve")
     div(:class="['page-content']"
-        :style="styles"
+        :style="pageStyles"
         ref="page-content"
         @drop.prevent="onDrop"
         @dragover.prevent
@@ -17,7 +17,9 @@ div(class="overflow-container"
         :image="this.config.backgroundImage"
         :pageIndex="pageIndex"
         :color="this.config.backgroundColor"
-        :key="this.config.backgroundImage.id")
+        :key="this.config.backgroundImage.id"
+        @mousedown.native.left="pageClickHandler()"
+        :contentScaleRatio="contentScaleRatio")
       nu-layer(v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
@@ -25,7 +27,8 @@ div(class="overflow-container"
         :data-pindex="`${pageIndex}`"
         :layerIndex="index"
         :pageIndex="pageIndex"
-        :config="layer")
+        :config="layer"
+        :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
@@ -67,6 +70,10 @@ export default Vue.extend({
     noBg: {
       type: Boolean,
       default: false
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
     }
   },
   data() {
@@ -82,31 +89,31 @@ export default Vue.extend({
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
-    styles(): { [index: string]: string } {
+    pageStyles(): { [index: string]: string } {
       return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`
       }
     },
     stylesWith3DPreserve(): { [index: string]: string } {
       return {
-        width: `${this.config.width}px`,
-        height: `${this.config.height}px`,
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: 'preserve-3d'
       }
     }
   },
   mounted() {
     if (this.config.isAutoResizeNeeded) {
-      // this.handleFontLoading()
-      this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
+      this.handleFontLoading()
+      // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
     }
   },
   watch: {
     'config.isAutoResizeNeeded'(newVal) {
       if (newVal) {
-        // this.handleFontLoading()
-        this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
+        this.handleFontLoading()
+        // this.handleSequentially ? queueUtils.push(this.handleFontLoading) : this.handleFontLoading()
       }
     }
   },
@@ -144,15 +151,15 @@ export default Vue.extend({
       this.pageIsHover = isHover
     },
     pageClickHandler(e: PointerEvent): void {
-      groupUtils.deselect()
-      // imageUtils.setImgControlDefault(false)
-      editorUtils.setInMultiSelectionMode(false)
-      this.setCurrActivePageIndex(this.pageIndex)
-      const sel = window.getSelection()
-      if (sel) {
-        sel.empty()
-        sel.removeAllRanges()
-      }
+      // groupUtils.deselect()
+      // // imageUtils.setImgControlDefault(false)
+      // editorUtils.setInMultiSelectionMode(false)
+      // this.setCurrActivePageIndex(this.pageIndex)
+      // const sel = window.getSelection()
+      // if (sel) {
+      //   sel.empty()
+      //   sel.removeAllRanges()
+      // }
     },
     onRightClick(event: MouseEvent) {
       if (generalUtils.isTouchDevice()) {

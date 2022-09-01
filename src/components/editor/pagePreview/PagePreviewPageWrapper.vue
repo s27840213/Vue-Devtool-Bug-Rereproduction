@@ -1,13 +1,14 @@
 <template lang="pug">
-  observer-sentinel(
-    target=".mobile-editor__page-preview"
-    :threshold="[0,1]"
-    :throttle="false"
-    :handleNotIntersecting="true"
-    @callback="handleCallback")
-    div(v-if="allPageMode" class="page-preview-page"
+  lazy-load(
+      target=".mobile-editor__page-preview"
+      :threshold="[0,1]"
+      :minHeight="contentWidth"
+      @loaded="handleLoaded")
+    div(v-if="!allPageMode" :style="loadingStyle")
+    div(v-else class="page-preview-page"
       :style="styles2"
-      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`")
+      :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
+      ref="pagePreview")
       div(class="page-preview-page-content pointer"
           :style="styles"
           @click="clickPage"
@@ -18,12 +19,12 @@
           @mouseenter="handleMouseEnter"
           @mouseleave="handleMouseLeave"
           ref="content")
-        page-content(v-if="inTheTarget"
+        page-content(
           class="click-disabled"
           :style="contentScaleStyles"
           :config="config"
           :pageIndex="index"
-          :scaleRatio="scaleRatio"
+          :contentScaleRatio="scaleRatio"
           :handleSequentially="true"
           :isPagePreview="true")
         div(class="page-preview-page__highlighter"
@@ -55,7 +56,6 @@
       div(v-if="type === 'full'"
         class="page-preview-page-title")
         span(:style="{'color': currFocusPageIndex === index ? '#4EABA6' : '#000'}") {{index+1}}
-    div(v-else :style="loadingStyle")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -67,7 +67,7 @@ import GroupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import editorUtils from '@/utils/editorUtils'
-import ObserverSentinel from '@/components/ObserverSentinel.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
 
 export default Vue.extend({
   props: {
@@ -88,15 +88,7 @@ export default Vue.extend({
   },
   components: {
     PageContent: () => import('@/components/editor/page/PageContent.vue'),
-    ObserverSentinel
-  },
-  created() {
-    console.log(this.currFocusPageIndex)
-  },
-  watch: {
-    currActivePageIndex: function(val) {
-      console.warn(val)
-    }
+    LazyLoad
   },
   data() {
     return {
@@ -113,7 +105,6 @@ export default Vue.extend({
       isMouseOver: false,
       isMenuOpen: false,
       contentWidth: 0,
-      inTheTarget: true,
       asyncTaskQueue: [] as unknown as Array<() => Promise<void>>,
       isHandlingAsyncTask: false
     }
@@ -143,7 +134,7 @@ export default Vue.extend({
     },
     contentScaleStyles(): { [index: string]: string } {
       return {
-        transform: `scale(${this.scaleRatio})`
+        // transform: `scale(${this.scaleRatio})`
       }
     },
     styles(): { [index: string]: string } {
@@ -174,13 +165,6 @@ export default Vue.extend({
         height: '100%'
       }
     }
-  },
-  mounted() {
-    const contentRef = (this.$refs.content as HTMLElement)
-    this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
-  },
-  activated() {
-    this.contentWidth = (this.$refs.content as HTMLElement).offsetWidth
   },
   methods: {
     ...mapMutations({
@@ -290,8 +274,11 @@ export default Vue.extend({
           break
       }
     },
-    handleCallback(entries: Array<IntersectionObserverEntry>) {
-      this.inTheTarget = entries[0].isIntersecting
+    handleLoaded() {
+      this.$nextTick(() => {
+        const contentRef = (this.$refs.content as HTMLElement)
+        this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
+      })
     }
   }
 })
@@ -364,14 +351,14 @@ export default Vue.extend({
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate3d(-50%, -50%, 0);
+    transform: translate(-50%, -50%);
     border-radius: 4px;
     z-index: -1;
   }
   &-title {
     position: absolute;
     bottom: -8px;
-    transform: translate3d(0, 100%, 0);
+    transform: translate(0, 100%);
     z-index: 100;
     display: flex;
     justify-content: center;

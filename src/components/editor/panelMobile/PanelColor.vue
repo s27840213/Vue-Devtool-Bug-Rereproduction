@@ -33,15 +33,15 @@ import stepsUtils from '@/utils/stepsUtils'
 import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
-import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import { IFrame, IGroup, IImage, ILayer, IShape } from '@/interfaces/layer'
 import ColorSlips from '@/components/editor/ColorSlips.vue'
-import { ColorEventType, LayerType } from '@/store/types'
+import { ColorEventType } from '@/store/types'
 import pageUtils from '@/utils/pageUtils'
 import frameUtils from '@/utils/frameUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
+import textBgUtils from '@/utils/textBgUtils'
 
 export default Vue.extend({
   data() {
@@ -191,12 +191,23 @@ export default Vue.extend({
           break
         }
 
-        case ColorEventType.textEffect: {
+        case ColorEventType.textEffect:
+        case ColorEventType.textBg:
+        case ColorEventType.textBgBorder:
+        case ColorEventType.textBgPadding: {
           const { styles } = textEffectUtils.getCurrentLayer()
-          const { textEffect = {} } = styles
-
-          const currentEffect = textEffect.name || 'none'
-          textEffectUtils.setTextEffect(currentEffect, { color: newColor })
+          if (this.currEvent === ColorEventType.textEffect) {
+            const { textEffect = {} } = styles
+            const currentEffect = textEffect.name || 'none'
+            textEffectUtils.setTextEffect(currentEffect, { color: newColor })
+          } else {
+            const { textBg = {} } = textEffectUtils.getCurrentLayer().styles
+            const currentEffect = textBg.name || 'none'
+            const key = this.currEvent === ColorEventType.textBgBorder ? 'bColor'
+              : this.currEvent === ColorEventType.textBgPadding ? 'pColor'
+                : 'color'
+            textBgUtils.setTextBg(currentEffect, { [key]: newColor })
+          }
           break
         }
 

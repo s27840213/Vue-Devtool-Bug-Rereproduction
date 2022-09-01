@@ -8,7 +8,7 @@
             :style="styles('')"
             @dblclick="onDblClick()"
             @dragenter="onDragEnter($event)"
-            @pointerdown="onMousedown($event)")
+            @pointerdown="onPointerdown($event)")
           //- @click.left.stop="onClickEvent($event)"
           svg(class="full-width" v-if="config.type === 'image' && (config.isFrame || config.isFrameImg)"
             :viewBox="`0 0 ${config.isFrameImg ? config.styles.width : config.styles.initWidth} ${config.isFrameImg ? config.styles.height : config.styles.initHeight}`")
@@ -82,7 +82,11 @@ export default Vue.extend({
     primaryLayer: Object,
     snapUtils: Object,
     type: String,
-    isMoved: Boolean
+    isMoved: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   components: {
     NuTextEditor
@@ -104,7 +108,7 @@ export default Vue.extend({
       },
       dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false,
-      dblTabsFlag: false
+      dblTapFlag: false
     }
   },
   mounted() {
@@ -232,22 +236,16 @@ export default Vue.extend({
       }
     },
     contentEditable(newVal) {
-      if (this.isActive) {
+      if (this.config.type !== 'text') return
+      if (this.config.active) {
+        if (!newVal || !this.config.isEdited) {
+          tiptapUtils.agent(editor => !editor.isDestroyed && editor.commands.selectAll())
+        }
         tiptapUtils.agent(editor => {
           editor.setEditable(newVal)
-          // @TODO 問廷安
-          // editor.commands.blur()
         })
-        if (newVal) {
-          this.$nextTick(() => {
-            tiptapUtils.focus({ scrollIntoView: false })
-          })
-        }
       }
-      LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: newVal })
-      if (!newVal) {
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
-      }
+      !GeneralUtils.isTouchDevice() && StepsUtils.updateHead(LayerUtils.pageIndex, LayerUtils.layerIndex, { contentEditable: newVal }, this.layerIndex)
     }
   },
   destroyed() {
@@ -281,7 +279,7 @@ export default Vue.extend({
         width: `${this.getLayerWidth / this.getLayerScale}px`,
         height: `${this.getLayerHeight / this.getLayerScale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`,
+        transform: `scaleX(${this.getLayerScale * this.contentScaleRatio}) scaleY(${this.getLayerScale * this.contentScaleRatio})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
@@ -316,17 +314,17 @@ export default Vue.extend({
         e.stopPropagation()
       }
     },
-    onMousedown(e: PointerEvent) {
+    onPointerdown(e: PointerEvent) {
       if (e.button !== 0) return
       const body = this.$refs.body as HTMLElement
       // body.addEventListener('touchstart', this.disableTouchEvent)
       if (GeneralUtils.isTouchDevice()) {
-        if (!this.dblTabsFlag && this.isActive && this.config.type === 'image') {
-          const touchtime = new Date().getTime()
+        if (!this.dblTapFlag && this.isActive && this.config.type === 'image') {
+          const touchtime = Date.now()
           const interval = 500
           const doubleTap = (e: PointerEvent) => {
             e.preventDefault()
-            if ((new Date().getTime()) - touchtime < interval && !this.dblTabsFlag) {
+            if (Date.now() - touchtime < interval && !this.dblTapFlag) {
               /**
                * This is the dbl-click callback block
                */
@@ -341,13 +339,13 @@ export default Vue.extend({
                 }
                 eventUtils.emit(PanelEvent.switchTab, 'crop')
               }
-              this.dblTabsFlag = true
+              this.dblTapFlag = true
             }
           }
           body.addEventListener('pointerdown', doubleTap)
           setTimeout(() => {
             body.removeEventListener('pointerdown', doubleTap)
-            this.dblTabsFlag = false
+            this.dblTapFlag = false
           }, interval)
         }
         this.$emit('pointerDownSubController')
@@ -363,7 +361,12 @@ export default Vue.extend({
       this.isPrimaryActive = this.primaryLayer.active
       formatUtils.applyFormatIfCopied(this.pageIndex, this.primaryLayerIndex, this.layerIndex)
       formatUtils.clearCopiedFormat()
-      if (this.type === 'tmp') return
+      if (this.type === 'tmp') {
+        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
+          groupUtils.deselectTargetLayer(this.layerIndex)
+        }
+        return
+      }
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x
         this.posDiff.y = this.primaryLayer.styles.y
@@ -413,10 +416,10 @@ export default Vue.extend({
       }
 
       return {
-        transform: `translate(${x}px, ${y}px)` + `rotate(${this.config.styles.rotate}deg)` +
+        transform: `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)` + `rotate(${this.config.styles.rotate}deg)` +
           `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
-        width: `${this.config.styles.width}px`,
-        height: `${this.config.styles.height}px`,
+        width: `${this.config.styles.width * this.contentScaleRatio}px`,
+        height: `${this.config.styles.height * this.contentScaleRatio}px`,
         'pointer-events': 'none'
       }
     },
@@ -440,6 +443,7 @@ export default Vue.extend({
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
+        transform: `translateZ(${this.config.styles.zindex}px)`,
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -447,11 +451,11 @@ export default Vue.extend({
       const { isFrameImg } = this.config
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth}px`
-        height = `${this.config.styles.initHeight}px`
+        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
+        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
       } else {
-        width = `${this.config.styles.width}px`
-        height = `${this.config.styles.height}px`
+        width = `${this.config.styles.width * this.contentScaleRatio}px`
+        height = `${this.config.styles.height * this.contentScaleRatio}px`
       }
       return { width, height }
     },
@@ -459,9 +463,9 @@ export default Vue.extend({
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
       if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / this.primaryScale}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px dashed ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) / this.primaryScale}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -515,12 +519,7 @@ export default Vue.extend({
     },
     onClickEvent(e: MouseEvent) {
       if (!this.isPrimaryActive) return
-      if (this.type === 'tmp') {
-        if (GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]) || this.inMultiSelectionMode) {
-          groupUtils.deselectTargetLayer(this.layerIndex)
-        }
-        return
-      }
+
       colorUtils.event.emit('closeColorPanel', false)
       this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
@@ -641,7 +640,8 @@ export default Vue.extend({
               imgX: clip.styles.imgX,
               imgY: clip.styles.imgY,
               imgWidth: clip.styles.imgWidth,
-              imgHeight: clip.styles.imgHeight
+              imgHeight: clip.styles.imgHeight,
+              adjust: clip.styles.adjust
             }
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
@@ -716,7 +716,8 @@ export default Vue.extend({
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
             imgWidth: clip.styles.imgWidth,
-            imgHeight: clip.styles.imgHeight
+            imgHeight: clip.styles.imgHeight,
+            adjust: clip.styles.adjust
             // horizontalFlip: clip.styles.horizontalFlip,
             // verticalFlip: clip.styles.verticalFlip
           }
@@ -794,6 +795,7 @@ export default Vue.extend({
     left: 0;
     position: absolute;
     touch-action: none;
+    transform-style: preserve-3d;
   }
   &__content {
     touch-action: none;

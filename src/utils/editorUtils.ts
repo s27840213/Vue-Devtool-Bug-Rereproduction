@@ -26,6 +26,10 @@ class EditorUtils {
     return store.getters['mobileEditor/getShowMobilePanel']
   }
 
+  get contentScaleRatio(): number {
+    return store.getters.getContentScaleRatio
+  }
+
   private setState(props: Partial<IMobileEditorState>) {
     store.commit('mobileEditor/SET_STATE', props)
   }

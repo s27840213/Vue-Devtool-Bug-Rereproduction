@@ -42,7 +42,7 @@ module.exports = {
         /**
              * 由於上面的代碼會讓 'src/assets/icon' 資料夾以外的svg全都不能用，
              * 但並不是所有svg圖檔都要拿來當icon，故設定另外一個loader來處理其他svg
-             */
+        */
         config.module
             .rule('file-loader')
             .test(/\.svg$/)

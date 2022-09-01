@@ -31,7 +31,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
-import { IImage } from '@/interfaces/layer'
+import { IFrame, IImage } from '@/interfaces/layer'
 import CircleCheckbox from '@/components/CircleCheckbox.vue'
 import AssetUtils, { RESIZE_RATIO_IMAGE } from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
@@ -46,6 +46,7 @@ import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
+import frameUtils from '@/utils/frameUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -220,8 +221,8 @@ export default Vue.extend({
       }
     },
     replaceImg(photo: IAssetPhoto) {
-      const { getCurrConfig: _config, pageIndex, layerIndex, subLayerIdx } = layerUtils
-      if (_config.type !== LayerType.image) return
+      const { getCurrLayer: layer, getCurrConfig: _config, pageIndex, layerIndex, subLayerIdx } = layerUtils
+      if (_config.type !== LayerType.image && _config.type !== LayerType.frame) return
 
       const url = this.isUploading ? (photo as IAssetPhoto).urls.prev : this.fullSrc
       const type = imageUtils.getSrcType(url)
@@ -239,7 +240,8 @@ export default Vue.extend({
       const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
       const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
-      const config = _config as IImage
+      const isPrimaryLayerFrame = layer.type === LayerType.frame
+      const config = isPrimaryLayerFrame ? ((layer as IFrame).clips.find(c => c.active) ?? (layer as IFrame).clips[0]) : _config as IImage
       const { imgWidth, imgHeight } = config.styles
       const path = `path('M0,0h${imgWidth}v${imgHeight}h${-imgWidth}z`
       const styles = {
@@ -251,8 +253,13 @@ export default Vue.extend({
           }
         } as unknown as IImage, path, config.styles).styles
       }
-      layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+      if (isPrimaryLayerFrame) {
+        frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
+        frameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
+      } else {
+        layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+      }
       this.setCloseMobilePanelFlag(true)
     },
     addImage(photo: IAssetPhoto) {
@@ -293,7 +300,7 @@ export default Vue.extend({
       this.$nextTick(() => {
         const el = document.querySelector('.res-info') as HTMLElement
         const { top, left, height } = (evt.target as HTMLElement).getBoundingClientRect()
-        el.style.transform = `translate3d(${left}px, ${top + height + 5}px,0)`
+        el.style.transform = `translate(${left}px, ${top + height + 5}px)`
         el.focus()
       })
     },
@@ -319,7 +326,7 @@ export default Vue.extend({
   display: inline-flex;
   justify-content: center;
   &.border {
-    border: 1px solid #D9DBE1;
+    border: 1px solid #d9dbe1;
     border-radius: 5px;
     padding: 6px;
     box-sizing: border-box;
@@ -329,7 +336,7 @@ export default Vue.extend({
     top: -11px;
     right: -11px;
     @include size(24px);
-    background: #FFFFFF;
+    background: #ffffff;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 50%;
     display: flex;

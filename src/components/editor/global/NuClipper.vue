@@ -16,7 +16,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    imgControl: Boolean
+    imgControl: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   data() {
     return {
@@ -46,8 +50,8 @@ export default Vue.extend({
           } else {
             // clipPath = layerPath
           }
-          width = `${width}px`
-          height = `${height}px`
+          width = `${width * this.contentScaleRatio}px`
+          height = `${height * this.contentScaleRatio}px`
           break
         case 'shape':
           width = `${this.shapeWidth}px`

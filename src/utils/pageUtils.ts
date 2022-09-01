@@ -212,7 +212,10 @@ class PageUtils {
       const oriPageName = pagesTmp[index].name
       json.name = oriPageName
       pagesTmp[index] = json
-      store.commit('SET_pages', this.newPages(pagesTmp))
+      store.commit('SET_pageToPos', {
+        newPage: json,
+        pos: index
+      })
     }
   }
 
@@ -393,7 +396,6 @@ class PageUtils {
     if ((store.state as any).user.userId === 'backendRendering' || Number.isNaN(resizeRatio)) {
       store.commit('SET_pageScaleRatio', 100)
     } else {
-      if (newRatio < 2) return
       store.commit('SET_pageScaleRatio', newRatio)
     }
 

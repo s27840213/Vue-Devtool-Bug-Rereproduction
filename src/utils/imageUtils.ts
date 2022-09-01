@@ -198,7 +198,7 @@ class ImageUtils {
     }
   }
 
-  getImgSize(srcObj: SrcObj): AxiosPromise<IImageSize> | undefined {
+  getImgSize(srcObj: SrcObj, cache = true): AxiosPromise<IImageSize> | undefined {
     const { type: _type, assetId, userId } = srcObj
     switch (_type) {
       case 'private':
@@ -211,7 +211,7 @@ class ImageUtils {
             token: '',
             type,
             asset_index: assetId as number,
-            cache: true
+            cache
           })
         } else if (typeof userId === 'string' && typeof assetId === 'string') {
           return imageApi.getImgSize({
@@ -219,7 +219,7 @@ class ImageUtils {
             type,
             asset_id: assetId,
             team_id: userId,
-            cache: true
+            cache
           })
         }
         break
@@ -230,7 +230,7 @@ class ImageUtils {
             token: '',
             type: 'background',
             key_id: assetId,
-            cache: true
+            cache
           })
         }
       }
