@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="mobile-panel"
-      :class="{'panel-padding': !noPaddingTheme}"
+      :class="{'panel-padding': !noPaddingTheme, 'not-rounded': insertTheme}"
       :style="panelStyle"
       v-click-outside="vcoConfig()"
       ref="panel")
@@ -28,12 +28,12 @@
           div(v-if="inSelectionState" class="mobile-panel__layer-num")
             span(class="label-sm text-white") {{selectedLayerNum}}
         div(class="mobile-panel__btn mobile-panel__right-btn"
-            :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn}")
+            :class="{'visible-hidden': !showRightBtn, 'click-disabled': !showRightBtn, 'insert': insertTheme}")
           svg-icon(
             class="click-disabled"
             :iconName="rightBtnName"
             :iconColor="'white'"
-            :iconWidth="'20px'")
+            :iconWidth="insertTheme ? '24px' : '20px'")
           div(class="mobile-panel__btn-click-zone"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
@@ -62,7 +62,7 @@ import PanelPhoto from '@/components/editor/panelSidebar/PanelPhoto.vue'
 import PanelObject from '@/components/editor/panelSidebar/PanelObject.vue'
 import ColorPanel from '@/components/editor/ColorSlips.vue'
 import PanelBackground from '@/components/editor/panelSidebar/PanelBackground.vue'
-import PanelText from '@/components/editor/panelSidebar/PanelText.vue'
+import PanelText from '@/components/vivisticker/PanelText.vue'
 import PanelFile from '@/components/editor/panelSidebar/PanelFile.vue'
 import PanelBrand from '@/components/editor/panelMobile/PanelBrand.vue'
 import PanelPage from '@/components/editor/panelSidebar/PanelPage.vue'
@@ -191,7 +191,7 @@ export default Vue.extend({
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list'].includes(this.currActivePanel)
+      return ['brand-list', 'text'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return this.inSelectionState || [
@@ -231,8 +231,11 @@ export default Vue.extend({
         }
       }
     },
+    insertTheme(): boolean {
+      return this.currActivePanel === 'text'
+    },
     showRightBtn(): boolean {
-      return this.whiteTheme
+      return this.whiteTheme || this.insertTheme
     },
     showLeftBtn(): boolean {
       return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
@@ -406,12 +409,11 @@ export default Vue.extend({
       }
     },
     rightBtnName(): string {
-      return 'close-circle'
-      // if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
-      //   return 'check-circle'
-      // } else {
-      //   return 'close-circle'
-      // }
+      if (this.insertTheme) {
+        return 'vivisticker_close'
+      } else {
+        return 'close-circle'
+      }
     },
     leftButtonAction(): (e: PointerEvent) => void {
       if (this.showExtraColorPanel) {
@@ -608,12 +610,17 @@ export default Vue.extend({
   box-sizing: border-box;
   z-index: setZindex(mobile-panel);
   border-radius: 10px 10px 0 0;
-  box-shadow: 0px -2px 5px setColor(gray-4, 0.5);
+  // box-shadow: 0px -2px 5px setColor(gray-4, 0.5);
+  box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
 
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto minmax(0, 1fr);
   justify-items: center;
+
+  &.not-rounded {
+    border-radius: 0;
+  }
 
   &.panel-padding {
     padding: 16px;
@@ -688,5 +695,9 @@ export default Vue.extend({
       width: 24px;
     }
   }
+}
+
+.insert {
+  transform: translate(-6px, -4px);
 }
 </style>

@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="panel-text")
     search-bar(class="panel-text__searchbar"
+      :class="{'no-top': isInEditor}"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
       :defaultKeyword="keywordLabel"
@@ -73,7 +74,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
-      getLayersNum: 'getLayersNum'
+      getLayersNum: 'getLayersNum',
+      isInEditor: 'vivisticker/getIsInEditor'
     }),
     ...mapState('textStock', [
       'categories',
@@ -191,21 +193,27 @@ export default Vue.extend({
     handleLoadMore() {
       this.getMoreContent()
     },
+    async addStandardText() {
+      await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
+        size: 18,
+        color: '#FFFFFF',
+        weight: 'bold'
+      })
+    },
     handleAddText() {
-      // await AssetUtils.addStandardText(config.type.toLowerCase(), config.text, i18n.locale, undefined, undefined)
-      vivistickerUtils.startEditing(
-        'text',
-        async () => {
-          await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
-            size: 18,
-            color: '#FFFFFF',
-            weight: 'bold'
-          })
-          return true
-        },
-        vivistickerUtils.getEmptyCallback()
-      )
-      console.log('start editing standard text')
+      if (this.isInEditor) {
+        this.addStandardText()
+      } else {
+        vivistickerUtils.startEditing(
+          'text',
+          async () => {
+            console.log('start editing standard text')
+            await this.addStandardText()
+            return true
+          },
+          vivistickerUtils.getEmptyCallback()
+        )
+      }
     },
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
@@ -230,6 +238,9 @@ export default Vue.extend({
   &__searchbar {
     margin-top: 24px;
     margin-bottom: 14px;
+    &.no-top {
+      margin-top: 0;
+    }
   }
   &__brand-header {
     margin-top: 10px;

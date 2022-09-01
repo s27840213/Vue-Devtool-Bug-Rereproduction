@@ -131,6 +131,7 @@ export default Vue.extend({
   watch: {
     closeMobilePanelFlag(newVal) {
       if (newVal) {
+        this.setCurrActivePanel('none')
         this.setCurrActiveSubPanel('none')
         this.setCloseMobilePanelFlag(false)
         editorUtils.setShowMobilePanel(false)
