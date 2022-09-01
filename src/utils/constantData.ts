@@ -15,9 +15,10 @@ interface BillingInfoInput {
 export interface IEffectOption {
   key: string
   label: string
-  type: 'range' | 'color'
+  type: 'range' | 'color' | 'select'
   min?: number
   max?: number
+  selectOptions: {value: string, label: string}[]
 }
 export interface IEffect {
   key: string
@@ -58,12 +59,14 @@ class ConstantData {
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [
-          ...[1].map((id) => themeItem(id)), {
-            label: 'FB 粉絲頁封面',
-            url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
-          },
-          ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        content: [{
+          label: 'FB 貼文',
+          url: 'https://blog.vivipic.com/tw/facebook-post/'
+        }, {
+          label: 'FB 粉絲頁封面',
+          url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+        },
+        ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0668'),
@@ -143,8 +146,11 @@ class ConstantData {
         }]
       }],
       us: [{
-        label: i18n.t('NN0671'),
-        url: 'https://blog.vivipic.com/us/'
+        label: 'Features',
+        content: [{
+          label: 'Objects',
+          url: 'https://blog.vivipic.com/us/objects/'
+        }]
       }, {
         label: i18n.t('NN0672'),
         content: [{
@@ -155,7 +161,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/us/us-faq/'
         }]
       }, {
-        label: i18n.t('NN0674'),
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/',
         content: [{
           label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'
@@ -229,7 +236,6 @@ class ConstantData {
     function toOptions(array: string[]) {
       const effectI18nMap = {
         distance: i18n.tc('NN0063'),
-        angleFunky: i18n.tc('NN0064'),
         angle: i18n.tc('NN0064'),
         blur: i18n.tc('NN0065'),
         opacity: i18n.tc('NN0066'),
@@ -238,14 +244,17 @@ class ConstantData {
         stroke: i18n.tc('NN0069'),
         shape: i18n.tc('NN0070'),
         bend: i18n.tc('NN0071'),
-        bStroke: i18n.tc('NN0732'),
-        bColor: i18n.tc('NN0733'),
+        bStroke: i18n.tc('NN0733'),
+        bColor: i18n.tc('NN0734'),
         bRadius: i18n.tc('NN0086'),
-        pStroke: i18n.tc('NN0734'),
+        pStroke: i18n.tc('NN0319'),
         pColor: i18n.tc('NN0735'),
-        height: i18n.tc('NN0736'),
-        yOffset: i18n.tc('NN0737'),
-        distanceInverse: i18n.tc('NN0738')
+        height: i18n.tc('NN0319'),
+        yOffset: i18n.tc('NN0736'),
+        distanceInverse: i18n.tc('NN0737'),
+        textStrokeColor: i18n.tc('NN0739'),
+        shadowStrokeColor: i18n.tc('NN0740'),
+        endpoint: i18n.tc('NN0738')
       }
 
       return array.map((name: string) => {
@@ -255,11 +264,22 @@ class ConstantData {
         } as IEffectOption
 
         option.type = 'range'
+        if (name.toLocaleLowerCase().endsWith('color')) {
+          option.type = 'color'
+        }
         switch (name) {
-          case 'color':
-          case 'bColor':
-          case 'pColor':
-            option.type = 'color'
+          case 'endpoint':
+            option.type = 'select'
+            option.selectOptions = [{
+              value: 'triangle',
+              label: i18n.tc('NN0730')
+            }, {
+              value: 'rounded',
+              label: i18n.tc('NN0731')
+            }, {
+              value: 'square',
+              label: i18n.tc('NN0732')
+            }]
             break
           case 'angle':
             option.max = 180
@@ -268,10 +288,6 @@ class ConstantData {
           case 'bend': // For curve
             option.max = 100
             option.min = -100
-            break
-          case 'angleFunky':
-            option.max = 60
-            option.min = -60
             break
           default:
             /* distance, blur, opacity, spread, stroke,
@@ -312,13 +328,13 @@ class ConstantData {
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
       // }, {
-      //   key: 'funky',
-      //   label: i18n.tc('NN0730'),
-      //   options: toOptions(['distance', 'distanceInverse', 'angleFunky', 'opacity', 'color'])
+      //   key: 'funky3d',
+      //   label: i18n.tc('NN0728'),
+      //   options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
       // }, {
-      //   key: 'boost',
-      //   label: i18n.tc('NN0731'),
-      //   options: toOptions(['distance', 'opacity', 'bColor', 'color'])
+      //   key: 'bold3d',
+      //   label: i18n.tc('NN0729'),
+      //   options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
@@ -368,17 +384,9 @@ class ConstantData {
     //     label: i18n.tc('NN0726'),
     //     options: toOptions(['bRadius', 'opacity', 'color'])
     //   }, {
-    //     key: 'underline-triangle',
+    //     key: 'underline',
     //     label: i18n.tc('NN0727'),
-    //     options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-    //   }, {
-    //     key: 'underline-circle',
-    //     label: i18n.tc('NN0728'),
-    //     options: toOptions(['height', 'yOffset', 'opacity', 'color'])
-    //   }, {
-    //     key: 'underline-square',
-    //     label: i18n.tc('NN0729'),
-    //     options: toOptions(['height', 'yOffset', 'opacity', 'color'])
+    //     options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
     //   }])
     }]
     return categories as IEffectCategory[]

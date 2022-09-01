@@ -230,7 +230,7 @@ class ImageShadowUtils {
     }
 
     let MAXSIZE = 1600
-    if (['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type)) {
+    if (!['unsplash', 'pexels'].includes(config.srcObj.type)) {
       const res = await imageUtils.getImgSize(config.srcObj)
       if (res) {
         MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
@@ -387,7 +387,7 @@ class ImageShadowUtils {
     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
 
     let MAXSIZE = 1600
-    if (['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type)) {
+    if (!['unsplash', 'pexels'].includes(config.srcObj.type)) {
       const res = await imageUtils.getImgSize(config.srcObj)
       if (res) {
         MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
@@ -557,7 +557,7 @@ class ImageShadowUtils {
       }
       setMark('shadow', 2)
       let MAXSIZE = 1600
-      if (['private', 'public', 'logo-private', 'logo-public', 'background'].includes(config.srcObj.type)) {
+      if (!['unsplash', 'pexels'].includes(config.srcObj.type)) {
         const res = await imageUtils.getImgSize(config.srcObj)
         if (res) {
           MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
