@@ -142,8 +142,11 @@ class ViviStickerUtils {
   }
 
   setLoadingFlag(layerIndex: number, subLayerIndex = -1) {
-    this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = true
-    if (!Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
+    const key = this.makeFlagKey(layerIndex, subLayerIndex)
+    if (Object.prototype.hasOwnProperty.call(this.loadingFlags, key)) {
+      this.loadingFlags[key] = true
+    }
+    if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()
     }
   }
