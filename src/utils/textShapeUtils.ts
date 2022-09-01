@@ -56,7 +56,6 @@ class Controller {
       const textHW = TextUtils.getTextHW(layer, -1)
       Object.assign(styles, {
         ...textHW,
-        textShape: {},
         x: x + ((width - textHW.width) / 2),
         y: +bend < 0 ? y + height - textHW.height : y
       })
