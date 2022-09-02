@@ -70,6 +70,7 @@ import stepsUtils from '@/utils/stepsUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
+import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
 
 export default Vue.extend({
@@ -83,7 +84,7 @@ export default Vue.extend({
   data() {
     return {
       openColorPicker: false,
-      currTab: 'shadow',
+      currTab: localStorageUtils.get('textEffectSetting', 'tab') as 'shadow'|'bg'|'shape',
       textEffects: constantData.textEffects(),
       colorTarget: {
         category: '',
@@ -119,8 +120,9 @@ export default Vue.extend({
       colorUtils.setCurrEvent(ColorEventType.textEffect)
       colorUtils.setCurrColor(this.currentStyle.shadow.color as string)
     },
-    switchTab(category: string) {
+    switchTab(category: 'shadow'|'bg'|'shape') {
       this.currTab = category
+      localStorageUtils.set('textEffectSetting', 'tab', category)
     },
     getOptions(effects1d: IEffect[]) {
       return _.find(effects1d, ['key',

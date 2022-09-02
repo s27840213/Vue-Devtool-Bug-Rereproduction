@@ -4,6 +4,7 @@ import CssConverter from '@/utils/cssConverter'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
+import localstorageUtils from '@/utils/localStorageUtils'
 
 class Controller {
   private shadowScale = 0.2
@@ -16,31 +17,31 @@ class Controller {
   getDefaultEffects() {
     return {
       none: {},
-      shadow: {
+      shadow: { // 陰影
         distance: 50,
         angle: 45,
         blur: 20,
         opacity: 60,
         color: ''
-      }, // 陰影
-      lift: {
+      },
+      lift: { // 模糊陰影
         spread: 50
-      }, // 模糊陰影
-      hollow: {
+      },
+      hollow: { // 外框
         stroke: 17,
         color: ''
-      }, // 空心
-      splice: {
+      },
+      splice: { // 外框分離
         distance: 50,
         angle: 45,
         stroke: 17,
         color: ''
-      }, // 出竅
-      echo: {
+      },
+      echo: { // 雙重陰影
         distance: 50,
         angle: 45,
         color: ''
-      }, // 雙重陰影
+      },
       funky3d: {
         distance: 40,
         distanceInverse: 0,
@@ -217,6 +218,7 @@ class Controller {
             before: `
               content: attr(data-text);
               position: absolute;
+              top: 2px;
               left: 0;
               z-index: -1;
               width: 100%;
@@ -231,7 +233,7 @@ class Controller {
     }
   }
 
-  updateTextEffect(pageIndex: number, layerIndex: number, attrs = {}) {
+  updateTextEffect(pageIndex: number, layerIndex: number) {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
     for (const idx in layers) {
@@ -275,8 +277,10 @@ class Controller {
         const textEffect = {} as any
         if (layerTextEffect && (layerTextEffect as any).name === effect) {
           Object.assign(textEffect, layerTextEffect, attrs)
+          localstorageUtils.set('textEffectSetting', effect, textEffect)
         } else {
-          Object.assign(textEffect, defaultAttrs, attrs, { name: effect })
+          const localAttrs = localstorageUtils.get('textEffectSetting', effect)
+          Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
         }
         const mainColor = this.getLayerMainColor(paragraphs)
         const mainFontSize = this.getLayerFontSize(paragraphs)
