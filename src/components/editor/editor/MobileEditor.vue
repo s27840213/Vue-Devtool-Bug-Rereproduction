@@ -10,8 +10,10 @@
           component(:is="inAllPagesMode ? 'all-pages' : 'mobile-editor-view'"
             :currActivePanel="currActivePanel"
             :isConfigPanelOpen="isConfigPanelOpen"
-            :inAllPagesMode="inAllPagesMode")
+            :inAllPagesMode="inAllPagesMode"
+            :showMobilePanel="showMobilePanelAfterTransitoin")
       transition(name="panel-up"
+                @before-enter="beforeEnter"
                 @after-enter="afterEnter"
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
@@ -38,10 +40,8 @@ import HeaderTabs from '@/components/editor/mobile/HeaderTabs.vue'
 import FooterTabs from '@/components/editor/mobile/FooterTabs.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { FunctionPanelType, SidebarPanelType, ColorEventType } from '@/store/types'
-import uploadUtils from '@/utils/uploadUtils'
 import store from '@/store'
 import stepsUtils from '@/utils/stepsUtils'
-import logUtils from '@/utils/logUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
@@ -51,7 +51,6 @@ import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
-import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   name: 'MobileEditor',
@@ -69,7 +68,8 @@ export default Vue.extend({
       isConfigPanelOpen: false,
       isLoading: false,
       currColorEvent: '',
-      ColorEventType
+      ColorEventType,
+      showMobilePanelAfterTransitoin: false
     }
   },
   created() {
@@ -242,6 +242,9 @@ export default Vue.extend({
         })
       }
     },
+    beforeEnter() {
+      this.showMobilePanelAfterTransitoin = true
+    },
     afterEnter() {
       pageUtils.fitPage()
     },
@@ -249,6 +252,9 @@ export default Vue.extend({
       // testUtils.end('addTemp (Nathan, after optimize)')
       this.setCurrActivePanel('none')
       pageUtils.fitPage()
+      setTimeout(() => {
+        this.showMobilePanelAfterTransitoin = false
+      }, 300)
     }
   }
 })
