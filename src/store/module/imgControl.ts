@@ -3,7 +3,6 @@ import { GetterTree, MutationTree } from 'vuex'
 import { IEditorState, ILayerInfo, LayerType } from '../types'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'
-import { functionsIn } from 'lodash'
 import groupUtils from '@/utils/groupUtils'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import frameUtils from '@/utils/frameUtils'
@@ -135,7 +134,12 @@ const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage, _pr
     }
     case LayerType.group: {
       const subLayer = groupUtils.mapLayersToTmp([image], primaryLayer.styles as ICalculatedGroupStyle)[0] as IImage
-      const { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
+      // const { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
+      let { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
+      imgX /= primaryLayer.styles.scale
+      imgY /= primaryLayer.styles.scale
+      imgWidth /= primaryLayer.styles.scale
+      imgHeight /= primaryLayer.styles.scale
       layerUtils.updateLayerStyles(pageIndex, layerIndex, {
         imgX, imgY, imgHeight, imgWidth
       }, subLayerIdx)

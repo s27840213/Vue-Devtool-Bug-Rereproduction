@@ -2,25 +2,6 @@
   div(v-if="isImgControl")
     div(class="dim-background"
       :style="styles")
-    //- template(v-if="primaryLayerType === 'group' || primaryLayerType === 'frame'")
-    //-   div
-    //-     nu-layer(style="opacity: 0.45"
-    //-       :layerIndex="layerIndex"
-    //-       :pageIndex="pageIndex"
-    //-       :imgControl="true"
-    //-       :config="image")
-    //-   div
-    //-     nu-layer(:layerIndex="currSubSelectedInfo.index"
-    //-       :pageIndex="pageIndex"
-    //-       :config="getCurrSubSelectedLayerShown")
-    //-   div(class="page-control" :style="Object.assign(styles('control'))")
-    //-       nu-img-controller(:layerIndex="currSubSelectedInfo.index"
-    //-                         :pageIndex="pageIndex"
-    //-                         :primaryLayerIndex="currSelectedInfo.index"
-    //-                         :primaryLayer="getCurrLayer"
-    //-                         :forRender="true"
-    //-                         :config="getCurrSubSelectedLayerShown")
-    //- template(v-if="primaryLayer.type === 'image'")
     div
       nu-layer(:style="'opacity: 0.45'"
         :layerIndex="layerIndex"
@@ -168,7 +149,6 @@ export default Vue.extend({
 
 .dim-background {
   position: absolute;
-  transform: translateZ(1000px);
   top: 0px;
   left: 0px;
   background: rgba(0, 0, 0, 0.4);

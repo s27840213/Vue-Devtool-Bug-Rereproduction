@@ -496,7 +496,6 @@ export default Vue.extend({
     parentLayerDimension(): number {
       const { width, height } = this.config.parentLayerStyles || {}
       const { imgWidth, imgHeight } = this.config.styles
-      const _scale = 1 / ((this.config as IImage).parentLayerStyles?.scale ?? 1)
       const imgRatio = imgWidth / imgHeight
       const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
       return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
@@ -617,22 +616,25 @@ export default Vue.extend({
         img.src = src
       })
     },
-    handleDimensionUpdate(newVal = 1, oldVal = -1) {
+    handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const imgElement = this.$refs.img as HTMLImageElement
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      const scale = this.config.parentLayerStyles?.scale ?? 1
+      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
 
         imgElement && (imgElement.onload = async () => {
           if (newVal > oldVal) {
-            await this.preLoadImg('next', newVal)
-            this.preLoadImg('pre', newVal)
+            await this.preLoadImg('next', currSize)
+            this.preLoadImg('pre', currSize)
           } else {
-            await this.preLoadImg('pre', newVal)
-            this.preLoadImg('next', newVal)
+            await this.preLoadImg('pre', currSize)
+            this.preLoadImg('next', currSize)
           }
         })
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, newVal))
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
