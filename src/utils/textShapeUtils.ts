@@ -79,6 +79,13 @@ class Controller {
     return styles.textShape?.name === 'curve'
   }
 
+  resetCurrTextEffect() {
+    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
+    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
+    const effectName = targetLayer.styles.textShape.name
+    this.setTextShape(effectName, this.shapes[effectName])
+  }
+
   setTextShape(shape: string, attrs?: any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)

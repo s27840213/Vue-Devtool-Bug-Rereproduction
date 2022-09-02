@@ -54,6 +54,10 @@
               div(class="text-effect-setting-options__field--btn"
                 :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
                 @click="handleColorModal(currCategory.name, option.key)")
+          div(class="text-effect-setting-options__field")
+            span
+            span(class="text-effect-setting-options__field--reset"
+                @click="resetTextEffect()") Reset
 </template>
 
 <script lang="ts">
@@ -139,7 +143,8 @@ export default Vue.extend({
 
       switch (this.currTab) {
         case 'shadow':
-          textEffectUtils.setTextEffect(effectName, Object.assign({}, effect, { ver: 'v1' }))
+          textEffectUtils.setTextEffect(effectName,
+            Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
           textBgUtils.setTextBg(effectName, Object.assign({}, effect))
@@ -156,6 +161,11 @@ export default Vue.extend({
     onEffectClick(effectName: string): void {
       this.setEffect({ effectName })
       this.recordChange()
+    },
+    resetTextEffect() {
+      const target = this.currTab === 'shadow' ? textEffectUtils
+        : this.currTab === 'shape' ? textShapeUtils : textBgUtils
+      target.resetCurrTextEffect()
     },
     handleRangeInput(event: Event, option: IEffectOption) {
       const name = (event.target as HTMLInputElement).name
@@ -256,6 +266,10 @@ export default Vue.extend({
     }
     &--range {
       grid-column: 1/3;
+    }
+    &--reset {
+      color: setColor(blue-1);
+      cursor: pointer;
     }
   }
 }
