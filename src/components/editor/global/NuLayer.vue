@@ -14,7 +14,8 @@
             :config="config"
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            v-bind="$attrs")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"

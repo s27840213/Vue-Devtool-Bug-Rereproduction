@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="nu-image"
+  div(v-if="!isImgControl" class="nu-image"
     :id="`nu-image-${config.id}`"
     :style="containerStyles"
     draggable="false")
@@ -96,14 +96,16 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
-    }
+    },
+    /** This prop is used to present if this image-component is
+     *  only used for rendering as image controlling */
+    forRender: Boolean
   },
   async created() {
     this.handleInitLoad()
     const isPrimaryLayerFrame = layerUtils.getCurrLayer.type === LayerType.frame
     if (!this.config.isFrameImg && !this.isBgImgControl && !this.config.isFrame && !this.config.forRender && !isPrimaryLayerFrame) {
       this.handleShadowInit()
-
       if (typeof this.config.styles.shadow.isTransparent === 'undefined') {
         const img = new Image()
         img.crossOrigin = 'anonymous'
@@ -230,7 +232,13 @@ export default Vue.extend({
         })
       }
     },
-    'config.imgControl'() {
+    'config.imgControl'(val) {
+      if (val) {
+        this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex, subLayerIdx: this.subLayerIndex })
+      } else {
+        this.setImgConfig(undefined)
+        this.handleDimensionUpdate()
+      }
       if (this.forRender) {
         return
       }
@@ -279,6 +287,9 @@ export default Vue.extend({
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    isImgControl(): boolean {
+      return this.config.imgControl
+    },
     layerInfo(): ILayerInfo {
       return {
         pageIndex: this.pageIndex,
@@ -493,11 +504,6 @@ export default Vue.extend({
       const primaryLayer = layerUtils.getLayer(this.pageIndex, this.layerIndex)
       return primaryLayer.type
     },
-    /** This prop is used to present if this image-component is
-     *  only used for rendering as image controlling */
-    forRender(): boolean {
-      return (this.config.forRender || this.imgControl) ?? false
-    },
     inProcess(): boolean {
       return this.config.inProcess
     },
@@ -513,7 +519,6 @@ export default Vue.extend({
     parentLayerDimension(): number {
       const { width, height } = this.config.parentLayerStyles || {}
       const { imgWidth, imgHeight } = this.config.styles
-      const _scale = 1 / ((this.config as IImage).parentLayerStyles?.scale ?? 1)
       const imgRatio = imgWidth / imgHeight
       const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
       return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
@@ -538,7 +543,8 @@ export default Vue.extend({
     ...mapActions('brandkit', ['updateLogos']),
     ...mapMutations({
       UPDATE_shadowEffect: 'UPDATE_shadowEffect',
-      setIsProcessing: 'bgRemove/SET_isProcessing'
+      setIsProcessing: 'bgRemove/SET_isProcessing',
+      setImgConfig: 'imgControl/SET_CONFIG'
     }),
     onError() {
       this.isOnError = true
@@ -633,22 +639,25 @@ export default Vue.extend({
         img.src = src
       })
     },
-    handleDimensionUpdate(newVal: number, oldVal: number) {
+    handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const imgElement = this.$refs.img as HTMLImageElement
-      if (!this.isOnError && this.config.previewSrc === undefined && imgElement) {
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      const scale = this.config.parentLayerStyles?.scale ?? 1
+      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
 
-        imgElement.onload = async () => {
+        imgElement && (imgElement.onload = async () => {
           if (newVal > oldVal) {
-            await this.preLoadImg('next', newVal)
-            this.preLoadImg('pre', newVal)
+            await this.preLoadImg('next', currSize)
+            this.preLoadImg('pre', currSize)
           } else {
-            await this.preLoadImg('pre', newVal)
-            this.preLoadImg('next', newVal)
+            await this.preLoadImg('pre', currSize)
+            this.preLoadImg('next', currSize)
           }
-        }
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, newVal))
+        })
+        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
@@ -709,6 +718,7 @@ export default Vue.extend({
       }
     },
     handleShadowInit() {
+      if (this.forRender) return
       const { shadow } = this
       switch (shadow.srcObj.type) {
         case 'shadow-private':
@@ -1089,8 +1099,4 @@ canvas {
   width: 100%;
   height: 100%;
 }
-
-// .layer-flip {
-//   transition: transform 0.2s linear;
-// }
 </style>

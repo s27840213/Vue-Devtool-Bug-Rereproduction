@@ -1,3 +1,4 @@
+import store from '@/store'
 import { VNode } from 'vue'
 import { DirectiveBinding } from 'vue/types/options'
 
@@ -7,7 +8,10 @@ const start = (callback: (e: PointerEvent) => void) => {
   return (e: PointerEvent) => {
     if (pressTimer === -1) {
       pressTimer = setTimeout((e: PointerEvent) => {
-        callback(e)
+        const isImgControl = store.getters['imgControl/isImgControl']
+        if (!isImgControl) {
+          callback(e)
+        }
         pressTimer = -1
       }, 800)
     }
@@ -15,6 +19,7 @@ const start = (callback: (e: PointerEvent) => void) => {
 }
 
 const cancel = (e: PointerEvent) => {
+  console.log('cancel')
   if (e.type === 'pointermove' && e.movementX === 0 && e.movementY === 0) {
     return
   }

@@ -66,7 +66,7 @@ export default Vue.extend({
       return
     }
     const shadow = (this.config as IImage).styles.shadow
-    if (shadow.currentEffect !== ShadowEffectType.none) {
+    if (shadow && shadow.currentEffect !== ShadowEffectType.none) {
       if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
         imageShadowUtils.setProcessId({
           pageId: pageUtils.currFocusPage.id,
@@ -83,17 +83,18 @@ export default Vue.extend({
     }
   },
   destroyed() {
-    const shadow = (this.config as IImage).styles.shadow
     for (let i = 0; i < this.getPage(this.pageIndex).layers.length; i++) {
       if (LayerUtils.getLayer(this.pageIndex, i).type === 'image') {
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
-    if (!this.forRender) {
-      if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
-        stepsUtils.record()
-      }
-    }
+    // const shadow = (this.config as IImage).styles.shadow
+    // if (!this.forRender) {
+    //   if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
+    //     stepsUtils.record()
+    //   }
+    // }
+    this.setImgConfig(undefined)
   },
   computed: {
     ...mapGetters({
@@ -186,6 +187,10 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex'
+    }),
+    ...mapMutations({
+      setImgConfig: 'imgControl/SET_CONFIG',
+      updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
     styles() {
       const zindex = (this.layerIndex + 1) * 1000
@@ -320,7 +325,11 @@ export default Vue.extend({
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
         imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height * reLayerScale - this.getImgHeight
       }
-      this.updateLayerStyles({
+      // this.updateLayerStyles({
+      //   imgX: imgPos.x,
+      //   imgY: imgPos.y
+      // })
+      this.updateConfig({
         imgX: imgPos.x,
         imgY: imgPos.y
       })
@@ -463,7 +472,13 @@ export default Vue.extend({
         width = offsetSize.width + initWidth
       }
 
-      this.updateLayerStyles({
+      // this.updateLayerStyles({
+      //   imgWidth: width,
+      //   imgHeight: height,
+      //   imgX: imgPos.x,
+      //   imgY: imgPos.y
+      // })
+      this.updateConfig({
         imgWidth: width,
         imgHeight: height,
         imgX: imgPos.x,

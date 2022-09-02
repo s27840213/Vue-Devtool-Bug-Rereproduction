@@ -312,6 +312,7 @@ export default Vue.extend({
   margin: 0 auto;
   background-color: setColor(white);
   box-shadow: 0px 10px 25px 0px rgba(0, 0, 0, 0.1);
+  cursor: default;
   &-col {
     display: flex;
     flex-direction: column;
