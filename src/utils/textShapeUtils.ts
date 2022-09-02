@@ -1,4 +1,4 @@
-import TextEffectUtils from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
 import { ILayer, ISpan, IText } from '@/interfaces/layer'
 import store from '@/store'
@@ -25,7 +25,7 @@ class Controller {
   }
 
   getSpecSubTextLayer(index: number): IText {
-    return TextEffectUtils.getSpecSubTextLayer(index)
+    return textEffectUtils.getSpecSubTextLayer(index)
   }
 
   getRadiusByBend(bend: number) {
@@ -80,9 +80,7 @@ class Controller {
   }
 
   resetCurrTextEffect() {
-    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const effectName = targetLayer.styles.textShape.name
+    const effectName = textEffectUtils.getCurrentLayer().styles.textEffect.name
     this.setTextShape(effectName, this.shapes[effectName])
   }
 

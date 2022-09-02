@@ -264,9 +264,7 @@ class Controller {
   }
 
   resetCurrTextEffect() {
-    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const effectName = targetLayer.styles.textEffect.name
+    const effectName = this.getCurrentLayer().styles.textEffect.name
     this.setTextEffect(effectName, this.effects[effectName])
   }
 

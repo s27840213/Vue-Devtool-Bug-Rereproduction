@@ -178,9 +178,7 @@ class TextBg {
   }
 
   resetCurrTextEffect() {
-    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const effectName = targetLayer.styles.textBg.name
+    const effectName = textEffectUtils.getCurrentLayer().styles.textEffect.name
     this.setTextBg(effectName, this.effects[effectName])
   }
 
