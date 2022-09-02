@@ -5,10 +5,15 @@ import { IMarker } from '@/interfaces/shape'
 import AssetUtils from './assetUtils'
 import { IAsset } from '@/interfaces/module'
 import layerUtils from './layerUtils'
-import { LayerType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import mappingUtils from './mappingUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from './pageUtils'
+import imageUtils from './imageUtils'
+import groupUtils from './groupUtils'
+import zindexUtils from './zindexUtils'
+import stepsUtils from './stepsUtils'
+import layerFactary from './layerFactary'
 
 class ShapeUtils {
   get hasMultiColors() {
@@ -189,6 +194,48 @@ class ShapeUtils {
       })
     }
     return svgOut
+  }
+
+  /**
+   *
+   * Check if the fetched json data is currently converted from svg to img
+   * If so, call svgImgHandler to handle the transforming
+   */
+  isSvgImg(jsonData: any): boolean {
+    if (jsonData.is_img) {
+      return true
+    }
+    return false
+  }
+
+  async svgImgHandler(layerInfo: ILayerInfo, config: IShape) {
+    const { designId, styles: { x, y, width, height, horizontalFlip, verticalFlip, rotate, opacity } } = config
+    const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    // let layerScale = store.state.pageScaleRatio
+    let primaryLayer
+    if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
+      primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    }
+    const srcObj = {
+      type: 'svg',
+      userId: '',
+      assetId: designId
+    }
+    const image = layerFactary.newImage({
+      srcObj,
+      styles: { x, y, width, height, horizontalFlip, verticalFlip, rotate, opacity },
+      parentLayerStyles: primaryLayer?.styles
+    })
+
+    if (primaryLayer) {
+      layerUtils.deleteSubLayer(pageIndex, layerIndex, subLayerIdx || -1)
+      layerUtils.addSubLayer(pageIndex, layerIndex, subLayerIdx || -1, image)
+    } else {
+      layerUtils.deleteLayer(layerIndex)
+      layerUtils.addLayersToPos(pageIndex, [image], layerIndex)
+      zindexUtils.reassignZindex(pageIndex)
+    }
+    stepsUtils.record()
   }
 
   async fetchSvg(config: IShape): Promise<IShape> {
