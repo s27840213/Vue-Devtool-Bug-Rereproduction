@@ -4,7 +4,8 @@
       header-tabs(@switchTab="switchTab"
         :currTab="currActivePanel"
         :inAllPagesMode="false")
-      div(class="vivisticker__content")
+      div(class="vivisticker__content"
+          @pointerdown.prevent="outerClick")
         vvstk-editor(v-show="isInEditor")
         main-menu(v-show="!isInEditor")
       transition(name="panel-up")
@@ -35,6 +36,7 @@ import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import textUtils from '@/utils/textUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   name: 'ViviSticker',
@@ -174,6 +176,11 @@ export default Vue.extend({
     },
     switchMainTab(panelType: string) {
       this.setCurrActiveTab(panelType)
+    },
+    outerClick() {
+      if (this.isInEditor) {
+        vivistickerUtils.deselect()
+      }
     }
   }
 })

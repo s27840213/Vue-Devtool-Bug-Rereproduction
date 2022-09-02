@@ -137,7 +137,8 @@ export default Vue.extend({
       isProcessShadow: 'shadow/isProcessing',
       isUploadImgShadow: 'shadow/isUploading',
       isHandleShadow: 'shadow/isHandling',
-      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode'
+      inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
+      controllerHidden: 'vivisticker/getControllerHidden'
     }),
     isTouchDevice(): boolean {
       return GeneralUtils.isTouchDevice()
@@ -157,11 +158,14 @@ export default Vue.extend({
     isActive(): boolean {
       return this.config.active
     },
+    isControllerShown(): boolean {
+      return this.isActive && !this.controllerHidden
+    },
     isLocked(): boolean {
       return this.config.locked
     },
     isTextEditing(): boolean {
-      return !this.isControlling && this.isActive
+      return !this.isControlling && this.isControllerShown
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -264,7 +268,7 @@ export default Vue.extend({
     frameClipStyles() {
       return {
         fill: '#00000000',
-        stroke: this.isActive ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
+        stroke: this.isControllerShown ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
         strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryScale * (100 / this.scaleRatio)}px`
       }
     },
@@ -319,7 +323,7 @@ export default Vue.extend({
       const body = this.$refs.body as HTMLElement
       // body.addEventListener('touchstart', this.disableTouchEvent)
       if (GeneralUtils.isTouchDevice()) {
-        if (!this.dblTapFlag && this.isActive && this.config.type === 'image') {
+        if (!this.dblTapFlag && this.isControllerShown && this.config.type === 'image') {
           const touchtime = Date.now()
           const interval = 500
           const doubleTap = (e: PointerEvent) => {
@@ -370,8 +374,8 @@ export default Vue.extend({
       if (this.getLayerType === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x
         this.posDiff.y = this.primaryLayer.styles.y
-        if (this.isActive && this.contentEditable) return
-        else if (!this.isActive) {
+        if (this.isControllerShown && this.contentEditable) return
+        else if (!this.isControllerShown) {
           this.isControlling = true
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
           eventUtils.addPointerEvent('pointerup', this.onMouseup)
@@ -461,7 +465,7 @@ export default Vue.extend({
     },
     outlineStyles() {
       const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
-      if (this.isActive && LayerUtils.getCurrLayer.type !== 'frame') {
+      if (this.isControllerShown && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
           return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px dashed ${outlineColor}`
         } else {

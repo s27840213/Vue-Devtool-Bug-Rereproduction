@@ -9,11 +9,19 @@ import uploadUtils from './uploadUtils'
 import eventUtils, { PanelEvent } from './eventUtils'
 import { ColorEventType, LayerType } from '@/store/types'
 import { IGroup, ILayer } from '@/interfaces/layer'
+import editorUtils from './editorUtils'
+import imageUtils from './imageUtils'
+import controlUtils from './controlUtils'
+import layerUtils from './layerUtils'
 
 class ViviStickerUtils {
   inDebugMode = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
+
+  get editorType(): string {
+    return store.getters['vivisticker/getEditorType']
+  }
 
   sendToIOS(messageType: string, message: any) {
     try {
@@ -114,6 +122,7 @@ class ViviStickerUtils {
   endEditing() {
     groupUtils.deselect()
     pageUtils.setPages()
+    this.showController()
     store.commit('vivisticker/SET_editorType', 'none')
   }
 
@@ -148,6 +157,40 @@ class ViviStickerUtils {
     }
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()
+    }
+  }
+
+  hideController() {
+    console.log('hi')
+    store.commit('vivisticker/SET_controllerHidden', true)
+  }
+
+  showController() {
+    store.commit('vivisticker/SET_controllerHidden', false)
+  }
+
+  deselect() {
+    if (this.editorType === 'text') {
+      groupUtils.deselect()
+      editorUtils.setInMultiSelectionMode(false)
+      store.commit('SET_currActivePageIndex', 0)
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault(false)
+      }
+    } else {
+      const { getCurrLayer: currLayer, pageIndex, layerIndex, subLayerIdx } = layerUtils
+      if (currLayer.type === 'text') {
+        layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false })
+      } else if (['group', 'tmp'].includes(currLayer.type) && subLayerIdx !== -1) {
+        const subLayer = (currLayer as IGroup).layers[subLayerIdx]
+        if (subLayer.type === 'text') {
+          layerUtils.updateLayerProps(pageIndex, layerIndex, { contentEditable: false }, subLayerIdx)
+        }
+      }
+      if (imageUtils.isImgControl()) {
+        imageUtils.setImgControlDefault(false)
+      }
+      this.hideController()
     }
   }
 }

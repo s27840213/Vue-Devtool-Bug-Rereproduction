@@ -10,6 +10,7 @@ div(class="overflow-container"
         @dragenter.prevent
         @contextmenu.prevent
         @click.right.stop="onRightClick"
+        @mousedown.left.stop="pageClickHandler()"
         @dblclick="pageDblClickHandler()"
         @mouseover="togglePageHighlighter(true)"
         @mouseout="togglePageHighlighter(false)")
@@ -47,6 +48,8 @@ import textUtils from '@/utils/textUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import queueUtils from '@/utils/queueUtils'
+import vivisticker from '@/store/module/vivisticker'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   components: { NuBgImage },
@@ -150,16 +153,8 @@ export default Vue.extend({
     togglePageHighlighter(isHover: boolean): void {
       this.pageIsHover = isHover
     },
-    pageClickHandler(e: PointerEvent): void {
-      // groupUtils.deselect()
-      // // imageUtils.setImgControlDefault(false)
-      // editorUtils.setInMultiSelectionMode(false)
-      // this.setCurrActivePageIndex(this.pageIndex)
-      // const sel = window.getSelection()
-      // if (sel) {
-      //   sel.empty()
-      //   sel.removeAllRanges()
-      // }
+    pageClickHandler(): void {
+      vivistickerUtils.deselect()
     },
     onRightClick(event: MouseEvent) {
       if (generalUtils.isTouchDevice()) {

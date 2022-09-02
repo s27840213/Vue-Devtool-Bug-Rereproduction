@@ -8,7 +8,8 @@ interface IViviStickerState {
   shareItem: IAsset | undefined,
   shareColor: string,
   editorBgIndex: number,
-  editorType: string
+  editorType: string,
+  controllerHidden: boolean
 }
 
 const EDITOR_BGS = [
@@ -26,7 +27,8 @@ const getDefaultState = (): IViviStickerState => ({
   shareItem: undefined,
   shareColor: '',
   editorBgIndex: 0,
-  editorType: 'none'
+  editorType: 'none',
+  controllerHidden: false
 })
 
 const state = getDefaultState()
@@ -54,6 +56,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getEditorType(state: IViviStickerState): string {
     return state.editorType
+  },
+  getControllerHidden(state: IViviStickerState): boolean {
+    return state.controllerHidden
   }
 }
 
@@ -75,6 +80,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_editorType(state: IViviStickerState, editorType: string) {
     state.editorType = editorType
+  },
+  SET_controllerHidden(state: IViviStickerState, controllerHidden: boolean) {
+    state.controllerHidden = controllerHidden
   },
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length
