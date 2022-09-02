@@ -8,10 +8,6 @@ const start = (callback: (e: PointerEvent) => void) => {
   return (e: PointerEvent) => {
     if (pressTimer === -1) {
       pressTimer = setTimeout((e: PointerEvent) => {
-        const isImgControl = store.getters['imgControl/isImgControl']
-        if (!isImgControl) {
-          callback(e)
-        }
         pressTimer = -1
       }, 800)
     }
@@ -55,6 +51,7 @@ const longpress = {
     (el as any).$value = binding.value
   },
   unbind(el: HTMLElement) {
+    clearTimeout(pressTimer)
     el.removeEventListener('pointerdown', (el as any).handler)
     el.removeEventListener('contextmenu', preventDefault)
     el.removeEventListener('pointerout', cancel)

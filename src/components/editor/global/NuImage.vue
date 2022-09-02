@@ -301,7 +301,7 @@ export default Vue.extend({
       return this.primaryLayerType === 'frame'
     },
     _contentScaleRatio(): number {
-      return this.config.isFrameImg || !this.isInFrame || this.imgControl ? this.contentScaleRatio : 1
+      return this.config.isFrameImg || !this.isInFrame || this.imgControl || this.forRender ? this.contentScaleRatio : 1
     },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle

@@ -1966,7 +1966,6 @@ export default Vue.extend({
       })
     },
     onPress(event: AnyTouchEvent) {
-      console.log('on press')
       if (!this.isActive) {
         GroupUtils.deselect()
         GroupUtils.select(this.pageIndex, [this.layerIndex])
