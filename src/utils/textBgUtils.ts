@@ -177,7 +177,7 @@ class TextBg {
     } else return {}
   }
 
-  setTextBg(effect: string, attrs?: Record<string, string | number>): void {
+  setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]

@@ -12,7 +12,7 @@
           svg-icon(v-for="effect in effects1d"
             :key="`${currCategory.name}-${effect.key}`"
             :iconName="`text-${currCategory.name}-${effect.key}`"
-            @click.native="onEffectClick(currCategory.name, effect.key)"
+            @click.native="onEffectClick(effect.key)"
             class="text-effect-setting__effect pointer"
             :class="{'text-effect-setting__effect--selected': currentStyle[currCategory.name].name === effect.key }"
             iconWidth="60px"
@@ -36,7 +36,7 @@
                 :name="option.key"
                 :max="option.max"
                 :min="option.min"
-                @change="(e)=>handleRangeInput(e, currCategory.name, option)"
+                @change="(e)=>handleRangeInput(e, option)"
                 @blur="recordChange"
                 type="number")
               input(class="text-effect-setting-options__field--range input__slider--range"
@@ -44,9 +44,9 @@
                 :name="option.key"
                 :max="option.max"
                 :min="option.min"
-                @input="(e)=>handleRangeInput(e, currCategory.name, option)"
-                @mousedown="handleRangeMousedown(currCategory.name)"
-                @mouseup="handleRangeMouseup(currCategory.name)"
+                @input="(e)=>handleRangeInput(e, option)"
+                @mousedown="handleRangeMousedown()"
+                @mouseup="handleRangeMouseup()"
                 v-ratio-change
                 type="range")
             //- Effect type color
@@ -126,70 +126,60 @@ export default Vue.extend({
     },
     getOptions(effects1d: IEffect[]) {
       return _.find(effects1d, ['key',
-        this.currentStyle[this.currCategory.name as 'shadow'|'bg'|'shape'].name])?.options
+        this.currentStyle[this.currTab].name])?.options
     },
-    onEffectClick(category: string, effectName: string): void {
-      switch (category) {
+    setEffect(options:{
+      effectName?: string,
+      effect?: Record<string, string|number|boolean>
+    }) {
+      let { effectName, effect } = options
+      if (!effectName) {
+        effectName = this.currentStyle[this.currTab].name || 'none'
+      }
+
+      switch (this.currTab) {
         case 'shadow':
-          textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
+          textEffectUtils.setTextEffect(effectName, Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
-          textBgUtils.setTextBg(effectName)
+          textBgUtils.setTextBg(effectName, Object.assign({}, effect))
           textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
           TextPropUtils.updateTextPropsState()
           break
         case 'shape':
-          textShapeUtils.setTextShape(effectName)
+          textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
           TextPropUtils.updateTextPropsState()
           textBgUtils.setTextBg('none') // Bg & shape are exclusive.
           break
       }
+    },
+    onEffectClick(effectName: string): void {
+      this.setEffect({ effectName })
       this.recordChange()
     },
-    getEffectName(category: 'shadow' | 'bg' | 'shape') {
-      return this.currentStyle[category].name || 'none'
-    },
-    handleRangeInput(event: Event, category: string, option: IEffectOption) {
+    handleRangeInput(event: Event, option: IEffectOption) {
       const name = (event.target as HTMLInputElement).name
       const value = parseInt((event.target as HTMLInputElement).value)
       const [max, min] = [option.max as number, option.min as number]
       const newVal = {
         [name]: value > max ? max : (value < min ? min : value)
       }
-
-      switch (category) {
-        case 'shadow':
-          textEffectUtils.setTextEffect(this.getEffectName('shadow'), newVal)
-          break
-        case 'bg':
-          textBgUtils.setTextBg(this.getEffectName('bg'), newVal)
-          break
-        case 'shape':
-          textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
-          break
-      }
+      this.setEffect({ effect: newVal })
     },
-    handleRangeMouseup(category: string) {
-      if (category === 'shape') {
-        textShapeUtils.setTextShape(this.getEffectName('shape'), { focus: false })
+    handleRangeMouseup() {
+      if (this.currTab === 'shape') {
+        this.setEffect({ effect: { focus: false } })
       }
       this.recordChange()
     },
-    handleRangeMousedown(category: string) {
-      if (category === 'shape') {
-        textShapeUtils.setTextShape(this.getEffectName('shape'), { focus: true })
+    handleRangeMousedown() {
+      if (this.currTab === 'shape') {
+        this.setEffect({ effect: { focus: true } })
       }
     },
     handleColorUpdate(color: string): void {
       const key = this.colorTarget.key
-      switch (this.colorTarget.category) {
-        case 'shadow':
-          textEffectUtils.setTextEffect(this.getEffectName('shadow'), { [key]: color })
-          break
-        case 'bg':
-          textBgUtils.setTextBg(this.getEffectName('bg'), { [key]: color })
-          break
-      }
+      this.setEffect({ effect: { [key]: color } })
     },
     recordChange() {
       stepsUtils.record()
@@ -200,7 +190,6 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .text-effect-setting {
-  font-size: 14px;
   &-tabs {
     @include caption-MD;
     display: grid;
@@ -236,6 +225,7 @@ export default Vue.extend({
     }
   }
   &-options {
+    @include body-SM;
     display: grid;
     gap: 10px;
     width: 100%;
@@ -246,17 +236,18 @@ export default Vue.extend({
   &-options__field {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    justify-items: start;
+    justify-items: end;
     row-gap: 10px;
+    &--name {
+      justify-self: start;
+    }
     &--options {
-      justify-self: end;
       box-sizing: border-box;
       height: 25px;
       padding: 0;
     }
     &--number,
     &--btn {
-      justify-self: end;
       box-sizing: border-box;
       width: 30px;
       height: 25px;
