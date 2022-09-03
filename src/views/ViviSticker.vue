@@ -1,9 +1,7 @@
 <template lang="pug">
   div(class="vivisticker")
     div(class="vivisticker__top")
-      header-tabs(@switchTab="switchTab"
-        :currTab="currActivePanel"
-        :inAllPagesMode="false")
+      header-tabs(:style="headerStyles()")
       div(class="vivisticker__content"
           @pointerdown.prevent="outerClick")
         vvstk-editor(v-show="isInEditor")
@@ -49,7 +47,9 @@ export default Vue.extend({
   },
   data() {
     return {
-      currColorEvent: ''
+      currColorEvent: '',
+      defaultWindowHeight: window.innerHeight,
+      headerOffset: 0
     }
   },
   created() {
@@ -84,6 +84,10 @@ export default Vue.extend({
       }
       lastTouchEnd = now
     }, false)
+    window.visualViewport.addEventListener('resize', this.handleResize)
+  },
+  destroyed() {
+    window.visualViewport.removeEventListener('resize', this.handleResize)
   },
   computed: {
     ...mapState('mobileEditor', {
@@ -128,6 +132,9 @@ export default Vue.extend({
           this.subLayerType === 'text' && !this.isLocked
         ) : (this.groupTypes.has('text') && !this.isLocked)
       ) : (this.currSelectedInfo.types.has('text'))
+    },
+    contentEditable(): boolean {
+      return this.currSelectedInfo.layers[0]?.contentEditable
     }
   },
   watch: {
@@ -153,6 +160,11 @@ export default Vue.extend({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
       setCurrActiveTab: 'vivisticker/SET_currActiveTab'
     }),
+    headerStyles() {
+      return {
+        transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`
+      }
+    },
     handleSwitchTab(panelType: string, props?: IFooterTabProps) {
       if (this.isInEditor) {
         this.switchTab(panelType, props)
@@ -181,6 +193,9 @@ export default Vue.extend({
       if (this.isInEditor) {
         vivistickerUtils.deselect()
       }
+    },
+    handleResize() {
+      this.headerOffset = this.defaultWindowHeight - window.innerHeight - 1
     }
   }
 })
@@ -216,5 +231,9 @@ export default Vue.extend({
     overflow: hidden;
     z-index: setZindex("editor-view");
   }
+}
+
+.header-bar {
+  transition: 0.2s ease;
 }
 </style>
