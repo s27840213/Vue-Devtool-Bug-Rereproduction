@@ -127,6 +127,8 @@ export default Vue.extend({
             this.pageTranslate = { x: -x, y: -y }
             this.pageScale = this.fitPageToScreen(width, height)
             pageUtils.setPages([page])
+            console.log(this.pageScale, page.width, page.height)
+            pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
             this.usingJSON = true
             break
           }
@@ -155,7 +157,7 @@ export default Vue.extend({
     },
     pageTransforms() {
       return {
-        transform: `translate(${this.pageScale * this.pageTranslate.x}px, ${this.pageScale * this.pageTranslate.y}px) scale(${this.pageScale})`
+        transform: `translate(${this.pageScale * this.pageTranslate.x}px, ${this.pageScale * this.pageTranslate.y}px)`
       }
     },
     clearBuffers() {

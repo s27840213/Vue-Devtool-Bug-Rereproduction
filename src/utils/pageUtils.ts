@@ -143,13 +143,11 @@ class PageUtils {
   }
 
   resizePage(format: { width: number, height: number }) {
+    console.log(format.width, format.height)
     resizeUtils.resizePage(pageUtils.currFocusPageIndex, this.getPage(pageUtils.currFocusPageIndex), format)
     this.updatePageProps({
-      pageIndex: pageUtils.currFocusPageIndex,
-      props: {
-        width: format.width,
-        height: format.height
-      }
+      width: format.width,
+      height: format.height
     })
   }
 
