@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
-    component(is="style") {{extraCss}}
-    div(ref="text" class="nu-text__body" :style="bodyStyles()" :data-id="uid")
+    //- component(is="style") {{extraCss}}
+    div(ref="text" class="nu-text__body" :style="bodyStyles()")
       nu-curve-text(v-if="isCurveText"
         ref="curveText"
         :config="config"
@@ -12,13 +12,31 @@
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
         :style="styles(p.styles)")
-        template(v-for="(span, sIndex) in p.spans")
-          span(class="nu-text__span"
-            :data-sindex="sIndex"
-            :key="span.id"
-            :data-text="span.text"
-            :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
-            br(v-if="!span.text && p.spans.length === 1")
+        span(v-for="(span, sIndex) in p.spans"
+          class="nu-text__span"
+          :data-sindex="sIndex"
+          :key="span.id"
+          :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
+          br(v-if="!span.text && p.spans.length === 1")
+    //- Duplicate of nu-text__body, used to implement text shadow bold3d.
+    div(v-if="config.styles.textEffect.name === 'bold3d'" class="nu-text__body"
+        :style="Object.assign(bodyStyles(), duplicatedBody)")
+      nu-curve-text(v-if="isCurveText"
+        class="duplicatedP"
+        :config="config"
+        :layerIndex="layerIndex"
+        :pageIndex="pageIndex"
+        :subLayerIndex="subLayerIndex")
+      p(v-else
+        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
+        :key="p.id"
+        :style="styles(p.styles)")
+        span(v-for="(span, sIndex) in p.spans"
+          class="nu-text__span"
+          :data-sindex="sIndex"
+          :key="span.id"
+          :style="Object.assign(styles(span.styles), spanEffect, duplicatedSpan)") {{ span.text }}
+          br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans"
         class="nu-text__span"
@@ -178,18 +196,37 @@ export default Vue.extend({
       }
       return textBgUtils.convertTextSpanEffect(this.config.styles)
     },
-    // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
-    extraCss(): string {
-      const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
-      return `
-        .nu-text__body[data-id="${this.uid}"] span::before {
-          ${rules?.before ?? ''}
-        }
-        .nu-text__body[data-id="${this.uid}"] span::after {
-          ${rules?.after ?? ''}
-        }
-      `
+    duplicatedBody() {
+      const bold3d = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      return {
+        position: 'absolute',
+        top: '0px',
+        left: bold3d.shadowLeft,
+        zIndex: '-1',
+        width: '100%',
+        opacity: 1,
+        webkitTextStroke: bold3d.shwdowWebkitTextStroke,
+        '--bold3d-color': bold3d.shadowColor
+      }
+    },
+    duplicatedSpan() {
+      return {
+        color: 'var(--bold3d-color)'
+      }
     }
+    // },
+    // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
+    // extraCss(): string {
+    //   const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
+    //   return `
+    //     .nu-text__body[data-id="${this.uid}"] span::before {
+    //       ${rules?.before ?? ''}
+    //     }
+    //     .nu-text__body[data-id="${this.uid}"] span::after {
+    //       ${rules?.after ?? ''}
+    //     }
+    //   `
+    // }
   },
   watch: {
     'config.paragraphs': {
@@ -207,20 +244,20 @@ export default Vue.extend({
       return tiptapUtils.textStylesRaw(styles)
     },
     bodyStyles() {
+      const { editing, contentEditable } = this.config
+      const { isCurveText, isFlipped } = this
+      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
-        textAlign: this.config.styles.align
+        textAlign: this.config.styles.align,
+        opacity
       }
     },
     wrapperStyles() {
-      const { editing, contentEditable } = this.config
-      const { isCurveText, isFlipped } = this
-      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
       return {
-        writingMode: this.config.styles.writingMode,
-        opacity
+        writingMode: this.config.styles.writingMode
       }
     },
     // getFontUrl(spanStyles: ISpanStyle): string {
@@ -258,7 +295,6 @@ export default Vue.extend({
     margin: 0;
   }
   &__span {
-    position: relative;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     // line-break: anywhere;

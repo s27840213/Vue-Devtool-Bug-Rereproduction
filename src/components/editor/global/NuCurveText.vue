@@ -5,7 +5,6 @@
     span(v-for="(span, sIndex) in spans"
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
-      :data-text="span.text"
       :key="sIndex",
       :style="styles(span.styles, sIndex)") {{ span.text }}
 </template>
@@ -185,5 +184,9 @@ export default Vue.extend({
     position: absolute;
     display: inline-block;
   }
+}
+// Only for text shadow bold3d shadow.
+.duplicatedP .nu-curve-text__span {
+  color: var(--bold3d-color) !important;
 }
 </style>

@@ -210,23 +210,9 @@ class Controller {
       case 'bold3d':
         return {
           webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
-          // Modify CSS rule directly will cause performance issue in Safari, use CSS var instead.
-          '--transform': `translateX(${effect.distance * 0.1}px)`,
-          '---webkit-text-stroke': `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
-          '--color': colorWithOpacity,
-          extraCss: {
-            before: `
-              content: attr(data-text);
-              position: absolute;
-              top: 2px;
-              left: 0;
-              z-index: -1;
-              width: 100%;
-              transform: var(--transform);
-              -webkit-text-stroke: var(---webkit-text-stroke);
-              color: var(--color);
-            `
-          }
+          shadowLeft: `${effect.distance * 0.1}px`,
+          shadowColor: colorWithOpacity,
+          shwdowWebkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
         }
       default:
         return { textShadow: 'none' }
