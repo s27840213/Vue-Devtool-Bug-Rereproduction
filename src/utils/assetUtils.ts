@@ -123,7 +123,7 @@ class AssetUtils {
         return Promise.resolve(asset)
       default: {
         return Promise.race([
-          fetch(asset.urls.json + `?ver=123${ver}`),
+          fetch(asset.urls.json + `?ver=123d${ver}`),
           new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
         ]).then((response: any) => {
           if (!response.ok) {

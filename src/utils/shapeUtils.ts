@@ -228,8 +228,8 @@ class ShapeUtils {
     })
 
     if (primaryLayer) {
-      layerUtils.deleteSubLayer(pageIndex, layerIndex, subLayerIdx || -1)
-      layerUtils.addSubLayer(pageIndex, layerIndex, subLayerIdx || -1, image)
+      layerUtils.deleteSubLayer(pageIndex, layerIndex, subLayerIdx ?? -1)
+      layerUtils.addSubLayer(pageIndex, layerIndex, subLayerIdx ?? -1, image)
     } else {
       layerUtils.deleteLayer(layerIndex)
       layerUtils.addLayersToPos(pageIndex, [image], layerIndex)
