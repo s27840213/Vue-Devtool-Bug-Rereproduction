@@ -5,6 +5,7 @@
     span(v-for="(span, sIndex) in spans"
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
+      :data-text="span.text"
       :key="sIndex",
       :style="styles(span.styles, sIndex)") {{ span.text }}
 </template>

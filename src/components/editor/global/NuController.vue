@@ -566,7 +566,7 @@ export default Vue.extend({
       let zindex
       if (this.isMoving && LayerUtils.layerIndex !== this.layerIndex) {
         /** The offset is used for frame enter/leave detection */
-        offset += LayerUtils.getCurrLayer.styles.zindex + 1
+        offset += LayerUtils.getCurrLayer.styles?.zindex + 1
       }
       if (type === 'control-point') {
         zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType === LayerType.tmp ? 10000 : 100)

@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     component(is="style") {{extraCss}}
-    div(ref="text" class="nu-text__body" :style="bodyStyles()")
+    div(ref="text" class="nu-text__body" :style="bodyStyles()" :data-id="uid")
       nu-curve-text(v-if="isCurveText"
         ref="curveText"
         :config="config"
@@ -10,14 +10,13 @@
         :subLayerIndex="subLayerIndex")
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-        :key="p.id",
+        :key="p.id"
         :style="styles(p.styles)")
         template(v-for="(span, sIndex) in p.spans")
           span(class="nu-text__span"
             :data-sindex="sIndex"
-            :key="span.id",
+            :key="span.id"
             :data-text="span.text"
-            :data-id="uid"
             :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
             br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
@@ -183,10 +182,10 @@ export default Vue.extend({
     extraCss(): string {
       const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
       return `
-        .nu-text__span[data-id="${this.uid}"]::before {
+        .nu-text__body[data-id="${this.uid}"] span::before {
           ${rules?.before ?? ''}
         }
-        .nu-text__span[data-id="${this.uid}"]::after {
+        .nu-text__body[data-id="${this.uid}"] span::after {
           ${rules?.after ?? ''}
         }
       `
