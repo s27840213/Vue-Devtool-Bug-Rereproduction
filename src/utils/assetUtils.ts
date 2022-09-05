@@ -123,7 +123,7 @@ class AssetUtils {
         return Promise.resolve(asset)
       default: {
         return Promise.race([
-          fetch(asset.urls.json + `?ver=123d${ver}`),
+          fetch(asset.urls.json + `?ver=${ver}`),
           new Promise((resolve, reject) => setTimeout(() => reject(new Error('timeout')), 30000))
         ]).then((response: any) => {
           if (!response.ok) {
@@ -592,17 +592,17 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addSvg({ ...asset.jsonData, designId: item.id, db: item.db }, attrs)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
-          this.addText(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addText({ ...asset.jsonData, designId: item.id, db: item.db }, attrs)
           break
         case 8:
-          this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          this.addFrame({ ...asset.jsonData, designId: item.id }, attrs)
           break
         case 10:
           this.addLine(asset.jsonData, attrs)

@@ -297,7 +297,6 @@ export default Vue.extend({
           if (!svg && this.config.designId) {
             const shape = await shapeUtils.fetchSvg(this.config)
             if (shapeUtils.isSvgImg(shape)) {
-              console.log('is svg img 300')
               shapeUtils.svgImgHandler({
                 pageIndex: this.pageIndex,
                 layerIndex: this.layerIndex,
