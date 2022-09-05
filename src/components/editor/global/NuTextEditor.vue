@@ -73,15 +73,12 @@ export default Vue.extend({
       this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
     })
     tiptapUtils.on('create', ({ editor }) => {
+      if (!this.config?.isEdited) {
+        layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
+        // editor.commands.focus()
+      }
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
-        editorDiv.addEventListener('click', () => {
-          if (!this.config?.isEdited && !editor.isFocused) {
-            layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-            editor.commands.focus()
-          }
-        })
-        editorDiv.dispatchEvent(new Event('click'))
         editorDiv.addEventListener('compositionend', () => {
           let toRecord = false
           const pages = stepsUtils.getPrevPages()
