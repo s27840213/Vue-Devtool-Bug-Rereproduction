@@ -989,6 +989,11 @@ export default Vue.extend({
         })
         this.isDoingGestureAction = false
         this.$emit('clearSnap')
+        if (this.getLayerType === 'text' && !this.config.isEdited) {
+          this.$nextTick(() => {
+            tiptapUtils.focus({ scrollIntoView: false })
+          })
+        }
         return
       }
 
