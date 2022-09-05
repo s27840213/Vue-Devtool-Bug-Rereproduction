@@ -92,6 +92,9 @@ class Controller {
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
       for (const idx in layers) {
+        // Leave text editing mode to show some span text effect.
+        layers[idx].contentEditable = false
+
         const { type } = layers[idx] as IText
         if (type === 'text') {
           const heightOri = layers[idx].styles.height
