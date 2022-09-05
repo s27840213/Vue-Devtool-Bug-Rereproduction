@@ -733,7 +733,7 @@ pipelines:
           #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
       - step:
           name: "deploy test"
-          deployment: test
+          deployment: stickertest
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:1.1.0
@@ -763,7 +763,7 @@ pipelines:
                 DELETE_FLAG: "true"
       - step:
           name: "deploy prod"
-          deployment: production
+          deployment: stickerproduction
           trigger: manual
           script:
             - pipe: atlassian/aws-s3-deploy:1.1.0
