@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
+    component(is="style") {{extraCss}}
     div(ref="text" class="nu-text__body" :style="bodyStyles()")
       nu-curve-text(v-if="isCurveText"
         ref="curveText"
@@ -15,6 +16,8 @@
           span(class="nu-text__span"
             :data-sindex="sIndex"
             :key="span.id",
+            :data-text="span.text"
+            :data-id="uid"
             :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
             br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
@@ -47,6 +50,7 @@ import { calcTmpProps } from '@/utils/groupUtils'
 import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import { isITextGooey } from '@/interfaces/format'
@@ -62,6 +66,7 @@ export default Vue.extend({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
+      uid: generalUtils.generateRandomString(6),
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
@@ -85,6 +90,7 @@ export default Vue.extend({
     if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
       textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
+          this.resizeCallback()
           this.isLoading = false
         }, 500) // for the delay between font loading and dom rendering
       })
@@ -97,44 +103,7 @@ export default Vue.extend({
       return
     }
 
-    this.resizeObserver = new (window as any).ResizeObserver((entries: any) => {
-      // for (const entry of entries) {
-      //   console.log(JSON.stringify(entry.contentRect))
-      // }
-      const config = generalUtils.deepCopy(this.config) as IText
-      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
-
-      // console.log('resize')
-
-      let widthLimit
-      if (this.isLoading && this.isAutoResizeNeeded) {
-        widthLimit = textUtils.autoResize(config, this.initSize)
-      } else {
-        widthLimit = config.widthLimit
-      }
-      const textHW = textUtils.getTextHW(config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
-        let x = config.styles.x
-        let y = config.styles.y
-        if (config.widthLimit === -1) {
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          }
-        }
-        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
-      } else {
-        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
-        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
-        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
-      }
-    })
+    this.resizeObserver = new (window as any).ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
   },
   computed: {
@@ -173,6 +142,18 @@ export default Vue.extend({
         )
       }
       return textBgUtils.convertTextSpanEffect(this.config.styles)
+    },
+    // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
+    extraCss(): string {
+      const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
+      return `
+        .nu-text__span[data-id="${this.uid}"]::before {
+          ${rules?.before ?? ''}
+        }
+        .nu-text__span[data-id="${this.uid}"]::after {
+          ${rules?.after ?? ''}
+        }
+      `
     }
   },
   watch: {
@@ -218,6 +199,44 @@ export default Vue.extend({
     //   }
     //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     // },
+    resizeCallback() {
+      // for (const entry of entries) {
+      //   console.log(JSON.stringify(entry.contentRect))
+      // }
+      const config = generalUtils.deepCopy(this.config) as IText
+      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
+
+      // console.log('resize')
+
+      let widthLimit
+      if (this.isLoading && this.isAutoResizeNeeded) {
+        widthLimit = textUtils.autoResize(config, this.initSize)
+      } else {
+        widthLimit = config.widthLimit
+      }
+      const textHW = textUtils.getTextHW(config, widthLimit)
+      if (typeof this.subLayerIndex === 'undefined') {
+        let x = config.styles.x
+        let y = config.styles.y
+        if (config.widthLimit === -1) {
+          if (config.styles.writingMode.includes('vertical')) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        }
+        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      } else {
+        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
+        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+      }
+    },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
       spans.forEach(span => {
@@ -242,7 +261,6 @@ export default Vue.extend({
     margin: 0;
   }
   &__span {
-    text-align: left;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     // line-break: anywhere;

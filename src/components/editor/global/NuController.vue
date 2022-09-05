@@ -474,7 +474,7 @@ export default Vue.extend({
           if (textMoveBar) {
             resizers = this.config.styles.writingMode.includes('vertical') ? resizers.slice(0, 2)
               : resizers.slice(2, 4)
-          } else if (this.config.styles.textShape && this.config.styles.textShape.name !== 'none') {
+          } else if (this.config.styles.textShape?.name && this.config.styles.textShape.name !== 'none') {
             resizers = []
           } else {
             resizers = this.config.styles.writingMode.includes('vertical') ? (
