@@ -55,8 +55,8 @@ export default Vue.extend({
     styles() {
       const config = this.config as IPage
       return {
-        width: `${config.width}px`,
-        height: `${config.height}px`
+        width: `${config.width * this.contentScaleRatio}px`,
+        height: `${config.height * this.contentScaleRatio}px`
         // overflow: this.selectedLayerCount > 0 ? 'initial' : 'hidden'
       }
     },
