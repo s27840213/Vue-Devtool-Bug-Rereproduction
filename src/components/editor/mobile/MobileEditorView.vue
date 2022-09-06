@@ -63,6 +63,15 @@ export default Vue.extend({
     currActivePanel: {
       default: 'none',
       type: String
+    },
+    /**
+     * @param showMobilePanel - this param is a little different to showMobilePanel in vuex
+     *    it's the state after the panel transition;i.e, if showMobilePanel is from true to false, the panel won't disapper immediately bcz transition
+     *    this showMobilePanel props is the state after transition
+     */
+    showMobilePanel: {
+      default: false,
+      type: Boolean
     }
   },
   data() {
@@ -153,6 +162,9 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
+    },
+    showMobilePanel(newVal) {
+      console.log(newVal)
     }
   },
 
@@ -222,7 +234,8 @@ export default Vue.extend({
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         padding: this.isDetailPage ? '0px' : '40px',
         flexDirection: this.isDetailPage ? 'column' : 'initial',
-        overflow: this.isDetailPage ? 'initial' : 'scroll'
+        overflow: this.isDetailPage ? 'initial' : 'scroll',
+        minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
     canvasStyle(): { [index: string]: string | number } {
@@ -231,10 +244,10 @@ export default Vue.extend({
       }
     },
     absContainerStyle(): { [index: string]: string | number } {
-      // const transformDuration = this.isSwiping ? 0.3 : 0
+      const transformDuration = !this.showMobilePanel ? 0.3 : 0
       return {
-        transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`
-        // transition: `transform ${transformDuration}s`
+        transform: this.isDetailPage ? 'initail' : `translate3d(0, -${this.currCardIndex * this.cardHeight}px,0)`,
+        transition: `transform ${transformDuration}s`
       }
     }
   },
@@ -326,7 +339,8 @@ export default Vue.extend({
         }
         case 'move': {
           const limitMultiplier = 4
-          if (pageUtils.mobileMinScaleRatio * limitMultiplier <= pageUtils.scaleRatio) {
+          if (pageUtils.mobileMinScaleRatio * limitMultiplier <= this.tmpScaleRatio * event.scale) {
+            pageUtils.setScaleRatio(pageUtils.mobileMinScaleRatio * limitMultiplier)
             return
           }
           pageUtils.setScaleRatio(Math.min(this.tmpScaleRatio * event.scale, pageUtils.mobileMinScaleRatio * limitMultiplier))
@@ -443,7 +457,6 @@ $REULER_SIZE: 20px;
 
   &__card {
     width: 100%;
-    min-height: 100%;
     box-sizing: border-box;
     display: flex;
     align-items: center;
