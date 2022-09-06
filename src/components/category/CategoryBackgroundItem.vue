@@ -12,6 +12,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import store from '@/store'
+import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import imageUtils from '@/utils/imageUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -27,6 +29,11 @@ export default Vue.extend({
       fallbackSrc: '',
       imageUtils
     }
+  },
+  computed: {
+    ...mapGetters('user', {
+      isAdmin: 'isAdmin'
+    })
   },
   methods: {
     handleNotFound(event: Event) {

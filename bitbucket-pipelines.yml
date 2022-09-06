@@ -364,7 +364,7 @@ pipelines:
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                 EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
-            - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+            - curl -k -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
       - step:
           name: "deploy prod"
           deployment: production
@@ -395,7 +395,7 @@ pipelines:
                 LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                 EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
-            - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+            - curl -k -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
     develop:
       - parallel:
           - step:

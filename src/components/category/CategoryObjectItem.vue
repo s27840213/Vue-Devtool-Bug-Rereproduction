@@ -29,9 +29,6 @@ export default Vue.extend({
       return generalUtils.isTouchDevice()
     }
   },
-  created() {
-    this.item.db = 'svg'
-  },
   methods: {
     addSvg() {
       if (!paymentUtils.checkPro(this.item, 'pro-object')) return

@@ -63,7 +63,8 @@ class AssetUtils {
       8: 'svg',
       9: 'svg',
       10: 'svg',
-      11: 'svg'
+      11: 'svg',
+      15: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
   }
@@ -99,15 +100,15 @@ class AssetUtils {
   }
 
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
-    const { id, type, ver, db, ...attrs } = item
+    const { id, type, ver, ...attrs } = item
     const typeCategory = this.getTypeCategory(type)
     const asset = {
       id,
       type,
       ver,
       urls: {
-        prev: [this.host, db || typeCategory, id, this.preview].join('/'),
-        json: [this.host, db || typeCategory, id, this.data].join('/')
+        prev: [this.host, typeCategory, id, this.preview].join('/'),
+        json: [this.host, typeCategory, id, this.data].join('/')
       },
       ...attrs
     } as IAsset
@@ -118,6 +119,9 @@ class AssetUtils {
         store.commit('SET_assetJson', { [id]: asset })
         return Promise.resolve(asset)
       }
+      case 14:
+      case 15:
+        return Promise.resolve(asset)
       default: {
         return Promise.race([
           fetch(asset.urls.json + `?ver=${ver}`),
@@ -464,7 +468,6 @@ class AssetUtils {
     } else {
       srcObj = url as SrcObj
     }
-
     const allLayers = this.getLayers(targePageIndex)
     // Check if there is any unchanged image layer with the same asset ID
     const imageLayers = allLayers.filter((layer: IShape | IText | IImage | IGroup | ITmp) => {
@@ -589,17 +592,17 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addSvg({ ...asset.jsonData, designId: item.id, db: 'svg' }, attrs)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           await this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
-          this.addText(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addText({ ...asset.jsonData, designId: item.id, db: 'text' }, attrs)
           break
         case 8:
-          this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          this.addFrame({ ...asset.jsonData, designId: item.id }, attrs)
           break
         case 10:
           await this.addLine(asset.jsonData, attrs)
@@ -608,12 +611,14 @@ class AssetUtils {
           await this.addBasicShape(asset.jsonData, attrs)
           break
         case 14: {
-          console.log(asset.jsonData)
           const { srcObj, styles } = asset.jsonData as IImage
-          // const src = ImageUtils.getSrc(srcObj, Math.max(styles.imgWidth, styles.imgHeight))
           this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
-        }
           break
+        }
+        case 15: {
+          this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          break
+        }
         default:
           throw new Error(`"${asset.type}" is not a type of asset`)
       }

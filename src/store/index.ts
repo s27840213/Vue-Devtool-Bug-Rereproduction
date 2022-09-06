@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex, { GetterTree, MutationTree } from 'vuex'
 import { IShape, IText, IImage, IGroup, ITmp, IParagraph, IFrame, IImageStyle } from '@/interfaces/layer'
-import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData } from './types'
+import { IEditorState, SidebarPanelType, FunctionPanelType, ISpecLayerData, ILayerInfo, LayerType } from './types'
 import { IPage } from '@/interfaces/page'
 import zindexUtils from '@/utils/zindexUtils'
 
@@ -29,6 +29,7 @@ import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import { ADD_subLayer } from '@/utils/layerUtils'
 
 Vue.use(Vuex)
 
@@ -822,7 +823,8 @@ const mutations: MutationTree<IEditorState> = {
   SET_useMobileEditor(state: IEditorState, bool: boolean) {
     state.useMobileEditor = bool
   },
-  ...imgShadowMutations
+  ...imgShadowMutations,
+  ADD_subLayer
 }
 
 function handleResize() {
