@@ -989,11 +989,6 @@ export default Vue.extend({
         })
         this.isDoingGestureAction = false
         this.$emit('clearSnap')
-        // if (this.getLayerType === 'text' && !this.config.isEdited) {
-        //   setTimeout(() => {
-        //     tiptapUtils.focus({ scrollIntoView: false })
-        //   }, 500)
-        // }
         return
       }
 
