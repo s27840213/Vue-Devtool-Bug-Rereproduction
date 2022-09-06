@@ -3,7 +3,7 @@
     div(class="vivisticker__top")
       header-tabs(:style="headerStyles()")
       div(class="vivisticker__content"
-          @pointerdown.prevent="outerClick")
+          @pointerdown="outerClick")
         vvstk-editor(v-show="isInEditor")
         main-menu(v-show="!isInEditor")
       transition(name="panel-up")
