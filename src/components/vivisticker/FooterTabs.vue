@@ -92,8 +92,8 @@ export default Vue.extend({
     },
     photoTabs(): Array<IFooterTab> {
       return [
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame },
-        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop' },
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame || this.isSvgImage },
+        { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage },
         // { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
         // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
         // { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
@@ -262,6 +262,18 @@ export default Vue.extend({
       const { index } = this.currSubSelectedInfo
       const { clips, type } = this.currSelectedInfo.layers[0].layers[index]
       return type === 'frame' && clips[0].srcObj.assetId
+    },
+    isSvgImage(): boolean {
+      const layer = layerUtils.getCurrLayer
+      const subLayerIdx = layerUtils.subLayerIdx
+      if (subLayerIdx === -1) {
+        return layer.type === LayerType.image && (layer as IImage).srcObj.type === 'svg'
+      } else {
+        const layers = (layer as IGroup).layers
+        if (!layers) return false
+        const subLayer = layers[subLayerIdx]
+        return subLayer.type === LayerType.image && (subLayer as IImage).srcObj.type === 'svg'
+      }
     },
     showPhotoTabs(): boolean {
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&

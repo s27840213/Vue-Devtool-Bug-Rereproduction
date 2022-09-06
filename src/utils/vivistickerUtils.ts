@@ -82,7 +82,12 @@ class ViviStickerUtils {
   getAssetInitiator(asset: IAsset): () => Promise<any> {
     return async () => {
       console.log('start editing', asset)
-      return await assetUtils.addAsset(asset)
+      if (asset.type === 15) {
+        await assetUtils.addAsset(asset)
+        return true
+      } else {
+        return await assetUtils.addAsset(asset)
+      }
     }
   }
 
@@ -111,6 +116,7 @@ class ViviStickerUtils {
       backgroundColor: '#F8F8F8'
     })])
     initiator().then((jsonData?: any) => {
+      console.log(jsonData)
       if (jsonData) {
         stepsUtils.reset()
         store.commit('vivisticker/SET_editorType', editorType)

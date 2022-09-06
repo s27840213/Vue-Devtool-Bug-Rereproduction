@@ -268,27 +268,19 @@ class ImageShadowUtils {
       layerInfo = this.layerData?.options?.layerInfo
     }
 
-    let MAXSIZE = 1600
-    if (!['unsplash', 'pexels'].includes(config.srcObj.type)) {
-      const res = await imageUtils.getImgSize(config.srcObj)
-      if (res) {
-        MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
-      }
-    }
-    const mappingScale = _imgWidth > _imgHeight
-      ? (layerWidth / _imgWidth) * MAXSIZE / drawCanvasW
-      : (layerHeight / _imgHeight) * MAXSIZE / drawCanvasH
-    const attrFactor = MAXSIZE / 1600
+    // const mappingScale = maxsize / middsize
+    // const mappingScale = _imgWidth > _imgHeight
+    // ? maxsize / drawCanvasW
+    // : maxsize / drawCanvasH
 
-    const canvasMaxW = canvas.width * mappingScale
-    const ellipseX = canvasMaxW * 0.5
-    const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
-    const layerIdentifier = (config.id ?? '') + `${layerWidth}${layerHeight}`
-    const hasBuffRecorded = this.dataBuff.effect === ShadowEffectType.floating &&
-      this.dataBuff.radius === radius && this.dataBuff.size === size &&
-      this.dataBuff.layerIdentifier === layerIdentifier && this.dataBuff.thinkness === thinkness
+    const ratio = _imgWidth / _imgHeight
+    const maxCanvasDrawH = (ratio > 1 ? maxsize / ratio : maxsize) * layerHeight / _imgHeight
+    const ellipseX = canvasMaxSize.width * 0.5
+    const ellipseY = ((canvasMaxSize.height - maxCanvasDrawH) * 0.5 + maxCanvasDrawH)
+    // const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
+    // const canvasMaxW = canvasMaxSize.width
 
-    if (layerInfo && timeout && !hasBuffRecorded) {
+    if (layerInfo && timeout) {
       this.setIsProcess(layerInfo, true)
     }
 
@@ -402,18 +394,8 @@ class ImageShadowUtils {
 
     ctxT.drawImage(img, -imgX, -imgY, drawImgWidth, drawImgHeight, blurImgX, blurImgY, drawCanvasW as number, drawCanvasH as number)
 
-    let MAXSIZE = 1600
-    if (!['unsplash', 'pexels'].includes(config.srcObj.type)) {
-      const res = await imageUtils.getImgSize(config.srcObj)
-      if (res) {
-        MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
-      }
-    }
-    const mappingScale = _imgWidth > _imgHeight
-      ? MAXSIZE / drawCanvasW
-      : MAXSIZE / drawCanvasH
-    const attrFactor = MAXSIZE / 1600
-
+    ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
+    const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('imageMatched', 1)
     const start = Date.now()
     const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1, handlerId)
@@ -507,31 +489,13 @@ class ImageShadowUtils {
       ctxT.putImageData(_imageData, 0, 0)
       console.log('1: handle spread time: ', Date.now() - start1)
       setMark('shadow', 2)
-      let MAXSIZE = 1600
-      if (!['unsplash', 'pexels'].includes(config.srcObj.type)) {
-        const res = await imageUtils.getImgSize(config.srcObj)
-        if (res) {
-          MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), 1600)
-        }
-      }
-      const mappingScale = _imgWidth > _imgHeight
-        ? MAXSIZE / drawCanvasW
-        : MAXSIZE / drawCanvasH
-      const arrtFactor = MAXSIZE / 1600
 
-      canvasMaxSize.width !== canvas.width * mappingScale && canvasMaxSize.setAttribute('width', `${Math.ceil(canvas.width * mappingScale)}`)
-      canvasMaxSize.height !== canvas.height * mappingScale && canvasMaxSize.setAttribute('height', `${Math.ceil(canvas.height * mappingScale)}`)
-
-      if (this.handlerId === handlerId) {
-        ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
-        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-        const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-        const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
-        // const bluredData = await imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * arrtFactor * fieldRange.shadow.radius.weighting) + 1, handlerId)
-
-        const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-        const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * arrtFactor * fieldRange.shadow.distance.weighting : 0
-        ctxMaxSize.putImageData(bluredData, offsetX, offsetY)
+      ctxMax.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
+      const imageData = ctxMax.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
+      const start2 = Date.now()
+      let bluredData
+      if (radius > 0) {
+        bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5), handlerId)
       } else {
         bluredData = imageData
       }
