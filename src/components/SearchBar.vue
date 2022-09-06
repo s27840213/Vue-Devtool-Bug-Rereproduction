@@ -104,16 +104,21 @@ export default Vue.extend({
     border-radius: 10px;
     &.dark {
       background: setColor(dark-bg);
+      & > input {
+        color: white;
+      }
     }
     &.white {
       background: setColor(gray-6);
+      & > input {
+        color: setColor(gray-1);
+      }
     }
     & > input {
       padding: 0;
       margin-top: 0;
       margin-bottom: 0;
       height: 26px;
-      color: white;
       &::placeholder {
         color: setColor(gray-3);
       }
