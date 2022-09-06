@@ -12,6 +12,7 @@
       :subLayerIndex="index"
       :flip="flip"
       :config="layer"
+      :inFrame="true"
       :contentScaleRatio="contentScaleRatio")
 </template>
 
