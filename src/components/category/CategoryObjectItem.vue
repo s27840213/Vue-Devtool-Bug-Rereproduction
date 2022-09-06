@@ -41,14 +41,6 @@ export default Vue.extend({
       return generalUtils.isTouchDevice()
     }
   },
-  // watch: {
-  //   item: {
-  //     handler() {
-  //       console.warn(this.item)
-  //     },
-  //     deep: true
-  //   }
-  // },
   methods: {
     ...mapMutations({
       _setCurrSelectedResInfo: 'SET_currSelectedResInfo'
@@ -64,7 +56,6 @@ export default Vue.extend({
     },
     addSvg() {
       if (!paymentUtils.checkPro(this.item, 'pro-object')) return
-      this.item.db = 'svg'
       assetUtils.addAsset(this.item)
     },
     showSvgInfo(evt: Event) {
