@@ -129,6 +129,30 @@ export default Extension.create({
               }
             }
           },
+          filter: {
+            default: 'none'
+          },
+          backgroundColor: {
+            default: 'transparent'
+          },
+          padding: {
+            default: '0'
+          },
+          boxDecorationBreak: {
+            default: 'slice'
+          },
+          backgroundRepeat: {
+            default: 'repeat'
+          },
+          backgroundImage: {
+            default: 'none'
+          },
+          backgroundSize: {
+            default: 'auto'
+          },
+          backgroundPositionY: {
+            default: '0%'
+          },
           type: {
             default: 'public',
             parseHTML: element => {

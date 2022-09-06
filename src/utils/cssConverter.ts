@@ -27,6 +27,14 @@ const styleMap = {
   decoration: 'text-decoration',
   style: 'font-style',
   caretColor: 'caret-color',
+  filter: 'filter',
+  backgroundColor: 'background-color',
+  padding: 'padding',
+  boxDecorationBreak: 'box-decoration-break',
+  backgroundRepeat: 'background-repeat',
+  backgroundImage: 'background-image',
+  backgroundSize: 'background-size',
+  backgroundPositionY: 'background-position-y',
   // below are not css valid properties, only for tiptap to record
   type: 'font-type',
   assetId: 'asset-id',
@@ -54,7 +62,9 @@ const styleMap = {
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'color', 'writingMode', 'decoration', 'style', 'caretColor',
-  'type', 'assetId', 'userId', 'fontUrl'
+  'type', 'assetId', 'userId', 'fontUrl', 'filter', 'backgroundColor', 'padding',
+  'boxDecorationBreak', 'backgroundRepeat', 'backgroundImage', 'backgroundSize',
+  'backgroundPositionY'
 ]
 
 class CssConveter {

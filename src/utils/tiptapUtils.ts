@@ -8,9 +8,9 @@ import cssConveter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
-import textPropUtils from './textPropUtils'
-import textEffectUtils from './textEffectUtils'
-import generalUtils from './generalUtils'
+import textPropUtils from '@/utils/textPropUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import textBgUtils from '@/utils/textBgUtils'
 
 class TiptapUtils {
   event: any
@@ -131,12 +131,14 @@ class TiptapUtils {
             // const newText = s.text.replace(' ', '\u200A') // 髮寬空格 能用但是寬度非常窄
             // const newText = s.text.replace(' ', '\u202F')
             // const newText = s.text.replace(' ', '\u205F')
+            const layerStyles = textEffectUtils.getCurrentLayer().styles
+            const textBg = textBgUtils.convertTextSpanEffect(layerStyles)
             return {
               type: 'text',
               text: newText,
               marks: [{
                 type: 'textStyle',
-                attrs: this.makeSpanStyle(s.styles)
+                attrs: Object.assign(this.makeSpanStyle(s.styles), textBg)
               }]
             }
           })

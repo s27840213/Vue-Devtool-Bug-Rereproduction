@@ -2,9 +2,9 @@ import store from '@/store'
 import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils//textEffectUtils'
-import imageAdjustUtil from '@/utils//imageAdjustUtil'
-import generalUtils from '@/utils//generalUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import tiptapUtils from '@/utils/tiptapUtils'
 
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
@@ -101,17 +101,11 @@ class TextBg {
 
   convertTextSpanEffect(styles: IStyle): Record<string, unknown> {
     const effect = styles.textBg as ITextBgEffect
-    const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
-    let color = ''
-    if (isITextUnderline(effect)) {
-      color = this.rgba(effect.color, effect.opacity * 0.01)
-    } else if (isITextGooey(effect)) {
-      color = this.rgba(effect.color, effect.opacity * 0.006 + 0.4)
-    }
 
     if (isITextUnderline(effect)) {
-      let underlineSvg = ''
+      const color = this.rgba(effect.color, effect.opacity * 0.01)
       const capWidth = styles.height * 0.005 * effect.height
+      let underlineSvg = ''
       switch (effect.endpoint) {
         case 'triangle':
           underlineSvg = `url("data:image/svg+xml;utf8,
@@ -141,10 +135,12 @@ class TextBg {
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
+      const color = this.rgba(effect.color, effect.opacity * 0.006 + 0.4)
+      const svgId = `textBg_gooey_${effect.color}_${effect.opacity}_${effect.bRadius}`
       return {
         padding: '0 20px',
-        backgroundColor: color,
         filter: `url(#${svgId})`,
+        backgroundColor: color,
         svgId: svgId,
         svgFilter: [
           imageAdjustUtil.createSvgFilter({
@@ -212,6 +208,9 @@ class TextBg {
         })
       }
     }
+
+    // Update content in tiptap and focus it if need.
+    tiptapUtils.updateHtml()
   }
 }
 
