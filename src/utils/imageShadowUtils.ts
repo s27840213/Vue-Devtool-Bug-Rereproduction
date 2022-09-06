@@ -146,10 +146,6 @@ class ImageShadowUtils {
     if (params.timeout !== 0) {
       // only handle the max-size-canvas calculation while in preview state
       const imgRatio = img.naturalWidth / img.naturalHeight
-      const maxW = imgRatio > 1 ? maxsize : maxsize * imgRatio
-      const maxH = imgRatio < 1 ? maxsize : maxsize / imgRatio
-      const drawCanvasW = Math.round(width / imgWidth * maxW)
-      const drawCanvasH = Math.round(height / imgHeight * maxH)
       const canvasW = Math.round((imgRatio > 1 ? maxsize : maxsize * imgRatio) + CANVAS_SPACE)
       const canvasH = Math.round((imgRatio > 1 ? maxsize / imgRatio : maxsize) + CANVAS_SPACE)
       canvasMaxSize.setAttribute('width', canvasW.toString())
@@ -198,7 +194,8 @@ class ImageShadowUtils {
       // canvasTest.style.zIndex = '10000'
 
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      this.dilate = getDilate(imageData, undefined, !timeout ? maxsize / middsize : 1)
+      const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
+      this.dilate = getDilate(imageData, isRect, undefined, !timeout ? maxsize / middsize : 1)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
     if (params && params.timeout !== 0) {

@@ -226,17 +226,6 @@ export default new class ImageShadowPanelUtils {
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
       ctxUpload.drawImage(updateCanvas, left, top, uploadCanvas.width, uploadCanvas.height, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
-      // const canvasTest = document.createElement('canvas')
-      // canvasTest.setAttribute('width', uploadCanvas.width.toString())
-      // canvasTest.setAttribute('height', uploadCanvas.height.toString())
-      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
-      // ctxText.drawImage(uploadCanvas, 0, 0)
-      // document.body.appendChild(canvasTest)
-      // // setTimeout(() => document.body.removeChild(canvasTest), 10000)
-      // canvasTest.style.position = 'absolute'
-      // canvasTest.style.top = '-100px'
-      // canvasTest.style.zIndex = '10000'
-
       logUtils.setLog('phase: start uploading result')
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 1)]
       setMark('upload', 5)

@@ -706,7 +706,6 @@ export default Vue.extend({
       }
     },
     async handleNewShadowEffect(clearShadowSrc = true) {
-      console.warn('123')
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {

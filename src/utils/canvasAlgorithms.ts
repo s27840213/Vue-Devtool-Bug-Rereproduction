@@ -142,9 +142,9 @@ interface IRect {
 // 	return { mapX, mapY }
 // }
 
-export function getDilate(imageData: ImageData, rect?: IRect, scale = 1) {
+const getManhanttan = function (imageData: ImageData, region?: IRect, scale = 1) {
 	const start = Date.now()
-	const { mapX, mapY } = manhattan(imageData, rect)
+	const { mapX, mapY } = manhattan(imageData, region)
 	console.warn('handle manhanttan calculation: ', Date.now() - start)
 	const { data: pixels, width, height } = imageData
 	const trasition_r = 1
@@ -174,7 +174,119 @@ export function getDilate(imageData: ImageData, rect?: IRect, scale = 1) {
 	}
 }
 
-function manhattan (imageData: ImageData, rect?: { top: number, left: number, width: number, height: number }) {
+const getRect = function (imageData: ImageData, region?: IRect, scale = 1) {
+	const start = Date.now()
+	const map = rect(imageData, region)
+	console.warn('handle manhanttan-rect calculation: ', Date.now() - start)
+	const { data: pixels, width, height } = imageData
+
+	return (r: number): Uint8ClampedArray => {
+		r *= scale
+		for (let y = 0; y < height; y++) {
+			const yy = y * width
+			for (let x = 0; x < width; x++) {
+				const pos0 = yy + x
+				const pos = pos0 * 4
+				pixels[pos] = 0
+				pixels[pos + 1] = 0
+				pixels[pos + 2] = 0
+				if (map[pos0] >= r) {
+					pixels[pos + 3] = 0
+				}	else {
+					pixels[pos + 3] = 255
+				}
+			}
+		}
+		return pixels
+	}
+}
+
+const rect = function (imageData: ImageData, region?: { top: number, left: number, width: number, height: number }) {
+	const DIST_MAX = 128
+	const map = [] as Array<number>
+	const { data: pixels, width, height } = imageData
+	for (let y = 0; y < height; y++) {
+		const yy = y * width
+		for (let x = 0; x < width; x++) {
+			const pos0 = yy + x
+			const pos = pos0 * 4
+			if (pixels[pos + 3] > 0) {
+				map[pos0] = 0
+			} else {
+				map[pos0] = DIST_MAX
+				if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+					if (map[pos0 - width] === map[pos0 - 1] && map[pos0 - width] === map[pos0 - width - 1] + 1) {
+						map[pos0] = map[pos0 - width]
+						continue
+					}
+				}
+				if (x > 0) {
+					map[pos0] = Math.min(map[pos0], map[pos0 - 1] + 1)
+				}
+				if (y > 0) {
+					map[pos0] = Math.min(map[pos0], map[pos0 - width] + 1)
+				}
+			}
+		}
+	}
+	for (let y = height - 1; y >= 0; y--) {
+		const yy = y * width
+		for (let x = width - 1; x >= 0; x--) {
+			const pos = yy + x
+			if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+				if (map[pos + width] === map[pos + 1] && map[pos + width] === map[pos + width + 1] + 1) {
+					map[pos] = map[pos + width]
+					continue
+				}
+			}
+			if (x + 1 < width) {
+				map[pos] = Math.min(map[pos], map[pos + 1] + 1)
+			}
+			if (y + 1 < height) {
+				map[pos] = Math.min(map[pos], map[pos + width] + 1)
+			}
+		}
+	}
+	for (let y = 0; y < height; y++) {
+		const yy = y * width
+		for (let x = width - 1; x >= 0; x--) {
+			const pos = yy + x
+			if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+				if (map[pos - width] === map[pos + 1] && map[pos + 1] === map[pos - width + 1] + 1) {
+					map[pos] = map[pos + 1]
+					continue
+				}
+			}
+			if (x + 1 < width) {
+				map[pos] = Math.min(map[pos], map[pos + 1] + 1)
+			}
+			if (y > 0) {
+				map[pos] = Math.min(map[pos], map[pos - width] + 1)
+			}
+		}
+	}
+	for (let y = height - 1; y >= 0; y--) {
+		const yy = y * width
+		for (let x = 0; x < width; x++) {
+			const pos = yy + x
+			if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+				if (map[pos + width] === map[pos - 1] && map[pos - 1] === map[pos + width - 1] + 1) {
+					map[pos] = map[pos - 1]
+					continue
+				}
+			}
+			if (x > 0) {
+				map[pos] = Math.min(map[pos], map[pos - 1] + 1)
+			}
+			if (y + 1 < height) {
+				map[pos] = Math.min(map[pos], map[pos + width] + 1)
+			}
+		}
+	}
+	return map
+}
+
+function manhattan (imageData: ImageData, region?: { top: number, left: number, width: number, height: number }) {
 	const DIST_MAX = 128
 	const mapX = [] as Array<number>
 	const mapY = [] as Array<number>
@@ -217,9 +329,9 @@ function manhattan (imageData: ImageData, rect?: { top: number, left: number, wi
 			}
 		}
 	}
-	for (let y = height - 1; y >= 0; y--) {
+	for (let y = Math.floor(height / 2); y >= 0; y--) {
 		const yy = y * width
-		for (let x = width - 1; x >= 0; x--) {
+		for (let x = Math.floor(width / 2); x >= 0; x--) {
 			const pos = yy + x
 			let curX = mapX[pos]
 			let curY = mapY[pos]
@@ -247,9 +359,9 @@ function manhattan (imageData: ImageData, rect?: { top: number, left: number, wi
 			mapY[pos] = curY
 		}
 	}
-	for (let y = 0; y < height; y++) {
+	for (let y = Math.floor(height / 2); y < height; y++) {
 		const yy = y * width
-		for (let x = width - 1; x >= 0; x--) {
+		for (let x = Math.floor(width / 2); x >= 0; x--) {
 			const pos = yy + x
 			let curX = mapX[pos]
 			let curY = mapY[pos]
@@ -277,9 +389,9 @@ function manhattan (imageData: ImageData, rect?: { top: number, left: number, wi
 			mapY[pos] = curY
 		}
 	}
-	for (let y = height - 1; y >= 0; y--) {
+	for (let y = Math.floor(height / 2); y >= 0; y--) {
 		const yy = y * width
-		for (let x = 0; x < width; x++) {
+		for (let x = Math.floor(width / 2); x < width; x++) {
 			const pos = yy + x
 			let curX = mapX[pos]
 			let curY = mapY[pos]
@@ -308,4 +420,8 @@ function manhattan (imageData: ImageData, rect?: { top: number, left: number, wi
 		}
 	}
 	return { mapX, mapY }
+}
+
+export function getDilate(imageData: ImageData, isRect?: boolean, region?: IRect, scale = 1) {
+	return isRect ? getRect(imageData, region, scale) : getManhanttan(imageData, region, scale)
 }
