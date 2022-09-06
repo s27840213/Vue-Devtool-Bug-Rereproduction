@@ -75,7 +75,8 @@ export default Vue.extend({
     tiptapUtils.on('create', ({ editor }) => {
       if (!this.config?.isEdited) {
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: true })
-        editor.commands.focus()
+        // editor.commands.focus()
+        editor.view.dom.focus()
       }
       const editorDiv = editor.view.dom as HTMLDivElement
       if (editorDiv) {
