@@ -11,7 +11,8 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
-      :config="layer")
+      :config="layer"
+      :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
