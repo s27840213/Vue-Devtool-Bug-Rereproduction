@@ -235,7 +235,6 @@ class ShapeUtils {
       layerUtils.addLayersToPos(pageIndex, [image], layerIndex)
       zindexUtils.reassignZindex(pageIndex)
     }
-    stepsUtils.record()
   }
 
   async fetchSvg(config: IShape): Promise<IShape> {
