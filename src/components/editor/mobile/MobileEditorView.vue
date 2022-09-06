@@ -234,7 +234,8 @@ export default Vue.extend({
         height: this.isDetailPage ? 'initial' : `${this.cardHeight}px`,
         padding: this.isDetailPage ? '0px' : '40px',
         flexDirection: this.isDetailPage ? 'column' : 'initial',
-        overflow: this.isDetailPage ? 'initial' : 'scroll'
+        overflow: this.isDetailPage ? 'initial' : 'scroll',
+        minHeight: this.isDetailPage ? 'none' : '100%'
       }
     },
     canvasStyle(): { [index: string]: string | number } {
@@ -456,7 +457,6 @@ $REULER_SIZE: 20px;
 
   &__card {
     width: 100%;
-    min-height: 100%;
     box-sizing: border-box;
     display: flex;
     align-items: center;
