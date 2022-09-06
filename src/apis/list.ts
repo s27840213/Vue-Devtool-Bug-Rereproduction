@@ -24,7 +24,9 @@ class ListService {
       platform: params.cache ? window.location.host : null,
       ver: params.cache ? store.getters['user/getVerApi'] : null,
       // [2022.01.19] uncached: font, layout
-      all_theme: params.all_theme
+      all_theme: params.all_theme,
+      // app: 0: vivipic (default), 1: vivisticker
+      app: 1
     }
 
     return axios.request<IListServiceResponse>({
