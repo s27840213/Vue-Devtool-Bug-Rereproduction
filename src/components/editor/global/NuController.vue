@@ -26,7 +26,7 @@
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
-            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
+            nu-sub-controller(v-if="layer.type !== 'image' || !layer.imgControl"
               class="relative"
               data-identifier="controller"
               :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
@@ -419,7 +419,8 @@ export default Vue.extend({
       setLastSelectedLayerIndex: 'SET_lastSelectedLayerIndex',
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setMoving: 'SET_moving',
-      setCurrSidebarPanel: 'SET_currSidebarPanelType'
+      setCurrSidebarPanel: 'SET_currSidebarPanelType',
+      setImgConfig: 'imgControl/SET_CONFIG'
     }),
     resizerBarStyles(resizer: IResizer) {
       const resizerStyle = { ...resizer }
@@ -725,6 +726,22 @@ export default Vue.extend({
       return `transform: translate(calc(${this.hintTranslation.x * this.contentScaleRatio}px - 100%), ${this.hintTranslation.y * this.contentScaleRatio}px) scale(${100 / this.scaleRatio * this.contentScaleRatio})`
     },
     moveStart(event: MouseEvent | TouchEvent | PointerEvent) {
+      const currLayerIndex = LayerUtils.layerIndex
+      if (currLayerIndex !== this.layerIndex) {
+        const layer = LayerUtils.getLayer(this.pageIndex, currLayerIndex)
+        if (layer.type === 'image') {
+          LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false })
+        } else if (layer.type === 'group') {
+          (layer as IGroup).layers
+            .forEach((l, i) => {
+              if (l.type === 'image') {
+                LayerUtils.updateLayerProps(this.pageIndex, currLayerIndex, { imgControl: false }, i)
+              }
+            })
+        }
+        this.setImgConfig(undefined)
+      }
+
       const eventType = eventUtils.getEventType(event)
       /**
        * used for frame layer for entering detection
@@ -757,7 +774,6 @@ export default Vue.extend({
           }, interval)
         }
       }
-
       if (eventType === 'pointer') {
         const pointerEvent = event as PointerEvent
         if (pointerEvent.button !== 0) return
@@ -771,8 +787,6 @@ export default Vue.extend({
       if (this.currFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
-      // ImageUtils.setImgControlDefault(false)
-
       /**
        * @Note - in Mobile version, we can't select the layer directly, we should make it active first
        * The exception is that we are in multi-selection mode
@@ -1912,6 +1926,7 @@ export default Vue.extend({
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
     },
     onDblClick() {
+      console.log('dbl')
       if (this.getLayerType !== 'image' || this.isLocked) return
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
@@ -2003,7 +2018,9 @@ export default Vue.extend({
     pointerDownSubController() {
       this.isPointerDownFromSubController = true
     },
-    dblSubController(targetIndex: number) {
+    dblSubController(e: MouseEvent, targetIndex: number) {
+      e.stopPropagation()
+      console.log('dbl sub')
       if (this.isHandleShadow) {
         return
       }
@@ -2029,7 +2046,9 @@ export default Vue.extend({
         default:
           return
       }
-      target.type === LayerType.image && !target.inProcess && updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      if (target.type === LayerType.image && !target.inProcess) {
+        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      }
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)

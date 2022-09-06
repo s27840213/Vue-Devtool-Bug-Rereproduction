@@ -6,7 +6,7 @@
             ref="body"
             :layer-index="`${layerIndex}`"
             :style="styles('')"
-            @dblclick="onDblClick()"
+            @dblclick="onDblClick($event)"
             @dragenter="onDragEnter($event)"
             @pointerdown="onPointerdown($event)")
           //- @click.left.stop="onClickEvent($event)"
@@ -523,11 +523,11 @@ export default Vue.extend({
       colorUtils.event.emit('closeColorPanel', false)
       this.$emit('clickSubController', this.layerIndex, this.config.type, GeneralUtils.exact([e.shiftKey, e.ctrlKey, e.metaKey]))
     },
-    onDblClick() {
+    onDblClick(e: MouseEvent) {
       if (this.type === 'tmp') {
         return
       }
-      this.$emit('dblSubController', this.layerIndex)
+      this.$emit('dblSubController', e, this.layerIndex)
     },
     onDragEnter(e: DragEvent) {
       const body = this.$refs.body as HTMLElement
