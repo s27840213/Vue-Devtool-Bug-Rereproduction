@@ -229,9 +229,9 @@ const rect = function (imageData: ImageData, region?: { top: number, left: numbe
 			}
 		}
 	}
-	for (let y = height - 1; y >= 0; y--) {
+	for (let y = Math.floor(height / 2); y >= 0; y--) {
 		const yy = y * width
-		for (let x = width - 1; x >= 0; x--) {
+		for (let x = Math.floor(width / 2); x >= 0; x--) {
 			const pos = yy + x
 			if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
 				if (map[pos + width] === map[pos + 1] && map[pos + width] === map[pos + width + 1] + 1) {
@@ -247,9 +247,9 @@ const rect = function (imageData: ImageData, region?: { top: number, left: numbe
 			}
 		}
 	}
-	for (let y = 0; y < height; y++) {
+	for (let y = Math.floor(height / 2); y < height; y++) {
 		const yy = y * width
-		for (let x = width - 1; x >= 0; x--) {
+		for (let x = Math.floor(width / 2); x >= 0; x--) {
 			const pos = yy + x
 			if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
 				if (map[pos - width] === map[pos + 1] && map[pos + 1] === map[pos - width + 1] + 1) {
@@ -265,9 +265,9 @@ const rect = function (imageData: ImageData, region?: { top: number, left: numbe
 			}
 		}
 	}
-	for (let y = height - 1; y >= 0; y--) {
+	for (let y = Math.floor(height / 2); y >= 0; y--) {
 		const yy = y * width
-		for (let x = 0; x < width; x++) {
+		for (let x = Math.floor(width / 2); x < width; x++) {
 			const pos = yy + x
 			if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
 				if (map[pos + width] === map[pos - 1] && map[pos - 1] === map[pos + width - 1] + 1) {
@@ -329,9 +329,9 @@ function manhattan (imageData: ImageData, region?: { top: number, left: number, 
 			}
 		}
 	}
-	for (let y = Math.floor(height / 2); y >= 0; y--) {
+	for (let y = height - 1; y >= 0; y--) {
 		const yy = y * width
-		for (let x = Math.floor(width / 2); x >= 0; x--) {
+		for (let x = width - 1; x >= 0; x--) {
 			const pos = yy + x
 			let curX = mapX[pos]
 			let curY = mapY[pos]
@@ -359,9 +359,9 @@ function manhattan (imageData: ImageData, region?: { top: number, left: number, 
 			mapY[pos] = curY
 		}
 	}
-	for (let y = Math.floor(height / 2); y < height; y++) {
+	for (let y = 0; y < height; y++) {
 		const yy = y * width
-		for (let x = Math.floor(width / 2); x >= 0; x--) {
+		for (let x = width - 1; x >= 0; x--) {
 			const pos = yy + x
 			let curX = mapX[pos]
 			let curY = mapY[pos]
@@ -389,9 +389,9 @@ function manhattan (imageData: ImageData, region?: { top: number, left: number, 
 			mapY[pos] = curY
 		}
 	}
-	for (let y = Math.floor(height / 2); y >= 0; y--) {
+	for (let y = height - 1; y >= 0; y--) {
 		const yy = y * width
-		for (let x = Math.floor(width / 2); x < width; x++) {
+		for (let x = 0; x < width; x++) {
 			const pos = yy + x
 			let curX = mapX[pos]
 			let curY = mapY[pos]

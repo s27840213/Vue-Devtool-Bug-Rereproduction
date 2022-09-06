@@ -920,11 +920,11 @@ export const shadowPropI18nMap = {
 
 export const fieldRange = {
   shadow: {
-    distance: { max: 100, min: 0, weighting: 1.8 },
+    distance: { max: 100, min: 0, weighting: 2 },
     angle: { max: 180, min: -180, weighting: 1 },
     radius: { max: 100, min: 0, weighting: 1.5 },
     opacity: { max: 100, min: 0, weighting: 1 },
-    spread: { max: 30, min: 0, weighting: 1 }
+    spread: { max: 20, min: 0, weighting: 1 }
   },
   blur: {
     radius: { max: 100, min: 0, weighting: 2 },
