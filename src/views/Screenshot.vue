@@ -85,6 +85,8 @@ export default Vue.extend({
         const type = urlParams.get('type')
         const id = urlParams.get('id')
         const ver = urlParams.get('ver')
+        const width = urlParams.get('width')
+        const height = urlParams.get('height')
         switch (type) {
           case 'svg': {
             const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
@@ -109,6 +111,37 @@ export default Vue.extend({
             setTimeout(() => { this.onload() }, 100)
             break
           }
+          case 'svgImage': {
+            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const photoAspectRatio = parseInt(width ?? '1') / parseInt(height ?? '1')
+            const photoWidth = photoAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * photoAspectRatio
+            const photoHeight = photoAspectRatio > pageAspectRatio ? window.innerWidth / photoAspectRatio : window.innerHeight
+
+            const srcObj = {
+              type: 'svg',
+              userId: '',
+              assetId: id
+            }
+
+            vivistickerUtils.initLoadingFlagsForOneLayer(() => {
+              this.onload()
+            })
+
+            this.config = layerFactary.newImage({
+              srcObj,
+              styles: {
+                x: 0,
+                y: 0,
+                width: photoWidth,
+                height: photoHeight,
+                initWidth: photoWidth,
+                initHeight: photoHeight,
+                imgWidth: photoWidth,
+                imgHeight: photoHeight
+              }
+            })
+            break
+          }
           case 'background': {
             this.backgroundImage = `https://template.vivipic.com/${type}/${id}/larg?ver=${ver}`
             break
@@ -127,7 +160,6 @@ export default Vue.extend({
             this.pageTranslate = { x: -x, y: -y }
             this.pageScale = this.fitPageToScreen(width, height)
             pageUtils.setPages([page])
-            console.log(this.pageScale, page.width, page.height)
             pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
             this.usingJSON = true
             break

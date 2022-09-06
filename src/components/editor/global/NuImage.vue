@@ -46,14 +46,14 @@
                 class="nu-image__picture"
                 draggable="false"
                 @error="onError()"
-                @load="onLoad ()")
+                @load="onLoad('main')")
         img(v-else ref="img"
           :style="flipStyles"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
           :src="finalSrc"
           draggable="false"
           @error="onError()"
-          @load="onLoad ()")
+          @load="onLoad('main')")
     template(v-if="hasHalation")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
@@ -83,6 +83,7 @@ import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import logUtils from '@/utils/logUtils'
 import { AxiosError } from 'axios'
 import i18n from '@/i18n'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   props: {
@@ -581,7 +582,10 @@ export default Vue.extend({
         }
       }
     },
-    onLoad() {
+    onLoad(type?: string) {
+      if (type === 'main') {
+        vivistickerUtils.setLoadingFlag(this.layerIndex, this.subLayerIndex)
+      }
       this.isOnError = false
     },
     logImgError(error: unknown, ...infos: Array<string>) {

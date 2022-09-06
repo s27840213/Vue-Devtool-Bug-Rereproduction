@@ -59,6 +59,8 @@ class ViviStickerUtils {
       case 5:
       case 11:
         return `type=svg&id=${item.id}&ver=${item.ver}`
+      case 15:
+        return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
       case 1:
         return `type=background&id=${item.id}&ver=${item.ver}`
       default:
@@ -154,6 +156,12 @@ class ViviStickerUtils {
       default:
         this.loadingFlags[this.makeFlagKey(layerIndex, subLayerIndex)] = false
     }
+  }
+
+  initLoadingFlagsForOneLayer(callback?: () => void) {
+    this.loadingFlags = {}
+    this.loadingCallback = callback
+    this.loadingFlags[this.makeFlagKey(0, -1)] = false
   }
 
   setLoadingFlag(layerIndex: number, subLayerIndex = -1) {
