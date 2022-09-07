@@ -1,10 +1,9 @@
 import store from '@/store'
 import i18n from '@/i18n'
 import { TranslateResult } from 'vue-i18n'
-import brandkitUtils from './brandkitUtils'
-import _ from 'lodash'
 import { Itheme } from '@/interfaces/theme'
 import themeUtils from './themeUtils'
+import _ from 'lodash'
 
 interface BillingInfoInput {
   label: TranslateResult
@@ -13,9 +12,27 @@ interface BillingInfoInput {
   optional?: boolean
   error?: string
 }
+export interface IEffectOption {
+  key: string
+  label: string
+  type: 'range' | 'color' | 'select'
+  min?: number
+  max?: number
+  selectOptions: {value: string, label: string}[]
+}
+export interface IEffect {
+  key: string
+  label: string
+  options: IEffectOption[]
+}
+export interface IEffectCategory {
+  name: string
+  label: string
+  effects2d: IEffect[][]
+}
 
-class PaymentData {
-  isLogin(): boolean {
+class ConstantData {
+  get isLogin(): boolean {
     return store.getters['user/isLogin']
   }
 
@@ -42,12 +59,14 @@ class PaymentData {
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [
-          ...[1].map((id) => themeItem(id)), {
-            label: 'FB 粉絲頁封面',
-            url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
-          },
-          ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        content: [{
+          label: 'FB 貼文',
+          url: 'https://blog.vivipic.com/tw/facebook-post/'
+        }, {
+          label: 'FB 粉絲頁封面',
+          url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+        },
+        ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0668'),
@@ -60,7 +79,12 @@ class PaymentData {
         ]
       }, {
         label: i18n.t('NN0669'),
-        content: [[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        content: [{
+          label: '喜帖',
+          url: 'https://blog.vivipic.com/tw/wedding-invitation/'
+        },
+        ...[[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        ]
       }],
       us: [{
         label: i18n.t('NN0667'),
@@ -95,6 +119,12 @@ class PaymentData {
       }, {
         label: i18n.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [{
+          label: 'ポラロイドフレーム',
+          url: 'https://blog.vivipic.com/jp/free-polaroid-frame-templates-2/'
+        }]
       }]
     }
     const resource = {
@@ -127,8 +157,11 @@ class PaymentData {
         }]
       }],
       us: [{
-        label: i18n.t('NN0671'),
-        url: 'https://blog.vivipic.com/us/'
+        label: 'Features',
+        content: [{
+          label: 'Objects',
+          url: 'https://blog.vivipic.com/us/objects/'
+        }]
       }, {
         label: i18n.t('NN0672'),
         content: [{
@@ -139,7 +172,8 @@ class PaymentData {
           url: 'https://blog.vivipic.com/us/us-faq/'
         }]
       }, {
-        label: i18n.t('NN0674'),
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/us/',
         content: [{
           label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'
@@ -187,12 +221,12 @@ class PaymentData {
       url: '/pricing',
       label: i18n.t('NN0643')
     }, {
-      hidden: !this.isLogin(),
+      hidden: !this.isLogin,
       name: 'MyDesign',
       url: '/mydesign',
       label: i18n.t('NN0080')
     }, {
-      hidden: !this.isLogin(),
+      hidden: !this.isLogin,
       name: 'BrandKit',
       url: '/brandkit',
       label: i18n.t('NN0007')
@@ -200,6 +234,173 @@ class PaymentData {
     themeUtils.checkThemeState()
     if (mobile) return _.filter(list, (it: Record<string, string>) => !['BrandKit'].includes(it.name))
     else return list
+  }
+
+  // For TextEffectSetting
+  textEffects() {
+    function arrTo2darr(arr: Array<unknown>) {
+      const newArr = []
+      while (arr.length) newArr.push(arr.splice(0, 3))
+      return newArr
+    }
+
+    function toOptions(array: string[]) {
+      const effectI18nMap = {
+        distance: i18n.tc('NN0063'),
+        angle: i18n.tc('NN0064'),
+        blur: i18n.tc('NN0065'),
+        opacity: i18n.tc('NN0066'),
+        color: i18n.tc('NN0067'),
+        spread: i18n.tc('NN0068'),
+        stroke: i18n.tc('NN0069'),
+        shape: i18n.tc('NN0070'),
+        bend: i18n.tc('NN0071'),
+        bStroke: i18n.tc('NN0733'),
+        bColor: i18n.tc('NN0734'),
+        bRadius: i18n.tc('NN0086'),
+        pStroke: i18n.tc('NN0319'),
+        pColor: i18n.tc('NN0735'),
+        height: i18n.tc('NN0319'),
+        yOffset: i18n.tc('NN0736'),
+        distanceInverse: i18n.tc('NN0737'),
+        textStrokeColor: i18n.tc('NN0739'),
+        shadowStrokeColor: i18n.tc('NN0740'),
+        endpoint: i18n.tc('NN0738')
+      }
+
+      return array.map((name: string) => {
+        const option = {
+          key: name,
+          label: effectI18nMap[name as keyof typeof effectI18nMap]
+        } as IEffectOption
+
+        option.type = 'range'
+        if (name.toLocaleLowerCase().endsWith('color')) {
+          option.type = 'color'
+        }
+        switch (name) {
+          case 'endpoint':
+            option.type = 'select'
+            option.selectOptions = [{
+              value: 'triangle',
+              label: i18n.tc('NN0730')
+            }, {
+              value: 'rounded',
+              label: i18n.tc('NN0731')
+            }, {
+              value: 'square',
+              label: i18n.tc('NN0732')
+            }]
+            break
+          case 'angle':
+            option.max = 180
+            option.min = -180
+            break
+          case 'bend': // For curve
+            option.max = 100
+            option.min = -100
+            break
+          default:
+            /* distance, blur, opacity, spread, stroke,
+             * bStroke, pStroke, bRadius, height */
+            option.max = 100
+            option.min = 0
+            break
+        }
+        return option
+      })
+    }
+
+    const categories = [{
+      name: 'shadow',
+      label: i18n.t('NN0112'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'shadow',
+        label: i18n.t('NN0112'),
+        options: toOptions(['distance', 'angle', 'blur', 'opacity', 'color'])
+      }, {
+        key: 'lift',
+        label: i18n.t('NN0113'),
+        options: toOptions(['spread'])
+      }, {
+        key: 'hollow',
+        label: i18n.t('NN0114'),
+        options: toOptions(['stroke'])
+      }, {
+        key: 'splice',
+        label: i18n.t('NN0115'),
+        options: toOptions(['stroke', 'distance', 'angle', 'color'])
+      }, {
+        key: 'echo',
+        label: i18n.t('NN0116'),
+        options: toOptions(['distance', 'angle', 'color'])
+      // }, {
+      //   key: 'funky3d',
+      //   label: i18n.tc('NN0728'),
+      //   options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
+      // }, {
+      //   key: 'bold3d',
+      //   label: i18n.tc('NN0729'),
+      //   options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      }])
+    }, {
+      name: 'shape',
+      label: i18n.t('NN0070'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0117'),
+        options: toOptions([])
+      }, {
+        key: 'curve',
+        label: i18n.t('NN0118'),
+        options: toOptions(['bend'])
+      }])
+    // }, {
+    //   name: 'bg',
+    //   label: i18n.tc('NN0719'),
+    //   effects2d: arrTo2darr([{
+    //     key: 'none',
+    //     label: i18n.t('NN0111'),
+    //     options: toOptions([])
+    //   }, {
+    //     key: 'square-borderless',
+    //     label: i18n.tc('NN0720'),
+    //     options: toOptions(['opacity', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'rounded-borderless',
+    //     label: i18n.tc('NN0721'),
+    //     options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'square-hollow',
+    //     label: i18n.tc('NN0722'),
+    //     options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
+    //   }, {
+    //     key: 'rounded-hollow',
+    //     label: i18n.tc('NN0723'),
+    //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+    //   }, {
+    //     key: 'square-both',
+    //     label: i18n.tc('NN0724'),
+    //     options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'rounded-both',
+    //     label: i18n.tc('NN0725'),
+    //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'gooey',
+    //     label: i18n.tc('NN0726'),
+    //     options: toOptions(['bRadius', 'opacity', 'color'])
+    //   }, {
+    //     key: 'underline',
+    //     label: i18n.tc('NN0727'),
+    //     options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
+    //   }])
+    }]
+    return categories as IEffectCategory[]
   }
 
   // For Settings
@@ -758,4 +959,4 @@ class PaymentData {
   }
 }
 
-export default new PaymentData()
+export default new ConstantData()

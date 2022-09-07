@@ -1,18 +1,19 @@
 import Vue from 'vue'
 import VueRouter, { RawLocation, Route, RouteConfig } from 'vue-router'
-import Editor from '../views/Editor.vue'
-import SignUp from '../views/Login/SignUp.vue'
-import Login from '../views/Login/Login.vue'
-import MyDesign from '../views/MyDesign.vue'
-import Home from '../views/Home.vue'
-import Settings from '../views/Settings.vue'
-import TemplateCenter from '../views/TemplateCenter.vue'
-import MobileWarning from '../views/MobileWarning.vue'
-import Preview from '../views/Preview.vue'
-import MobileEditor from '../views/MobileEditor.vue'
-import SvgIconView from '../views/SvgIconView.vue'
-import BrandKit from '../views/BrandKit.vue'
-import Pricing from '../views/Pricing.vue'
+import Editor from '@/views/Editor.vue'
+import SignUp from '@/views/Login/SignUp.vue'
+import Login from '@/views/Login/Login.vue'
+import MyDesign from '@/views/MyDesign.vue'
+import Home from '@/views/Home.vue'
+import Settings from '@/views/Settings.vue'
+import TemplateCenter from '@/views/TemplateCenter.vue'
+import MobileWarning from '@/views/MobileWarning.vue'
+import Preview from '@/views/Preview.vue'
+import MobileEditor from '@/views/MobileEditor.vue'
+import SvgIconView from '@/views/SvgIconView.vue'
+import BrandKit from '@/views/BrandKit.vue'
+import Pricing from '@/views/Pricing.vue'
+import CopyTool from '@/views/CopyTool.vue'
 import store from '@/store'
 import { editorRouteHandler } from './handler'
 import i18n from '@/i18n'
@@ -213,6 +214,11 @@ if (process.env.NODE_ENV !== 'production') {
     path: 'svgicon',
     name: 'SvgIconView',
     component: SvgIconView
+  })
+  routes.push({
+    path: 'copytool',
+    name: 'CopyTool',
+    component: CopyTool
   })
 }
 

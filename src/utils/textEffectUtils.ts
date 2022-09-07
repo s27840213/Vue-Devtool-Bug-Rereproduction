@@ -1,9 +1,9 @@
-import TextUtils from '@/utils/textUtils'
 import LayerUtils from '@/utils/layerUtils'
 import { IParagraph, IText } from '@/interfaces/layer'
-import CssConverter from './cssConverter'
+import CssConverter from '@/utils/cssConverter'
 import store from '@/store'
-import generalUtils from './generalUtils'
+import generalUtils from '@/utils/generalUtils'
+import mathUtils from '@/utils/mathUtils'
 
 class Controller {
   private shadowScale = 0.2
@@ -40,7 +40,21 @@ class Controller {
         distance: 50,
         angle: 45,
         color: ''
-      } // 雙重陰影
+      }, // 雙重陰影
+      funky3d: {
+        distance: 40,
+        distanceInverse: 0,
+        angle: 45,
+        opacity: 100,
+        color: '#F1D289'
+      },
+      bold3d: {
+        distance: 40,
+        opacity: 100,
+        textStrokeColor: '#000000',
+        shadowStrokeColor: '#FDA830',
+        color: '#F1D289'
+      }
     }
   }
 
@@ -96,6 +110,7 @@ class Controller {
   }
 
   convertColor2rgba(colorStr: string, alpha?: number) {
+    if (colorStr === 'transparent') return 'transparent'
     if (colorStr.startsWith('#')) {
       return this.convertHex2rgba(colorStr, alpha)
     }
@@ -112,7 +127,16 @@ class Controller {
     return `rgba(${hexList.map(x => parseInt(x, 16)).join(',')}, ${opacity})`
   }
 
-  convertTextEffect(effect: any) {
+  funky3d(distance: number, distanceInverse: number, angle: number, color: string) {
+    const shadow = []
+    for (let d = -distanceInverse * 0.06; d < distance * 1.5; d += 0.5) {
+      const { x, y } = mathUtils.getRotatedPoint(-angle, { x: 0, y: 0 }, { x: 0, y: d })
+      shadow.push(`${color} ${x}px ${y}px`)
+    }
+    return { textShadow: shadow.join(',') }
+  }
+
+  convertTextEffect(effect: any): Record<string, any> {
     const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor, ver } = effect || {}
     const unit = this.shadowScale * fontSize
     let strokeWidth = this.strokeScale * fontSize
@@ -125,12 +149,14 @@ class Controller {
     const effectSpreadBlur = spread * 1.6 * 0.01 * unit
     const effectOpacity = opacity * 0.01
     const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
+    const colorWithOpacity = color ? this.convertColor2rgba(color, effectOpacity) : ''
+
     switch (name) {
       case 'shadow':
         return CssConverter.convertTextShadow(
           effectShadowOffset * Math.cos(angle * Math.PI / 180),
           effectShadowOffset * Math.sin(angle * Math.PI / 180),
-          this.convertColor2rgba(color, effectOpacity),
+          colorWithOpacity,
           effectBlur
         )
       case 'lift':
@@ -172,6 +198,33 @@ class Controller {
               ).textShadow
             )
             .join(',')
+        }
+      case 'funky3d':
+        return this.funky3d(
+          distance,
+          effect.distanceInverse,
+          effect.angle,
+          colorWithOpacity
+        )
+      case 'bold3d':
+        return {
+          webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
+          // Modify CSS rule directly will cause performance issue in Safari, use CSS var instead.
+          '--transform': `translateX(${effect.distance * 0.1}px)`,
+          '---webkit-text-stroke': `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
+          '--color': colorWithOpacity,
+          extraCss: {
+            before: `
+              content: attr(data-text);
+              position: absolute;
+              left: 0;
+              z-index: -1;
+              width: 100%;
+              transform: var(--transform);
+              -webkit-text-stroke: var(---webkit-text-stroke);
+              color: var(--color);
+            `
+          }
         }
       default:
         return { textShadow: 'none' }

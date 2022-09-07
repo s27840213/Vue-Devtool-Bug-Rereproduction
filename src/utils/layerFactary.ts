@@ -236,7 +236,10 @@ class LayerFactary {
         writingMode: 'initial',
         align: 'center',
         horizontalFlip: false,
-        verticalFlip: false
+        verticalFlip: false,
+        textEffect: { name: 'none' },
+        textBg: { name: 'none' },
+        textShape: { name: 'none' }
       },
       paragraphs: [
         {
