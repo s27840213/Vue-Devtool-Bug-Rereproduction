@@ -28,8 +28,10 @@
             //- Effect type select
             template(v-if="option.type === 'select'")
               options(class="text-effect-setting-options__field--options"
-                      v-model="currentStyle[currCategory.name][option.key]"
+                      :value="currentStyle[currCategory.name][option.key]"
+                      @input="(v)=>handleSelectInput(option.key, v)"
                       :options="option.selectOptions")
+            //- Effect type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting-options__field--number"
                 :value="currentStyle[currCategory.name][option.key]"
@@ -166,6 +168,9 @@ export default Vue.extend({
       const target = this.currTab === 'shadow' ? textEffectUtils
         : this.currTab === 'shape' ? textShapeUtils : textBgUtils
       target.resetCurrTextEffect()
+    },
+    handleSelectInput(key: string, newVal: string) {
+      this.setEffect({ effect: { [key]: newVal } })
     },
     handleRangeInput(event: Event, option: IEffectOption) {
       const name = (event.target as HTMLInputElement).name

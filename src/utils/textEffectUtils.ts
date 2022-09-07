@@ -4,7 +4,7 @@ import CssConverter from '@/utils/cssConverter'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
-import localstorageUtils from '@/utils/localStorageUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
 
 class Controller {
   private shadowScale = 0.2
@@ -43,7 +43,7 @@ class Controller {
         color: ''
       },
       funky3d: {
-        distance: 40,
+        distance: 10,
         distanceInverse: 0,
         angle: 45,
         opacity: 100,
@@ -271,9 +271,9 @@ class Controller {
         const textEffect = {} as any
         if (layerTextEffect && (layerTextEffect as any).name === effect) {
           Object.assign(textEffect, layerTextEffect, attrs)
-          localstorageUtils.set('textEffectSetting', effect, textEffect)
+          localStorageUtils.set('textEffectSetting', effect, textEffect)
         } else {
-          const localAttrs = localstorageUtils.get('textEffectSetting', effect)
+          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
         }
         const mainColor = this.getLayerMainColor(paragraphs)

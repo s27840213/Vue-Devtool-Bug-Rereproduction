@@ -5,6 +5,7 @@ import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
 
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
@@ -190,7 +191,7 @@ class TextBg {
   }
 
   resetCurrTextEffect() {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textEffect.name
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, this.effects[effectName])
   }
 
@@ -212,8 +213,10 @@ class TextBg {
         const textBg = {} as ITextBgEffect
         if (layerTextBg && layerTextBg.name === effect) {
           Object.assign(textBg, layerTextBg, attrs)
+          localStorageUtils.set('textEffectSetting', effect, textBg)
         } else {
-          Object.assign(textBg, defaultAttrs, attrs, { name: effect })
+          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
+          Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
         }
 
         store.commit('UPDATE_specLayerData', {

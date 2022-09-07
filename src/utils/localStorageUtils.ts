@@ -9,14 +9,14 @@ class LocalStorage {
     localStorage.setItem(category, JSON.stringify(this.defaultValue[category]))
   }
 
-  set(category: string, key: string, value: string) {
+  set(category: string, key: string, value: unknown) {
     let item = localStorage.getItem(category)
     if (!item) {
       this.reset(category)
       item = localStorage.getItem(category)
     }
 
-    let obj: Record<string, string>
+    let obj: Record<string, unknown>
     try {
       obj = JSON.parse(item as string)
     } catch {
