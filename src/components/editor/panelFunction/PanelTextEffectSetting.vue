@@ -250,7 +250,7 @@ export default Vue.extend({
   }
   &-options__field {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: auto 1fr;
     justify-items: end;
     row-gap: 10px;
     &--name {
@@ -258,6 +258,7 @@ export default Vue.extend({
     }
     &--options {
       box-sizing: border-box;
+      width: 100px;
       height: 25px;
       padding: 0;
     }

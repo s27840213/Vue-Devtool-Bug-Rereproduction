@@ -200,7 +200,7 @@ export default Vue.extend({
       const bold3d = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
         position: 'absolute',
-        top: '0px',
+        top: bold3d.shadowTop,
         left: bold3d.shadowLeft,
         zIndex: '-1',
         width: '100%',

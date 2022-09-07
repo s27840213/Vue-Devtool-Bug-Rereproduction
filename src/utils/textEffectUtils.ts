@@ -51,6 +51,7 @@ class Controller {
       },
       bold3d: {
         distance: 40,
+        angle: 0,
         opacity: 100,
         textStrokeColor: '#000000',
         shadowStrokeColor: '#FDA830',
@@ -207,13 +208,16 @@ class Controller {
           effect.angle,
           colorWithOpacity
         )
-      case 'bold3d':
+      case 'bold3d': {
+        const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
         return {
           webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
-          shadowLeft: `${effect.distance * 0.1}px`,
+          shadowLeft: `${x}px`,
+          shadowTop: `${y}px`,
           shadowColor: colorWithOpacity,
           shwdowWebkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
         }
+      }
       default:
         return { textShadow: 'none' }
     }

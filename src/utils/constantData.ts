@@ -328,7 +328,7 @@ class ConstantData {
       }, {
         key: 'bold3d',
         label: i18n.tc('NN0729'),
-        options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+        options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
