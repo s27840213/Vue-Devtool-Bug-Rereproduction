@@ -51,7 +51,7 @@ class Controller {
     } else {
       Object.assign(styles.textShape, defaultAttrs, attrs, { name: shape })
     }
-    if (shape === 'none') {
+    if (shape === 'none' && styleTextShape.name !== 'none') {
       const { bend } = styleTextShape as any
       const textHW = TextUtils.getTextHW(layer, -1)
       Object.assign(styles, {
@@ -60,7 +60,7 @@ class Controller {
         y: +bend < 0 ? y + height - textHW.height : y
       })
       props.widthLimit = -1
-    } else { // curve
+    } else if (shape === 'curve') { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
       props.widthLimit = -1

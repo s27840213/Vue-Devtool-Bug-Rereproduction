@@ -104,25 +104,35 @@ class TextBg {
 
     if (isITextUnderline(effect)) {
       const color = this.rgba(effect.color, effect.opacity * 0.01)
-      const capWidth = styles.height * 0.005 * effect.height
-      let underlineSvg = ''
+      const borderWidth = Math.round(effect.height / 2)
+      let bgEndpoints = ''
+
       switch (effect.endpoint) {
         case 'triangle':
-          underlineSvg = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m${capWidth} 0h${styles.width - capWidth}l-${capWidth} ${capWidth * 2}h-${styles.width - capWidth}z'/>
+          bgEndpoints = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m${borderWidth + 1} 0h-1l-${borderWidth} ${borderWidth * 2}h${borderWidth + 1}z'/>
+            </svg>"), url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${borderWidth + 1}l-${borderWidth} ${borderWidth * 2}h-1z'/>
             </svg>")`.replace(/\n[ ]*/g, '')
           break
         case 'rounded':
-          underlineSvg = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m${capWidth} 0a1 1 0 000 ${capWidth * 2}h${styles.width - capWidth * 2}a1 1 0 000 -${capWidth * 2}z'/>
+          bgEndpoints = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m${borderWidth + 1} 0h-1a1 1 0 000 ${borderWidth * 2}h1z'/>
+            </svg>"), url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h1a1 1 0 010 ${borderWidth * 2}h-1z'/>
             </svg>")`.replace(/\n[ ]*/g, '')
           break
         case 'square':
-          underlineSvg = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m0 0h${styles.width}v${capWidth * 2}h-${styles.width}z'/>
+          bgEndpoints = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
+            </svg>"), url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
             </svg>")`.replace(/\n[ ]*/g, '')
           break
       }
@@ -130,8 +140,14 @@ class TextBg {
       return {
         boxDecorationBreak: 'clone',
         backgroundRepeat: 'no-repeat',
-        backgroundImage: underlineSvg,
-        backgroundSize: '100%',
+        backgroundImage: `
+          linear-gradient(180deg, ${color}, ${color}),
+          ${bgEndpoints}`,
+        backgroundSize: `
+          calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
+          ${borderWidth + 1}px ${borderWidth * 2}px,
+          ${borderWidth + 1}px ${borderWidth * 2}px`,
+        backgroundPositionX: `${borderWidth}px, 0, 100%`,
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
