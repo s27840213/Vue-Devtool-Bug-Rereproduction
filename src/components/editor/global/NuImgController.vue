@@ -4,7 +4,7 @@
       :style="controllerStyles()")
     div(class="nu-controller__body"
         ref="body"
-        :style="styles()"
+        :style="styles"
         @pointerdown.stop="moveStart"
         @touchstart="disableTouchEvent")
       div(v-for="(scaler, index) in controlPoints.scalers"
@@ -24,7 +24,6 @@ import { ICoordinate } from '@/interfaces/frame'
 import MathUtils from '@/utils/mathUtils'
 import LayerUtils from '@/utils/layerUtils'
 import FrameUtils from '@/utils/frameUtils'
-import stepsUtils from '@/utils/stepsUtils'
 import generalUtils from '@/utils/generalUtils'
 import eventUtils from '@/utils/eventUtils'
 import imageShadowUtils from '@/utils/imageShadowUtils'
@@ -84,12 +83,6 @@ export default Vue.extend({
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
-    // const shadow = (this.config as IImage).styles.shadow
-    // if (!this.forRender) {
-    //   if (shadow.currentEffect === ShadowEffectType.none || (!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched)) {
-    //     stepsUtils.record()
-    //   }
-    // }
     this.setImgConfig(undefined)
   },
   computed: {
@@ -97,6 +90,17 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getPage: 'getPage'
     }),
+    styles(): any {
+      const zindex = (this.layerIndex + 1) * 1000
+      const pos = this.imgControllerPosHandler()
+      return {
+        transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
+        width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
+        height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
+        outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
+        'pointer-events': this.pointerEvents ?? 'initial'
+      }
+    },
     isMobile(): boolean {
       return generalUtils.isTouchDevice()
     },
@@ -134,16 +138,6 @@ export default Vue.extend({
     getLayerRotate(): number {
       return this.config.styles.rotate
     },
-    flipFactorX(): number {
-      if (['frame', 'group'].includes(LayerUtils.getCurrLayer.type)) {
-        return LayerUtils.getCurrLayer.styles.horizontalFlip ? -1 : 1
-      } else return 1
-    },
-    flipFactorY(): number {
-      if (['frame', 'group'].includes(LayerUtils.getCurrLayer.type)) {
-        return LayerUtils.getCurrLayer.styles.verticalFlip ? -1 : 1
-      } else return 1
-    },
     angleInRad(): number {
       const { type, styles: primaryStyles } = LayerUtils.getCurrLayer
       const { rotate } = this.config.styles
@@ -177,17 +171,6 @@ export default Vue.extend({
       setImgConfig: 'imgControl/SET_CONFIG',
       updateConfig: 'imgControl/UPDATE_CONFIG'
     }),
-    styles() {
-      const zindex = (this.layerIndex + 1) * 1000
-      const pos = this.imgControllerPosHandler()
-      return {
-        transform: `translate3d(${pos.x}px, ${pos.y}px, ${zindex}px ) rotate(${this.config.styles.rotate}deg)`,
-        width: `${this.config.styles.imgWidth * this.getLayerScale}px`,
-        height: `${this.config.styles.imgHeight * this.getLayerScale}px`,
-        outline: `${2 * (100 / this.scaleRatio)}px dashed #7190CC`,
-        'pointer-events': this.pointerEvents ?? 'initial'
-      }
-    },
     controllerStyles() {
       const zindex = 0
       return {
@@ -231,15 +214,15 @@ export default Vue.extend({
        * For sub-img-controller under frame layer
        * if the frame layer is set the flip prop, do following mapping modification
        */
-      const currLayer = LayerUtils.getCurrLayer
-      if (currLayer.type === 'frame' && !this.config.forRender) {
-        const baseLine = {
-          x: -w / 2 + currLayer.styles.width / 2,
-          y: -h / 2 + currLayer.styles.height / 2
-        }
-        imgControllerPos.x += currLayer.styles.horizontalFlip ? -2 * (imgControllerPos.x - baseLine.x) : 0
-        imgControllerPos.y += currLayer.styles.verticalFlip ? -2 * (imgControllerPos.y - baseLine.y) : 0
-      }
+      // const currLayer = LayerUtils.getCurrLayer
+      // if (currLayer.type === 'frame' && !this.config.forRender) {
+      //   const baseLine = {
+      //     x: -w / 2 + currLayer.styles.width / 2,
+      //     y: -h / 2 + currLayer.styles.height / 2
+      //   }
+      //   imgControllerPos.x += currLayer.styles.horizontalFlip ? -2 * (imgControllerPos.x - baseLine.x) : 0
+      //   imgControllerPos.y += currLayer.styles.verticalFlip ? -2 * (imgControllerPos.y - baseLine.y) : 0
+      // }
 
       return imgControllerPos
     },
@@ -283,37 +266,33 @@ export default Vue.extend({
     moving(event: MouseEvent | PointerEvent) {
       this.setCursorStyle('move')
       event.preventDefault()
-      const reLayerScale = 1 / this.getLayerScale
+      const _layerScale = 1 / this.getLayerScale
       const baseLine = {
-        x: -this.getImgWidth * 0.5 + (this.config.styles.width * reLayerScale) * 0.5,
-        y: -this.getImgHeight * 0.5 + (this.config.styles.height * reLayerScale) * 0.5
+        x: -this.getImgWidth * 0.5 + (this.config.styles.width * _layerScale) * 0.5,
+        y: -this.getImgHeight * 0.5 + (this.config.styles.height * _layerScale) * 0.5
       }
       const translateLimit = {
-        width: (this.getImgWidth - this.config.styles.width * reLayerScale) * 0.5,
-        height: (this.getImgHeight - this.config.styles.height * reLayerScale) * 0.5
+        width: (this.getImgWidth - this.config.styles.width * _layerScale) * 0.5,
+        height: (this.getImgHeight - this.config.styles.height * _layerScale) * 0.5
       }
 
       const offsetPos = MouseUtils.getMouseRelPoint(event, this.initialPos)
-      offsetPos.x = (offsetPos.x * reLayerScale) * (100 / this.scaleRatio)
-      offsetPos.y = (offsetPos.y * reLayerScale) * (100 / this.scaleRatio)
+      offsetPos.x = (offsetPos.x * _layerScale) * (100 / this.scaleRatio)
+      offsetPos.y = (offsetPos.y * _layerScale) * (100 / this.scaleRatio)
+
       const currLayer = LayerUtils.getCurrLayer
       if (typeof this.primaryLayerIndex !== 'undefined' && currLayer.type === 'group') {
         const primaryScale = LayerUtils.getCurrLayer.styles.scale
         offsetPos.x /= primaryScale
         offsetPos.y /= primaryScale
       }
-
       const imgPos = this.imgPosMapper(offsetPos)
       if (Math.abs(imgPos.x - baseLine.x) > translateLimit.width) {
-        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width * reLayerScale - this.getImgWidth
+        imgPos.x = imgPos.x - baseLine.x > 0 ? 0 : this.config.styles.width * _layerScale - this.getImgWidth
       }
       if (Math.abs(imgPos.y - baseLine.y) > translateLimit.height) {
-        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height * reLayerScale - this.getImgHeight
+        imgPos.y = imgPos.y - baseLine.y > 0 ? 0 : this.config.styles.height * _layerScale - this.getImgHeight
       }
-      // this.updateLayerStyles({
-      //   imgX: imgPos.x,
-      //   imgY: imgPos.y
-      // })
       this.updateConfig({
         imgX: imgPos.x,
         imgY: imgPos.y
@@ -322,8 +301,8 @@ export default Vue.extend({
     imgPosMapper(offsetPos: ICoordinate): ICoordinate {
       const angleInRad = this.angleInRad
       return {
-        x: this.flipFactorX * (offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad)) + this.initImgPos.imgX,
-        y: this.flipFactorY * (-offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad)) + this.initImgPos.imgY
+        x: offsetPos.x * Math.cos(angleInRad) + offsetPos.y * Math.sin(angleInRad) + this.initImgPos.imgX,
+        y: -offsetPos.x * Math.sin(angleInRad) + offsetPos.y * Math.cos(angleInRad) + this.initImgPos.imgY
       }
     },
     moveEnd(e: MouseEvent) {
@@ -331,11 +310,6 @@ export default Vue.extend({
         x: Math.abs(e.clientX - this.initialPos.x),
         y: Math.abs(e.clientY - this.initialPos.y)
       }
-      // if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-      //   this.updateLayerProps({ imgControl: false })
-      //   stepsUtils.record()
-      //   this.updateLayerProps({ imgControl: true })
-      // }
       this.setCursorStyle('default')
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
       eventUtils.removePointerEvent('pointermove', this.moving)
@@ -355,8 +329,8 @@ export default Vue.extend({
       const vect = MouseUtils.getMouseRelPoint(event, this.center)
       const clientP = ControlUtils.getNoRotationPos(vect, this.center, angleInRad)
 
-      this.control.xSign = (clientP.x - this.center.x > 0) ? this.flipFactorX : -this.flipFactorX
-      this.control.ySign = (clientP.y - this.center.y > 0) ? this.flipFactorY : -this.flipFactorY
+      this.control.xSign = (clientP.x - this.center.x > 0) ? 1 : -1
+      this.control.ySign = (clientP.y - this.center.y > 0) ? 1 : -1
 
       this.currCursorStyling(event)
 
@@ -377,11 +351,10 @@ export default Vue.extend({
         diff.offsetX /= primaryScale
         diff.offsetY /= primaryScale
       }
-      // const [dx, dy] = [diff.offsetX / this.config.styles.scale, diff.offsetY / this.config.styles.scale]
       const [dx, dy] = [diff.offsetX / this.getLayerScale, diff.offsetY / this.getLayerScale]
 
-      const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad)) * this.flipFactorX
-      const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad)) * this.flipFactorY
+      const offsetWidth = this.control.xSign * (dy * Math.sin(angleInRad) + dx * Math.cos(angleInRad))
+      const offsetHeight = this.control.ySign * (dy * Math.cos(angleInRad) - dx * Math.sin(angleInRad))
       if (offsetWidth === 0 || offsetHeight === 0) return
       const initWidth = this.initialWH.width
       const initHeight = this.initialWH.height
@@ -456,13 +429,6 @@ export default Vue.extend({
         height = offsetSize.height + initHeight
         width = offsetSize.width + initWidth
       }
-
-      // this.updateLayerStyles({
-      //   imgWidth: width,
-      //   imgHeight: height,
-      //   imgX: imgPos.x,
-      //   imgY: imgPos.y
-      // })
       this.updateConfig({
         imgWidth: width,
         imgHeight: height,
@@ -475,11 +441,6 @@ export default Vue.extend({
         x: Math.abs(e.clientX - this.initialPos.x),
         y: Math.abs(e.clientY - this.initialPos.y)
       }
-      // if (Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0) {
-      //   this.updateLayerProps({ imgControl: false })
-      //   stepsUtils.record()
-      //   this.updateLayerProps({ imgControl: true })
-      // }
       this.isControlling = false
       this.setCursorStyle('default')
 

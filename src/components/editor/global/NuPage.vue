@@ -117,44 +117,7 @@
                 @setFocus="setFocus()"
                 @getClosestSnaplines="getClosestSnaplines"
                 @clearSnap="clearSnap")
-          dim-background(v-if="isImgControl" :config="config" :pageScaleRatio="pageScaleRatio")
-          //- div(v-if="ImageUtils.isImgControl(pageIndex)"
-          //-     class="dim-background"
-          //-     :style="styles('control')")
-          //-   template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
-          //-     div
-          //-       nu-layer(style="opacity: 0.45"
-          //-         :layerIndex="currSubSelectedInfo.index"
-          //-         :pageIndex="pageIndex"
-          //-         :imgControl="true"
-          //-         :config="getCurrSubSelectedLayerShown")
-          //-     div
-          //-       nu-layer(:layerIndex="currSubSelectedInfo.index"
-          //-         :pageIndex="pageIndex"
-          //-         :config="getCurrSubSelectedLayerShown")
-          //-     div(class="page-control" :style="Object.assign(styles('control'))")
-          //-         nu-img-controller(:layerIndex="currSubSelectedInfo.index"
-          //-                           :pageIndex="pageIndex"
-          //-                           :primaryLayerIndex="currSelectedInfo.index"
-          //-                           :primaryLayer="getCurrLayer"
-          //-                           :forRender="true"
-          //-                           :config="getCurrSubSelectedLayerShown")
-          //-   template(v-else-if="getCurrLayer.type === 'image'")
-          //-     div
-          //-       nu-layer(:style="'opacity: 0.45'"
-          //-         :layerIndex="currSelectedIndex"
-          //-         :pageIndex="pageIndex"
-          //-         :imgControl="true"
-          //-         :config="Object.assign(getCurrLayer, { forRender: true })")
-          //-     div
-          //-       nu-layer(:layerIndex="currSelectedIndex"
-          //-         :pageIndex="pageIndex"
-          //-         :config="Object.assign(getCurrLayer, { forRender: true })")
-          //-     div(class="page-control" :style="Object.assign(styles('control'))")
-          //-         nu-img-controller(:layerIndex="currSelectedIndex"
-          //-                           :pageIndex="pageIndex"
-          //-                           :forRender="true"
-          //-                           :config="getCurrLayer")
+          dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio")
           div(v-if="isBackgroundImageControl"
               class="background-control"
               :style="backgroundControlStyles()")
@@ -312,7 +275,7 @@ export default Vue.extend({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
-      isImgControl: 'imgControl/isImgControl'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',

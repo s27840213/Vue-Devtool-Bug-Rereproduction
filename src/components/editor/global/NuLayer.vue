@@ -173,10 +173,6 @@ export default Vue.extend({
       }
       return styles
     },
-    flipStyles() {
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      return CssConveter.convertFlipStyle(horizontalFlip, verticalFlip)
-    },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       e.stopPropagation()
@@ -234,10 +230,6 @@ export default Vue.extend({
   transform-origin: top left;
   top: 0;
   left: 0;
-}
-
-.layer-flip {
-  transition: transform 0.2s linear;
 }
 
 .test-index {

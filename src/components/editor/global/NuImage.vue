@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="!isImgControl" class="nu-image"
+  div(v-if="!isImgControl || forRender" class="nu-image"
     :id="`nu-image-${config.id}`"
     :style="styles"
     draggable="false")
@@ -94,7 +94,11 @@ export default Vue.extend({
     imgControl: Boolean,
     /** This prop is used to present if this image-component is
      *  only used for rendering as image controlling */
-    forRender: Boolean
+    forRender: Boolean,
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    }
   },
   async created() {
     this.handleInitLoad()
@@ -228,7 +232,7 @@ export default Vue.extend({
     },
     'config.imgControl'(val) {
       if (val) {
-        this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex, subLayerIdx: this.subLayerIndex })
+        this.setImgConfig(this.layerInfo)
       } else {
         this.setImgConfig(undefined)
         this.handleDimensionUpdate()
@@ -285,11 +289,16 @@ export default Vue.extend({
       return this.config.imgControl
     },
     layerInfo(): ILayerInfo {
-      return {
+      const layerInfo = {
         pageIndex: this.pageIndex,
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
       }
+      const { primaryLayer } = this
+      if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
+        layerInfo.subLayerIdx--
+      }
+      return layerInfo
     },
     styles(): any {
       const { width, height } = this.config.styles
