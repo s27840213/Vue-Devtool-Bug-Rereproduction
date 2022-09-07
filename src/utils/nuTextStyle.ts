@@ -150,6 +150,9 @@ export default Extension.create({
           backgroundSize: {
             default: 'auto'
           },
+          backgroundPositionX: {
+            default: '0%'
+          },
           backgroundPositionY: {
             default: '0%'
           },

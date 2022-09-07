@@ -34,6 +34,7 @@ const styleMap = {
   backgroundRepeat: 'background-repeat',
   backgroundImage: 'background-image',
   backgroundSize: 'background-size',
+  backgroundPositionX: 'background-position-x',
   backgroundPositionY: 'background-position-y',
   // below are not css valid properties, only for tiptap to record
   type: 'font-type',
@@ -64,7 +65,7 @@ const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpaci
   'size', 'color', 'writingMode', 'decoration', 'style', 'caretColor',
   'type', 'assetId', 'userId', 'fontUrl', 'filter', 'backgroundColor', 'padding',
   'boxDecorationBreak', 'backgroundRepeat', 'backgroundImage', 'backgroundSize',
-  'backgroundPositionY'
+  'backgroundPositionX', 'backgroundPositionY'
 ]
 
 class CssConveter {
