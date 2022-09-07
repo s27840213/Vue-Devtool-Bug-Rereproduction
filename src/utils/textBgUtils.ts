@@ -102,9 +102,10 @@ class TextBg {
 
   convertTextSpanEffect(styles: IStyle): Record<string, unknown> {
     const effect = styles.textBg as ITextBgEffect
+    if (!isITextUnderline(effect) && !isITextGooey(effect)) return {}
+    const color = this.rgba(effect.color, effect.opacity * 0.01)
 
     if (isITextUnderline(effect)) {
-      const color = this.rgba(effect.color, effect.opacity * 0.01)
       const borderWidth = Math.round(effect.height / 2)
       let bgEndpoints = ''
 
@@ -152,40 +153,16 @@ class TextBg {
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
-      const color = this.rgba(effect.color, effect.opacity * 0.006 + 0.4)
-      const svgId = `textBg_gooey_${effect.color}_${effect.opacity}_${effect.bRadius}`
       return {
         padding: '0 20px',
-        filter: `url(#${svgId})`,
-        backgroundColor: color,
-        svgId: svgId,
-        svgFilter: [
-          imageAdjustUtil.createSvgFilter({
-            tag: 'feGaussianBlur',
-            attrs: {
-              in: 'SourceGraphic',
-              result: 'blur',
-              stdDeviation: effect.bRadius * 0.5
-            }
-          }),
-          imageAdjustUtil.createSvgFilter({
-            tag: 'feColorMatrix',
-            attrs: {
-              in: 'blur',
-              result: 'goo',
-              mode: 'matrix',
-              values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9'
-            }
-          }),
-          imageAdjustUtil.createSvgFilter({
-            tag: 'feComposite',
-            attrs: {
-              in: 'SourceGraphic',
-              in2: 'goo',
-              operator: 'atop'
-            }
-          })
-        ]
+        boxDecorationBreak: 'clone',
+        duplicatedSpan: {
+          padding: '0 20px',
+          borderRadius: `${effect.bRadius}px`,
+          color: 'transparent',
+          boxDecorationBreak: 'clone',
+          backgroundColor: color
+        }
       }
     } else return {}
   }

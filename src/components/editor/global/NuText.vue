@@ -19,10 +19,10 @@
           :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     //- Duplicate of nu-text__body, used to implement text shadow bold3d.
-    div(v-if="config.styles.textEffect.name === 'bold3d'" class="nu-text__body"
+    div(v-if="showDuplicated" class="nu-text__body"
         :style="Object.assign(bodyStyles(), duplicatedBody)")
       nu-curve-text(v-if="isCurveText"
-        class="duplicatedP"
+        isDuplicated
         :config="config"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
@@ -196,22 +196,30 @@ export default Vue.extend({
       }
       return textBgUtils.convertTextSpanEffect(this.config.styles)
     },
-    duplicatedBody() {
-      const bold3d = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+    showDuplicated() {
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles)
+      return Boolean(textShadow.duplicatedBody || textShadow.duplicatedSpan ||
+        textBg.duplicatedBody || textBg.duplicatedSpan
+      )
+    },
+    duplicatedBody():Record<string, string> {
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
       return {
         position: 'absolute',
-        top: bold3d.shadowTop,
-        left: bold3d.shadowLeft,
+        top: '0px',
         zIndex: '-1',
         width: '100%',
         opacity: 1,
-        webkitTextStroke: bold3d.shwdowWebkitTextStroke,
-        '--bold3d-color': bold3d.shadowColor
+        ...textShadow.duplicatedBody
       }
     },
-    duplicatedSpan() {
+    duplicatedSpan():Record<string, string> {
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles)
       return {
-        color: 'var(--bold3d-color)'
+        ...textShadow.duplicatedSpan,
+        ...textBg.duplicatedSpan as Record<string, string>
       }
     }
     // },

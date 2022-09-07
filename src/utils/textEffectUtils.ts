@@ -212,10 +212,14 @@ class Controller {
         const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
         return {
           webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
-          shadowLeft: `${x}px`,
-          shadowTop: `${y}px`,
-          shadowColor: colorWithOpacity,
-          shwdowWebkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
+          duplicatedBody: {
+            top: `${y}px`,
+            left: `${x}px`,
+            webkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
+          },
+          duplicatedSpan: {
+            color: colorWithOpacity
+          }
         }
       }
       default:
