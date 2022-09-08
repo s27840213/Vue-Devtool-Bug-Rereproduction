@@ -84,6 +84,19 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
         image.styles.x = primaryLayer.styles.x
         image.styles.y = primaryLayer.styles.y
         image.styles.scale = primaryLayer.styles.scale
+        const pv = primaryLayer.styles.verticalFlip
+        const ph = primaryLayer.styles.horizontalFlip
+        const v = image.styles.verticalFlip
+        const h = image.styles.horizontalFlip
+        image.styles.verticalFlip = (pv || v) && !(pv && v)
+        image.styles.horizontalFlip = (ph || h) && !(ph && h)
+        image.styles.rotate = primaryLayer.styles.rotate
+        if (pv) {
+          image.styles.imgY = image.styles.height - image.styles.imgHeight - image.styles.imgY
+        }
+        if (ph) {
+          image.styles.imgX = image.styles.width - image.styles.imgWidth - image.styles.imgX
+        }
         return image
       } else {
         image.styles.x *= primaryLayer.styles.scale
@@ -121,7 +134,13 @@ const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage, _pr
   switch (primaryLayer.type) {
     case LayerType.frame: {
       if (frameUtils.isImageFrame(primaryLayer as IFrame)) {
-        const { styles: { imgX, imgY, imgWidth, imgHeight } } = image
+        let { styles: { imgX, imgY, imgWidth, imgHeight, width, height } } = image
+        if (primaryLayer.styles.verticalFlip) {
+          imgY = height - imgHeight - imgY
+        }
+        if (primaryLayer.styles.horizontalFlip) {
+          imgX = width - imgWidth - imgX
+        }
         frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, 0, {
           imgX, imgY, imgHeight, imgWidth
         })

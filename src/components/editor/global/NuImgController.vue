@@ -398,7 +398,8 @@ export default Vue.extend({
            *  => offsetSize.width + initWidth = this.config.styles.styles.width - this.initImgPos.imgX
            */
           if (currLayer.type === 'frame') {
-            offsetSize.width = this.config.styles.width / currLayer.styles.scale - this.initImgPos.imgX - initWidth
+            offsetSize.width = this.config.styles.width - this.initImgPos.imgX - initWidth
+            // offsetSize.width = this.config.styles.width / currLayer.styles.scale - this.initImgPos.imgX - initWidth
           } else {
             offsetSize.width = this.config.styles.width - this.initImgPos.imgX - initWidth
           }
@@ -419,7 +420,8 @@ export default Vue.extend({
           offsetSize.height = this.initImgPos.imgY
         } else {
           if (currLayer.type === 'frame') {
-            offsetSize.height = this.config.styles.height / currLayer.styles.scale - this.initImgPos.imgY - initHeight
+            offsetSize.height = this.config.styles.height - this.initImgPos.imgY - initHeight
+            // offsetSize.height = this.config.styles.height / currLayer.styles.scale - this.initImgPos.imgY - initHeight
           } else {
             offsetSize.height = this.config.styles.height - this.initImgPos.imgY - initHeight
           }
