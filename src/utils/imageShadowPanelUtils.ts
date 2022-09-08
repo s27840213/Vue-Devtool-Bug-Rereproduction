@@ -143,7 +143,7 @@ export default new class ImageShadowPanelUtils {
       // Handle the params for drawing
       setMark('upload', 1)
       const img = new Image()
-      let MAXSIZE = 1600
+      // let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
       img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
@@ -153,7 +153,7 @@ export default new class ImageShadowPanelUtils {
           if (isSVG) {
             await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
               img.onload = () => {
-                MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+                // MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
                 resolve()
               }
               img.onerror = () => {
@@ -163,7 +163,7 @@ export default new class ImageShadowPanelUtils {
               }
             })
           } else {
-            MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+            // MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
             resolve()
           }
         }
@@ -178,17 +178,31 @@ export default new class ImageShadowPanelUtils {
       logUtils.setLog('phase: finish load max size img')
       setMark('upload', 2)
       const updateCanvas = document.createElement('canvas')
-      const { width, height, imgWidth, imgHeight } = config.styles
-      const drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
-      const drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
+      let params = {} as any
+      let drawCanvasH = 0
+      let drawCanvasW = 0
+      if (config.styles.shadow.currentEffect === ShadowEffectType.floating) {
+        const ratio = config.styles.imgWidth / config.styles.imgHeight
+        drawCanvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio))
+        drawCanvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600))
+        const _canvasW = (ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE
+        const _canvasH = (ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE
+        updateCanvas.setAttribute('width', `${_canvasW}`)
+        updateCanvas.setAttribute('height', `${_canvasH}`)
+        params = { timeout: 0, drawCanvasW, drawCanvasH }
+      } else {
+        const { width, height, imgWidth, imgHeight } = config.styles
+        drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
+        drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
 
-      const canvasW = Math.round(img.naturalWidth + CANVAS_SPACE)
-      const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
-      // const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
-      // const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
-      updateCanvas.setAttribute('width', `${canvasW}`)
-      updateCanvas.setAttribute('height', `${canvasH}`)
-      const params = { timeout: 0, drawCanvasW, drawCanvasH, MAXSIZE }
+        const canvasW = Math.round(img.naturalWidth + CANVAS_SPACE)
+        const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
+        // const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
+        // const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
+        updateCanvas.setAttribute('width', `${canvasW}`)
+        updateCanvas.setAttribute('height', `${canvasH}`)
+        params = { timeout: 0, drawCanvasW, drawCanvasH }
+      }
       imageShadowUtils.drawingInit(updateCanvas, img, config, params)
 
       switch (config.styles.shadow.currentEffect) {
@@ -256,7 +270,6 @@ export default new class ImageShadowPanelUtils {
             }
           }).then(() => {
             const newImg = new Image()
-            newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
               const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
               layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
