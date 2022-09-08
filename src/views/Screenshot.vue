@@ -21,6 +21,7 @@ import { CustomWindow } from '@/interfaces/customWindow'
 import pageUtils from '@/utils/pageUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import { IPage } from '@/interfaces/page'
+import shapeUtils from '@/utils/shapeUtils'
 
 declare let window: CustomWindow
 
@@ -90,7 +91,10 @@ export default Vue.extend({
         switch (type) {
           case 'svg': {
             const json = await (await fetch(`https://template.vivipic.com/${type}/${id}/config.json?ver=${ver}`)).json()
-            const vSize = json.vSize as number[]
+            let vSize = json.vSize as number[] | undefined
+            if (!vSize) {
+              vSize = [json.styles.width, json.styles.height]
+            }
             const pageAspectRatio = window.innerWidth / window.innerHeight
             const svgAspectRatio = vSize[0] / vSize[1]
             const svgWidth = svgAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * svgAspectRatio

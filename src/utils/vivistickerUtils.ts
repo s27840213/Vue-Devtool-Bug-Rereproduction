@@ -58,6 +58,7 @@ class ViviStickerUtils {
     switch (item.type) {
       case 5:
       case 11:
+      case 10:
         return `type=svg&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
