@@ -4,7 +4,7 @@
     img(class="category-object-item__img"
       draggable="false"
       :src="src || `https://template.vivipic.com/svg/${item.id}/prev?ver=${item.ver}`")
-    pro-item(v-if="item.plan")
+    //- pro-item(v-if="item.plan")
     div(v-if="item.type !== 8" class="category-object-item__edit" @click.stop.prevent="handleEditObject")
       svg-icon(iconName="pen" iconColor="white" iconWidth="18px")
 </template>
@@ -31,7 +31,7 @@ export default Vue.extend({
   },
   methods: {
     addSvg() {
-      if (!paymentUtils.checkPro(this.item, 'pro-object')) return
+      // if (!paymentUtils.checkPro(this.item, 'pro-object')) return
       if (this.item.type === 8) {
         this.handleEditObject()
       } else {
