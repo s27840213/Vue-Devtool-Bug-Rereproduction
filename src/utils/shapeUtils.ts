@@ -199,16 +199,15 @@ class ShapeUtils {
      * The following code is meant to merge the style computed from user settings and the style
      * originally on the svg elements.
      */
-
     // convert svg string to doc object
-    const svgDoc = (new DOMParser()).parseFromString(svgOut, 'text/html')
+    const svgDoc = (new DOMParser()).parseFromString(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">${svgOut}</svg>`, 'image/svg+xml')
     // get the parent element containing top-level svg elements
-    const body = svgDoc.childNodes[0].childNodes[1]
-    this.mergeClassAndStyle(body)
-    svgOut = (new XMLSerializer()).serializeToString(body)
-    // since string produced by XMLSerializer contains root body tag, remove it in the following:
-    svgOut = svgOut.replace(/<body[^>]*>/g, '')
-    svgOut = svgOut.replace(/<\/body>/g, '')
+    const svg = svgDoc.childNodes[0]
+    this.mergeClassAndStyle(svg)
+    svgOut = (new XMLSerializer()).serializeToString(svg)
+    // since string produced by XMLSerializer contains root svg tag, remove it in the following:
+    svgOut = svgOut.replace(/<svg[^>]*>/g, '')
+    svgOut = svgOut.replace(/<\/svg>/g, '')
     return svgOut
   }
 
@@ -220,7 +219,9 @@ class ShapeUtils {
         const styleContent = node.attributes.getNamedItem('style')?.value ?? ''
         const mergedContent = classContent + styleContent
         node.removeAttribute('class')
-        node.setAttribute('style', mergedContent)
+        if (mergedContent) {
+          node.setAttribute('style', mergedContent)
+        }
       }
       if (child.hasChildNodes()) {
         this.mergeClassAndStyle(child)
