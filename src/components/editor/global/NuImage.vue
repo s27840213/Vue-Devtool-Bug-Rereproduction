@@ -790,23 +790,27 @@ export default Vue.extend({
       // small size preview
       const { width, height, imgWidth, imgHeight, shadow } = this.config.styles
       const _mappingScale = shadow.middsize / shadow.maxsize
+      let _drawCanvasW = 0
+      let _drawCanvasH = 0
+      this.shadowBuff.drawCanvasW = Math.round(img.naturalWidth * width / imgWidth)
+      this.shadowBuff.drawCanvasH = Math.round(img.naturalHeight * height / imgHeight)
       if (currentEffect === ShadowEffectType.floating) {
         const ratio = img.naturalWidth / img.naturalHeight
         const _canvasW = (ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE
         const _canvasH = (ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE
-        this.shadowBuff.drawCanvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio))
-        this.shadowBuff.drawCanvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600))
-        this.shadowBuff.canvasSize.width = _canvasW * width / this.shadowBuff.drawCanvasW
-        this.shadowBuff.canvasSize.height = _canvasH * height / this.shadowBuff.drawCanvasH
+        _drawCanvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio))
+        _drawCanvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600))
+        this.shadowBuff.canvasSize.width = _canvasW * width / _drawCanvasW
+        this.shadowBuff.canvasSize.height = _canvasH * height / _drawCanvasH
         canvas.setAttribute('width', `${_canvasW}`)
         canvas.setAttribute('height', `${_canvasH}`)
       } else {
         const _canvasW = img.naturalWidth + CANVAS_SPACE * _mappingScale
         const _canvasH = img.naturalHeight + CANVAS_SPACE * _mappingScale
-        this.shadowBuff.drawCanvasW = Math.round(img.naturalWidth * width / imgWidth)
-        this.shadowBuff.drawCanvasH = Math.round(img.naturalHeight * height / imgHeight)
         this.shadowBuff.canvasSize.width = _canvasW * width / this.shadowBuff.drawCanvasW
         this.shadowBuff.canvasSize.height = _canvasH * height / this.shadowBuff.drawCanvasH
+        _drawCanvasW = this.shadowBuff.drawCanvasW
+        _drawCanvasH = this.shadowBuff.drawCanvasH
         canvas.setAttribute('width', `${_canvasW}`)
         canvas.setAttribute('height', `${_canvasH}`)
       }
@@ -822,8 +826,8 @@ export default Vue.extend({
 
       const params = {
         pageId: pageUtils.getPage(this.pageIndex).id,
-        drawCanvasW: shadowBuff.drawCanvasW,
-        drawCanvasH: shadowBuff.drawCanvasH,
+        drawCanvasW: _drawCanvasW,
+        drawCanvasH: _drawCanvasH,
         layerInfo,
         cb: this.clearShadowSrc
       }

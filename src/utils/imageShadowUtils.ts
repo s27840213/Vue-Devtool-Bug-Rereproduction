@@ -256,7 +256,6 @@ class ImageShadowUtils {
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     ctxMaxSize.beginPath()
 
-    console.log(canvasMaxSize.width, canvasMaxSize.height)
     const { styles } = config
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
