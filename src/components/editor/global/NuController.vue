@@ -590,7 +590,7 @@ export default Vue.extend({
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
+      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       return {
         transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width}px`,
@@ -609,8 +609,8 @@ export default Vue.extend({
         ...textBgStyles,
         borderWidth: 0,
         borderColor: 'transparent',
-        padding: textBgStyles.controllerPadding,
         backgroundColor: 'transparent',
+        backgroundImage: 'none',
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },

@@ -69,7 +69,7 @@ export default Vue.extend({
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
+          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
             textEffectStyles,

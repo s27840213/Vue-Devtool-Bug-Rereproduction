@@ -132,7 +132,7 @@ class TiptapUtils {
             // const newText = s.text.replace(' ', '\u202F')
             // const newText = s.text.replace(' ', '\u205F')
             const layerStyles = textEffectUtils.getCurrentLayer().styles
-            const textBg = textBgUtils.convertTextSpanEffect(layerStyles)
+            const textBg = textBgUtils.convertTextSpanEffect(layerStyles.textBg)
             return {
               type: 'text',
               text: newText,

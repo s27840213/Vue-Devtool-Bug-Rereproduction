@@ -1,6 +1,5 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
-    //- component(is="style") {{extraCss}}
     div(ref="text" class="nu-text__body" :style="bodyStyles()")
       nu-curve-text(v-if="isCurveText"
         ref="curveText"
@@ -18,7 +17,7 @@
           :key="span.id"
           :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    //- Duplicate of nu-text__body, used to implement text shadow bold3d.
+    //- Duplicate of nu-text__body, used to implement some text effect.
     div(v-if="showDuplicated" class="nu-text__body"
         :style="Object.assign(bodyStyles(), duplicatedBody)")
       nu-curve-text(v-if="isCurveText"
@@ -194,11 +193,11 @@ export default Vue.extend({
           this.subLayerIndex ?? -1
         )
       }
-      return textBgUtils.convertTextSpanEffect(this.config.styles)
+      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
     showDuplicated() {
       const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles)
+      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
       return Boolean(textShadow.duplicatedBody || textShadow.duplicatedSpan ||
         textBg.duplicatedBody || textBg.duplicatedSpan
       )
@@ -216,25 +215,12 @@ export default Vue.extend({
     },
     duplicatedSpan():Record<string, string> {
       const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles)
+      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
       return {
         ...textShadow.duplicatedSpan,
         ...textBg.duplicatedSpan as Record<string, string>
       }
     }
-    // },
-    // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
-    // extraCss(): string {
-    //   const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
-    //   return `
-    //     .nu-text__body[data-id="${this.uid}"] span::before {
-    //       ${rules?.before ?? ''}
-    //     }
-    //     .nu-text__body[data-id="${this.uid}"] span::after {
-    //       ${rules?.after ?? ''}
-    //     }
-    //   `
-    // }
   },
   watch: {
     'config.paragraphs': {

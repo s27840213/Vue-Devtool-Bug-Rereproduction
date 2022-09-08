@@ -82,26 +82,32 @@ class TextBg {
     }
   }
 
-  convertTextEffect(effect: ITextBgEffect) {
+  convertTextEffect(styles: IStyle) {
+    const effect = styles.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
 
     const opacity = effect.opacity * 0.01
+    const width = styles.width + (effect.bStroke + 20) * 2
+    const height = styles.height + (effect.bStroke + effect.pStroke) * 2
+    const innerWidth = styles.width + 20 * 2 + effect.bStroke
+    const innerHeight = styles.height + effect.pStroke * 2 + effect.bStroke
+    const innerRadius = Math.max(0, Math.min(effect.bRadius - effect.bStroke / 2, innerWidth / 2, innerHeight / 2))
+    const bgImg = `url("data:image/svg+xml;utf8,
+      <svg width='${width}' height='${height}' xmlns='http://www.w3.org/2000/svg'>
+        <path style='fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}' stroke-width='${effect.bStroke}' d='
+          m${effect.bStroke / 2} ${effect.bStroke / 2 + innerRadius}a${innerRadius} ${innerRadius} 0 01${innerRadius} -${innerRadius}
+          h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
+          v${innerHeight - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} ${innerRadius}
+          h-${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} -${innerRadius}z'/>
+      </svg>")`.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
     return {
-      borderWidth: `${effect.bStroke}px`,
-      borderStyle: 'solid',
-      borderColor: this.rgba(effect.bColor, opacity),
+      padding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`,
       borderRadius: `${effect.bRadius}px`,
-      padding: `${effect.pStroke}px 20px`,
-      backgroundColor: this.rgba(effect.pColor, opacity),
-      // Prevent BGcolor overflow to border
-      backgroundClip: 'padding-box',
-      // Only for Contorller
-      controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`
+      backgroundImage: bgImg
     }
   }
 
-  convertTextSpanEffect(styles: IStyle): Record<string, unknown> {
-    const effect = styles.textBg as ITextBgEffect
+  convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
     if (!isITextUnderline(effect) && !isITextGooey(effect)) return {}
     const color = this.rgba(effect.color, effect.opacity * 0.01)
 
