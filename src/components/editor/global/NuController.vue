@@ -1317,8 +1317,7 @@ export default Vue.extend({
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
 
-      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
-        this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
+      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect)
 
       eventUtils.addPointerEvent('pointermove', this.resizing)
       eventUtils.addPointerEvent('pointerup', this.resizeEnd)

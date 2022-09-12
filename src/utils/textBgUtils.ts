@@ -3,7 +3,6 @@ import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 
@@ -82,6 +81,10 @@ class TextBg {
     }
   }
 
+  inlineSvg(svg: string) {
+    return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
+  }
+
   convertTextEffect(styles: IStyle) {
     const effect = styles.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
@@ -92,6 +95,7 @@ class TextBg {
     const innerWidth = styles.width + 20 * 2 + effect.bStroke
     const innerHeight = styles.height + effect.pStroke * 2 + effect.bStroke
     const innerRadius = Math.max(0, Math.min(effect.bRadius - effect.bStroke / 2, innerWidth / 2, innerHeight / 2))
+    // How to prevent stroke and color mix, https://stackoverflow.com/a/69290621
     const bgImg = `url("data:image/svg+xml;utf8,
       <svg width='${width}' height='${height}' xmlns='http://www.w3.org/2000/svg'>
         <path style='fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}' stroke-width='${effect.bStroke}' d='
@@ -99,11 +103,12 @@ class TextBg {
           h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
           v${innerHeight - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} ${innerRadius}
           h-${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} -${innerRadius}z'/>
-      </svg>")`.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
+      </svg>")`
     return {
       padding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`,
       borderRadius: `${effect.bRadius}px`,
-      backgroundImage: bgImg
+      backgroundImage: this.inlineSvg(bgImg),
+      backgroundSize: '100% 100%'
     }
   }
 
@@ -123,7 +128,7 @@ class TextBg {
             </svg>"), url("data:image/svg+xml;utf8,
             <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
               <path d='m0 0h${borderWidth + 1}l-${borderWidth} ${borderWidth * 2}h-1z'/>
-            </svg>")`.replace(/\n[ ]*/g, '')
+            </svg>")`
           break
         case 'rounded':
           bgEndpoints = `url("data:image/svg+xml;utf8,
@@ -132,7 +137,7 @@ class TextBg {
             </svg>"), url("data:image/svg+xml;utf8,
             <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
               <path d='m0 0h1a1 1 0 010 ${borderWidth * 2}h-1z'/>
-            </svg>")`.replace(/\n[ ]*/g, '')
+            </svg>")`
           break
         case 'square':
           bgEndpoints = `url("data:image/svg+xml;utf8,
@@ -141,7 +146,7 @@ class TextBg {
             </svg>"), url("data:image/svg+xml;utf8,
             <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
               <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
-            </svg>")`.replace(/\n[ ]*/g, '')
+            </svg>")`
           break
       }
 
@@ -150,7 +155,7 @@ class TextBg {
         backgroundRepeat: 'no-repeat',
         backgroundImage: `
           linear-gradient(180deg, ${color}, ${color}),
-          ${bgEndpoints}`,
+          ${this.inlineSvg(bgEndpoints)}`,
         backgroundSize: `
           calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
           ${borderWidth + 1}px ${borderWidth * 2}px,
