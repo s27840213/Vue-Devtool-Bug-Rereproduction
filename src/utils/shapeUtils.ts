@@ -154,7 +154,6 @@ class ShapeUtils {
 
   svgFormatter(svgIn: string, className: string, styleTextContent: string[], transTextContent: string[], point?: number[], svgParameters?: number[], pDiff?: number[]): string {
     let svgOut = svgIn
-    svgOut = svgOut.replace(/class/g, 'style')
     for (let i = 0; i < styleTextContent.length; i++) {
       const regId = new RegExp('\\$style\\[' + i + '\\]_ID', 'g')
       svgOut = svgOut.replace(regId, `${className}S${i}_ID`)
@@ -193,7 +192,41 @@ class ShapeUtils {
         return Math.max((Number(p1) + pDiff[1]), 0).toString()
       })
     }
+    /**
+     * To solve performance issue on Safari, inline style should be used instead of class.
+     * However, sometimes the S3 provided svg string has already contained inline style for
+     * some svg elements.
+     * The following code is meant to merge the style computed from user settings and the style
+     * originally on the svg elements.
+     */
+    // convert svg string to doc object
+    const svgDoc = (new DOMParser()).parseFromString(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">${svgOut}</svg>`, 'image/svg+xml')
+    // get the parent element containing top-level svg elements
+    const svg = svgDoc.childNodes[0]
+    this.mergeClassAndStyle(svg)
+    svgOut = (new XMLSerializer()).serializeToString(svg)
+    // since string produced by XMLSerializer contains root svg tag, remove it in the following:
+    svgOut = svgOut.replace(/<svg[^>]*>/g, '')
+    svgOut = svgOut.replace(/<\/svg>/g, '')
     return svgOut
+  }
+
+  mergeClassAndStyle(root: ChildNode) {
+    for (const child of root.childNodes) {
+      const node = child as SVGElement
+      if (node.attributes) {
+        const classContent = node.attributes.getNamedItem('class')?.value ?? ''
+        const styleContent = node.attributes.getNamedItem('style')?.value ?? ''
+        const mergedContent = classContent + styleContent
+        node.removeAttribute('class')
+        if (mergedContent) {
+          node.setAttribute('style', mergedContent)
+        }
+      }
+      if (child.hasChildNodes()) {
+        this.mergeClassAndStyle(child)
+      }
+    }
   }
 
   /**
