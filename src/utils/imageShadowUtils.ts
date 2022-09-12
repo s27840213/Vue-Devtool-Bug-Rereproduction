@@ -665,8 +665,8 @@ class ImageShadowUtils {
   }
 
   getImgEdgeWidth(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const ROW_PIXELS = imageData.data.length / imageData.height
     const COL_PIXELS = imageData.data.length / imageData.width
 
