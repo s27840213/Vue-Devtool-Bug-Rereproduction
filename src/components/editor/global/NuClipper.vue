@@ -6,7 +6,6 @@
 
 <script lang="ts">
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
 import Vue from 'vue'
