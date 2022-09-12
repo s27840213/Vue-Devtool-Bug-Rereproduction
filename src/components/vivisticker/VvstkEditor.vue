@@ -1,56 +1,27 @@
 <template lang="pug">
   div(class="vvstk-editor")
     div(class="vvstk-editor__pseudo-page" :style="styles('page')")
-      page-content(:config="config" :pageIndex="pageIndex" :noBg="true")
-      div(class="page-control" :style="styles('control')")
-        template(v-for="(layer, index) in config.layers")
-          component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-controller'"
-            data-identifier="controller"
-            :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-            :layerIndex="index"
-            :pageIndex="pageIndex"
-            :config="layer"
-            :snapUtils="snapUtils"
-            @getClosestSnaplines="getClosestSnaplines"
-            @clearSnap="clearSnap")
-      div(v-if="imageUtils.isImgControl(pageIndex)"
-          class="dim-background"
-          :style="styles('control')")
-        template(v-if="getCurrLayer.type === 'group' || getCurrLayer.type === 'frame'")
-          nu-layer(style="opacity: 0.45"
-            :layerIndex="currSubSelectedInfo.index"
-            :pageIndex="pageIndex"
-            :imgControl="true"
-            :config="getCurrSubSelectedLayerShown")
-          nu-layer(:layerIndex="currSubSelectedInfo.index"
-            :pageIndex="pageIndex"
-            :config="getCurrSubSelectedLayerShown")
-          div(class="page-control" :style="Object.assign(styles('control'))")
-              nu-img-controller(:layerIndex="currSubSelectedInfo.index"
-                                :pageIndex="pageIndex"
-                                :primaryLayerIndex="currSelectedInfo.index"
-                                :primaryLayer="getCurrLayer"
-                                :forRender="true"
-                                :config="getCurrSubSelectedLayerShown")
-        template(v-else-if="getCurrLayer.type === 'image'")
-          nu-layer(:style="'opacity: 0.45'"
-            :layerIndex="currSelectedIndex"
-            :pageIndex="pageIndex"
-            :imgControl="true"
-            :config="Object.assign(getCurrLayer, { forRender: true })")
-          nu-layer(:layerIndex="currSelectedIndex"
-            :pageIndex="pageIndex"
-            :config="Object.assign(getCurrLayer, { forRender: true })")
-          div(class="page-control" :style="Object.assign(styles('control'))")
-              nu-img-controller(:layerIndex="currSelectedIndex"
-                                :pageIndex="pageIndex"
-                                :forRender="true"
-                                :config="getCurrLayer")
+      div(class="vvstk-editor__scale-container" :style="styles('scale')")
+        page-content(:config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio")
+        div(class="page-control" :style="styles('control')")
+          template(v-for="(layer, index) in config.layers")
+            nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
+              data-identifier="controller"
+              :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
+              :layerIndex="index"
+              :pageIndex="pageIndex"
+              :config="layer"
+              :snapUtils="snapUtils"
+              :contentScaleRatio="contentScaleRatio"
+              @getClosestSnaplines="getClosestSnaplines"
+              @clearSnap="clearSnap")
+        dim-background(v-if="isImgControl" :config="config" :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
+import DimBackground from '@/components/editor/page/DimBackground.vue'
 import { IPage } from '@/interfaces/page'
 import { mapGetters } from 'vuex'
 import { IFrame, IGroup, IImage, ILayer, ITmp } from '@/interfaces/layer'
@@ -82,7 +53,8 @@ export default Vue.extend({
       currSelectedIndex: 'getCurrSelectedIndex',
       pages: 'getPages',
       getLayer: 'getLayer',
-      editorBg: 'vivisticker/getEditorBg'
+      editorBg: 'vivisticker/getEditorBg',
+      isImgControl: 'imgControl/isImgControl'
     }),
     config(): IPage {
       return this.pages[this.pageIndex]
@@ -130,10 +102,14 @@ export default Vue.extend({
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
+    },
+    contentScaleRatio(): number {
+      return 0.4
     }
   },
   components: {
-    PageContent
+    PageContent,
+    DimBackground
   },
   methods: {
     styles(type: string) {
@@ -159,6 +135,10 @@ export default Vue.extend({
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
             backgroundColor: this.editorBg
+          }
+        case 'scale':
+          return {
+            transform: `scale(${1 / this.contentScaleRatio})`
           }
       }
     },
@@ -186,6 +166,13 @@ export default Vue.extend({
     margin: 16px auto 0 auto;
     box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
     border-radius: 10px;
+  }
+  &__scale-container {
+    width: 0px;
+    height: 0px;
+    position: relative;
+    box-sizing: border-box;
+    transform-origin: 0 0;
   }
 }
 
