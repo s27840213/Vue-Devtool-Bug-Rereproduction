@@ -14,6 +14,7 @@
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
+    font-tag
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -59,13 +60,15 @@ import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import FontTag from '@/components/font/FontTag.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
     CategoryFontItem,
-    CategoryListFont
+    CategoryListFont,
+    FontTag
   },
   props: {
     noTitle: {
