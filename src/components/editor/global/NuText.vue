@@ -204,13 +204,15 @@ export default Vue.extend({
     },
     duplicatedBody():Record<string, string> {
       const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
       return {
         position: 'absolute',
         top: '0px',
         zIndex: '-1',
         width: '100%',
         opacity: 1,
-        ...textShadow.duplicatedBody
+        ...textShadow.duplicatedBody,
+        ...textBgSpan.duplicatedBody as Record<string, string>
       }
     },
     duplicatedSpan():Record<string, string> {

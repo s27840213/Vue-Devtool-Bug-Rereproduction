@@ -376,7 +376,7 @@ class ConstantData {
       }, {
         key: 'gooey',
         label: i18n.tc('NN0726'),
-        options: toOptions(['bRadius', 'opacity', 'color'])
+        options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
       }, {
         key: 'underline',
         label: i18n.tc('NN0727'),

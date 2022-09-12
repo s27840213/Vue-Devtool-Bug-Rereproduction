@@ -37,6 +37,7 @@ export interface ITextUnderline {
 
 export interface ITextGooey {
   name: 'gooey'
+  distance: number
   bRadius: number
   opacity: number
   color: string

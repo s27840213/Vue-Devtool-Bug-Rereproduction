@@ -3,6 +3,7 @@ import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 
@@ -74,6 +75,7 @@ class TextBg {
         color: '#F1D289'
       },
       gooey: {
+        distance: 0,
         bRadius: 48,
         opacity: 100,
         color: '#F1D289'
@@ -164,16 +166,48 @@ class TextBg {
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
     } else if (isITextGooey(effect)) {
+      const svgId = `textBg_gooey_${effect.bRadius}`
       return {
-        padding: '0 20px',
+        padding: `${effect.distance}px ${effect.distance + 20}px`,
         boxDecorationBreak: 'clone',
+        duplicatedBody: {
+          filter: `url(#${svgId})`,
+          opacity: effect.opacity * 0.01
+        },
         duplicatedSpan: {
-          padding: '0 20px',
-          borderRadius: `${effect.bRadius}px`,
+          padding: `${effect.distance}px ${effect.distance + 20}px`,
           color: 'transparent',
           boxDecorationBreak: 'clone',
-          backgroundColor: color
-        }
+          backgroundColor: effect.color
+        },
+        svgId: svgId,
+        svgFilter: [
+          imageAdjustUtil.createSvgFilter({
+            tag: 'feGaussianBlur',
+            attrs: {
+              in: 'SourceGraphic',
+              result: 'blur',
+              stdDeviation: effect.bRadius * 0.5
+            }
+          }),
+          imageAdjustUtil.createSvgFilter({
+            tag: 'feColorMatrix',
+            attrs: {
+              in: 'blur',
+              result: 'goo',
+              mode: 'matrix',
+              values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9'
+            }
+          }),
+          imageAdjustUtil.createSvgFilter({
+            tag: 'feComposite',
+            attrs: {
+              in: 'SourceGraphic',
+              in2: 'goo',
+              operator: 'atop'
+            }
+          })
+        ]
       }
     } else return {}
   }
