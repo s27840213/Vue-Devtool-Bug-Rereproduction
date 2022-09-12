@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="category-background-item")
     img(class="pointer"
-      :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
+      :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'tiny', item.ver)"
       draggable="false"
       v-press="handleShare"
       @click="addBackground"
