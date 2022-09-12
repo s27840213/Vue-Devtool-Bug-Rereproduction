@@ -63,7 +63,8 @@ class AssetUtils {
       8: 'svg',
       9: 'svg',
       10: 'svg',
-      11: 'svg'
+      11: 'svg',
+      15: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
   }
@@ -99,15 +100,15 @@ class AssetUtils {
   }
 
   fetch(item: IListServiceContentDataItem): Promise<IAsset> {
-    const { id, type, ver, db, ...attrs } = item
+    const { id, type, ver, ...attrs } = item
     const typeCategory = this.getTypeCategory(type)
     const asset = {
       id,
       type,
       ver,
       urls: {
-        prev: [this.host, db || typeCategory, id, this.preview].join('/'),
-        json: [this.host, db || typeCategory, id, this.data].join('/')
+        prev: [this.host, typeCategory, id, this.preview].join('/'),
+        json: [this.host, typeCategory, id, this.data].join('/')
       },
       ...attrs
     } as IAsset
@@ -592,17 +593,17 @@ class AssetUtils {
           break
         case 5:
         case 9:
-          this.addSvg(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addSvg({ ...asset.jsonData, designId: item.id, db: 'svg' }, attrs)
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
-          this.addText(Object.assign({}, asset.jsonData, { designId: item.id, db: item.db }), attrs)
+          this.addText({ ...asset.jsonData, designId: item.id, db: 'text' }, attrs)
           break
         case 8:
-          this.addFrame(Object.assign({}, asset.jsonData, { designId: item.id }), attrs)
+          this.addFrame({ ...asset.jsonData, designId: item.id }, attrs)
           break
         case 10:
           this.addLine(asset.jsonData, attrs)
