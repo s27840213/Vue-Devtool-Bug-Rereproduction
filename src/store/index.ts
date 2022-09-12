@@ -29,6 +29,7 @@ import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import imgControl from '@/store/module/imgControl'
 import { ADD_subLayer } from '@/utils/layerUtils'
 
 Vue.use(Vuex)
@@ -100,7 +101,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: false,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 0.4
+  defaultContentScaleRatio: 0.25
 })
 
 const state = getDefaultState()
@@ -854,6 +855,7 @@ export default new Vuex.Store({
     markers,
     bgRemove,
     shadow,
-    vivisticker
+    vivisticker,
+    imgControl
   }
 })

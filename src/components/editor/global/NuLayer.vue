@@ -14,7 +14,8 @@
             :config="config"
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
-            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            v-bind="$attrs")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
@@ -52,6 +53,10 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
+    inFrame: {
+      type: Boolean,
+      default: false
+    },
     contentScaleRatio: {
       default: 1,
       type: Number
@@ -71,7 +76,7 @@ export default Vue.extend({
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer, this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer, this.inFrame ? 1 : this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -154,7 +159,7 @@ export default Vue.extend({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio})` : `scale(${scale * this.contentScaleRatio}) scale(${this.pageScaleRatio}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? `scale(${this.pageScaleRatio})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.pageScaleRatio}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
       return styles
     }
