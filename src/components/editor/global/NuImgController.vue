@@ -62,7 +62,7 @@ export default Vue.extend({
       return
     }
     const shadow = (this.config as IImage).styles.shadow
-    if (shadow.currentEffect !== ShadowEffectType.none) {
+    if (![ShadowEffectType.none, ShadowEffectType.floating].includes(shadow.currentEffect)) {
       if (shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent) {
         imageShadowUtils.setProcessId({
           pageId: pageUtils.currFocusPage.id,
