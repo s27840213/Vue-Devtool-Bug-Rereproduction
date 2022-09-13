@@ -97,20 +97,27 @@ class TextBg {
     const innerWidth = styles.width + 20 * 2 + effect.bStroke
     const innerHeight = styles.height + effect.pStroke * 2 + effect.bStroke
     const innerRadius = Math.max(0, Math.min(effect.bRadius - effect.bStroke / 2, innerWidth / 2, innerHeight / 2))
-    // How to prevent stroke and color mix, https://stackoverflow.com/a/69290621
-    const bgImg = `url("data:image/svg+xml;utf8,
-      <svg width='${width}' height='${height}' xmlns='http://www.w3.org/2000/svg'>
-        <path style='fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}' stroke-width='${effect.bStroke}' d='
-          m${effect.bStroke / 2} ${effect.bStroke / 2 + innerRadius}a${innerRadius} ${innerRadius} 0 01${innerRadius} -${innerRadius}
-          h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
-          v${innerHeight - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} ${innerRadius}
-          h-${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} -${innerRadius}z'/>
-      </svg>")`
+
     return {
       padding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`,
       borderRadius: `${effect.bRadius}px`,
-      backgroundImage: this.inlineSvg(bgImg),
-      backgroundSize: '100% 100%'
+      // How to prevent stroke and color mix, https://stackoverflow.com/a/69290621
+      svg: {
+        width,
+        height,
+        content: [{
+          tag: 'path',
+          attrs: {
+            style: `fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}`,
+            'stroke-width': `${effect.bStroke}`,
+            d: `
+              m${effect.bStroke / 2} ${effect.bStroke / 2 + innerRadius}a${innerRadius} ${innerRadius} 0 01${innerRadius} -${innerRadius}
+              h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
+              v${innerHeight - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} ${innerRadius}
+              h-${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} -${innerRadius}z`
+          }
+        }]
+      }
     }
   }
 

@@ -43,6 +43,7 @@
         :data-sindex="sIndex"
         :key="sIndex",
         :style="styles(span.styles, sIndex)") {{ span.text }}
+    //- Svg filter for text effect gooey.
     svg(v-if="spanEffect.svgFilter")
       filter(:id="spanEffect.svgId")
         component(v-for="(elm, idx) in spanEffect.svgFilter"

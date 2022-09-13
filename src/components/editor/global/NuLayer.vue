@@ -4,6 +4,13 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
+    //- Svg BG for text effex box.
+    svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
+        class="nu-layer__BG")
+      component(v-for="(elm, idx) in svgBG.content"
+                :key="`svgFilter${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
@@ -89,6 +96,10 @@ export default Vue.extend({
         }
       }
       return styles
+    },
+    svgBG() {
+      const textBg = textBgUtils.convertTextEffect(this.config.styles)
+      return textBg.svg
     },
     getLayerPos(): { x: number, y: number } {
       return {
@@ -207,6 +218,9 @@ export default Vue.extend({
   transform-style: preserve-3d;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
+  }
+  &__BG {
+    position: absolute;
   }
   &__inProcess {
     width: 100%;
