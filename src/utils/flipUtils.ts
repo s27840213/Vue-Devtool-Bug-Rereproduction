@@ -38,13 +38,15 @@ class FlipUtils {
     }
     switch (layer.type) {
       case 'frame':
-        LayerUtils.subLayerIdx !== -1 && (() => {
+        if (LayerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(LayerUtils.getCurrLayer as IFrame)) {
+          const subIdx = Math.max(LayerUtils.subLayerIdx, 0)
           frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-            , LayerUtils.subLayerIdx, {
-            horizontalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.horizontalFlip
+            , subIdx, {
+            horizontalFlip: !(layer as IFrame).clips[subIdx].styles.horizontalFlip
           })
-        })()
-        LayerUtils.subLayerIdx === -1 && defaultFlip()
+        } else {
+          defaultFlip()
+        }
         break
       case 'group':
         LayerUtils.subLayerIdx !== -1 && (() => {
@@ -69,13 +71,15 @@ class FlipUtils {
     }
     switch (layer.type) {
       case 'frame':
-        LayerUtils.subLayerIdx !== -1 && (() => {
+        if (LayerUtils.subLayerIdx !== -1 || frameUtils.isImageFrame(LayerUtils.getCurrLayer as IFrame)) {
+          const subIdx = Math.max(LayerUtils.subLayerIdx, 0)
           frameUtils.updateFrameLayerStyles(currSelectedInfo.pageIndex, currSelectedInfo.index
-            , LayerUtils.subLayerIdx, {
-            verticalFlip: !(layer as IFrame).clips[LayerUtils.subLayerIdx].styles.verticalFlip
+            , subIdx, {
+            verticalFlip: !(layer as IFrame).clips[subIdx].styles.verticalFlip
           })
-        })()
-        LayerUtils.subLayerIdx === -1 && defaultFlip()
+        } else {
+          defaultFlip()
+        }
         break
       case 'group':
         LayerUtils.subLayerIdx !== -1 && (() => {
