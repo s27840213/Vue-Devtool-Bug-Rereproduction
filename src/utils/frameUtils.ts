@@ -153,7 +153,7 @@ class FrameUtils {
           isFrameImg: true
         }]
       } as unknown as IFrame)
-      LayerUtils.deleteLayer(LayerUtils.pageIndex, layerIndex)
+      LayerUtils.deleteLayer(pageIndex, layerIndex)
       LayerUtils.addLayersToPos(pageIndex, [newFrame], layerIndex)
       zindexUtils.reassignZindex(pageIndex)
       stepsUtils.record()
