@@ -12,7 +12,7 @@
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
-        class="nu-image__picture"
+        class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc"
         @error="onError()"
@@ -994,7 +994,15 @@ export default Vue.extend({
   align-items: center;
 
   &__picture {
-    // object-fit: cover;
+    object-fit: cover;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__picture-shadow {
     position: absolute;
     top: 0px;
     left: 0px;
