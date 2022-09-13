@@ -102,6 +102,7 @@ export default Vue.extend({
   align-items: center;
 
   &__range-input {
+    margin: 0;
     --lower-color: #{setColor(blue-1)};
     --upper-color: #{setColor(gray-4)};
     @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
