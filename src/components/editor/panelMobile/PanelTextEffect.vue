@@ -124,7 +124,6 @@ export default Vue.extend({
           break
       }
       this.recordChange()
-      this.$emit('fitPage')
     },
     recordChange() {
       stepsUtils.record()

@@ -113,7 +113,6 @@ export default Vue.extend({
       imageShadowUtils.setEffect(effectName, {
         ...(!alreadySetEffect && imageShadowUtils.getDefaultEffect(effectName))
       })
-      this.$emit('fitPage')
     },
     handleEffectUpdate(value: string, name: string): void {
       imageShadowPanelUtils.handleEffectUpdate(name, value)

@@ -46,8 +46,7 @@
           class="border-box p-2"
           v-bind="dynamicBindProps"
           v-on="dynamicBindMethod"
-          @close="closeMobilePanel"
-          @fitPage="fitPage")
+          @close="closeMobilePanel")
     transition(name="panel-up")
       mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
         :currActivePanel="currActiveSubPanel"
