@@ -47,6 +47,7 @@ import imageShadowUtils from '@/utils/imageShadowUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import frameUtils from '@/utils/frameUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -187,21 +188,6 @@ export default Vue.extend({
           isPreview: this.isUploading,
           previewsrc: this.previewSrc
         })
-        // @Test
-        // if (!['pixels', 'unsplash'].includes(srcObj.type)) {
-        //   const img = new Image()
-        //   img.crossOrigin = 'anonymous'
-        //   const src = imageUtils.getSrc(srcObj, 'tiny')
-        //   img.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-        //   const time1 = new Date()
-        //   img.onload = () => {
-        //     const time2 = new Date()
-        //     console.log(time2.getTime() - time1.getTime())
-        //     const isTransparent = imageShadowUtils.isTransparentBg(img)
-        //     console.log(isTransparent)
-        //     this.setCurrDraggedPhoto({ isTransparent })
-        //   }
-        // }
       }
     },
     dragEnd() {
@@ -261,6 +247,7 @@ export default Vue.extend({
         layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
       }
       this.setCloseMobilePanelFlag(true)
+      stepsUtils.record()
     },
     addImage(photo: IAssetPhoto) {
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
