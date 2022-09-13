@@ -147,6 +147,14 @@ export default Vue.extend({
 .ProseMirror.non-selectable {
   white-space: pre-wrap;
   // line-break: anywhere;
+  > p > span {
+    &:first-child {
+      padding-left: var(--textGooeyPaddingX) !important;
+    }
+    &:last-child {
+      padding-right: var(--textGooeyPaddingX) !important;
+    }
+  }
 }
 
 ::selection {

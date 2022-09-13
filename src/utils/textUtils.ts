@@ -599,7 +599,14 @@ class TextUtils {
             })
           })
         const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles.textBg)
-        Object.assign(span.style, spanStyleObject, textBgSpanEffect)
+        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>)
+        Object.assign(span.style, additionalStyle)
+        // Set CSS var to span
+        for (const [key, value] of Object.entries(additionalStyle)) {
+          if (key.startsWith('--')) {
+            span.style.setProperty(key, value)
+          }
+        }
 
         span.classList.add('nu-text__span')
         p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)

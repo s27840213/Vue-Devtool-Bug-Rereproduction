@@ -138,6 +138,16 @@ export default Extension.create({
           padding: {
             default: '0'
           },
+          paddingTop: {
+            default: '0'
+          },
+          paddingBottom: {
+            default: '0'
+          },
+          // To set padding left right, use CSS rule in NuTextEditor.
+          textGooeyPaddingX: {
+            default: '0'
+          },
           boxDecorationBreak: {
             default: 'slice'
           },

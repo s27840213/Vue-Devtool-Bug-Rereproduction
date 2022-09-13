@@ -294,6 +294,12 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
     // line-break: anywhere;
+    &:first-child {
+      padding-left: var(--textGooeyPaddingX);
+    }
+    &:last-child {
+      padding-right: var(--textGooeyPaddingX);
+    }
   }
   &__observee {
     position: absolute;

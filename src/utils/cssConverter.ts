@@ -30,6 +30,9 @@ const styleMap = {
   filter: 'filter',
   backgroundColor: 'background-color',
   padding: 'padding',
+  paddingTop: 'padding-top',
+  paddingBottom: 'padding-bottom',
+  textGooeyPaddingX: '--textGooeyPaddingX',
   boxDecorationBreak: 'box-decoration-break',
   backgroundRepeat: 'background-repeat',
   backgroundImage: 'background-image',
@@ -64,6 +67,7 @@ const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'color', 'writingMode', 'decoration', 'style', 'caretColor',
   'type', 'assetId', 'userId', 'fontUrl', 'filter', 'backgroundColor', 'padding',
+  'paddingTop', 'paddingBottom', 'textGooeyPaddingX',
   'boxDecorationBreak', 'backgroundRepeat', 'backgroundImage', 'backgroundSize',
   'backgroundPositionX', 'backgroundPositionY'
 ]

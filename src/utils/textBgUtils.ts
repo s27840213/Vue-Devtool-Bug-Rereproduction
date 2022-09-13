@@ -168,16 +168,17 @@ class TextBg {
     } else if (isITextGooey(effect)) {
       const svgId = `textBg_gooey_${effect.bRadius}`
       return {
-        padding: `${effect.distance}px ${effect.distance + 20}px`,
+        paddingTop: `${effect.distance}px`,
+        paddingBottom: `${effect.distance}px`,
+        textGooeyPaddingX: `${effect.distance + 20}px`, // For tiptap CSS var
+        '--textGooeyPaddingX': `${effect.distance + 20}px`,
         boxDecorationBreak: 'clone',
         duplicatedBody: {
           filter: `url(#${svgId})`,
           opacity: effect.opacity * 0.01
         },
         duplicatedSpan: {
-          padding: `${effect.distance}px ${effect.distance + 20}px`,
           color: 'transparent',
-          boxDecorationBreak: 'clone',
           backgroundColor: effect.color
         },
         svgId: svgId,
