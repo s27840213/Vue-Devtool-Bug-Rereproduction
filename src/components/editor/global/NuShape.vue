@@ -296,6 +296,14 @@ export default Vue.extend({
           // should be deleted after the new json format stablize
           if (!svg && this.config.designId) {
             const shape = await shapeUtils.fetchSvg(this.config)
+            if (shapeUtils.isSvgImg(shape)) {
+              shapeUtils.svgImgHandler({
+                pageIndex: this.pageIndex,
+                layerIndex: this.layerIndex,
+                subLayerIdx: this.subLayerIndex
+              }, this.config)
+              return
+            }
             shape.color = this.config.color
             this.config.styles.initWidth = shape.vSize[0]
             this.config.styles.initHeight = shape.vSize[1]
@@ -330,6 +338,14 @@ export default Vue.extend({
         default: {
           if (!svg && this.config.designId) {
             const shape = await shapeUtils.fetchSvg(this.config) as Partial<IShape>
+            if (shapeUtils.isSvgImg(shape)) {
+              shapeUtils.svgImgHandler({
+                pageIndex: this.pageIndex,
+                layerIndex: this.layerIndex,
+                subLayerIdx: this.subLayerIndex
+              }, this.config)
+              return
+            }
             this.config.color && this.config.color.length && (shape.color = this.config.color)
             !this.config.className && (this.config.className = shapeUtils.classGenerator())
 

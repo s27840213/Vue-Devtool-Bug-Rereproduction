@@ -12,7 +12,7 @@
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
-        class="nu-image__picture"
+        class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc"
         @error="onError()"
@@ -72,7 +72,7 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
-import imageShadowUtils, { CANVAS_SCALE, CANVAS_SIZE, CANVAS_SPACE } from '@/utils/imageShadowUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE, DRAWING_TIMEOUT } from '@/utils/imageShadowUtils'
 import eventUtils, { ImageEvent, PanelEvent } from '@/utils/eventUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import pageUtils from '@/utils/pageUtils'
@@ -169,15 +169,11 @@ export default Vue.extend({
       isOnError: false,
       src: '',
       shadowBuff: {
-        canvasScale: CANVAS_SCALE,
-        canvasShadowImg: {
-          shadow: undefined as undefined | HTMLImageElement,
-          imageMatched: undefined as undefined | HTMLImageElement,
-          floating: undefined as undefined | HTMLImageElement
-        },
+        canvasShadowImg: undefined as undefined | HTMLImageElement,
         canvasSize: { width: 0, height: 0 },
         drawCanvasW: 0,
-        drawCanvasH: 0
+        drawCanvasH: 0,
+        MAXSIZE: 0
       }
     }
   },
@@ -190,9 +186,7 @@ export default Vue.extend({
     },
     srcObj: {
       handler: function () {
-        this.shadowBuff.canvasShadowImg.imageMatched = undefined
-        this.shadowBuff.canvasShadowImg.shadow = undefined
-        this.shadowBuff.canvasShadowImg.floating = undefined
+        this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {
           return
         }
@@ -224,7 +218,7 @@ export default Vue.extend({
       }
     },
     showCanvas(val) {
-      if (val) {
+      if (val && (this.config as IImage).styles.shadow.srcObj.type) {
         setTimeout(() => {
           this.handleNewShadowEffect(false)
         })
@@ -241,12 +235,10 @@ export default Vue.extend({
         return
       }
       if (!this.config.imgControl && this.currentShadowEffect !== ShadowEffectType.none) {
-        if (this.shadow.isTransparent) {
+        if (this.shadow.isTransparent && ![ShadowEffectType.floating].includes(this.currentShadowEffect)) {
           this.redrawShadow()
-          // this.redrawShadow(true)
         } else if (this.currentShadowEffect === ShadowEffectType.imageMatched) {
           this.redrawShadow()
-          // this.redrawShadow(true)
         }
       }
     },
@@ -732,7 +724,7 @@ export default Vue.extend({
         }
       }
     },
-    handleNewShadowEffect(clearShadowSrc = true) {
+    async handleNewShadowEffect(clearShadowSrc = true) {
       const { canvas, layerInfo, shadowBuff } = this
       if (!canvas || this.isUploadingShadowImg) {
         if (!canvas) {
@@ -744,21 +736,102 @@ export default Vue.extend({
         return
       }
       clearShadowSrc && this.clearShadowSrc()
-      const { width, height } = this.config.styles
-      const spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
-      const _canvasW = (width + CANVAS_SPACE * spaceScale)
-      const _canvasH = (height + CANVAS_SPACE * spaceScale)
-      const canvasRatio = _canvasH / _canvasW
-      const canvasW = _canvasW >= _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
-      const canvasH = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
-      this.shadowBuff.drawCanvasW = width * canvasW / _canvasW
-      this.shadowBuff.drawCanvasH = height * canvasH / _canvasH
+      const { currentEffect } = this.shadow
+      const hasShadowSrc = this.shadow.srcObj.type && this.shadow.srcObj.type !== 'upload' && this.shadow.srcObj.assetId
+      if (currentEffect !== ShadowEffectType.none) {
+        const { id } = this
+        imageShadowUtils.setHandleId(id)
+        imageShadowUtils.setProcessId(id)
+        !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo, true)
+      }
 
-      this.shadowBuff.canvasSize.width = _canvasW
-      this.shadowBuff.canvasSize.height = _canvasH
+      let img = new Image()
+      if (!['unsplash', 'pixels'].includes(this.config.srcObj.type) && !this.shadowBuff.MAXSIZE) {
+        const res = await ImageUtils.getImgSize(this.config.srcObj, false)
+        if (res) {
+          this.shadowBuff.MAXSIZE = Math.min(Math.max(res.data.height, res.data.width), CANVAS_MAX_SIZE)
+        }
+      } else if (['unsplash', 'pixels'].includes(this.config.srcObj.type)) {
+        this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
+      }
 
-      canvas.setAttribute('width', `${canvasW}`)
-      canvas.setAttribute('height', `${canvasH}`)
+      switch (currentEffect) {
+        case ShadowEffectType.imageMatched:
+        case ShadowEffectType.floating:
+        case ShadowEffectType.shadow:
+        case ShadowEffectType.frame:
+        case ShadowEffectType.blur: {
+          if (!shadowBuff.canvasShadowImg) {
+            img.crossOrigin = 'anonymous'
+            img.src = ImageUtils.getSrc(this.config,
+              ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? CANVAS_SIZE : 'smal') +
+              `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            await new Promise<void>((resolve) => {
+              img.onload = async () => {
+                this.shadowBuff.canvasShadowImg = img
+                const isSVG = await imageShadowPanelUtils.isSVG(img, this.config)
+                if (isSVG) {
+                  imageShadowPanelUtils.svgImageSizeFormatter(img, 510, () => {
+                    /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
+                    img.onload = () => {
+                      this.shadowBuff.MAXSIZE = CANVAS_MAX_SIZE
+                      resolve()
+                    }
+                    img.onerror = () => {
+                      console.log('img load error')
+                      resolve()
+                    }
+                  })
+                } else {
+                  resolve()
+                }
+              }
+            })
+          } else {
+            img = shadowBuff.canvasShadowImg as HTMLImageElement
+          }
+          break
+        }
+        case ShadowEffectType.none:
+          imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
+          imageShadowUtils.clearLayerData()
+      }
+
+      imageShadowUtils.updateEffectProps(this.layerInfo, {
+        maxsize: shadowBuff.MAXSIZE,
+        middsize: Math.max(img.naturalWidth, img.naturalHeight)
+      })
+
+      /**
+       * Calculate canvas parameters
+       */
+      // small size preview
+      const { width, height, imgWidth, imgHeight, shadow } = this.config.styles
+      const _mappingScale = shadow.middsize / shadow.maxsize
+      let _drawCanvasW = 0
+      let _drawCanvasH = 0
+      this.shadowBuff.drawCanvasW = Math.round(img.naturalWidth * width / imgWidth)
+      this.shadowBuff.drawCanvasH = Math.round(img.naturalHeight * height / imgHeight)
+      if (currentEffect === ShadowEffectType.floating) {
+        const ratio = img.naturalWidth / img.naturalHeight
+        const _canvasW = (ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE
+        const _canvasH = (ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE
+        _drawCanvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio))
+        _drawCanvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600))
+        this.shadowBuff.canvasSize.width = _canvasW * width / _drawCanvasW
+        this.shadowBuff.canvasSize.height = _canvasH * height / _drawCanvasH
+        canvas.setAttribute('width', `${_canvasW}`)
+        canvas.setAttribute('height', `${_canvasH}`)
+      } else {
+        const _canvasW = img.naturalWidth + CANVAS_SPACE * _mappingScale
+        const _canvasH = img.naturalHeight + CANVAS_SPACE * _mappingScale
+        this.shadowBuff.canvasSize.width = _canvasW * width / this.shadowBuff.drawCanvasW
+        this.shadowBuff.canvasSize.height = _canvasH * height / this.shadowBuff.drawCanvasH
+        _drawCanvasW = this.shadowBuff.drawCanvasW
+        _drawCanvasH = this.shadowBuff.drawCanvasH
+        canvas.setAttribute('width', `${_canvasW}`)
+        canvas.setAttribute('height', `${_canvasH}`)
+      }
 
       let canvasList = [canvas]
       if (this.isShowPagePanel) {
@@ -769,129 +842,40 @@ export default Vue.extend({
         ] as HTMLCanvasElement[]
       }
 
-      const { currentEffect } = this.shadow
-      if (currentEffect !== ShadowEffectType.none) {
-        const { id } = this
-        imageShadowUtils.setHandleId(id)
-        imageShadowUtils.setProcessId(id)
-        imageShadowUtils.setIsProcess(layerInfo, true)
+      const params = {
+        pageId: pageUtils.getPage(this.pageIndex).id,
+        drawCanvasW: _drawCanvasW,
+        drawCanvasH: _drawCanvasH,
+        layerInfo,
+        cb: this.clearShadowSrc
       }
-      switch (currentEffect) {
-        case ShadowEffectType.shadow:
-        case ShadowEffectType.frame:
-        case ShadowEffectType.blur: {
-          const params = {
-            pageId: pageUtils.getPage(this.pageIndex).id,
-            drawCanvasW: shadowBuff.drawCanvasW,
-            drawCanvasH: shadowBuff.drawCanvasH,
-            layerInfo,
-            cb: this.clearShadowSrc
-          }
-          const img = shadowBuff.canvasShadowImg.shadow as HTMLImageElement || new Image()
-          imageShadowUtils.drawingInit(canvas, this.$refs.img as HTMLImageElement, this.config, params)
-          if (shadowBuff.canvasShadowImg.shadow && !imageShadowUtils.inUploadProcess) {
+      imageShadowUtils.drawingInit(canvas, img, this.config, params)
+      if (!hasShadowSrc) {
+        switch (currentEffect) {
+          case ShadowEffectType.shadow:
+          case ShadowEffectType.frame:
+          case ShadowEffectType.blur:
             imageShadowUtils.drawShadow(canvasList, img, this.config, params)
-          } else {
-            img.crossOrigin = 'anonymous'
-            img.onload = () => {
-              imageShadowPanelUtils.isSVG(img, this.config)
-                .then(async (isSVG) => {
-                  return await new Promise<void>((resolve) => {
-                    if (isSVG) {
-                      imageShadowPanelUtils.svgImageSizeFormatter(img, () => {
-                        /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
-                        img.onload = () => resolve()
-                      })
-                    } else {
-                      resolve()
-                    }
-                  })
-                })
-                .finally(() => {
-                  if (!imageShadowUtils.inUploadProcess) {
-                    imageShadowUtils.drawShadow(canvasList, img, this.config, params)
-                    this.shadowBuff.canvasShadowImg.shadow = img
-                  }
-                })
-            }
-            img.src = ImageUtils.getSrc(this.config,
-              ['private', 'public', 'logo-private', 'logo-public', 'background'].includes(this.config.srcObj.type) ? 'smal' : CANVAS_SIZE) +
-              `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-          }
-          break
-        }
-        case ShadowEffectType.imageMatched: {
-          const params = {
-            pageId: pageUtils.getPage(this.pageIndex).id,
-            drawCanvasW: shadowBuff.drawCanvasW,
-            drawCanvasH: shadowBuff.drawCanvasH,
-            layerInfo,
-            cb: this.clearShadowSrc
-          }
-          const img = shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement || new Image()
-          imageShadowUtils.drawingInit(canvas, this.$refs.img as HTMLImageElement, this.config, params)
-          if (shadowBuff.canvasShadowImg.imageMatched && !imageShadowUtils.inUploadProcess) {
-            imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg.imageMatched, this.config, params)
-          } else {
-            img.crossOrigin = 'anonymous'
-            img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            img.onload = () => {
-              imageShadowPanelUtils.isSVG(img, this.config)
-                .then(async (isSVG) => {
-                  return await new Promise<void>((resolve) => {
-                    if (isSVG) {
-                      imageShadowPanelUtils.svgImageSizeFormatter(img, () => {
-                        /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
-                        img.onload = () => resolve()
-                      })
-                    } else {
-                      resolve()
-                    }
-                  })
-                })
-                .finally(() => {
-                  if (!imageShadowUtils.inUploadProcess) {
-                    imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
-                    this.shadowBuff.canvasShadowImg.imageMatched = img
-                  }
-                })
-            }
-          }
-          break
-        }
-        case ShadowEffectType.floating: {
-          const params = {
-            pageId: pageUtils.getPage(this.pageIndex).id,
-            layerInfo,
-            drawCanvasW: shadowBuff.drawCanvasW,
-            drawCanvasH: shadowBuff.drawCanvasH,
-            cb: this.clearShadowSrc
-          }
-          const img = shadowBuff.canvasShadowImg.floating || new Image()
-          imageShadowUtils.drawingInit(canvas, this.$refs.img as HTMLImageElement, this.config, params)
-          if (shadowBuff.canvasShadowImg.floating && !imageShadowUtils.inUploadProcess) {
+            break
+          case ShadowEffectType.imageMatched:
+            imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
+            break
+          case ShadowEffectType.floating: {
             imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
-          } else {
-            img.crossOrigin = 'anonymous'
-            img.onload = () => {
-              if (!imageShadowUtils.inUploadProcess) {
-                imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
-                this.shadowBuff.canvasShadowImg.floating = img
-              }
-            }
-            img.src = this.src + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+            break
           }
-          break
         }
-        case ShadowEffectType.none:
-          imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
-          imageShadowUtils.clearLayerData()
+      }
+      if (currentEffect === ShadowEffectType.none) {
+        imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
+        imageShadowUtils.clearLayerData()
       }
     },
     updateShadowEffect(effects: IShadowEffects) {
       const { layerInfo, canvas, shadowBuff } = this
       const { drawCanvasW, drawCanvasH } = shadowBuff
       if (!canvas || this.isUploadingShadowImg) {
+        console.log('can not get canvas')
         return
       }
 
@@ -911,34 +895,36 @@ export default Vue.extend({
             ...effects
           }
         })
-        this.clearShadowSrc()
         switch (this.currentShadowEffect) {
           case ShadowEffectType.shadow:
           case ShadowEffectType.blur:
           case ShadowEffectType.frame:
-            if (shadowBuff.canvasShadowImg.shadow as HTMLImageElement) {
-              imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg.shadow as HTMLImageElement, this.config, {
+            if (shadowBuff.canvasShadowImg as HTMLImageElement) {
+              imageShadowUtils.drawShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: () => this.shadow.srcObj.type && this.clearShadowSrc()
               })
             }
             break
           case ShadowEffectType.imageMatched:
-            if (shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement) {
-              imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg.imageMatched as HTMLImageElement, this.config, {
+            if (shadowBuff.canvasShadowImg as HTMLImageElement) {
+              imageShadowUtils.drawImageMatchedShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: () => this.shadow.srcObj.type && this.clearShadowSrc()
               })
             }
             break
           case ShadowEffectType.floating:
-            if (shadowBuff.canvasShadowImg.floating as HTMLImageElement) {
-              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg.floating as HTMLImageElement, this.config, {
+            if (shadowBuff.canvasShadowImg as HTMLImageElement) {
+              imageShadowUtils.drawFloatingShadow(canvasList, shadowBuff.canvasShadowImg as HTMLImageElement, this.config, {
                 layerInfo,
                 drawCanvasW,
-                drawCanvasH
+                drawCanvasH,
+                cb: () => this.shadow.srcObj.type && this.clearShadowSrc()
               })
             }
             break
@@ -979,12 +965,19 @@ export default Vue.extend({
           }
           imageShadowPanelUtils.handleShadowUpload(layerData)
         } else {
-          this.handleNewShadowEffect()
-          if (openPanel) {
-            eventUtils.emit(PanelEvent.showPhotoShadow)
-          } else {
-            imageShadowPanelUtils.handleShadowUpload()
+          // this.handleNewShadowEffect()
+          // if (openPanel) {
+          //   eventUtils.emit(PanelEvent.showPhotoShadow)
+          // } else {
+          //   imageShadowPanelUtils.handleShadowUpload()
+          // }
+          const primarylayerId = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id
+          const layerData = {
+            primarylayerId,
+            config: this.config,
+            layerInfo: this.layerInfo
           }
+          imageShadowPanelUtils.handleShadowUpload(layerData)
         }
       })
     },
@@ -1021,6 +1014,14 @@ export default Vue.extend({
 
   &__picture {
     object-fit: cover;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__picture-shadow {
     position: absolute;
     top: 0px;
     left: 0px;

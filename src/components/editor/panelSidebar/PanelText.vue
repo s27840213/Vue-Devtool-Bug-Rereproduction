@@ -135,9 +135,9 @@ export default Vue.extend({
       const { keyword, categories } = this
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
-        .map(category => ({
+        .map((category, index) => ({
           size: 201,
-          id: `rows_${category.list.map(item => item.id).join('_')}`,
+          id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
           title: category.title
@@ -177,7 +177,7 @@ export default Vue.extend({
       this.handleSearch,
       this.handleCategorySearch,
       async () => {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
         textUtils.loadDefaultFonts(this.extractFonts)
       })
@@ -203,7 +203,7 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
-      'getRecently',
+      'getRecAndCate',
       'getMoreContent'
     ]),
     ...mapMutations({
@@ -229,7 +229,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       }
     },
@@ -238,7 +238,7 @@ export default Vue.extend({
       if (keyword) {
         this.getContent({ keyword, locale })
       } else {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       }
     },

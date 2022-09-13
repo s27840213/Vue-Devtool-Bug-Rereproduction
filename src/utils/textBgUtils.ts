@@ -66,19 +66,8 @@ class TextBg {
         pStroke: 10,
         pColor: '#F1D289'
       },
-      'underline-triangle': {
-        height: 20,
-        yOffset: 10,
-        opacity: 100,
-        color: '#F1D289'
-      },
-      'underline-circle': {
-        height: 20,
-        yOffset: 10,
-        opacity: 100,
-        color: '#F1D289'
-      },
-      'underline-square': {
+      underline: {
+        endpoint: 'rounded',
         height: 20,
         yOffset: 10,
         opacity: 100,
@@ -123,15 +112,14 @@ class TextBg {
     if (isITextUnderline(effect)) {
       let underlineSvg = ''
       const capWidth = styles.height * 0.005 * effect.height
-      const type = effect.name.split('-')[1]
-      switch (type) {
+      switch (effect.endpoint) {
         case 'triangle':
           underlineSvg = `url("data:image/svg+xml;utf8,
             <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
               <path d='m${capWidth} 0h${styles.width - capWidth}l-${capWidth} ${capWidth * 2}h-${styles.width - capWidth}z'/>
             </svg>")`.replace(/\n[ ]*/g, '')
           break
-        case 'circle':
+        case 'rounded':
           underlineSvg = `url("data:image/svg+xml;utf8,
             <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
               <path d='m${capWidth} 0a1 1 0 000 ${capWidth * 2}h${styles.width - capWidth * 2}a1 1 0 000 -${capWidth * 2}z'/>

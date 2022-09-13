@@ -2,7 +2,7 @@ import { IShape, IText, IImage, IGroup, ITmp, ILayer, IFrame, IParagraph, IImage
 import store from '@/store'
 import ZindexUtils from '@/utils/zindexUtils'
 import GroupUtils from '@/utils/groupUtils'
-import { ISpecLayerData, LayerType } from '@/store/types'
+import { IEditorState, ILayerInfo, ISpecLayerData, LayerType } from '@/store/types'
 import { IPage } from '@/interfaces/page'
 import TemplateUtils from './templateUtils'
 import TextUtils from './textUtils'
@@ -146,7 +146,6 @@ class LayerUtils {
     store.commit('DELETE_selectedLayer')
     ZindexUtils.reassignZindex(this.currSelectedInfo.pageIndex)
     TemplateUtils.updateTextInfoTarget()
-
     /**
      * Some kind of situation we don't want to record the step when delete layer
      * ex: when we drag layer from one page to another, we will delete layer and then add this layer to page
@@ -157,10 +156,10 @@ class LayerUtils {
     }
   }
 
-  deleteLayer(index: number) {
+  deleteLayer(pageIndex: number, layerIndex: number) {
     store.commit('DELETE_layer', {
-      pageIndex: this.pageIndex,
-      layerIndex: index
+      pageIndex,
+      layerIndex
     })
   }
 
@@ -185,6 +184,13 @@ class LayerUtils {
       pageIndex,
       primaryIndex,
       subIndex
+    })
+  }
+
+  addSubLayer(pageIndex: number, layerIndex: number, subLayerIdx: number, config: IImage | IShape | IText) {
+    store.commit('ADD_subLayer', {
+      layerInfo: { pageIndex, layerIndex, subLayerIdx },
+      config
     })
   }
 
@@ -516,3 +522,22 @@ class LayerUtils {
 const layerUtils = new LayerUtils()
 
 export default layerUtils
+
+export const DELETE_subLayer = function (state: IEditorState, layerInfo: ILayerInfo) {
+  const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+  const primaryL = state.pages[pageIndex].layers[layerIndex] as IGroup
+  if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
+    return
+  }
+  primaryL.layers.splice(subLayerIdx, 1)
+}
+
+export const ADD_subLayer = function (state: IEditorState, payload: { layerInfo: ILayerInfo, config: IImage | IShape | IText }) {
+  const { layerInfo, config } = payload
+  const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+  const primaryL = state.pages[pageIndex].layers[layerIndex] as IGroup
+  if (primaryL.type !== LayerType.group || typeof subLayerIdx === 'undefined' || subLayerIdx === -1) {
+    return
+  }
+  primaryL.layers.splice(subLayerIdx, 0, config)
+}
