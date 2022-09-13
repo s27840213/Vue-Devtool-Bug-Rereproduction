@@ -79,7 +79,12 @@ class ConstantData {
         ]
       }, {
         label: i18n.t('NN0669'),
-        content: [[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        content: [{
+          label: '喜帖',
+          url: 'https://blog.vivipic.com/tw/wedding-invitation/'
+        },
+        ...[[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        ]
       }],
       us: [{
         label: i18n.t('NN0667'),
@@ -114,6 +119,12 @@ class ConstantData {
       }, {
         label: i18n.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [{
+          label: 'ポラロイドフレーム',
+          url: 'https://blog.vivipic.com/jp/free-polaroid-frame-templates-2/'
+        }]
       }]
     }
     const resource = {
@@ -162,7 +173,7 @@ class ConstantData {
         }]
       }, {
         label: i18n.t('NN0671'),
-        url: 'https://blog.vivipic.com/',
+        url: 'https://blog.vivipic.com/us/',
         content: [{
           label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'

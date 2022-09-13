@@ -95,13 +95,13 @@ export default Vue.extend({
         }, 500) // for the delay between font loading and dom rendering
       })
     }
-    if (this.currSelectedInfo.layers >= 1) {
-      TextPropUtils.updateTextPropsState()
-    }
+    // if (this.currSelectedInfo.layers >= 1) {
+    //   TextPropUtils.updateTextPropsState()
+    // }
 
-    if (LayerUtils.getCurrLayer.type === 'tmp') {
-      return
-    }
+    // if (LayerUtils.getCurrLayer.type === 'tmp') {
+    //   return
+    // }
 
     this.resizeObserver = new (window as any).ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
@@ -231,6 +231,8 @@ export default Vue.extend({
       } else {
         // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+        // if (group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
