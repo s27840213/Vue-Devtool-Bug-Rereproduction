@@ -13,6 +13,7 @@ import { mapGetters } from 'vuex'
 import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
@@ -28,7 +29,18 @@ export default Vue.extend({
   computed: {
     ...mapGetters('user', {
       isAdmin: 'isAdmin'
-    })
+    }),
+    itemStyle(): any {
+      const { width } = this.item.preview || {
+        width: generalUtils.isTouchDevice()
+          ? (window.innerWidth - 54) / 3
+          : 145
+      }
+      return {
+        objectFit: 'contain',
+        width: `${width}px`
+      }
+    }
   },
   methods: {
     handleNotFound(event: Event) {

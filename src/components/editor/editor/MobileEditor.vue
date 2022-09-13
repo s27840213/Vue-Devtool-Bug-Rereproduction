@@ -14,7 +14,6 @@
             :showMobilePanel="showMobilePanelAfterTransitoin")
       transition(name="panel-up"
                 @before-enter="beforeEnter"
-                @after-enter="afterEnter"
                 @after-leave="afterLeave")
         mobile-panel(v-show="showMobilePanel || inMultiSelectionMode"
           :currActivePanel="currActivePanel"
@@ -202,26 +201,13 @@ export default Vue.extend({
     ...mapActions({
       fetchBrands: 'brandkit/fetchBrands'
     }),
-    /**
-     * There are three case need fitPage:
-     * 1. Panel open => afterEnter
-     * 2. Panel close => afterLeave
-     * 3. Panel switch => switchTab else if(oldCAP!=='none'),
-     *    fitPage should call after setCurrActivePanel, or it will get wrong value.
-    */
     switchTab(panelType: string, props?: IFooterTabProps) {
       if (this.currActivePanel === panelType || panelType === 'none') {
         editorUtils.setShowMobilePanel(false)
         editorUtils.setInMultiSelectionMode(false)
       } else {
-        const oldCAP = this.currActivePanel
         editorUtils.setShowMobilePanel(true)
         this.setCurrActivePanel(panelType)
-        if (oldCAP !== 'none') {
-          this.$nextTick(() => {
-            pageUtils.fitPage()
-          })
-        }
         if (props) {
           if (panelType === 'color' && props.currColorEvent) {
             this.currColorEvent = props.currColorEvent
@@ -245,13 +231,8 @@ export default Vue.extend({
     beforeEnter() {
       this.showMobilePanelAfterTransitoin = true
     },
-    afterEnter() {
-      pageUtils.fitPage()
-    },
     afterLeave() {
-      // testUtils.end('addTemp (Nathan, after optimize)')
       this.setCurrActivePanel('none')
-      pageUtils.fitPage()
       setTimeout(() => {
         this.showMobilePanelAfterTransitoin = false
       }, 300)
