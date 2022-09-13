@@ -156,10 +156,10 @@ class LayerUtils {
     }
   }
 
-  deleteLayer(index: number) {
+  deleteLayer(pageIndex: number, layerIndex: number) {
     store.commit('DELETE_layer', {
-      pageIndex: this.pageIndex,
-      layerIndex: index
+      pageIndex,
+      layerIndex
     })
   }
 

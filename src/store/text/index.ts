@@ -243,7 +243,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
   let response
   switch (type) {
     case 'public':
-      cssUrl = `https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`
+      cssUrl = addPlatform(`https://template.vivipic.com/font/${face}/subset/font.css?ver=${ver}&origin=true`)
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
@@ -256,7 +256,7 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
       }
       return ''
     case 'admin':
-      cssUrl = `https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`
+      cssUrl = addPlatform(`https://template.vivipic.com/admin/${userId}/asset/font/${assetId}/subset/font.css?ver=${ver}&origin=true`)
       try {
         response = await fetch(randomizeVer(cssUrl))
         if (response.ok) return cssUrl
@@ -299,12 +299,20 @@ const getFontUrl = async (type: string, url: string, face: string, userId: strin
 }
 
 const randomizeVer = (url: string): string => {
-  return url.replace(/ver=[0-9]+/g, `ver=${generalUtils.generateRandomString(6)}`)
+  return url.replace(/ver=[0-9a-zA-Z]+/g, `ver=${generalUtils.generateRandomString(6)}`)
 }
 
 const getCssUrl = (urlMap: {[key:string]: string}, ver: number) => {
   const cssUrl = urlMap.css
-  return cssUrl ? `${cssUrl}&ver=${ver}&origin=true` : ''
+  return cssUrl ? addPlatform(`${cssUrl}&ver=${ver}&origin=true`) : ''
+}
+
+const addPlatform = (url: string): string => {
+  if (url.includes('?')) {
+    return `${url}&platform=${window.location.hostname}`
+  } else {
+    return `${url}?platform=${window.location.hostname}`
+  }
 }
 
 export default {
