@@ -231,7 +231,8 @@ export default Vue.extend({
       } else {
         // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        if (group.layers[this.subLayerIndex].type !== 'text') return
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+        // if (group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)

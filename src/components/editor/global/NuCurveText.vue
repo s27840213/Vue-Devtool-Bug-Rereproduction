@@ -54,7 +54,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
       } else {
         const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        if (group.layers[this.subLayerIndex].type !== 'text') return
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
         TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
         TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)

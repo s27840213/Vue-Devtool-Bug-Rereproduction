@@ -779,10 +779,9 @@ export default Vue.extend({
       }
 
       imageShadowUtils.updateEffectProps(this.layerInfo, {
-          maxsize: shadowBuff.MAXSIZE,
-          middsize: Math.max(img.naturalWidth, img.naturalHeight)
-        }
-      )
+        maxsize: shadowBuff.MAXSIZE,
+        middsize: Math.max(img.naturalWidth, img.naturalHeight)
+      })
 
       /**
        * Calculate canvas parameters

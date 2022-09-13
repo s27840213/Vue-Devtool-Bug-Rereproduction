@@ -65,8 +65,11 @@ class ConstantData {
         }, {
           label: 'FB 粉絲頁封面',
           url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+        }, {
+          label: 'IG 貼文',
+          url: 'https://blog.vivipic.com/tw/ig-post-design/'
         },
-        ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0668'),
@@ -115,7 +118,12 @@ class ConstantData {
       }],
       jp: [{
         label: i18n.t('NN0667'),
-        content: [1, 8, 2, 3, 4, 9, 21].map((id) => themeItem(id))
+        content: [
+          ...[1, 8, 2, 3, 4, 9].map((id) => themeItem(id)), {
+            label: 'プロフィール写真',
+            url: 'https://blog.vivipic.com/jp/pfp-profile-pictures-2/'
+          }
+        ]
       }, {
         label: i18n.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))
