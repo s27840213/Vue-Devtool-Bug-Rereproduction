@@ -98,6 +98,7 @@ import colorUtils from '@/utils/colorUtils'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   name: 'mobile-panel',
@@ -156,7 +157,13 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: ''
+      innerTab: '',
+      fitPage: _.debounce(() => {
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
+      }, 100),
+      resizeObserver: null as unknown as ResizeObserver
     }
   },
   computed: {
@@ -498,6 +505,11 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
+    this.resizeObserver = new ResizeObserver(this.fitPage)
+    this.resizeObserver.observe(this.$refs.panel as Element)
+  },
+  beforeDestroy() {
+    this.resizeObserver && this.resizeObserver.disconnect()
   },
   methods: {
     ...mapMutations({
@@ -564,14 +576,8 @@ export default Vue.extend({
         this.closeMobilePanel()
       } else if (this.panelHeight >= maxHeightPx * 0.75) {
         this.panelHeight = maxHeightPx
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
       } else {
         this.panelHeight = maxHeightPx * 0.5
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
@@ -600,11 +606,6 @@ export default Vue.extend({
     },
     switchInnerTab(panelIndex: number) {
       this.innerTab = this.innerTabs.key[panelIndex]
-    },
-    fitPage() {
-      this.$nextTick(() => {
-        pageUtils.fitPage()
-      })
     }
   }
 })
