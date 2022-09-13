@@ -14,7 +14,7 @@
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
-    font-tag
+    font-tag(v-if="!hasSearch" @search="handleSearch")
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -79,7 +79,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      FileUtils
+      FileUtils,
+      hasSearch: false
     }
   },
   mounted() {
@@ -258,6 +259,11 @@ export default Vue.extend({
       keyword ? this.getMoreContent() : this.getMoreCategory()
     },
     handleSearch(keyword: string) {
+      if (keyword) {
+        this.hasSearch = true
+      } else {
+        this.hasSearch = false
+      }
       this.resetContent()
       keyword ? this.getTagContent({ keyword }) : this.getRecently()
     },
