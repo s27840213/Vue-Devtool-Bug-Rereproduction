@@ -36,7 +36,7 @@ export default Vue.extend({
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: generalUtils.isTouchDevice()
-        ? (window.innerWidth - 50) / 3
+        ? (window.innerWidth - 54) / 3
         : 145
       }
       return {
