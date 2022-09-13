@@ -37,6 +37,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
 import payment from '@/store/module/payment'
+import fontTag from '@/store/module/fontTag'
 import { ADD_subLayer, DELETE_subLayer } from '@/utils/layerUtils'
 
 Vue.use(Vuex)
@@ -856,6 +857,7 @@ export default new Vuex.Store({
     bgRemove,
     file,
     payment,
-    shadow
+    shadow,
+    fontTag
   }
 })
