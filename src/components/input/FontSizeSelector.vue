@@ -131,11 +131,7 @@ export default Vue.extend({
         layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
-          tiptapUtils.agent(editor => {
-            layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-          })
-          textPropUtils.updateTextPropsState({ fontSize: value })
+          textPropUtils.fontSizeStepping(parseInt(value) - parseInt(this.props.fontSize))
           textEffectUtils.refreshSize()
         })
       }

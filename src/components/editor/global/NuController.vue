@@ -1828,13 +1828,13 @@ export default Vue.extend({
       const { textShape } = config.styles
       return textShape && textShape.name === 'curve'
     },
-    calcSize(config: IText, composing: boolean) {
-      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing)
+    calcSize(config: IText, composing: boolean, keepCenter = false) {
+      this.checkIfCurve(config) ? this.curveTextSizeRefresh(config) : this.textSizeRefresh(config, composing, keepCenter)
     },
-    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean }) {
+    handleTextChange(payload: { paragraphs: IParagraph[], isSetContentRequired: boolean, toRecord?: boolean, keepCenter?: boolean }) {
       const config = generalUtils.deepCopy(this.config)
       config.paragraphs = payload.paragraphs
-      this.calcSize(config, !!tiptapUtils.editor?.view?.composing)
+      this.calcSize(config, !!tiptapUtils.editor?.view?.composing, payload.keepCenter)
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { paragraphs: payload.paragraphs })
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
@@ -1860,9 +1860,10 @@ export default Vue.extend({
         this.waitFontLoadingAndRecord()
       }
     },
-    textSizeRefresh(text: IText, composing: boolean) {
+    textSizeRefresh(text: IText, composing: boolean, keepCenter: boolean) {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       const getSize = () => isVertical ? this.getLayerHeight : this.getLayerWidth
+      const oldCenter = mathUtils.getCenter(text.styles)
 
       let widthLimit = this.getLayerRotate ? getSize() : this.config.widthLimit
       let textHW = TextUtils.getTextHW(text, widthLimit)
@@ -1918,12 +1919,31 @@ export default Vue.extend({
       }
 
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
-      LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
-        width: textHW.width,
-        height: textHW.height,
-        x: layerX,
-        y: layerY
-      })
+
+      if (keepCenter) {
+        const newCenter = mathUtils.getCenter({
+          width: textHW.width,
+          height: textHW.height,
+          x: layerX,
+          y: layerY
+        })
+
+        const offset = { x: oldCenter.x - newCenter.x, y: oldCenter.y - newCenter.y }
+
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          width: textHW.width,
+          height: textHW.height,
+          x: layerX + offset.x,
+          y: layerY + offset.y
+        })
+      } else {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, {
+          width: textHW.width,
+          height: textHW.height,
+          x: layerX,
+          y: layerY
+        })
+      }
     },
     curveTextSizeRefresh(text: IText) {
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))

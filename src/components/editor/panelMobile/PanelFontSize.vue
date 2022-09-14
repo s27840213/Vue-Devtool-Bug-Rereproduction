@@ -7,7 +7,8 @@
       max="144"
       min="1"
       step="1"
-      type="range")
+      type="range"
+      @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">
@@ -21,6 +22,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
+import stepsUtils from '@/utils/stepsUtils'
 export default Vue.extend({
   components: {
     MobileSlider,
@@ -71,12 +73,7 @@ export default Vue.extend({
         return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
       },
       set(value: number): void {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        tiptapUtils.applySpanStyle('size', value)
-        tiptapUtils.agent(editor => {
-          layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        })
-        textPropUtils.updateTextPropsState({ fontSize: value.toString() })
+        textPropUtils.fontSizeStepping(value - parseInt(this.props.fontSize))
         textEffectUtils.refreshSize()
       }
     }
@@ -87,6 +84,9 @@ export default Vue.extend({
       return {
         '--progress': `${(finalFontSize - 1) / (143) * 100}%`
       }
+    },
+    handleChangeStop() {
+      stepsUtils.record()
     }
   }
 })

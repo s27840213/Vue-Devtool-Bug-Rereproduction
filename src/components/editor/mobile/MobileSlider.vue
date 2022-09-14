@@ -16,7 +16,7 @@
       :step="step"
       v-ratio-change
       type="range"
-      @mouseup="handleChangeStop")
+      @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">

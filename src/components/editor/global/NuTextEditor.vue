@@ -69,8 +69,8 @@ export default Vue.extend({
         this.updateLayerProps({ loadFontEdited: true })
       }
     })
-    tiptapUtils.onForceUpdate((editor, toRecord) => {
-      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord })
+    tiptapUtils.onForceUpdate((editor, toRecord, keepCenter) => {
+      this.$emit('update', { ...tiptapUtils.toIParagraph(editor.getJSON()), toRecord, keepCenter })
     })
     tiptapUtils.on('create', ({ editor }) => {
       if (!this.config?.isEdited) {

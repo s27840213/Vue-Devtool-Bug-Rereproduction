@@ -15,7 +15,7 @@ import shortcutUtils from './shortcutUtils'
 
 class TiptapUtils {
   event: any
-  eventHandler: undefined | ((toRecord: boolean) => void)
+  eventHandler: undefined | ((toRecord: boolean, keepCenter: boolean) => void)
   editor: Editor | undefined = undefined
   prevText: string | undefined = undefined
 
@@ -82,9 +82,9 @@ class TiptapUtils {
     this.agent(editor => editor.on(event, handler))
   }
 
-  onForceUpdate(handler: (editor: Editor, toRecord: boolean) => void): void {
-    const fullHandler = (toRecord: boolean) => {
-      this.agent(editor => handler(editor, toRecord))
+  onForceUpdate(handler: (editor: Editor, toRecord: boolean, keepCenter: boolean) => void): void {
+    const fullHandler = (toRecord: boolean, keepCenter: boolean) => {
+      this.agent(editor => handler(editor, toRecord, keepCenter))
     }
     if (this.eventHandler) {
       this.event.off('update', this.eventHandler)
@@ -93,8 +93,8 @@ class TiptapUtils {
     this.event.on('update', fullHandler)
   }
 
-  forceUpdate(toRecord = false) {
-    this.event.emit('update', toRecord)
+  forceUpdate(toRecord = false, keepCenter = false) {
+    this.event.emit('update', toRecord, keepCenter)
   }
 
   isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null

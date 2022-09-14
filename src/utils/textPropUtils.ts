@@ -578,7 +578,7 @@ class TextPropUtils {
         styles: { ...styles }
       })
       paragraphs[pIndex].spans[sIndex].text = paragraphs[pIndex].spans[sIndex].text.substring(0, offset)
-      Object.assign(config?.paragraphs, paragraphs)
+      Object.assign(config?.paragraphs ?? {}, paragraphs)
       TextUtils.updateSelection({ pIndex, sIndex: sIndex + 1, offset: 1 }, TextUtils.getNullSel())
     }
   }
@@ -1031,7 +1031,7 @@ class TextPropUtils {
           }
           editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
           Vue.nextTick(() => {
-            tiptapUtils.forceUpdate()
+            tiptapUtils.forceUpdate(false, true)
             this.updateTextPropsState()
           })
         }
