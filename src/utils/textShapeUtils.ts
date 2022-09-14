@@ -54,7 +54,7 @@ class Controller {
       const localAttrs = localStorageUtils.get('textEffectSetting', shape)
       Object.assign(styles.textShape, defaultAttrs, localAttrs, attrs, { name: shape })
     }
-    if (shape === 'none' && styleTextShape.name !== 'none') {
+    if (shape === 'none' && styleTextShape.name && styleTextShape.name !== 'none') {
       const { bend } = styleTextShape as any
       const textHW = TextUtils.getTextHW(layer, -1)
       Object.assign(styles, {
