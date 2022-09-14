@@ -165,17 +165,15 @@ class Controller {
     }
   }
 
-  dirHandler(clientP: ICoordinate, rect: DOMRect, width?: number, height?: number): boolean {
+  dirHandler(clientP: ICoordinate, rect: DOMRect): boolean {
     const center: ICoordinate = this.getRectCenter(rect)
-    width = width ?? rect.width
-    height = height ?? rect.height
     const H = {
-      left: center.x - width / 2,
-      right: center.x + width / 2
+      left: center.x - rect.width / 2,
+      right: center.x + rect.width / 2
     }
     const V = {
-      top: center.y - height / 2,
-      bottom: center.y + height / 2
+      top: center.y - rect.height / 2,
+      bottom: center.y + rect.height / 2
     }
     const xmin = Math.min(Math.abs(clientP.x - H.left), Math.abs(clientP.x - H.right))
     const ymin = Math.min(Math.abs(clientP.y - V.top), Math.abs(clientP.y - V.bottom))

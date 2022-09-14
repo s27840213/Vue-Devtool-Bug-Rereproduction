@@ -36,7 +36,8 @@ export interface ITextUnderline {
 }
 
 export interface ITextGooey {
-  name: 'gooey'
+  name: 'gooey'|'cloud'
+  distance: number
   bRadius: number
   opacity: number
   color: string
@@ -53,7 +54,7 @@ export function isITextUnderline(object: ITextBgEffect): object is ITextUnderlin
   return object && object.name && object.name === 'underline'
 }
 export function isITextGooey(object: ITextBgEffect): object is ITextGooey {
-  return object && object.name && object.name === 'gooey'
+  return object && object.name && ['gooey', 'cloud'].includes(object.name)
 }
 
 export interface ITextFormat {

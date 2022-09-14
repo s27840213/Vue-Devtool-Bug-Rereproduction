@@ -6,7 +6,7 @@
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
       :key="sIndex",
-      :style="styles(span.styles, sIndex)") {{ span.text }}
+      :style="Object.assign(styles(span.styles, sIndex), duplicatedSpan)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -17,13 +17,18 @@ import { IGroup, ISpan } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import TextUtils from '@/utils/textUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
   props: {
     config: Object,
     layerIndex: Number,
     pageIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    isDuplicated: {
+      type: Boolean,
+      default: false
+    }
   },
   data () {
     return {
@@ -118,6 +123,12 @@ export default Vue.extend({
     },
     transforms(): string[] {
       return TextShapeUtils.convertTextShape(this.textWidth, this.bend)
+    },
+    duplicatedSpan(): Record<string, string> {
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      return this.isDuplicated ? {
+        ...textShadow.duplicatedSpan
+      } : {}
     }
   },
   watch: {
