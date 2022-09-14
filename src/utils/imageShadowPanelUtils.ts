@@ -1,7 +1,7 @@
 import { IBlurEffect, IFloatingEffect, IImageMatchedEffect, IShadowEffect, IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
 import { ColorEventType, FunctionPanelType, ILayerInfo, LayerProcessType, LayerType } from '@/store/types'
 import colorUtils from './colorUtils'
-import imageShadowUtils, { CANVAS_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
+import imageShadowUtils, { CANVAS_MAX_SIZE, CANVAS_SIZE, CANVAS_SPACE, fieldRange, logMark, setMark } from './imageShadowUtils'
 import layerUtils from './layerUtils'
 import pageUtils from './pageUtils'
 import store from '@/store'
@@ -102,22 +102,22 @@ export default new class ImageShadowPanelUtils {
       imageShadowUtils.setUploadProcess(true)
       imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
 
-      // if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
-      //   /**
-      //    * Check if the state of the shadow is the same
-      //    */
-      //   const { shadowSrcObj } = config.styles.shadow.srcState
-      //   const layerInfo = {
-      //     pageIndex: _pageIndex,
-      //     layerIndex: _layerIndex,
-      //     subLayerIdx: _subLayerIdx
-      //   }
-      //   imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
-      //   imageShadowUtils.setUploadProcess(false)
-      //   imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-      //   imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
-      //   return
-      // }
+      if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
+        /**
+         * Check if the state of the shadow is the same
+         */
+        const { shadowSrcObj } = config.styles.shadow.srcState
+        const layerInfo = {
+          pageIndex: _pageIndex,
+          layerIndex: _layerIndex,
+          subLayerIdx: _subLayerIdx
+        }
+        imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
+        imageShadowUtils.setUploadProcess(false)
+        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        return
+      }
       if (primarylayerId) {
         this.setIsUploading(pageId, primarylayerId, config.id as string, true)
       } else {
@@ -143,17 +143,17 @@ export default new class ImageShadowPanelUtils {
       // Handle the params for drawing
       setMark('upload', 1)
       const img = new Image()
-      let MAXSIZE = 1600
+      // let MAXSIZE = 1600
       img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config.srcObj, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
+      img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
         `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
       await new Promise<void>((resolve, reject) => {
         img.onload = async () => {
           const isSVG = await this.isSVG(img, config)
           if (isSVG) {
-            await this.svgImageSizeFormatter(img, () => {
+            await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
               img.onload = () => {
-                MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+                // MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
                 resolve()
               }
               img.onerror = () => {
@@ -163,7 +163,7 @@ export default new class ImageShadowPanelUtils {
               }
             })
           } else {
-            MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
+            // MAXSIZE = Math.max(img.naturalWidth, img.naturalHeight)
             resolve()
           }
         }
@@ -178,40 +178,45 @@ export default new class ImageShadowPanelUtils {
       logUtils.setLog('phase: finish load max size img')
       setMark('upload', 2)
       const updateCanvas = document.createElement('canvas')
-      const { width, height, imgWidth, imgHeight } = config.styles
-      const drawCanvasW = width / imgWidth * img.naturalWidth
-      const drawCanvasH = height / imgHeight * img.naturalHeight
-      let spaceScale = Math.max((height > width ? height : width) / CANVAS_SIZE, 0.3)
-      const _canvasW = (width + CANVAS_SPACE * spaceScale)
-      const _canvasH = (height + CANVAS_SPACE * spaceScale)
-      const canvasRatio = _canvasH / _canvasW
-      const canvasWOri = _canvasW >= _canvasH ? CANVAS_SIZE : CANVAS_SIZE / canvasRatio
-      const canvasHOri = _canvasW < _canvasH ? CANVAS_SIZE : CANVAS_SIZE * canvasRatio
-      const drawCanvasWOri = width * canvasWOri / _canvasW
-      const drawCanvasHOri = height * canvasHOri / _canvasH
+      let params = {} as any
+      let drawCanvasH = 0
+      let drawCanvasW = 0
+      if (config.styles.shadow.currentEffect === ShadowEffectType.floating) {
+        const ratio = config.styles.imgWidth / config.styles.imgHeight
+        drawCanvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio))
+        drawCanvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600))
+        const _canvasW = (ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE
+        const _canvasH = (ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE
+        updateCanvas.setAttribute('width', `${_canvasW}`)
+        updateCanvas.setAttribute('height', `${_canvasH}`)
+        params = { timeout: 0, drawCanvasW, drawCanvasH }
+      } else {
+        const { width, height, imgWidth, imgHeight } = config.styles
+        drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
+        drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
 
-      spaceScale *= width > height ? CANVAS_SIZE / _canvasW : CANVAS_SIZE / _canvasH
-      spaceScale *= imgWidth > imgHeight
-        ? (width / imgWidth) * MAXSIZE / drawCanvasWOri
-        : (height / imgHeight) * MAXSIZE / drawCanvasHOri
-
-      const canvasW = drawCanvasW + CANVAS_SPACE * spaceScale
-      const canvasH = drawCanvasH + CANVAS_SPACE * spaceScale
-      updateCanvas.setAttribute('width', `${canvasW}`)
-      updateCanvas.setAttribute('height', `${canvasH}`)
+        const canvasW = Math.round(img.naturalWidth + CANVAS_SPACE)
+        const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
+        // const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
+        // const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
+        updateCanvas.setAttribute('width', `${canvasW}`)
+        updateCanvas.setAttribute('height', `${canvasH}`)
+        params = { timeout: 0, drawCanvasW, drawCanvasH }
+      }
+      imageShadowUtils.drawingInit(updateCanvas, img, config, params)
 
       switch (config.styles.shadow.currentEffect) {
         case ShadowEffectType.shadow:
         case ShadowEffectType.blur:
         case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawShadow([updateCanvas], img, config, params)
           break
         }
         case ShadowEffectType.imageMatched:
-          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
           break
         case ShadowEffectType.floating: {
-          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, { timeout: 0, drawCanvasW, drawCanvasH })
+          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, params)
           break
         }
         case ShadowEffectType.none:
@@ -220,9 +225,10 @@ export default new class ImageShadowPanelUtils {
           logUtils.setLog('Error: effect type error: ' + config.styles.shadow.currentEffect)
           generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
       }
+
       logUtils.setLog('phase: finish drawing')
       setMark('upload', 3)
-      const { right, left, top, bottom } = await imageShadowUtils.getImgEdgeWidth(updateCanvas)
+      const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
       logUtils.setLog('phase: finish calculate edge')
@@ -232,7 +238,7 @@ export default new class ImageShadowPanelUtils {
       uploadCanvas.setAttribute('width', (updateCanvas.width - left - right).toString())
       uploadCanvas.setAttribute('height', (updateCanvas.height - top - bottom).toString())
       const ctxUpload = uploadCanvas.getContext('2d') as CanvasRenderingContext2D
-      ctxUpload.drawImage(updateCanvas, left, top, updateCanvas.width - right - left, updateCanvas.height - bottom - top, 0, 0, uploadCanvas.width, uploadCanvas.height)
+      ctxUpload.drawImage(updateCanvas, left, top, uploadCanvas.width, uploadCanvas.height, 0, 0, uploadCanvas.width, uploadCanvas.height)
 
       logUtils.setLog('phase: start uploading result')
       const uploadImg = [uploadCanvas.toDataURL('image/png;base64', 1)]
@@ -253,8 +259,8 @@ export default new class ImageShadowPanelUtils {
           }
           const _width = config.styles.width / config.styles.scale
           const _height = config.styles.height / config.styles.scale
-          const newWidth = (updateCanvas.width - right - left) / drawCanvasW * _width
-          const newHeight = (updateCanvas.height - top - bottom) / drawCanvasH * _height
+          const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
+          const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
           new Promise<void>((resolve) => {
             if (!isAdmin) {
               store.dispatch('shadow/ADD_SHADOW_IMG', [srcObj.assetId], { root: true })
@@ -264,7 +270,6 @@ export default new class ImageShadowPanelUtils {
             }
           }).then(() => {
             const newImg = new Image()
-            newImg.crossOrigin = 'anonynous'
             newImg.onload = () => {
               const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
               layerUtils.updateLayerProps(pageIndex, layerIndex, { isUploading: false, inProcess: LayerProcessType.none }, subLayerIdx)
@@ -321,6 +326,7 @@ export default new class ImageShadowPanelUtils {
             imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
+            console.warn('shadow upload finish')
           })
         }
       })
@@ -338,7 +344,7 @@ export default new class ImageShadowPanelUtils {
     } else return false
   }
 
-  async svgImageSizeFormatter(img: HTMLImageElement, cb?: () => void) {
+  async svgImageSizeFormatter(img: HTMLImageElement, size = CANVAS_MAX_SIZE, cb?: () => void) {
     return new Promise<void>((resolve) => {
       fetch(img.src)
         .then(async (response) => {
@@ -347,7 +353,7 @@ export default new class ImageShadowPanelUtils {
           container.innerHTML = data
           const svg = container.getElementsByTagName('svg')[0]
           if (svg) {
-            const pngScaleRation = 1600 / Math.max(img.naturalWidth, img.naturalHeight)
+            const pngScaleRation = size / Math.max(img.naturalWidth, img.naturalHeight)
             svg.setAttribute('width', (img.naturalWidth * pngScaleRation).toString() + 'px')
             svg.setAttribute('height', (img.naturalHeight * pngScaleRation).toString() + 'px')
             const blob = new Blob([container.innerHTML], { type: 'image/svg+xml;charset=utf-8' })

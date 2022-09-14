@@ -19,6 +19,7 @@ import svgIconUtils from './utils/svgIconUtils'
 import logUtils from './utils/logUtils'
 import longpress from './utils/longpress'
 import generalUtils from './utils/generalUtils'
+import imageShadowUtils from './utils/imageShadowUtils'
 window.onerror = function (msg, url, line) {
   const message = [
     'Message: ' + msg,
@@ -64,12 +65,12 @@ Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
 
-Vue.use(VueGtm, {
-  id: 'GTM-T7LDWBP',
-  enabled: true,
-  // display console logs debugs or not (optional)
-  debug: false
-})
+// Vue.use(VueGtm, {
+//   id: 'GTM-T7LDWBP',
+//   enabled: true,
+//   // display console logs debugs or not (optional)
+//   debug: false
+// })
 
 Vue.component('RecycleScroller', RecycleScroller)
 

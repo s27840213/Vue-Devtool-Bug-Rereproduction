@@ -45,25 +45,15 @@ export default Vue.extend({
     return {
       ShortcutUtils,
       StepsUtils,
-      online: false,
       designUploadStatus: 'success'
     }
   },
   created() {
-    networkUtils.onNetworkChange('EditorHeader', (online) => {
-      this.online = online
-      if (!this.online) {
-        networkUtils.notifyNetworkError()
-      }
-    })
     uploadUtils.onDesignUploadStatus((status) => {
       this.designUploadStatus = status
     })
-
-    this.online = navigator.onLine
   },
   beforeDestroy() {
-    networkUtils.offNetworkChange('EditorHeader')
     uploadUtils.offDesignUploadStatus()
   },
   computed: {
@@ -99,13 +89,13 @@ export default Vue.extend({
       }
     },
     statusColor(): string {
-      if (!this.online) {
+      if (!networkUtils.check()) {
         return 'red'
       }
       return this.designUploadStatus === 'uploading' ? 'yellow' : 'green-1'
     },
     statusHint(): string {
-      if (!this.online) {
+      if (!networkUtils.check()) {
         return `${this.$t('NN0349')}`
       }
       return this.designUploadStatus === 'uploading' ? `${this.$t('NN0136')}` : `${this.$t('NN0135')}`

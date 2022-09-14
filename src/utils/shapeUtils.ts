@@ -264,7 +264,7 @@ class ShapeUtils {
       layerUtils.deleteSubLayer(pageIndex, layerIndex, subLayerIdx ?? -1)
       layerUtils.addSubLayer(pageIndex, layerIndex, subLayerIdx ?? -1, image)
     } else {
-      layerUtils.deleteLayer(layerIndex)
+      layerUtils.deleteLayer(pageIndex, layerIndex)
       layerUtils.addLayersToPos(pageIndex, [image], layerIndex)
       zindexUtils.reassignZindex(pageIndex)
     }

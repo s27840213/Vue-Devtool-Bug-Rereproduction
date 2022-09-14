@@ -6,7 +6,7 @@
             ref="body"
             :layer-index="`${layerIndex}`"
             :style="styles('')"
-            @dblclick="onDblClick()"
+            @dblclick="onDblClick($event)"
             @dragenter="onDragEnter($event)"
             @pointerdown="onMousedown($event)"
             @click.left.stop="onClick")
@@ -489,11 +489,11 @@ export default Vue.extend({
       TextUtils.asSubLayerSizeRefresh(this.pageIndex, this.primaryLayerIndex, this.layerIndex, curveTextHW.areaHeight, heightOri)
       TextUtils.fixGroupCoordinates(this.pageIndex, this.primaryLayerIndex)
     },
-    onDblClick() {
+    onDblClick(e: MouseEvent) {
       if (this.type === 'tmp') {
         return
       }
-      this.$emit('dblSubController', this.layerIndex)
+      this.$emit('dblSubController', e, this.layerIndex)
     },
     onTextFocus() {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: true })
@@ -742,7 +742,7 @@ export default Vue.extend({
       if (this.isDraggedPanelPhoto) return
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
-        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })
