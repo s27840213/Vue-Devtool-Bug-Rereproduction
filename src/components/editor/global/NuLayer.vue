@@ -11,7 +11,8 @@
           class="transition-none"
           :config="config"
           :imgControl="imgControl"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex")
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          v-bind="$attrs")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
@@ -172,10 +173,6 @@ export default Vue.extend({
       }
       return styles
     },
-    flipStyles() {
-      const { horizontalFlip, verticalFlip } = this.config.styles
-      return CssConveter.convertFlipStyle(horizontalFlip, verticalFlip)
-    },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       e.stopPropagation()
@@ -233,10 +230,6 @@ export default Vue.extend({
   transform-origin: top left;
   top: 0;
   left: 0;
-}
-
-.layer-flip {
-  transition: transform 0.2s linear;
 }
 
 .test-index {
