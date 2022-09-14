@@ -504,7 +504,7 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
-    this.resizeObserver = new ResizeObserver(this.fitPage)
+    this.resizeObserver = new (window as any).ResizeObserver(this.fitPage)
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
   beforeDestroy() {

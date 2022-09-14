@@ -615,7 +615,7 @@ export default Vue.extend({
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
+      const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       return {
         transform: `translate3d(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`,
         width: `${width * this.contentScaleRatio}px`,
@@ -634,8 +634,8 @@ export default Vue.extend({
         ...textBgStyles,
         borderWidth: 0,
         borderColor: 'transparent',
-        padding: textBgStyles.controllerPadding,
         backgroundColor: 'transparent',
+        backgroundImage: 'none',
         '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
       }
     },
@@ -1405,8 +1405,7 @@ export default Vue.extend({
       this.control.xSign = (clientP.x - center.x > 0) ? 1 : -1
       this.control.ySign = (clientP.y - center.y > 0) ? 1 : -1
 
-      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect,
-        this.getLayerWidth * this.scaleRatio / 100, this.getLayerHeight * this.scaleRatio / 100)
+      this.control.isHorizon = ControlUtils.dirHandler(clientP, rect)
 
       eventUtils.addPointerEvent('pointermove', this.resizing)
       eventUtils.addPointerEvent('pointerup', this.resizeEnd)

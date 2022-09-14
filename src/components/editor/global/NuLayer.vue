@@ -4,6 +4,13 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
+    //- Svg BG for text effex box.
+    svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
+        class="nu-layer__BG")
+      component(v-for="(elm, idx) in svgBG.content"
+                :key="`svgFilter${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
     div(class="layer-translate posAbs"
         :style="translateStyles")
       div(class="layer-scale posAbs" ref="scale"
@@ -85,7 +92,7 @@ export default Vue.extend({
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
+          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
             textEffectStyles,
@@ -105,6 +112,10 @@ export default Vue.extend({
         }
       }
       return styles
+    },
+    svgBG() {
+      const textBg = textBgUtils.convertTextEffect(this.config.styles)
+      return textBg.svg
     },
     getLayerPos(): { x: number, y: number } {
       return {
@@ -221,6 +232,9 @@ export default Vue.extend({
   transform-style: preserve-3d;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
+  }
+  &__BG {
+    position: absolute;
   }
   &__inProcess {
     width: 100%;
