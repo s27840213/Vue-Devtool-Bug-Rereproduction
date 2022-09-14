@@ -74,6 +74,11 @@ class TextBg {
         opacity: 100,
         color: '#F1D289'
       },
+      cloud: {
+        bRadius: 48,
+        opacity: 100,
+        color: '#F1D289'
+      },
       gooey: {
         distance: 0,
         bRadius: 48,
@@ -172,7 +177,14 @@ class TextBg {
         backgroundPositionX: `${borderWidth}px, 0, 100%`,
         backgroundPositionY: `${100 - (effect.yOffset)}%`
       }
-    } else if (isITextGooey(effect)) {
+    } else if (isITextGooey(effect) && effect.name === 'cloud') {
+      return {
+        padding: '0 20px',
+        boxDecorationBreak: 'clone',
+        borderRadius: `${effect.bRadius}px`,
+        backgroundColor: color
+      }
+    } else if (isITextGooey(effect) && effect.name === 'gooey') {
       const svgId = `textBg_gooey_${effect.bRadius}`
       return {
         paddingTop: `${effect.distance}px`,
