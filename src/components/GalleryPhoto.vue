@@ -43,11 +43,14 @@ import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
 import { FunctionPanelType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
+<<<<<<< HEAD
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import frameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
+=======
+>>>>>>> origin/feature/font-list-tag
 
 export default Vue.extend({
   name: 'GalleryPhoto',
@@ -72,18 +75,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      online: true
     }
-  },
-  created() {
-    networkUtils.onNetworkChange(this.photo.id, (online) => {
-      this.online = online
-    })
-
-    this.online = navigator.onLine
-  },
-  beforeDestroy() {
-    networkUtils.offNetworkChange(this.photo.id)
   },
   computed: {
     ...mapState({
@@ -138,7 +130,7 @@ export default Vue.extend({
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag'
     }),
     dragStart(e: DragEvent, photo: any) {
-      if (!this.online) {
+      if (!networkUtils.check()) {
         networkUtils.notifyNetworkError()
         return
       }
@@ -253,7 +245,7 @@ export default Vue.extend({
       if (this.getCurrFunctionPanelType === FunctionPanelType.photoShadow) {
         eventUtils.emit(PanelEvent.showPhotoShadow, '')
       }
-      if (!this.online) {
+      if (!networkUtils.check()) {
         networkUtils.notifyNetworkError()
         return
       }
