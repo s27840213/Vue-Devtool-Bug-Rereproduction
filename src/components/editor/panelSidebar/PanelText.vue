@@ -177,7 +177,7 @@ export default Vue.extend({
       this.handleSearch,
       this.handleCategorySearch,
       async () => {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
         textUtils.loadDefaultFonts(this.extractFonts)
       })
@@ -203,7 +203,7 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
-      'getRecently',
+      'getRecAndCate',
       'getMoreContent'
     ]),
     ...mapMutations({
@@ -229,7 +229,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       }
     },
@@ -238,7 +238,7 @@ export default Vue.extend({
       if (keyword) {
         this.getContent({ keyword, locale })
       } else {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       }
     },
