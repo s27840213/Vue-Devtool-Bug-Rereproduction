@@ -11,6 +11,7 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
+      :primaryLayer="config"
       :config="layer")
 </template>
 
