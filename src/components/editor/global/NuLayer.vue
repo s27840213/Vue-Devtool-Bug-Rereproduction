@@ -249,10 +249,6 @@ export default Vue.extend({
   left: 0;
 }
 
-.layer-flip {
-  transition: transform 0.2s linear;
-}
-
 .test-index {
   position: absolute;
   top: 0;

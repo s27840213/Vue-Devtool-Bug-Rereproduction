@@ -118,7 +118,7 @@
                 @setFocus="setFocus()"
                 @getClosestSnaplines="getClosestSnaplines"
                 @clearSnap="clearSnap")
-          dim-background(v-if="isImgControl" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
+          dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
           div(v-if="isBackgroundImageControl"
               class="background-control"
               :style="backgroundControlStyles()")
@@ -277,7 +277,7 @@ export default Vue.extend({
     ...mapState(['isMoving', 'currDraggedPhoto']),
     ...mapState('shadow', ['handleId']),
     ...mapGetters({
-      isImgControl: 'imgControl/isImgControl'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx'
     }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',

@@ -1926,7 +1926,6 @@ export default Vue.extend({
       LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, textShapeUtils.getCurveTextProps(text))
     },
     onDblClick() {
-      console.log('dbl')
       if (this.getLayerType !== 'image' || this.isLocked) return
       if (this.currSelectedInfo.index < 0) {
         GroupUtils.select(this.pageIndex, [this.layerIndex])
@@ -2020,7 +2019,6 @@ export default Vue.extend({
     },
     dblSubController(e: MouseEvent, targetIndex: number) {
       e.stopPropagation()
-      console.log('dbl sub')
       if (this.isHandleShadow) {
         return
       }
@@ -2030,17 +2028,17 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case LayerType.group:
           target = (this.config as IGroup).layers[targetIndex]
+          updateSubLayerProps = LayerUtils.updateSubLayerProps
           if (!target.active) {
             return
           }
-          updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case LayerType.frame:
           target = (this.config as IFrame).clips[targetIndex]
+          updateSubLayerProps = FrameUtils.updateFrameLayerProps
           if (!target.active || (target as IImage).srcObj.type === 'frame') {
             return
           }
-          updateSubLayerProps = FrameUtils.updateFrameLayerProps
           break
         case LayerType.image:
         default:

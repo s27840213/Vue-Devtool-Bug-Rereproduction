@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="!isImgControl || isBgImgControl" class="nu-image"
+  div(v-if="!isImgControl || forRender || isBgImgControl" class="nu-image"
     :id="`nu-image-${config.id}`"
     :style="containerStyles"
     draggable="false")
@@ -12,7 +12,7 @@
       class="shadow__picture"
       :style="imgShadowStyles")
       img(ref="shadow-img"
-        class="nu-image__picture"
+        class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc"
         @error="onError()"
@@ -99,7 +99,11 @@ export default Vue.extend({
     },
     /** This prop is used to present if this image-component is
      *  only used for rendering as image controlling */
-    forRender: Boolean
+    forRender: Boolean,
+    primaryLayer: {
+      type: Object,
+      default: () => { return undefined }
+    }
   },
   async created() {
     this.handleInitLoad()
@@ -228,7 +232,7 @@ export default Vue.extend({
     },
     'config.imgControl'(val) {
       if (val) {
-        this.setImgConfig({ pageIndex: this.pageIndex, layerIndex: this.layerIndex, subLayerIdx: this.subLayerIndex })
+        this.setImgConfig(this.layerInfo)
       } else {
         this.setImgConfig(undefined)
         this.handleDimensionUpdate()
@@ -283,11 +287,16 @@ export default Vue.extend({
       return this.config.imgControl
     },
     layerInfo(): ILayerInfo {
-      return {
+      const layerInfo = {
         pageIndex: this.pageIndex,
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
       }
+      const { primaryLayer } = this
+      if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
+        layerInfo.subLayerIdx--
+      }
+      return layerInfo
     },
     isInFrame(): boolean {
       return this.primaryLayerType === 'frame'
@@ -634,7 +643,7 @@ export default Vue.extend({
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const imgElement = this.$refs.img as HTMLImageElement
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      const scale = this.config.parentLayerStyles?.scale ?? 1
+      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
       const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
@@ -1029,6 +1038,14 @@ export default Vue.extend({
 
   &__picture {
     object-fit: cover;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__picture-shadow {
     position: absolute;
     top: 0px;
     left: 0px;

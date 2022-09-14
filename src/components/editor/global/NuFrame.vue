@@ -11,9 +11,10 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
-      :config="layer"
       :inFrame="true"
-      :contentScaleRatio="contentScaleRatio")
+      :contentScaleRatio="contentScaleRatio"
+      :primaryLayer="config"
+      :config="layer")
 </template>
 
 <script lang="ts">
@@ -150,7 +151,7 @@ export default Vue.extend({
     },
     shadowSrc() {
       const shadow = this.config.styles.shadow
-      if (shadow && shadow.srcObj?.type) {
+      if (shadow && shadow.srcObj && shadow.srcObj.type) {
         const { width, height } = this.config.styles
         const size = ImageUtils.getSrcSize(shadow.srcObj, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))

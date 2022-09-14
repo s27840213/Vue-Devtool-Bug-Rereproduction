@@ -38,7 +38,7 @@ import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
 import payment from '@/store/module/payment'
 import imgControl from '@/store/module/imgControl'
-import { ADD_subLayer, DELETE_subLayer } from '@/utils/layerUtils'
+import { ADD_subLayer } from '@/utils/layerUtils'
 
 Vue.use(Vuex)
 
