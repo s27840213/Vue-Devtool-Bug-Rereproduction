@@ -64,6 +64,18 @@ const routes: Array<RouteConfig> = [
         console.log(error)
       }
     }
+  },
+  {
+    path: '*',
+    name: 'Fallback',
+    component: ViviSticker,
+    beforeEnter: async (to, from, next) => {
+      try {
+        router.replace({ name: 'ViviSticker', query: {}, params: {} })
+      } catch (error) {
+        console.log(error)
+      }
+    }
   }
 ]
 
