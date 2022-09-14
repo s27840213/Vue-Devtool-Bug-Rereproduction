@@ -43,14 +43,10 @@ import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
 import { FunctionPanelType, LayerType } from '@/store/types'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
-<<<<<<< HEAD
-import imageShadowUtils from '@/utils/imageShadowUtils'
 import mouseUtils from '@/utils/mouseUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import frameUtils from '@/utils/frameUtils'
 import stepsUtils from '@/utils/stepsUtils'
-=======
->>>>>>> origin/feature/font-list-tag
 
 export default Vue.extend({
   name: 'GalleryPhoto',
