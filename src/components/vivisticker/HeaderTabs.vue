@@ -79,13 +79,13 @@ export default Vue.extend({
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: shortcutUtils.redo }
         ] : []
-      } else if (this.isInCategory) {
-        return [
-          { icon: 'chevron-left', width: 24, action: this.clearCategory }
-        ]
       } else if (this.isInBgShare) {
         return [
           { icon: 'chevron-left', width: 24, action: this.clearBgShare }
+        ]
+      } else if (this.isInCategory) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.clearCategory }
         ]
       } else {
         return [
@@ -106,10 +106,10 @@ export default Vue.extend({
     centerTitle(): string {
       if (this.isInEditor) {
         return ''
-      } else if (this.isInCategory) {
-        return this.keyword
       } else if (this.isInBgShare) {
         return `${this.$t('NN0214')}`
+      } else if (this.isInCategory) {
+        return this.keyword
       } else {
         return ''
       }
