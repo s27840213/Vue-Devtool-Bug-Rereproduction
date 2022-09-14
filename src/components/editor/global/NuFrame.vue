@@ -163,10 +163,12 @@ export default Vue.extend({
       if (shadow && shadow.srcObj?.type) {
         const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
         const { horizontalFlip, verticalFlip, scale } = this.config.styles
+        const x = (horizontalFlip ? -imgX : imgX) * scale * this.contentScaleRatio
+        const y = (verticalFlip ? -imgY : imgY) * scale * this.contentScaleRatio
         return {
-          width: (imgWidth * scale).toString() + 'px',
-          height: (imgHeight * scale).toString() + 'px',
-          transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px)`
+          width: (imgWidth * scale * this.contentScaleRatio).toString() + 'px',
+          height: (imgHeight * scale * this.contentScaleRatio).toString() + 'px',
+          transform: `translate(${x}px, ${y}px)`
         }
       }
       return {}
