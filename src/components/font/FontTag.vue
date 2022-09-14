@@ -1,14 +1,21 @@
 <template lang="pug">
   div(class="font-tag")
-    div(:class="{'font-tag__container': !expand}")
-      div(class="font-tag__flex-container")
-        div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-          @click="onClick(tag)")
-          div(class="font-tag__tag") {{ tag }}
-    div(v-if="!expand" class="font-tag__more-wrapper")
-      div(class="font-tag__more pointer"
-        @click="onClick(more)")
-        div(class="font-tag__tag") {{ '...' }}
+    template(v-if="!isTouchDevice")
+      div(:class="{'font-tag__container': !expand}")
+        div(class="font-tag__flex-container")
+          div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
+            @click="onClick(tag)")
+            div(class="font-tag__tag") {{ tag }}
+      div(v-if="!expand" class="font-tag__more-wrapper")
+        div(class="font-tag__more pointer"
+          @click="onClickMore")
+          div(class="font-tag__tag") {{ '...' }}
+    template(v-else)
+      div(class="font-tag__container-mobile")
+        div(class="font-tag__flex-container-mobile")
+          div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
+            @click="onClick(tag)")
+            div(class="font-tag__tag") {{ tag }}
 
 </template>
 
@@ -19,10 +26,8 @@ import { mapActions, mapState } from 'vuex'
 
 export default Vue.extend({
   data() {
-    const more = generalUtils.generateRandomString(6)
     return {
-      expand: false,
-      more
+      expand: false
     }
   },
   created() {
@@ -31,18 +36,20 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('fontTag', ['tags'])
+    ...mapState('fontTag', ['tags']),
+    isTouchDevice(): boolean {
+      return generalUtils.isTouchDevice()
+    }
   },
   methods: {
     ...mapActions('fontTag', {
       addFontTags: 'ADD_FONT_TAGS'
     }),
     onClick(tag: string) {
-      if (tag === this.more) {
-        this.expand = true
-      } else {
-        this.$emit('search', tag)
-      }
+      this.$emit('search', tag)
+    },
+    onClickMore() {
+      this.expand = true
     }
   }
 })
@@ -54,6 +61,11 @@ export default Vue.extend({
   &__container {
     overflow: hidden;
     max-height: 52px;
+    &-mobile {
+      max-height: 52px;
+      overflow-x: scroll;
+      @include no-scrollbar;
+    }
   }
   &__more {
     padding: 8px;
@@ -70,12 +82,18 @@ export default Vue.extend({
   &__flex-container {
     display: flex;
     flex-wrap: wrap;
+    &-mobile {
+      display: flex;
+    }
   }
-  &__tag-wrapper {
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid #E0E0E0;
-    margin: 5px
+  &__tag {
+    &-wrapper {
+      flex-shrink: 0;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid #E0E0E0;
+      margin: 5px
+    }
   }
 }
 </style>
