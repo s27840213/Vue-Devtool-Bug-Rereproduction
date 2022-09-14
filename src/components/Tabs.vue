@@ -17,6 +17,10 @@ export default Vue.extend({
       type: Array as PropType<string[]>,
       default: () => []
     },
+    defaultTab: {
+      type: Number,
+      default: 0
+    },
     theme: { // value: dark, light
       type: String,
       default: 'dark'
@@ -24,7 +28,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      currActiveTabIndex: 0
+      currActiveTabIndex: this.defaultTab
     }
   },
   computed: {
