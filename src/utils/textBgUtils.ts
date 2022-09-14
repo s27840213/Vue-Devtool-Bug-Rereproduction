@@ -128,9 +128,9 @@ class TextBg {
 
   convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
     if (!isITextUnderline(effect) && !isITextGooey(effect)) return {}
-    const color = this.rgba(effect.color, effect.opacity * 0.01)
 
     if (isITextUnderline(effect)) {
+      const { color } = effect
       const borderWidth = Math.round(effect.height / 2)
       let bgEndpoints = ''
 
@@ -165,19 +165,24 @@ class TextBg {
       }
 
       return {
-        boxDecorationBreak: 'clone',
-        backgroundRepeat: 'no-repeat',
-        backgroundImage: `
-          linear-gradient(180deg, ${color}, ${color}),
-          ${this.inlineSvg(bgEndpoints)}`,
-        backgroundSize: `
-          calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
-          ${borderWidth + 1}px ${borderWidth * 2}px,
-          ${borderWidth + 1}px ${borderWidth * 2}px`,
-        backgroundPositionX: `${borderWidth}px, 0, 100%`,
-        backgroundPositionY: `${100 - (effect.yOffset)}%`
+        duplicatedSpan: {
+          color: 'transparent',
+          opacity: effect.opacity * 0.01,
+          boxDecorationBreak: 'clone',
+          backgroundRepeat: 'no-repeat',
+          backgroundImage: `
+            linear-gradient(180deg, ${color}, ${color}),
+            ${this.inlineSvg(bgEndpoints)}`,
+          backgroundSize: `
+            calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
+            ${borderWidth + 1}px ${borderWidth * 2}px,
+            ${borderWidth + 1}px ${borderWidth * 2}px`,
+          backgroundPositionX: `${borderWidth}px, 0, 100%`,
+          backgroundPositionY: `${100 - (effect.yOffset)}%`
+        }
       }
     } else if (isITextGooey(effect) && effect.name === 'cloud') {
+      const color = this.rgba(effect.color, effect.opacity * 0.01)
       return {
         padding: '0 20px',
         boxDecorationBreak: 'clone',
@@ -185,6 +190,7 @@ class TextBg {
         backgroundColor: color
       }
     } else if (isITextGooey(effect) && effect.name === 'gooey') {
+      const { color } = effect
       const svgId = `textBg_gooey_${effect.bRadius}`
       return {
         paddingTop: `${effect.distance}px`,
@@ -198,7 +204,7 @@ class TextBg {
         },
         duplicatedSpan: {
           color: 'transparent',
-          backgroundColor: effect.color
+          backgroundColor: color
         },
         svgId: svgId,
         svgFilter: [

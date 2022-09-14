@@ -1,8 +1,8 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
-    div(ref="text" class="nu-text__body" :style="bodyStyles()")
+    div(v-for="text in duplicatedText" class="nu-text__body"
+        :style="Object.assign(bodyStyles(), text.extraBody)")
       nu-curve-text(v-if="isCurveText"
-        ref="curveText"
         :config="config"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
@@ -15,26 +15,7 @@
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
-          br(v-if="!span.text && p.spans.length === 1")
-    //- Duplicate of nu-text__body, used to implement some text effect.
-    div(v-if="showDuplicated" class="nu-text__body"
-        :style="Object.assign(bodyStyles(), duplicatedBody)")
-      nu-curve-text(v-if="isCurveText"
-        isDuplicated
-        :config="config"
-        :layerIndex="layerIndex"
-        :pageIndex="pageIndex"
-        :subLayerIndex="subLayerIndex")
-      p(v-else
-        v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-        :key="p.id"
-        :style="styles(p.styles)")
-        span(v-for="(span, sIndex) in p.spans"
-          class="nu-text__span"
-          :data-sindex="sIndex"
-          :key="span.id"
-          :style="Object.assign(styles(span.styles), spanEffect, duplicatedSpan)") {{ span.text }}
+          :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans"
@@ -196,33 +177,30 @@ export default Vue.extend({
       }
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
-    showDuplicated() {
-      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      return Boolean(textShadow.duplicatedBody || textShadow.duplicatedSpan ||
-        textBg.duplicatedBody || textBg.duplicatedSpan
-      )
-    },
-    duplicatedBody():Record<string, string> {
-      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      return {
+    duplicatedText() {
+      const duplicatedBodyBasicCss = {
         position: 'absolute',
         top: '0px',
-        zIndex: '-1',
         width: '100%',
-        opacity: 1,
-        ...textShadow.duplicatedBody,
-        ...textBgSpan.duplicatedBody as Record<string, string>
+        opacity: 1
       }
-    },
-    duplicatedSpan():Record<string, string> {
       const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const textBg = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      return {
-        ...textShadow.duplicatedSpan,
-        ...textBg.duplicatedSpan as Record<string, string>
+      const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
+      const textShadowCss = {
+        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
+        extraSpan: textShadow.duplicatedSpan
       }
+      const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
+      const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
+      const textBgSpanCss = {
+        extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
+        extraSpan: textBgSpan.duplicatedSpan
+      }
+      return [
+        ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
+        ...(duplicatedTextShadow ? [textShadowCss] : []),
+        {} // Original text, don't have extra css
+      ]
     }
   },
   watch: {
