@@ -1,11 +1,10 @@
 <template lang="pug">
   div(class="font-tag")
     template(v-if="!isTouchDevice")
-      div(:class="{'font-tag__container': !expand}")
-        div(class="font-tag__flex-container")
-          div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
-            @click="onClick(tag)")
-            div(class="font-tag__tag") {{ tag }}
+      div(:class="{'font-tag__container': !expand, 'font-tag__flex-container': true}")
+        div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
+          @click="onClick(tag)")
+          div(class="font-tag__tag") {{ tag }}
       div(v-if="!expand" class="font-tag__more-wrapper")
         div(class="font-tag__more pointer"
           @click="onClickMore")
@@ -62,7 +61,6 @@ export default Vue.extend({
     overflow: hidden;
     max-height: 52px;
     &-mobile {
-      max-height: 52px;
       overflow-x: scroll;
       @include no-scrollbar;
     }
