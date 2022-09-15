@@ -14,6 +14,7 @@ import AssetUtils from '@/utils/assetUtils'
 import textPropUtils from '@/utils/textPropUtils'
 import DragUtils from '@/utils/dragUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   props: {
@@ -47,11 +48,7 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addText() {
-      // AssetUtils.addAsset(this.item)
-      //   .then(() => {
-      //     textPropUtils.updateTextPropsState()
-      //   })
-      console.log('start editing', this.item)
+      vivistickerUtils.startEditing('text', vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
     }
   }
 })

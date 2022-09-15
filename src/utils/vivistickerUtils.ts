@@ -13,6 +13,7 @@ import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import controlUtils from './controlUtils'
 import layerUtils from './layerUtils'
+import textPropUtils from './textPropUtils'
 
 class ViviStickerUtils {
   inDebugMode = false
@@ -102,6 +103,9 @@ class ViviStickerUtils {
         } else {
           eventUtils.emit(PanelEvent.switchTab, 'opacity')
         }
+      }
+      if (asset.type === 0) {
+        textPropUtils.updateTextPropsState()
       }
     }
   }
