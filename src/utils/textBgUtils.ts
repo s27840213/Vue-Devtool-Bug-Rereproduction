@@ -6,6 +6,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import text from '@/store/text'
 
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
@@ -238,6 +239,38 @@ class TextBg {
     } else return {}
   }
 
+  syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {
+    Object.assign(textBg, { name: textBg.name || effectName })
+    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
+    const newShareAttrs = { opacity: textBg.opacity }
+    const newEffect = { opacity: shareAttrs.opacity }
+    if (isITextBox(textBg)) {
+      if (['square-borderless', 'rounded-borderless',
+        'square-both', 'rounded-both'].includes(textBg.name)) {
+        Object.assign(newShareAttrs, { color: textBg.pColor })
+        Object.assign(newEffect, { pColor: shareAttrs.color })
+      }
+      if (['square-hollow', 'rounded-hollow',
+        'square-both', 'rounded-both'].includes(textBg.name)) {
+        Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
+        Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
+      }
+    } else {
+      Object.assign(newShareAttrs, { color: textBg.color })
+      Object.assign(newEffect, { color: shareAttrs.color })
+    }
+
+    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+    if (!effectName) {
+      Object.assign(shareAttrs, newShareAttrs)
+      localStorageUtils.set('textEffectSetting', 'textBgShare', shareAttrs)
+    } else {
+      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+      Object.assign(effect, newEffect)
+      localStorageUtils.set('textEffectSetting', effectName, effect)
+    }
+  }
+
   resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, this.effects[effectName])
@@ -262,7 +295,9 @@ class TextBg {
         if (layerTextBg && layerTextBg.name === effect) {
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
+          this.syncShareAttrs(textBg, null)
         } else {
+          this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
         }
