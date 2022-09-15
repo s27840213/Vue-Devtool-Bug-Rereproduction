@@ -1,14 +1,14 @@
 <template lang="pug">
-  div(class="font-tag")
+  div(class="font-tag" v-click-outside="clickOutsideHandler")
     template(v-if="!isTouchDevice")
-      div(:class="{'font-tag__container': !expand, 'font-tag__flex-container': true}")
+      div(:class="{'showMore': showMore, 'font-tag__container': !showMore, 'font-tag__flex-container': true}")
         div(class="font-tag__tag-wrapper pointer" v-for="tag in tags"
           @click="onClick(tag)")
           div(class="font-tag__tag") {{ tag }}
-      div(v-if="!expand" class="font-tag__more-wrapper")
-        div(class="font-tag__more pointer"
+      div(v-if="!showMore" class="font-tag__more-wrapper")
+        div(class="font-tag__tag-wrapper pointer"
           @click="onClickMore")
-          div(class="font-tag__tag") {{ '...' }}
+          div(class="font-tag__tag") {{ 'more...' }}
     template(v-else)
       div(class="font-tag__container-mobile")
         div(class="font-tag__flex-container-mobile")
@@ -21,13 +21,12 @@
 <script lang="ts">
 import generalUtils from '@/utils/generalUtils'
 import Vue from 'vue'
-import { mapActions, mapState } from 'vuex'
+import vClickOutside from 'v-click-outside'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default Vue.extend({
-  data() {
-    return {
-      expand: false
-    }
+  directives: {
+    clickOutside: vClickOutside.directive
   },
   created() {
     if (this.tags.length === 0) {
@@ -35,7 +34,7 @@ export default Vue.extend({
     }
   },
   computed: {
-    ...mapState('fontTag', ['tags']),
+    ...mapState('fontTag', ['tags', 'showMore']),
     isTouchDevice(): boolean {
       return generalUtils.isTouchDevice()
     }
@@ -44,11 +43,19 @@ export default Vue.extend({
     ...mapActions('fontTag', {
       addFontTags: 'ADD_FONT_TAGS'
     }),
+    ...mapMutations('fontTag', {
+      setShowMore: 'SET_SHOW_MORE'
+    }),
     onClick(tag: string) {
       this.$emit('search', tag)
     },
     onClickMore() {
-      this.expand = true
+      this.setShowMore(true)
+    },
+    clickOutsideHandler() {
+      if (this.showMore) {
+        this.setShowMore(false)
+      }
     }
   }
 })
@@ -57,17 +64,17 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .font-tag {
   position: relative;
+  font-size: 14px;
   &__container {
     overflow: hidden;
-    max-height: 52px;
+    max-height: 43px;
+    margin: 0 -5px 0 -5px;
     &-mobile {
       overflow-x: scroll;
       @include no-scrollbar;
     }
   }
   &__more {
-    padding: 8px;
-    margin: 5px;
     &-wrapper {
       position: absolute;
       padding: 0 0 0 10px;
@@ -87,11 +94,16 @@ export default Vue.extend({
   &__tag {
     &-wrapper {
       flex-shrink: 0;
-      padding: 8px;
+      padding: 6px;
       border-radius: 12px;
       border: 1px solid #E0E0E0;
-      margin: 5px
+      margin: 4px
     }
+  }
+  .showMore {
+    background: white;
+    padding: 5px;
+    border-radius: 5px;
   }
 }
 </style>

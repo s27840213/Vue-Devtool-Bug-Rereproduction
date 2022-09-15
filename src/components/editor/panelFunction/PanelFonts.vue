@@ -48,7 +48,7 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
@@ -90,6 +90,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
+    this.setShowMore(false)
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
@@ -243,12 +244,16 @@ export default Vue.extend({
       'fetchFonts',
       'fetchMoreFonts'
     ]),
+    ...mapMutations('fontTag', {
+      setShowMore: 'SET_SHOW_MORE'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     closeFontsPanel() {
       this.resetContent()
       this.$emit('closeFontsPanel')
+      this.setShowMore(false)
     },
     handleLoadMore(moreType: string | undefined) {
       if (moreType === 'asset') {
@@ -261,6 +266,7 @@ export default Vue.extend({
     handleSearch(keyword: string) {
       if (keyword) {
         this.hasSearch = true
+        this.setShowMore(false)
       } else {
         this.hasSearch = false
       }
@@ -285,7 +291,15 @@ export default Vue.extend({
   &__title {
     text-align: center;
     position: relative;
-    margin-bottom: 5px;
+    margin-bottom: -10px;
+    background: white;
+    width: 285px;
+    min-height: 50px;
+    top: -20px;
+    left: -20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   > div {
     margin-top: 15px;
