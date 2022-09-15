@@ -102,39 +102,43 @@
           @mouseover="togglePageHighlighter(true)"
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")
-        div(class="scale-container relative"
-            :style="scaleContainerStyles")
-          page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
-          div(class="page-control" :style="styles('control')")
-            template(v-for="(layer, index) in config.layers")
-              nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
-                data-identifier="controller"
-                :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
-                :layerIndex="index"
+        lazy-load(
+            target=".mobile-editor__page-preview"
+            :minHeight="config.width * (scaleRatio / 100)"
+            :threshold="[0,1]")
+          div(class="scale-container relative"
+              :style="scaleContainerStyles")
+            page-content(:config="config" :pageIndex="pageIndex" :contentScaleRatio="contentScaleRatio")
+            div(class="page-control" :style="styles('control')")
+              template(v-for="(layer, index) in config.layers")
+                nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
+                  data-identifier="controller"
+                  :key="`controller-${(layer.id === undefined) ? index : layer.id}`"
+                  :layerIndex="index"
+                  :pageIndex="pageIndex"
+                  :config="layer"
+                  :snapUtils="snapUtils"
+                  :contentScaleRatio="contentScaleRatio"
+                  @setFocus="setFocus()"
+                  @getClosestSnaplines="getClosestSnaplines"
+                  @clearSnap="clearSnap")
+            dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
+            div(v-if="isBackgroundImageControl"
+                class="background-control"
+                :style="backgroundControlStyles()")
+              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
+              nu-background-controller(:config="config.backgroundImage.config"
                 :pageIndex="pageIndex"
-                :config="layer"
-                :snapUtils="snapUtils"
-                :contentScaleRatio="contentScaleRatio"
-                @setFocus="setFocus()"
-                @getClosestSnaplines="getClosestSnaplines"
-                @clearSnap="clearSnap")
-          dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :pageScaleRatio="pageScaleRatio" :contentScaleRatio="contentScaleRatio")
-          div(v-if="isBackgroundImageControl"
-              class="background-control"
-              :style="backgroundControlStyles()")
-            nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true"  :contentScaleRatio="contentScaleRatio")
-            nu-background-controller(:config="config.backgroundImage.config"
-              :pageIndex="pageIndex"
-              :contentScaleRatio="contentScaleRatio")
-            div(:style="backgroundContorlClipStyles()")
-              nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
-              component(v-for="(elm, idx) in getHalation"
-                :key="idx"
-                :is="elm.tag"
-                v-bind="elm.attrs")
-          div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
-              class="dim-background"
-              :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
+                :contentScaleRatio="contentScaleRatio")
+              div(:style="backgroundContorlClipStyles()")
+                nu-image(:config="config.backgroundImage.config" :inheritStyle="backgroundFlipStyles()" :isBgImgControl="true" :contentScaleRatio="contentScaleRatio")
+                component(v-for="(elm, idx) in getHalation"
+                  :key="idx"
+                  :is="elm.tag"
+                  v-bind="elm.attrs")
+            div(v-if="isAnyBackgroundImageControl && !isBackgroundImageControl"
+                class="dim-background"
+                :style="Object.assign(styles('control'), {'pointer-events': 'initial'})")
       div(v-show="pageIsHover || currFocusPageIndex === pageIndex"
         class="page-highlighter"
         :style="wrapperStyles()")
@@ -177,6 +181,7 @@ import Vue from 'vue'
 import { mapMutations, mapGetters, mapState } from 'vuex'
 import { IShape, IText, IImage, IGroup, ILayer, ITmp, IFrame, IImageStyle } from '@/interfaces/layer'
 import PageContent from '@/components/editor/page/PageContent.vue'
+import LazyLoad from '@/components/LazyLoad.vue'
 import MouseUtils from '@/utils/mouseUtils'
 import ShortcutUtils from '@/utils/shortcutUtils'
 import GroupUtils from '@/utils/groupUtils'
@@ -206,7 +211,8 @@ export default Vue.extend({
     NuImage,
     NuBackgroundController,
     PageContent,
-    DimBackground
+    DimBackground,
+    LazyLoad
   },
   data() {
     return {
@@ -293,15 +299,15 @@ export default Vue.extend({
       groupType: 'getGroupType',
       lockGuideline: 'getLockGuideline',
       currFunctionPanelType: 'getCurrFunctionPanelType',
-      isProcessingShadow: 'shadow/isProcessing'
+      isProcessingShadow: 'shadow/isProcessing',
+      contentScaleRatio: 'getContentScaleRatio'
     }),
-    contentScaleRatio(): number {
-      return 0.4
-    },
     scaleContainerStyles(): { [index: string]: string } {
       return {
         // transform: `scale(${1})`
-        transform: `scale(${this.scaleRatio / 100 / 0.4})`
+        width: `${this.config.width * this.contentScaleRatio}px`,
+        height: `${this.config.height * this.contentScaleRatio}px`,
+        transform: `scale(${this.scaleRatio / 100 / this.contentScaleRatio})`
       }
     },
     getCurrLayer(): ILayer {
@@ -759,9 +765,9 @@ export default Vue.extend({
   position: relative;
   box-sizing: content-box;
   outline: none;
-  &:empty {
-    background-color: setColor(gray-4);
-  }
+  // &:empty {
+  //   background-color: setColor(gray-4);
+  // }
 }
 .scale-container {
   width: 0px;

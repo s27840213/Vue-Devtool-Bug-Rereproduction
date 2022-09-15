@@ -275,6 +275,9 @@ class PageUtils {
     store.commit('SET_pages', currentPagesTmp)
   }
 
+  // findCentralPageIndexInfo(preventFocus = false) {
+  //   // console.lg
+  // }
   findCentralPageIndexInfo = throttle(this.findCentralPageIndexInfoHandler, 100)
 
   private findCentralPageIndexInfoHandler(preventFocus = false) {
