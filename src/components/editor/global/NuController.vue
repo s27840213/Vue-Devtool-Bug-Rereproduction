@@ -1854,7 +1854,7 @@ export default Vue.extend({
       if (this.widthLimitSetDuringComposition) {
         this.widthLimitSetDuringComposition = false
         LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit: -1 })
-        this.textSizeRefresh(this.config, false)
+        this.textSizeRefresh(this.config, false, false)
       }
       if (toRecord) {
         this.waitFontLoadingAndRecord()

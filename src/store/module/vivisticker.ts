@@ -21,7 +21,8 @@ const getDefaultState = (): IViviStickerState => ({
   currActiveTab: 'object',
   isInCategoryDict: {
     object: false,
-    background: false
+    background: false,
+    text: false
   },
   isInBgShare: false,
   shareItem: undefined,

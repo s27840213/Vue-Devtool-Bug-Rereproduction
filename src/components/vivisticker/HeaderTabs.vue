@@ -60,6 +60,9 @@ export default Vue.extend({
     ...mapState('background', {
       backgroundKeyword: 'keyword'
     }),
+    ...mapState('textStock', {
+      textKeyword: 'keyword'
+    }),
     ...mapGetters({
       isInEditor: 'vivisticker/getIsInEditor',
       isCurrentInCategory: 'vivisticker/getIsInCategory',
@@ -100,6 +103,8 @@ export default Vue.extend({
           return this.objectsKeyword
         case 'background':
           return this.backgroundKeyword
+        case 'text':
+          return this.textKeyword
       }
       return ''
     },
@@ -136,7 +141,10 @@ export default Vue.extend({
       resetObjects: 'objects/resetContent',
       refetchObjects: 'objects/getRecAndCate',
       resetBackgrounds: 'background/resetContent',
-      refetchBackgrounds: 'background/getRecAndCate'
+      refetchBackgrounds: 'background/getRecAndCate',
+      resetTexts: 'textStock/resetContent',
+      refetchTexts: 'textStock/getRecAndCate',
+      refetchTextContent: 'textStock/getContent'
     }),
     ...mapMutations({
       setIsInCategory: 'vivisticker/SET_isInCategory',
@@ -161,6 +169,10 @@ export default Vue.extend({
           this.resetBackgrounds()
           this.refetchBackgrounds()
           break
+        case 'text':
+          this.resetTexts()
+          this.refetchTexts()
+          this.refetchTextContent()
       }
     },
     clearBgShare() {

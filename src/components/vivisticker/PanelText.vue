@@ -1,6 +1,7 @@
 <template lang="pug">
   div(class="panel-text")
-    search-bar(class="panel-text__searchbar"
+    search-bar(v-if="!isInCategory"
+      class="panel-text__searchbar"
       :class="{'no-top': isInEditor}"
       :placeholder="$t('NN0092', {target: $tc('NN0005',1)})"
       clear
@@ -75,7 +76,8 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       getLayersNum: 'getLayersNum',
-      isInEditor: 'vivisticker/getIsInEditor'
+      isInEditor: 'vivisticker/getIsInEditor',
+      isTabInCategory: 'vivisticker/getIsInCategory'
     }),
     ...mapState('textStock', [
       'categories',
@@ -85,6 +87,9 @@ export default Vue.extend({
       'preview',
       'keyword'
     ]),
+    isInCategory(): boolean {
+      return this.isTabInCategory('text')
+    },
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
@@ -146,7 +151,7 @@ export default Vue.extend({
       this.handleSearch,
       this.handleCategorySearch,
       async () => {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       })
   },
@@ -166,7 +171,7 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
-      'getRecently',
+      'getRecAndCate',
       'getMoreContent'
     ]),
     ...mapMutations({
@@ -177,7 +182,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       }
     },
@@ -185,8 +190,9 @@ export default Vue.extend({
       this.resetContent()
       if (keyword) {
         this.getContent({ keyword, locale })
+        vivistickerUtils.setIsInCategory('text', true)
       } else {
-        this.getRecently()
+        this.getRecAndCate()
         this.getContent()
       }
     },
