@@ -101,11 +101,13 @@ export default Vue.extend({
       this.$emit('pushHistory', type)
     },
     openColorPanel(key: string) {
-      const eventType = this.currCategory.name === 'shadow' ? ColorEventType.textEffect
-        : key === 'bColor' ? ColorEventType.textBgBorder
-          : key === 'pColor' ? ColorEventType.textBgPadding
-            : ColorEventType.textBg
-      this.$emit('openExtraColorModal', eventType, MobileColorPanelType.palette)
+      if (this.currCategory.name === 'shadow') {
+        this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
+        textEffectUtils.setColorKey(key)
+      } else { // Text BG
+        this.$emit('openExtraColorModal', ColorEventType.textBg, MobileColorPanelType.palette)
+        textBgUtils.setColorKey(key)
+      }
     },
     onEffectClick(category: string, effectName: string): void {
       switch (category) {
