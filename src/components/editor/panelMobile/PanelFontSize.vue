@@ -8,6 +8,7 @@
       min="1"
       step="1"
       type="range"
+      :disabled="fontSize === '--'"
       @pointerup="handleChangeStop")
 </template>
 
