@@ -26,7 +26,7 @@
       template(v-if="((['group', 'tmp', 'frame'].includes(getLayerType))) && !isDragging")
         div(class="sub-controller")
           template(v-for="(layer,index) in getLayers")
-            component(:is="layer.type === 'image' && layer.imgControl ? 'nu-img-controller' : 'nu-sub-controller'"
+            nu-sub-controller(v-if="layer.type !== 'image' || !layer.imgControl"
               class="relative"
               data-identifier="controller"
               :style="getLayerType === 'frame' ? '' : subControllerStyles(layer.type === 'image' && layer.imgControl)"
@@ -1921,7 +1921,8 @@ export default Vue.extend({
         LayerUtils.setCurrSubSelectedInfo(targetIndex, type)
       }
     },
-    dblSubController(targetIndex: number) {
+    dblSubController(e: MouseEvent, targetIndex: number) {
+      e.stopPropagation()
       if (this.isHandleShadow) {
         return
       }
@@ -1931,23 +1932,25 @@ export default Vue.extend({
       switch (this.getLayerType) {
         case LayerType.group:
           target = (this.config as IGroup).layers[targetIndex]
+          updateSubLayerProps = LayerUtils.updateSubLayerProps
           if (!target.active) {
             return
           }
-          updateSubLayerProps = LayerUtils.updateSubLayerProps
           break
         case LayerType.frame:
           target = (this.config as IFrame).clips[targetIndex]
+          updateSubLayerProps = FrameUtils.updateFrameLayerProps
           if (!target.active || (target as IImage).srcObj.type === 'frame') {
             return
           }
-          updateSubLayerProps = FrameUtils.updateFrameLayerProps
           break
         case LayerType.image:
         default:
           return
       }
-      target.type === LayerType.image && !target.inProcess && updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      if (target.type === LayerType.image && !target.inProcess) {
+        updateSubLayerProps(this.pageIndex, this.layerIndex, targetIndex, { imgControl: true })
+      }
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)

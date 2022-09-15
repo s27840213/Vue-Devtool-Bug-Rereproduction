@@ -85,8 +85,11 @@ class ConstantData {
         content: [{
           label: '喜帖',
           url: 'https://blog.vivipic.com/tw/wedding-invitation/'
+        }, {
+          label: '邀請卡',
+          url: 'https://blog.vivipic.com/tw/invitation-card/'
         },
-        ...[[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        ...[20, 19, 18, 22].map((id) => themeItem(id))
         ]
       }],
       us: [{
