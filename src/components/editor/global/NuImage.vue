@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="!isImgControl || forRender" class="nu-image"
+  div(v-if="!isImgControl || forRender || isBgImgControl" class="nu-image"
     :id="`nu-image-${config.id}`"
     :style="styles"
     draggable="false")
