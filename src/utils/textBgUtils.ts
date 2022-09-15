@@ -6,6 +6,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import text from '@/store/text'
 
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
@@ -128,9 +129,9 @@ class TextBg {
 
   convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
     if (!isITextUnderline(effect) && !isITextGooey(effect)) return {}
-    const color = this.rgba(effect.color, effect.opacity * 0.01)
 
     if (isITextUnderline(effect)) {
+      const { color } = effect
       const borderWidth = Math.round(effect.height / 2)
       let bgEndpoints = ''
 
@@ -165,19 +166,24 @@ class TextBg {
       }
 
       return {
-        boxDecorationBreak: 'clone',
-        backgroundRepeat: 'no-repeat',
-        backgroundImage: `
-          linear-gradient(180deg, ${color}, ${color}),
-          ${this.inlineSvg(bgEndpoints)}`,
-        backgroundSize: `
-          calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
-          ${borderWidth + 1}px ${borderWidth * 2}px,
-          ${borderWidth + 1}px ${borderWidth * 2}px`,
-        backgroundPositionX: `${borderWidth}px, 0, 100%`,
-        backgroundPositionY: `${100 - (effect.yOffset)}%`
+        duplicatedSpan: {
+          color: 'transparent',
+          opacity: effect.opacity * 0.01,
+          boxDecorationBreak: 'clone',
+          backgroundRepeat: 'no-repeat',
+          backgroundImage: `
+            linear-gradient(180deg, ${color}, ${color}),
+            ${this.inlineSvg(bgEndpoints)}`,
+          backgroundSize: `
+            calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
+            ${borderWidth + 1}px ${borderWidth * 2}px,
+            ${borderWidth + 1}px ${borderWidth * 2}px`,
+          backgroundPositionX: `${borderWidth}px, 0, 100%`,
+          backgroundPositionY: `${100 - (effect.yOffset)}%`
+        }
       }
     } else if (isITextGooey(effect) && effect.name === 'cloud') {
+      const color = this.rgba(effect.color, effect.opacity * 0.01)
       return {
         padding: '0 20px',
         boxDecorationBreak: 'clone',
@@ -185,6 +191,7 @@ class TextBg {
         backgroundColor: color
       }
     } else if (isITextGooey(effect) && effect.name === 'gooey') {
+      const { color } = effect
       const svgId = `textBg_gooey_${effect.bRadius}`
       return {
         paddingTop: `${effect.distance}px`,
@@ -198,7 +205,7 @@ class TextBg {
         },
         duplicatedSpan: {
           color: 'transparent',
-          backgroundColor: effect.color
+          backgroundColor: color
         },
         svgId: svgId,
         svgFilter: [
@@ -232,6 +239,38 @@ class TextBg {
     } else return {}
   }
 
+  syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {
+    Object.assign(textBg, { name: textBg.name || effectName })
+    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
+    const newShareAttrs = { opacity: textBg.opacity }
+    const newEffect = { opacity: shareAttrs.opacity }
+    if (isITextBox(textBg)) {
+      if (['square-borderless', 'rounded-borderless',
+        'square-both', 'rounded-both'].includes(textBg.name)) {
+        Object.assign(newShareAttrs, { color: textBg.pColor })
+        Object.assign(newEffect, { pColor: shareAttrs.color })
+      }
+      if (['square-hollow', 'rounded-hollow',
+        'square-both', 'rounded-both'].includes(textBg.name)) {
+        Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
+        Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
+      }
+    } else {
+      Object.assign(newShareAttrs, { color: textBg.color })
+      Object.assign(newEffect, { color: shareAttrs.color })
+    }
+
+    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+    if (!effectName) {
+      Object.assign(shareAttrs, newShareAttrs)
+      localStorageUtils.set('textEffectSetting', 'textBgShare', shareAttrs)
+    } else {
+      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+      Object.assign(effect, newEffect)
+      localStorageUtils.set('textEffectSetting', effectName, effect)
+    }
+  }
+
   resetCurrTextEffect() {
     const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
     this.setTextBg(effectName, this.effects[effectName])
@@ -256,7 +295,9 @@ class TextBg {
         if (layerTextBg && layerTextBg.name === effect) {
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
+          this.syncShareAttrs(textBg, null)
         } else {
+          this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
         }

@@ -27,7 +27,7 @@ class LocalStorage {
     localStorage.setItem(category, JSON.stringify(obj))
   }
 
-  get(category: string, key: string):string|null {
+  get(category: string, key: string):unknown {
     const item = localStorage.getItem(category)
     if (item && typeof item === 'string') {
       try {
