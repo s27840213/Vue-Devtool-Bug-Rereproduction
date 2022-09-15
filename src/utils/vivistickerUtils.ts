@@ -120,7 +120,8 @@ class ViviStickerUtils {
     pageUtils.setPages([pageUtils.newPage({
       width: pageWidth,
       height: Math.round(pageWidth * 420 / 358),
-      backgroundColor: '#F8F8F8'
+      backgroundColor: '#F8F8F8',
+      isAutoResizeNeeded: true
     })])
     initiator().then((jsonData?: any) => {
       console.log(jsonData)
