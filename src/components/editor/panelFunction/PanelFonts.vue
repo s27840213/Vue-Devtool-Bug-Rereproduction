@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="panel-fonts")
     div(v-if="!noTitle" class="panel-fonts__title")
-      span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+      span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(
         v-if="!isMobile"
         class="panel-fonts__close pointer"
