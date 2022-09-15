@@ -74,7 +74,7 @@ export default Vue.extend({
         return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
       },
       set(value: number): void {
-        textPropUtils.fontSizeStepping(value - parseInt(this.props.fontSize))
+        textPropUtils.fontSizeStepping(Math.round(value / this.scale * 10) / 10 - parseInt(this.props.fontSize))
         textEffectUtils.refreshSize()
       }
     }

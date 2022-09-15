@@ -75,22 +75,11 @@ export default Vue.extend({
       }
       return currLayer.styles.scale
     },
-    fontSize: {
-      get(): number | string {
-        if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
-          return '--'
-        }
-        return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
-      },
-      set(value: number): void {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        tiptapUtils.applySpanStyle('size', value)
-        tiptapUtils.agent(editor => {
-          layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        })
-        textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-        textEffectUtils.refreshSize()
+    fontSize(): number | string {
+      if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
+        return '--'
       }
+      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
     },
     step(): number {
       // const config = LayerUtils.getCurrConfig
@@ -128,10 +117,9 @@ export default Vue.extend({
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          textPropUtils.fontSizeStepping(parseInt(value) - parseInt(this.props.fontSize))
+          textPropUtils.fontSizeStepping(Math.round(parseInt(value) / this.scale * 10) / 10 - parseInt(this.props.fontSize))
           textEffectUtils.refreshSize()
         })
       }
