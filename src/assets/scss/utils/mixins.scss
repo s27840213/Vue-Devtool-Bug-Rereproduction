@@ -160,3 +160,44 @@ $thumb-color: #d9dbe1; // gray-4
 .default-input {
   @include default-input;
 }
+
+@mixin progressSlider($height: 5px, $thumbSize: 12px, $marginTop: -3.5px, $thumbColor: white, $scale: false) {
+	height: $height;
+	display: block;
+	appearance: none;
+	outline: none;
+	background: linear-gradient(to right, var(--lower-color) var(--progress), var(--upper-color) var(--progress));
+	border-radius: $height / 2;
+	&::-webkit-slider-runnable-track {
+		height: $height / 2;
+	}
+	&::-webkit-slider-thumb {
+		appearance: none;
+		width: $thumbSize;
+		height: $thumbSize;
+		border-radius: 50%;
+		background-color: $thumbColor;
+		box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+		margin-top: $marginTop;
+		position: relative;
+}
+	&::-moz-range-thumb {
+		appearance: none;
+		width: $thumbSize;
+		height: $thumbSize;
+		border-radius: 50%;
+		background-color: $thumbColor;
+		box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
+		border: none;
+		margin-top: $marginTop;
+		position: relative;
+	}
+	@if $scale {
+		&::-webkit-slider-thumb:hover {
+			transform: scale(1.333);
+		}
+		&::-moz-range-thumb:hover {
+			transform: scale(1.333);
+		}
+	}
+}

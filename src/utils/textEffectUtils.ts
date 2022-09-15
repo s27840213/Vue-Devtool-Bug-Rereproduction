@@ -5,10 +5,12 @@ import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import { ITextEffect } from '@/interfaces/format'
 
 class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
+  private currColorKey = ''
   effects = {} as { [key: string]: any }
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -257,6 +259,36 @@ class Controller {
     }
   }
 
+  syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
+    Object.assign(textShadow, { name: textShadow.name || effectName })
+    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
+    const newShareAttrs = { }
+    const newEffect = { }
+    if (['funky3d', 'bold3d'].includes(textShadow.name)) {
+      Object.assign(newShareAttrs, { color: textShadow.color })
+      Object.assign(newEffect, { color: shareAttrs.color })
+    }
+
+    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+    if (!effectName) {
+      Object.assign(shareAttrs, newShareAttrs)
+      localStorageUtils.set('textEffectSetting', 'textShadowShare', shareAttrs)
+    } else {
+      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+      Object.assign(effect, newEffect)
+      localStorageUtils.set('textEffectSetting', effectName, effect)
+    }
+  }
+
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = this.getCurrentLayer().styles.textEffect.name
+    this.setTextEffect(effectName, { [this.currColorKey]: color })
+  }
+
   resetCurrTextEffect() {
     const effectName = this.getCurrentLayer().styles.textEffect.name
     this.setTextEffect(effectName, this.effects[effectName])
@@ -280,7 +312,9 @@ class Controller {
         if (layerTextEffect && (layerTextEffect as any).name === effect) {
           Object.assign(textEffect, layerTextEffect, attrs)
           localStorageUtils.set('textEffectSetting', effect, textEffect)
+          this.syncShareAttrs(textEffect, null)
         } else {
+          this.syncShareAttrs(textEffect, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
         }

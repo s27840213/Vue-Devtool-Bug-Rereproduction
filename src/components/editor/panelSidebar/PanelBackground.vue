@@ -104,6 +104,10 @@ export default Vue.extend({
       defaultBgColor: 'color/getDefaultBgColors',
       getBackgroundColor: 'getBackgroundColor'
     }),
+    itemWidth(): number {
+      const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
+      return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
+    },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
@@ -125,7 +129,7 @@ export default Vue.extend({
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
-          size: 201,
+          size: this.itemWidth + 10 + 46,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
@@ -144,7 +148,7 @@ export default Vue.extend({
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: title ? (155 + 46) : 155,
+            size: title ? (this.itemWidth + 10 + 46) : this.itemWidth + 10,
             title
           }
         })
@@ -297,8 +301,8 @@ export default Vue.extend({
   flex-direction: column;
   overflow-x: hidden;
   &__item {
-    width: 145px;
-    height: 145px;
+    width: min(calc((100vw - 10px - 48px) / 2), 145px);
+    height: min(calc((100vw - 10px - 48px) / 2), 145px);
     margin: 0 auto;
     object-fit: cover;
     vertical-align: middle;
