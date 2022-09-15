@@ -1152,6 +1152,7 @@ class TextUtils {
               l.type === 'text' && TextPropUtils.propAppliedAllText(layerIndex, idx, prop, preprocessedValue)
               l.type === 'text' && this.updateGroupLayerSizeByShape(LayerUtils.pageIndex, layerIndex, idx)
             })
+          TextPropUtils.updateTextPropsState({ [prop]: _value })
         } else {
           tiptapUtils.applyParagraphStyle(prop, preprocessedValue, false)
           TextPropUtils.updateTextPropsState({ [prop]: _value })

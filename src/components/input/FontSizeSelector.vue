@@ -6,7 +6,7 @@
         @contextmenu.prevent) -
       button(class="font-size-selector__range-input-button")
         input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
-              @change="setSize" :value="fontSize")
+              @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
       div(class="pointer"
         @pointerdown="fontSizeStepping(step)"
         @contextmenu.prevent) +
@@ -36,7 +36,7 @@ export default Vue.extend({
     return {
       fontSelectValue,
       fieldRange: {
-        fontSize: { min: 6, max: 800 },
+        fontSize: { min: 1, max: 144 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
@@ -108,7 +108,6 @@ export default Vue.extend({
       return value.toString()
     },
     handleValueUpdate(value: number) {
-      layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
       tiptapUtils.spanStyleHandler('size', value)
       tiptapUtils.forceUpdate(true)
       textPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -119,7 +118,15 @@ export default Vue.extend({
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          textPropUtils.fontSizeStepping(Math.round(parseInt(value) / this.scale * 10) / 10 - parseInt(this.props.fontSize))
+          // TODO: need to deal with diff scales in group
+          // if (this.props.fontSize === '--') {
+          //   tiptapUtils.spanStyleHandler('size', parseFloat(value))
+          //   tiptapUtils.forceUpdate(true)
+          //   textPropUtils.updateTextPropsState({ fontSize: value.toString() })
+          // } else {
+          //   textPropUtils.fontSizeStepping(Math.round(parseFloat(value) / this.scale * 10) / 10 - parseFloat(this.props.fontSize))
+          // }
+          textPropUtils.fontSizeStepping(Math.round(parseFloat(value) / this.scale * 10) / 10 - parseFloat(this.props.fontSize))
           textEffectUtils.refreshSize()
         })
       }

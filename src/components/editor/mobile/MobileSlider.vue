@@ -32,7 +32,7 @@ export default Vue.extend({
     title: String,
     name: String,
     value: {
-      type: Number,
+      type: [Number, String],
       required: true
     },
     min: {
@@ -57,7 +57,7 @@ export default Vue.extend({
   },
   computed: {
     propsVal: {
-      get(): number {
+      get(): number | string {
         return this.value
       },
       set(val: number): void {
@@ -72,7 +72,7 @@ export default Vue.extend({
   methods: {
     progressStyles() {
       return {
-        '--progress': `${(this.value - this.min) / (this.max - this.min) * 100}%`
+        '--progress': (typeof this.value === 'string') ? '50%' : `${(this.value - this.min) / (this.max - this.min) * 100}%`
       }
     },
     handleChangeStop() {

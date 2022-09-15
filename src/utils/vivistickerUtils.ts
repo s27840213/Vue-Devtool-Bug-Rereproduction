@@ -104,7 +104,7 @@ class ViviStickerUtils {
           eventUtils.emit(PanelEvent.switchTab, 'opacity')
         }
       }
-      if (asset.type === 0) {
+      if (asset.type === 7) {
         textPropUtils.updateTextPropsState()
       }
     }

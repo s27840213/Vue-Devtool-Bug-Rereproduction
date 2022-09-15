@@ -4,8 +4,8 @@
     input(class="panel-font-size__range-input"
       :style="progressStyles()"
       v-model.number="fontSize"
-      max="144"
-      min="1"
+      :max="fieldRange.fontSize.max"
+      :min="fieldRange.fontSize.min"
       step="1"
       type="range"
       :disabled="fontSize === '--'"
@@ -33,7 +33,7 @@ export default Vue.extend({
     return {
       openValueSelector: false,
       fieldRange: {
-        fontSize: { min: 6, max: 800 },
+        fontSize: { min: 1, max: 144 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
@@ -74,16 +74,16 @@ export default Vue.extend({
         return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
       },
       set(value: number): void {
-        textPropUtils.fontSizeStepping(Math.round(value / this.scale * 10) / 10 - parseInt(this.props.fontSize))
+        textPropUtils.fontSizeStepping(Math.round(value / this.scale * 10) / 10 - parseFloat(this.props.fontSize))
         textEffectUtils.refreshSize()
       }
     }
   },
   methods: {
     progressStyles() {
-      const finalFontSize = (this.fontSize === '--') ? 0 : this.fontSize as number
+      const finalFontSize = this.fontSize as number
       return {
-        '--progress': `${(finalFontSize - 1) / (143) * 100}%`
+        '--progress': (this.fontSize === '--') ? '50%' : `${(finalFontSize - 1) / (143) * 100}%`
       }
     },
     handleChangeStop() {
