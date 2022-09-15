@@ -52,19 +52,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      online: true,
       scrollTop: 0
     }
-  },
-  created() {
-    networkUtils.onNetworkChange('PanelFile', (online) => {
-      this.online = online
-    })
-
-    this.online = navigator.onLine
-  },
-  beforeDestroy() {
-    networkUtils.offNetworkChange('PanelFile')
   },
   computed: {
     ...mapState('file', [
@@ -106,7 +95,7 @@ export default Vue.extend({
       !this.pending && this.getMoreMyfiles()
     },
     uploadImage() {
-      if (!this.online) {
+      if (!networkUtils.check()) {
         networkUtils.notifyNetworkError()
       } else if (uploadUtils.isLogin) {
         uploadUtils.chooseAssets('image')
@@ -119,7 +108,7 @@ export default Vue.extend({
       if (evt.dataTransfer?.getData('data') || !dt) {
       } else {
         const files = dt.files
-        if (!this.online) {
+        if (!networkUtils.check()) {
           networkUtils.notifyNetworkError()
         } else if (uploadUtils.isLogin) {
           uploadUtils.uploadAsset('image', files)
