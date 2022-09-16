@@ -1,8 +1,8 @@
 <template lang="pug">
-  p(class="nu-curve-text__p" :style="pStyle")
-    span(v-if="focus"  class="nu-curve-text__circle" :style="circleStyle")
+  p(class="nu-curve-text__p" :style="pStyle()")
+    span(v-if="focus()"  class="nu-curve-text__circle" :style="circleStyle()")
       svg-icon(iconName="curve-center" :style="curveIconStyle")
-    span(v-for="(span, sIndex) in spans"
+    span(v-for="(span, sIndex) in spans()"
       class="nu-curve-text__span"
       :class="`nu-curve-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
       :key="sIndex",
@@ -40,7 +40,7 @@ export default Vue.extend({
     }
   },
   created () {
-    this.computeDimensions(this.spans)
+    this.computeDimensions(this.spans())
     // TextUtils.loadAllFonts(this.config, 1)
     TextUtils.loadAllFonts(this.config)
   },
@@ -65,7 +65,7 @@ export default Vue.extend({
         TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
       }
 
-      this.computeDimensions(this.spans)
+      this.computeDimensions(this.spans())
     })
     this.observeAllSpans()
   },
@@ -74,6 +74,26 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
+    duplicatedSpan(): Record<string, string> {
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      return this.isDuplicated ? {
+        ...textShadow.duplicatedSpan
+      } : {}
+    }
+  },
+  watch: {
+    'config.paragraphs': {
+      handler() {
+        this.computeDimensions(this.spans())
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect()
+          this.observeAllSpans()
+        }
+      },
+      deep: true
+    }
+  },
+  methods: {
     focus(): boolean {
       const { textShape } = this.config.styles
       return textShape.focus
@@ -94,7 +114,8 @@ export default Vue.extend({
       }
     },
     circleStyle(): any {
-      const { bend, minHeight, scaleRatio } = this
+      const { minHeight, scaleRatio } = this
+      const bend = this.bend()
       const borderWidth = `${1 / (scaleRatio * 0.01)}px`
       const style = {} as any
       const radius = 1000 / Math.pow(Math.abs(bend), 0.6)
@@ -122,30 +143,12 @@ export default Vue.extend({
       }
     },
     transforms(): string[] {
-      return TextShapeUtils.convertTextShape(this.textWidth, this.bend)
+      return TextShapeUtils.convertTextShape(this.textWidth, this.bend())
     },
-    duplicatedSpan(): Record<string, string> {
-      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      return this.isDuplicated ? {
-        ...textShadow.duplicatedSpan
-      } : {}
-    }
-  },
-  watch: {
-    spans: {
-      handler(newSpans) {
-        this.computeDimensions(newSpans)
-        if (this.resizeObserver) {
-          this.resizeObserver.disconnect()
-          this.observeAllSpans()
-        }
-      },
-      deep: true
-    }
-  },
-  methods: {
     styles(styles: any, idx: number) {
-      const { transforms, bend, textHeight, minHeight } = this
+      const { textHeight, minHeight } = this
+      const bend = this.bend()
+      const transforms = this.transforms()
       const baseline = `${(minHeight - textHeight[idx]) / 2}px`
       const fontStyles = tiptapUtils.textStylesRaw(styles)
       return Object.assign(

@@ -104,21 +104,21 @@ export default Vue.extend({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
-    },
+    }
     /**
      * @Note Vuex Props
      */
-    scaleRatio: Number,
-    getCurrFunctionPanelType: Number,
-    isUploadingShadowImg: Boolean,
-    isHandling: Boolean,
-    isShowPagePanel: Boolean,
-    imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
-    userId: String,
-    verUni: String,
-    uploadId: Object as PropType<ILayerIdentifier>,
-    handleId: Object as PropType<ILayerIdentifier>,
-    uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
+    // scaleRatio: Number,
+    // getCurrFunctionPanelType: Number,
+    // isUploadingShadowImg: Boolean,
+    // isHandling: Boolean,
+    // isShowPagePanel: Boolean,
+    // imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
+    // userId: String,
+    // verUni: String,
+    // uploadId: Object as PropType<ILayerIdentifier>,
+    // handleId: Object as PropType<ILayerIdentifier>,
+    // uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
     // ...mapGetters({
     //   scaleRatio: 'getPageScaleRatio',
     //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
@@ -298,15 +298,15 @@ export default Vue.extend({
   },
   components: { NuAdjustImage },
   computed: {
-    // ...mapGetters({
-    //   scaleRatio: 'getPageScaleRatio',
-    //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-    //   isUploadingShadowImg: 'shadow/isUploading',
-    //   isHandling: 'shadow/isHandling',
-    //   isShowPagePanel: 'page/getShowPagePanel'
-    // }),
-    // ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
-    // ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
+    }),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isImgControl(): boolean {
       return this.config.imgControl
     },
