@@ -2,7 +2,7 @@
   div(class="nu-text" :style="wrapperStyles()")
     div(v-for="text in duplicatedText" class="nu-text__body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
-      nu-curve-text(v-if="isCurveText"
+      nu-curve-text(v-if="isCurveText()"
         :config="config"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
@@ -17,8 +17,8 @@
           :key="span.id"
           :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    div(v-if="!isCurveText" class="nu-text__observee")
-      span(v-for="(span, sIndex) in spans"
+    div(v-if="!isCurveText()" class="nu-text__observee")
+      span(v-for="(span, sIndex) in spans()"
         class="nu-text__span"
         :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
         :data-sindex="sIndex"
@@ -114,22 +114,6 @@ export default Vue.extend({
       getLayer: 'getLayer',
       getTextInfo: 'getTextInfo'
     }),
-    getLayerScale(): number {
-      return this.config.styles.scale
-    },
-    isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
-    },
-    isFlipped(): boolean {
-      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    },
-    spans(): ISpan[] {
-      return textShapeUtils.flattenSpans(this.config)
-    },
-    isAutoResizeNeeded(): boolean {
-      return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
-    },
     spanEffect(): Record<string, unknown> {
       // May cause performance issue
       if (isITextGooey(this.config.styles.textBg)) {
@@ -179,13 +163,25 @@ export default Vue.extend({
     }
   },
   methods: {
+    isCurveText(): any {
+      const { textShape } = this.config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
+    spans(): ISpan[] {
+      return textShapeUtils.flattenSpans(this.config)
+    },
+    isAutoResizeNeeded(): boolean {
+      return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
+    },
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)
     },
     bodyStyles() {
       const { editing, contentEditable } = this.config
-      const { isCurveText, isFlipped } = this
-      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
+      const opacity = editing ? (contentEditable ? ((this.isCurveText() || this.isFlipped()) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
@@ -220,7 +216,7 @@ export default Vue.extend({
       // console.log('resize')
 
       let widthLimit
-      if (this.isLoading && this.isAutoResizeNeeded) {
+      if (this.isLoading && this.isAutoResizeNeeded()) {
         widthLimit = textUtils.autoResize(config, this.initSize)
       } else {
         widthLimit = config.widthLimit

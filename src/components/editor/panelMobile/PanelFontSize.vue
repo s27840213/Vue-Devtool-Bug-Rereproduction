@@ -3,10 +3,12 @@
     font-size-selector
     input(class="panel-font-size__range-input input__slider--range"
       v-model.number="fontSize"
-      max="144"
-      min="1"
+      :max="fieldRange.fontSize.max"
+      :min="fieldRange.fontSize.min"
       step="1"
-      type="range")
+      type="range"
+      :disabled="fontSize === '--'"
+      @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">
@@ -20,6 +22,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
+import stepsUtils from '@/utils/stepsUtils'
 export default Vue.extend({
   components: {
     MobileSlider,
@@ -29,7 +32,7 @@ export default Vue.extend({
     return {
       openValueSelector: false,
       fieldRange: {
-        fontSize: { min: 6, max: 800 },
+        fontSize: { min: 1, max: 144 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
@@ -78,6 +81,11 @@ export default Vue.extend({
         textPropUtils.updateTextPropsState({ fontSize: value.toString() })
         textEffectUtils.refreshSize()
       }
+    }
+  },
+  methods: {
+    handleChangeStop() {
+      stepsUtils.record()
     }
   }
 })

@@ -22,6 +22,7 @@
             :imgControl="imgControl"
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :scaleRatio="scaleRatio"
             v-bind="$attrs")
     div(v-if="showSpinner" class="nu-layer__inProcess")
       square-loading
@@ -32,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
@@ -44,6 +45,9 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
 import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ILayerIdentifier } from '@/interfaces/layer'
+import { IUploadShadowImg } from '@/store/module/shadow'
 
 export default Vue.extend({
   components: {
@@ -67,6 +71,21 @@ export default Vue.extend({
       default: 1,
       type: Number
     }
+    /**
+     * @Note Vuex Props
+    //  */
+    // currSelectedInfo: Object as PropType<ICurrSelectedInfo>,
+    // scaleRatio: Number,
+    // getCurrFunctionPanelType: Number,
+    // isUploadingShadowImg: Boolean,
+    // isHandling: Boolean,
+    // isShowPagePanel: Boolean,
+    // imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
+    // userId: String,
+    // verUni: String,
+    // uploadId: Object as PropType<ILayerIdentifier>,
+    // handleId: Object as PropType<ILayerIdentifier>,
+    // uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
   },
   data() {
     return {
@@ -75,7 +94,12 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters({
-      currSelectedInfo: 'getCurrSelectedInfo'
+      currSelectedInfo: 'getCurrSelectedInfo',
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
     }),
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
