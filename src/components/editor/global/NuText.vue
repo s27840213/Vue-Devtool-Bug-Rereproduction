@@ -19,7 +19,6 @@
         :key="p.id"
         :style="styles(p.styles)")
         span(v-for="(span, sIndex) in p.spans"
-          :ref="`span${pIndex}_${sIndex}`"
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
@@ -190,56 +189,155 @@ export default Vue.extend({
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
     svgBG():Record<string, unknown>|null {
-      if (this.isLoading || this.config.styles.textBg.name !== 'gooey') return null
+      const textBg = this.config.styles.textBg
+      if (this.isLoading || !isITextGooey(textBg)) return null
       else {
-        let rects = []
-        const bodyRect = _.nth(this.$refs.body, -1).getClientRects()[0]
-        const scaleRatio = 1 / (this.pageScaleRatio * 0.01 * this.config.styles.scale)
-        for (const [pIndex, p] of this.config.paragraphs.entries()) {
-          for (const [sIndex] of p.spans.entries()) {
-            rects.push(_.nth(this.$refs[`span${pIndex}_${sIndex}`], -1).getClientRects())
+        class Point {
+          x: number
+          y: number
+          constructor(x: number, y: number) {
+            this.x = x
+            this.y = y
+          }
+
+          middle(p: Point) {
+            return new Point(
+              (this.x + p.x) / 2,
+              (this.y + p.y) / 2
+            )
+          }
+
+          add(p: {x: number, y: number}) {
+            return new Point(
+              this.x + p.x,
+              this.y + p.y
+            )
+          }
+
+          dist(p: Point) {
+            return Math.pow(Math.pow(this.x - p.x, 2) ^ 2 + Math.pow(this.y - p.y, 2), 0.5)
+          }
+
+          toString() {
+            return `${this.x} ${this.y}`
           }
         }
-        rects = rects.reduce((acc, rect) => {
+
+        const unused = { // To trigger computed.
+          a: this.config.styles.width,
+          b: this.config.paragraphs
+        }
+
+        const bRadius = textBg.bRadius
+        const scaleRatio = 1 / (this.pageScaleRatio * 0.01 * this.config.styles.scale)
+
+        const rawRects = [] as DOMRect[][]
+        const body = _.nth(this.$refs.body, -1)
+        const bodyRect = body.getClientRects()[0]
+        for (const p of body.childNodes) {
+          for (const span of p.childNodes) {
+            rawRects.push(span.getClientRects())
+          }
+        }
+        const rects = rawRects.reduce((acc, rect) => {
           if (rect) acc.push(...rect)
           return acc
         }, [])
-        console.log('bodyRect', bodyRect)
+        console.log('bodyRect', bodyRect, _.nth(this.$refs.body, -1))
+        rects.forEach((rect: DOMRect, index: number) => {
+          if (rect.width === 0) {
+            const prev = rects[index - 1]
+            const next = rects[index + 1]
+            const target = ((prev?.width ?? 100000) < (next?.width ?? 100000)) ? prev : next
+            rect.x = target.x
+            rect.width = target.width
+          }
+        })
         rects.forEach((rect: DOMRect) => {
-          rect.x -= bodyRect.x
-          rect.y -= bodyRect.y
-          rect.x *= scaleRatio
+          rect.x = (rect.x - bodyRect.x) * scaleRatio
+          rect.y = (rect.y - bodyRect.y) * scaleRatio
           rect.width *= scaleRatio
           rect.height *= scaleRatio
         })
         console.log('rects', rects)
-        const color = 'purple'
-        const pathArray = []
 
-        pathArray.push(`m${rects[0].x} ${rects[0].y}`)
-        // pathArray.push('m0 0')
+        const pathArray = []
         for (let i = 0; i < rects.length; i++) {
+          const [first, last] = [i === 0, i === rects.length - 1]
+
           const rect = rects[i]
-          const rectNext = _.nth(rects, i + 1)
-          pathArray.push(`v${rect.height}`)
-          if (i === rects.length - 1) {
-            pathArray.push(`h${rect.width}`)
-          } else {
-            pathArray.push(`h${rectNext.x - rect.x}`)
+          const rectLeftTop = new Point(rect.x, rect.y)
+          // const rectLeft = new Point(rect.x, rect.y + rect.height / 2)
+          const rectLeftBottom = new Point(rect.x, rect.y + rect.height)
+          const rectPrev = rects[i - 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
+          const rectPrevLeftBottom = new Point(rectPrev.x, rectPrev.y + rectPrev.height)
+          const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
+            : rectPrevLeftBottom.middle(rectLeftTop)
+          rectPrevLeftBottom.y = prevMiddle.y
+          rectLeftTop.y = prevMiddle.y
+          const rectNext = rects[i + 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
+          const rectNextLeftTop = new Point(rectNext.x, rectNext.y)
+          const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
+            : rectLeftBottom.middle(rectNextLeftTop)
+          rectLeftBottom.y = nextMiddle.y
+          rectNextLeftTop.y = nextMiddle.y
+          const radius = Math.min(bRadius, rect.height / 2)
+          const radiusTop = Math.min(radius, rectLeftTop.dist(prevMiddle)) *
+            (rectPrevLeftBottom.x < rectLeftTop.x ? -1 : 1)
+          const radiusBottom = Math.min(radius, rectLeftBottom.dist(nextMiddle)) *
+            (rectLeftBottom.x < rectNextLeftTop.x ? 1 : -1)
+
+          if (first) {
+            pathArray.push(`m${prevMiddle}`)
           }
+          const curveTopStart = rectLeftTop.add({ x: radiusTop, y: 0 })
+          const curveTopEnd = rectLeftTop.add({ x: 0, y: radius })
+          pathArray.push(`L${curveTopStart}`)
+          pathArray.push(`C${rectLeftTop.middle(curveTopStart)} ${rectLeftTop.middle(curveTopEnd)} ${curveTopEnd}`)
+          const curveBottomStart = rectLeftBottom.add({ x: 0, y: -radius })
+          const curveBottomEnd = rectLeftBottom.add({ x: radiusBottom, y: 0 })
+          pathArray.push(`L${curveBottomStart}`)
+          pathArray.push(`C${rectLeftBottom.middle(curveBottomStart)} ${rectLeftBottom.middle(curveBottomEnd)} ${curveBottomEnd}`)
         }
         for (let i = rects.length - 1; i >= 0; i--) {
+          const [first, last] = [i === 0, i === rects.length - 1]
+
           const rect = rects[i]
-          const rectPrev = _.nth(rects, i - 1)
-          pathArray.push(`v-${rect.height}`)
-          if (i === 0) {
-            pathArray.push(`h-${rect.width}`)
-          } else {
-            pathArray.push(`h${rect.x - rectPrev.x}`)
-          }
+          const rectRightTop = new Point(rect.x + rect.width, rect.y)
+          // const rectRight = new Point(rect.x + rect.width, rect.y + rect.height / 2)
+          const rectRightBottom = new Point(rect.x + rect.width, rect.y + rect.height)
+
+          const rectPrev = rects[i - 1] ?? { x: 0, y: 0, width: 0, height: 0 }
+          const rectPrevRightBottom = new Point(rectPrev.x + rectPrev.width, rectPrev.y + rectPrev.height)
+          const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
+            : rectPrevRightBottom.middle(rectRightTop)
+          rectPrevRightBottom.y = prevMiddle.y
+          rectRightTop.y = prevMiddle.y
+          const rectNext = rects[i + 1] ?? { x: 0, y: 0, width: 0, height: 0 }
+          const rectNextRightTop = new Point(rectNext.x + rectNext.width, rectNext.y)
+          const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
+            : rectRightBottom.middle(rectNextRightTop)
+          rectRightBottom.y = nextMiddle.y
+          rectNextRightTop.y = nextMiddle.y
+          const radius = Math.min(bRadius, rect.height / 2)
+          const radiusTop = Math.min(radius, rectRightTop.dist(prevMiddle)) *
+            (rectPrevRightBottom.x < rectRightTop.x ? -1 : 1)
+          const radiusBottom = Math.min(radius, rectRightBottom.dist(nextMiddle)) *
+            (rectRightBottom.x < rectNextRightTop.x ? 1 : -1)
+
+          const curveBottomStart = rectRightBottom.add({ x: radiusBottom, y: 0 })
+          const curveBottomEnd = rectRightBottom.add({ x: 0, y: -radius })
+          pathArray.push(`L${curveBottomStart}`)
+          pathArray.push(`C${rectRightBottom.middle(curveBottomStart)} ${rectRightBottom.middle(curveBottomEnd)} ${curveBottomEnd}`)
+          const curveTopStart = rectRightTop.add({ x: 0, y: radius })
+          const curveTopEnd = rectRightTop.add({ x: radiusTop, y: 0 })
+          pathArray.push(`L${curveTopStart}`)
+          pathArray.push(`C${rectRightTop.middle(curveTopStart)} ${rectRightTop.middle(curveTopEnd)} ${curveTopEnd}`)
         }
         const path = pathArray.join('')
         console.log('path', path)
+
+        const color = 'purple'
         return {
           attrs: {
             width: bodyRect.width * scaleRatio,
