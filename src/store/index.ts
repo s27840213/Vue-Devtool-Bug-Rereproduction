@@ -37,6 +37,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
 import payment from '@/store/module/payment'
+import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
 import { ADD_subLayer } from '@/utils/layerUtils'
 
@@ -872,6 +873,7 @@ export default new Vuex.Store({
     file,
     payment,
     shadow,
+    fontTag,
     imgControl
   }
 })
