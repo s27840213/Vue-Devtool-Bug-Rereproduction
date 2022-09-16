@@ -6,7 +6,6 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
-import text from '@/store/text'
 
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
@@ -194,10 +193,10 @@ class TextBg {
       const { color } = effect
       const svgId = `textBg_gooey_${effect.bRadius}`
       return {
-        paddingTop: `${effect.distance}px`,
-        paddingBottom: `${effect.distance}px`,
-        textGooeyPaddingX: `${effect.distance + 20}px`, // For tiptap CSS var
-        '--textGooeyPaddingX': `${effect.distance + 20}px`,
+        // paddingTop: `${effect.distance}px`,
+        // paddingBottom: `${effect.distance}px`,
+        // textGooeyPaddingX: `${effect.distance + 20}px`, // For tiptap CSS var
+        // '--textGooeyPaddingX': `${effect.distance + 20}px`,
         boxDecorationBreak: 'clone',
         duplicatedBody: {
           filter: `url(#${svgId})`,
@@ -207,7 +206,7 @@ class TextBg {
           color: 'transparent',
           backgroundColor: color
         },
-        svgId: svgId,
+        // svgId: svgId,
         svgFilter: [
           imageAdjustUtil.createSvgFilter({
             tag: 'feGaussianBlur',

@@ -8,7 +8,7 @@
     svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
         class="nu-layer__BG")
       component(v-for="(elm, idx) in svgBG.content"
-                :key="`svgFilter${idx}`"
+                :key="`layerSvgBG${idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs")
     div(class="layer-scale" ref="scale"

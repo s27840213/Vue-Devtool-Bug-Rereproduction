@@ -1,6 +1,13 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
-    div(v-for="text in duplicatedText" class="nu-text__body"
+    //- Svg BG for text effex gooey.
+    svg(v-if="svgBG" v-bind="svgBG.attrs"
+        class="nu-text__BG")
+      component(v-for="(elm, idx) in svgBG.content"
+                :key="`textSvgBg${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
+    div(v-for="text in duplicatedText" class="nu-text__body" ref="body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
       nu-curve-text(v-if="isCurveText"
         :config="config"
@@ -12,6 +19,7 @@
         :key="p.id"
         :style="styles(p.styles)")
         span(v-for="(span, sIndex) in p.spans"
+          :ref="`span${pIndex}_${sIndex}`"
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
@@ -52,6 +60,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import { isITextGooey } from '@/interfaces/format'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -143,7 +152,10 @@ export default Vue.extend({
   computed: {
     ...mapState('text', ['fontStore']),
     ...mapState('user', ['verUni']),
-    ...mapGetters('text', ['getDefaultFontsList']),
+    ...mapGetters({
+      getDefaultFontsList: 'text/getDefaultFontsList',
+      pageScaleRatio: 'getPageScaleRatio'
+    }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -177,6 +189,73 @@ export default Vue.extend({
       }
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
+    svgBG():Record<string, unknown>|null {
+      if (this.isLoading || this.config.styles.textBg.name !== 'gooey') return null
+      else {
+        let rects = []
+        const bodyRect = _.nth(this.$refs.body, -1).getClientRects()[0]
+        const scaleRatio = 1 / (this.pageScaleRatio * 0.01 * this.config.styles.scale)
+        for (const [pIndex, p] of this.config.paragraphs.entries()) {
+          for (const [sIndex] of p.spans.entries()) {
+            rects.push(_.nth(this.$refs[`span${pIndex}_${sIndex}`], -1).getClientRects())
+          }
+        }
+        rects = rects.reduce((acc, rect) => {
+          if (rect) acc.push(...rect)
+          return acc
+        }, [])
+        console.log('bodyRect', bodyRect)
+        rects.forEach((rect: DOMRect) => {
+          rect.x -= bodyRect.x
+          rect.y -= bodyRect.y
+          rect.x *= scaleRatio
+          rect.width *= scaleRatio
+          rect.height *= scaleRatio
+        })
+        console.log('rects', rects)
+        const color = 'purple'
+        const pathArray = []
+
+        pathArray.push(`m${rects[0].x} ${rects[0].y}`)
+        // pathArray.push('m0 0')
+        for (let i = 0; i < rects.length; i++) {
+          const rect = rects[i]
+          const rectNext = _.nth(rects, i + 1)
+          pathArray.push(`v${rect.height}`)
+          if (i === rects.length - 1) {
+            pathArray.push(`h${rect.width}`)
+          } else {
+            pathArray.push(`h${rectNext.x - rect.x}`)
+          }
+        }
+        for (let i = rects.length - 1; i >= 0; i--) {
+          const rect = rects[i]
+          const rectPrev = _.nth(rects, i - 1)
+          pathArray.push(`v-${rect.height}`)
+          if (i === 0) {
+            pathArray.push(`h-${rect.width}`)
+          } else {
+            pathArray.push(`h${rect.x - rectPrev.x}`)
+          }
+        }
+        const path = pathArray.join('')
+        console.log('path', path)
+        return {
+          attrs: {
+            width: bodyRect.width * scaleRatio,
+            height: bodyRect.height * scaleRatio,
+            fill: color
+          },
+          content: [{
+            tag: 'path',
+            attrs: {
+              d: path
+            }
+          }]
+        }
+      }
+    },
+    // Use duplicated of text to do some text effect, define there difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
@@ -261,6 +340,11 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   position: relative;
+  &__BG {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
   &__body {
     outline: none;
     padding: 0;
@@ -272,6 +356,7 @@ export default Vue.extend({
   &__span {
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    position: relative;
     // line-break: anywhere;
     &:first-child {
       padding-left: var(--textGooeyPaddingX);
