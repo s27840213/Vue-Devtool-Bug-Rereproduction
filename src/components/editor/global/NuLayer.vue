@@ -4,17 +4,17 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
-    //- Svg BG for text effex box.
-    svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
-        class="nu-layer__BG")
-      component(v-for="(elm, idx) in svgBG.content"
-                :key="`svgFilter${idx}`"
-                :is="elm.tag"
-                v-bind="elm.attrs")
     div(class="layer-translate posAbs"
         :style="translateStyles")
       div(class="layer-scale posAbs" ref="scale"
           :style="scaleStyles")
+        //- Svg BG for text effex box.
+        svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
+            class="nu-layer__BG")
+          component(v-for="(elm, idx) in svgBG.content"
+                    :key="`svgFilter${idx}`"
+                    :is="elm.tag"
+                    v-bind="elm.attrs")
         nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
@@ -235,6 +235,7 @@ export default Vue.extend({
   }
   &__BG {
     position: absolute;
+    left: 0;
   }
   &__inProcess {
     width: 100%;
