@@ -54,7 +54,8 @@ export default Vue.extend({
       pages: 'getPages',
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
-      isImgControl: 'imgControl/isImgControl'
+      isImgControl: 'imgControl/isImgControl',
+      contentScaleRatio: 'getContentScaleRatio'
     }),
     config(): IPage {
       return this.pages[this.pageIndex]
@@ -102,9 +103,6 @@ export default Vue.extend({
     },
     selectedLayerCount(): number {
       return this.currSelectedInfo.layers.length
-    },
-    contentScaleRatio(): number {
-      return 0.4
     }
   },
   components: {
