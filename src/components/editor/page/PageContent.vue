@@ -47,8 +47,6 @@ div(class="overflow-container"
         :uploadId="uploadId"
         :handleId="handleId"
         :uploadShadowImgs="uploadShadowImgs")
-    template(v-else)
-      div(class='pages-loading')
 </template>
 
 <script lang="ts">
