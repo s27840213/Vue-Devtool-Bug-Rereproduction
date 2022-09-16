@@ -1,61 +1,60 @@
 <template lang="pug">
-  div(class="nu-image")
-  //- div(v-if="!isImgControl || forRender || isBgImgControl" class="nu-image"
-  //-   :id="`nu-image-${config.id}`"
-  //-   :style="containerStyles"
-  //-   draggable="false")
-  //-   div(v-if="showCanvas"
-  //-     class="shadow__canvas-wrapper"
-  //-     :style="canvasWrapperStyle")
-  //-     canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
-  //-   div(v-if="shadowSrc && !config.isFrameImg"
-  //-     :id="`nu-image-${config.id}__shadow`"
-  //-     class="shadow__picture"
-  //-     :style="imgShadowStyles")
-  //-     img(ref="shadow-img"
-  //-       class="nu-image__picture-shadow"
-  //-       draggable="false"
-  //-       :src="shadowSrc"
-  //-       @error="onError()"
-  //-       @load="onLoad()")
-  //-   div(class="img-wrapper"
-  //-     :style="imgWrapperstyle")
-  //-     div(class='nu-image__picture'
-  //-       :style="imgStyles")
-  //-       svg(v-if="isAdjustImage"
-  //-         :style="flipStyles"
-  //-         :class="{'layer-flip': flippedAnimation }"
-  //-         :viewBox="svgViewBox"
-  //-         :width="svgImageWidth"
-  //-         :height="svgImageHeight"
-  //-         preserveAspectRatio="none"
-  //-         role="image")
-  //-         defs
-  //-           filter(:id="filterId"
-  //-             color-interpolation-filters="sRGB")
-  //-             component(v-for="(elm, idx) in svgFilterElms"
-  //-               :key="`svgFilter${idx}`"
-  //-               :is="elm.tag"
-  //-               v-bind="elm.attrs")
-  //-               component(v-for="child in elm.child"
-  //-                 :key="child.tag"
-  //-                 :is="child.tag"
-  //-                 v-bind="child.attrs")
-  //-         g
-  //-           g(:filter="`url(#${filterId})`")
-  //-             image(:xlink:href="finalSrc" ref="img"
-  //-               class="nu-image__picture"
-  //-               draggable="false"
-  //-               @error="onError()"
-  //-               @load="onLoad ()")
-  //-       img(v-else ref="img"
-  //-         :style="flipStyles"
-  //-         :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
-  //-         :src="finalSrc"
-  //-         draggable="false"
-  //-         @error="onError()"
-  //-         @load="onLoad ()")
-  //-   template(v-if="hasHalation")
+  div(v-if="!isImgControl || forRender || isBgImgControl" class="nu-image"
+    :id="`nu-image-${config.id}`"
+    :style="containerStyles"
+    draggable="false")
+    div(v-if="showCanvas"
+      class="shadow__canvas-wrapper"
+      :style="canvasWrapperStyle")
+      canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
+    div(v-if="shadowSrc && !config.isFrameImg"
+      :id="`nu-image-${config.id}__shadow`"
+      class="shadow__picture"
+      :style="imgShadowStyles")
+      img(ref="shadow-img"
+        class="nu-image__picture-shadow"
+        draggable="false"
+        :src="shadowSrc"
+        @error="onError()"
+        @load="onLoad()")
+    div(class="img-wrapper"
+      :style="imgWrapperstyle")
+      div(class='nu-image__picture'
+        :style="imgStyles")
+        svg(v-if="isAdjustImage"
+          :style="flipStyles"
+          :class="{'layer-flip': flippedAnimation }"
+          :viewBox="svgViewBox"
+          :width="svgImageWidth"
+          :height="svgImageHeight"
+          preserveAspectRatio="none"
+          role="image")
+          defs
+            filter(:id="filterId"
+              color-interpolation-filters="sRGB")
+              component(v-for="(elm, idx) in svgFilterElms"
+                :key="`svgFilter${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
+                component(v-for="child in elm.child"
+                  :key="child.tag"
+                  :is="child.tag"
+                  v-bind="child.attrs")
+          g
+            g(:filter="`url(#${filterId})`")
+              image(:xlink:href="finalSrc" ref="img"
+                class="nu-image__picture"
+                draggable="false"
+                @error="onError()"
+                @load="onLoad ()")
+        img(v-else ref="img"
+          :style="flipStyles"
+          :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
+          :src="finalSrc"
+          draggable="false"
+          @error="onError()"
+          @load="onLoad ()")
+    template(v-if="hasHalation")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
         :is="elm.tag"
@@ -104,21 +103,21 @@ export default Vue.extend({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
-    },
+    }
     /**
      * @Note Vuex Props
      */
-    scaleRatio: Number,
-    getCurrFunctionPanelType: Number,
-    isUploadingShadowImg: Boolean,
-    isHandling: Boolean,
-    isShowPagePanel: Boolean,
-    imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
-    userId: String,
-    verUni: String,
-    uploadId: Object as PropType<ILayerIdentifier>,
-    handleId: Object as PropType<ILayerIdentifier>,
-    uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
+    // scaleRatio: Number,
+    // getCurrFunctionPanelType: Number,
+    // isUploadingShadowImg: Boolean,
+    // isHandling: Boolean,
+    // isShowPagePanel: Boolean,
+    // imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
+    // userId: String,
+    // verUni: String,
+    // uploadId: Object as PropType<ILayerIdentifier>,
+    // handleId: Object as PropType<ILayerIdentifier>,
+    // uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
     // ...mapGetters({
     //   scaleRatio: 'getPageScaleRatio',
     //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
@@ -298,15 +297,15 @@ export default Vue.extend({
   },
   components: { NuAdjustImage },
   computed: {
-    // ...mapGetters({
-    //   scaleRatio: 'getPageScaleRatio',
-    //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-    //   isUploadingShadowImg: 'shadow/isUploading',
-    //   isHandling: 'shadow/isHandling',
-    //   isShowPagePanel: 'page/getShowPagePanel'
-    // }),
-    // ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
-    // ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    ...mapGetters({
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
+    }),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isImgControl(): boolean {
       return this.config.imgControl
     },

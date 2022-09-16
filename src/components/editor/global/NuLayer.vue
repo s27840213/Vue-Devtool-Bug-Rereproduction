@@ -81,22 +81,22 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
-    },
+    }
     /**
      * @Note Vuex Props
-     */
-    currSelectedInfo: Object as PropType<ICurrSelectedInfo>,
-    scaleRatio: Number,
-    getCurrFunctionPanelType: Number,
-    isUploadingShadowImg: Boolean,
-    isHandling: Boolean,
-    isShowPagePanel: Boolean,
-    imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
-    userId: String,
-    verUni: String,
-    uploadId: Object as PropType<ILayerIdentifier>,
-    handleId: Object as PropType<ILayerIdentifier>,
-    uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
+    //  */
+    // currSelectedInfo: Object as PropType<ICurrSelectedInfo>,
+    // scaleRatio: Number,
+    // getCurrFunctionPanelType: Number,
+    // isUploadingShadowImg: Boolean,
+    // isHandling: Boolean,
+    // isShowPagePanel: Boolean,
+    // imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
+    // userId: String,
+    // verUni: String,
+    // uploadId: Object as PropType<ILayerIdentifier>,
+    // handleId: Object as PropType<ILayerIdentifier>,
+    // uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
   },
   data() {
     return {
@@ -104,14 +104,14 @@ export default Vue.extend({
     }
   },
   computed: {
-    // ...mapGetters({
-    //   currSelectedInfo: 'getCurrSelectedInfo',
-    //   scaleRatio: 'getPageScaleRatio',
-    //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-    //   isUploadingShadowImg: 'shadow/isUploading',
-    //   isHandling: 'shadow/isHandling',
-    //   isShowPagePanel: 'page/getShowPagePanel'
-    // }),
+    ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo',
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
+    }),
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
     },
