@@ -54,7 +54,6 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number,
     subLayerIndex: Number,
-    flip: Object,
     imgControl: Boolean,
     inGroup: {
       type: Boolean,
@@ -176,31 +175,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    // styles() {
-    //   const styles = Object.assign(
-    //     CssConveter.convertDefaultStyle(this.config.styles),
-    //     {
-    //       // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
-    //       'pointer-events': 'none'
-    //     }
-    //   )
-    //   switch (this.config.type) {
-    //     case LayerType.text: {
-    //       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
-    //       Object.assign(
-    //         styles,
-    //         textEffectStyles,
-    //         {
-    //           background: 'rgba(0, 0, 255, 0)',
-    //           willChange: 'text-shadow',
-    //           '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-    //         }
-    //       )
-    //       break
-    //     }
-    //   }
-    //   return styles
-    // },
     onDrop(e: DragEvent) {
       MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
       e.stopPropagation()
