@@ -65,12 +65,12 @@ Vue.use(FloatingVue, {
   themes: tooltipUtils.themes
 })
 
-Vue.use(VueGtm, {
-  id: 'GTM-T7LDWBP',
-  enabled: true,
-  // display console logs debugs or not (optional)
-  debug: false
-})
+// Vue.use(VueGtm, {
+//   id: 'GTM-T7LDWBP',
+//   enabled: true,
+//   // display console logs debugs or not (optional)
+//   debug: false
+// })
 
 Vue.component('RecycleScroller', RecycleScroller)
 

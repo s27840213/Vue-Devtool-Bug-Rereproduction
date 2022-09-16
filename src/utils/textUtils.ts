@@ -598,8 +598,15 @@ class TextUtils {
               [s.split(':')[0].trim()]: s.split(': ')[1].trim()
             })
           })
-        const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles)
-        Object.assign(span.style, spanStyleObject, textBgSpanEffect)
+        const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles.textBg)
+        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>)
+        Object.assign(span.style, additionalStyle)
+        // Set CSS var to span
+        for (const [key, value] of Object.entries(additionalStyle)) {
+          if (key.startsWith('--')) {
+            span.style.setProperty(key, value)
+          }
+        }
 
         span.classList.add('nu-text__span')
         p.appendChild(!spanData.text && pData.spans.length === 1 ? document.createElement('br') : span)
@@ -1078,8 +1085,6 @@ class TextUtils {
     let autoSize = this.getTextHW(config, widthLimit)
     const originDimension = initSize[dimension]
     let prevDiff = Number.MAX_VALUE
-    let prevWidthLimit = -1
-    let prevDimension = -1
     let minDiff = Number.MAX_VALUE
     let minDiffWidLimit = -1
     let minDiffDimension = -1
@@ -1093,10 +1098,10 @@ class TextUtils {
         minDiffDimension = autoDimension
       }
       if (currDiff > prevDiff) {
-        if (prevWidthLimit !== -1) {
+        if (minDiffWidLimit !== -1) {
           return {
-            widthLimit: prevWidthLimit,
-            otherDimension: prevDimension
+            widthLimit: minDiffWidLimit,
+            otherDimension: minDiffDimension
           }
         } else {
           return {
@@ -1106,8 +1111,6 @@ class TextUtils {
         }
       }
       prevDiff = currDiff
-      prevWidthLimit = widthLimit
-      prevDimension = autoDimension
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
         if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }

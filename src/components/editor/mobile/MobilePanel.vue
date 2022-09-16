@@ -256,7 +256,8 @@ export default Vue.extend({
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial'
-            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
+            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px',
+          paddingBottom: 0
           // height: this.fixSize || this.extraFixSizeCondition
           //   ? 'initial'
           //   : this.panelHeight + 'px'
@@ -662,6 +663,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    overflow-x: hidden;
     @include no-scrollbar;
   }
 

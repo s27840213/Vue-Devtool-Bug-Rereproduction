@@ -1,12 +1,21 @@
 <template lang="pug">
   div(class="panel-fonts")
-    div(class="panel-fonts__search")
-      search-bar(placeholder="Search font"
-        clear
-        :defaultKeyword="keywordLabel"
-        vivisticker="white"
-        @search="handleSearch")
+    div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
+      span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+      svg-icon(
+        v-if="!isMobile"
+        class="panel-fonts__close pointer"
+        :iconName="'close'"
+        :iconWidth="'30px'"
+        :iconColor="'gray-2'"
+        @click.native="closeFontsPanel")
+    search-bar(placeholder="Search font"
+      clear
+      :defaultKeyword="keywordLabel"
+      vivisticker="white"
+      @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
+    font-tag(v-if="!hasSearch" @search="handleSearch")
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -29,7 +38,7 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
@@ -39,13 +48,15 @@ import { IListServiceContentData, IListServiceContentDataItem } from '@/interfac
 import uploadUtils from '@/utils/uploadUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import FontTag from '@/components/font/FontTag.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
     CategoryFontItem,
-    CategoryListFont
+    CategoryListFont,
+    FontTag
   },
   props: {
     noTitle: {
@@ -56,13 +67,15 @@ export default Vue.extend({
   },
   data() {
     return {
-      FileUtils
+      FileUtils,
+      hasSearch: false
     }
   },
   mounted() {
     this.getRecently()
   },
   destroyed() {
+    this.setShowMore(false)
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
@@ -166,18 +179,28 @@ export default Vue.extend({
       'getMoreContent',
       'getMoreCategory'
     ]),
+    ...mapMutations('fontTag', {
+      setShowMore: 'SET_SHOW_MORE'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     closeFontsPanel() {
       this.resetContent()
       this.$emit('closeFontsPanel')
+      this.setShowMore(false)
     },
     handleLoadMore(moreType: string | undefined) {
       const { keyword } = this
       keyword ? this.getMoreContent() : this.getMoreCategory()
     },
     handleSearch(keyword: string) {
+      if (keyword) {
+        this.hasSearch = true
+        this.setShowMore(false)
+      } else {
+        this.hasSearch = false
+      }
       this.resetContent()
       keyword ? this.getTagContent({ keyword }) : this.getRecently()
     },
@@ -197,6 +220,19 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   padding: 0 8px;
+  &__title {
+    text-align: center;
+    position: relative;
+    margin-bottom: -10px;
+    background: white;
+    width: 285px;
+    min-height: 50px;
+    top: -20px;
+    left: -20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   > div {
     margin-top: 15px;
     &:nth-child(1) {

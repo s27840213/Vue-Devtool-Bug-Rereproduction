@@ -1,25 +1,22 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
-    component(is="style") {{extraCss}}
-    div(ref="text" class="nu-text__body" :style="bodyStyles()")
+    div(v-for="text in duplicatedText" class="nu-text__body"
+        :style="Object.assign(bodyStyles(), text.extraBody)")
       nu-curve-text(v-if="isCurveText"
-        ref="curveText"
         :config="config"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
         :subLayerIndex="subLayerIndex")
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
-        :key="p.id",
+        :key="p.id"
         :style="styles(p.styles)")
-        template(v-for="(span, sIndex) in p.spans")
-          span(class="nu-text__span"
-            :data-sindex="sIndex"
-            :key="span.id",
-            :data-text="span.text"
-            :data-id="uid"
-            :style="Object.assign(styles(span.styles), spanEffect)") {{ span.text }}
-            br(v-if="!span.text && p.spans.length === 1")
+        span(v-for="(span, sIndex) in p.spans"
+          class="nu-text__span"
+          :data-sindex="sIndex"
+          :key="span.id"
+          :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
+          br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans"
         class="nu-text__span"
@@ -27,6 +24,7 @@
         :data-sindex="sIndex"
         :key="sIndex",
         :style="styles(span.styles, sIndex)") {{ span.text }}
+    //- Svg filter for text effect gooey.
     svg(v-if="spanEffect.svgFilter")
       filter(:id="spanEffect.svgId")
         component(v-for="(elm, idx) in spanEffect.svgFilter"
@@ -141,19 +139,32 @@ export default Vue.extend({
           this.subLayerIndex ?? -1
         )
       }
-      return textBgUtils.convertTextSpanEffect(this.config.styles)
+      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
-    // Pure CSS rule control by JS, https://stackoverflow.com/a/57331310
-    extraCss(): string {
-      const rules = textEffectUtils.convertTextEffect(this.config.styles.textEffect).extraCss
-      return `
-        .nu-text__span[data-id="${this.uid}"]::before {
-          ${rules?.before ?? ''}
-        }
-        .nu-text__span[data-id="${this.uid}"]::after {
-          ${rules?.after ?? ''}
-        }
-      `
+    duplicatedText() {
+      const duplicatedBodyBasicCss = {
+        position: 'absolute',
+        top: '0px',
+        width: '100%',
+        opacity: 1
+      }
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
+      const textShadowCss = {
+        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
+        extraSpan: textShadow.duplicatedSpan
+      }
+      const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
+      const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
+      const textBgSpanCss = {
+        extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
+        extraSpan: textBgSpan.duplicatedSpan
+      }
+      return [
+        ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
+        ...(duplicatedTextShadow ? [textShadowCss] : []),
+        {} // Original text, don't have extra css
+      ]
     }
   },
   watch: {
@@ -172,20 +183,20 @@ export default Vue.extend({
       return tiptapUtils.textStylesRaw(styles)
     },
     bodyStyles() {
+      const { editing, contentEditable } = this.config
+      const { isCurveText, isFlipped } = this
+      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
         height: isVertical ? '' : '100%',
-        textAlign: this.config.styles.align
+        textAlign: this.config.styles.align,
+        opacity
       }
     },
     wrapperStyles() {
-      const { editing, contentEditable } = this.config
-      const { isCurveText, isFlipped } = this
-      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
       return {
-        writingMode: this.config.styles.writingMode,
-        opacity
+        writingMode: this.config.styles.writingMode
       }
     },
     // getFontUrl(spanStyles: ISpanStyle): string {
@@ -266,6 +277,12 @@ export default Vue.extend({
     white-space: pre-wrap;
     overflow-wrap: break-word;
     // line-break: anywhere;
+    &:first-child {
+      padding-left: var(--textGooeyPaddingX);
+    }
+    &:last-child {
+      padding-right: var(--textGooeyPaddingX);
+    }
   }
   &__observee {
     position: absolute;

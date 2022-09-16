@@ -65,8 +65,11 @@ class ConstantData {
         }, {
           label: 'FB 粉絲頁封面',
           url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+        }, {
+          label: 'IG 貼文',
+          url: 'https://blog.vivipic.com/tw/ig-post-design/'
         },
-        ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0668'),
@@ -82,8 +85,11 @@ class ConstantData {
         content: [{
           label: '喜帖',
           url: 'https://blog.vivipic.com/tw/wedding-invitation/'
+        }, {
+          label: '邀請卡',
+          url: 'https://blog.vivipic.com/tw/invitation-card/'
         },
-        ...[[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        ...[20, 19, 18, 22].map((id) => themeItem(id))
         ]
       }],
       us: [{
@@ -115,7 +121,12 @@ class ConstantData {
       }],
       jp: [{
         label: i18n.t('NN0667'),
-        content: [1, 8, 2, 3, 4, 9, 21].map((id) => themeItem(id))
+        content: [
+          ...[1, 8, 2, 3, 4, 9].map((id) => themeItem(id)), {
+            label: 'プロフィール写真',
+            url: 'https://blog.vivipic.com/jp/pfp-profile-pictures-2/'
+          }
+        ]
       }, {
         label: i18n.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))
@@ -338,14 +349,14 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
-      // }, {
-      //   key: 'funky3d',
-      //   label: i18n.tc('NN0728'),
-      //   options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
-      // }, {
-      //   key: 'bold3d',
-      //   label: i18n.tc('NN0729'),
-      //   options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      }, {
+        key: 'funky3d',
+        label: i18n.tc('NN0728'),
+        options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
+      }, {
+        key: 'bold3d',
+        label: i18n.tc('NN0729'),
+        options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
@@ -359,46 +370,50 @@ class ConstantData {
         label: i18n.t('NN0118'),
         options: toOptions(['bend'])
       }])
-    // }, {
-    //   name: 'bg',
-    //   label: i18n.tc('NN0719'),
-    //   effects2d: arrTo2darr([{
-    //     key: 'none',
-    //     label: i18n.t('NN0111'),
-    //     options: toOptions([])
-    //   }, {
-    //     key: 'square-borderless',
-    //     label: i18n.tc('NN0720'),
-    //     options: toOptions(['opacity', 'pStroke', 'pColor'])
-    //   }, {
-    //     key: 'rounded-borderless',
-    //     label: i18n.tc('NN0721'),
-    //     options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
-    //   }, {
-    //     key: 'square-hollow',
-    //     label: i18n.tc('NN0722'),
-    //     options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
-    //   }, {
-    //     key: 'rounded-hollow',
-    //     label: i18n.tc('NN0723'),
-    //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
-    //   }, {
-    //     key: 'square-both',
-    //     label: i18n.tc('NN0724'),
-    //     options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-    //   }, {
-    //     key: 'rounded-both',
-    //     label: i18n.tc('NN0725'),
-    //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-    //   }, {
-    //     key: 'gooey',
-    //     label: i18n.tc('NN0726'),
-    //     options: toOptions(['bRadius', 'opacity', 'color'])
-    //   }, {
-    //     key: 'underline',
-    //     label: i18n.tc('NN0727'),
-    //     options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
-    //   }])
+    }, {
+      name: 'bg',
+      label: i18n.tc('NN0719'),
+      effects2d: arrTo2darr([{
+        key: 'none',
+        label: i18n.t('NN0111'),
+        options: toOptions([])
+      }, {
+        key: 'square-borderless',
+        label: i18n.tc('NN0720'),
+        options: toOptions(['opacity', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-borderless',
+        label: i18n.tc('NN0721'),
+        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
+      }, {
+        key: 'square-hollow',
+        label: i18n.tc('NN0722'),
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
+      }, {
+        key: 'rounded-hollow',
+        label: i18n.tc('NN0723'),
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+      }, {
+        key: 'square-both',
+        label: i18n.tc('NN0724'),
+        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'rounded-both',
+        label: i18n.tc('NN0725'),
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+      }, {
+        key: 'cloud',
+        label: i18n.tc('NN0741'),
+        options: toOptions(['bRadius', 'opacity', 'color'])
+      }, {
+        key: 'gooey',
+        label: i18n.tc('NN0726'),
+        options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
+      }, {
+        key: 'underline',
+        label: i18n.tc('NN0727'),
+        options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
+      }])
     }]
     return categories as IEffectCategory[]
   }

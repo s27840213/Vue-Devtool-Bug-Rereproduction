@@ -1,12 +1,13 @@
-import TextEffectUtils from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
 import { ILayer, ISpan, IText } from '@/interfaces/layer'
 import store from '@/store'
-import generalUtils from './generalUtils'
-import layerUtils from './layerUtils'
-import tiptapUtils from './tiptapUtils'
-import mathUtils from './mathUtils'
+import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import mathUtils from '@/utils/mathUtils'
 import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
+import localStorageUtils from '@/utils/localStorageUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -25,7 +26,7 @@ class Controller {
   }
 
   getSpecSubTextLayer(index: number): IText {
-    return TextEffectUtils.getSpecSubTextLayer(index)
+    return textEffectUtils.getSpecSubTextLayer(index)
   }
 
   getRadiusByBend(bend: number) {
@@ -48,10 +49,12 @@ class Controller {
     } as { [key: string]: any }
     if (styleTextShape && (styleTextShape as any).name === shape) {
       Object.assign(styles.textShape, styleTextShape, attrs)
+      localStorageUtils.set('textEffectSetting', shape, styles.textShape)
     } else {
-      Object.assign(styles.textShape, defaultAttrs, attrs, { name: shape })
+      const localAttrs = localStorageUtils.get('textEffectSetting', shape)
+      Object.assign(styles.textShape, defaultAttrs, localAttrs, attrs, { name: shape })
     }
-    if (shape === 'none') {
+    if (shape === 'none' && styleTextShape.name && styleTextShape.name !== 'none') {
       const { bend } = styleTextShape as any
       const textHW = TextUtils.getTextHW(layer, -1)
       Object.assign(styles, {
@@ -60,7 +63,7 @@ class Controller {
         y: +bend < 0 ? y + height - textHW.height : y
       })
       props.widthLimit = -1
-    } else { // curve
+    } else if (shape === 'curve') { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
       props.widthLimit = -1
@@ -79,6 +82,11 @@ class Controller {
     return styles.textShape?.name === 'curve'
   }
 
+  resetCurrTextEffect() {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textShape.name
+    this.setTextShape(effectName, this.shapes[effectName])
+  }
+
   setTextShape(shape: string, attrs?: any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
@@ -87,6 +95,9 @@ class Controller {
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
       for (const idx in layers) {
+        // Leave text editing mode to show some span text effect.
+        layers[idx].contentEditable = false
+
         const { type } = layers[idx] as IText
         if (type === 'text') {
           const heightOri = layers[idx].styles.height

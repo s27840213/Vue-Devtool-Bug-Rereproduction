@@ -191,23 +191,13 @@ export default Vue.extend({
           break
         }
 
-        case ColorEventType.textEffect:
-        case ColorEventType.textBg:
-        case ColorEventType.textBgBorder:
-        case ColorEventType.textBgPadding: {
-          const { styles } = textEffectUtils.getCurrentLayer()
-          if (this.currEvent === ColorEventType.textEffect) {
-            const { textEffect = {} } = styles
-            const currentEffect = textEffect.name || 'none'
-            textEffectUtils.setTextEffect(currentEffect, { color: newColor })
-          } else {
-            const { textBg = {} } = textEffectUtils.getCurrentLayer().styles
-            const currentEffect = textBg.name || 'none'
-            const key = this.currEvent === ColorEventType.textBgBorder ? 'bColor'
-              : this.currEvent === ColorEventType.textBgPadding ? 'pColor'
-                : 'color'
-            textBgUtils.setTextBg(currentEffect, { [key]: newColor })
-          }
+        case ColorEventType.textEffect: {
+          textEffectUtils.setColor(newColor)
+          break
+        }
+
+        case ColorEventType.textBg: {
+          textBgUtils.setColor(newColor)
           break
         }
 

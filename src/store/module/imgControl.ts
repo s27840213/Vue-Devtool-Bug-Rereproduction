@@ -27,8 +27,8 @@ const state: IImgControlState = {
 }
 
 const getters: GetterTree<IImgControlState, IEditorState> = {
-  isImgControl(state): boolean {
-    return state.image !== undefined
+  imgControlPageIdx(state): number {
+    return state.layerInfo.pageIndex
   }
 }
 
@@ -63,7 +63,7 @@ const mutations: MutationTree<IImgControlState> = {
     }
 
     state.image = layerMapping(state.primaryLayer, generalUtils.deepCopy(layer)) as IImage
-    state.image.imgControl = false
+    // state.image.imgControl = false
     state.layerInfo = { pageIndex, layerIndex, subLayerIdx }
   },
   [UPDATE_CONFIG] (state, styles: Partial<IImageStyle>) {
@@ -83,21 +83,33 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
       if (frameUtils.isImageFrame(primaryLayer as IFrame)) {
         image.styles.x = primaryLayer.styles.x
         image.styles.y = primaryLayer.styles.y
-        image.styles.scale = 1
-        // image.styles.imgWidth *= layer.styles.scale
-        // image.styles.imgHeight *= layer.styles.scale
+        image.styles.scale = primaryLayer.styles.scale
+        const pv = primaryLayer.styles.verticalFlip
+        const ph = primaryLayer.styles.horizontalFlip
+        const v = image.styles.verticalFlip
+        const h = image.styles.horizontalFlip
+        image.styles.verticalFlip = (pv || v) && !(pv && v)
+        image.styles.horizontalFlip = (ph || h) && !(ph && h)
+        image.styles.rotate = primaryLayer.styles.rotate
+        if (pv) {
+          image.styles.imgY = image.styles.height - image.styles.imgHeight - image.styles.imgY
+        }
+        if (ph) {
+          image.styles.imgX = image.styles.width - image.styles.imgWidth - image.styles.imgX
+        }
         return image
+      } else {
+        image.styles.x *= primaryLayer.styles.scale
+        image.styles.y *= primaryLayer.styles.scale
+        if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
+          const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
+          const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
+          const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
+          image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
+          image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
+        }
+        return groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
       }
-      image.styles.x *= primaryLayer.styles.scale
-      image.styles.y *= primaryLayer.styles.scale
-      if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-        const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-        const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-        const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-        image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-        image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-      }
-      return groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
     }
     case LayerType.group: {
       const scale = image.styles.scale
@@ -121,12 +133,32 @@ const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage, _pr
   const primaryLayer = _primaryLayer ?? layerUtils.getLayer(pageIndex, layerIndex)
   switch (primaryLayer.type) {
     case LayerType.frame: {
+      if (frameUtils.isImageFrame(primaryLayer as IFrame)) {
+        let { styles: { imgX, imgY, imgWidth, imgHeight, width, height } } = image
+        if (primaryLayer.styles.verticalFlip) {
+          imgY = height - imgHeight - imgY
+        }
+        if (primaryLayer.styles.horizontalFlip) {
+          imgX = width - imgWidth - imgX
+        }
+        frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, 0, {
+          imgX, imgY, imgHeight, imgWidth
+        })
+        return
+      }
       const subLayer = groupUtils.mapLayersToTmp([image], primaryLayer.styles as ICalculatedGroupStyle)[0] as IImage
-      let { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
+      let { styles: { imgX, imgY, imgWidth, imgHeight, width, height } } = subLayer
+      if (primaryLayer.styles.horizontalFlip) {
+        imgX = width - imgWidth - imgX
+      }
+      if (primaryLayer.styles.verticalFlip) {
+        imgY = height - imgHeight - imgY
+      }
       imgX /= primaryLayer.styles.scale
       imgY /= primaryLayer.styles.scale
       imgWidth /= primaryLayer.styles.scale
       imgHeight /= primaryLayer.styles.scale
+
       frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, subLayerIdx ?? 0, {
         imgX, imgY, imgHeight: imgHeight, imgWidth
       })

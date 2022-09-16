@@ -58,8 +58,8 @@ export default Vue.extend({
           break
         case 'frame':
           if (frameUtils.isImageFrame(this.config)) {
-            width = `${width}px`
-            height = `${height}px`
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
           } else {
             width = `${width / scale}px`
             height = `${height / scale}px`

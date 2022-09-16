@@ -23,13 +23,9 @@ import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import ValueSelector from '@/components/ValueSelector.vue'
 import vClickOutside from 'v-click-outside'
 
 export default Vue.extend({
-  components: {
-    ValueSelector
-  },
   props: {
   },
   data() {
@@ -106,12 +102,6 @@ export default Vue.extend({
       if (value < min) return min.toString()
       else if (value > max) return max.toString()
       return value.toString()
-    },
-    handleValueUpdate(value: number) {
-      tiptapUtils.spanStyleHandler('size', value)
-      tiptapUtils.forceUpdate(true)
-      textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-      textEffectUtils.refreshSize()
     },
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement

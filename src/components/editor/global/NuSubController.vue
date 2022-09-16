@@ -776,7 +776,7 @@ export default Vue.extend({
       if (this.isDraggedPanelPhoto) return
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
-        LayerUtils.deleteLayer(LayerUtils.layerIndex)
+        LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)
         const newIndex = this.primaryLayerIndex > LayerUtils.layerIndex ? this.primaryLayerIndex - 1 : this.primaryLayerIndex
         groupUtils.set(this.pageIndex, newIndex, [this.primaryLayer])
         FrameUtils.updateFrameLayerProps(this.pageIndex, newIndex, this.layerIndex, { active: true })

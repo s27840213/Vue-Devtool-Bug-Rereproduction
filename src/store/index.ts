@@ -29,6 +29,7 @@ import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
+import fontTag from '@/store/module/fontTag'
 import imgControl from '@/store/module/imgControl'
 import { ADD_subLayer } from '@/utils/layerUtils'
 
@@ -856,6 +857,7 @@ export default new Vuex.Store({
     bgRemove,
     shadow,
     vivisticker,
+    fontTag,
     imgControl
   }
 })

@@ -27,6 +27,18 @@ const styleMap = {
   decoration: 'text-decoration',
   style: 'font-style',
   caretColor: 'caret-color',
+  filter: 'filter',
+  backgroundColor: 'background-color',
+  padding: 'padding',
+  paddingTop: 'padding-top',
+  paddingBottom: 'padding-bottom',
+  textGooeyPaddingX: '--textGooeyPaddingX',
+  boxDecorationBreak: 'box-decoration-break',
+  backgroundRepeat: 'background-repeat',
+  backgroundImage: 'background-image',
+  backgroundSize: 'background-size',
+  backgroundPositionX: 'background-position-x',
+  backgroundPositionY: 'background-position-y',
   // below are not css valid properties, only for tiptap to record
   type: 'font-type',
   assetId: 'asset-id',
@@ -54,7 +66,10 @@ const styleMap = {
 const transformProps: string[] = ['x', 'y', 'scale', 'scaleX', 'scaleY', 'rotate']
 const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpacing',
   'size', 'color', 'writingMode', 'decoration', 'style', 'caretColor',
-  'type', 'assetId', 'userId', 'fontUrl'
+  'type', 'assetId', 'userId', 'fontUrl', 'filter', 'backgroundColor', 'padding',
+  'paddingTop', 'paddingBottom', 'textGooeyPaddingX',
+  'boxDecorationBreak', 'backgroundRepeat', 'backgroundImage', 'backgroundSize',
+  'backgroundPositionX', 'backgroundPositionY'
 ]
 
 class CssConveter {
@@ -91,6 +106,9 @@ class CssConveter {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (prop === 'lineHeight') {
         result[styleMap[prop]] = `${sourceStyles[prop]}`
+      } else if (['boxDecorationBreak'].includes(prop)) { // For webkit CSS
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
+        result[`-webkit-${styleMap[prop]}`] = `${sourceStyles[prop]}`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (typeof sourceStyles[prop] !== 'undefined') {

@@ -227,7 +227,7 @@ export default Vue.extend({
       return [
         { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
         { icon: 'position', text: `${this.$tc('NN0044', 2)}`, panelType: 'position' },
-        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip', disabled: this.currSelectedInfo.types.has(LayerType.frame) },
+        { icon: 'flip', text: `${this.$t('NN0038')}`, panelType: 'flip' },
         { icon: 'transparency', text: `${this.$t('NN0030')}`, panelType: 'opacity' },
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object', hidden: true },
         { icon: 'layers-alt', text: `${this.$t('NN0031')}`, panelType: 'order' }
@@ -261,7 +261,9 @@ export default Vue.extend({
       } else if (this.showFontTabs) {
         return [this.mainMenu, ...this.fontTabs, ...this.genearlLayerTabs]
       } else if (this.showFrameTabs) {
-        console.log('frame')
+        if (frameUtils.isImageFrame(layerUtils.getCurrLayer as IFrame)) {
+          return this.photoTabs
+        }
         return this.frameTabs
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
@@ -434,10 +436,8 @@ export default Vue.extend({
                   layerUtils.updateLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, { imgControl: true })
                   break
                 case 'frame':
-                  index = (layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image')
-                  if (index >= 0) {
-                    frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
-                  }
+                  index = Math.max((layerUtils.getCurrLayer as IFrame).clips.findIndex(l => l.type === 'image' && l.active), 0)
+                  frameUtils.updateFrameLayerProps(layerUtils.pageIndex, layerUtils.layerIndex, index, { imgControl: true })
                   break
                 case 'group':
                   if (layerUtils.getCurrConfig.type === LayerType.image) {

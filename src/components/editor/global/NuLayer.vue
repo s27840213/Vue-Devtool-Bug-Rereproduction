@@ -8,6 +8,13 @@
         :style="translateStyles")
       div(class="layer-scale posAbs" ref="scale"
           :style="scaleStyles")
+        //- Svg BG for text effex box.
+        svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
+            class="nu-layer__BG")
+          component(v-for="(elm, idx) in svgBG.content"
+                    :key="`svgFilter${idx}`"
+                    :is="elm.tag"
+                    v-bind="elm.attrs")
         nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
@@ -85,7 +92,7 @@ export default Vue.extend({
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
+          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
             textEffectStyles,
@@ -105,6 +112,10 @@ export default Vue.extend({
         }
       }
       return styles
+    },
+    svgBG() {
+      const textBg = textBgUtils.convertTextEffect(this.config.styles)
+      return textBg.svg
     },
     getLayerPos(): { x: number, y: number } {
       return {
@@ -222,6 +233,10 @@ export default Vue.extend({
   &:focus {
     background-color: rgba(168, 218, 220, 1);
   }
+  &__BG {
+    position: absolute;
+    left: 0;
+  }
   &__inProcess {
     width: 100%;
     height: 100%;
@@ -247,10 +262,6 @@ export default Vue.extend({
   transform-origin: top left;
   top: 0;
   left: 0;
-}
-
-.layer-flip {
-  transition: transform 0.2s linear;
 }
 
 .test-index {

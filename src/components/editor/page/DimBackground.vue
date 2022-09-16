@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(v-if="isImgControl")
+  div(v-if="imgControlPageIdx !== -1")
     div(class="dim-background"
       :style="styles")
     div
@@ -17,22 +17,20 @@
         :contentScaleRatio="contentScaleRatio"
         :config="image")
     div(class="page-control" :style="styles")
-        nu-img-controller(:layerIndex="layerIndex"
-                          :pageIndex="pageIndex"
-                          :contentScaleRatio="contentScaleRatio"
-                          :config="image")
-                          //- :forRender="true"
+      nu-img-controller(:layerIndex="layerIndex"
+                        :pageIndex="pageIndex"
+                        :contentScaleRatio="contentScaleRatio"
+                        :primaryLayer="primaryLayer"
+                        :config="image")
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { mapMutations, mapGetters, mapState } from 'vuex'
-import NuImage from '@/components/editor/global/NuImage.vue'
+import { mapGetters, mapState } from 'vuex'
 import NuBackgroundController from '@/components/editor/global/NuBackgroundController.vue'
 import { IPage } from '@/interfaces/page'
 
 export default Vue.extend({
   components: {
-    NuImage,
     NuBackgroundController
   },
   data() {
@@ -50,7 +48,7 @@ export default Vue.extend({
   computed: {
     ...mapState('imgControl', ['image', 'layerInfo', 'primaryLayer']),
     ...mapGetters({
-      isImgControl: 'imgControl/isImgControl'
+      imgControlPageIdx: 'imgControl/imgControlPageIdx'
     }),
     styles() {
       const config = this.config as IPage
@@ -65,63 +63,7 @@ export default Vue.extend({
     },
     layerIndex(): number {
       return this.layerInfo.layerIndex
-    },
-    subLayerIdx(): number {
-      return this.layerInfo.subLayerIdx
     }
-    // getCurrLayer(): ILayer {
-    //   return generalUtils.deepCopy(this.getLayer(this.pageIndex, this.currSelectedIndex))
-    // },
-    // getCurrSubSelectedLayerShown(): IImage | undefined {
-    //   const layer = this.getCurrLayer
-    //   if (layer.type === 'group') {
-    //     const subLayer = generalUtils.deepCopy((this.getCurrLayer as IGroup).layers[this.currSubSelectedInfo.index]) as IImage
-    //     const scale = subLayer.styles.scale
-    //     subLayer.styles.scale = 1
-    //     subLayer.styles.x *= layer.styles.scale
-    //     subLayer.styles.y *= layer.styles.scale
-    //     const mappedLayer = GroupUtils
-    //       .mapLayersToPage([subLayer], this.getCurrLayer as ITmp)[0] as IImage
-    //     mappedLayer.styles.scale = scale
-    //     return Object.assign(mappedLayer, { forRender: true, pointerEvents: 'none' })
-    //   } else if (layer.type === 'frame') {
-    //     if (frameUtils.isImageFrame(layer as IFrame)) {
-    //       const image = generalUtils.deepCopy((layer as IFrame).clips[0]) as IImage
-    //       image.styles.x = layer.styles.x
-    //       image.styles.y = layer.styles.y
-    //       image.styles.scale = 1
-    //       // image.styles.imgWidth *= layer.styles.scale
-    //       // image.styles.imgHeight *= layer.styles.scale
-    //       return Object.assign(image, { forRender: true })
-    //     }
-    //     const primaryLayer = this.getCurrLayer as IFrame
-    //     const image = generalUtils.deepCopy(primaryLayer.clips[Math.max(this.currSubSelectedInfo.index, 0)]) as IImage
-    //     image.styles.x *= primaryLayer.styles.scale
-    //     image.styles.y *= primaryLayer.styles.scale
-    //     if (primaryLayer.styles.horizontalFlip || primaryLayer.styles.verticalFlip) {
-    //       const { imgX, imgY, imgWidth, imgHeight, width, height } = image.styles
-    //       const [baselineX, baselineY] = [-(imgWidth - width) / 2, -(imgHeight - height) / 2]
-    //       const [translateX, translateY] = [imgX - baselineX, imgY - baselineY]
-    //       image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
-    //       image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
-    //     }
-    //     Object.assign(image, { forRender: true })
-    //     return GroupUtils.mapLayersToPage([image], this.getCurrLayer as ITmp)[0] as IImage
-    //   }
-    //   return undefined
-    // }
-  },
-  methods: {
-    ...mapMutations({
-      ADD_newLayers: 'ADD_newLayers',
-      setCurrActivePageIndex: 'SET_currActivePageIndex',
-      setDropdown: 'popup/SET_STATE',
-      _addPage: 'ADD_page',
-      _deletePage: 'DELETE_page',
-      setPanelType: 'SET_currFunctionPanelType',
-      setSidebarType: 'SET_currSidebarPanelType',
-      setCurrHoveredPageIndex: 'SET_currHoveredPageIndex'
-    })
   }
 })
 </script>

@@ -11,9 +11,10 @@
       :layerIndex="layerIndex"
       :subLayerIndex="index"
       :flip="flip"
-      :config="layer"
       :inFrame="true"
-      :contentScaleRatio="contentScaleRatio")
+      :contentScaleRatio="contentScaleRatio"
+      :primaryLayer="config"
+      :config="layer")
 </template>
 
 <script lang="ts">
@@ -150,7 +151,7 @@ export default Vue.extend({
     },
     shadowSrc() {
       const shadow = this.config.styles.shadow
-      if (shadow && shadow.srcObj?.type) {
+      if (shadow && shadow.srcObj && shadow.srcObj.type) {
         const { width, height } = this.config.styles
         const size = ImageUtils.getSrcSize(shadow.srcObj, ImageUtils.getSignificantDimension(width, height) * (this.scaleRatio / 100))
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
@@ -162,10 +163,12 @@ export default Vue.extend({
       if (shadow && shadow.srcObj?.type) {
         const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
         const { horizontalFlip, verticalFlip, scale } = this.config.styles
+        const x = (horizontalFlip ? -imgX : imgX) * scale * this.contentScaleRatio
+        const y = (verticalFlip ? -imgY : imgY) * scale * this.contentScaleRatio
         return {
-          width: (imgWidth * scale).toString() + 'px',
-          height: (imgHeight * scale).toString() + 'px',
-          transform: `translate(${(horizontalFlip ? -imgX : imgX) * scale}px, ${(verticalFlip ? -imgY : imgY) * scale}px)`
+          width: (imgWidth * scale * this.contentScaleRatio).toString() + 'px',
+          height: (imgHeight * scale * this.contentScaleRatio).toString() + 'px',
+          transform: `translate(${x}px, ${y}px)`
         }
       }
       return {}
