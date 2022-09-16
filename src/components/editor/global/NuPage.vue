@@ -103,7 +103,7 @@
           @mouseleave="togglePageHighlighter(false)"
           tabindex="0")
         lazy-load(
-            target=".mobile-editor__page-preview"
+            target=".editor-view"
             :minHeight="config.width * (scaleRatio / 100)"
             :threshold="[0,1]")
           div(class="scale-container relative"
@@ -174,6 +174,7 @@
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
         :style="wrapperStyles()")
+    div(class="layer-num") {{config.layers.length}}
 </template>
 
 <script lang="ts">
@@ -880,5 +881,11 @@ export default Vue.extend({
 
 .skeleton {
   background-color: setColor(white);
+}
+
+.layer-num {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
 }
 </style>

@@ -439,8 +439,8 @@ export default Vue.extend({
       const resizeBarScale = generalUtils.isTouchDevice() ? 2.5 : 1
       const HW = {
         // Get the widht/height of the controller for resizer-bar and minus the scaler size
-        width: isHorizon ? `${this.getLayerWidth * 0.4 - scalerOffset}px` : `${width * 0.4 * resizeBarScale}px`,
-        height: !isHorizon ? `${this.getLayerHeight * 0.4 - scalerOffset}px` : `${height * 0.4 * resizeBarScale}px`
+        width: isHorizon ? `${this.getLayerWidth * this.contentScaleRatio - scalerOffset}px` : `${width * this.contentScaleRatio * resizeBarScale}px`,
+        height: !isHorizon ? `${this.getLayerHeight * this.contentScaleRatio - scalerOffset}px` : `${height * this.contentScaleRatio * resizeBarScale}px`
       }
       return Object.assign(resizerStyle, HW)
     },

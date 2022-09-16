@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -104,7 +104,30 @@ export default Vue.extend({
     primaryLayer: {
       type: Object,
       default: () => { return undefined }
-    }
+    },
+    /**
+     * @Note Vuex Props
+     */
+    scaleRatio: Number,
+    getCurrFunctionPanelType: Number,
+    isUploadingShadowImg: Boolean,
+    isHandling: Boolean,
+    isShowPagePanel: Boolean,
+    imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
+    userId: String,
+    verUni: String,
+    uploadId: Object as PropType<ILayerIdentifier>,
+    handleId: Object as PropType<ILayerIdentifier>,
+    uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
+    // ...mapGetters({
+    //   scaleRatio: 'getPageScaleRatio',
+    //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+    //   isUploadingShadowImg: 'shadow/isUploading',
+    //   isHandling: 'shadow/isHandling',
+    //   isShowPagePanel: 'page/getShowPagePanel'
+    // }),
+    // ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    // ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs'])
   },
   async created() {
     this.handleInitLoad()
@@ -275,15 +298,15 @@ export default Vue.extend({
   },
   components: { NuAdjustImage },
   computed: {
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
-      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
-      isUploadingShadowImg: 'shadow/isUploading',
-      isHandling: 'shadow/isHandling',
-      isShowPagePanel: 'page/getShowPagePanel'
-    }),
-    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
-    ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
+    // ...mapGetters({
+    //   scaleRatio: 'getPageScaleRatio',
+    //   getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+    //   isUploadingShadowImg: 'shadow/isUploading',
+    //   isHandling: 'shadow/isHandling',
+    //   isShowPagePanel: 'page/getShowPagePanel'
+    // }),
+    // ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    // ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isImgControl(): boolean {
       return this.config.imgControl
     },
@@ -438,7 +461,7 @@ export default Vue.extend({
     getPreviewSize(): number {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return ImageUtils
-        .getSrcSize(this.config.srcObj, sizeMap.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
+        .getSrcSize(this.config.srcObj, sizeMap?.flatMap(e => e.key === 'tiny' ? [e.size] : [])[0] as number || 150)
     },
     isAdjustImage(): boolean {
       const { styles: { adjust = {} } } = this.config
@@ -454,7 +477,7 @@ export default Vue.extend({
         return false
       }
       const isCurrShadowEffectApplied = this.currentShadowEffect !== ShadowEffectType.none
-      const isHandling = handleId.pageId === pageUtils.getPage(pageIndex).id && (() => {
+      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex).id && (() => {
         if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
           const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
           return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId

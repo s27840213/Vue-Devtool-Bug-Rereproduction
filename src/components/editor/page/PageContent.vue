@@ -21,7 +21,12 @@ div(class="overflow-container"
         :key="this.config.backgroundImage.id"
         @mousedown.native.left="pageClickHandler()"
         :contentScaleRatio="contentScaleRatio")
-      nu-layer(v-for="(layer,index) in config.layers"
+      //- lazy-load(v-for="(layer,index) in config.layers"
+      //-     :key="layer.id"
+      //-     target=".editor-view"
+      //-     :threshold="[0,1]")
+      nu-layer(
+        v-for="(layer,index) in config.layers"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
@@ -29,7 +34,21 @@ div(class="overflow-container"
         :layerIndex="index"
         :pageIndex="pageIndex"
         :config="layer"
-        :contentScaleRatio="contentScaleRatio")
+        :currSelectedInfo="currSelectedInfo"
+        :contentScaleRatio="contentScaleRatio"
+        :scaleRatio="scaleRatio"
+        :getCurrFunctionPanelType="getCurrFunctionPanelType"
+        :isUploadingShadowImg="isUploadingShadowImg"
+        :isHandling="isHandling"
+        :isShowPagePanel="isShowPagePanel"
+        :imgSizeMap="imgSizeMap"
+        :userId="userId"
+        :verUni="verUni"
+        :uploadId="uploadId"
+        :handleId="handleId"
+        :uploadShadowImgs="uploadShadowImgs")
+    template(v-else)
+      div(class='pages-loading')
 </template>
 
 <script lang="ts">
@@ -43,16 +62,19 @@ import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import DragUtils from '@/utils/dragUtils'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
-import queueUtils from '@/utils/queueUtils'
 import vivisticker from '@/store/module/vivisticker'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import LazyLoad from '@/components/LazyLoad.vue'
 
 export default Vue.extend({
-  components: { NuBgImage },
+  components: {
+    NuBgImage,
+    LazyLoad
+  },
   props: {
     config: {
       type: Object,
@@ -87,8 +109,16 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       isProcessImgShadow: 'shadow/isProcessing',
-      isUploadImgShadow: 'shadow/isUploading'
+      isUploadImgShadow: 'shadow/isUploading',
+      currSelectedInfo: 'getCurrSelectedInfo',
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
     }),
+    ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
+    ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
     },
