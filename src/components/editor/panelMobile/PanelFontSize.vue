@@ -6,8 +6,9 @@
       :max="fieldRange.fontSize.max"
       :min="fieldRange.fontSize.min"
       step="1"
+      type="range"
       :disabled="fontSize === '--'"
-      type="range")
+      @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">
@@ -21,6 +22,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import pageUtils from '@/utils/pageUtils'
 import { mapGetters, mapState } from 'vuex'
 import { IGroup, ILayer } from '@/interfaces/layer'
+import stepsUtils from '@/utils/stepsUtils'
 export default Vue.extend({
   components: {
     MobileSlider,
@@ -79,6 +81,11 @@ export default Vue.extend({
         textPropUtils.updateTextPropsState({ fontSize: value.toString() })
         textEffectUtils.refreshSize()
       }
+    }
+  },
+  methods: {
+    handleChangeStop() {
+      stepsUtils.record()
     }
   }
 })
