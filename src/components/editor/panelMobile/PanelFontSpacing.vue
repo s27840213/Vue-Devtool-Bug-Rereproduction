@@ -43,10 +43,10 @@ export default Vue.extend({
       return layerUtils.getCurrOpacity
     },
     lineHeight(): number {
-      return this.props.lineHeight
+      return this.props.lineHeight === '--' ? this.props.lineHeight : parseFloat(this.props.lineHeight)
     },
     fontSpacing(): number {
-      return this.props.fontSpacing
+      return this.props.fontSpacing === '--' ? this.props.fontSpacing : parseFloat(this.props.fontSpacing)
     }
   },
   methods: {
