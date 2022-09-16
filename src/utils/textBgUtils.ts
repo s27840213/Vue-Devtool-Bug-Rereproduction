@@ -9,6 +9,7 @@ import localStorageUtils from '@/utils/localStorageUtils'
 import text from '@/store/text'
 
 class TextBg {
+  private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number>>
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -269,6 +270,15 @@ class TextBg {
       Object.assign(effect, newEffect)
       localStorageUtils.set('textEffectSetting', effectName, effect)
     }
+  }
+
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, { [this.currColorKey]: color })
   }
 
   resetCurrTextEffect() {
