@@ -220,6 +220,7 @@ export default Vue.extend({
   display: flex;
   flex-direction: column;
   padding: 0 8px;
+  overflow-x: hidden;
   &__title {
     text-align: center;
     position: relative;

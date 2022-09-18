@@ -156,7 +156,8 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: ''
+      innerTab: '',
+      draggedPanelHeight: 0
     }
   },
   computed: {
@@ -215,6 +216,9 @@ export default Vue.extend({
     halfSizeInInitState(): boolean {
       return this.showExtraColorPanel || ['fonts', 'adjust', 'photo-shadow', 'color', 'text-effect'].includes(this.currActivePanel)
     },
+    minHalfSize(): boolean {
+      return ['fonts'].includes(this.currActivePanel)
+    },
     panelTitle(): string {
       switch (this.currActivePanel) {
         case 'crop': {
@@ -251,7 +255,8 @@ export default Vue.extend({
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial'
-            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
+            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px',
+          minHeight: (this.minHalfSize && !this.isDraggingPanel) ? this.draggedPanelHeight + 'px' : 'unset'
           // height: this.fixSize || this.extraFixSizeCondition
           //   ? 'initial'
           //   : this.panelHeight + 'px'
@@ -484,6 +489,7 @@ export default Vue.extend({
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = this.initHeightPx()
+      this.draggedPanelHeight = this.panelHeight
     },
     showMobilePanel(newVal) {
       if (!newVal) {
@@ -493,6 +499,7 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
+    this.draggedPanelHeight = this.panelHeight
   },
   methods: {
     ...mapMutations({
@@ -557,11 +564,13 @@ export default Vue.extend({
         this.closeMobilePanel()
       } else if (this.panelHeight >= maxHeightPx * 0.75) {
         this.panelHeight = maxHeightPx
+        this.draggedPanelHeight = this.panelHeight
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
       } else {
         this.panelHeight = maxHeightPx * 0.5
+        this.draggedPanelHeight = this.panelHeight
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
