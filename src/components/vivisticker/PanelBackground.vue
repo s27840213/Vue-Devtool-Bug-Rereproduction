@@ -152,8 +152,9 @@ export default Vue.extend({
       shareColor: 'vivisticker/getShareColor'
     }),
     itemWidth(): number {
-      const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
-      return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
+      // const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
+      // return basicWidth < 145 ? basicWidth : 145 // 145px is the default width
+      return 142
     },
     isInCategory(): boolean {
       return this.isTabInCategory('background')
@@ -189,16 +190,16 @@ export default Vue.extend({
     listResult(): any[] {
       const { keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 2))
+      const result = new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 2, idx * 2 + 2)
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
           const title: string = !keyword && !idx ? `${this.$t('NN0340')}` : ''
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
             type: 'category-background-item',
             list: rowItems,
-            size: title ? (this.itemWidth + 10 + 46) : this.itemWidth + 10,
+            size: title ? (this.itemWidth + 32 + 46) : this.itemWidth + 32,
             title
           }
         })
@@ -410,19 +411,19 @@ export default Vue.extend({
     flex-grow: 1;
   }
   &__item {
-    width: min(calc((100vw - 10px - 48px) / 2), 145px);
-    height: min(calc((100vw - 10px - 48px) / 2), 145px);
+    width: 80px;
+    height: 142px;
     margin: 0 auto;
     object-fit: cover;
     vertical-align: middle;
   }
   &__items {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     column-gap: 10px;
   }
   &__header {
-    grid-column: 1 / 3;
+    grid-column: 1 / 4;
     line-height: 26px;
     color: #ffffff;
     padding: 10px 0;
