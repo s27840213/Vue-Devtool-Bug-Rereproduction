@@ -181,7 +181,6 @@ class ViviStickerUtils {
   }
 
   hideController() {
-    console.log('hi')
     store.commit('vivisticker/SET_controllerHidden', true)
   }
 
