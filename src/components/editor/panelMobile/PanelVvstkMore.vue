@@ -62,10 +62,12 @@ export default Vue.extend({
         action: this.handleLocaleList
       }, {
         text: `${this.$t('NN0147')}`,
-        icon: 'vivisticker_info'
+        icon: 'vivisticker_info',
+        action: this.handleOpenInfo
       }, {
         text: `${this.$t('NN0742')}`,
-        icon: 'vivisticker_mail'
+        icon: 'vivisticker_mail',
+        action: this.handleOpenInfo
       }]
     },
     localeOptions(): OptionConfig[] {
@@ -98,6 +100,18 @@ export default Vue.extend({
     },
     handleLocaleList() {
       this.$emit('pushHistory', 'locale')
+    },
+    handleOpenInfo() {
+      let url = 'https://www.instagram.com/vivisticker/'
+      switch (this.$i18n.locale) {
+        case 'tw':
+          url = 'https://www.instagram.com/vivistickertw/'
+          break
+        case 'jp':
+          url = 'https://www.instagram.com/vivistickerjp/'
+          break
+      }
+      window.open(url, '_blank')
     }
   }
 })
