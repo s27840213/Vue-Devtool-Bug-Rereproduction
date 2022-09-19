@@ -445,7 +445,7 @@ class AssetUtils {
       })
   }
 
-  addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}) {
+  addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
@@ -484,7 +484,17 @@ class AssetUtils {
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
-      styles: {
+      styles: categoryType === 14 ? {
+        x,
+        y,
+        width: photoWidth,
+        height: photoHeight,
+        initWidth: photoWidth,
+        initHeight: photoHeight,
+        imgWidth: photoWidth,
+        imgHeight: photoHeight,
+        ...styles
+      } : {
         ...styles,
         x,
         y,
@@ -615,7 +625,7 @@ class AssetUtils {
           switch ((asset.jsonData as any).type) {
             case 'image': {
               const { srcObj, styles } = asset.jsonData as IImage
-              this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
+              this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles }, 14)
               break
             }
             case 'group':
