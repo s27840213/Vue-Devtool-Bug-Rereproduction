@@ -794,7 +794,9 @@ export default Vue.extend({
         }
         case ShadowEffectType.none:
           imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
+          imageShadowUtils.setProcessId()
           imageShadowUtils.clearLayerData()
+          return
       }
 
       imageShadowUtils.updateEffectProps(this.layerInfo, {
@@ -865,10 +867,6 @@ export default Vue.extend({
             break
           }
         }
-      }
-      if (currentEffect === ShadowEffectType.none) {
-        imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
-        imageShadowUtils.clearLayerData()
       }
     },
     updateShadowEffect(effects: IShadowEffects) {

@@ -103,7 +103,7 @@ export default Vue.extend({
     //   return
     // }
 
-    this.resizeObserver = new (window as any).ResizeObserver(this.resizeCallback)
+    this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
   },
   computed: {
