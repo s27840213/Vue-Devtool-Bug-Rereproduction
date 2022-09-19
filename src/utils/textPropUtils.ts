@@ -955,7 +955,7 @@ class TextPropUtils {
           const sAttrs = tiptapUtils.generateSpanStyle(editor.storage.nuTextStyle.spanStyle)
           sAttrs.size += step
           editor.storage.nuTextStyle.spanStyle = tiptapUtils.textStyles(sAttrs)
-          editor.chain().focus().setMark('textStyle', sAttrs).run()
+          editor.chain().setMark('textStyle', sAttrs).run()
           this.updateTextPropsState({ fontSize: sAttrs.size })
         } else {
           if (to.textOffset === 0 && endSIndex !== 0) {
@@ -1029,7 +1029,7 @@ class TextPropUtils {
               pAttrs.size += step
             }
           }
-          editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).focus().selectPrevious().run()
+          editor.chain().setContent(tiptapUtils.toJSON(tiptapUtils.toIParagraph(tiptapJSON).paragraphs)).selectPrevious().run()
           Vue.nextTick(() => {
             tiptapUtils.forceUpdate(false, true)
             this.updateTextPropsState()
