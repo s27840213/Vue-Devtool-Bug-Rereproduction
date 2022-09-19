@@ -36,7 +36,8 @@ class TiptapUtils {
       ],
       editorProps: {
         attributes: {
-          class: 'non-selectable'
+          class: 'non-selectable',
+          draggable: 'false'
         },
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
