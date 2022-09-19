@@ -3,9 +3,67 @@ import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import imageAdjustUtil from '@/utils/imageAdjustUtil'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import _ from 'lodash'
+
+// For text effect gooey
+class Point {
+  x: number
+  y: number
+  constructor(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+
+  middle(p: Point) {
+    return new Point(
+      (this.x + p.x) / 2,
+      (this.y + p.y) / 2
+    )
+  }
+
+  add(p: {x: number, y: number}) {
+    return new Point(
+      this.x + p.x,
+      this.y + p.y
+    )
+  }
+
+  dist(p: Point) {
+    return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
+  }
+
+  toString() {
+    return `${this.x} ${this.y}`
+  }
+}
+
+// For text effect gooey
+class Path {
+  pathArray = [] as string[]
+  currPos: Point
+  constructor(p: Point) {
+    this.currPos = p
+    this.pathArray.push(`M${p}`)
+  }
+
+  L(end: Point) {
+    if (this.currPos.dist(end) < 0.1) return
+    this.currPos = end
+    this.pathArray.push(`L${end}`)
+  }
+
+  C(c1: Point, c2: Point, end: Point) {
+    if (this.currPos.dist(end) < 0.1) return
+    this.currPos = end
+    this.pathArray.push(`C${c1} ${c2} ${end}`)
+  }
+
+  result() {
+    return this.pathArray.join('')
+  }
+}
 
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
@@ -236,6 +294,139 @@ class TextBg {
         // ]
       }
     } else return {}
+  }
+
+  drawGooey(config: IText, pageScaleRatio: number, bodHTML: Element[]) {
+    const textBg = config.styles.textBg
+    if (!isITextGooey(textBg)) return null
+    else {
+      const bRadius = textBg.bRadius
+      const padding = textBg.distance * 0.33
+      const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
+
+      const rawRects = [] as DOMRect[][]
+      const body = _.nth(bodHTML, -1)
+      const bodyRect = body.getClientRects()[0]
+      for (const p of body.childNodes) {
+        for (const span of p.childNodes) {
+          rawRects.push(span.getClientRects())
+        }
+      }
+      const rects = rawRects.reduce((acc, rect) => {
+        if (rect) acc.push(...rect)
+        return acc
+      }, [])
+
+      // Deal with empty line
+      rects.forEach((rect: DOMRect, index: number) => {
+        if (rect.width < 1) {
+          let nextIndex = index + 1
+          while (nextIndex < rects.length && rects[nextIndex].width < 1)nextIndex++
+          const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
+          const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
+          const target = (prev.width < next.width) ? prev : next
+          rect.x = target.x
+          rect.width = target.width
+        }
+      })
+      // Add padding and coordinate initial.
+      rects.forEach((rect: DOMRect) => {
+        rect.x = (rect.x - bodyRect.x) * scaleRatio - padding
+        rect.y = (rect.y - bodyRect.y) * scaleRatio - padding
+        rect.width = (rect.width) * scaleRatio + padding * 2
+        rect.height = (rect.height) * scaleRatio + padding * 2
+      })
+      // Delete rect overlap.
+      rects.forEach((rect: DOMRect, index: number) => {
+        if (index === rects.length - 1) return
+        const rectNext = rects[index + 1]
+        const newY = ((rect.y + rect.height) + (rectNext.y)) / 2
+        rect.height = newY - rect.y
+        rectNext.height -= newY - rectNext.y
+        rectNext.y = newY
+      })
+
+      let path = null as unknown as Path
+      for (let i = 0; i < rects.length; i++) {
+        const [first, last] = [i === 0, i === rects.length - 1]
+
+        const rect = rects[i]
+        const rectLeftTop = new Point(rect.x, rect.y)
+        // const rectLeft = new Point(rect.x, rect.y + rect.height / 2)
+        const rectLeftBottom = new Point(rect.x, rect.y + rect.height)
+        const rectPrev = rects[i - 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
+        const rectPrevLeftBottom = new Point(rectPrev.x, rectPrev.y + rectPrev.height)
+        const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
+          : rectPrevLeftBottom.middle(rectLeftTop)
+        const rectNext = rects[i + 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
+        const rectNextLeftTop = new Point(rectNext.x, rectNext.y)
+        const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
+          : rectLeftBottom.middle(rectNextLeftTop)
+        const radius = Math.min(bRadius, rect.height / 2)
+        const radiusTop = Math.min(radius, rectLeftTop.dist(prevMiddle)) *
+          (rectPrevLeftBottom.x < rectLeftTop.x ? -1 : 1)
+        const radiusBottom = Math.min(radius, rectLeftBottom.dist(nextMiddle)) *
+          (rectLeftBottom.x < rectNextLeftTop.x ? 1 : -1)
+
+        if (first) {
+          path = new Path(prevMiddle)
+        }
+        const curveTopStart = rectLeftTop.add({ x: radiusTop, y: 0 })
+        const curveTopEnd = rectLeftTop.add({ x: 0, y: radius })
+        path.L(curveTopStart)
+        path.C(rectLeftTop.middle(curveTopStart), rectLeftTop.middle(curveTopEnd), curveTopEnd)
+        const curveBottomStart = rectLeftBottom.add({ x: 0, y: -radius })
+        const curveBottomEnd = rectLeftBottom.add({ x: radiusBottom, y: 0 })
+        path.L(curveBottomStart)
+        path.C(rectLeftBottom.middle(curveBottomStart), rectLeftBottom.middle(curveBottomEnd), curveBottomEnd)
+      }
+      for (let i = rects.length - 1; i >= 0; i--) {
+        const [first, last] = [i === 0, i === rects.length - 1]
+
+        const rect = rects[i]
+        const rectRightTop = new Point(rect.x + rect.width, rect.y)
+        // const rectRight = new Point(rect.x + rect.width, rect.y + rect.height / 2)
+        const rectRightBottom = new Point(rect.x + rect.width, rect.y + rect.height)
+
+        const rectPrev = rects[i - 1] ?? { x: 0, y: 0, width: 0, height: 0 }
+        const rectPrevRightBottom = new Point(rectPrev.x + rectPrev.width, rectPrev.y + rectPrev.height)
+        const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
+          : rectPrevRightBottom.middle(rectRightTop)
+        const rectNext = rects[i + 1] ?? { x: 0, y: 0, width: 0, height: 0 }
+        const rectNextRightTop = new Point(rectNext.x + rectNext.width, rectNext.y)
+        const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
+          : rectRightBottom.middle(rectNextRightTop)
+        const radius = Math.min(bRadius, rect.height / 2)
+        const radiusTop = Math.min(radius, rectRightTop.dist(prevMiddle)) *
+          (rectPrevRightBottom.x < rectRightTop.x ? -1 : 1)
+        const radiusBottom = Math.min(radius, rectRightBottom.dist(nextMiddle)) *
+          (rectRightBottom.x < rectNextRightTop.x ? 1 : -1)
+
+        const curveBottomStart = rectRightBottom.add({ x: radiusBottom, y: 0 })
+        const curveBottomEnd = rectRightBottom.add({ x: 0, y: -radius })
+        path.L(curveBottomStart)
+        path.C(rectRightBottom.middle(curveBottomStart), rectRightBottom.middle(curveBottomEnd), curveBottomEnd)
+        const curveTopStart = rectRightTop.add({ x: 0, y: radius })
+        const curveTopEnd = rectRightTop.add({ x: radiusTop, y: 0 })
+        path.L(curveTopStart)
+        path.C(rectRightTop.middle(curveTopStart), rectRightTop.middle(curveTopEnd), curveTopEnd)
+      }
+
+      const color = 'purple'
+      return {
+        attrs: {
+          width: bodyRect.width * scaleRatio,
+          height: bodyRect.height * scaleRatio,
+          fill: color
+        },
+        content: [{
+          tag: 'path',
+          attrs: {
+            d: path.result()
+          }
+        }]
+      }
+    }
   }
 
   syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {
