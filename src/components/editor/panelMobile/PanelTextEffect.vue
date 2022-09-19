@@ -196,24 +196,20 @@ export default Vue.extend({
     padding-bottom: 12px;
   }
 
-  &__field {
-    > div:nth-child(n) {
-      margin-bottom: 20px;
-    }
-  }
-
   &__color {
     flex: 1;
     display: flex;
     justify-content: space-between;
-    padding: 10px;
+    padding: 4px 10px;
     align-items: center;
     position: relative;
-    color: setColor(gray-3);
+    color: setColor(gray-2);
     &-slip {
-      height: 24px;
-      width: 32px;
+      height: 30px;
+      width: 30px;
+      border-radius: 4px;
       box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
+      margin-right: 10px;
     }
   }
 }

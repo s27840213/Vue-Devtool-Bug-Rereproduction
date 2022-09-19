@@ -507,18 +507,16 @@ export default Vue.extend({
       margin-top: 26px;
     }
     &__slider {
-      --lower-color: #{setColor(blue-1)};
-      --upper-color: white;
+      --lower-color: white;
+      --upper-color: #{setColor(gray-2)};
       @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
       margin: 0;
       &::-webkit-slider-thumb {
-        box-shadow: none;
-        border: 3px solid setColor(blue-1);
+      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
         position: relative;
       }
       &::-moz-range-thumb {
-        box-shadow: none;
-        border: 3px solid setColor(blue-1);
+      box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
         position: relative;
       }
     }
