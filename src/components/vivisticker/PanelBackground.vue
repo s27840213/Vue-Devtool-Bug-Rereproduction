@@ -507,7 +507,7 @@ export default Vue.extend({
       margin-top: 26px;
     }
     &__slider {
-      --lower-color: white;
+      --lower-color: #{setColor(gray-6)};
       --upper-color: #{setColor(gray-2)};
       @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
       margin: 0;
