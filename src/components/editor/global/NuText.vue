@@ -215,11 +215,36 @@ export default Vue.extend({
           }
 
           dist(p: Point) {
-            return Math.pow(Math.pow(this.x - p.x, 2) ^ 2 + Math.pow(this.y - p.y, 2), 0.5)
+            return Math.pow(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2), 0.5)
           }
 
           toString() {
             return `${this.x} ${this.y}`
+          }
+        }
+        class Path {
+          pathArray = [] as string[]
+          currPos = new Point(0, 0)
+
+          constructor(p: Point) {
+            this.currPos = p
+            this.pathArray.push(`M${p}`)
+          }
+
+          L(end: Point) {
+            if (this.currPos.dist(end) < 0.1) return
+            this.currPos = end
+            this.pathArray.push(`L${end}`)
+          }
+
+          C(c1: Point, c2: Point, end: Point) {
+            if (this.currPos.dist(end) < 0.1) return
+            this.currPos = end
+            this.pathArray.push(`C${c1} ${c2} ${end}`)
+          }
+
+          result() {
+            return this.pathArray.join('')
           }
         }
 
@@ -229,6 +254,7 @@ export default Vue.extend({
         }
 
         const bRadius = textBg.bRadius
+        const padding = textBg.distance * 0.33
         const scaleRatio = 1 / (this.pageScaleRatio * 0.01 * this.config.styles.scale)
 
         const rawRects = [] as DOMRect[][]
@@ -245,7 +271,7 @@ export default Vue.extend({
         }, [])
         console.log('bodyRect', bodyRect, _.nth(this.$refs.body, -1))
         rects.forEach((rect: DOMRect, index: number) => {
-          if (rect.width === 0) {
+          if (rect.width < 1) {
             const prev = rects[index - 1]
             const next = rects[index + 1]
             const target = ((prev?.width ?? 100000) < (next?.width ?? 100000)) ? prev : next
@@ -254,14 +280,13 @@ export default Vue.extend({
           }
         })
         rects.forEach((rect: DOMRect) => {
-          rect.x = (rect.x - bodyRect.x) * scaleRatio
-          rect.y = (rect.y - bodyRect.y) * scaleRatio
-          rect.width *= scaleRatio
-          rect.height *= scaleRatio
+          rect.x = (rect.x - bodyRect.x - padding) * scaleRatio
+          rect.y = (rect.y - bodyRect.y - padding) * scaleRatio
+          rect.width = (rect.width + padding * 2) * scaleRatio
+          rect.height = (rect.height + padding * 2) * scaleRatio
         })
         console.log('rects', rects)
-
-        const pathArray = []
+        let path = null as unknown as Path
         for (let i = 0; i < rects.length; i++) {
           const [first, last] = [i === 0, i === rects.length - 1]
 
@@ -281,23 +306,23 @@ export default Vue.extend({
             : rectLeftBottom.middle(rectNextLeftTop)
           rectLeftBottom.y = nextMiddle.y
           rectNextLeftTop.y = nextMiddle.y
-          const radius = Math.min(bRadius, rect.height / 2)
+          const radius = Math.min(bRadius, (rect.height - padding * 2 * scaleRatio) / 2)
           const radiusTop = Math.min(radius, rectLeftTop.dist(prevMiddle)) *
             (rectPrevLeftBottom.x < rectLeftTop.x ? -1 : 1)
           const radiusBottom = Math.min(radius, rectLeftBottom.dist(nextMiddle)) *
             (rectLeftBottom.x < rectNextLeftTop.x ? 1 : -1)
 
           if (first) {
-            pathArray.push(`m${prevMiddle}`)
+            path = new Path(prevMiddle)
           }
           const curveTopStart = rectLeftTop.add({ x: radiusTop, y: 0 })
           const curveTopEnd = rectLeftTop.add({ x: 0, y: radius })
-          pathArray.push(`L${curveTopStart}`)
-          pathArray.push(`C${rectLeftTop.middle(curveTopStart)} ${rectLeftTop.middle(curveTopEnd)} ${curveTopEnd}`)
+          path.L(curveTopStart)
+          path.C(rectLeftTop.middle(curveTopStart), rectLeftTop.middle(curveTopEnd), curveTopEnd)
           const curveBottomStart = rectLeftBottom.add({ x: 0, y: -radius })
           const curveBottomEnd = rectLeftBottom.add({ x: radiusBottom, y: 0 })
-          pathArray.push(`L${curveBottomStart}`)
-          pathArray.push(`C${rectLeftBottom.middle(curveBottomStart)} ${rectLeftBottom.middle(curveBottomEnd)} ${curveBottomEnd}`)
+          path.L(curveBottomStart)
+          path.C(rectLeftBottom.middle(curveBottomStart), rectLeftBottom.middle(curveBottomEnd), curveBottomEnd)
         }
         for (let i = rects.length - 1; i >= 0; i--) {
           const [first, last] = [i === 0, i === rects.length - 1]
@@ -319,7 +344,7 @@ export default Vue.extend({
             : rectRightBottom.middle(rectNextRightTop)
           rectRightBottom.y = nextMiddle.y
           rectNextRightTop.y = nextMiddle.y
-          const radius = Math.min(bRadius, rect.height / 2)
+          const radius = Math.min(bRadius, (rect.height - padding * 2 * scaleRatio) / 2)
           const radiusTop = Math.min(radius, rectRightTop.dist(prevMiddle)) *
             (rectPrevRightBottom.x < rectRightTop.x ? -1 : 1)
           const radiusBottom = Math.min(radius, rectRightBottom.dist(nextMiddle)) *
@@ -327,15 +352,14 @@ export default Vue.extend({
 
           const curveBottomStart = rectRightBottom.add({ x: radiusBottom, y: 0 })
           const curveBottomEnd = rectRightBottom.add({ x: 0, y: -radius })
-          pathArray.push(`L${curveBottomStart}`)
-          pathArray.push(`C${rectRightBottom.middle(curveBottomStart)} ${rectRightBottom.middle(curveBottomEnd)} ${curveBottomEnd}`)
+          path.L(curveBottomStart)
+          path.C(rectRightBottom.middle(curveBottomStart), rectRightBottom.middle(curveBottomEnd), curveBottomEnd)
           const curveTopStart = rectRightTop.add({ x: 0, y: radius })
           const curveTopEnd = rectRightTop.add({ x: radiusTop, y: 0 })
-          pathArray.push(`L${curveTopStart}`)
-          pathArray.push(`C${rectRightTop.middle(curveTopStart)} ${rectRightTop.middle(curveTopEnd)} ${curveTopEnd}`)
+          path.L(curveTopStart)
+          path.C(rectRightTop.middle(curveTopStart), rectRightTop.middle(curveTopEnd), curveTopEnd)
         }
-        const path = pathArray.join('')
-        console.log('path', path)
+        console.log('path', path.result())
 
         const color = 'purple'
         return {
@@ -347,7 +371,7 @@ export default Vue.extend({
           content: [{
             tag: 'path',
             attrs: {
-              d: path
+              d: path.result()
             }
           }]
         }
@@ -442,6 +466,7 @@ export default Vue.extend({
     position: absolute;
     left: 0;
     top: 0;
+    overflow: visible;
   }
   &__body {
     outline: none;
