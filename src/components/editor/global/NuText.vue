@@ -1,8 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     //- Svg BG for text effex gooey.
-    svg(v-if="svgBG" v-bind="svgBG.attrs"
-        class="nu-text__BG")
+    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -31,17 +30,6 @@
         :data-sindex="sIndex"
         :key="sIndex",
         :style="styles(span.styles, sIndex)") {{ span.text }}
-    //- Svg filter for text effect gooey.
-    svg(v-if="spanEffect.svgFilter")
-      filter(:id="spanEffect.svgId")
-        component(v-for="(elm, idx) in spanEffect.svgFilter"
-                  :key="`svgFilter${idx}`"
-                  :is="elm.tag"
-                  v-bind="elm.attrs")
-          component(v-for="child in elm.child"
-                    :key="child.tag"
-                    :is="child.tag"
-                    v-bind="child.attrs")
 </template>
 
 <script lang="ts">
@@ -58,8 +46,6 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import { isITextGooey } from '@/interfaces/format'
-import _ from 'lodash'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -81,7 +67,7 @@ export default Vue.extend({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: {} as Record<string, unknown> | null
+      svgBG: null as Record<string, unknown> | null
     }
   },
   created() {
@@ -180,14 +166,6 @@ export default Vue.extend({
       return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
     },
     spanEffect(): Record<string, unknown> {
-      // May cause performance issue
-      if (isITextGooey(this.config.styles.textBg)) {
-        textUtils.updateTextLayerSizeByShape(
-          this.pageIndex,
-          this.layerIndex,
-          this.subLayerIndex ?? -1
-        )
-      }
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
     // Use duplicated of text to do some text effect, define there difference css here.
@@ -228,8 +206,11 @@ export default Vue.extend({
         this.$nextTick(this.drawSvgBG)
       }
     },
-    'config.styles.width'() {
-      this.$nextTick(this.drawSvgBG)
+    'config.styles': {
+      deep: true,
+      handler() {
+        this.$nextTick(this.drawSvgBG)
+      }
     }
   },
   methods: {

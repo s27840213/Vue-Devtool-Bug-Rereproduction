@@ -247,52 +247,6 @@ class TextBg {
         borderRadius: `${effect.bRadius}px`,
         backgroundColor: color
       }
-    } else if (isITextGooey(effect) && effect.name === 'gooey') {
-      const { color } = effect
-      const svgId = `textBg_gooey_${effect.bRadius}`
-      return {
-        // paddingTop: `${effect.distance}px`,
-        // paddingBottom: `${effect.distance}px`,
-        // textGooeyPaddingX: `${effect.distance + 20}px`, // For tiptap CSS var
-        // '--textGooeyPaddingX': `${effect.distance + 20}px`,
-        // boxDecorationBreak: 'clone',
-        // duplicatedBody: {
-        //   filter: `url(#${svgId})`,
-        //   opacity: effect.opacity * 0.01
-        // },
-        // duplicatedSpan: {
-        //   color: 'transparent',
-        //   backgroundColor: color
-        // },
-        // svgId: svgId,
-        // svgFilter: [
-        //   imageAdjustUtil.createSvgFilter({
-        //     tag: 'feGaussianBlur',
-        //     attrs: {
-        //       in: 'SourceGraphic',
-        //       result: 'blur',
-        //       stdDeviation: effect.bRadius * 0.5
-        //     }
-        //   }),
-        //   imageAdjustUtil.createSvgFilter({
-        //     tag: 'feColorMatrix',
-        //     attrs: {
-        //       in: 'blur',
-        //       result: 'goo',
-        //       mode: 'matrix',
-        //       values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9'
-        //     }
-        //   }),
-        //   imageAdjustUtil.createSvgFilter({
-        //     tag: 'feComposite',
-        //     attrs: {
-        //       in: 'SourceGraphic',
-        //       in2: 'goo',
-        //       operator: 'atop'
-        //     }
-        //   })
-        // ]
-      }
     } else return {}
   }
 
@@ -301,7 +255,8 @@ class TextBg {
     if (!isITextGooey(textBg)) return null
     else {
       const bRadius = textBg.bRadius
-      const padding = textBg.distance * 0.33
+      const padding = textBg.distance
+      const color = this.rgba(textBg.color, textBg.opacity * 0.01)
       const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
 
       const rawRects = [] as DOMRect[][]
@@ -412,7 +367,6 @@ class TextBg {
         path.C(rectRightTop.middle(curveTopStart), rectRightTop.middle(curveTopEnd), curveTopEnd)
       }
 
-      const color = 'purple'
       return {
         attrs: {
           width: bodyRect.width * scaleRatio,
