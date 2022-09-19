@@ -7,7 +7,7 @@
       clear
       :defaultKeyword="keywordLabel"
       vivisticker="dark"
-      :color="{close: 'gray-4', search: 'gray-4'}"
+      :color="{close: 'black-5', search: 'black-5'}"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     template(v-if="!keyword")
@@ -289,7 +289,7 @@ export default Vue.extend({
     margin-bottom: 14px;
     padding: 14px 0;
     box-sizing: border-box;
-    background-color: setColor(dark-bg);
+    background-color: setColor(black-3);
     border-radius: 10px;
     &:active {
       background-color: setColor(dark-bg-active);

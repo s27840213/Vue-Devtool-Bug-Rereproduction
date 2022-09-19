@@ -43,7 +43,7 @@ export default Vue.extend({
         default:
           return {
             active: 'white',
-            inactive: '#969BAB'
+            inactive: '#9C9C9C'
           }
       }
     }

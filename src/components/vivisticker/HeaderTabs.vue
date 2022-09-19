@@ -196,7 +196,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .header-bar {
   @include size(100%, 44px);
-  background-color: setColor(nav);
+  background-color: setColor(black-1);
   display: flex;
   align-items: center;
   justify-content: space-between;

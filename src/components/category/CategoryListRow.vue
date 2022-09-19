@@ -96,8 +96,8 @@ export default Vue.extend({
       left: -1px;
       background: linear-gradient(
         90deg,
-        #2c2f43 22%,
-        rgba(255, 255, 255, 0) 85%
+        #202020 23.91%,
+        rgba(32, 32, 32, 0) 104.35%
       );
       #{$this}__icon {
         left: 3px;
@@ -107,8 +107,8 @@ export default Vue.extend({
       right: -1px;
       background: linear-gradient(
         270deg,
-        #2c2f43 22%,
-        rgba(255, 255, 255, 0) 85%
+        #202020 23.91%,
+        rgba(32, 32, 32, 0) 104.35%
       );
       #{$this}__icon {
         right: 3px;

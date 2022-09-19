@@ -208,7 +208,7 @@ export default Vue.extend({
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-columns: 1fr;
   overflow: hidden;
-  background-color: setColor(nav-active);
+  background-color: setColor(black-2);
 
   &__top {
     height: 100%;
@@ -217,11 +217,11 @@ export default Vue.extend({
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-columns: 1fr;
-    background-color: setColor(nav-active);
+    background-color: setColor(black-2);
   }
   &__bottom {
     z-index: setZindex("footer");
-    background-color: setColor(nav-active);
+    background-color: setColor(black-2);
   }
 
   &__content {

@@ -156,7 +156,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .vvstk-editor {
   @include size(100%);
-  background: setColor(nav-active);
+  background: setColor(black-2);
   &__pseudo-page {
     position: relative;
     transform-style: preserve-3d;

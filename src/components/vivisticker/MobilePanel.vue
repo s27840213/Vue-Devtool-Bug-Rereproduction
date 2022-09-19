@@ -252,7 +252,7 @@ export default Vue.extend({
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
           'row-gap': this.hideDynamicComp ? '0px' : '10px',
-          backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
+          backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial'
             : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px',

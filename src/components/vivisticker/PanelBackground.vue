@@ -10,7 +10,7 @@
       clear
       :defaultKeyword="keywordLabel"
       vivisticker="dark"
-      :color="{close: 'gray-4', search: 'gray-4'}"
+      :color="{close: 'black-5', search: 'black-5'}"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
     category-list(ref="list"
@@ -533,7 +533,7 @@ export default Vue.extend({
     &__hint-text {
       margin: 0;
       @include body-SM;
-      color: setColor(gray-3);
+      color: setColor(black-5);
     }
   }
   &__share {
@@ -541,7 +541,7 @@ export default Vue.extend({
     top: 0;
     left: 0;
     @include size(100%);
-    background: setColor(nav);
+    background: setColor(black-1);
     &__screen {
       margin-top: 25px;
       margin-left: auto;

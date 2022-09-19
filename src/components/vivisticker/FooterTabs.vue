@@ -8,10 +8,10 @@
             @click="handleTabAction(tab)")
           svg-icon(class="click-disabled"
             :iconName="tab.icon"
-            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'blue-1' :'white'"
+            :iconColor="(tab.disabled || isLocked) ? 'gray-2' : currTab ===  tab.panelType ? 'white' :'black-4'"
             :iconWidth="'24px'")
           span(class="no-wrap click-disabled"
-            :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-blue-1' : 'text-white'") {{tab.text}}
+            :class="(tab.disabled || isLocked) ? 'text-gray-2' :(currTab ===  tab.panelType ) ? 'text-white' : 'text-black-4'") {{tab.text}}
 </template>
 <script lang="ts">
 import layerUtils from '@/utils/layerUtils'
@@ -484,7 +484,7 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .footer-tabs {
   overflow: hidden;
-  background-color: setColor(gray-5);
+  background-color: setColor(black-1);
   &__container {
     height: 53px;
     overflow: scroll;
@@ -493,7 +493,7 @@ export default Vue.extend({
     grid-auto-flow: column;
     grid-auto-columns: 65px;
     column-gap: 20px;
-    background-color: setColor(nav);
+    background-color: setColor(black-1);
     padding: 0 12px;
     @include no-scrollbar;
     transition: transform 0.3s, opacity 0.4s;

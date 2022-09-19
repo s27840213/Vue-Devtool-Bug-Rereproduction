@@ -13,7 +13,7 @@ interface IViviStickerState {
 }
 
 const EDITOR_BGS = [
-  '#3D4256',
+  '#2E2E2E',
   '#F4F5F7'
 ]
 

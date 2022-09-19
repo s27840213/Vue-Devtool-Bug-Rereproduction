@@ -50,7 +50,7 @@ export default Vue.extend({
   height: 100%;
   width: 100%;
   box-sizing: border-box;
-  background-color: setColor(nav-active);
+  background-color: setColor(black-2);
 
   &__bottom-section {
     width: 100%;
