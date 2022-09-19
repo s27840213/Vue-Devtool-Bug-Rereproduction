@@ -330,7 +330,7 @@ class TextBg {
         const rectNextLeftTop = new Point(rectNext.x, rectNext.y)
         const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
           : rectLeftBottom.middle(rectNextLeftTop)
-        const radius = Math.min(bRadius, rect.height / 2)
+        const radius = rect.height * bRadius * 0.005
         const radiusTop = Math.min(radius, rectLeftTop.dist(prevMiddle)) *
           (rectPrevLeftBottom.x < rectLeftTop.x ? -1 : 1)
         const radiusBottom = Math.min(radius, rectLeftBottom.dist(nextMiddle)) *
@@ -364,7 +364,7 @@ class TextBg {
         const rectNextRightTop = new Point(rectNext.x + rectNext.width, rectNext.y)
         const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
           : rectRightBottom.middle(rectNextRightTop)
-        const radius = Math.min(bRadius, rect.height / 2)
+        const radius = rect.height * bRadius * 0.005
         const radiusTop = Math.min(radius, rectRightTop.dist(prevMiddle)) *
           (rectPrevRightBottom.x < rectRightTop.x ? -1 : 1)
         const radiusBottom = Math.min(radius, rectRightBottom.dist(nextMiddle)) *
