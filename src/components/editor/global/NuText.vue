@@ -97,6 +97,7 @@ export default Vue.extend({
     // }
     this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
+    this.drawSvgBG()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -165,19 +166,21 @@ export default Vue.extend({
           this.resizeObserver.disconnect()
           this.observeAllSpans()
         }
-        this.$nextTick(this.drawSvgBG)
+        this.drawSvgBG()
       }
     },
     'config.styles': {
       deep: true,
       handler() {
-        this.$nextTick(this.drawSvgBG)
+        this.drawSvgBG()
       }
     }
   },
   methods: {
     drawSvgBG() {
-      this.svgBG = textBgUtils.drawSvgBg(this.config, this.pageScaleRatio, this.$refs.body as Element[])
+      this.$nextTick(() => {
+        this.svgBG = textBgUtils.drawSvgBg(this.config, this.pageScaleRatio, this.$refs.body as Element[])
+      })
     },
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)
@@ -249,7 +252,7 @@ export default Vue.extend({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
-      this.$nextTick(this.drawSvgBG)
+      this.drawSvgBG()
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
