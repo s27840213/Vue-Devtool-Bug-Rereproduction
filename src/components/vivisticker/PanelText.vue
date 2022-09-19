@@ -270,7 +270,7 @@ export default Vue.extend({
   &__items {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    column-gap: 0px;
+    column-gap: 10px;
   }
   &__header {
     grid-column: 1 / 4;

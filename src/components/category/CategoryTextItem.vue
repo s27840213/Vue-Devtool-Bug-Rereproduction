@@ -1,7 +1,7 @@
 <template lang="pug">
   img(class="pointer"
     :src="src || fallbackSrc || `https://template.vivipic.com/text/${item.id}/prev?ver=${item.ver}`"
-    style="object-fit: contain;"
+    :style="itemStyle"
     @click="addText"
     @error="handleNotFound")
 </template>
@@ -33,7 +33,7 @@ export default Vue.extend({
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: generalUtils.isTouchDevice()
-          ? (window.innerWidth - 54) / 3
+          ? (window.innerWidth - 68) / 3
           : 145
       }
       return {
