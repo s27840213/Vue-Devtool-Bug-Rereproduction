@@ -15,7 +15,7 @@
               :contentScaleRatio="contentScaleRatio"
               @getClosestSnaplines="getClosestSnaplines"
               @clearSnap="clearSnap")
-        dim-background(v-if="isImgControl" :config="config" :contentScaleRatio="contentScaleRatio")
+        dim-background(v-if="imgControlPageIdx === pageIndex" :config="config" :contentScaleRatio="contentScaleRatio")
 </template>
 
 <script lang="ts">
@@ -54,7 +54,7 @@ export default Vue.extend({
       pages: 'getPages',
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
-      isImgControl: 'imgControl/isImgControl',
+      imgControlPageIdx: 'imgControl/imgControlPageIdx',
       contentScaleRatio: 'getContentScaleRatio'
     }),
     config(): IPage {

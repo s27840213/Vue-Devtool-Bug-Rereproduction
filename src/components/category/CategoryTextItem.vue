@@ -26,10 +26,9 @@ export default Vue.extend({
       fallbackSrc: ''
     }
   },
-  components: {},
   computed: {
-    ...mapGetters('user', {
-      isAdmin: 'isAdmin'
+    ...mapGetters({
+      isInEditor: 'vivisticker/getIsInEditor'
     }),
     itemStyle(): any {
       const { width } = this.item.preview || {
@@ -48,7 +47,13 @@ export default Vue.extend({
       this.fallbackSrc = require('@/assets/img/svg/image-preview.svg') // prevent infinite refetching when network disconneted
     },
     addText() {
-      vivistickerUtils.startEditing('text', vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
+      if (this.isInEditor) {
+        AssetUtils.addAsset(this.item).then(() => {
+          textPropUtils.updateTextPropsState()
+        })
+      } else {
+        vivistickerUtils.startEditing('text', vivistickerUtils.getAssetInitiator(this.item), vivistickerUtils.getAssetCallback(this.item))
+      }
     }
   }
 })

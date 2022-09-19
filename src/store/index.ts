@@ -17,6 +17,7 @@ import font from '@/store/module/font'
 import background from '@/store/module/background'
 import modal from '@/store/module/modal'
 import popup from '@/store/module/popup'
+import page from '@/store/module/page'
 import markers from '@/store/module/markers'
 import mobileEditor from '@/store/module/mobileEditor'
 import vivisticker from '@/store/module/vivisticker'
@@ -853,6 +854,7 @@ export default new Vuex.Store({
     mobileEditor,
     modal,
     popup,
+    page,
     markers,
     bgRemove,
     shadow,
