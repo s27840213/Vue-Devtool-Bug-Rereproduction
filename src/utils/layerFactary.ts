@@ -79,7 +79,8 @@ class LayerFactary {
       config.styles.shadow = basicConfig.styles.shadow
     }
     const { styles: { imgWidth, imgX, imgHeight, imgY } } = config
-    if (imgWidth < Math.abs(imgX) + width || imgHeight < Math.abs(imgY) + height) {
+    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth < Math.abs(imgX) + width || imgHeight < Math.abs(imgY) + height
+    if (isImgSizeWrong) {
       const layer = { styles: { width: basicConfig.styles.imgWidth, height: basicConfig.styles.imgHeight } } as unknown as IImage
       const clipperStyles = { width: basicConfig.styles.width, height: basicConfig.styles.height, scale: 1 } as IStyle
       const data = mouseUtils.clipperHandler(layer, '', clipperStyles)
