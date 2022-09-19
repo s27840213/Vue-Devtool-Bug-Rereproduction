@@ -197,43 +197,43 @@ class TextBg {
         // paddingBottom: `${effect.distance}px`,
         // textGooeyPaddingX: `${effect.distance + 20}px`, // For tiptap CSS var
         // '--textGooeyPaddingX': `${effect.distance + 20}px`,
-        boxDecorationBreak: 'clone',
-        duplicatedBody: {
-          filter: `url(#${svgId})`,
-          opacity: effect.opacity * 0.01
-        },
-        duplicatedSpan: {
-          color: 'transparent',
-          backgroundColor: color
-        },
+        // boxDecorationBreak: 'clone',
+        // duplicatedBody: {
+        //   filter: `url(#${svgId})`,
+        //   opacity: effect.opacity * 0.01
+        // },
+        // duplicatedSpan: {
+        //   color: 'transparent',
+        //   backgroundColor: color
+        // },
         // svgId: svgId,
-        svgFilter: [
-          imageAdjustUtil.createSvgFilter({
-            tag: 'feGaussianBlur',
-            attrs: {
-              in: 'SourceGraphic',
-              result: 'blur',
-              stdDeviation: effect.bRadius * 0.5
-            }
-          }),
-          imageAdjustUtil.createSvgFilter({
-            tag: 'feColorMatrix',
-            attrs: {
-              in: 'blur',
-              result: 'goo',
-              mode: 'matrix',
-              values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9'
-            }
-          }),
-          imageAdjustUtil.createSvgFilter({
-            tag: 'feComposite',
-            attrs: {
-              in: 'SourceGraphic',
-              in2: 'goo',
-              operator: 'atop'
-            }
-          })
-        ]
+        // svgFilter: [
+        //   imageAdjustUtil.createSvgFilter({
+        //     tag: 'feGaussianBlur',
+        //     attrs: {
+        //       in: 'SourceGraphic',
+        //       result: 'blur',
+        //       stdDeviation: effect.bRadius * 0.5
+        //     }
+        //   }),
+        //   imageAdjustUtil.createSvgFilter({
+        //     tag: 'feColorMatrix',
+        //     attrs: {
+        //       in: 'blur',
+        //       result: 'goo',
+        //       mode: 'matrix',
+        //       values: '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9'
+        //     }
+        //   }),
+        //   imageAdjustUtil.createSvgFilter({
+        //     tag: 'feComposite',
+        //     attrs: {
+        //       in: 'SourceGraphic',
+        //       in2: 'goo',
+        //       operator: 'atop'
+        //     }
+        //   })
+        // ]
       }
     } else return {}
   }

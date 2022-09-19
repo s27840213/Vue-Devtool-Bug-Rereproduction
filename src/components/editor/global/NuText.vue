@@ -270,20 +270,33 @@ export default Vue.extend({
           return acc
         }, [])
         console.log('bodyRect', bodyRect, _.nth(this.$refs.body, -1))
+        // Deal with empty line
         rects.forEach((rect: DOMRect, index: number) => {
           if (rect.width < 1) {
-            const prev = rects[index - 1]
-            const next = rects[index + 1]
-            const target = ((prev?.width ?? 100000) < (next?.width ?? 100000)) ? prev : next
+            let nextIndex = index + 1
+            while (nextIndex < rects.length && rects[nextIndex].width < 1)nextIndex++
+            const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
+            const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
+            const target = (prev.width < next.width) ? prev : next
             rect.x = target.x
             rect.width = target.width
           }
         })
+        // Add padding and coordinate initial.
         rects.forEach((rect: DOMRect) => {
-          rect.x = (rect.x - bodyRect.x - padding) * scaleRatio
-          rect.y = (rect.y - bodyRect.y - padding) * scaleRatio
-          rect.width = (rect.width + padding * 2) * scaleRatio
-          rect.height = (rect.height + padding * 2) * scaleRatio
+          rect.x = (rect.x - bodyRect.x) * scaleRatio - padding
+          rect.y = (rect.y - bodyRect.y) * scaleRatio - padding
+          rect.width = (rect.width) * scaleRatio + padding * 2
+          rect.height = (rect.height) * scaleRatio + padding * 2
+        })
+        // Delete rect overlap.
+        rects.forEach((rect: DOMRect, index: number) => {
+          if (index === rects.length - 1) return
+          const rectNext = rects[index + 1]
+          const newY = ((rect.y + rect.height) + (rectNext.y)) / 2
+          rect.height = newY - rect.y
+          rectNext.height -= newY - rectNext.y
+          rectNext.y = newY
         })
         console.log('rects', rects)
         let path = null as unknown as Path
@@ -298,15 +311,11 @@ export default Vue.extend({
           const rectPrevLeftBottom = new Point(rectPrev.x, rectPrev.y + rectPrev.height)
           const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
             : rectPrevLeftBottom.middle(rectLeftTop)
-          rectPrevLeftBottom.y = prevMiddle.y
-          rectLeftTop.y = prevMiddle.y
           const rectNext = rects[i + 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
           const rectNextLeftTop = new Point(rectNext.x, rectNext.y)
           const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
             : rectLeftBottom.middle(rectNextLeftTop)
-          rectLeftBottom.y = nextMiddle.y
-          rectNextLeftTop.y = nextMiddle.y
-          const radius = Math.min(bRadius, (rect.height - padding * 2 * scaleRatio) / 2)
+          const radius = Math.min(bRadius, rect.height / 2)
           const radiusTop = Math.min(radius, rectLeftTop.dist(prevMiddle)) *
             (rectPrevLeftBottom.x < rectLeftTop.x ? -1 : 1)
           const radiusBottom = Math.min(radius, rectLeftBottom.dist(nextMiddle)) *
@@ -336,15 +345,11 @@ export default Vue.extend({
           const rectPrevRightBottom = new Point(rectPrev.x + rectPrev.width, rectPrev.y + rectPrev.height)
           const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
             : rectPrevRightBottom.middle(rectRightTop)
-          rectPrevRightBottom.y = prevMiddle.y
-          rectRightTop.y = prevMiddle.y
           const rectNext = rects[i + 1] ?? { x: 0, y: 0, width: 0, height: 0 }
           const rectNextRightTop = new Point(rectNext.x + rectNext.width, rectNext.y)
           const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
             : rectRightBottom.middle(rectNextRightTop)
-          rectRightBottom.y = nextMiddle.y
-          rectNextRightTop.y = nextMiddle.y
-          const radius = Math.min(bRadius, (rect.height - padding * 2 * scaleRatio) / 2)
+          const radius = Math.min(bRadius, rect.height / 2)
           const radiusTop = Math.min(radius, rectRightTop.dist(prevMiddle)) *
             (rectPrevRightBottom.x < rectRightTop.x ? -1 : 1)
           const radiusBottom = Math.min(radius, rectRightBottom.dist(nextMiddle)) *
