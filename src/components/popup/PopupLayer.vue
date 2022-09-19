@@ -214,7 +214,7 @@ export default Vue.extend({
         {
           icon: 'copy',
           text: '上傳 元素群組',
-          condition: this.inAdminMode && this.isLogin,
+          condition: this.inAdminMode && this.isLogin && (this.isGroup || this.isImage),
           shortcutText: '',
           action: () => {
             uploadUtils.uploadLayer('shape')
@@ -223,7 +223,7 @@ export default Vue.extend({
         {
           icon: 'copy',
           text: '上傳 元素群組 + ID',
-          condition: this.inAdminMode && this.isLogin,
+          condition: this.inAdminMode && this.isLogin && (this.isGroup || this.isImage),
           shortcutText: '',
           action: (event?: MouseEvent) => {
             setTimeout(() => {

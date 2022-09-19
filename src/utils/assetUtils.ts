@@ -64,6 +64,7 @@ class AssetUtils {
       9: 'svg',
       10: 'svg',
       11: 'svg',
+      14: 'svg',
       15: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
@@ -119,7 +120,6 @@ class AssetUtils {
         store.commit('SET_assetJson', { [id]: asset })
         return Promise.resolve(asset)
       }
-      case 14:
       case 15:
         return Promise.resolve(asset)
       default: {
@@ -600,7 +600,7 @@ class AssetUtils {
           this.addTemplate(asset.jsonData, attrs)
           break
         case 7:
-          this.addText({ ...asset.jsonData, designId: item.id, db: 'text' }, attrs)
+          this.addText({ ...asset.jsonData, designId: item.id }, attrs)
           break
         case 8:
           this.addFrame({ ...asset.jsonData, designId: item.id }, attrs)
@@ -612,8 +612,15 @@ class AssetUtils {
           this.addBasicShape(asset.jsonData, attrs)
           break
         case 14: {
-          const { srcObj, styles } = asset.jsonData as IImage
-          this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
+          switch ((asset.jsonData as any).type) {
+            case 'image': {
+              const { srcObj, styles } = asset.jsonData as IImage
+              this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
+              break
+            }
+            case 'group':
+              this.addText({ ...asset.jsonData, designId: item.id }, attrs)
+          }
           break
         }
         case 15: {
