@@ -7,7 +7,7 @@
     div(class="mobile-panel__top-section"
       :class="{'self-padding': noPaddingTheme}")
       div(class="mobile-panel__drag-bar"
-        :class="{'visible-hidden': panelTitle !== ''}"
+        :class="{'visible-hidden': panelTitle !== '' || fixSize || extraFixSizeCondition}"
         @pointerdown="dragPanelStart"
         @touchstart="disableTouchEvent")
           div
@@ -83,6 +83,7 @@ import PanelObjectAdjust from '@/components/editor/panelMobile/PanelObjectAdjust
 import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.vue'
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
+import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -145,6 +146,7 @@ export default Vue.extend({
     PanelPhotoShadow,
     PanelObjectAdjust,
     PanelBrandList,
+    PanelVvstkMore,
     Tabs
   },
   data() {
@@ -187,18 +189,18 @@ export default Vue.extend({
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'vvstk-more']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
     noPaddingTheme(): boolean {
-      return ['brand-list', 'text'].includes(this.currActivePanel)
+      return ['brand-list', 'text', 'vvstk-more'].includes(this.currActivePanel)
     },
     fixSize(): boolean {
       return this.inSelectionState || [
         'crop', 'bgRemove', 'position', 'flip', 'opacity',
         'order', 'font-size', 'font-format',
-        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list'].includes(this.currActivePanel)
+        'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more'].includes(this.currActivePanel)
     },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
@@ -251,7 +253,7 @@ export default Vue.extend({
       return Object.assign(
         (this.isSubPanel ? { bottom: '0', position: 'absolute', zIndex: '100' } : {}) as { [index: string]: string },
         {
-          'row-gap': this.hideDynamicComp ? '0px' : '10px',
+          'row-gap': (this.hideDynamicComp || this.currActivePanel === 'vvstk-more') ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial'
@@ -339,6 +341,11 @@ export default Vue.extend({
           }
           return brandDefaultVal
         }
+        case 'vvstk-more': {
+          return Object.assign(defaultVal, {
+            panelHistory: this.panelHistory
+          })
+        }
         case 'brand': {
           return Object.assign(defaultVal, {
             maxheight: this.maxHeightPx()
@@ -392,6 +399,16 @@ export default Vue.extend({
           }
         }
         case 'brand-list': {
+          return {
+            pushHistory: (history: string) => {
+              this.panelHistory.push(history)
+            },
+            back: () => {
+              this.panelHistory.pop()
+            }
+          }
+        }
+        case 'vvstk-more': {
           return {
             pushHistory: (history: string) => {
               this.panelHistory.push(history)

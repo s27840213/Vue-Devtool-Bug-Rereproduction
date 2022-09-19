@@ -65,6 +65,11 @@ const routes: Array<RouteConfig> = [
       }
     }
   },
+  ...(process.env.NODE_ENV !== 'production') ? [{
+    path: 'svgicon',
+    name: 'SvgIconView',
+    component: SvgIconView
+  }] : [],
   {
     path: '*',
     name: 'Fallback',
@@ -78,14 +83,6 @@ const routes: Array<RouteConfig> = [
     }
   }
 ]
-
-if (process.env.NODE_ENV !== 'production') {
-  routes.push({
-    path: 'svgicon',
-    name: 'SvgIconView',
-    component: SvgIconView
-  })
-}
 
 const router = new VueRouter({
   mode: 'history',

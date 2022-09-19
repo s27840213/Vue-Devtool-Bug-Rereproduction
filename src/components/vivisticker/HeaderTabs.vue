@@ -22,6 +22,7 @@
                   :iconColor="tab.disabled ? 'gray-2' : 'white'")
 </template>
 <script lang="ts">
+import editorUtils from '@/utils/editorUtils'
 import imageUtils from '@/utils/imageUtils'
 import shortcutUtils from '@/utils/shortcutUtils'
 import stepsUtils from '@/utils/stepsUtils'
@@ -131,7 +132,7 @@ export default Vue.extend({
         return []
       } else {
         return [
-          { icon: 'more', width: 24 }
+          { icon: 'more', width: 24, action: this.handleMore }
         ]
       }
     }
@@ -188,6 +189,10 @@ export default Vue.extend({
     },
     handleCopy() {
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+    },
+    handleMore() {
+      editorUtils.setCurrActivePanel('vvstk-more')
+      editorUtils.setShowMobilePanel(true)
     }
   }
 })
