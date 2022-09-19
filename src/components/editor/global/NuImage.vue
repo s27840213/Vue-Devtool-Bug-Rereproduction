@@ -287,22 +287,19 @@ export default Vue.extend({
         subLayerIdx: this.subLayerIndex
       }
       const { primaryLayer } = this
-      if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
+      if (!this.config.isFrameImg && primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
         layerInfo.subLayerIdx--
       }
       return layerInfo
     },
     styles(): any {
       const { width, height } = this.config.styles
-      const { inheritStyle = {} } = this
       return this.showCanvas ? {
         width: `${width}px`,
         height: `${height}px`
-        // ...inheritStyle
       } : {
         // Fix the safari rendering bug, add the following code can fix it...
         transform: 'translate(0,0)'
-        // ...inheritStyle
       }
     },
     svgImageWidth(): number {
