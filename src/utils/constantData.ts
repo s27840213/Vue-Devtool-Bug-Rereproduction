@@ -59,12 +59,17 @@ class ConstantData {
     const templateType = {
       tw: [{
         label: i18n.t('NN0667'),
-        content: [
-          ...[1].map((id) => themeItem(id)), {
-            label: 'FB 粉絲頁封面',
-            url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
-          },
-          ...[2, 3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
+        content: [{
+          label: 'FB 貼文',
+          url: 'https://blog.vivipic.com/tw/facebook-post/'
+        }, {
+          label: 'FB 粉絲頁封面',
+          url: 'https://blog.vivipic.com/tw/facebook-cover-2/'
+        }, {
+          label: 'IG 貼文',
+          url: 'https://blog.vivipic.com/tw/ig-post-design/'
+        },
+        ...[3, 9, 4, [14, 15], 21].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0668'),
@@ -77,7 +82,15 @@ class ConstantData {
         ]
       }, {
         label: i18n.t('NN0669'),
-        content: [[16, 17], 20, 19, 18, 22].map((id) => themeItem(id))
+        content: [{
+          label: '喜帖',
+          url: 'https://blog.vivipic.com/tw/wedding-invitation/'
+        }, {
+          label: '邀請卡',
+          url: 'https://blog.vivipic.com/tw/invitation-card/'
+        },
+        ...[20, 19, 18, 22].map((id) => themeItem(id))
+        ]
       }],
       us: [{
         label: i18n.t('NN0667'),
@@ -108,10 +121,24 @@ class ConstantData {
       }],
       jp: [{
         label: i18n.t('NN0667'),
-        content: [1, 8, 2, 3, 4, 9, 21].map((id) => themeItem(id))
+        content: [
+          ...[1, 8, 2, 3, 4, 9].map((id) => themeItem(id)), {
+            label: 'プロフィール写真',
+            url: 'https://blog.vivipic.com/jp/pfp-profile-pictures-2/'
+          }
+        ]
       }, {
         label: i18n.t('NN0668'),
         content: [5, 6, 7].map((id) => themeItem(id))
+      }, {
+        label: i18n.t('NN0669'),
+        content: [{
+          label: 'ポラロイドフレーム',
+          url: 'https://blog.vivipic.com/jp/free-polaroid-frame-templates-2/'
+        }, {
+          label: '招待状',
+          url: 'https://blog.vivipic.com/jp/invitation/'
+        }]
       }]
     }
     const resource = {
@@ -144,8 +171,11 @@ class ConstantData {
         }]
       }],
       us: [{
-        label: i18n.t('NN0671'),
-        url: 'https://blog.vivipic.com/us/'
+        label: 'Features',
+        content: [{
+          label: 'Objects',
+          url: 'https://blog.vivipic.com/us/objects/'
+        }]
       }, {
         label: i18n.t('NN0672'),
         content: [{
@@ -156,7 +186,8 @@ class ConstantData {
           url: 'https://blog.vivipic.com/us/us-faq/'
         }]
       }, {
-        label: i18n.t('NN0674'),
+        label: i18n.t('NN0671'),
+        url: 'https://blog.vivipic.com/us/',
         content: [{
           label: i18n.t('NN0675'),
           url: 'https://blog.vivipic.com/us/category/tutorial-us/'

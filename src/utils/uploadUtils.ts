@@ -652,6 +652,7 @@ class UploadUtils {
       })
       .catch(async (error) => {
         // Error: 403: Forbidden
+        logUtils.setLog(`Failed: ${error}`)
         console.error(error)
         await store.dispatch('user/login', { token: this.token })
       })
@@ -775,6 +776,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
+        navigator.clipboard.writeText(designId)
         modalUtils.setModalInfo('上傳成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }
@@ -843,6 +845,7 @@ class UploadUtils {
       xhrReq.open('POST', this.loginOutput.upload_admin_map.url, true)
       xhrReq.send(formData)
       xhrReq.onload = () => {
+        navigator.clipboard.writeText(designId)
         modalUtils.setModalInfo('更新成功', [`Design ID: ${designId}`, `Status code: ${xhr.status}`, '已複製 Design ID 到剪貼簿'])
       }
     }

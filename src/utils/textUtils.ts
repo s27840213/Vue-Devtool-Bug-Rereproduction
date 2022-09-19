@@ -1085,8 +1085,6 @@ class TextUtils {
     let autoSize = this.getTextHW(config, widthLimit)
     const originDimension = initSize[dimension]
     let prevDiff = Number.MAX_VALUE
-    let prevWidthLimit = -1
-    let prevDimension = -1
     let minDiff = Number.MAX_VALUE
     let minDiffWidLimit = -1
     let minDiffDimension = -1
@@ -1100,10 +1098,10 @@ class TextUtils {
         minDiffDimension = autoDimension
       }
       if (currDiff > prevDiff) {
-        if (prevWidthLimit !== -1) {
+        if (minDiffWidLimit !== -1) {
           return {
-            widthLimit: prevWidthLimit,
-            otherDimension: prevDimension
+            widthLimit: minDiffWidLimit,
+            otherDimension: minDiffDimension
           }
         } else {
           return {
@@ -1113,8 +1111,6 @@ class TextUtils {
         }
       }
       prevDiff = currDiff
-      prevWidthLimit = widthLimit
-      prevDimension = autoDimension
       if (autoDimension - originDimension > 5 * scale) {
         if (direction < 0) break
         if (direction >= 100) return { widthLimit: minDiffWidLimit, otherDimension: minDiffDimension }

@@ -13,7 +13,7 @@
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import TextShapeUtils from '@/utils/textShapeUtils'
-import { ISpan } from '@/interfaces/layer'
+import { IGroup, ISpan } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
 import TextUtils from '@/utils/textUtils'
@@ -50,7 +50,7 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    this.resizeObserver = new (window as any).ResizeObserver(() => {
+    this.resizeObserver = new ResizeObserver(() => {
       if (this.isDestroyed) return
 
       // console.log('resize')
@@ -58,6 +58,8 @@ export default Vue.extend({
       if (typeof this.subLayerIndex === 'undefined') {
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
       } else {
+        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
         TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
         TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)

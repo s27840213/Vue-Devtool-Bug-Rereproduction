@@ -5,10 +5,15 @@ import { IMarker } from '@/interfaces/shape'
 import AssetUtils from './assetUtils'
 import { IAsset } from '@/interfaces/module'
 import layerUtils from './layerUtils'
-import { LayerType } from '@/store/types'
+import { ILayerInfo, LayerType } from '@/store/types'
 import mappingUtils from './mappingUtils'
 import generalUtils from '@/utils/generalUtils'
 import pageUtils from './pageUtils'
+import imageUtils from './imageUtils'
+import groupUtils from './groupUtils'
+import zindexUtils from './zindexUtils'
+import stepsUtils from './stepsUtils'
+import layerFactary from './layerFactary'
 
 class ShapeUtils {
   get hasMultiColors() {
@@ -149,8 +154,9 @@ class ShapeUtils {
 
   svgFormatter(svgIn: string, className: string, styleTextContent: string[], transTextContent: string[], point?: number[], svgParameters?: number[], pDiff?: number[]): string {
     let svgOut = svgIn
-    svgOut = svgOut.replace(/class/g, 'style')
     for (let i = 0; i < styleTextContent.length; i++) {
+      const regId = new RegExp('\\$style\\[' + i + '\\]_ID', 'g')
+      svgOut = svgOut.replace(regId, `${className}S${i}_ID`)
       const reg = new RegExp('\\$style\\[' + i + '\\]', 'g')
       svgOut = svgOut.replace(reg, `${styleTextContent[i]}`)
     }
@@ -186,7 +192,82 @@ class ShapeUtils {
         return Math.max((Number(p1) + pDiff[1]), 0).toString()
       })
     }
+    /**
+     * To solve performance issue on Safari, inline style should be used instead of class.
+     * However, sometimes the S3 provided svg string has already contained inline style for
+     * some svg elements.
+     * The following code is meant to merge the style computed from user settings and the style
+     * originally on the svg elements.
+     */
+    // convert svg string to doc object
+    const svgDoc = (new DOMParser()).parseFromString(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">${svgOut}</svg>`, 'image/svg+xml')
+    // get the parent element containing top-level svg elements
+    const svg = svgDoc.childNodes[0]
+    this.mergeClassAndStyle(svg)
+    svgOut = (new XMLSerializer()).serializeToString(svg)
+    // since string produced by XMLSerializer contains root svg tag, remove it in the following:
+    svgOut = svgOut.replace(/<svg[^>]*>/g, '')
+    svgOut = svgOut.replace(/<\/svg>/g, '')
     return svgOut
+  }
+
+  mergeClassAndStyle(root: ChildNode) {
+    for (const child of root.childNodes) {
+      const node = child as SVGElement
+      if (node.attributes) {
+        const classContent = node.attributes.getNamedItem('class')?.value ?? ''
+        const styleContent = node.attributes.getNamedItem('style')?.value ?? ''
+        const mergedContent = classContent + styleContent
+        node.removeAttribute('class')
+        if (mergedContent) {
+          node.setAttribute('style', mergedContent)
+        }
+      }
+      if (child.hasChildNodes()) {
+        this.mergeClassAndStyle(child)
+      }
+    }
+  }
+
+  /**
+   *
+   * Check if the fetched json data is currently converted from svg to img
+   * If so, call svgImgHandler to handle the transforming
+   */
+  isSvgImg(jsonData: any): boolean {
+    if (jsonData.is_img) {
+      return true
+    }
+    return false
+  }
+
+  async svgImgHandler(layerInfo: ILayerInfo, config: IShape) {
+    const { designId, styles: { x, y, width, height, horizontalFlip, verticalFlip, rotate, opacity } } = config
+    const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    // let layerScale = store.state.pageScaleRatio
+    let primaryLayer
+    if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
+      primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+    }
+    const srcObj = {
+      type: 'svg',
+      userId: '',
+      assetId: designId
+    }
+    const image = layerFactary.newImage({
+      srcObj,
+      styles: { x, y, width, height, horizontalFlip, verticalFlip, rotate, opacity },
+      parentLayerStyles: primaryLayer?.styles
+    })
+
+    if (primaryLayer) {
+      layerUtils.deleteSubLayer(pageIndex, layerIndex, subLayerIdx ?? -1)
+      layerUtils.addSubLayer(pageIndex, layerIndex, subLayerIdx ?? -1, image)
+    } else {
+      layerUtils.deleteLayer(pageIndex, layerIndex)
+      layerUtils.addLayersToPos(pageIndex, [image], layerIndex)
+      zindexUtils.reassignZindex(pageIndex)
+    }
   }
 
   async fetchSvg(config: IShape): Promise<IShape> {

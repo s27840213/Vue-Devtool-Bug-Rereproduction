@@ -59,6 +59,7 @@ class LayerFactary {
           currentEffect: 'none',
           effects: {
             color: '#000000',
+            frameColor: '#000000',
             ...Object.keys(ShadowEffectType)
               .reduce((obj, effect) => {
                 return {

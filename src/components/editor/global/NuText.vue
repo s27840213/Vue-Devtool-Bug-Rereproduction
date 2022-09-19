@@ -83,57 +83,19 @@ export default Vue.extend({
     if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
       textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
+          this.resizeCallback()
           this.isLoading = false
         }, 500) // for the delay between font loading and dom rendering
       })
     }
-    if (this.currSelectedInfo.layers >= 1) {
-      TextPropUtils.updateTextPropsState()
-    }
+    // if (this.currSelectedInfo.layers >= 1) {
+    //   TextPropUtils.updateTextPropsState()
+    // }
 
-    if (LayerUtils.getCurrLayer.type === 'tmp') {
-      return
-    }
-
-    this.resizeObserver = new (window as any).ResizeObserver((entries: any) => {
-      // for (const entry of entries) {
-      //   console.log(JSON.stringify(entry.contentRect))
-      // }
-      const config = generalUtils.deepCopy(this.config) as IText
-      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
-
-      // console.log('resize')
-
-      let widthLimit
-      if (this.isLoading && this.isAutoResizeNeeded) {
-        widthLimit = textUtils.autoResize(config, this.initSize)
-      } else {
-        widthLimit = config.widthLimit
-      }
-      const textHW = textUtils.getTextHW(config, widthLimit)
-      if (typeof this.subLayerIndex === 'undefined') {
-        let x = config.styles.x
-        let y = config.styles.y
-        if (config.widthLimit === -1) {
-          if (config.styles.writingMode.includes('vertical')) {
-            y = config.styles.y - (textHW.height - config.styles.height) / 2
-          } else {
-            x = config.styles.x - (textHW.width - config.styles.width) / 2
-          }
-        }
-        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
-        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
-      } else {
-        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
-        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
-        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
-        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
-      }
-      this.$nextTick(this.drawSvgBG)
-    })
+    // if (LayerUtils.getCurrLayer.type === 'tmp') {
+    //   return
+    // }
+    this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
   },
   computed: {
@@ -248,6 +210,47 @@ export default Vue.extend({
     //   }
     //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     // },
+    resizeCallback() {
+      // for (const entry of entries) {
+      //   console.log(JSON.stringify(entry.contentRect))
+      // }
+      const config = generalUtils.deepCopy(this.config) as IText
+      if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
+
+      // console.log('resize')
+
+      let widthLimit
+      if (this.isLoading && this.isAutoResizeNeeded) {
+        widthLimit = textUtils.autoResize(config, this.initSize)
+      } else {
+        widthLimit = config.widthLimit
+      }
+      const textHW = textUtils.getTextHW(config, widthLimit)
+      if (typeof this.subLayerIndex === 'undefined') {
+        let x = config.styles.x
+        let y = config.styles.y
+        if (config.widthLimit === -1) {
+          if (config.styles.writingMode.includes('vertical')) {
+            y = config.styles.y - (textHW.height - config.styles.height) / 2
+          } else {
+            x = config.styles.x - (textHW.width - config.styles.width) / 2
+          }
+        }
+        // console.log(this.layerIndex, textHW.width, textHW.height, config.styles.x, config.styles.y, x, y, widthLimit)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { x, y, width: textHW.width, height: textHW.height })
+        LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { widthLimit })
+      } else {
+        // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
+        const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+        // if (group.layers[this.subLayerIndex].type !== 'text') return
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
+        LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
+        const { width, height } = calcTmpProps(group.layers, group.styles.scale)
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
+      }
+      this.$nextTick(this.drawSvgBG)
+    },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
       spans.forEach(span => {
