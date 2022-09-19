@@ -6,6 +6,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
+import Vue from 'vue'
 
 // For text effect gooey
 class Point {
@@ -250,27 +251,40 @@ class TextBg {
     } else return {}
   }
 
-  drawGooey(config: IText, pageScaleRatio: number, bodHTML: Element[]) {
+  drawSvgBg(config: IText, pageScaleRatio: number, bodyHtml: Element[]) {
     const textBg = config.styles.textBg
-    if (!isITextGooey(textBg)) return null
-    else {
+    const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
+    let path = null as unknown as Path
+    const rawRects = [] as DOMRect[][]
+    const body = _.nth(bodyHtml, -1)
+    const bodyRect = body.getClientRects()[0]
+    for (const p of body.childNodes) {
+      for (const span of p.childNodes) {
+        rawRects.push(span.getClientRects())
+      }
+    }
+    const rects = rawRects.reduce((acc, rect) => {
+      if (rect) acc.push(...rect)
+      return acc
+    }, [])
+
+    // Merge Rect if at the same line.
+    rects.forEach((rect: DOMRect, index: number) => {
+      const nextIndex = index + 1
+      while (nextIndex < rects.length) {
+        const rectNext = rects[nextIndex]
+        if (rect.y !== rectNext.y) break
+        else {
+          rect.width += rectNext.width
+        }
+        Vue.delete(rects, nextIndex)
+      }
+    })
+
+    if (isITextGooey(textBg) && textBg.name === 'gooey') {
       const bRadius = textBg.bRadius
       const padding = textBg.distance
       const color = this.rgba(textBg.color, textBg.opacity * 0.01)
-      const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
-
-      const rawRects = [] as DOMRect[][]
-      const body = _.nth(bodHTML, -1)
-      const bodyRect = body.getClientRects()[0]
-      for (const p of body.childNodes) {
-        for (const span of p.childNodes) {
-          rawRects.push(span.getClientRects())
-        }
-      }
-      const rects = rawRects.reduce((acc, rect) => {
-        if (rect) acc.push(...rect)
-        return acc
-      }, [])
 
       // Deal with empty line
       rects.forEach((rect: DOMRect, index: number) => {
@@ -301,7 +315,6 @@ class TextBg {
         rectNext.y = newY
       })
 
-      let path = null as unknown as Path
       for (let i = 0; i < rects.length; i++) {
         const [first, last] = [i === 0, i === rects.length - 1]
 
@@ -380,7 +393,23 @@ class TextBg {
           }
         }]
       }
-    }
+    } else if (isITextUnderline(textBg)) {
+      const color = this.rgba(textBg.color, textBg.opacity * 0.01)
+
+      return {
+        attrs: {
+          width: bodyRect.width * scaleRatio,
+          height: bodyRect.height * scaleRatio,
+          fill: color
+        },
+        content: [{
+          tag: 'path',
+          attrs: {
+            d: path.result()
+          }
+        }]
+      }
+    } else return null
   }
 
   syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {

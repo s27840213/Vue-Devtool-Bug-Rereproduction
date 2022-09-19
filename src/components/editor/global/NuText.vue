@@ -177,7 +177,7 @@ export default Vue.extend({
   },
   methods: {
     drawSvgBG() {
-      this.svgBG = textBgUtils.drawGooey(this.config, this.pageScaleRatio, this.$refs.body as Element[])
+      this.svgBG = textBgUtils.drawSvgBg(this.config, this.pageScaleRatio, this.$refs.body as Element[])
     },
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)
