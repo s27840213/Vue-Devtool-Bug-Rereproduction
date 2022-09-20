@@ -197,8 +197,6 @@ export default new class ImageShadowPanelUtils {
 
         const canvasW = Math.round(img.naturalWidth + CANVAS_SPACE)
         const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
-        // const canvasW = Math.round(drawCanvasW + CANVAS_SPACE)
-        // const canvasH = Math.round(drawCanvasH + CANVAS_SPACE)
         updateCanvas.setAttribute('width', `${canvasW}`)
         updateCanvas.setAttribute('height', `${canvasH}`)
         params = { timeout: 0, drawCanvasW, drawCanvasH }
@@ -381,7 +379,11 @@ export default new class ImageShadowPanelUtils {
   }
 
   handleColorUpdate(color: string, currentEffect: ShadowEffectType = this.currentEffect): void {
-    imageShadowUtils.setEffect(currentEffect, { color })
+    if (currentEffect === ShadowEffectType.frame) {
+      imageShadowUtils.setEffect(currentEffect, { frameColor: color })
+    } else {
+      imageShadowUtils.setEffect(currentEffect, { color })
+    }
   }
 
   reset(effect: ShadowEffectType = ShadowEffectType.none, layerInfo?: ILayerInfo) {
