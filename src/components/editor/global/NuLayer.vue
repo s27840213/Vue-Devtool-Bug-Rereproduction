@@ -1,17 +1,17 @@
 <template lang="pug">
-  div(class="nu-layer" :style="layerStyles" ref="body"
+  div(class="nu-layer" :style="layerStyles()" ref="body"
       @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
     div(class="layer-translate posAbs"
-        :style="translateStyles")
+        :style="translateStyles()")
       div(class="layer-scale posAbs" ref="scale"
-          :style="scaleStyles")
+          :style="scaleStyles()")
         //- Svg BG for text effex box.
-        svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
+        svg(v-if="svgBG()" :width="svgBG().width" :height="svgBG().height"
             class="nu-layer__BG")
-          component(v-for="(elm, idx) in svgBG.content"
+          component(v-for="(elm, idx) in svgBG().content"
                     :key="`svgFilter${idx}`"
                     :is="elm.tag"
                     v-bind="elm.attrs")
@@ -24,7 +24,7 @@
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :scaleRatio="scaleRatio"
             v-bind="$attrs")
-    div(v-if="showSpinner" class="nu-layer__inProcess")
+    div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
       //-   :iconName="'spiner'"
@@ -100,13 +100,28 @@ export default Vue.extend({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel'
-    }),
+    })
+  },
+  methods: {
+    onDrop(e: DragEvent) {
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())
+      e.stopPropagation()
+    },
+    onDropClipper(e: DragEvent) {
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos(), this.config.path, this.config.styles)
+      e.stopPropagation()
+    },
+    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
+    },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer, this.inFrame ? 1 : this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.inFrame ? 1 : this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -146,22 +161,6 @@ export default Vue.extend({
         y: this.config.styles.y
       }
     },
-    getLayerX(): number {
-      return this.config.styles.x
-    },
-    getLayerY(): number {
-      return this.config.styles.y
-    },
-    getCos(): number {
-      return MathUtils.cos(this.config.styles.rotate)
-    },
-    hasShadowSrc(): boolean {
-      if (this.config.type === LayerType.image) {
-        return this.config.styles.shadow && this.config.styles.shadow.srcObj && this.config.styles.shadow.srcObj.type
-      } else {
-        return false
-      }
-    },
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100
     },
@@ -177,7 +176,7 @@ export default Vue.extend({
       const { zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
-      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio)})` : `scale(${1 / (this.pageScaleRatio)}) translateZ(0)`
+      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.pageScaleRatio())}) translateZ(0)`
       /**
       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
@@ -193,24 +192,9 @@ export default Vue.extend({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.pageScaleRatio}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.pageScaleRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
       return styles
-    }
-  },
-  methods: {
-    onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-      e.stopPropagation()
-    },
-    onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
-      e.stopPropagation()
-    },
-    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
-      layerUtils.updateLayerProps(pageIndex, layerIndex, {
-        shown
-      })
     }
   }
 })

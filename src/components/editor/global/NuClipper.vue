@@ -26,14 +26,14 @@ export default Vue.extend({
     }
   },
   computed: {
+  },
+  methods: {
     shapeWidth(): number {
       return (this.config.vSize?.[0] ?? 0) + (this.config.pDiff?.[0])
     },
     shapeHeight(): number {
       return (this.config.vSize?.[1] ?? 0) + (this.config.pDiff?.[1])
-    }
-  },
-  methods: {
+    },
     styles() {
       const { type, imgControl } = this.config
       const { horizontalFlip, verticalFlip } = this.config.styles
@@ -53,8 +53,8 @@ export default Vue.extend({
           height = `${height * this.contentScaleRatio}px`
           break
         case 'shape':
-          width = `${this.shapeWidth}px`
-          height = `${this.shapeHeight}px`
+          width = `${this.shapeWidth()}px`
+          height = `${this.shapeHeight()}px`
           break
         case 'frame':
           if (frameUtils.isImageFrame(this.config)) {
