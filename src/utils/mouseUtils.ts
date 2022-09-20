@@ -200,11 +200,8 @@ class MouseUtils {
       imgWidth: img.width,
       imgHeight: img.height,
       scale: clipperStyles.scale,
-      // rotate: clipperStyles.rotate,
       imgX: -img.width / 2 + clipperStyles.width / 2,
       imgY: -img.height / 2 + clipperStyles.height / 2
-      // x: clipperStyles.x,
-      // y: clipperStyles.y
     }
     Object.assign(layer.styles, newStyles)
     layer.clipPath = clipPath.substring(0, 4) === 'path' ? clipPath : `path('${clipPath}')`

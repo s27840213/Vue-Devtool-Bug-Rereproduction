@@ -6,12 +6,14 @@
       nu-layer(:style="'opacity: 0.45'"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
+        :primaryLayer="primaryLayer"
         :imgControl="true"
         :forRender="true"
         :config="image")
     div
       nu-layer(:layerIndex="layerIndex"
         :pageIndex="pageIndex"
+        :primaryLayer="primaryLayer"
         :forRender="true"
         :config="image")
     div(class="page-control" :style="styles")
