@@ -7,6 +7,7 @@
                 iconColor="white"
                 iconWidth="24px")
       div(class="tutorial__video")
+        video(autoplay playsinline muted loop :src="videoSource")
       div(class="tutorial__content")
         div(class="tutorial__content__title") {{ title }}
         div(class="tutorial__content__description") {{ description }}
@@ -21,7 +22,8 @@
         div(class="tutorial__content__indicators")
           div(v-for="(stepConfig, index) in stepConfigs"
               class="tutorial__content__indicator"
-              :class="{current: index === step}")
+              :class="{current: index === step}"
+              @click.prevent.stop="step = index")
 </template>
 
 <script lang="ts">
@@ -35,19 +37,23 @@ export default Vue.extend({
       stepConfigs: [
         {
           title: `${this.$t('NN0746')}`,
-          description: `${this.$t('NN0750')}`
+          description: `${this.$t('NN0750')}`,
+          video: 'https://template.vivipic.com/static/video/copy_paste.mp4'
         },
         {
           title: `${this.$t('NN0747')}`,
-          description: `${this.$t('NN0751')}`
+          description: `${this.$t('NN0751')}`,
+          video: 'https://template.vivipic.com/static/video/copy_paste.mp4'
         },
         {
           title: `${this.$t('NN0748')}`,
-          description: `${this.$t('NN0752')}`
+          description: `${this.$t('NN0752')}`,
+          video: 'https://template.vivipic.com/static/video/objects.mp4'
         },
         {
           title: `${this.$t('NN0749')}`,
-          description: `${this.$t('NN0753')}`
+          description: `${this.$t('NN0753')}`,
+          video: 'https://template.vivipic.com/static/video/objects.mp4'
         }
       ]
     }
@@ -61,6 +67,9 @@ export default Vue.extend({
     },
     buttonText(): string {
       return this.step < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
+    },
+    videoSource(): string {
+      return this.stepConfigs[this.step].video
     }
   },
   methods: {
@@ -102,7 +111,13 @@ export default Vue.extend({
     right: 20px;
   }
   &__video {
+    overflow: hidden;
     background: setColor(gray-1);
+    & > video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
   &__content {
     height: 233px;
@@ -158,6 +173,7 @@ export default Vue.extend({
       background: setColor(gray-2);
       border-radius: 50%;
       opacity: 0.3;
+      transition: opacity 0.3s ease-in;
       &.current {
         opacity: 1;
       }
