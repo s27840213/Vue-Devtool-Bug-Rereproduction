@@ -20,13 +20,11 @@ module.exports = {
         'space-before-function-paren': 0,
         '@typescript-eslint/no-var-requires': 0,
         'camelcase': 'off',
-        'indent': ['off', 2],
-        'no-tabs': 0
-            // 'comma-dangle': ['error', 'never'],
-            // semi: 'off',
-            // 'import/no-dynamic-require': 'off',
-            // 'global-require': 0,
-            // 'no-shadow': 'off',
-            // '@typescript-eslint/no-explicit-any': 'off'
+        // 'comma-dangle': ['error', 'never'],
+        // semi: 'off',
+        // 'import/no-dynamic-require': 'off',
+        // 'global-require': 0,
+        // 'no-shadow': 'off',
+        // '@typescript-eslint/no-explicit-any': 'off'
     }
 }
