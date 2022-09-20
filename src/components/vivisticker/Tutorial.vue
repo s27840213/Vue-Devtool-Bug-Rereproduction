@@ -1,0 +1,167 @@
+<template lang="pug">
+  transition(name="panel-up")
+    div(class="tutorial relative")
+      div(class="tutorial__close"
+          @click.prevent.stop="handleClose")
+        svg-icon(iconName="vivisticker_close"
+                iconColor="white"
+                iconWidth="24px")
+      div(class="tutorial__video")
+      div(class="tutorial__content")
+        div(class="tutorial__content__title") {{ title }}
+        div(class="tutorial__content__description") {{ description }}
+        div(class="tutorial__content__button-container")
+          div(class="tutorial__content__button"
+              @click.prevent.stop="handleNextStep")
+            span {{ buttonText }}
+            div(class="tutorial__content__button-icon")
+              svg-icon(iconName="chevron-right"
+                        iconColor="light-bg"
+                        iconWidth="32px")
+        div(class="tutorial__content__indicators")
+          div(v-for="(stepConfig, index) in stepConfigs"
+              class="tutorial__content__indicator"
+              :class="{current: index === step}")
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import { mapMutations } from 'vuex'
+
+export default Vue.extend({
+  data() {
+    return {
+      step: 0,
+      stepConfigs: [
+        {
+          title: `${this.$t('NN0746')}`,
+          description: `${this.$t('NN0750')}`
+        },
+        {
+          title: `${this.$t('NN0747')}`,
+          description: `${this.$t('NN0751')}`
+        },
+        {
+          title: `${this.$t('NN0748')}`,
+          description: `${this.$t('NN0752')}`
+        },
+        {
+          title: `${this.$t('NN0749')}`,
+          description: `${this.$t('NN0753')}`
+        }
+      ]
+    }
+  },
+  computed: {
+    title(): string {
+      return this.stepConfigs[this.step].title
+    },
+    description(): string {
+      return this.stepConfigs[this.step].description
+    },
+    buttonText(): string {
+      return this.step < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
+    }
+  },
+  methods: {
+    ...mapMutations({
+      setShowTutorial: 'vivisticker/SET_showTutorial'
+    }),
+    handleClose() {
+      this.setShowTutorial(false)
+    },
+    handleNextStep() {
+      if (this.step !== this.stepConfigs.length - 1) {
+        this.step++
+      } else {
+        this.setShowTutorial(false)
+      }
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.tutorial {
+  @include size(100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: setColor(gray-1);
+  overflow: hidden;
+  z-index: setZindex('popup');
+  &__close {
+    @include size(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  &__video {
+    background: setColor(gray-1);
+  }
+  &__content {
+    height: 233px;
+    background: setColor(white);
+    box-sizing: border-box;
+    padding: 24px;
+    &__title {
+      @include text-H5;
+      color: setColor(gray-1);
+      text-align: left;
+    }
+    &__description {
+      margin-top: 16px;
+      @include body-SM;
+      color: setColor(gray-1);
+      text-align: left;
+    }
+    &__button-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      height: 40px;
+      margin-top: 24px;
+      padding-left: 24px;
+      padding-right: 4px;
+      box-sizing: border-box;
+      @include text-H6;
+      color: setColor(light-bg);
+      background: setColor(black-2);
+      border-radius: 100px;
+    }
+    &__button-icon {
+      @include size(32px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    &__indicators {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    &__indicator {
+      @include size(6px);
+      background: setColor(gray-2);
+      border-radius: 50%;
+      opacity: 0.3;
+      &.current {
+        opacity: 1;
+      }
+    }
+  }
+}
+</style>

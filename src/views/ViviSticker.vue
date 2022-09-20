@@ -16,6 +16,7 @@
       @switchMainTab="switchMainTab"
       :currTab="isInEditor ? currActivePanel : currActiveTab"
       :inAllPagesMode="false")
+    tutorial(v-if="showTutorial")
 </template>
 
 <script lang="ts">
@@ -25,6 +26,7 @@ import VvstkEditor from '@/components/vivisticker/VvstkEditor.vue'
 import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
+import Tutorial from '@/components/vivisticker/Tutorial.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -46,7 +48,8 @@ export default Vue.extend({
     VvstkEditor,
     MobilePanel,
     HeaderTabs,
-    FooterTabs
+    FooterTabs,
+    Tutorial
   },
   data() {
     return {
@@ -109,7 +112,8 @@ export default Vue.extend({
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInEditor: 'vivisticker/getIsInEditor',
-      isInBgShare: 'vivisticker/getIsInBgShare'
+      isInBgShare: 'vivisticker/getIsInBgShare',
+      showTutorial: 'vivisticker/getShowTutorial'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked

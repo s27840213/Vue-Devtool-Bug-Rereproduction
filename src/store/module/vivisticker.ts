@@ -13,7 +13,8 @@ interface IViviStickerState {
   editorBgIndex: number,
   editorType: string,
   controllerHidden: boolean,
-  isStandaloneMode: boolean
+  isStandaloneMode: boolean,
+  showTutorial: boolean
 }
 
 const EDITOR_BGS = [
@@ -35,7 +36,8 @@ const getDefaultState = (): IViviStickerState => ({
   editorBgIndex: 0,
   editorType: 'none',
   controllerHidden: false,
-  isStandaloneMode: false
+  isStandaloneMode: false,
+  showTutorial: false
 })
 
 const state = getDefaultState()
@@ -72,6 +74,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getUserInfo(state: IViviStickerState): IUserInfo {
     return state.userInfo
+  },
+  getShowTutorial(state: IViviStickerState): boolean {
+    return state.showTutorial
   }
 }
 
@@ -102,6 +107,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
     state.userInfo = userInfo
+  },
+  SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
+    state.showTutorial = showTutorial
   },
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length

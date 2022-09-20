@@ -60,7 +60,8 @@ export default Vue.extend({
     mainOptions(): OptionConfig[] {
       return [{
         text: `${this.$t('NN0146')}`,
-        icon: 'vivisticker_play-circle'
+        icon: 'vivisticker_play-circle',
+        action: this.handleShowTutorial
       }, {
         text: `${this.$t('NN0174')}`,
         icon: 'vivisticker_global',
@@ -114,6 +115,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setShowTutorial: 'vivisticker/SET_showTutorial'
+    }),
     handleOptionAction(action?: () => void) {
       if (action) {
         action()
@@ -125,6 +129,10 @@ export default Vue.extend({
       } else {
         return false
       }
+    },
+    handleShowTutorial() {
+      this.setShowTutorial(true)
+      editorUtils.setCloseMobilePanelFlag(true)
     },
     handleLocaleList() {
       this.$emit('pushHistory', 'locale')
