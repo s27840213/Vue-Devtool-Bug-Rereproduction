@@ -255,6 +255,7 @@ class TextBg {
     const textBg = config.styles.textBg
     const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
     let path = null as unknown as Path
+    const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRect[][]
     const body = _.nth(bodyHtml, -1)
     const bodyRect = body.getClientRects()[0]
@@ -267,6 +268,23 @@ class TextBg {
       if (rect) acc.push(...rect)
       return acc
     }, [])
+
+    if (vertical) {
+      Object.assign(bodyRect, {
+        x: bodyRect.y,
+        y: bodyRect.x,
+        width: bodyRect.height,
+        height: bodyRect.width
+      })
+      rects.forEach((rect: DOMRect) => {
+        Object.assign(rect, {
+          x: rect.y,
+          y: rect.x,
+          width: rect.height,
+          height: rect.width
+        })
+      })
+    }
 
     // Merge Rect if at the same line.
     rects.forEach((rect: DOMRect, index: number) => {
@@ -284,6 +302,8 @@ class TextBg {
     if (isITextGooey(textBg) && textBg.name === 'gooey') {
       const bRadius = textBg.bRadius
       const padding = textBg.distance
+      const width = bodyRect.width * scaleRatio
+      const height = bodyRect.height * scaleRatio
       const color = this.rgba(textBg.color, textBg.opacity * 0.01)
 
       // Deal with empty line
@@ -302,8 +322,8 @@ class TextBg {
       rects.forEach((rect: DOMRect) => {
         rect.x = (rect.x - bodyRect.x) * scaleRatio - padding
         rect.y = (rect.y - bodyRect.y) * scaleRatio - padding
-        rect.width = (rect.width) * scaleRatio + padding * 2
-        rect.height = (rect.height) * scaleRatio + padding * 2
+        rect.width = rect.width * scaleRatio + padding * 2
+        rect.height = rect.height * scaleRatio + padding * 2
       })
       // Delete rect overlap.
       rects.forEach((rect: DOMRect, index: number) => {
@@ -382,9 +402,14 @@ class TextBg {
 
       return {
         attrs: {
-          width: bodyRect.width * scaleRatio,
-          height: bodyRect.height * scaleRatio,
-          fill: color
+          width,
+          height,
+          fill: color,
+          ...vertical ? {
+            transform: `rotate(90,-${width * 0.5},-${height * 0.5})
+              translate(0,-${height})
+              scale(1,-1)`
+          } : {}
         },
         content: [{
           tag: 'path',
@@ -398,9 +423,9 @@ class TextBg {
 
       return {
         attrs: {
-          width: bodyRect.width * scaleRatio,
-          height: bodyRect.height * scaleRatio,
-          fill: color
+          // width: bodyRect.width * scaleRatio,
+          // height: bodyRect.height * scaleRatio,
+          // fill: color
         },
         content: [{
           tag: 'path',
