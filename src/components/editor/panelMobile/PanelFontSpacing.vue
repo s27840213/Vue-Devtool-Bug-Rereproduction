@@ -1,19 +1,19 @@
 <template lang="pug">
   div(class="panel-spacing")
     mobile-slider(:title="`${$t('NN0109')}`"
-      :value="lineHeight"
-      :min="fieldRange.lineHeight.min"
-      :max="fieldRange.lineHeight.max"
-      :step="0.01"
-      :propKey="'lh'"
-      @update:lh="updateLineHeight")
-    mobile-slider(:title="`${$t('NN0110')}`"
       :value="fontSpacing"
       :min="fieldRange.fontSpacing.min"
       :max="fieldRange.fontSpacing.max"
       :step="1"
       :propKey="'fs'"
       @update:fs="updateFontSpacing")
+    mobile-slider(:title="`${$t('NN0110')}`"
+      :value="lineHeight"
+      :min="fieldRange.lineHeight.min"
+      :max="fieldRange.lineHeight.max"
+      :step="0.01"
+      :propKey="'lh'"
+      @update:lh="updateLineHeight")
 </template>
 
 <script lang="ts">
