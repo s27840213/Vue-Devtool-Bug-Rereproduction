@@ -157,6 +157,7 @@ export default Vue.extend({
 .vvstk-editor {
   @include size(100%);
   background: setColor(black-2);
+  overflow: hidden;
   &__pseudo-page {
     position: relative;
     transform-style: preserve-3d;
