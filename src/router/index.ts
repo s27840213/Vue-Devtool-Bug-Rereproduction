@@ -101,11 +101,13 @@ const router = new VueRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        const urlParams = new URLSearchParams(window.location.search)
-        const standalone = urlParams.get('standalone')
-        if (standalone) {
-          vivistickerUtils.enterStandaloneMode()
-        }
+        // TODO: always enters standalone mode before iOS App implements login function
+        // const urlParams = new URLSearchParams(window.location.search)
+        // const standalone = urlParams.get('standalone')
+        // if (standalone) {
+        //   vivistickerUtils.enterStandaloneMode()
+        // }
+        vivistickerUtils.enterStandaloneMode()
         vivistickerUtils.getUserInfo().then((userInfo: IUserInfo) => {
           const locale = userInfo.locale
           i18n.locale = locale
