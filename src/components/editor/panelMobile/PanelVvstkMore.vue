@@ -16,11 +16,12 @@
           svg-icon(iconName="vivisticker__version"
                     iconWidth="24px"
                     iconColor="gray-3")
-        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : ${'v. 1.0'} ${'v. 1.0'}` }}
+        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}` }}
     template(v-if="lastHistory === 'locale'")
       div(class="panel-vvstk-more__options")
         div(v-for="option in localeOptions"
             class="panel-vvstk-more__option"
+            :class="{selected: handleOptionSelected(option.selected)}"
             @click.prevent.stop="handleOptionAction(option.action)")
           div(class="panel-vvstk-more__option-icon")
             svg-icon(:iconName="option.icon"
@@ -38,6 +39,7 @@ type OptionConfig = {
   text: string
   icon: string
   action?: () => void
+  selected?: () => boolean
 }
 
 export default Vue.extend({
@@ -52,6 +54,9 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters({
+      userInfo: 'vivisticker/getUserInfo'
+    }),
     mainOptions(): OptionConfig[] {
       return [{
         text: `${this.$t('NN0146')}`,
@@ -73,14 +78,30 @@ export default Vue.extend({
     localeOptions(): OptionConfig[] {
       return [{
         text: 'English',
-        icon: 'vivisticker_global'
+        icon: 'vivisticker_global',
+        selected: () => {
+          return this.$i18n.locale === 'us'
+        }
       }, {
         text: '繁體中文',
-        icon: 'vivisticker_global'
+        icon: 'vivisticker_global',
+        selected: () => {
+          return this.$i18n.locale === 'tw'
+        }
       }, {
         text: '日本語',
-        icon: 'vivisticker_global'
+        icon: 'vivisticker_global',
+        selected: () => {
+          return this.$i18n.locale === 'jp'
+        }
       }]
+    },
+    appVersion(): string {
+      return this.userInfo.appVer
+    },
+    buildNumber(): string {
+      const { VUE_APP_BUILD_NUMBER: buildNumber } = process.env
+      return buildNumber ? `v.${buildNumber}` : 'local'
     },
     historySize(): number {
       return this.panelHistory.length
@@ -96,6 +117,13 @@ export default Vue.extend({
     handleOptionAction(action?: () => void) {
       if (action) {
         action()
+      }
+    },
+    handleOptionSelected(selected?: () => boolean): boolean {
+      if (selected) {
+        return selected()
+      } else {
+        return false
       }
     },
     handleLocaleList() {
@@ -132,6 +160,9 @@ export default Vue.extend({
     align-items: center;
     justify-content: start;
     &:not(.version):active {
+      background: setColor(black-6);
+    }
+    &.selected {
       background: setColor(black-6);
     }
   }

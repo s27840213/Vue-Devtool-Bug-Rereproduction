@@ -1,7 +1,10 @@
 import { IAsset } from '@/interfaces/module'
+import { IUserInfo } from '@/interfaces/vivisticker'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IViviStickerState {
+  userInfo: IUserInfo,
   currActiveTab: string,
   isInCategoryDict: {[key: string]: boolean},
   isInBgShare: boolean,
@@ -9,7 +12,8 @@ interface IViviStickerState {
   shareColor: string,
   editorBgIndex: number,
   editorType: string,
-  controllerHidden: boolean
+  controllerHidden: boolean,
+  isStandaloneMode: boolean
 }
 
 const EDITOR_BGS = [
@@ -18,6 +22,7 @@ const EDITOR_BGS = [
 ]
 
 const getDefaultState = (): IViviStickerState => ({
+  userInfo: vivistickerUtils.getDefaultUserInfo(),
   currActiveTab: 'object',
   isInCategoryDict: {
     object: false,
@@ -29,7 +34,8 @@ const getDefaultState = (): IViviStickerState => ({
   shareColor: '',
   editorBgIndex: 0,
   editorType: 'none',
-  controllerHidden: false
+  controllerHidden: false,
+  isStandaloneMode: false
 })
 
 const state = getDefaultState()
@@ -60,6 +66,12 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getControllerHidden(state: IViviStickerState): boolean {
     return state.controllerHidden
+  },
+  getIsStandaloneMode(state: IViviStickerState): boolean {
+    return state.isStandaloneMode
+  },
+  getUserInfo(state: IViviStickerState): IUserInfo {
+    return state.userInfo
   }
 }
 
@@ -84,6 +96,12 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_controllerHidden(state: IViviStickerState, controllerHidden: boolean) {
     state.controllerHidden = controllerHidden
+  },
+  SET_isStandaloneMode(state: IViviStickerState, isStandaloneMode: boolean) {
+    state.isStandaloneMode = isStandaloneMode
+  },
+  SET_userInfo(state: IViviStickerState, userInfo: IUserInfo) {
+    state.userInfo = userInfo
   },
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length

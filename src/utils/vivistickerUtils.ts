@@ -14,14 +14,29 @@ import imageUtils from './imageUtils'
 import controlUtils from './controlUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
+import { IUserInfo } from '@/interfaces/vivisticker'
+
+const STANDALONE_USER_INFO: IUserInfo = {
+  appVer: '1.0',
+  locale: 'us'
+}
 
 class ViviStickerUtils {
   inDebugMode = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
+  loginCallback = undefined as (() => void) | undefined
 
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
+  }
+
+  get isStandaloneMode(): boolean {
+    return store.getters['vivisticker/getIsStandaloneMode']
+  }
+
+  getDefaultUserInfo(): IUserInfo {
+    return STANDALONE_USER_INFO
   }
 
   sendToIOS(messageType: string, message: any) {
@@ -188,6 +203,10 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_controllerHidden', false)
   }
 
+  enterStandaloneMode() {
+    store.commit('vivisticker/SET_isStandaloneMode', true)
+  }
+
   deselect() {
     if (this.editorType === 'text') {
       groupUtils.deselect()
@@ -210,6 +229,30 @@ class ViviStickerUtils {
         imageUtils.setImgControlDefault(false)
       }
       this.hideController()
+    }
+  }
+
+  async getUserInfo(): Promise<IUserInfo> {
+    if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
+    await Promise.race([
+      new Promise<void>(resolve => {
+        this.loginCallback = resolve
+      }),
+      new Promise<void>(resolve => {
+        setTimeout(() => {
+          resolve()
+        }, 30000) // 30s timeout
+      })
+    ])
+    this.loginCallback = undefined
+    return store.getters['vivisticker/getUserInfo']
+  }
+
+  loginResult(info: IUserInfo) {
+    console.log(JSON.stringify(info))
+    store.commit('vivisticker/SET_userInfo', info)
+    if (this.loginCallback) {
+      this.loginCallback()
     }
   }
 }

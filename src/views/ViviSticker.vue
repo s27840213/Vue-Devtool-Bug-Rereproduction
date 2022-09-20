@@ -30,11 +30,14 @@ import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
 import { IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import { IFooterTabProps } from '@/interfaces/editor'
+import { CustomWindow } from '@/interfaces/customWindow'
 import eventUtils, { PanelEvent } from '@/utils/eventUtils'
 import editorUtils from '@/utils/editorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+
+declare let window: CustomWindow
 
 export default Vue.extend({
   name: 'ViviSticker',
@@ -55,6 +58,7 @@ export default Vue.extend({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
+    window.loginResult = vivistickerUtils.loginResult
   },
   mounted() {
     /**

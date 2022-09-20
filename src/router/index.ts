@@ -8,6 +8,8 @@ import i18n from '@/i18n'
 import localeUtils from '@/utils/localeUtils'
 import logUtils from '@/utils/logUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
+import { IUserInfo } from '@/interfaces/vivisticker'
 
 Vue.use(VueRouter)
 
@@ -99,28 +101,21 @@ const router = new VueRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        // let locale = localStorage.getItem('locale')
-        let locale = 'us'
-        // if local storage is empty
-        if (locale === '' || !locale) {
-          locale = to.params.locale
-          // without locale param, determine the locale with browser language
-          if (locale === '' || !locale) {
-            i18n.locale = localeUtils.getBrowserLang()
-          } else {
-            i18n.locale = locale
-          }
-        } else if (locale && ['tw', 'us', 'jp'].includes(locale) && locale !== i18n.locale) {
-          // if local storage has been set
+        const urlParams = new URLSearchParams(window.location.search)
+        const standalone = urlParams.get('standalone')
+        if (standalone) {
+          vivistickerUtils.enterStandaloneMode()
+        }
+        vivistickerUtils.getUserInfo().then((userInfo: IUserInfo) => {
+          const locale = userInfo.locale
           i18n.locale = locale
-          localStorage.setItem('locale', locale)
-        }
-        next()
-        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
-          // Delete locale in url, will be ignore by prerender.
-          delete router.currentRoute.params.locale
-          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
-        }
+          next()
+          if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+            // Delete locale in url, will be ignore by prerender.
+            delete router.currentRoute.params.locale
+            router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
+          }
+        })
       },
       children: routes
     }
