@@ -13,13 +13,14 @@
           div
       div
         div(class="mobile-panel__btn mobile-panel__left-btn"
-            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn,}")
+            :class="{'visible-hidden': !showLeftBtn, 'click-disabled': !showLeftBtn, 'insert': insertTheme}")
           svg-icon(
             class="click-disabled"
             :iconName="leftBtnName"
             :iconColor="'white'"
-            :iconWidth="'20px'")
+            :iconWidth="insertTheme ? '32px' : '20px'")
           div(class="mobile-panel__btn-click-zone"
+            :class="{'insert-left': insertTheme}"
             @pointerdown="leftButtonAction"
             @touchstart="disableTouchEvent")
         div(class="mobile-panel__title")
@@ -35,19 +36,20 @@
             :iconColor="'white'"
             :iconWidth="insertTheme ? '24px' : '20px'")
           div(class="mobile-panel__btn-click-zone"
+            :class="{'insert-right': insertTheme}"
             @pointerdown="rightButtonAction"
             @touchstart="disableTouchEvent")
       tabs(v-if="innerTabs.label" class="mobile-panel__inner-tab" theme="light"
           :tabs="innerTabs.label" @switchTab="switchInnerTab")
     div(class="mobile-panel__bottom-section")
-      keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-text', 'panel-file']")
-        //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
-        component(v-if="!bgRemoveMode && !hideDynamicComp"
-          class="border-box"
-          v-bind="dynamicBindProps"
-          v-on="dynamicBindMethod"
-          @close="closeMobilePanel"
-          @fitPage="fitPage")
+      //- keep-alive(:include="['panel-template', 'panel-photo', 'panel-object', 'panel-background', 'panel-file']")
+      //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
+      component(v-if="!bgRemoveMode && !hideDynamicComp"
+        class="border-box"
+        v-bind="dynamicBindProps"
+        v-on="dynamicBindMethod"
+        @close="closeMobilePanel"
+        @fitPage="fitPage")
     transition(name="panel-up")
       mobile-panel(v-if="!isSubPanel && currActiveSubPanel !== 'none'"
         :currActivePanel="currActiveSubPanel"
@@ -169,8 +171,12 @@ export default Vue.extend({
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
-      showMobilePanel: 'mobileEditor/getShowMobilePanel'
+      showMobilePanel: 'mobileEditor/getShowMobilePanel',
+      isInCategory: 'vivisticker/getIsInCategory'
     }),
+    isTextInCategory(): boolean {
+      return this.isInCategory('text')
+    },
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
     },
@@ -244,7 +250,7 @@ export default Vue.extend({
       return this.whiteTheme || this.insertTheme
     },
     showLeftBtn(): boolean {
-      return this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)
+      return (this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -359,6 +365,10 @@ export default Vue.extend({
           return {
             is: ''
           }
+        case 'text':
+          return Object.assign(defaultVal, {
+            isInsert: true
+          })
         default: {
           return defaultVal
         }
@@ -424,7 +434,9 @@ export default Vue.extend({
       }
     },
     leftBtnName(): string {
-      if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
+      if (this.insertTheme) {
+        return 'vivisticker_back'
+      } else if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
         return 'back-circle'
       } else {
         return 'close-circle'
@@ -438,6 +450,14 @@ export default Vue.extend({
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
+      if (this.insertTheme && this.isTextInCategory) {
+        return () => {
+          this.setIsInCategory({ tab: 'text', bool: false })
+          this.resetTexts()
+          this.refetchTexts()
+          this.refetchTextContent()
+        }
+      }
       if (this.showExtraColorPanel) {
         return () => {
           this.showExtraColorPanel = false
@@ -520,11 +540,15 @@ export default Vue.extend({
   },
   methods: {
     ...mapMutations({
-      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel'
+      setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
+      setIsInCategory: 'vivisticker/SET_isInCategory'
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
-      addRecentlyColors: 'color/addRecentlyColors'
+      addRecentlyColors: 'color/addRecentlyColors',
+      resetTexts: 'textStock/resetContent',
+      refetchTexts: 'textStock/getRecAndCate',
+      refetchTextContent: 'textStock/getContent'
     }),
     vcoConfig() {
       return {
@@ -675,6 +699,14 @@ export default Vue.extend({
     position: relative;
   }
 
+  &__left-btn.insert {
+    transform: translate(-2px, -6px);
+  }
+
+  &__right-btn.insert {
+    transform: translate(-6px, -4px);
+  }
+
   &__btn-click-zone {
     position: absolute;
     width: 28px;
@@ -684,6 +716,23 @@ export default Vue.extend({
     transform: translate(-4px, -4px);
     border-radius: 50%;
     touch-action: manipulation;
+    &.insert-left {
+      width: 32px;
+      height: 32px;
+      transform: none;
+      border-radius: 5px;
+      &:active {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+    &.insert-right {
+      width: 32px;
+      height: 32px;
+      border-radius: 5px;
+      &:active {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
   }
 
   &__bottom-section {
@@ -721,9 +770,5 @@ export default Vue.extend({
       width: 24px;
     }
   }
-}
-
-.insert {
-  transform: translate(-6px, -4px);
 }
 </style>

@@ -72,6 +72,12 @@ export default Vue.extend({
       scrollTop: 0
     }
   },
+  props: {
+    isInsert: {
+      default: false,
+      type: Boolean
+    }
+  },
   computed: {
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
@@ -146,7 +152,8 @@ export default Vue.extend({
       return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
     }
   },
-  async mounted() {
+  mounted() {
+    if (this.isInsert) return
     generalUtils.panelInit('text',
       this.handleSearch,
       this.handleCategorySearch,
@@ -162,9 +169,6 @@ export default Vue.extend({
   },
   deactivated() {
     (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
-  },
-  destroyed() {
-    this.resetContent()
   },
   methods: {
     ...mapActions('textStock', [
