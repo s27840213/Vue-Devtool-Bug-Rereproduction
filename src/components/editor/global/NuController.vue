@@ -1870,7 +1870,7 @@ export default Vue.extend({
       let layerY = this.getLayerPos.y
 
       if (widthLimit === -1) {
-        const pageSize = (this.$parent.$el as HTMLElement)
+        const pageSize = (document.querySelector('.page-control') as HTMLElement)
           .getBoundingClientRect()[isVertical ? 'height' : 'width'] / (this.scaleRatio * 0.01)
         const currTextSize = textHW[isVertical ? 'height' : 'width']
 
