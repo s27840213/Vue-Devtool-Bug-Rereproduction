@@ -319,7 +319,7 @@ class AssetUtils {
   }
 
   addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
-    const { pageIndex, styles = {}, ver } = attrs
+    const { pageIndex, styles = {}, ver, panelPreviewSrc } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
     const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
@@ -349,7 +349,8 @@ class AssetUtils {
         assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
       },
-      ver
+      ver,
+      panelPreviewSrc
     })
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
@@ -577,18 +578,21 @@ class AssetUtils {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       const asset = await this.get(item) as IAsset
+      const start = Date.now()
+      const data = await ImageUtils.getImageSize(ImageUtils.getSrc({
+        srcObj: {
+          type: 'background',
+          assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
+          userId: ''
+        }
+      }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
+      console.log(Date.now() - start)
       switch (asset.type) {
         case 1:
           this.addBackground(
             asset.urls.prev,
             { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver },
-            await ImageUtils.getImageSize(ImageUtils.getSrc({
-              srcObj: {
-                type: 'background',
-                assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
-                userId: ''
-              }
-            }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
+            data
           )
           break
         case 5:

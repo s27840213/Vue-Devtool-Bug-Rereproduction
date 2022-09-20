@@ -39,7 +39,8 @@ export default Vue.extend({
       if (this.locked) {
         return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
-      AssetUtils.addAsset(this.item)
+      const panelPreviewSrc = this.src || this.fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: this.item.id, userId: '' } }, 'prev', this.item.ver)
+      AssetUtils.addAsset(this.item, { panelPreviewSrc })
     },
     openUpdateDesignPopup() {
       if (this.isAdmin) {

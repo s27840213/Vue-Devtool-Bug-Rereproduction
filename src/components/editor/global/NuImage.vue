@@ -179,7 +179,7 @@ export default Vue.extend({
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      this.handleDimensionUpdate(newVal, oldVal)
+      // this.handleDimensionUpdate(newVal, oldVal)
     },
     parentLayerDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
@@ -193,7 +193,8 @@ export default Vue.extend({
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
         } else {
-          this.perviewAsLoading()
+          console.log('in watch hook')
+          this.previewAsLoading()
         }
       },
       deep: true
@@ -579,7 +580,7 @@ export default Vue.extend({
       console.warn(log)
       logUtils.setLog(log)
     },
-    async perviewAsLoading() {
+    async previewAsLoading() {
       if (this.config.previewSrc) {
         return
       }
@@ -656,7 +657,7 @@ export default Vue.extend({
     async handleInitLoad() {
       const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
-        await this.perviewAsLoading()
+        await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
           if (type === 'pexels') {

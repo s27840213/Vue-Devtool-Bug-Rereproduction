@@ -15,6 +15,20 @@ import { findIndex } from 'lodash'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
+  imgLoadHandler(src: string, cb: () => void) {
+    const image = new Image()
+    image.src = src
+    if (image.complete) {
+      cb()
+    } else {
+      image.onload = cb
+    }
+  }
+
+  getImgIdentifier(srcObj: SrcObj, ...attrs: Array<string>): string {
+    return [srcObj.type, srcObj.userId, srcObj.assetId, ...attrs].join(',')
+  }
+
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
       const currLayer = LayerUtils.getCurrLayer
