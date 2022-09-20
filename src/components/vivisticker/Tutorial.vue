@@ -9,16 +9,20 @@
       div(class="tutorial__video")
         video(autoplay playsinline muted loop :src="videoSource")
       div(class="tutorial__content")
-        div(class="tutorial__content__title") {{ title }}
-        div(class="tutorial__content__description") {{ description }}
-        div(class="tutorial__content__button-container")
-          div(class="tutorial__content__button"
-              @click.prevent.stop="handleNextStep")
-            span {{ buttonText }}
-            div(class="tutorial__content__button-icon")
-              svg-icon(iconName="chevron-right"
-                        iconColor="light-bg"
-                        iconWidth="32px")
+        div(class="tutorial__content__container")
+          div(v-for="(stepConfig, index) in stepConfigs"
+              class="tutorial__content__step"
+              :style="transformStyles()")
+            div(class="tutorial__content__title") {{ stepConfig.title }}
+            div(class="tutorial__content__description") {{ stepConfig.description }}
+            div(class="tutorial__content__button-container")
+              div(class="tutorial__content__button"
+                  @click.prevent.stop="handleNextStep")
+                span {{ buttonText(index) }}
+                div(class="tutorial__content__button-icon")
+                  svg-icon(iconName="chevron-right"
+                            iconColor="light-bg"
+                            iconWidth="32px")
         div(class="tutorial__content__indicators")
           div(v-for="(stepConfig, index) in stepConfigs"
               class="tutorial__content__indicator"
@@ -55,7 +59,8 @@ export default Vue.extend({
           description: `${this.$t('NN0753')}`,
           video: 'https://template.vivipic.com/static/video/objects.mp4'
         }
-      ]
+      ],
+      basicWidth: window.innerWidth
     }
   },
   computed: {
@@ -65,9 +70,6 @@ export default Vue.extend({
     description(): string {
       return this.stepConfigs[this.step].description
     },
-    buttonText(): string {
-      return this.step < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
-    },
     videoSource(): string {
       return this.stepConfigs[this.step].video
     }
@@ -76,6 +78,14 @@ export default Vue.extend({
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial'
     }),
+    transformStyles() {
+      return {
+        transform: `translateX(-${this.basicWidth * this.step}px)`
+      }
+    },
+    buttonText(index: number): string {
+      return index < this.stepConfigs.length - 1 ? `${this.$t('NN0744')}` : `${this.$t('NN0745')}`
+    },
     handleClose() {
       this.setShowTutorial(false)
     },
@@ -111,6 +121,7 @@ export default Vue.extend({
     right: 20px;
   }
   &__video {
+    width: 100vw;
     overflow: hidden;
     background: setColor(gray-1);
     & > video {
@@ -120,10 +131,21 @@ export default Vue.extend({
     }
   }
   &__content {
+    width: 100vw;
     height: 233px;
     background: setColor(white);
     box-sizing: border-box;
-    padding: 24px;
+    &__container {
+      display: flex;
+      overflow: hidden;
+    }
+    &__step {
+      width: 100vw;
+      padding: 24px 24px 0 24px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      transition: transform 0.3s linear;
+    }
     &__title {
       @include text-H5;
       color: setColor(gray-1);
