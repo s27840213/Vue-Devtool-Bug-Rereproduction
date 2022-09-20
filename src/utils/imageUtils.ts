@@ -15,13 +15,14 @@ import { findIndex } from 'lodash'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
-  imgLoadHandler(src: string, cb: () => void) {
+  imgLoadHandler(src: string, cb: () => void, error?: () => void) {
     const image = new Image()
     image.src = src
     if (image.complete) {
       cb()
     } else {
       image.onload = cb
+      error && (image.onerror = error)
     }
   }
 

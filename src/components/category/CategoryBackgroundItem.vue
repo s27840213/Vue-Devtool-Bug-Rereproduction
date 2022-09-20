@@ -1,5 +1,6 @@
 <template lang="pug">
   img(class="pointer"
+    ref="img"
     :src="src || fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: item.id, userId: '' }}, 'prev', item.ver)"
     draggable="false"
     @click="addBackground"
@@ -40,7 +41,12 @@ export default Vue.extend({
         return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
       const panelPreviewSrc = this.src || this.fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: this.item.id, userId: '' } }, 'prev', this.item.ver)
-      AssetUtils.addAsset(this.item, { panelPreviewSrc })
+      const img = this.$refs.img as HTMLImageElement
+      const imgSrcSize = {
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      }
+      AssetUtils.addAsset(this.item, { panelPreviewSrc, imgSrcSize })
     },
     openUpdateDesignPopup() {
       if (this.isAdmin) {

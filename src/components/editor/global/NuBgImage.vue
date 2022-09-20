@@ -209,28 +209,50 @@ export default Vue.extend({
       return this.stylesConverter()
     },
     async previewAsLoading() {
+      let isPrimaryImgLoaded = false
       const config = this.image.config as IImage
+      const urlId = ImageUtils.getImgIdentifier(this.image.config.srcObj)
       if (config.previewSrc) {
-        this.src = config.previewSrc
+        const previewSrc = config.previewSrc
+        ImageUtils.imgLoadHandler(previewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = previewSrc
+          }
+        })
       } else if (config.srcObj.type === 'background') {
-        this.src = this.image.config.panelPreviewSrc
-        console.log('set src = prev')
+        const panelPreviewSrc = this.image.config.panelPreviewSrc
+        ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = panelPreviewSrc
+          }
+        })
       }
-      const img = new Image()
       const src = ImageUtils.getSrc(this.image.config)
       return new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          /** If after onload the img, the config.srcObj is the same, set the src. */
-          if (ImageUtils.getSrc(this.image.config) === src) {
+        ImageUtils.imgLoadHandler(src, () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+            isPrimaryImgLoaded = true
             this.src = src
+            resolve()
           }
-          resolve()
-        }
-        img.onerror = () => {
+        }, () => {
           reject(new Error('cannot load the current image'))
-        }
-        img.src = src
+        })
       })
+      // const img = new Image()
+      // return new Promise<void>((resolve, reject) => {
+      //   img.onload = () => {
+      //     /** If after onload the img, the config.srcObj is the same, set the src. */
+      //     if (ImageUtils.getSrc(this.image.config) === src) {
+      //       this.src = src
+      //     }
+      //     resolve()
+      //   }
+      //   img.onerror = () => {
+      //     reject(new Error('cannot load the current image'))
+      //   }
+      //   img.src = src
+      // })
     },
     stylesConverter(): { [key: string]: string } {
       return {
