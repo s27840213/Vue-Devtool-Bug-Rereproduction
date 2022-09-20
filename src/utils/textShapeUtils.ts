@@ -44,8 +44,7 @@ class Controller {
     const props = {} as { [key: string]: any }
     const defaultAttrs = this.shapes[shape]
     const styles = {
-      textShape: {},
-      writingMode: 'initial'
+      textShape: {}
     } as { [key: string]: any }
     if (styleTextShape && (styleTextShape as any).name === shape) {
       Object.assign(styles.textShape, styleTextShape, attrs)
@@ -65,7 +64,7 @@ class Controller {
       props.widthLimit = -1
     } else if (shape === 'curve') { // curve
       const { bend } = styles.textShape as any
-      Object.assign(styles, this.getCurveTextProps(layer, +bend))
+      Object.assign(styles, this.getCurveTextProps(layer, +bend), { writingMode: 'initial' })
       props.widthLimit = -1
     }
     return { styles, props }

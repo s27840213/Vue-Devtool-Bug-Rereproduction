@@ -252,9 +252,9 @@ class TextBg {
   }
 
   drawSvgBg(config: IText, pageScaleRatio: number, bodyHtml: Element[]) {
+    let path = null as unknown as Path
     const textBg = config.styles.textBg
     const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
-    let path = null as unknown as Path
     const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRect[][]
     const body = _.nth(bodyHtml, -1)
@@ -404,17 +404,15 @@ class TextBg {
         attrs: {
           width,
           height,
-          fill: color,
-          ...vertical ? {
-            transform: `rotate(90,-${width * 0.5},-${height * 0.5})
-              translate(0,-${height})
-              scale(1,-1)`
-          } : {}
+          fill: color
         },
         content: [{
           tag: 'path',
           attrs: {
-            d: path.result()
+            d: path.result(),
+            ...vertical ? {
+              transform: 'rotate(90) scale(1,-1)'
+            } : {}
           }
         }]
       }
