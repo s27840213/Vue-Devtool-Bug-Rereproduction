@@ -292,7 +292,7 @@ export default Vue.extend({
     background-color: setColor(black-3);
     border-radius: 10px;
     &:active {
-      background-color: setColor(dark-bg-active);
+      background-color: setColor(black-1-5);
     }
     & > span {
       font-weight: 700;

@@ -4,7 +4,7 @@
       div(class="panel-object-adjust__options")
         div(v-for="(option,index) in lineOptions"
             class="panel-object-adjust__option"
-            :class="currMode === index ? 'bg-blue-1' : 'bg-gray-5'")
+            :class="currMode === index ? 'bg-gray-2' : 'bg-gray-5'")
           svg-icon(
             :iconName="option"
             iconWidth="24px"
@@ -19,28 +19,28 @@
           @update="setLineWidth")
         div(v-if="currMode === 1" class="panel-object-adjust__line-dash")
           div(class="panel-object-adjust__line-dash__option bg-gray-5"
-              :class="{'border-blue-1': isNormalDash}"
+              :class="isNormalDash ? 'border-black-5' : 'border-transparent'"
               @pointerdown="handleLineDash(0)")
             svg-icon(iconName="no-dash" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
           div(class="panel-object-adjust__line-dash__option bg-gray-5"
-              :class="{'border-blue-1': !isNormalDash}"
+              :class="isNormalDash ? 'border-transparent' : 'border-black-5'"
               @pointerdown="handleLineDash(1)")
             svg-icon(iconName="dash-1" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
           div(class="vr")
           div(class="panel-object-adjust__line-dash__option bg-gray-5"
-              :class="{'border-blue-1': isLineCapButt}"
+              :class="isLineCapButt ? 'border-black-5' : 'border-transparent'"
               @pointerdown="handleLineEdge(0)")
             svg-icon(class="mr-5" iconName="butt" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text body-2") {{$t('NN0084')}}
           div(class="panel-object-adjust__line-dash__option bg-gray-5"
-              :class="{'border-blue-1': !isLineCapButt}"
+              :class="isLineCapButt ? 'border-transparent' : 'border-black-5'"
               @pointerdown="handleLineEdge(1)")
             svg-icon(class="mr-5" iconName="round" iconWidth="11px" iconHeight="6px" iconColor="gray-2")
             div(class="shape-setting__value-selector__button-text body-2") {{$t('NN0085')}}
         div(v-if="currMode === 2" class="panel-object-adjust__markers")
             template(v-for="markerslot in makeSlots")
               div(class="panel-object-adjust__option bg-gray-5"
-                  :class="{'outline-blue-1': startMarker === markerslot.marker}"
+                  :class="startMarker === markerslot.marker ? 'border-black-5' : 'border-transparent'"
                   @pointerup="handleStartMarkerUpdate(markerslot.marker)")
                 marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
                   :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
@@ -51,7 +51,7 @@
         div(v-if="currMode === 3" class="panel-object-adjust__markers")
           template(v-for="markerslot in makeSlots")
             div(class="panel-object-adjust__option bg-gray-5"
-                :class="{'outline-blue-1': endMarker === markerslot.marker}"
+                :class="endMarker === markerslot.marker ? 'border-black-5' : 'border-transparent'"
                 @pointerup="handleEndMarkerUpdate(markerslot.marker)")
               marker-icon(iconWidth="18px" iconColor="#474A57" iconHeight="12px"
                 :styleFormat="markerContentMap[markerslot.marker].styleArray[0]"
@@ -64,14 +64,14 @@
       div(class="panel-object-adjust__options")
         div(v-for="(option,index) in ['line-width', 'non-filled']"
             class="panel-object-adjust__option"
-            :class="currMode === index ? 'bg-blue-1' : 'bg-gray-5'"
+            :class="currMode === index ? 'bg-gray-2' : 'bg-gray-5'"
             @pointerdown="switchMode(index)")
           svg-icon(
             :iconName="option"
             iconWidth="24px"
             :iconColor="currMode === index ? 'white' :'gray-2'")
         div(class="panel-object-adjust__option panel-object-adjust__option--with-val"
-            :class="corRadDisabled ? 'bg-gray-6 text-gray-4 click-disabled' : currMode === 2 ? 'bg-blue-1 text-white' : 'bg-gray-5 text-gray-2'"
+            :class="corRadDisabled ? 'bg-gray-6 text-gray-4 click-disabled' : currMode === 2 ? 'bg-gray-2 text-white' : 'bg-gray-5 text-gray-2'"
             @pointerdown="switchMode(2)")
           svg-icon(
             :iconName="'rounded-corner'"
@@ -88,12 +88,12 @@
           @update="setLineWidth")
         div(v-if="currMode === 1" class="panel-object-adjust__fill")
           div(class="panel-object-adjust__fill__option bg-gray-5"
-              :class="{'border-blue-1': !filled}"
+              :class="filled ? 'border-transparent' : 'border-black-5'"
               @pointerdown="handleBasicShapeFilledUpdate(false)")
             svg-icon(iconName="non-filled" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
             div(class="ml-25 body-2") {{$t('NN0088')}}
           div(class="panel-object-adjust__fill__option bg-gray-5"
-              :class="{'border-blue-1': filled}"
+              :class="filled ? 'border-black-5' : 'border-transparent'"
               @pointerdown="handleBasicShapeFilledUpdate(true)")
             svg-icon(iconName="filled" iconWidth="25px" iconHeight="20px" iconColor="gray-2")
             div(class="ml-25 body-2") {{$t('NN0087')}}
@@ -403,7 +403,6 @@ export default Vue.extend({
     align-items: center;
     overflow-x: scroll;
     @include no-scrollbar;
-    padding: 2px 2px;
 
     > div {
       aspect-ratio: 1/1;

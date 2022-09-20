@@ -185,7 +185,7 @@ export default Vue.extend({
     box-sizing: border-box;
 
     &--selected {
-      border-color: setColor(gray-3);
+      border-color: setColor(black-5);
     }
   }
 

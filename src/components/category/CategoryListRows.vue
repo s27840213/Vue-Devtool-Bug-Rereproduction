@@ -41,8 +41,8 @@ export default Vue.extend({
   }
   &__action {
     @include body-SM;
-    &:hover {
-      color: #4eabe6;
+    &:active {
+      color: setColor(black-5);
     }
   }
 }

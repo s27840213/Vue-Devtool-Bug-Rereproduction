@@ -132,7 +132,7 @@ export default Vue.extend({
     align-items: center;
     justify-content: start;
     &:not(.version):active {
-      background: setColor(gray-4);
+      background: setColor(black-6);
     }
   }
   &__option-icon {

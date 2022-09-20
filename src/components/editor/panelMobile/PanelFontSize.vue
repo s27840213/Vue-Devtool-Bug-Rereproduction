@@ -104,8 +104,8 @@ export default Vue.extend({
 
   &__range-input {
     margin: 0;
-    --lower-color: #{setColor(gray-2)};
-    --upper-color: #{setColor(gray-4)};
+    --lower-color: #{setColor(black-5)};
+    --upper-color: #{setColor(black-6)};
     @include progressSlider($height: 3px, $thumbSize: 16px, $marginTop: -7.5px);
     &::-webkit-slider-thumb {
       box-shadow: 0px 0px 8px rgba(60, 60, 60, 0.31);
