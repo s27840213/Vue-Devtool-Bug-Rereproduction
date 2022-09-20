@@ -66,6 +66,157 @@ class Path {
   }
 }
 
+class Gooey {
+  controlPoints = [[], []] as {top: Point, bottom: Point}[][]
+  constructor(rects: DOMRect[]) {
+    const first = rects[0]
+    this.controlPoints[0].push({
+      top: new Point(first.x + first.width, first.y),
+      bottom: new Point(first.x + first.width, first.y)
+    })
+    this.controlPoints[1].push({
+      top: new Point(first.x, first.y),
+      bottom: new Point(first.x, first.y)
+    })
+    rects.forEach((rect: DOMRect) => {
+      this.controlPoints[0].push({
+        top: new Point(rect.x, rect.y),
+        bottom: new Point(rect.x, rect.y + rect.height)
+      })
+      this.controlPoints[1].push({
+        top: new Point(rect.x + rect.width, rect.y),
+        bottom: new Point(rect.x + rect.width, rect.y + rect.height)
+      })
+    })
+    const last = _.nth(rects, -1)
+    this.controlPoints[0].push({
+      top: new Point(last.x + last.width, last.y + last.height),
+      bottom: new Point(last.x + last.width, last.y + last.height)
+    })
+    this.controlPoints[1].push({
+      top: new Point(last.x, last.y + last.height),
+      bottom: new Point(last.x, last.y + last.height)
+    })
+  }
+
+  // Merge the area that two Rects overlap.
+  merge() {
+    this.controlPoints[0].forEach((cps, index) => {
+      if (index === this.controlPoints[0].length - 1) return
+      const cpsNext = this.controlPoints[0][index + 1]
+      const newY = cps.bottom.x < cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
+      cps.bottom.y = cpsNext.top.y = newY
+    })
+    this.controlPoints[1].forEach((cps, index) => {
+      if (index === this.controlPoints[1].length - 1) return
+      const cpsNext = this.controlPoints[1][index + 1]
+      const newY = cps.bottom.x > cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
+      cps.bottom.y = cpsNext.top.y = newY
+    })
+  }
+
+  // Delete Rect if its top below bottom after merge.
+  delete() {
+    let count = 0
+    this.controlPoints.forEach(side => {
+      side.forEach((cps, index) => {
+        if (cps.top.y > cps.bottom.y) {
+          Vue.delete(side, index)
+          count++
+        }
+      })
+    })
+    return count
+  }
+
+  // Keep doing merge and delete until nothing to delete.
+  preProcess() {
+    do {
+      this.merge()
+    } while (this.delete())
+  }
+
+  // Return svg path
+  process(bRadius: number) {
+    let path = null as unknown as Path
+    let ps = this.controlPoints[0]
+    for (let i = 1; i < ps.length - 1; i++) {
+      const rect = ps[i]
+      const rectPrev = ps[i - 1]
+      const prevMiddle = rectPrev.bottom.middle(rect.top)
+      const rectNext = ps[i + 1]
+      const nextMiddle = rect.bottom.middle(rectNext.top)
+      const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
+      const radiusTop = Math.min(radius, rect.top.dist(prevMiddle)) *
+        (rectPrev.bottom.x < rect.top.x ? -1 : 1)
+      const radiusBottom = Math.min(radius, rect.bottom.dist(nextMiddle)) *
+        (rect.bottom.x < rectNext.top.x ? 1 : -1)
+
+      if (i === 1) {
+        path = new Path(prevMiddle)
+      }
+      const curveTopStart = rect.top.add({ x: radiusTop, y: 0 })
+      const curveTopEnd = rect.top.add({ x: 0, y: radius })
+      path.L(curveTopStart)
+      path.C(rect.top.middle(curveTopStart), rect.top.middle(curveTopEnd), curveTopEnd)
+      const curveBottomStart = rect.bottom.add({ x: 0, y: -radius })
+      const curveBottomEnd = rect.bottom.add({ x: radiusBottom, y: 0 })
+      path.L(curveBottomStart)
+      path.C(rect.bottom.middle(curveBottomStart), rect.bottom.middle(curveBottomEnd), curveBottomEnd)
+    }
+    ps = this.controlPoints[1]
+    for (let i = ps.length - 2; i > 0; i--) {
+      const rect = ps[i]
+      const rectPrev = ps[i - 1]
+      const prevMiddle = rectPrev.bottom.middle(rect.top)
+      const rectNext = ps[i + 1]
+      const nextMiddle = rect.bottom.middle(rectNext.top)
+      const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
+      const radiusTop = Math.min(radius, rect.top.dist(prevMiddle)) *
+        (rectPrev.bottom.x < rect.top.x ? -1 : 1)
+      const radiusBottom = Math.min(radius, rect.bottom.dist(nextMiddle)) *
+        (rect.bottom.x < rectNext.top.x ? 1 : -1)
+
+      const curveBottomStart = rect.bottom.add({ x: radiusBottom, y: 0 })
+      const curveBottomEnd = rect.bottom.add({ x: 0, y: -radius })
+      path.L(curveBottomStart)
+      path.C(rect.bottom.middle(curveBottomStart), rect.bottom.middle(curveBottomEnd), curveBottomEnd)
+      const curveTopStart = rect.top.add({ x: 0, y: radius })
+      const curveTopEnd = rect.top.add({ x: radiusTop, y: 0 })
+      path.L(curveTopStart)
+      path.C(rect.top.middle(curveTopStart), rect.top.middle(curveTopEnd), curveTopEnd)
+    }
+
+    return path.result()
+  }
+
+  // For debug
+  toCircle() {
+    const circle = [] as Record<string, unknown>[]
+    this.controlPoints.forEach(side => {
+      side.forEach(cps => {
+        circle.push({
+          tag: 'circle',
+          attrs: {
+            cx: cps.top.x,
+            cy: cps.top.y,
+            r: '5'
+          }
+        })
+        circle.push({
+          tag: 'circle',
+          attrs: {
+            cx: cps.bottom.x,
+            cy: cps.bottom.y,
+            r: '5'
+          }
+        })
+      })
+    })
+    return circle
+  }
+}
+
 class TextBg {
   effects = {} as Record<string, Record<string, string | number>>
   constructor() {
@@ -252,7 +403,6 @@ class TextBg {
   }
 
   drawSvgBg(config: IText, pageScaleRatio: number, bodyHtml: Element[]) {
-    let path = null as unknown as Path
     const textBg = config.styles.textBg
     const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
     const vertical = config.styles.writingMode === 'vertical-lr'
@@ -269,6 +419,7 @@ class TextBg {
       return acc
     }, [])
 
+    // If is vertical text, exchange its coordinate.
     if (vertical) {
       Object.assign(bodyRect, {
         x: bodyRect.y,
@@ -285,7 +436,6 @@ class TextBg {
         })
       })
     }
-
     // Merge Rect if at the same line.
     rects.forEach((rect: DOMRect, index: number) => {
       const nextIndex = index + 1
@@ -298,107 +448,44 @@ class TextBg {
         Vue.delete(rects, nextIndex)
       }
     })
+    // Deal with empty line
+    rects.forEach((rect: DOMRect, index: number) => {
+      if (rect.width < 1) {
+        let nextIndex = index + 1
+        while (nextIndex < rects.length && rects[nextIndex].width < 1)nextIndex++
+        const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
+        const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
+        const target = (prev.width < next.width) ? prev : next
+        rect.x = target.x
+        rect.width = target.width
+      }
+    })
+    // Coordinate initial.
+    rects.forEach((rect: DOMRect) => {
+      rect.x = (rect.x - bodyRect.x) * scaleRatio
+      rect.y = (rect.y - bodyRect.y) * scaleRatio
+      rect.width = rect.width * scaleRatio
+      rect.height = rect.height * scaleRatio
+    })
 
     if (isITextGooey(textBg) && textBg.name === 'gooey') {
-      const bRadius = textBg.bRadius
       const padding = textBg.distance
+      const bRadius = textBg.bRadius
       const width = bodyRect.width * scaleRatio
       const height = bodyRect.height * scaleRatio
       const color = this.rgba(textBg.color, textBg.opacity * 0.01)
 
-      // Deal with empty line
-      rects.forEach((rect: DOMRect, index: number) => {
-        if (rect.width < 1) {
-          let nextIndex = index + 1
-          while (nextIndex < rects.length && rects[nextIndex].width < 1)nextIndex++
-          const next = rects[nextIndex] ?? { x: bodyRect.x, width: bodyRect.width }
-          const prev = rects[index - 1] ?? { x: bodyRect.x, width: bodyRect.width }
-          const target = (prev.width < next.width) ? prev : next
-          rect.x = target.x
-          rect.width = target.width
-        }
-      })
-      // Add padding and coordinate initial.
+      // Add padding.
       rects.forEach((rect: DOMRect) => {
-        rect.x = (rect.x - bodyRect.x) * scaleRatio - padding
-        rect.y = (rect.y - bodyRect.y) * scaleRatio - padding
-        rect.width = rect.width * scaleRatio + padding * 2
-        rect.height = rect.height * scaleRatio + padding * 2
-      })
-      // Delete rect overlap.
-      rects.forEach((rect: DOMRect, index: number) => {
-        if (index === rects.length - 1) return
-        const rectNext = rects[index + 1]
-        const newY = ((rect.y + rect.height) + (rectNext.y)) / 2
-        rect.height = newY - rect.y
-        rectNext.height -= newY - rectNext.y
-        rectNext.y = newY
+        rect.x -= padding
+        rect.y -= padding
+        rect.width += padding * 2
+        rect.height += padding * 2
       })
 
-      for (let i = 0; i < rects.length; i++) {
-        const [first, last] = [i === 0, i === rects.length - 1]
-
-        const rect = rects[i]
-        const rectLeftTop = new Point(rect.x, rect.y)
-        // const rectLeft = new Point(rect.x, rect.y + rect.height / 2)
-        const rectLeftBottom = new Point(rect.x, rect.y + rect.height)
-        const rectPrev = rects[i - 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
-        const rectPrevLeftBottom = new Point(rectPrev.x, rectPrev.y + rectPrev.height)
-        const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
-          : rectPrevLeftBottom.middle(rectLeftTop)
-        const rectNext = rects[i + 1] ?? { x: 99999, y: 99999, width: 99999, height: 99999 }
-        const rectNextLeftTop = new Point(rectNext.x, rectNext.y)
-        const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
-          : rectLeftBottom.middle(rectNextLeftTop)
-        const radius = rect.height * bRadius * 0.005
-        const radiusTop = Math.min(radius, rectLeftTop.dist(prevMiddle)) *
-          (rectPrevLeftBottom.x < rectLeftTop.x ? -1 : 1)
-        const radiusBottom = Math.min(radius, rectLeftBottom.dist(nextMiddle)) *
-          (rectLeftBottom.x < rectNextLeftTop.x ? 1 : -1)
-
-        if (first) {
-          path = new Path(prevMiddle)
-        }
-        const curveTopStart = rectLeftTop.add({ x: radiusTop, y: 0 })
-        const curveTopEnd = rectLeftTop.add({ x: 0, y: radius })
-        path.L(curveTopStart)
-        path.C(rectLeftTop.middle(curveTopStart), rectLeftTop.middle(curveTopEnd), curveTopEnd)
-        const curveBottomStart = rectLeftBottom.add({ x: 0, y: -radius })
-        const curveBottomEnd = rectLeftBottom.add({ x: radiusBottom, y: 0 })
-        path.L(curveBottomStart)
-        path.C(rectLeftBottom.middle(curveBottomStart), rectLeftBottom.middle(curveBottomEnd), curveBottomEnd)
-      }
-      for (let i = rects.length - 1; i >= 0; i--) {
-        const [first, last] = [i === 0, i === rects.length - 1]
-
-        const rect = rects[i]
-        const rectRightTop = new Point(rect.x + rect.width, rect.y)
-        // const rectRight = new Point(rect.x + rect.width, rect.y + rect.height / 2)
-        const rectRightBottom = new Point(rect.x + rect.width, rect.y + rect.height)
-
-        const rectPrev = rects[i - 1] ?? { x: 0, y: 0, width: 0, height: 0 }
-        const rectPrevRightBottom = new Point(rectPrev.x + rectPrev.width, rectPrev.y + rectPrev.height)
-        const prevMiddle = first ? new Point(rect.x + rect.width / 2, rect.y)
-          : rectPrevRightBottom.middle(rectRightTop)
-        const rectNext = rects[i + 1] ?? { x: 0, y: 0, width: 0, height: 0 }
-        const rectNextRightTop = new Point(rectNext.x + rectNext.width, rectNext.y)
-        const nextMiddle = last ? new Point(rect.x + rect.width / 2, rect.y + rect.height)
-          : rectRightBottom.middle(rectNextRightTop)
-        const radius = rect.height * bRadius * 0.005
-        const radiusTop = Math.min(radius, rectRightTop.dist(prevMiddle)) *
-          (rectPrevRightBottom.x < rectRightTop.x ? -1 : 1)
-        const radiusBottom = Math.min(radius, rectRightBottom.dist(nextMiddle)) *
-          (rectRightBottom.x < rectNextRightTop.x ? 1 : -1)
-
-        const curveBottomStart = rectRightBottom.add({ x: radiusBottom, y: 0 })
-        const curveBottomEnd = rectRightBottom.add({ x: 0, y: -radius })
-        path.L(curveBottomStart)
-        path.C(rectRightBottom.middle(curveBottomStart), rectRightBottom.middle(curveBottomEnd), curveBottomEnd)
-        const curveTopStart = rectRightTop.add({ x: 0, y: radius })
-        const curveTopEnd = rectRightTop.add({ x: radiusTop, y: 0 })
-        path.L(curveTopStart)
-        path.C(rectRightTop.middle(curveTopStart), rectRightTop.middle(curveTopEnd), curveTopEnd)
-      }
+      const cps = new Gooey(rects)
+      cps.preProcess()
+      const d = cps.process(bRadius)
 
       return {
         attrs: {
@@ -409,7 +496,7 @@ class TextBg {
         content: [{
           tag: 'path',
           attrs: {
-            d: path.result(),
+            d,
             ...vertical ? {
               transform: 'rotate(90) scale(1,-1)'
             } : {}
@@ -428,7 +515,7 @@ class TextBg {
         content: [{
           tag: 'path',
           attrs: {
-            d: path.result()
+            // d: path.result()
           }
         }]
       }
