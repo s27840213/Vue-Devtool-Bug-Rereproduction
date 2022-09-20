@@ -234,6 +234,7 @@ class ViviStickerUtils {
 
   async getUserInfo(): Promise<IUserInfo> {
     if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
+    this.sendToIOS('LOGIN', {})
     await Promise.race([
       new Promise<void>(resolve => {
         this.loginCallback = resolve
