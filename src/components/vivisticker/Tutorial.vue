@@ -154,7 +154,6 @@ export default Vue.extend({
   }
   &__content {
     width: 100vw;
-    height: 233px;
     background: setColor(black-1);
     box-sizing: border-box;
     box-shadow: 0px 4px 10px 2px rgba(255, 255, 255, 0.25);
@@ -212,6 +211,7 @@ export default Vue.extend({
     }
     &__indicators {
       margin-top: 28px;
+      margin-bottom: 17px;
       display: flex;
       align-items: center;
       justify-content: center;
