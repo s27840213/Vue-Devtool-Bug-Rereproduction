@@ -130,7 +130,7 @@ export default Vue.extend({
   left: 0;
   display: grid;
   grid-template-rows: 1fr auto;
-  background: setColor(black-2);
+  background: setColor(black-1);
   overflow: hidden;
   z-index: setZindex('popup');
   &__close {
@@ -145,7 +145,7 @@ export default Vue.extend({
   &__video {
     width: 100vw;
     overflow: hidden;
-    background: setColor(black-2);
+    background: setColor(black-1);
     & > video {
       width: 100%;
       height: 100%;
@@ -155,7 +155,7 @@ export default Vue.extend({
   &__content {
     width: 100vw;
     height: 233px;
-    background: setColor(black-2);
+    background: setColor(black-1);
     box-sizing: border-box;
     box-shadow: 0px 4px 10px 2px rgba(255, 255, 255, 0.25);
     z-index: 1;
