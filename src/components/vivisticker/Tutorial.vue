@@ -1,6 +1,8 @@
 <template lang="pug">
   transition(name="panel-up")
-    div(class="tutorial relative")
+    div(ref="main" class="tutorial relative"
+        @swipeleft="handleSwipeLeft"
+        @swiperight="handleSwipeRight")
       div(class="tutorial__close"
           @click.prevent.stop="handleClose")
         svg-icon(iconName="vivisticker_close"
@@ -32,6 +34,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { mapMutations } from 'vuex'
 
 export default Vue.extend({
@@ -74,6 +77,12 @@ export default Vue.extend({
       return this.stepConfigs[this.step].video
     }
   },
+  mounted() {
+    const mainAt = new AnyTouch(this.$refs.main as HTMLElement, { preventDefault: false })
+    this.$on('hook:destroyed', () => {
+      mainAt.destroy()
+    })
+  },
   methods: {
     ...mapMutations({
       setShowTutorial: 'vivisticker/SET_showTutorial'
@@ -95,6 +104,16 @@ export default Vue.extend({
       } else {
         this.setShowTutorial(false)
       }
+    },
+    handleSwipeLeft(e: AnyTouchEvent) {
+      console.log('left')
+      e.stopImmediatePropagation()
+      if (this.step < this.stepConfigs.length - 1) this.step++
+    },
+    handleSwipeRight(e: AnyTouchEvent) {
+      console.log('right')
+      e.stopImmediatePropagation()
+      if (this.step > 0) this.step--
     }
   }
 })
