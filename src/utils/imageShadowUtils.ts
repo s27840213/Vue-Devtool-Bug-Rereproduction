@@ -517,8 +517,6 @@ class ImageShadowUtils {
 
   getLocalEffectColor(effectName: ShadowEffectType) {
     const key = effectName === ShadowEffectType.frame ? 'shadow-color-frame' : 'shadow-color'
-    console.log(key)
-    console.log(localStorage.getItem('shadow-color-frame'), localStorage.getItem('shadow-color'))
     return localStorage.getItem(key) || ''
   }
 
