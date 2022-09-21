@@ -1,4 +1,5 @@
 export interface CustomWindow extends Window {
     fetchDesign: any,
-    loginResult: any
+    loginResult: any,
+    updateInfoDone: any
 }

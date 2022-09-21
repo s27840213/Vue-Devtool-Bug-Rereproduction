@@ -37,6 +37,9 @@ import editorUtils from '@/utils/editorUtils'
 import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import { CustomWindow } from '@/interfaces/customWindow'
+
+declare let window: CustomWindow
 
 export default Vue.extend({
   name: 'ViviSticker',
@@ -58,6 +61,7 @@ export default Vue.extend({
   created() {
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
+    window.updateInfoDone = vivistickerUtils.updateInfoDone
   },
   mounted() {
     /**
