@@ -25,7 +25,7 @@ class ViviStickerUtils {
   inDebugMode = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
-  loginCallback = undefined as (() => void) | undefined
+  callbackMap = {} as {[key: string]: () => void}
 
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
@@ -232,29 +232,37 @@ class ViviStickerUtils {
     }
   }
 
-  async getUserInfo(): Promise<IUserInfo> {
-    if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
-    this.sendToIOS('LOGIN', { empty: '' })
+  async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000) {
+    this.sendToIOS(type, message)
     await Promise.race([
       new Promise<void>(resolve => {
-        this.loginCallback = resolve
+        this.callbackMap[event] = resolve
       }),
       new Promise<void>(resolve => {
         setTimeout(() => {
           resolve()
-        }, 5000) // 5s timeout
+        }, timeout)
       })
     ])
-    this.loginCallback = undefined
+    delete this.callbackMap[event]
+  }
+
+  handleCallback(event: string) {
+    if (this.callbackMap[event]) {
+      this.callbackMap[event]()
+    }
+  }
+
+  async getUserInfo(): Promise<IUserInfo> {
+    if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
+    await this.callIOSAsAPI('LOGIN', { empty: '' }, 'login')
     return store.getters['vivisticker/getUserInfo']
   }
 
   loginResult(info: IUserInfo) {
     console.log(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
-    if (vivistickerUtils.loginCallback) {
-      vivistickerUtils.loginCallback()
-    }
+    vivistickerUtils.handleCallback('login')
   }
 }
 
