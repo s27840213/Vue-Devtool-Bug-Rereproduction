@@ -146,13 +146,15 @@ class Gooey {
     this.controlPoints[0].forEach((cps, index, arr) => {
       if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[0][index + 1]
-      const newY = cps.bottom.x < cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
+      const newY = cps.bottom.x === cpsNext.top.x ? (cps.bottom.y + cpsNext.top.y) / 2
+        : cps.bottom.x < cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
     })
     this.controlPoints[1].forEach((cps, index, arr) => {
       if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[1][index + 1]
-      const newY = cps.bottom.x > cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
+      const newY = cpsNext.top.x ? (cps.bottom.y + cpsNext.top.y) / 2
+        : cps.bottom.x > cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
     })
   }
@@ -492,7 +494,7 @@ class TextBg {
             tag: 'path',
             attrs: {
               d,
-              transform: vertical ? 'rotate(90) scale(1,-1)' : 'none'
+              transform: vertical ? 'rotate(90) scale(1,-1)' : ''
             }
           }
         ]
@@ -528,7 +530,8 @@ class TextBg {
         paths.push({
           tag: 'path',
           attrs: {
-            d: path.result()
+            d: path.result(),
+            transform: vertical ? 'rotate(90) scale(1,-1)' : ''
           }
         })
         // paths.push(...path.toCircle()) // Show control point
