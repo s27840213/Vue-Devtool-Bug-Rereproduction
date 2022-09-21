@@ -153,7 +153,7 @@ class Gooey {
     this.controlPoints[1].forEach((cps, index, arr) => {
       if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[1][index + 1]
-      const newY = cpsNext.top.x ? (cps.bottom.y + cpsNext.top.y) / 2
+      const newY = cps.bottom.x === cpsNext.top.x ? (cps.bottom.y + cpsNext.top.y) / 2
         : cps.bottom.x > cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
     })
