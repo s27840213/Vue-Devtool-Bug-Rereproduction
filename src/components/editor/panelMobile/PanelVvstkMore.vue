@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 import Vue, { PropType } from 'vue'
 import { mapGetters, mapMutations } from 'vuex'
 
@@ -82,19 +83,22 @@ export default Vue.extend({
         icon: 'vivisticker_global',
         selected: () => {
           return this.$i18n.locale === 'us'
-        }
+        },
+        action: () => { this.handleUpdateLocale('us') }
       }, {
         text: '繁體中文',
         icon: 'vivisticker_global',
         selected: () => {
           return this.$i18n.locale === 'tw'
-        }
+        },
+        action: () => { this.handleUpdateLocale('tw') }
       }, {
         text: '日本語',
         icon: 'vivisticker_global',
         selected: () => {
           return this.$i18n.locale === 'jp'
-        }
+        },
+        action: () => { this.handleUpdateLocale('jp') }
       }]
     },
     appVersion(): string {
@@ -148,6 +152,11 @@ export default Vue.extend({
           break
       }
       window.open(url, '_blank')
+    },
+    handleUpdateLocale(locale: string) {
+      vivistickerUtils.updateLocale(locale).then(() => {
+        this.$router.go(0)
+      })
     }
   }
 })

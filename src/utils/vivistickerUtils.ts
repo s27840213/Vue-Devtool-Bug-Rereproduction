@@ -15,6 +15,7 @@ import controlUtils from './controlUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
 import { IUserInfo } from '@/interfaces/vivisticker'
+import localeUtils from './localeUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.0',
@@ -26,6 +27,7 @@ class ViviStickerUtils {
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   callbackMap = {} as {[key: string]: () => void}
+  errorMessageMap = {} as {[key: string]: string}
 
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
@@ -37,6 +39,14 @@ class ViviStickerUtils {
 
   getDefaultUserInfo(): IUserInfo {
     return STANDALONE_USER_INFO
+  }
+
+  setDefaultLocale() {
+    let locale = localStorage.getItem('locale')
+    if (locale === '' || !locale) {
+      locale = localeUtils.getBrowserLang()
+    }
+    STANDALONE_USER_INFO.locale = locale
   }
 
   sendToIOS(messageType: string, message: any) {
@@ -263,6 +273,23 @@ class ViviStickerUtils {
     console.log(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
     vivistickerUtils.handleCallback('login')
+  }
+
+  async updateLocale(locale: string): Promise<void> {
+    if (this.isStandaloneMode) {
+      localStorage.setItem('locale', locale)
+      return
+    }
+    await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
+  }
+
+  updateInfoDone(flag: string, msg?: string) {
+    console.log(flag)
+    if (flag !== '0') {
+      console.log(msg)
+      this.errorMessageMap.locale = msg ?? ''
+    }
+    vivistickerUtils.handleCallback('update-user-info')
   }
 }
 

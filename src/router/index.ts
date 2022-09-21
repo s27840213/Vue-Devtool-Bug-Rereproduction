@@ -109,10 +109,12 @@ const router = new VueRouter({
         const standalone = urlParams.get('standalone')
         if (standalone) {
           vivistickerUtils.enterStandaloneMode()
+          vivistickerUtils.setDefaultLocale()
         }
         vivistickerUtils.getUserInfo().then((userInfo: IUserInfo) => {
           const locale = userInfo.locale
           i18n.locale = locale
+          localStorage.setItem('locale', locale)
           next()
           if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
             // Delete locale in url, will be ignore by prerender.
