@@ -43,26 +43,68 @@ class Point {
 // For text effect gooey
 class Path {
   pathArray = [] as string[]
+  pointArray = [] as Point[]
   currPos: Point
   constructor(p: Point) {
     this.currPos = p
+    this.pointArray.push(this.currPos)
     this.pathArray.push(`M${p}`)
   }
 
   L(end: Point) {
     if (this.currPos.dist(end) < 0.1) return
     this.currPos = end
+    this.pointArray.push(this.currPos)
     this.pathArray.push(`L${end}`)
   }
 
   C(c1: Point, c2: Point, end: Point) {
     if (this.currPos.dist(end) < 0.1) return
     this.currPos = end
+    this.pointArray.push(this.currPos)
     this.pathArray.push(`C${c1} ${c2} ${end}`)
+  }
+
+  v(dist: number) {
+    this.currPos = this.currPos.add(new Point(0, dist))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`v${dist}`)
+  }
+
+  h(dist: number) {
+    this.currPos = this.currPos.add(new Point(dist, 0))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`h${dist}`)
+  }
+
+  l(x: number, y: number) {
+    this.currPos = this.currPos.add(new Point(x, y))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`l${x} ${y}`)
+  }
+
+  a(offset: number) {
+    this.currPos = this.currPos.add(new Point(0, offset))
+    this.pointArray.push(this.currPos)
+    this.pathArray.push(`a1 1 0 000 ${offset}`)
   }
 
   result() {
     return this.pathArray.join('')
+  }
+
+  toCircle() {
+    return this.pointArray.map(p => {
+      return {
+        tag: 'circle',
+        attrs: {
+          cx: p.x,
+          cy: p.y,
+          r: '5',
+          fill: 'red'
+        }
+      }
+    })
   }
 }
 
@@ -101,14 +143,14 @@ class Gooey {
 
   // Merge the area that two Rects overlap.
   merge() {
-    this.controlPoints[0].forEach((cps, index) => {
-      if (index === this.controlPoints[0].length - 1) return
+    this.controlPoints[0].forEach((cps, index, arr) => {
+      if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[0][index + 1]
       const newY = cps.bottom.x < cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
     })
-    this.controlPoints[1].forEach((cps, index) => {
-      if (index === this.controlPoints[1].length - 1) return
+    this.controlPoints[1].forEach((cps, index, arr) => {
+      if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[1][index + 1]
       const newY = cps.bottom.x > cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
@@ -119,12 +161,13 @@ class Gooey {
   delete() {
     let count = 0
     this.controlPoints.forEach(side => {
-      side.forEach((cps, index) => {
-        if (cps.top.y > cps.bottom.y) {
-          Vue.delete(side, index)
+      for (let i = 1; i < side.length - 1;) {
+        const cps = side[i]
+        if (side.length > 3 && cps.bottom.y - cps.top.y < 20) {
+          Vue.delete(side, i)
           count++
-        }
-      })
+        } else i++
+      }
     })
     return count
   }
@@ -200,7 +243,8 @@ class Gooey {
           attrs: {
             cx: cps.top.x,
             cy: cps.top.y,
-            r: '5'
+            r: '5',
+            fill: 'red'
           }
         })
         circle.push({
@@ -208,7 +252,8 @@ class Gooey {
           attrs: {
             cx: cps.bottom.x,
             cy: cps.bottom.y,
-            r: '5'
+            r: '5',
+            fill: 'blue'
           }
         })
       })
@@ -290,8 +335,8 @@ class TextBg {
         color: '#F1D289'
       },
       gooey: {
-        distance: 0,
-        bRadius: 48,
+        distance: 20,
+        bRadius: 40,
         opacity: 100,
         color: '#F1D289'
       }
@@ -337,61 +382,7 @@ class TextBg {
   }
 
   convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
-    if (!isITextUnderline(effect) && !isITextGooey(effect)) return {}
-
-    if (isITextUnderline(effect)) {
-      const { color } = effect
-      const borderWidth = Math.round(effect.height / 2)
-      let bgEndpoints = ''
-
-      switch (effect.endpoint) {
-        case 'triangle':
-          bgEndpoints = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m${borderWidth + 1} 0h-1l-${borderWidth} ${borderWidth * 2}h${borderWidth + 1}z'/>
-            </svg>"), url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m0 0h${borderWidth + 1}l-${borderWidth} ${borderWidth * 2}h-1z'/>
-            </svg>")`
-          break
-        case 'rounded':
-          bgEndpoints = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m${borderWidth + 1} 0h-1a1 1 0 000 ${borderWidth * 2}h1z'/>
-            </svg>"), url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m0 0h1a1 1 0 010 ${borderWidth * 2}h-1z'/>
-            </svg>")`
-          break
-        case 'square':
-          bgEndpoints = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
-            </svg>"), url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
-            </svg>")`
-          break
-      }
-
-      return {
-        duplicatedSpan: {
-          color: 'transparent',
-          opacity: effect.opacity * 0.01,
-          boxDecorationBreak: 'clone',
-          backgroundRepeat: 'no-repeat',
-          backgroundImage: `
-            linear-gradient(180deg, ${color}, ${color}),
-            ${this.inlineSvg(bgEndpoints)}`,
-          backgroundSize: `
-            calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
-            ${borderWidth + 1}px ${borderWidth * 2}px,
-            ${borderWidth + 1}px ${borderWidth * 2}px`,
-          backgroundPositionX: `${borderWidth}px, 0, 100%`,
-          backgroundPositionY: `${100 - (effect.yOffset)}%`
-        }
-      }
-    } else if (isITextGooey(effect) && effect.name === 'cloud') {
+    if (isITextGooey(effect) && effect.name === 'cloud') {
       const color = this.rgba(effect.color, effect.opacity * 0.01)
       return {
         padding: '0 20px',
@@ -404,6 +395,8 @@ class TextBg {
 
   drawSvgBg(config: IText, pageScaleRatio: number, bodyHtml: Element[]) {
     const textBg = config.styles.textBg
+    if (!((isITextGooey(textBg) && textBg.name === 'gooey') || isITextUnderline(textBg))) return null
+
     const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
     const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRect[][]
@@ -493,31 +486,61 @@ class TextBg {
           height,
           fill: color
         },
-        content: [{
-          tag: 'path',
-          attrs: {
-            d,
-            ...vertical ? {
-              transform: 'rotate(90) scale(1,-1)'
-            } : {}
+        content: [
+          // ...cps.toCircle(), // Show control point
+          {
+            tag: 'path',
+            attrs: {
+              d,
+              transform: vertical ? 'rotate(90) scale(1,-1)' : 'none'
+            }
           }
-        }]
+        ]
       }
     } else if (isITextUnderline(textBg)) {
       const color = this.rgba(textBg.color, textBg.opacity * 0.01)
+      const paths = [] as Record<string, unknown>[]
+      rects.forEach(rect => {
+        const capWidth = rect.height * 0.005 * textBg.height
+        // capWidth = Math.min(capWidth, rect.width / 2)
+        const yOffset = (rect.height - capWidth * 2) * 0.01 * (100 - textBg.yOffset)
+        const path = new Path(new Point(rect.x + capWidth, rect.y + yOffset))
+
+        switch (textBg.endpoint) {
+          case 'triangle':
+            path.h(rect.width - capWidth)
+            path.l(-capWidth, capWidth * 2)
+            path.h(-(rect.width - capWidth))
+            break
+          case 'rounded':
+            path.a(capWidth * 2)
+            path.h(rect.width - capWidth * 2)
+            path.a(-capWidth * 2)
+            break
+          case 'square':
+            path.h(rect.width - capWidth)
+            path.v(capWidth * 2)
+            path.h(-rect.width)
+            path.v(-capWidth * 2)
+            break
+        }
+
+        paths.push({
+          tag: 'path',
+          attrs: {
+            d: path.result()
+          }
+        })
+        // paths.push(...path.toCircle()) // Show control point
+      })
 
       return {
         attrs: {
-          // width: bodyRect.width * scaleRatio,
-          // height: bodyRect.height * scaleRatio,
-          // fill: color
+          width: bodyRect.width * scaleRatio,
+          height: bodyRect.height * scaleRatio,
+          fill: color
         },
-        content: [{
-          tag: 'path',
-          attrs: {
-            // d: path.result()
-          }
-        }]
+        content: paths
       }
     } else return null
   }
