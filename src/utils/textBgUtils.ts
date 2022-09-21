@@ -109,35 +109,41 @@ class Path {
 }
 
 class Gooey {
-  controlPoints = [[], []] as {top: Point, bottom: Point}[][]
+  controlPoints = [[], []] as {top: Point, bottom: Point, oldHeight: number}[][]
   constructor(rects: DOMRect[]) {
     const first = rects[0]
     this.controlPoints[0].push({
       top: new Point(first.x + first.width, first.y),
-      bottom: new Point(first.x + first.width, first.y)
+      bottom: new Point(first.x + first.width, first.y),
+      oldHeight: 0 // to-delete
     })
     this.controlPoints[1].push({
       top: new Point(first.x, first.y),
-      bottom: new Point(first.x, first.y)
+      bottom: new Point(first.x, first.y),
+      oldHeight: 0
     })
     rects.forEach((rect: DOMRect) => {
       this.controlPoints[0].push({
         top: new Point(rect.x, rect.y),
-        bottom: new Point(rect.x, rect.y + rect.height)
+        bottom: new Point(rect.x, rect.y + rect.height),
+        oldHeight: rect.height
       })
       this.controlPoints[1].push({
         top: new Point(rect.x + rect.width, rect.y),
-        bottom: new Point(rect.x + rect.width, rect.y + rect.height)
+        bottom: new Point(rect.x + rect.width, rect.y + rect.height),
+        oldHeight: rect.height
       })
     })
     const last = _.nth(rects, -1)
     this.controlPoints[0].push({
       top: new Point(last.x + last.width, last.y + last.height),
-      bottom: new Point(last.x + last.width, last.y + last.height)
+      bottom: new Point(last.x + last.width, last.y + last.height),
+      oldHeight: last.height
     })
     this.controlPoints[1].push({
       top: new Point(last.x, last.y + last.height),
-      bottom: new Point(last.x, last.y + last.height)
+      bottom: new Point(last.x, last.y + last.height),
+      oldHeight: last.height
     })
   }
 
@@ -182,7 +188,7 @@ class Gooey {
   }
 
   // Return svg path
-  process(bRadius: number) {
+  process(bRadius: number, debug: number) {
     let path = null as unknown as Path
     let ps = this.controlPoints[0]
     for (let i = 1; i < ps.length - 1; i++) {
@@ -191,7 +197,13 @@ class Gooey {
       const prevMiddle = rectPrev.bottom.middle(rect.top)
       const rectNext = ps[i + 1]
       const nextMiddle = rect.bottom.middle(rectNext.top)
-      const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
+      const radius = debug === 0
+        ? rect.top.dist(rect.bottom) * bRadius * 0.005
+        : debug === 1 ? Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
+          : Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
+      // const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
+      // const radius = Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
+      // const radius = Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
       const radiusTop = Math.min(radius, rect.top.dist(prevMiddle)) *
         (rectPrev.bottom.x < rect.top.x ? -1 : 1)
       const radiusBottom = Math.min(radius, rect.bottom.dist(nextMiddle)) *
@@ -216,7 +228,13 @@ class Gooey {
       const prevMiddle = rectPrev.bottom.middle(rect.top)
       const rectNext = ps[i + 1]
       const nextMiddle = rect.bottom.middle(rectNext.top)
-      const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
+      const radius = debug === 0
+        ? rect.top.dist(rect.bottom) * bRadius * 0.005
+        : debug === 1 ? Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
+          : Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
+      // const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
+      // const radius = Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
+      // const radius = Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
       const radiusTop = Math.min(radius, rect.top.dist(prevMiddle)) *
         (rectPrev.bottom.x < rect.top.x ? -1 : 1)
       const radiusBottom = Math.min(radius, rect.bottom.dist(nextMiddle)) *
@@ -482,12 +500,16 @@ class TextBg {
 
       const cps = new Gooey(rects)
       cps.preProcess()
-      const d = cps.process(bRadius)
+      const debug = (textBg as any).endpoint
+      const d = cps.process(bRadius,
+        debug === 'triangle' ? 0
+          : debug === 'rounded' ? 1 : 2
+      )
 
       return {
         attrs: { width, height, fill },
         content: [
-          // ...cps.toCircle(), // Show control point
+          ...cps.toCircle(), // Show control point
           {
             tag: 'path',
             attrs: {
