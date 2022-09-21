@@ -45,22 +45,22 @@ export default Vue.extend({
         {
           title: `${this.$t('NN0746')}`,
           description: `${this.$t('NN0750')}`,
-          video: 'https://template.vivipic.com/static/video/copy_paste.mp4'
+          video: 'https://template.vivipic.com/static/video/us-01-copy_paste.mp4'
         },
         {
           title: `${this.$t('NN0747')}`,
           description: `${this.$t('NN0751')}`,
-          video: 'https://template.vivipic.com/static/video/copy_paste.mp4'
+          video: 'https://template.vivipic.com/static/video/us-02-text.mp4'
         },
         {
           title: `${this.$t('NN0748')}`,
           description: `${this.$t('NN0752')}`,
-          video: 'https://template.vivipic.com/static/video/objects.mp4'
+          video: 'https://template.vivipic.com/static/video/us-03-objects.mp4'
         },
         {
           title: `${this.$t('NN0749')}`,
           description: `${this.$t('NN0753')}`,
-          video: 'https://template.vivipic.com/static/video/objects.mp4'
+          video: 'https://template.vivipic.com/static/video/us-04-background.mp4'
         }
       ],
       basicWidth: window.innerWidth
