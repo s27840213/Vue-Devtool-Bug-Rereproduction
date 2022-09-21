@@ -10,6 +10,9 @@ import logUtils from '@/utils/logUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { IUserInfo } from '@/interfaces/vivisticker'
+import { CustomWindow } from '@/interfaces/customWindow'
+
+declare let window: CustomWindow
 
 Vue.use(VueRouter)
 
@@ -101,13 +104,12 @@ const router = new VueRouter({
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
-        // TODO: always enters standalone mode before iOS App implements login function
-        // const urlParams = new URLSearchParams(window.location.search)
-        // const standalone = urlParams.get('standalone')
-        // if (standalone) {
-        //   vivistickerUtils.enterStandaloneMode()
-        // }
-        vivistickerUtils.enterStandaloneMode()
+        window.loginResult = vivistickerUtils.loginResult
+        const urlParams = new URLSearchParams(window.location.search)
+        const standalone = urlParams.get('standalone')
+        if (standalone) {
+          vivistickerUtils.enterStandaloneMode()
+        }
         vivistickerUtils.getUserInfo().then((userInfo: IUserInfo) => {
           const locale = userInfo.locale
           i18n.locale = locale

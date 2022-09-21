@@ -234,7 +234,7 @@ class ViviStickerUtils {
 
   async getUserInfo(): Promise<IUserInfo> {
     if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
-    this.sendToIOS('LOGIN', {})
+    this.sendToIOS('LOGIN', { empty: '' })
     await Promise.race([
       new Promise<void>(resolve => {
         this.loginCallback = resolve
@@ -242,7 +242,7 @@ class ViviStickerUtils {
       new Promise<void>(resolve => {
         setTimeout(() => {
           resolve()
-        }, 30000) // 30s timeout
+        }, 5000) // 5s timeout
       })
     ])
     this.loginCallback = undefined
@@ -252,10 +252,12 @@ class ViviStickerUtils {
   loginResult(info: IUserInfo) {
     console.log(JSON.stringify(info))
     store.commit('vivisticker/SET_userInfo', info)
-    if (this.loginCallback) {
-      this.loginCallback()
+    if (vivistickerUtils.loginCallback) {
+      vivistickerUtils.loginCallback()
     }
   }
 }
 
-export default new ViviStickerUtils()
+const vivistickerUtils = new ViviStickerUtils()
+
+export default vivistickerUtils
