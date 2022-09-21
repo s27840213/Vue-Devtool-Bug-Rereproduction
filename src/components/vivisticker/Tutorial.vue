@@ -158,6 +158,7 @@ export default Vue.extend({
     background: setColor(black-2);
     box-sizing: border-box;
     box-shadow: 0px 4px 10px 2px rgba(255, 255, 255, 0.25);
+    z-index: 1;
     &__container {
       display: flex;
       overflow: hidden;
