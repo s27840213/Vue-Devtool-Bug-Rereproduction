@@ -105,6 +105,7 @@
         lazy-load(
             target=".editor-view"
             :minHeight="config.width * (scaleRatio / 100)"
+            :maxHeight="config.width * (scaleRatio / 100)"
             :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")

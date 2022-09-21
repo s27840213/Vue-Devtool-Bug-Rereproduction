@@ -26,6 +26,7 @@ export default Vue.extend({
       default: 0,
       type: Number
     },
+    maxHeight: Number,
     threshold: {
       type: Array as PropType<number[]>,
       default: () => [0, 1]
@@ -113,7 +114,8 @@ export default Vue.extend({
   computed: {
     styles(): { [index: string]: string } {
       return {
-        minHeight: `${this.minHeight}px`
+        minHeight: `${this.minHeight}px`,
+        ...(this.maxHeight && { maxHeight: `${this.maxHeight}px` })
       }
     }
   },
