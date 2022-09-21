@@ -41,6 +41,7 @@ export default Vue.extend({
     },
     addBackground() {
       vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
+      AssetUtils.addAssetToRecentlyUsed(this.item)
     },
     handleShare() {
       this.$emit('share', this.item)

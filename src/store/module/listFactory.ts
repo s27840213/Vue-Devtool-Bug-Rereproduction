@@ -1,5 +1,5 @@
 import { ModuleTree, ActionTree, MutationTree, GetterTree } from 'vuex'
-import { IListServiceData } from '@/interfaces/api'
+import { IListServiceContentData, IListServiceData } from '@/interfaces/api'
 import { IListModuleState } from '@/interfaces/module'
 import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
@@ -46,6 +46,13 @@ export default function (this: any) {
           listAll: 0,
           listCategory: 0
         })
+        if (data.data.content.length === 0) {
+          data.data.content = [{
+            title: i18n.t('NN0024'),
+            list: [],
+            is_recent: 1
+          } as IListServiceContentData]
+        }
         if (writeBack) commit('SET_RECENTLY', data.data)
         else return data.data
       } catch (error) {

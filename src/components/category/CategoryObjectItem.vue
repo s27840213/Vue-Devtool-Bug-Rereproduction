@@ -15,6 +15,7 @@ import ProItem from '@/components/payment/ProItem.vue'
 import paymentUtils from '@/utils/paymentUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import assetUtils from '@/utils/assetUtils'
 
 export default Vue.extend({
   components: {
@@ -36,6 +37,7 @@ export default Vue.extend({
         this.handleEditObject()
       } else {
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
+        assetUtils.addAssetToRecentlyUsed(this.item)
       }
     },
     handleEditObject() {

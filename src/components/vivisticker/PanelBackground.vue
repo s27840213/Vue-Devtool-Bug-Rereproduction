@@ -102,6 +102,7 @@ import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { IAsset } from '@/interfaces/module'
+import assetUtils from '@/utils/assetUtils'
 export default Vue.extend({
   components: {
     SearchBar,
@@ -179,6 +180,7 @@ export default Vue.extend({
       const { keyword, categories } = this
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
+        .filter(category => category.list.length > 0)
         .map(category => ({
           size: this.itemWidth + 10 + 46,
           id: `rows_${category.list.map(item => item.id).join('_')}`,
@@ -379,12 +381,18 @@ export default Vue.extend({
         this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
         'download'
       )
+      if (this.shareItem) {
+        assetUtils.addAssetToRecentlyUsed(this.shareItem)
+      }
     },
     handleStory() {
       vivistickerUtils.sendScreenshotUrl(
         this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
         'IGStory'
       )
+      if (this.shareItem) {
+        assetUtils.addAssetToRecentlyUsed(this.shareItem)
+      }
     }
   }
 })

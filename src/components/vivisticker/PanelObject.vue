@@ -85,6 +85,7 @@ export default Vue.extend({
       const { keyword, categories } = this
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
+        .filter(category => category.list.length > 0)
         .map(category => ({
           size: 140,
           id: `rows_${category.list.map(item => item.id).join('_')}`,

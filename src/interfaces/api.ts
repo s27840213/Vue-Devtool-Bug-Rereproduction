@@ -149,7 +149,7 @@ export interface IListServiceContentDataItem {
 }
 
 export interface IListServiceContentData {
-  category_id: number
+  // category_id: number
   list: IListServiceContentDataItem[]
   title: string
   is_recent?: number
