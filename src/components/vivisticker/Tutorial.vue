@@ -23,7 +23,7 @@
                 span {{ buttonText(index) }}
                 div(class="tutorial__content__button-icon")
                   svg-icon(iconName="chevron-right"
-                            iconColor="light-bg"
+                            iconColor="black-3"
                             iconWidth="32px")
         div(class="tutorial__content__indicators")
           div(v-for="(stepConfig, index) in stepConfigs"
@@ -130,7 +130,7 @@ export default Vue.extend({
   left: 0;
   display: grid;
   grid-template-rows: 1fr auto;
-  background: setColor(gray-1);
+  background: setColor(black-2);
   overflow: hidden;
   z-index: setZindex('popup');
   &__close {
@@ -145,7 +145,7 @@ export default Vue.extend({
   &__video {
     width: 100vw;
     overflow: hidden;
-    background: setColor(gray-1);
+    background: setColor(black-2);
     & > video {
       width: 100%;
       height: 100%;
@@ -155,8 +155,9 @@ export default Vue.extend({
   &__content {
     width: 100vw;
     height: 233px;
-    background: setColor(white);
+    background: setColor(black-2);
     box-sizing: border-box;
+    box-shadow: 0px 4px 10px 2px rgba(255, 255, 255, 0.25);
     &__container {
       display: flex;
       overflow: hidden;
@@ -170,13 +171,13 @@ export default Vue.extend({
     }
     &__title {
       @include text-H5;
-      color: setColor(gray-1);
+      color: setColor(white);
       text-align: left;
     }
     &__description {
       margin-top: 16px;
       @include body-SM;
-      color: setColor(gray-1);
+      color: setColor(white);
       text-align: left;
     }
     &__button-container {
@@ -195,9 +196,12 @@ export default Vue.extend({
       padding-right: 4px;
       box-sizing: border-box;
       @include text-H6;
-      color: setColor(light-bg);
-      background: setColor(black-2);
+      color: setColor(black-3);
+      background: setColor(white);
       border-radius: 100px;
+      &:active {
+        background: setColor(white, 0.8);
+      }
     }
     &__button-icon {
       @include size(32px);
@@ -214,7 +218,7 @@ export default Vue.extend({
     }
     &__indicator {
       @include size(6px);
-      background: setColor(gray-2);
+      background: setColor(white);
       border-radius: 50%;
       opacity: 0.3;
       transition: opacity 0.3s ease-in;
