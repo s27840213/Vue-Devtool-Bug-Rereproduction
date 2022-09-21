@@ -405,10 +405,6 @@ class ConstantData {
         label: i18n.tc('NN0725'),
         options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
       }, {
-        key: 'cloud',
-        label: i18n.tc('NN0741'),
-        options: toOptions(['bRadius', 'opacity', 'color'])
-      }, {
         key: 'gooey',
         label: i18n.tc('NN0726'),
         options: toOptions(['distance', 'bRadius', 'opacity', 'color'])

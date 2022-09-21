@@ -133,27 +133,27 @@ export default Vue.extend({
     },
     // Use duplicated of text to do some text effect, define there difference css here.
     duplicatedText() {
-      const duplicatedBodyBasicCss = {
-        position: 'absolute',
-        top: '0px',
-        width: '100%',
-        opacity: 1
-      }
-      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
-      const textShadowCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
-        extraSpan: textShadow.duplicatedSpan
-      }
-      const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
-      const textBgSpanCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
-        extraSpan: textBgSpan.duplicatedSpan
-      }
+      // const duplicatedBodyBasicCss = {
+      //   position: 'absolute',
+      //   top: '0px',
+      //   width: '100%',
+      //   opacity: 1
+      // }
+      // const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      // const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
+      // const textShadowCss = {
+      //   extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
+      //   extraSpan: textShadow.duplicatedSpan
+      // }
+      // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
+      // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
+      // const textBgSpanCss = {
+      //   extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
+      //   extraSpan: textBgSpan.duplicatedSpan
+      // }
       return [
-        ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
-        ...(duplicatedTextShadow ? [textShadowCss] : []),
+        // ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
+        // ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
     }

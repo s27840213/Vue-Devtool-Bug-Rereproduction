@@ -146,14 +146,14 @@ class Gooey {
     this.controlPoints[0].forEach((cps, index, arr) => {
       if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[0][index + 1]
-      const newY = cps.bottom.x === cpsNext.top.x ? (cps.bottom.y + cpsNext.top.y) / 2
+      const newY = Math.abs(cps.bottom.x - cpsNext.top.x) < 10 ? (cps.bottom.y + cpsNext.top.y) / 2
         : cps.bottom.x < cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
     })
     this.controlPoints[1].forEach((cps, index, arr) => {
       if (index === 0 || index === arr.length - 1 || index === arr.length - 2) return
       const cpsNext = this.controlPoints[1][index + 1]
-      const newY = cps.bottom.x === cpsNext.top.x ? (cps.bottom.y + cpsNext.top.y) / 2
+      const newY = Math.abs(cps.bottom.x - cpsNext.top.x) < 10 ? (cps.bottom.y + cpsNext.top.y) / 2
         : cps.bottom.x > cpsNext.top.x ? cps.bottom.y : cpsNext.top.y
       cps.bottom.y = cpsNext.top.y = newY
     })
@@ -331,11 +331,6 @@ class TextBg {
         opacity: 100,
         color: '#F1D289'
       },
-      cloud: {
-        bRadius: 48,
-        opacity: 100,
-        color: '#F1D289'
-      },
       gooey: {
         distance: 20,
         bRadius: 40,
@@ -365,13 +360,16 @@ class TextBg {
       borderRadius: `${effect.bRadius}px`,
       // How to prevent stroke and color mix, https://stackoverflow.com/a/69290621
       svg: {
-        width,
-        height,
+        attrs: {
+          width,
+          height,
+          style: `border-radius: ${effect.bRadius}px`
+        },
         content: [{
           tag: 'path',
           attrs: {
             style: `fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}`,
-            'stroke-width': `${effect.bStroke}`,
+            'stroke-width': effect.bStroke,
             d: `
               m${effect.bStroke / 2} ${effect.bStroke / 2 + innerRadius}a${innerRadius} ${innerRadius} 0 01${innerRadius} -${innerRadius}
               h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
@@ -384,15 +382,16 @@ class TextBg {
   }
 
   convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
-    if (isITextGooey(effect) && effect.name === 'cloud') {
-      const color = this.rgba(effect.color, effect.opacity * 0.01)
-      return {
-        padding: '0 20px',
-        boxDecorationBreak: 'clone',
-        borderRadius: `${effect.bRadius}px`,
-        backgroundColor: color
-      }
-    } else return {}
+    // if (isITextGooey(effect) && effect.name === 'cloud') {
+    //   const color = this.rgba(effect.color, effect.opacity * 0.01)
+    //   return {
+    //     padding: '0 20px',
+    //     boxDecorationBreak: 'clone',
+    //     borderRadius: `${effect.bRadius}px`,
+    //     backgroundColor: color
+    //   }
+    // } else return {}
+    return {}
   }
 
   drawSvgBg(config: IText, pageScaleRatio: number, bodyHtml: Element[]) {
@@ -404,6 +403,12 @@ class TextBg {
     const rawRects = [] as DOMRect[][]
     const body = _.nth(bodyHtml, -1)
     const bodyRect = body.getClientRects()[0]
+    // common svg attrs
+    const width = bodyRect.width * scaleRatio
+    const height = bodyRect.height * scaleRatio
+    const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
+    const transform = vertical ? 'rotate(90) scale(1,-1)' : ''
+
     for (const p of body.childNodes) {
       for (const span of p.childNodes) {
         rawRects.push(span.getClientRects())
@@ -466,9 +471,6 @@ class TextBg {
     if (isITextGooey(textBg) && textBg.name === 'gooey') {
       const padding = textBg.distance
       const bRadius = textBg.bRadius
-      const width = bodyRect.width * scaleRatio
-      const height = bodyRect.height * scaleRatio
-      const color = this.rgba(textBg.color, textBg.opacity * 0.01)
 
       // Add padding.
       rects.forEach((rect: DOMRect) => {
@@ -483,24 +485,19 @@ class TextBg {
       const d = cps.process(bRadius)
 
       return {
-        attrs: {
-          width,
-          height,
-          fill: color
-        },
+        attrs: { width, height, fill },
         content: [
           // ...cps.toCircle(), // Show control point
           {
             tag: 'path',
             attrs: {
               d,
-              transform: vertical ? 'rotate(90) scale(1,-1)' : ''
+              transform
             }
           }
         ]
       }
     } else if (isITextUnderline(textBg)) {
-      const color = this.rgba(textBg.color, textBg.opacity * 0.01)
       const paths = [] as Record<string, unknown>[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
@@ -531,18 +528,14 @@ class TextBg {
           tag: 'path',
           attrs: {
             d: path.result(),
-            transform: vertical ? 'rotate(90) scale(1,-1)' : ''
+            transform
           }
         })
         // paths.push(...path.toCircle()) // Show control point
       })
 
       return {
-        attrs: {
-          width: bodyRect.width * scaleRatio,
-          height: bodyRect.height * scaleRatio,
-          fill: color
-        },
+        attrs: { width, height, fill },
         content: paths
       }
     } else return null

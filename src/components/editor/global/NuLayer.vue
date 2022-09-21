@@ -5,8 +5,7 @@
       @dragleave.prevent
       @dragenter.prevent)
     //- Svg BG for text effex box.
-    svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
-        class="nu-layer__BG")
+    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-layer__BG")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`layerSvgBG${idx}`"
                 :is="elm.tag"
