@@ -9,7 +9,7 @@
                 iconColor="white"
                 iconWidth="24px")
       div(class="tutorial__video")
-        video(autoplay playsinline muted :src="videoSource" @ended="handleEnded")
+        //- video(autoplay playsinline muted :src="videoSource" @ended="handleEnded")
       div(class="tutorial__content")
         div(class="tutorial__content__container")
           div(v-for="(stepConfig, index) in stepConfigs"
