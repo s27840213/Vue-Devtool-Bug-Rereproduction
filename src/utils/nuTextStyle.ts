@@ -129,18 +129,6 @@ export default Extension.create({
               }
             }
           },
-          backgroundColor: {
-            default: 'transparent'
-          },
-          padding: {
-            default: '0'
-          },
-          boxDecorationBreak: {
-            default: 'slice'
-          },
-          borderRadius: {
-            default: '0'
-          },
           type: {
             default: 'public',
             parseHTML: element => {

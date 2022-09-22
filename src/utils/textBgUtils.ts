@@ -3,7 +3,6 @@ import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import tiptapUtils from '@/utils/tiptapUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
 import Vue from 'vue'
@@ -415,8 +414,14 @@ class TextBg {
       const nextIndex = index + 1
       while (nextIndex < rects.length) {
         const next = rects[nextIndex]
-        if (((next.y < rect.y && rect.y << next.y + next.height) ||
-          (rect.y < next.y && next.y << rect.y + rect.height))) {
+        const currTop = rect.y
+        const currBottom = rect.y + rect.height
+        const nextTop = next.y
+        const nextBottom = next.y + next.height
+        if (((nextTop < currTop && currTop < nextBottom &&
+          nextTop < currBottom && currBottom < nextBottom) ||
+          (currTop < nextTop && nextTop < currBottom &&
+          currTop < nextBottom && nextBottom < currBottom))) {
           rect.y = Math.min(rect.y, next.y)
           rect.width += next.width
           rect.height = Math.max(rect.height, next.height)
@@ -626,9 +631,6 @@ class TextBg {
         })
       }
     }
-
-    // Update content in tiptap and focus it if need.
-    tiptapUtils.updateHtml()
   }
 }
 
