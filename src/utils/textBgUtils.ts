@@ -83,14 +83,14 @@ class Path {
     this.pathArray.push(`l${x} ${y}`)
   }
 
-  a(offset: number) {
-    this.currPos = this.currPos.add(new Point(0, offset))
+  a(rx: number, ry: number, sweepFlag: number, x: number, y: number) {
+    this.currPos = this.currPos.add(new Point(x, y))
     this.pointArray.push(this.currPos)
-    this.pathArray.push(`a1 1 0 000 ${offset}`)
+    this.pathArray.push(`a${rx} ${ry} 0 0${sweepFlag}${x} ${y}`)
   }
 
   result() {
-    return this.pathArray.join('')
+    return this.pathArray.join('') + 'z'
   }
 
   toCircle() {
@@ -365,38 +365,6 @@ class TextBg {
   convertTextEffect(styles: IStyle) {
     const effect = styles.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
-
-    const opacity = effect.opacity * 0.01
-    const width = styles.width + (effect.bStroke + 20) * 2
-    const height = styles.height + (effect.bStroke + effect.pStroke) * 2
-    const innerWidth = styles.width + 20 * 2 + effect.bStroke
-    const innerHeight = styles.height + effect.pStroke * 2 + effect.bStroke
-    const innerRadius = Math.max(0, Math.min(effect.bRadius - effect.bStroke / 2, innerWidth / 2, innerHeight / 2))
-
-    return {
-      padding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`,
-      borderRadius: `${effect.bRadius}px`,
-      // How to prevent stroke and color mix, https://stackoverflow.com/a/69290621
-      svg: {
-        attrs: {
-          width,
-          height,
-          style: `border-radius: ${effect.bRadius}px`
-        },
-        content: [{
-          tag: 'path',
-          attrs: {
-            style: `fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}`,
-            'stroke-width': effect.bStroke,
-            d: `
-              m${effect.bStroke / 2} ${effect.bStroke / 2 + innerRadius}a${innerRadius} ${innerRadius} 0 01${innerRadius} -${innerRadius}
-              h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
-              v${innerHeight - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} ${innerRadius}
-              h-${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} -${innerRadius}z`
-          }
-        }]
-      }
-    }
   }
 
   convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
@@ -414,8 +382,6 @@ class TextBg {
 
   drawSvgBg(config: IText, pageScaleRatio: number, bodyHtml: Element[]) {
     const textBg = config.styles.textBg
-    if (!((isITextGooey(textBg) && textBg.name === 'gooey') || isITextUnderline(textBg))) return null
-
     const scaleRatio = 1 / (pageScaleRatio * 0.01 * config.styles.scale)
     const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRect[][]
@@ -424,7 +390,6 @@ class TextBg {
     // common svg attrs
     const width = bodyRect.width * scaleRatio
     const height = bodyRect.height * scaleRatio
-    const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
     const transform = vertical ? 'rotate(90) scale(1,-1)' : ''
 
     for (const p of body.childNodes) {
@@ -486,9 +451,10 @@ class TextBg {
       rect.height = rect.height * scaleRatio
     })
 
-    if (isITextGooey(textBg) && textBg.name === 'gooey') {
+    if (isITextGooey(textBg)) {
       const padding = textBg.distance
       const bRadius = textBg.bRadius
+      const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
 
       // Add padding.
       rects.forEach((rect: DOMRect) => {
@@ -508,18 +474,17 @@ class TextBg {
 
       return {
         attrs: { width, height, fill },
-        content: [
-          ...cps.toCircle(), // Show control point
-          {
-            tag: 'path',
-            attrs: {
-              d,
-              transform
-            }
+        content: [{
+          tag: 'path',
+          attrs: {
+            d,
+            transform
           }
-        ]
+        }]
+        // .concat(cps.toCircle() as any) // Show control point
       }
     } else if (isITextUnderline(textBg)) {
+      const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
       const paths = [] as Record<string, unknown>[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
@@ -534,9 +499,9 @@ class TextBg {
             path.h(-(rect.width - capWidth))
             break
           case 'rounded':
-            path.a(capWidth * 2)
+            path.a(1, 1, 0, 0, capWidth * 2)
             path.h(rect.width - capWidth * 2)
-            path.a(-capWidth * 2)
+            path.a(1, 1, 0, 0, -capWidth * 2)
             break
           case 'square':
             path.h(rect.width - capWidth)
@@ -559,6 +524,40 @@ class TextBg {
       return {
         attrs: { width, height, fill },
         content: paths
+      }
+    } else if (isITextBox(textBg)) {
+      const opacity = textBg.opacity * 0.01
+      const boxWidth = (width + 20 * 2 + textBg.bStroke)
+      const boxHeight = (height + textBg.pStroke * 2 + textBg.bStroke)
+      const boxRadius = Math.max(0, Math.min((textBg.bRadius - textBg.bStroke / 2), boxWidth / 2, boxHeight / 2))
+
+      const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
+      path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
+      path.h(boxWidth - boxRadius * 2)
+      path.a(boxRadius, boxRadius, 1, boxRadius, boxRadius)
+      path.v(boxHeight - boxRadius * 2)
+      path.a(boxRadius, boxRadius, 1, -boxRadius, boxRadius)
+      path.h(-(boxWidth - boxRadius * 2))
+      path.a(boxRadius, boxRadius, 1, -boxRadius, -boxRadius)
+
+      return {
+        attrs: {
+          width: boxWidth + textBg.bStroke,
+          height: boxHeight + textBg.bStroke,
+          style: `left: ${-textBg.bStroke - 20}px;
+            top: ${-textBg.bStroke - textBg.pStroke}px;
+            border-radius: ${textBg.bRadius}px;
+            overflow: hidden`
+        },
+        content: [{
+          tag: 'path',
+          attrs: {
+            style: `fill:${textBg.pColor}; stroke:${textBg.bColor}; opacity:${opacity}`,
+            'stroke-width': textBg.bStroke,
+            d: path.result()
+          }
+        }]
+        // .concat(path.toCircle() as any) // Show control point
       }
     } else return null
   }

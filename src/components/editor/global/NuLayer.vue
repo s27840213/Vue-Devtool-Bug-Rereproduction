@@ -4,12 +4,6 @@
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
-    //- Svg BG for text effex box.
-    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-layer__BG")
-      component(v-for="(elm, idx) in svgBG.content"
-                :key="`layerSvgBG${idx}`"
-                :is="elm.tag"
-                v-bind="elm.attrs")
     div(class="layer-scale" ref="scale"
         :style="scaleStyles()")
       nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
@@ -96,10 +90,6 @@ export default Vue.extend({
         }
       }
       return styles
-    },
-    svgBG() {
-      const textBg = textBgUtils.convertTextEffect(this.config.styles)
-      return textBg.svg
     },
     getLayerPos(): { x: number, y: number } {
       return {
