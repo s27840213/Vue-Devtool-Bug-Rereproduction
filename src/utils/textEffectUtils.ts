@@ -293,8 +293,6 @@ class Controller {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
-      // Leave text editing mode to show some span text effect.
-      layers[idx].contentEditable = false
 
       const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
       if (type === 'text') {

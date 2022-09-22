@@ -361,12 +361,12 @@ class TextBg {
     return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
   }
 
-  convertTextEffect(styles: IStyle) {
+  convertTextEffect(styles: IStyle) { // to-delete
     const effect = styles.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
   }
 
-  convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
+  convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> { // to-delete
     return {}
   }
 
@@ -418,10 +418,10 @@ class TextBg {
         const currBottom = rect.y + rect.height
         const nextTop = next.y
         const nextBottom = next.y + next.height
-        if (((nextTop < currTop && currTop < nextBottom &&
-          nextTop < currBottom && currBottom < nextBottom) ||
-          (currTop < nextTop && nextTop < currBottom &&
-          currTop < nextBottom && nextBottom < currBottom))) {
+        if (((nextTop <= currTop && currTop <= nextBottom &&
+          nextTop <= currBottom && currBottom <= nextBottom) ||
+          (currTop <= nextTop && nextTop <= currBottom &&
+          currTop <= nextBottom && nextBottom <= currBottom))) {
           rect.y = Math.min(rect.y, next.y)
           rect.width += next.width
           rect.height = Math.max(rect.height, next.height)
@@ -606,11 +606,8 @@ class TextBg {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
-      // Leave text editing mode to show some span text effect.
-      layers[idx].contentEditable = false
 
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
-
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
         if (layerTextBg && layerTextBg.name === effect) {
