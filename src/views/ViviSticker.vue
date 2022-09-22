@@ -62,6 +62,9 @@ export default Vue.extend({
     eventUtils.on(PanelEvent.switchTab, this.switchTab)
     textUtils.loadDefaultFonts()
     window.updateInfoDone = vivistickerUtils.updateInfoDone
+    if (this.userInfo.isFirstOpen) {
+      this.setShowTutorial(true)
+    }
   },
   mounted() {
     /**
@@ -113,7 +116,8 @@ export default Vue.extend({
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
-      showTutorial: 'vivisticker/getShowTutorial'
+      showTutorial: 'vivisticker/getShowTutorial',
+      userInfo: 'vivisticker/getUserInfo'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
@@ -166,7 +170,8 @@ export default Vue.extend({
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setCurrActivePanel: 'mobileEditor/SET_currActivePanel',
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
-      setCurrActiveTab: 'vivisticker/SET_currActiveTab'
+      setCurrActiveTab: 'vivisticker/SET_currActiveTab',
+      setShowTutorial: 'vivisticker/SET_showTutorial'
     }),
     headerStyles() {
       return {
