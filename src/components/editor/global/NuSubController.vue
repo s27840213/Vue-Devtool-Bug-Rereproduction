@@ -708,8 +708,6 @@ export default Vue.extend({
           imgHeight,
           imgX,
           imgY
-          // horizontalFlip: currLayer.styles.horizontalFlip,
-          // verticalFlip: currLayer.styles.verticalFlip
         })
         const body = this.$refs.body as HTMLElement
         body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerleave' : 'mouseleave', this.onFrameMouseLeave)

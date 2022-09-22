@@ -2,6 +2,7 @@
 import { SrcObj } from '@/interfaces/gallery'
 import { IShadowEffects, IShadowProps, IShadowStyles, ShadowEffectType } from '@/interfaces/imgShadow'
 import { IGroup, IImage, IImageStyle } from '@/interfaces/layer'
+import generalUtils from '@/utils/generalUtils'
 import { IEditorState, ILayerInfo } from '../types'
 
 const UPDATE_shadowEffect = 'UPDATE_shadowEffect' as const
@@ -10,6 +11,7 @@ const UPDATE_shadowStyles = 'UPDATE_shadowStyles' as const
 const SET_shadowEffectState = 'SET_shadowEffectState' as const
 const SET_srcObj = 'SET_srcObj' as const
 const SET_srcState = 'SET_srcState' as const
+const SET_old = 'SET_old' as const
 
 const imgShadowMutations = {
   [UPDATE_shadowEffect](state: IEditorState, data: { layerInfo: ILayerInfo, payload: IShadowEffects }) {
@@ -94,6 +96,21 @@ const imgShadowMutations = {
       Object.assign(target.styles.shadow.srcState, { effect, effects, layerSrcObj, shadowSrcObj, layerState })
     } else {
       target.styles.shadow.srcState = { effect, effects, layerSrcObj, shadowSrcObj, layerState }
+    }
+  },
+  [SET_old](state: IEditorState, layerInfo: ILayerInfo) {
+    const { pageIndex, layerIndex, subLayerIdx } = layerInfo
+    if (pageIndex === -1 || layerIndex === -1) return
+
+    let target
+    if (typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1) {
+      target = (state.pages[pageIndex].layers[layerIndex] as IGroup).layers[subLayerIdx] as IImage
+    } else {
+      target = state.pages[pageIndex].layers[layerIndex] as IImage
+    }
+    target.styles.shadow.old = {
+      currentEffect: target.styles.shadow.currentEffect,
+      effects: generalUtils.deepCopy(target.styles.shadow.effects)
     }
   }
 }

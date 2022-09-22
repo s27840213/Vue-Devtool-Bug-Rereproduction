@@ -200,6 +200,10 @@ export default Vue.extend({
     },
     shadowEffects: {
       handler(val) {
+        const shadow = (this.config as IImage).styles.shadow
+        if (shadow.old && shadow.old.currentEffect !== shadow.currentEffect) {
+          return
+        }
         if (!this.forRender && this.$refs.canvas && !this.isUploadingShadowImg && this.currentShadowEffect !== ShadowEffectType.none) {
           this.updateShadowEffect(val)
         }
@@ -809,28 +813,27 @@ export default Vue.extend({
       const _mappingScale = shadow.middsize / shadow.maxsize
       let _drawCanvasW = 0
       let _drawCanvasH = 0
-      this.shadowBuff.drawCanvasW = Math.round(img.naturalWidth * width / imgWidth)
-      this.shadowBuff.drawCanvasH = Math.round(img.naturalHeight * height / imgHeight)
-      if (currentEffect === ShadowEffectType.floating) {
-        const ratio = img.naturalWidth / img.naturalHeight
-        const _canvasW = (ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE
-        const _canvasH = (ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE
-        _drawCanvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio))
-        _drawCanvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600))
-        this.shadowBuff.canvasSize.width = _canvasW * width / _drawCanvasW
-        this.shadowBuff.canvasSize.height = _canvasH * height / _drawCanvasH
-        canvas.setAttribute('width', `${_canvasW}`)
-        canvas.setAttribute('height', `${_canvasH}`)
+      let _canvasW = 0
+      let _canvasH = 0
+      const isRect = currentEffect === ShadowEffectType.frame && shadow.isTransparent === false
+      if (currentEffect === ShadowEffectType.floating || isRect) {
+        const ratio = isRect ? width / height : img.naturalWidth / img.naturalHeight
+        _drawCanvasW = Math.round(ratio > 1 ? 1600 : 1600 * ratio)
+        _drawCanvasH = Math.round(ratio > 1 ? 1600 / ratio : 1600)
+        _canvasW = _drawCanvasW + CANVAS_SPACE
+        _canvasH = _drawCanvasH + CANVAS_SPACE
       } else {
-        const _canvasW = img.naturalWidth + CANVAS_SPACE * _mappingScale
-        const _canvasH = img.naturalHeight + CANVAS_SPACE * _mappingScale
-        this.shadowBuff.canvasSize.width = _canvasW * width / this.shadowBuff.drawCanvasW
-        this.shadowBuff.canvasSize.height = _canvasH * height / this.shadowBuff.drawCanvasH
-        _drawCanvasW = this.shadowBuff.drawCanvasW
-        _drawCanvasH = this.shadowBuff.drawCanvasH
-        canvas.setAttribute('width', `${_canvasW}`)
-        canvas.setAttribute('height', `${_canvasH}`)
+        _canvasW = img.naturalWidth + CANVAS_SPACE * _mappingScale
+        _canvasH = img.naturalHeight + CANVAS_SPACE * _mappingScale
+        _drawCanvasW = Math.round(img.naturalWidth * width / imgWidth)
+        _drawCanvasH = Math.round(img.naturalHeight * height / imgHeight)
       }
+      this.shadowBuff.canvasSize.width = _canvasW * width / _drawCanvasW
+      this.shadowBuff.canvasSize.height = _canvasH * height / _drawCanvasH
+      this.shadowBuff.drawCanvasW = _drawCanvasW
+      this.shadowBuff.drawCanvasH = _drawCanvasH
+      canvas.setAttribute('width', `${_canvasW}`)
+      canvas.setAttribute('height', `${_canvasH}`)
 
       let canvasList = [canvas]
       if (this.isShowPagePanel) {

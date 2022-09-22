@@ -201,10 +201,6 @@ export default Vue.extend({
         isUploading
       }, subLayerIdx)
     },
-    // focusOnPanel() {
-    //   const panel = this.$refs.panel as HTMLElement
-    //   panel.focus()
-    // },
     setUploadingData(layerIdentifier: ILayerIdentifier, id: string) {
       const { pageId, layerId, subLayerId } = layerIdentifier
       const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId || '')

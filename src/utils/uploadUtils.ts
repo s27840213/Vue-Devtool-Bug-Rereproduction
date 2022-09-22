@@ -26,6 +26,7 @@ import brandkitUtils from './brandkitUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import networkUtils from './networkUtils'
 import _ from 'lodash'
+import shadow from '@/store/module/shadow'
 
 // 0 for update db, 1 for update prev, 2 for update both
 enum PutAssetDesignType {
@@ -1288,6 +1289,7 @@ class UploadUtils {
     }
     switch (type) {
       case 'image':
+        delete styles.shadow.old
         return {
           ...general,
           imgX: styles.imgX,

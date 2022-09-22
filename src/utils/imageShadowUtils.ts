@@ -130,8 +130,14 @@ class ImageShadowUtils {
       const canvasH = Math.round((imgRatio > 1 ? 1600 / imgRatio : 1600) + CANVAS_SPACE)
       canvasMaxSize.setAttribute('width', canvasW.toString())
       canvasMaxSize.setAttribute('height', canvasH.toString())
+    } else if (config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent) {
+      const ratio = width / height
+      const canvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE)
+      const canvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE)
+      canvasMaxSize.setAttribute('width', canvasW.toString())
+      canvasMaxSize.setAttribute('height', canvasH.toString())
+      /** only handle the max-size-canvas calculation while in preview state */
     } else if (params.timeout !== 0) {
-      // only handle the max-size-canvas calculation while in preview state
       const imgRatio = img.naturalWidth / img.naturalHeight
       const canvasW = Math.round((imgRatio > 1 ? maxsize : maxsize * imgRatio) + CANVAS_SPACE)
       const canvasH = Math.round((imgRatio > 1 ? maxsize / imgRatio : maxsize) + CANVAS_SPACE)
@@ -160,15 +166,24 @@ class ImageShadowUtils {
     if ([ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
       const ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
       const { drawCanvasW, drawCanvasH, timeout = DRAWING_TIMEOUT } = params
-      const drawImgWidth = width / imgWidth * img.naturalWidth
-      const drawImgHeight = height / imgHeight * img.naturalHeight
-      const scaleRatio = img.naturalWidth / imgWidth
-      const x = (canvas.width - drawCanvasW) * 0.5
-      const y = (canvas.height - drawCanvasH) * 0.5
-      ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-      ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
-      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
       const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
+      if (isRect) {
+        const drawImgWidth = img.naturalWidth
+        const drawImgHeight = img.naturalHeight
+        const x = (canvas.width - drawCanvasW) * 0.5
+        const y = (canvas.height - drawCanvasH) * 0.5
+        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+        ctxT.drawImage(img, 0, 0, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      } else {
+        const drawImgWidth = width / imgWidth * img.naturalWidth
+        const drawImgHeight = height / imgHeight * img.naturalHeight
+        const scaleRatio = img.naturalWidth / imgWidth
+        const x = (canvas.width - drawCanvasW) * 0.5
+        const y = (canvas.height - drawCanvasH) * 0.5
+        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+        ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      }
+      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
       this.dilate = getDilate(imageData, isRect, undefined, !timeout ? maxsize / middsize : 1)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
@@ -298,21 +313,17 @@ class ImageShadowUtils {
       return
     }
     const { timeout = DRAWING_TIMEOUT } = params
-    const handlerId = generalUtils.generateRandomString(6)
-    if (!store.getters['shadow/isUploading'] || !params.timeout) {
-      this.handlerId = handlerId
-    }
     if (timeout) {
       clearTimeout(this._draw)
       this._draw = setTimeout(() => {
-        this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
+        this.imageMathcedHandler(canvas_s, img, config, params)
       }, timeout)
     } else {
-      this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
+      this.imageMathcedHandler(canvas_s, img, config, params)
     }
   }
 
-  imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     logUtils.setLog('canvas drawing: drawImageMatchedShadow start:')
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
@@ -360,9 +371,7 @@ class ImageShadowUtils {
     ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('imageMatched', 1)
-    const start = Date.now()
     const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1)
-    console.log('image-matched blur handling time: ', Date.now() - start)
     setMark('imageMatched', 2)
     const xFactor = layerWidth / _imgWidth
     const yFactor = layerHeight / _imgHeight
@@ -436,7 +445,9 @@ class ImageShadowUtils {
       }
 
       setMark('shadow', 1)
-      const _imageData = new ImageData(this.dilate(spread * Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)), canvasT.width, canvasT.height)
+      const spreadF = currentEffect === ShadowEffectType.frame && !shadow.isTransparent
+        ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
+      const _imageData = new ImageData(this.dilate(spread * spreadF), canvasT.width, canvasT.height)
       ctxT.putImageData(_imageData, 0, 0)
       setMark('shadow', 2)
 
@@ -572,6 +583,8 @@ class ImageShadowUtils {
       const { shadow } = layer.styles
       const { effects } = shadow
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
+
+      this.updateShadowOld(layerInfo)
 
       if (layer.styles.scale !== 1) {
         let { imgWidth, imgHeight, imgX, imgY } = layer.styles.shadow.styles
@@ -759,6 +772,10 @@ class ImageShadowUtils {
     })
   }
 
+  updateShadowOld(layerInfo: ILayerInfo) {
+    store.commit('SET_old', layerInfo)
+  }
+
   setShadowSrcState(layerInfo: ILayerInfo, attrs: {
     effect: ShadowEffectType,
     effects: IShadowEffects,
@@ -873,7 +890,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
-    spread: { max: 30, min: 0, weighting: 0.72 },
+    spread: { max: 30, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 2 }
   },
