@@ -422,16 +422,30 @@ export default Vue.extend({
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
+      const colorHandler = () => {
+        if (this.showExtraColorPanel || this.currActivePanel === 'color') {
+          if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
+            this.addRecentlyColors(colorUtils.currColor)
+          }
+        }
+      }
       if (this.showExtraColorPanel) {
         return () => {
+          colorHandler()
           this.showExtraColorPanel = false
           this.panelHistory.pop()
         }
       }
       if (this.panelHistory.length > 0) {
-        return () => { this.panelHistory.pop() }
+        return () => {
+          colorHandler()
+          this.panelHistory.pop()
+        }
       } else {
-        return () => { this.closeMobilePanel() }
+        return () => {
+          colorHandler()
+          this.closeMobilePanel()
+        }
       }
     },
     rightButtonAction(): () => void {
