@@ -699,11 +699,16 @@ class AssetUtils {
   }
 
   setRecentlyUsed(typeModule: string, recentlyUsedList: any[]) {
-    const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
-    const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
-    if (recentlyUsed) {
-      recentlyUsed.list = recentlyUsedList
-      store.commit(`${typeModule}/SET_STATE`, { categories })
+    if (typeModule === 'color') {
+      const recently = recentlyUsedList.map(({ id }: { id: string }) => `#${id}`)
+      store.commit(`${typeModule}/SET_recentlyColors`, recently)
+    } else {
+      const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+      const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
+      if (recentlyUsed) {
+        recentlyUsed.list = recentlyUsedList
+        store.commit(`${typeModule}/SET_STATE`, { categories })
+      }
     }
   }
 }

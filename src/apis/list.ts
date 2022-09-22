@@ -6,6 +6,7 @@ import {
   IListServiceResponse
 } from '@/interfaces/api'
 import store from '@/store'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 class ListService {
   getList(params: IListServiceParams) {
@@ -111,23 +112,11 @@ class ListService {
   }
 
   getRecentlyUsedColor() {
-    return this.getList({
-      token: authToken().token || '',
-      locale: localeUtils.currLocale(),
-      type: 'color'
-    })
+    return vivistickerUtils.listAsset('color')
   }
 
   addRecentlyUsedColor(color: string) {
-    return axios.request<IListServiceResponse>({
-      url: '/add-design',
-      method: 'POST',
-      data: {
-        token: authToken().token || '',
-        type: 'color',
-        design_id: color
-      }
-    })
+    vivistickerUtils.addAsset('color', { id: color })
   }
 }
 

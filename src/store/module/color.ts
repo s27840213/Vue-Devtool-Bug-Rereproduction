@@ -131,10 +131,7 @@ const mutations: MutationTree<IColorState> = {
 const actions: ActionTree<IColorState, unknown> = {
   async initRecentlyColors({ commit }) {
     if (state.recentlyColors.length) return
-
-    let recently = (await list.getRecentlyUsedColor()).data.data.content as unknown as string[]
-    recently = recently.map((color: string) => `#${color}`)
-    commit('SET_recentlyColors', recently)
+    await list.getRecentlyUsedColor()
   },
   addRecentlyColors({ commit }, color: string) {
     list.addRecentlyUsedColor(color.replace('#', ''))
