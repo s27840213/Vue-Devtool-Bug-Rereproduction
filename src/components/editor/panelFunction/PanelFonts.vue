@@ -49,6 +49,7 @@ import uploadUtils from '@/utils/uploadUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import FontTag from '@/components/font/FontTag.vue'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   components: {
@@ -72,7 +73,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getRecently()
+    this.getRecently().then(() => { vivistickerUtils.listAsset('font') })
   },
   destroyed() {
     this.setShowMore(false)
@@ -202,7 +203,7 @@ export default Vue.extend({
         this.hasSearch = false
       }
       this.resetContent()
-      keyword ? this.getTagContent({ keyword }) : this.getRecently()
+      keyword ? this.getTagContent({ keyword }) : this.getRecently().then(() => { vivistickerUtils.listAsset('font') })
     },
     uploadFont() {
       uploadUtils.chooseAssets('font')

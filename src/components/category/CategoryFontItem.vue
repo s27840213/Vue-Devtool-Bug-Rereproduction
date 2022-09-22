@@ -153,7 +153,7 @@ export default Vue.extend({
           original: '',
           json: ''
         }
-      })
+      }, 'font')
     },
     async setEditorFont() {
       if (this.pending) return
@@ -237,7 +237,7 @@ export default Vue.extend({
               original: '',
               json: ''
             }
-          })
+          }, 'font')
           // StepsUtils.record()
           if (subLayerIdx === -1) { // no sub layer is selected
             const group = layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IGroup
@@ -309,7 +309,7 @@ export default Vue.extend({
             original: '',
             json: ''
           }
-        })
+        }, 'font')
         // StepsUtils.record()
         TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)

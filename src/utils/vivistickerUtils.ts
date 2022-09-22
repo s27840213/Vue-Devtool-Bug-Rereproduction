@@ -11,7 +11,6 @@ import { ColorEventType, LayerType } from '@/store/types'
 import { IGroup, ILayer } from '@/interfaces/layer'
 import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
-import controlUtils from './controlUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
 import { IUserInfo } from '@/interfaces/vivisticker'
@@ -303,6 +302,21 @@ class ViviStickerUtils {
       this.errorMessageMap.locale = data.msg ?? ''
     }
     vivistickerUtils.handleCallback('update-user-info')
+  }
+
+  async listAsset(key: string): Promise<void> {
+    if (this.isStandaloneMode) return
+    await this.callIOSAsAPI('LIST_ASSET', { key }, `list-asset-${key}`)
+  }
+
+  listAssetResult(data: { key: string, assets: any[] }) {
+    assetUtils.setRecentlyUsed(data.key, data.assets)
+    vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+  }
+
+  addAsset(key: string, asset: any) {
+    if (this.isStandaloneMode) return
+    this.sendToIOS('ADD_ASSET', { key, asset })
   }
 }
 

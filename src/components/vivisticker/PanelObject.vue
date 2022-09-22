@@ -133,7 +133,10 @@ export default Vue.extend({
     generalUtils.panelInit('object',
       this.handleSearch,
       this.handleCategorySearch,
-      this.getRecAndCate
+      async () => {
+        await this.getRecAndCate()
+        vivistickerUtils.listAsset('objects')
+      }
     )
   },
   activated() {
@@ -161,7 +164,7 @@ export default Vue.extend({
         this.panelParams = `http://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
         this.getTagContent({ keyword })
       } else {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('objects') })
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
@@ -171,7 +174,7 @@ export default Vue.extend({
         this.getContent({ keyword, locale })
         vivistickerUtils.setIsInCategory('object', true)
       } else {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('objects') })
       }
     },
     handleLoadMore() {

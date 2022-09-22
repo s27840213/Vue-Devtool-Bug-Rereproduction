@@ -159,7 +159,7 @@ export default Vue.extend({
       this.handleSearch,
       this.handleCategorySearch,
       async () => {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('textStock') })
         this.getContent()
       })
   },
@@ -187,7 +187,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('textStock') })
         this.getContent()
       }
     },
@@ -197,7 +197,7 @@ export default Vue.extend({
         this.getContent({ keyword, locale })
         vivistickerUtils.setIsInCategory('text', true)
       } else {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('textStock') })
         this.getContent()
       }
     },

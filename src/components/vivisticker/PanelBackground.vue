@@ -247,7 +247,10 @@ export default Vue.extend({
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
-      this.getRecAndCate)
+      async () => {
+        await this.getRecAndCate()
+        vivistickerUtils.listAsset('background')
+      })
   },
   activated() {
     const el = (this.$refs.list as Vue).$el
@@ -335,7 +338,7 @@ export default Vue.extend({
       if (keyword) {
         this.getTagContent({ keyword })
       } else {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('background') })
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
@@ -344,7 +347,7 @@ export default Vue.extend({
         this.getContent({ keyword, locale })
         vivistickerUtils.setIsInCategory('background', true)
       } else {
-        this.getRecAndCate()
+        this.getRecAndCate().then(() => { vivistickerUtils.listAsset('background') })
       }
     },
     handleLoadMore() {
@@ -382,7 +385,7 @@ export default Vue.extend({
         'download'
       )
       if (this.shareItem) {
-        assetUtils.addAssetToRecentlyUsed(this.shareItem)
+        assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
       }
     },
     handleStory() {
@@ -391,7 +394,7 @@ export default Vue.extend({
         'IGStory'
       )
       if (this.shareItem) {
-        assetUtils.addAssetToRecentlyUsed(this.shareItem)
+        assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
       }
     }
   }

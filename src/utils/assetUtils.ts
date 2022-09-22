@@ -23,6 +23,7 @@ import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
+import vivistickerUtils from './vivistickerUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -586,6 +587,7 @@ class AssetUtils {
   async addAsset(item: IListServiceContentDataItem, attrs: IAssetProps = {}) {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
+      let key = ''
       const asset = await this.get(item) as IAsset
       switch (asset.type) {
         case 1:
@@ -604,6 +606,7 @@ class AssetUtils {
         case 5:
         case 9:
           this.addSvg({ ...asset.jsonData, designId: item.id, db: 'svg' }, attrs)
+          key = 'objects'
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
@@ -611,15 +614,19 @@ class AssetUtils {
           break
         case 7:
           this.addText({ ...asset.jsonData, designId: item.id, db: 'text' }, attrs)
+          key = 'textStock'
           break
         case 8:
           this.addFrame({ ...asset.jsonData, designId: item.id }, attrs)
+          key = 'objects'
           break
         case 10:
           await this.addLine(asset.jsonData, attrs)
+          key = 'objects'
           break
         case 11:
           await this.addBasicShape(asset.jsonData, attrs)
+          key = 'objects'
           break
         case 14: {
           const { srcObj, styles } = asset.jsonData as IImage
@@ -634,7 +641,7 @@ class AssetUtils {
           throw new Error(`"${asset.type}" is not a type of asset`)
       }
       editorUtils.setCloseMobilePanelFlag(true)
-      this.addAssetToRecentlyUsed(asset)
+      this.addAssetToRecentlyUsed(asset, key)
       return asset.jsonData
     } catch (error) {
       console.log(error)
@@ -642,13 +649,28 @@ class AssetUtils {
     }
   }
 
-  addAssetToRecentlyUsed(asset: IAsset) {
+  addAssetToRecentlyUsed(asset: IAsset, key = '') {
     const {
       id, type, width, height, plan,
       content_ids: contentIds, match_cover: matchCover,
       user_id: userId, asset_id: assetId, asset_index: assetIndex_,
       src, ver, signed_url: signedUrl
     } = asset
+    const item = {
+      id,
+      plan,
+      type,
+      width,
+      height,
+      content_ids: contentIds,
+      match_cover: matchCover,
+      src,
+      user_id: userId,
+      asset_id: assetId,
+      asset_index: assetIndex_,
+      signed_url: signedUrl,
+      ver
+    }
     const typeCategory = this.getTypeCategory(type)
     const typeModule = this.getTypeModule(type)
     if (typeCategory && typeModule) {
@@ -660,23 +682,10 @@ class AssetUtils {
         if (assetIndex >= 0) {
           recentlyUsed.list.splice(assetIndex, 1)
         }
-        recentlyUsed.list.unshift({
-          id,
-          plan,
-          type,
-          width,
-          height,
-          content_ids: contentIds,
-          match_cover: matchCover,
-          src,
-          user_id: userId,
-          asset_id: assetId,
-          asset_index: assetIndex_,
-          signed_url: signedUrl,
-          ver
-        })
+        recentlyUsed.list.unshift(item)
         store.commit(`${typeModule}/SET_STATE`, { categories })
       }
+      if (key) vivistickerUtils.addAsset(key, item)
       const params = {} as { [key: string]: any }
       if (typeCategory === 'font') {
         params.is_asset = (src === 'private' || src === 'admin') ? 1 : 0
@@ -687,6 +696,15 @@ class AssetUtils {
 
   addTemplateToRecentlyUsedPure(id: string): Promise<any> {
     return listApi.addDesign(id, 'template')
+  }
+
+  setRecentlyUsed(typeModule: string, recentlyUsedList: any[]) {
+    const categories = generalUtils.deepCopy((store.state as any)[typeModule].categories)
+    const recentlyUsed = categories.find((category: IListServiceContentData) => category.is_recent === 1)
+    if (recentlyUsed) {
+      recentlyUsed.list = recentlyUsedList
+      store.commit(`${typeModule}/SET_STATE`, { categories })
+    }
   }
 }
 

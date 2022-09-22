@@ -37,7 +37,7 @@ export default Vue.extend({
         this.handleEditObject()
       } else {
         vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrl(this.item))
-        assetUtils.addAssetToRecentlyUsed(this.item)
+        assetUtils.addAssetToRecentlyUsed(this.item, 'objects')
       }
     },
     handleEditObject() {
