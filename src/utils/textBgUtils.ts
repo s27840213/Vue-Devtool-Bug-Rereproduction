@@ -192,62 +192,62 @@ class Gooey {
     let path = null as unknown as Path
     let ps = this.controlPoints[0]
     for (let i = 1; i < ps.length - 1; i++) {
-      const rect = ps[i]
-      const rectPrev = ps[i - 1]
-      const prevMiddle = rectPrev.bottom.middle(rect.top)
-      const rectNext = ps[i + 1]
-      const nextMiddle = rect.bottom.middle(rectNext.top)
+      const curr = ps[i]
+      const prev = ps[i - 1]
+      const prevMiddle = prev.bottom.middle(curr.top)
+      const next = ps[i + 1]
+      const nextMiddle = curr.bottom.middle(next.top)
       const radius = debug === 0
-        ? rect.top.dist(rect.bottom) * bRadius * 0.005
-        : debug === 1 ? Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
-          : Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
-      // const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
-      // const radius = Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
-      // const radius = Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
-      const radiusTop = Math.min(radius, rect.top.dist(prevMiddle)) *
-        (rectPrev.bottom.x < rect.top.x ? -1 : 1)
-      const radiusBottom = Math.min(radius, rect.bottom.dist(nextMiddle)) *
-        (rect.bottom.x < rectNext.top.x ? 1 : -1)
+        ? curr.top.dist(curr.bottom) * bRadius * 0.005
+        : debug === 1 ? Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
+          : Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
+      // const radius = curr.top.dist(curr.bottom) * bRadius * 0.005
+      // const radius = Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
+      // const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
+      const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) *
+        (prev.bottom.x < curr.top.x ? -1 : 1)
+      const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) *
+        (curr.bottom.x < next.top.x ? 1 : -1)
 
       if (i === 1) {
         path = new Path(prevMiddle)
       }
-      const curveTopStart = rect.top.add({ x: radiusTop, y: 0 })
-      const curveTopEnd = rect.top.add({ x: 0, y: radius })
+      const curveTopStart = curr.top.add({ x: radiusTop, y: 0 })
+      const curveTopEnd = curr.top.add({ x: 0, y: radius })
       path.L(curveTopStart)
-      path.C(rect.top.middle(curveTopStart), rect.top.middle(curveTopEnd), curveTopEnd)
-      const curveBottomStart = rect.bottom.add({ x: 0, y: -radius })
-      const curveBottomEnd = rect.bottom.add({ x: radiusBottom, y: 0 })
+      path.C(curr.top.middle(curveTopStart), curr.top.middle(curveTopEnd), curveTopEnd)
+      const curveBottomStart = curr.bottom.add({ x: 0, y: -radius })
+      const curveBottomEnd = curr.bottom.add({ x: radiusBottom, y: 0 })
       path.L(curveBottomStart)
-      path.C(rect.bottom.middle(curveBottomStart), rect.bottom.middle(curveBottomEnd), curveBottomEnd)
+      path.C(curr.bottom.middle(curveBottomStart), curr.bottom.middle(curveBottomEnd), curveBottomEnd)
     }
     ps = this.controlPoints[1]
     for (let i = ps.length - 2; i > 0; i--) {
-      const rect = ps[i]
-      const rectPrev = ps[i - 1]
-      const prevMiddle = rectPrev.bottom.middle(rect.top)
-      const rectNext = ps[i + 1]
-      const nextMiddle = rect.bottom.middle(rectNext.top)
+      const curr = ps[i]
+      const prev = ps[i - 1]
+      const prevMiddle = prev.bottom.middle(curr.top)
+      const next = ps[i + 1]
+      const nextMiddle = curr.bottom.middle(next.top)
       const radius = debug === 0
-        ? rect.top.dist(rect.bottom) * bRadius * 0.005
-        : debug === 1 ? Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
-          : Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
-      // const radius = rect.top.dist(rect.bottom) * bRadius * 0.005
-      // const radius = Math.min(bRadius, rect.top.dist(rect.bottom) / 2)
-      // const radius = Math.min(rect.oldHeight * bRadius * 0.005, rect.top.dist(rect.bottom) / 2)
-      const radiusTop = Math.min(radius, rect.top.dist(prevMiddle)) *
-        (rectPrev.bottom.x < rect.top.x ? -1 : 1)
-      const radiusBottom = Math.min(radius, rect.bottom.dist(nextMiddle)) *
-        (rect.bottom.x < rectNext.top.x ? 1 : -1)
+        ? curr.top.dist(curr.bottom) * bRadius * 0.005
+        : debug === 1 ? Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
+          : Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
+      // const radius = curr.top.dist(curr.bottom) * bRadius * 0.005
+      // const radius = Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
+      // const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
+      const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) *
+        (prev.bottom.x < curr.top.x ? -1 : 1)
+      const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) *
+        (curr.bottom.x < next.top.x ? 1 : -1)
 
-      const curveBottomStart = rect.bottom.add({ x: radiusBottom, y: 0 })
-      const curveBottomEnd = rect.bottom.add({ x: 0, y: -radius })
+      const curveBottomStart = curr.bottom.add({ x: radiusBottom, y: 0 })
+      const curveBottomEnd = curr.bottom.add({ x: 0, y: -radius })
       path.L(curveBottomStart)
-      path.C(rect.bottom.middle(curveBottomStart), rect.bottom.middle(curveBottomEnd), curveBottomEnd)
-      const curveTopStart = rect.top.add({ x: 0, y: radius })
-      const curveTopEnd = rect.top.add({ x: radiusTop, y: 0 })
+      path.C(curr.bottom.middle(curveBottomStart), curr.bottom.middle(curveBottomEnd), curveBottomEnd)
+      const curveTopStart = curr.top.add({ x: 0, y: radius })
+      const curveTopEnd = curr.top.add({ x: radiusTop, y: 0 })
       path.L(curveTopStart)
-      path.C(rect.top.middle(curveTopStart), rect.top.middle(curveTopEnd), curveTopEnd)
+      path.C(curr.top.middle(curveTopStart), curr.top.middle(curveTopEnd), curveTopEnd)
     }
 
     return path.result()
@@ -368,15 +368,6 @@ class TextBg {
   }
 
   convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
-    // if (isITextGooey(effect) && effect.name === 'cloud') {
-    //   const color = this.rgba(effect.color, effect.opacity * 0.01)
-    //   return {
-    //     padding: '0 20px',
-    //     boxDecorationBreak: 'clone',
-    //     borderRadius: `${effect.bRadius}px`,
-    //     backgroundColor: color
-    //   }
-    // } else return {}
     return {}
   }
 
@@ -423,11 +414,13 @@ class TextBg {
     rects.forEach((rect: DOMRect, index: number) => {
       const nextIndex = index + 1
       while (nextIndex < rects.length) {
-        const rectNext = rects[nextIndex]
-        if (rect.y !== rectNext.y) break
-        else {
-          rect.width += rectNext.width
-        }
+        const next = rects[nextIndex]
+        if (((next.y < rect.y && rect.y << next.y + next.height) ||
+          (rect.y < next.y && next.y << rect.y + rect.height))) {
+          rect.y = Math.min(rect.y, next.y)
+          rect.width += next.width
+          rect.height = Math.max(rect.height, next.height)
+        } else break
         Vue.delete(rects, nextIndex)
       }
     })
