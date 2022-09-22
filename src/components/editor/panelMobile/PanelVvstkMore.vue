@@ -154,6 +154,7 @@ export default Vue.extend({
       window.open(url, '_blank')
     },
     handleUpdateLocale(locale: string) {
+      if (locale === this.$i18n.locale) return
       vivistickerUtils.updateLocale(locale).then(() => {
         location.reload()
       })
