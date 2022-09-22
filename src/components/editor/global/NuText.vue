@@ -6,6 +6,7 @@
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs")
+    //- to-delete: duplicatedText, extraBody, extraSpan
     div(v-for="text in duplicatedText" class="nu-text__body" ref="body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
       nu-curve-text(v-if="isCurveText"
@@ -40,10 +41,8 @@ import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
-import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 
@@ -179,7 +178,9 @@ export default Vue.extend({
   methods: {
     drawSvgBG() {
       this.$nextTick(() => {
-        this.svgBG = textBgUtils.drawSvgBg(this.config, this.pageScaleRatio, this.$refs.body as Element[])
+        const targetLayer = this.getLayer(this.pageIndex, this.layerIndex)
+        const groupScaleRatio = this.subLayerIndex !== -1 ? targetLayer.styles.scale : 1
+        this.svgBG = textBgUtils.drawSvgBg(this.config, this.pageScaleRatio * groupScaleRatio, this.$refs.body as Element[])
       })
     },
     styles(styles: any) {
