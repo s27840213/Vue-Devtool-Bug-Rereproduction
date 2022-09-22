@@ -271,6 +271,36 @@ pipelines:
                   EXTRA_ARGS: "--exclude=*.js.map"
                   DELETE_FLAG: "true"
         - step:
+            name: "stickertest"
+            deployment: stickertest
+            trigger: manual
+            script:
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: $AWS_BUCKET_STICKERTEST
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: $AWS_BUCKET_STICKERTEST
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=* --include=index.html"
+              - pipe: atlassian/aws-s3-deploy:1.1.0
+                variables:
+                  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                  S3_BUCKET: $AWS_BUCKET_STICKERTEST
+                  LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                  EXTRA_ARGS: "--exclude=*.js.map"
+                  DELETE_FLAG: "true"
+        - step:
             name: "create pull request"
             trigger: manual
             script:
@@ -696,36 +726,6 @@ pipelines:
                     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_TEST
                     AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_TEST
                     S3_BUCKET: $AWS_BUCKET_DEV0
-                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=*.js.map"
-                    DELETE_FLAG: "true"
-          - step:
-              name: "stickertest"
-              deployment: stickertest
-              trigger: manual
-              script:
-                - pipe: atlassian/aws-s3-deploy:1.1.0
-                  variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                    S3_BUCKET: $AWS_BUCKET_STICKERTEST
-                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
-                - pipe: atlassian/aws-s3-deploy:1.1.0
-                  variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                    S3_BUCKET: $AWS_BUCKET_STICKERTEST
-                    LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                    EXTRA_ARGS: "--exclude=* --include=index.html"
-                - pipe: atlassian/aws-s3-deploy:1.1.0
-                  variables:
-                    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                    S3_BUCKET: $AWS_BUCKET_STICKERTEST
                     LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
                     EXTRA_ARGS: "--exclude=*.js.map"
                     DELETE_FLAG: "true"
