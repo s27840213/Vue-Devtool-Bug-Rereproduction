@@ -305,7 +305,8 @@ export default Vue.extend({
         case 'download': {
           return {
             is: 'popup-download',
-            hideContainer: true
+            hideContainer: true,
+            pageIndex: pageUtils.currFocusPageIndex
           }
         }
         case 'text-effect': {
