@@ -175,7 +175,6 @@
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
         :style="wrapperStyles()")
-    div(class="layer-num") {{config.layers.length}}
 </template>
 
 <script lang="ts">

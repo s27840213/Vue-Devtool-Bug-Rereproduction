@@ -2,7 +2,7 @@
   div(class="nu-text" :style="wrapperStyles()")
     div(v-for="text in duplicatedText" class="nu-text__body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
-      nu-curve-text(v-if="isCurveText()"
+      nu-curve-text(v-if="isCurveText"
         :config="config"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
@@ -17,7 +17,7 @@
           :key="span.id"
           :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    div(v-if="!isCurveText()" class="nu-text__observee")
+    div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans()"
         class="nu-text__span"
         :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
@@ -125,6 +125,13 @@ export default Vue.extend({
       }
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
+    isCurveText(): any {
+      const { textShape } = this.config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
     duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
@@ -163,13 +170,6 @@ export default Vue.extend({
     }
   },
   methods: {
-    isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
-    },
-    isFlipped(): boolean {
-      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    },
     spans(): ISpan[] {
       return textShapeUtils.flattenSpans(this.config)
     },
@@ -181,7 +181,7 @@ export default Vue.extend({
     },
     bodyStyles() {
       const { editing, contentEditable } = this.config
-      const opacity = editing ? (contentEditable ? ((this.isCurveText() || this.isFlipped()) ? 0.2 : 0) : 1) : 1
+      const opacity = editing ? (contentEditable ? ((this.isCurveText || this.isFlipped) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',

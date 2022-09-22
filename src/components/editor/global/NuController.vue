@@ -43,7 +43,7 @@
               @clickSubController="clickSubController"
               @dblSubController="dblSubController"
               @pointerDownSubController="pointerDownSubController")
-      template(v-if="config.type === 'text' && isActive()")
+      template(v-if="config.type === 'text' && isActive")
         div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
           nu-text-editor(:initText="textHtml()" :id="`text-${layerIndex}`"
             :style="textBodyStyle()"
@@ -68,12 +68,12 @@
             @keydown.native.meta.shift.90.exact.stop.self
             @update="handleTextChange"
             @compositionend="handleTextCompositionEnd")
-      div(v-if="isActive() && isLocked() && (scaleRatio >20)"
+      div(v-if="isActive && isLocked() && (scaleRatio >20)"
           class="nu-controller__lock-icon"
           :style="lockIconStyles()")
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
           @click.native="MappingUtils.mappingIconAction('lock')")
-    div(v-if="isActive() && !isControlling && !isLocked() && !isImgControl"
+    div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
@@ -103,7 +103,7 @@
               :style="Object.assign(resizerBarStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
           div(class="control-point resizer"
               :style="Object.assign(resizerStyles(resizer.styles), cursorStyles(resizer.cursor, getLayerRotate()))")
-        div(v-if="config.type === 'text' && contentEditable()" v-for="(resizer, index) in resizer(controlPoints, true)"
+        div(v-if="config.type === 'text' && contentEditable" v-for="(resizer, index) in resizer(controlPoints, true)"
             @pointerdown="moveStart")
           div(class="control-point__resize-bar control-point__move-bar"
               :key="index"
@@ -132,7 +132,7 @@
               @pointerdown.native.stop="rotateStart"
               @touchstart.native="disableTouchEvent")
             img(class="control-point__mover"
-              v-if="config.type !== 'text' || !contentEditable()"
+              v-if="config.type !== 'text' || !contentEditable"
               :src="require('@/assets/img/svg/move.svg')"
               :style='controlPointStyles()'
               @pointerdown="moveStart"
@@ -286,6 +286,20 @@ export default Vue.extend({
             })
       }
       return false
+    },
+    isCurveText(): boolean {
+      return this.checkIfCurve(this.config)
+    },
+    isTextEditing(): boolean {
+      // return !this.isControlling && this.contentEditable
+      // @Test
+      return !this.isControlling
+    },
+    contentEditable(): boolean {
+      return this.config.contentEditable
+    },
+    isActive(): boolean {
+      return this.config.active
     }
   },
   watch: {
@@ -478,17 +492,17 @@ export default Vue.extend({
       const textstyles = {
         width: '100%',
         height: '100%',
-        userSelect: this.contentEditable() ? 'text' : 'none',
-        opacity: (this.isTextEditing() && this.contentEditable()) ? 1 : 0
+        userSelect: this.contentEditable ? 'text' : 'none',
+        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
       }
-      return !this.isCurveText() ? textstyles
+      return !this.isCurveText ? textstyles
         : {
           width: 'auto',
           height: 'auto',
           position: 'absolute',
           top: 0,
           left: 0,
-          opacity: (this.isTextEditing() && this.contentEditable()) ? 1 : 0
+          opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
         }
     },
     groupControllerStyle() {
@@ -529,7 +543,7 @@ export default Vue.extend({
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
         return 0
-      } else if (this.getLayerType() === 'text' && this.isActive()) {
+      } else if (this.getLayerType() === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
       return (zindex ?? (this.config.styles.zindex)) + offset
@@ -551,7 +565,7 @@ export default Vue.extend({
          * So, if we want to control the layer, we need to set it to none.
          * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
          */
-        // touchAction: this.isActive() ? 'none' : 'initial',
+        // touchAction: this.isActive ? 'none' : 'initial',
         touchAction: 'none',
         ...textEffectStyles,
         ...textBgStyles,
@@ -579,7 +593,7 @@ export default Vue.extend({
     //        */
     //       return (this.layerIndex + 1) * 1000
     //     }
-    //     if (this.getLayerType() === 'text' && this.isActive()) {
+    //     if (this.getLayerType() === 'text' && this.isActive) {
     //       return (this.layerIndex + 1) * 99
     //     }
     //     return this.config.styles.zindex + 1
@@ -598,7 +612,7 @@ export default Vue.extend({
     //      * So, if we want to control the layer, we need to set it to none.
     //      * And when the layer is non-active, we need to set it to initial or it make some gesture action failed
     //      */
-    //     touchAction: this.isActive() ? 'none' : 'initial',
+    //     touchAction: this.isActive ? 'none' : 'initial',
     //     ...textEffectStyles,
     //     '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
     //   }
@@ -635,7 +649,7 @@ export default Vue.extend({
 
       if (this.isLine() || (this.isMoving && LayerUtils.currSelectedInfo.index !== this.layerIndex)) {
         return 'none'
-      } else if (this.isShown() || this.isActive()) {
+      } else if (this.isShown() || this.isActive) {
         if (this.config.type === 'tmp' || this.isControlling) {
           return `${2 * (100 / this.scaleRatio) * this.contentScaleRatio}px dashed ${outlineColor}`
         } else {
@@ -674,7 +688,7 @@ export default Vue.extend({
       body.releasePointerCapture((event as PointerEvent).pointerId)
 
       if (this.isTouchDevice()) {
-        if (!this.dblTabsFlag && this.isActive()) {
+        if (!this.dblTabsFlag && this.isActive) {
           const touchtime = Date.now()
           const interval = 500
           const doubleTap = (e: PointerEvent) => {
@@ -714,7 +728,7 @@ export default Vue.extend({
        * @Note - in Mobile version, we can't select the layer directly, we should make it active first
        * The exception is that we are in multi-selection mode
        */
-      if (this.isTouchDevice() && !this.isActive() && !this.isLocked() && !this.inMultiSelectionMode) {
+      if (this.isTouchDevice() && !this.isActive && !this.isLocked() && !this.inMultiSelectionMode) {
         body.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
@@ -723,9 +737,9 @@ export default Vue.extend({
       }
 
       this.movingByControlPoint = false
-      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable()
-      const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable()
-      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable() && !inCopyMode
+      // const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable
+      const inCopyMode = (generalUtils.exact([event.altKey])) && !this.contentEditable
+      const inSelectionMode = (generalUtils.exact([event.shiftKey, event.ctrlKey, event.metaKey])) && !this.contentEditable && !inCopyMode
       const { inMultiSelectionMode } = this
       if (!this.isLocked()) {
         event.stopPropagation()
@@ -748,9 +762,9 @@ export default Vue.extend({
           const isMover = targetClassList.contains('control-point__mover')
 
           // if the text layer is already active and contentEditable
-          if (this.isActive() && !inSelectionMode && this.contentEditable() && !isMoveBar) {
+          if (this.isActive && !inSelectionMode && this.contentEditable && !isMoveBar) {
             return
-          } else if (!this.isActive()) {
+          } else if (!this.isActive) {
             let targetIndex = this.layerIndex
             if (!inSelectionMode && !inMultiSelectionMode) {
               GroupUtils.deselect()
@@ -797,13 +811,13 @@ export default Vue.extend({
       }
       if (this.config.type !== 'tmp') {
         let targetIndex = this.layerIndex
-        if (this.isActive() && this.currSelectedInfo.layers.length === 1) {
+        if (this.isActive && this.currSelectedInfo.layers.length === 1) {
           if (inSelectionMode) {
             GroupUtils.deselect()
             targetIndex = this.config.styles.zindex - 1
             this.setLastSelectedLayerIndex(this.layerIndex)
           }
-        } else if (!this.isActive()) {
+        } else if (!this.isActive) {
           // already have selected layer
           if (this.currSelectedInfo.index >= 0) {
             // Did not press shift/cmd/ctrl key -> deselect selected layers first
@@ -841,7 +855,7 @@ export default Vue.extend({
       }
 
       if (this.isTouchDevice() && !this.isLocked()) {
-        if (!this.isActive()) {
+        if (!this.isActive) {
           if (posDiff.x > 1 || posDiff.y > 1) {
             this.isDoingGestureAction = true
             return
@@ -862,7 +876,7 @@ export default Vue.extend({
         eventUtils.removePointerEvent('pointermove', this.moving)
         return
       }
-      if (this.isActive()) {
+      if (this.isActive) {
         if (generalUtils.getEventType(e) !== 'touch') {
           e.preventDefault()
         }
@@ -905,7 +919,7 @@ export default Vue.extend({
       ControlUtils.updateImgPos(this.pageIndex, this.layerIndex, this.config.styles.imgX, this.config.styles.imgY)
     },
     moveEnd(e: MouseEvent | TouchEvent) {
-      if (!this.isDoingGestureAction && !this.isActive()) {
+      if (!this.isDoingGestureAction && !this.isActive) {
         const body = (this.$refs.body as HTMLElement)
         body.removeEventListener('touchstart', this.disableTouchEvent)
         GroupUtils.deselect()
@@ -926,7 +940,7 @@ export default Vue.extend({
       }
 
       this.setMoving(false)
-      if (this.isActive()) {
+      if (this.isActive) {
         // if (posDiff.x === 0 && posDiff.y === 0 && !this.isLocked()) {
         //   // if (LayerUtils.isClickOutOfPagePart(e, this.$refs.body as HTMLElement, this.config)) {
         //   //   GroupUtils.deselect()
@@ -984,11 +998,11 @@ export default Vue.extend({
           if (this.inMultiSelectionMode) {
             if (this.config.type !== 'tmp') {
               let targetIndex = this.layerIndex
-              if (this.isActive() && this.currSelectedInfo.layers.length === 1) {
+              if (this.isActive && this.currSelectedInfo.layers.length === 1) {
                 GroupUtils.deselect()
                 targetIndex = this.config.styles.zindex - 1
                 this.setLastSelectedLayerIndex(this.layerIndex)
-              } else if (!this.isActive()) {
+              } else if (!this.isActive) {
                 // already have selected layer
                 if (this.currSelectedInfo.index >= 0) {
                   // this if statement is used to prevent select the layer in another page
@@ -1887,7 +1901,7 @@ export default Vue.extend({
       })
     },
     onPress(event: AnyTouchEvent) {
-      if (!this.isActive()) {
+      if (!this.isActive) {
         GroupUtils.deselect()
         GroupUtils.select(this.pageIndex, [this.layerIndex])
       }
@@ -1900,7 +1914,7 @@ export default Vue.extend({
       editorUtils.setInMultiSelectionMode(true)
     },
     clickSubController(targetIndex: number, type: string, selectionMode: boolean) {
-      if (!this.isActive()) {
+      if (!this.isActive) {
         // moveStart will handle the following:
         // LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true })
         return
@@ -2034,9 +2048,6 @@ export default Vue.extend({
       return (type === 'group' || type === 'tmp')
         ? this.config.layers : (type === 'frame' ? this.config.clips : [])
     },
-    isActive(): boolean {
-      return this.config.active
-    },
     isShown(): boolean {
       return this.config.shown
     },
@@ -2045,9 +2056,6 @@ export default Vue.extend({
     },
     isLine(): boolean {
       return this.config.type === 'shape' && this.config.category === 'D'
-    },
-    isCurveText(): boolean {
-      return this.checkIfCurve(this.config)
     },
     getLayerWidth(): number {
       return this.config.styles.width
@@ -2060,14 +2068,6 @@ export default Vue.extend({
     },
     getLayerScale(): number {
       return this.config.styles.scale
-    },
-    isTextEditing(): boolean {
-      // return !this.isControlling && this.contentEditable()
-      // @Test
-      return !this.isControlling
-    },
-    contentEditable(): boolean {
-      return this.config.contentEditable
     },
     isDragging(): boolean {
       return this.config.dragging
