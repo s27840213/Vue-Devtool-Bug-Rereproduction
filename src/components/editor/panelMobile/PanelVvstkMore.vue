@@ -155,7 +155,7 @@ export default Vue.extend({
     },
     handleUpdateLocale(locale: string) {
       vivistickerUtils.updateLocale(locale).then(() => {
-        this.$router.go(0)
+        location.reload()
       })
     }
   }
