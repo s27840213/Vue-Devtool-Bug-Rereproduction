@@ -150,8 +150,10 @@ export default Vue.extend({
           break
         case 'bg':
           textBgUtils.setTextBg(effectName, Object.assign({}, effect))
-          textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
-          TextPropUtils.updateTextPropsState()
+          if (this.currentStyle.shape.name !== 'none') {
+            textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
+            TextPropUtils.updateTextPropsState()
+          }
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, Object.assign({}, effect))

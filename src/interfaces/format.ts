@@ -43,7 +43,7 @@ export interface ITextGooey {
   color: string
 }
 
-export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | Record<string, never>
+export type ITextBgEffect = ITextBox | ITextUnderline | ITextGooey | {name: 'none'}
 
 export function isITextBox(object: ITextBgEffect): object is ITextBox {
   return object && object.name &&

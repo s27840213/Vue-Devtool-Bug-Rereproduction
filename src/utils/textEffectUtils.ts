@@ -259,6 +259,7 @@ class Controller {
   }
 
   syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
+    if (textShadow.name === 'none') return
     Object.assign(textShadow, { name: textShadow.name || effectName })
     const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
     const newShareAttrs = { }

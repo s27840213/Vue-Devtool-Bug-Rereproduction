@@ -179,8 +179,8 @@ export default Vue.extend({
     drawSvgBG() {
       this.$nextTick(() => {
         const targetLayer = this.getLayer(this.pageIndex, this.layerIndex)
-        const groupScaleRatio = this.subLayerIndex !== -1 ? targetLayer.styles.scale : 1
-        this.svgBG = textBgUtils.drawSvgBg(this.config, this.pageScaleRatio * groupScaleRatio, this.$refs.body as Element[])
+        const groupScaleRatio = this.subLayerIndex !== undefined ? targetLayer.styles.scale : 1
+        this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
       })
     },
     styles(styles: any) {
