@@ -74,6 +74,10 @@ export default Vue.extend({
      * https://medium.com/@littleDog/%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-user-scalable-no-%E5%B1%AC%E6%80%A7%E8%A2%ABios-safari-ignore-e6a0531050ba
      */
 
+    if (!this.userInfo.isFirstOpen) {
+      vivistickerUtils.sendAppLoaded()
+    }
+
     stepsUtils.MAX_STORAGE_COUNT = 15
     document.addEventListener('touchstart', (event: TouchEvent) => {
       /**

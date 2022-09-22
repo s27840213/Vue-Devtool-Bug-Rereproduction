@@ -9,7 +9,7 @@
                 iconColor="white"
                 iconWidth="24px")
       div(class="tutorial__video")
-        video(autoplay playsinline muted :src="videoSource" @ended="handleEnded")
+        video(autoplay playsinline muted :src="videoSource" @ended="handleEnded" @canplay="handleVideoLoaded")
       div(class="tutorial__content")
         div(class="tutorial__content__container")
           div(v-for="(stepConfig, index) in stepConfigs"
@@ -36,6 +36,7 @@
 import Vue from 'vue'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { mapMutations } from 'vuex'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   data() {
@@ -107,6 +108,10 @@ export default Vue.extend({
     },
     handleEnded() {
       this.handleNextStep()
+    },
+    handleVideoLoaded() {
+      console.log('loaded')
+      vivistickerUtils.sendAppLoaded()
     },
     handleSwipeLeft(e: AnyTouchEvent) {
       console.log('left')

@@ -20,10 +20,11 @@ import localeUtils from './localeUtils'
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.0',
   locale: 'us',
-  isFirstOpen: false
+  isFirstOpen: true
 }
 
 class ViviStickerUtils {
+  appLoadedSent = false
   inDebugMode = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
@@ -40,6 +41,10 @@ class ViviStickerUtils {
 
   getDefaultUserInfo(): IUserInfo {
     return STANDALONE_USER_INFO
+  }
+
+  getEmptyMessage(): {[key: string]: string} {
+    return { empty: '' }
   }
 
   setDefaultLocale() {
@@ -77,6 +82,13 @@ class ViviStickerUtils {
       const url = `${window.location.origin}/screenshot/?${query}`
       console.log(url)
       window.open(url, '_blank')
+    }
+  }
+
+  sendAppLoaded() {
+    if (!this.appLoadedSent) {
+      this.sendToIOS('APP_LOADED', this.getEmptyMessage())
+      this.appLoadedSent = true
     }
   }
 
@@ -266,7 +278,7 @@ class ViviStickerUtils {
 
   async getUserInfo(): Promise<IUserInfo> {
     if (this.isStandaloneMode) return store.getters['vivisticker/getUserInfo']
-    await this.callIOSAsAPI('LOGIN', { empty: '' }, 'login')
+    await this.callIOSAsAPI('LOGIN', this.getEmptyMessage(), 'login')
     return store.getters['vivisticker/getUserInfo']
   }
 
