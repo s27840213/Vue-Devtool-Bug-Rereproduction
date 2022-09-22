@@ -92,7 +92,10 @@ class AssetUtils {
       7: 'textStock',
       5: 'objects',
       8: 'objects',
-      9: 'objects'
+      9: 'objects',
+      10: 'objects',
+      11: 'objects',
+      15: 'objects'
     } as { [key: number]: string }
     return typeModuleMap[type]
   }
@@ -635,6 +638,7 @@ class AssetUtils {
         }
         case 15: {
           this.addImage(asset.urls.prev, (asset.width ?? 1) / (asset.height ?? 1))
+          key = 'objects'
           break
         }
         default:
