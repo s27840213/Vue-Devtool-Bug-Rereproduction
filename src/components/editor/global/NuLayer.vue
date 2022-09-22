@@ -164,6 +164,9 @@ export default Vue.extend({
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100
     },
+    compensationRatio(): number {
+      return Math.max(1, this.pageScaleRatio())
+    },
     showSpinner(): boolean {
       const { config } = this
       const shadow = this.config.styles.shadow
@@ -176,7 +179,7 @@ export default Vue.extend({
       const { zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
-      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.pageScaleRatio())}) translateZ(0)`
+      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.compensationRatio())}) translateZ(0)`
       /**
       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
@@ -192,7 +195,7 @@ export default Vue.extend({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.pageScaleRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
       return styles
     }

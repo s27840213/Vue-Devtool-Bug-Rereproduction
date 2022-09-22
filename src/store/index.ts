@@ -110,7 +110,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: false,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 0.25
+  defaultContentScaleRatio: 0.4
 })
 
 const state = getDefaultState()
