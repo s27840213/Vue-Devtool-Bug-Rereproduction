@@ -284,11 +284,11 @@ class ViviStickerUtils {
     await this.callIOSAsAPI('UPDATE_USER_INFO', { locale }, 'update-user-info')
   }
 
-  updateInfoDone(flag: string, msg?: string) {
-    console.log(flag)
-    if (flag !== '0') {
-      console.log(msg)
-      this.errorMessageMap.locale = msg ?? ''
+  updateInfoDone(data: { flag: string, msg?: string }) {
+    console.log(data)
+    if (data.flag !== '0') {
+      console.log(data.msg)
+      this.errorMessageMap.locale = data.msg ?? ''
     }
     vivistickerUtils.handleCallback('update-user-info')
   }
