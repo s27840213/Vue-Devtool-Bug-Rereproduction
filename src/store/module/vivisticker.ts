@@ -1,6 +1,7 @@
 import { IAsset } from '@/interfaces/module'
 import { IUserInfo } from '@/interfaces/vivisticker'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import _ from 'lodash'
 import { GetterTree, MutationTree, ActionTree } from 'vuex'
 
 interface IViviStickerState {
@@ -14,7 +15,8 @@ interface IViviStickerState {
   editorType: string,
   controllerHidden: boolean,
   isStandaloneMode: boolean,
-  showTutorial: boolean
+  showTutorial: boolean,
+  recentlyBgColors: string[]
 }
 
 const EDITOR_BGS = [
@@ -37,7 +39,8 @@ const getDefaultState = (): IViviStickerState => ({
   editorType: 'none',
   controllerHidden: false,
   isStandaloneMode: false,
-  showTutorial: false
+  showTutorial: false,
+  recentlyBgColors: []
 })
 
 const state = getDefaultState()
@@ -77,6 +80,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getShowTutorial(state: IViviStickerState): boolean {
     return state.showTutorial
+  },
+  getRecentlyBgColors(state: IViviStickerState): string[] {
+    return state.recentlyBgColors
   }
 }
 
@@ -110,6 +116,15 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_showTutorial(state: IViviStickerState, showTutorial: boolean) {
     state.showTutorial = showTutorial
+  },
+  SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
+    state.recentlyBgColors = recentlyBgColors
+  },
+  UPDATE_addRecentlyBgColor(state: IViviStickerState, recentlyBgColor: string) {
+    let recently = state.recentlyBgColors
+    recently = _.without(recently, recentlyBgColor)
+    recently = [recentlyBgColor].concat(recently)
+    state.recentlyBgColors = recently
   },
   UPDATE_switchBg(state: IViviStickerState) {
     state.editorBgIndex = (state.editorBgIndex + 1) % EDITOR_BGS.length

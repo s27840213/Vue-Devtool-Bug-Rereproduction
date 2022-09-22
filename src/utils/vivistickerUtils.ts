@@ -310,7 +310,7 @@ class ViviStickerUtils {
   }
 
   listAssetResult(data: { key: string, assets: any[] }) {
-    console.log(data, assetUtils, vivistickerUtils)
+    console.log(data)
     assetUtils.setRecentlyUsed(data.key, data.assets)
     vivistickerUtils.handleCallback(`list-asset-${data.key}`)
   }

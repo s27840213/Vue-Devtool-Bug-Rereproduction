@@ -22,6 +22,16 @@
           svg-icon(iconName="loading"
             iconColor="white"
             iconWidth="20px")
+      template(v-slot:recently-background-colors)
+        div(ref="colorBlock")
+          div(class="text-left py-5 text-white") {{$t('NN0024')}}
+          div(class="panel-bg__colors")
+            div(class="panel-bg__color add-color")
+            div(v-for="color in recentlyColors"
+              class="panel-bg__color"
+              v-press="() => handleShareColor(color)"
+              :style="colorStyles(color)"
+              @click="setBgColor(color)")
       template(v-slot:default-background-colors)
         div(ref="colorBlock")
           div(class="text-left py-5 text-white") {{$t('NN0089')}}
@@ -31,8 +41,6 @@
               v-press="() => handleShareColor(color)"
               :style="colorStyles(color)"
               @click="setBgColor(color)")
-              //- div(class="panel-bg__color-back")
-                div(class="panel-bg__color-inner" :style="colorStyles(color)")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
           v-if="!keyword"
@@ -150,7 +158,8 @@ export default Vue.extend({
       isTabInCategory: 'vivisticker/getIsInCategory',
       isInBgShare: 'vivisticker/getIsInBgShare',
       shareItem: 'vivisticker/getShareItem',
-      shareColor: 'vivisticker/getShareColor'
+      shareColor: 'vivisticker/getShareColor',
+      allRecentlyColors: 'vivisticker/getRecentlyBgColors'
     }),
     itemWidth(): number {
       // const basicWidth = (window.innerWidth - 48 - 10) / 2 // (100vw - panel-left-right-padding - gap) / 2
@@ -165,6 +174,19 @@ export default Vue.extend({
     },
     currBackgroundColor(): string {
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
+    },
+    recentlyColors(): string[] {
+      return this.allRecentlyColors.slice(0, 20)
+    },
+    recentlyBackgroundColors(): any[] {
+      const { keyword } = this
+      if (keyword) { return [] }
+      const key = 'recently-background-colors'
+      return [{
+        id: key,
+        type: key,
+        size: generalUtils.isTouchDevice() ? window.innerWidth / 2 : 157
+      }]
     },
     defaultBackgroundColors(): any[] {
       const { keyword } = this
@@ -213,7 +235,7 @@ export default Vue.extend({
     list(): any[] {
       const list = generalUtils.deepCopy(
         this.showImageTab ? this.listCategories
-          .concat(this.listResult) : this.defaultBackgroundColors
+          .concat(this.listResult) : this.recentlyBackgroundColors.concat(this.defaultBackgroundColors)
       )
       /**
        * @NeedCodeReview with Nathan
@@ -247,8 +269,9 @@ export default Vue.extend({
     generalUtils.panelInit('bg',
       this.handleSearch,
       this.handleCategorySearch,
-      async () => {
-        await this.getRecAndCate('background')
+      () => {
+        this.getRecAndCate('background')
+        vivistickerUtils.listAsset('backgroundColor')
       })
   },
   activated() {
@@ -280,7 +303,8 @@ export default Vue.extend({
       setCloseMobilePanelFlag: 'mobileEditor/SET_closeMobilePanelFlag',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setShareItem: 'vivisticker/SET_shareItem',
-      setShareColor: 'vivisticker/SET_shareColor'
+      setShareColor: 'vivisticker/SET_shareColor',
+      addRecentlyBgColor: 'vivisticker/UPDATE_addRecentlyBgColor'
     }),
     colorStyles(color: string) {
       return {
@@ -310,6 +334,8 @@ export default Vue.extend({
     },
     setBgColor(color: string) {
       vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color))
+      vivistickerUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
+      this.addRecentlyBgColor(color)
     },
     getColorWithOpacity(color: string): string {
       const R1 = parseInt(color.substring(1, 3), 16)
@@ -385,6 +411,9 @@ export default Vue.extend({
       )
       if (this.shareItem) {
         assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
+      } else {
+        vivistickerUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
+        this.addRecentlyBgColor(this.shareColor)
       }
     },
     handleStory() {
@@ -394,6 +423,9 @@ export default Vue.extend({
       )
       if (this.shareItem) {
         assetUtils.addAssetToRecentlyUsed(this.shareItem, 'background')
+      } else {
+        vivistickerUtils.addAsset('backgroundColor', { id: this.shareColor.replace('#', '') })
+        this.addRecentlyBgColor(this.shareColor)
       }
     }
   }
@@ -461,6 +493,10 @@ export default Vue.extend({
     -webkit-touch-callout: none;
     user-select: none;
     border-radius: 4px;
+    &.add-color {
+      background-image: url("~@/assets/img/svg/addColor.png");
+      background-size: cover;
+    }
   }
   // &__color-back {
   //   position: absolute;
