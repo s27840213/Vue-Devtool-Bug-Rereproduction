@@ -5,6 +5,7 @@ import { captureException } from '@sentry/browser'
 import localeUtils from '@/utils/localeUtils'
 import store from '@/store'
 import i18n from '@/i18n'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export const SET_STATE = 'SET_STATE' as const
 export const SET_CONTENT = 'SET_CONTENT' as const
@@ -34,7 +35,7 @@ export default function (this: any) {
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
     // For others, get recently used and categoryies.
-    getRecently: async ({ commit, state }, writeBack = true) => {
+    getRecently: async ({ commit, state }, { writeBack = true, key }) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, categories: [], locale }) // Reset categories
@@ -53,8 +54,12 @@ export default function (this: any) {
             is_recent: 1
           } as IListServiceContentData]
         }
-        if (writeBack) commit('SET_RECENTLY', data.data)
-        else return data.data
+        if (writeBack) {
+          commit('SET_RECENTLY', data.data)
+          if (key) {
+            vivistickerUtils.listAsset(key)
+          }
+        } else return data.data
       } catch (error) {
         captureException(error)
       }
@@ -87,13 +92,16 @@ export default function (this: any) {
     },
 
     // For panel initial, get recently and categories at the same time.
-    getRecAndCate: async ({ dispatch, commit }) => {
+    getRecAndCate: async ({ dispatch, commit }, key?: string) => {
       await Promise.all([
-        dispatch('getRecently', false),
+        dispatch('getRecently', { writeBack: false }),
         dispatch('getCategories', false)
       ]).then(([recently, category]) => {
         category.content = recently.content.concat(category.content)
         commit('SET_CATEGORIES', category)
+        if (key) {
+          vivistickerUtils.listAsset(key)
+        }
         if (category.content.length === 0) {
           dispatch('getMoreContent')
         }

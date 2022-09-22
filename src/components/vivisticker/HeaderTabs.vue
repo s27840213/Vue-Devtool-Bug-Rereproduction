@@ -164,16 +164,16 @@ export default Vue.extend({
       switch (this.currActiveTab) {
         case 'object':
           this.resetObjects()
-          this.refetchObjects().then(() => { vivistickerUtils.listAsset('objects') })
+          this.refetchObjects('objects')
           break
         case 'background':
           this.resetBackgrounds()
-          this.refetchBackgrounds().then(() => { vivistickerUtils.listAsset('background') })
+          this.refetchBackgrounds('background')
           break
         case 'text':
           this.resetTexts()
-          this.refetchTexts()
-          this.refetchTextContent().then(() => { vivistickerUtils.listAsset('textStock') })
+          this.refetchTexts('textStock')
+          this.refetchTextContent()
       }
     },
     clearBgShare() {

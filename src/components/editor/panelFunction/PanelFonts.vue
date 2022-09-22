@@ -73,7 +73,7 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.getRecently().then(() => { vivistickerUtils.listAsset('font') })
+    this.getRecently({ key: 'font' })
   },
   destroyed() {
     this.setShowMore(false)
@@ -203,7 +203,7 @@ export default Vue.extend({
         this.hasSearch = false
       }
       this.resetContent()
-      keyword ? this.getTagContent({ keyword }) : this.getRecently().then(() => { vivistickerUtils.listAsset('font') })
+      keyword ? this.getTagContent({ keyword }) : this.getRecently({ key: 'font' })
     },
     uploadFont() {
       uploadUtils.chooseAssets('font')
