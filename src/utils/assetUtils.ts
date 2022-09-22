@@ -91,7 +91,10 @@ class AssetUtils {
       7: 'textStock',
       5: 'objects',
       8: 'objects',
-      9: 'objects'
+      9: 'objects',
+      10: 'objects',
+      11: 'objects',
+      15: 'objects'
     } as { [key: number]: string }
     return typeModuleMap[type]
   }
