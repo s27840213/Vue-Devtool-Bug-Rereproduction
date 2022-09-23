@@ -226,7 +226,7 @@ export default Vue.extend({
   &__effects {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    column-gap: 16px;
+    column-gap: 7.5px;
     width: 212px;
   }
   &__effect {

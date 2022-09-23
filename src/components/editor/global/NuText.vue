@@ -127,6 +127,7 @@ export default Vue.extend({
         position: 'absolute',
         top: '0px',
         width: '100%',
+        height: '100%',
         opacity: 1
       }
       const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
