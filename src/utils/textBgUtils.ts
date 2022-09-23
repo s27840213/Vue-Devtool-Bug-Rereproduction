@@ -95,7 +95,7 @@ class TextBg {
   }
 
   convertTextEffect(styles: IStyle) {
-    const effect = styles.textBg as ITextBgEffect
+    const effect = styles?.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
 
     const opacity = effect.opacity * 0.01
@@ -240,7 +240,7 @@ class TextBg {
     } else return {}
   }
 
-  syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {
+  syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
     Object.assign(textBg, { name: textBg.name || effectName })
     const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
     const newShareAttrs = { opacity: textBg.opacity }
