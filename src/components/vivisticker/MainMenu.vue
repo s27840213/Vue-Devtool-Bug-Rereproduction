@@ -5,7 +5,8 @@
       keep-alive(:include="['panel-object', 'panel-background', 'panel-text']")
         //- p-2 is used to prevent the edge being cutted by overflow: scroll or overflow-y: scroll
         component(class="border-box"
-                  :is="`panel-${this.currActiveTab}`")
+                  :is="`panel-${this.currActiveTab}`"
+                  @openColorPicker="handleOpenColorPicker")
 </template>
 
 <script lang="ts">
@@ -40,6 +41,9 @@ export default Vue.extend({
     })
   },
   methods: {
+    handleOpenColorPicker() {
+      this.$emit('openColorPicker')
+    }
   }
 })
 </script>

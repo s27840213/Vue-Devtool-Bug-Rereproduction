@@ -16,7 +16,8 @@ interface IViviStickerState {
   controllerHidden: boolean,
   isStandaloneMode: boolean,
   showTutorial: boolean,
-  recentlyBgColors: string[]
+  recentlyBgColors: string[],
+  newBgColor: string
 }
 
 const EDITOR_BGS = [
@@ -40,7 +41,8 @@ const getDefaultState = (): IViviStickerState => ({
   controllerHidden: false,
   isStandaloneMode: false,
   showTutorial: false,
-  recentlyBgColors: []
+  recentlyBgColors: [],
+  newBgColor: ''
 })
 
 const state = getDefaultState()
@@ -83,6 +85,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getRecentlyBgColors(state: IViviStickerState): string[] {
     return state.recentlyBgColors
+  },
+  getNewBgColor(state: IViviStickerState): string {
+    return state.newBgColor
   }
 }
 
@@ -119,6 +124,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_recentlyBgColors(state: IViviStickerState, recentlyBgColors: string[]) {
     state.recentlyBgColors = recentlyBgColors
+  },
+  SET_newBgColor(state: IViviStickerState, newBgColor: string) {
+    state.newBgColor = newBgColor
   },
   UPDATE_addRecentlyBgColor(state: IViviStickerState, recentlyBgColor: string) {
     let recently = state.recentlyBgColors

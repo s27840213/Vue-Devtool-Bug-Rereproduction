@@ -254,6 +254,12 @@ class ViviStickerUtils {
     }
   }
 
+  commitNewBgColor() {
+    const newBgColor = store.getters['vivisticker/getNewBgColor']
+    this.addAsset('backgroundColor', { id: newBgColor.replace('#', '') })
+    store.commit('vivisticker/UPDATE_addRecentlyBgColor', newBgColor)
+  }
+
   async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000) {
     this.sendToIOS(type, message)
     await Promise.race([

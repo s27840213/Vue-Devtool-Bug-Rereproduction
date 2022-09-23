@@ -86,6 +86,7 @@ import PanelPhotoShadow from '@/components/editor/panelMobile/PanelPhotoShadow.v
 import PanelBrandList from '@/components/editor/panelMobile/PanelBrandList.vue'
 import PopupDownload from '@/components/popup/PopupDownload.vue'
 import PanelVvstkMore from '@/components/editor/panelMobile/PanelVvstkMore.vue'
+import PanelColorPicker from '@/components/editor/panelMobile/PanelColorPicker.vue'
 import Tabs from '@/components/Tabs.vue'
 
 import { mapActions, mapGetters, mapMutations } from 'vuex'
@@ -101,6 +102,7 @@ import colorUtils from '@/utils/colorUtils'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   name: 'mobile-panel',
@@ -149,6 +151,7 @@ export default Vue.extend({
     PanelObjectAdjust,
     PanelBrandList,
     PanelVvstkMore,
+    PanelColorPicker,
     Tabs
   },
   data() {
@@ -195,7 +198,7 @@ export default Vue.extend({
         'replace', 'crop', 'bgRemove', 'position', 'flip',
         'opacity', 'order', 'fonts', 'font-size', 'text-effect',
         'font-format', 'font-spacing', 'download', 'more', 'color',
-        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'vvstk-more']
+        'adjust', 'photo-shadow', 'resize', 'object-adjust', 'brand-list', 'vvstk-more', 'color-picker']
 
       return this.inSelectionState || this.showExtraColorPanel || whiteThemePanel.includes(this.currActivePanel)
     },
@@ -250,7 +253,7 @@ export default Vue.extend({
       return this.whiteTheme || this.insertTheme
     },
     showLeftBtn(): boolean {
-      return (this.whiteTheme && (this.panelHistory.length > 0 || this.currActivePanel === 'resize' || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
+      return (this.whiteTheme && (this.panelHistory.length > 0 || ['resize', 'color-picker'].includes(this.currActivePanel) || this.showExtraColorPanel)) || (this.insertTheme && this.isTextInCategory)
     },
     hideDynamicComp(): boolean {
       return this.currActivePanel === 'crop' || this.inSelectionState
@@ -324,6 +327,11 @@ export default Vue.extend({
           return Object.assign(defaultVal, {
             currEvent: this.currColorEvent,
             panelHistory: this.panelHistory
+          })
+        }
+        case 'color-picker': {
+          return Object.assign(defaultVal, {
+            currEvent: this.currColorEvent
           })
         }
         case 'resize': {
@@ -436,7 +444,7 @@ export default Vue.extend({
     leftBtnName(): string {
       if (this.insertTheme) {
         return 'vivisticker_back'
-      } else if (this.panelHistory.length > 0 && this.currActivePanel !== 'resize') {
+      } else if (this.panelHistory.length > 0 && !['resize', 'color-picker'].includes(this.currActivePanel)) {
         return 'back-circle'
       } else {
         return 'close-circle'
@@ -445,6 +453,8 @@ export default Vue.extend({
     rightBtnName(): string {
       if (this.insertTheme) {
         return 'vivisticker_close'
+      } else if (this.currActivePanel === 'color-picker') {
+        return 'check-mobile-circle'
       } else {
         return 'close-circle'
       }
@@ -518,6 +528,12 @@ export default Vue.extend({
             if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
               this.addRecentlyColors(colorUtils.currColor)
             }
+            break
+          }
+
+          case 'color-picker': {
+            vivistickerUtils.commitNewBgColor()
+            break
           }
         }
         this.closeMobilePanel()

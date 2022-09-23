@@ -5,7 +5,7 @@
       div(class="vivisticker__content"
           @pointerdown="outerClick")
         vvstk-editor(v-show="isInEditor")
-        main-menu(v-show="!isInEditor")
+        main-menu(v-show="!isInEditor" @openColorPicker="handleOpenColorPicker")
       transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
@@ -38,6 +38,7 @@ import imageShadowPanelUtils from '@/utils/imageShadowPanelUtils'
 import textUtils from '@/utils/textUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import { CustomWindow } from '@/interfaces/customWindow'
+import { ColorEventType } from '@/store/types'
 
 declare let window: CustomWindow
 
@@ -203,6 +204,11 @@ export default Vue.extend({
           }
         }
       }
+    },
+    handleOpenColorPicker() {
+      editorUtils.setShowMobilePanel(true)
+      this.setCurrActivePanel('color-picker')
+      this.currColorEvent = ColorEventType.background
     },
     switchMainTab(panelType: string) {
       this.setCurrActiveTab(panelType)
