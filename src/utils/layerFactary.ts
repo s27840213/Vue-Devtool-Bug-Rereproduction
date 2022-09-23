@@ -12,6 +12,7 @@ import tiptapUtils from './tiptapUtils'
 import ZindexUtils from './zindexUtils'
 import imageShadowUtils from './imageShadowUtils'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import mouseUtils from './mouseUtils'
 
 class LayerFactary {
   newImage(config: any): IImage {
@@ -59,6 +60,7 @@ class LayerFactary {
           currentEffect: 'none',
           effects: {
             color: '#000000',
+            frameColor: '#000000',
             ...Object.keys(ShadowEffectType)
               .reduce((obj, effect) => {
                 return {
@@ -76,11 +78,22 @@ class LayerFactary {
     if (config.styles.shadow && !Object.prototype.hasOwnProperty.call(config.styles.shadow, 'srcObj')) {
       config.styles.shadow = basicConfig.styles.shadow
     }
+    const { styles: { imgWidth, imgX, imgHeight, imgY } } = config
+    const isImgSizeWrong = !imgWidth || !imgHeight || imgWidth < Math.abs(imgX) + width || imgHeight < Math.abs(imgY) + height
+    if (isImgSizeWrong) {
+      const layer = { styles: { width: basicConfig.styles.imgWidth, height: basicConfig.styles.imgHeight } } as unknown as IImage
+      const clipperStyles = { width: basicConfig.styles.width, height: basicConfig.styles.height, scale: 1 } as IStyle
+      const data = mouseUtils.clipperHandler(layer, '', clipperStyles)
+      const { styles: { imgWidth, imgHeight, imgX, imgY } } = data
+      config.styles.imgWidth = imgWidth
+      config.styles.imgHeight = imgHeight
+      config.styles.imgX = imgX
+      config.styles.imgY = imgY
+    }
 
     Object.assign(basicConfig.styles, config.styles)
     delete config.styles
 
-    // basicConfig.styles.scale = basicConfig.styles.width / basicConfig.styles.initWidth
     const image = Object.assign(basicConfig, config)
     return image
   }
@@ -181,7 +194,7 @@ class LayerFactary {
       },
       clips,
       blendLayers,
-      decoration: decoration ? this.newShape((() => {
+      decoration: decoration && !clips[0].isFrameImg ? this.newShape((() => {
         decoration.vSize = [initWidth, initHeight]
         decoration.styles = {
           width: initWidth,
@@ -191,7 +204,7 @@ class LayerFactary {
         } as IStyle
         return decoration
       })()) : undefined,
-      decorationTop: decorationTop ? this.newShape((() => {
+      decorationTop: decorationTop && !clips[0].isFrameImg ? this.newShape((() => {
         decorationTop.vSize = [initWidth, initHeight]
         decorationTop.styles = {
           width: initWidth,

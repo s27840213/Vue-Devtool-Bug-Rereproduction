@@ -48,7 +48,8 @@ export interface IFloatingEffect {
 }
 
 export interface IShadowEffects {
-  color: string
+  color: string,
+  frameColor?: string,
   shadow?: IShadowEffect,
   blur?: IBlurEffect,
   frame?: IFrameEffect,

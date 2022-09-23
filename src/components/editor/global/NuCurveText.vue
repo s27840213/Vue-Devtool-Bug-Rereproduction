@@ -50,7 +50,7 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    this.resizeObserver = new (window as any).ResizeObserver(() => {
+    this.resizeObserver = new ResizeObserver(() => {
       if (this.isDestroyed) return
 
       // console.log('resize')

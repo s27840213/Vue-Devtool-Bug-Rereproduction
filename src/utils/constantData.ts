@@ -135,6 +135,9 @@ class ConstantData {
         content: [{
           label: 'ポラロイドフレーム',
           url: 'https://blog.vivipic.com/jp/free-polaroid-frame-templates-2/'
+        }, {
+          label: '招待状',
+          url: 'https://blog.vivipic.com/jp/invitation/'
         }]
       }]
     }
