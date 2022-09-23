@@ -1,11 +1,11 @@
+import Vue from 'vue'
 import store from '@/store'
 import { IStyle, IText } from '@/interfaces/layer'
-import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
+import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect, ITextGooey } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
-import Vue from 'vue'
 
 // For text effect gooey
 class Point {
@@ -109,7 +109,9 @@ class Path {
 
 class Gooey {
   controlPoints = [[], []] as {top: Point, bottom: Point, oldHeight: number}[][]
-  constructor(rects: DOMRect[]) {
+  bRadius: number
+  constructor(textBg: ITextGooey, rects: DOMRect[]) {
+    this.bRadius = textBg.bRadius
     const first = rects[0]
     this.controlPoints[0].push({
       top: new Point(first.x + first.width, first.y),
@@ -170,7 +172,7 @@ class Gooey {
     this.controlPoints.forEach(side => {
       for (let i = 1; i < side.length - 1;) {
         const cps = side[i]
-        if (side.length > 3 && cps.bottom.y - cps.top.y < 20) {
+        if (side.length > 3 && cps.bottom.y - cps.top.y < cps.oldHeight * 0.1) {
           Vue.delete(side, i)
           count++
         } else i++
@@ -187,7 +189,8 @@ class Gooey {
   }
 
   // Return svg path
-  process(bRadius: number, debug: number) {
+  process(debug: number) {
+    const bRadius = this.bRadius
     let path = null as unknown as Path
     let ps = this.controlPoints[0]
     for (let i = 1; i < ps.length - 1; i++) {
@@ -462,7 +465,6 @@ class TextBg {
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance
-      const bRadius = textBg.bRadius
       const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
 
       // Add padding.
@@ -473,10 +475,10 @@ class TextBg {
         rect.height += padding * 2
       })
 
-      const cps = new Gooey(rects)
+      const cps = new Gooey(textBg, rects)
       cps.preProcess()
       const debug = (textBg as any).endpoint
-      const d = cps.process(bRadius,
+      const d = cps.process(
         debug === 'triangle' ? 0
           : debug === 'rounded' ? 1 : 2
       )

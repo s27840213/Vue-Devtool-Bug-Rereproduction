@@ -704,7 +704,7 @@ pipelines:
               trigger: manual
               script:
                 - ./bash/create_pull_request.sh
-    text-effect: #Copy from Default
+    feature/text-effect: # Copy from Default
       - parallel:
         - step:
             name: "Verify build environment"

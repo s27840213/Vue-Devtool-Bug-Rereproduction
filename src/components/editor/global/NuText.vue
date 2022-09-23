@@ -6,7 +6,6 @@
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
                 v-bind="elm.attrs")
-    //- to-delete: duplicatedText, extraBody, extraSpan
     div(v-for="text in duplicatedText" class="nu-text__body" ref="body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
       nu-curve-text(v-if="isCurveText"
@@ -45,6 +44,7 @@ import tiptapUtils from '@/utils/tiptapUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -132,18 +132,18 @@ export default Vue.extend({
     },
     // Use duplicated of text to do some text effect, define there difference css here.
     duplicatedText() {
-      // const duplicatedBodyBasicCss = {
-      //   position: 'absolute',
-      //   top: '0px',
-      //   width: '100%',
-      //   opacity: 1
-      // }
-      // const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
-      // const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
-      // const textShadowCss = {
-      //   extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
-      //   extraSpan: textShadow.duplicatedSpan
-      // }
+      const duplicatedBodyBasicCss = {
+        position: 'absolute',
+        top: '0px',
+        width: '100%',
+        opacity: 1
+      }
+      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
+      const textShadowCss = {
+        extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
+        extraSpan: textShadow.duplicatedSpan
+      }
       // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
       // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
       // const textBgSpanCss = {
@@ -152,7 +152,7 @@ export default Vue.extend({
       // }
       return [
         // ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
-        // ...(duplicatedTextShadow ? [textShadowCss] : []),
+        ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
     }
