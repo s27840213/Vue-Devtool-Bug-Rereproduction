@@ -177,6 +177,9 @@ export default new class ImageShadowPanelUtils {
         drawCanvasH = Math.round(ratio > 1 ? 1600 / ratio : 1600)
         const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
         updateCanvas = document.querySelectorAll(`.shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIdx === 'undefined' ? -1 : subLayerIdx}`)[0] as HTMLCanvasElement
+        setMark('upload', 1)
+        setMark('upload', 2)
+        setMark('upload', 3)
       } else {
         setMark('upload', 1)
         const img = new Image()

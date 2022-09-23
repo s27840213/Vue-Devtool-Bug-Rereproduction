@@ -15,8 +15,8 @@
         class="nu-image__picture-shadow"
         draggable="false"
         :src="shadowSrc"
-        @error="onError()"
-        @load="onLoad()")
+        @error="onError"
+        @load="onLoad")
     div(class="img-wrapper"
       :style="imgWrapperstyle")
       div(class='nu-image__picture'
@@ -45,15 +45,15 @@
               image(:xlink:href="finalSrc" ref="img"
                 class="nu-image__picture"
                 draggable="false"
-                @error="onError()"
-                @load="onLoad ()")
+                @error="onError"
+                @load="onLoad")
         img(v-else ref="img"
           :style="flipStyles"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation }"
           :src="finalSrc"
           draggable="false"
-          @error="onError()"
-          @load="onLoad ()")
+          @error="onError"
+          @load="onLoad")
     template(v-if="hasHalation")
       component(v-for="(elm, idx) in cssFilterElms"
         :key="`cssFilter${idx}`"
@@ -426,7 +426,7 @@ export default Vue.extend({
       return this.config.styles.adjust.halation
     },
     showCanvas(): boolean {
-      const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
+      const { pageIndex, layerIndex, subLayerIndex, handleId } = this
       if (typeof pageIndex === 'undefined') {
         return false
       }
@@ -853,20 +853,18 @@ export default Vue.extend({
         cb: this.clearShadowSrc
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)
-      if (!hasShadowSrc) {
-        switch (currentEffect) {
-          case ShadowEffectType.shadow:
-          case ShadowEffectType.frame:
-          case ShadowEffectType.blur:
-            imageShadowUtils.drawShadow(canvasList, img, this.config, params)
-            break
-          case ShadowEffectType.imageMatched:
-            imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
-            break
-          case ShadowEffectType.floating: {
-            imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
-            break
-          }
+      switch (currentEffect) {
+        case ShadowEffectType.shadow:
+        case ShadowEffectType.frame:
+        case ShadowEffectType.blur:
+          imageShadowUtils.drawShadow(canvasList, img, this.config, params)
+          break
+        case ShadowEffectType.imageMatched:
+          imageShadowUtils.drawImageMatchedShadow(canvasList, img, this.config, params)
+          break
+        case ShadowEffectType.floating: {
+          imageShadowUtils.drawFloatingShadow(canvasList, img, this.config, params)
+          break
         }
       }
     },
@@ -939,7 +937,7 @@ export default Vue.extend({
         imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
       }
     },
-    redrawShadow(openPanel = false) {
+    redrawShadow() {
       const id = {
         pageId: pageUtils.getPage(this.pageIndex).id,
         layerId: typeof this.layerIndex !== 'undefined' && this.layerIndex !== -1
@@ -955,29 +953,13 @@ export default Vue.extend({
         layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { active: true }, this.subLayerIndex)
       }
       this.$nextTick(() => {
-        if (generalUtils.isTouchDevice()) {
-          const primarylayerId = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id
-          const layerData = {
-            primarylayerId,
-            config: this.config,
-            layerInfo: this.layerInfo
-          }
-          imageShadowPanelUtils.handleShadowUpload(layerData)
-        } else {
-          // this.handleNewShadowEffect()
-          // if (openPanel) {
-          //   eventUtils.emit(PanelEvent.showPhotoShadow)
-          // } else {
-          //   imageShadowPanelUtils.handleShadowUpload()
-          // }
-          const primarylayerId = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id
-          const layerData = {
-            primarylayerId,
-            config: this.config,
-            layerInfo: this.layerInfo
-          }
-          imageShadowPanelUtils.handleShadowUpload(layerData)
+        const primarylayerId = layerUtils.getLayer(this.layerInfo.pageIndex, this.layerInfo.layerIndex).id
+        const layerData = {
+          primarylayerId,
+          config: this.config,
+          layerInfo: this.layerInfo
         }
+        imageShadowPanelUtils.handleShadowUpload(layerData)
       })
     },
     fetchShadowImg() {
