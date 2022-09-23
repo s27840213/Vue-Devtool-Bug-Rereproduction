@@ -770,7 +770,7 @@ export default Vue.extend({
             await new Promise<void>((resolve) => {
               img.onload = async () => {
                 this.shadowBuff.canvasShadowImg = img
-                const isSVG = await imageShadowPanelUtils.isSVG(img, this.config)
+                const isSVG = await imageShadowPanelUtils.isSVG(img.src, this.config)
                 if (isSVG) {
                   imageShadowPanelUtils.svgImageSizeFormatter(img, 510, () => {
                     /** svgImageSizeFormatter change the img src, need to use onload to catch the changed img */
@@ -815,9 +815,10 @@ export default Vue.extend({
       let _drawCanvasH = 0
       let _canvasW = 0
       let _canvasH = 0
-      const isRect = currentEffect === ShadowEffectType.frame && shadow.isTransparent === false
-      if (currentEffect === ShadowEffectType.floating || isRect) {
-        const ratio = isRect ? width / height : img.naturalWidth / img.naturalHeight
+      const isStaticShadow = currentEffect === ShadowEffectType.floating ||
+        (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+      if (isStaticShadow) {
+        const ratio = currentEffect === ShadowEffectType.floating ? img.naturalWidth / img.naturalHeight : width / height
         _drawCanvasW = Math.round(ratio > 1 ? 1600 : 1600 * ratio)
         _drawCanvasH = Math.round(ratio > 1 ? 1600 / ratio : 1600)
         _canvasW = _drawCanvasW + CANVAS_SPACE

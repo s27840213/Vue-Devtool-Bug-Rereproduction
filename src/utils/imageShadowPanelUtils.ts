@@ -99,6 +99,17 @@ export default new class ImageShadowPanelUtils {
   }
 
   async handleShadowUpload(_layerData?: any, forceUpload = false) {
+    try {
+      this._handleShadowUpload(_layerData, forceUpload)
+    } catch {
+      imageShadowUtils.clearLayerData()
+      imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+      imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+      imageShadowUtils.setUploadProcess(false)
+    }
+  }
+
+  async _handleShadowUpload(_layerData?: any, forceUpload = false) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     const layerData = _layerData ?? imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
@@ -108,6 +119,7 @@ export default new class ImageShadowPanelUtils {
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
+      const shadow = config.styles.shadow
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
       imageShadowUtils.setUploadProcess(true)
       imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
@@ -150,55 +162,55 @@ export default new class ImageShadowPanelUtils {
         layerId: primarylayerId || config.id || '',
         subLayerId: primarylayerId ? config.id || '' : ''
       })
-      /** Handle the params for drawing */
-      setMark('upload', 1)
-      const img = new Image()
-      img.crossOrigin = 'anonynous'
-      img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
-        `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-      await new Promise<void>((resolve, reject) => {
-        img.onload = async () => {
-          const isSVG = await this.isSVG(img, config)
-          if (isSVG) {
-            await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
-              img.onload = () => {
-                resolve()
-              }
-              img.onerror = () => {
-                const log = 'error: isSVG img loading error, src: ' + img.src
-                logUtils.setLog(log)
-                console.log(log)
-              }
-            })
-          } else {
-            resolve()
-          }
-        }
-        img.onerror = (e) => {
-          const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img.src + 'error:' + e.toString()
-          logUtils.setLog(log)
-          console.log(log, e)
-          reject(e)
-        }
-      })
 
-      logUtils.setLog('phase: finish load max size img')
-      setMark('upload', 2)
-      const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
-      const updateCanvas = document.createElement('canvas')
+      let updateCanvas = document.createElement('canvas')
       let params = {} as any
       let drawCanvasH = 0
       let drawCanvasW = 0
-      if (config.styles.shadow.currentEffect === ShadowEffectType.floating || isRect) {
+      const isStaticShadow = shadow.currentEffect === ShadowEffectType.floating ||
+      (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+
+      if (isStaticShadow) {
         const { width, height, imgWidth, imgHeight } = config.styles
-        const ratio = isRect ? width / height : imgWidth / imgHeight
+        const ratio = shadow.currentEffect === ShadowEffectType.floating ? imgWidth / imgHeight : width / height
         drawCanvasW = Math.round(ratio > 1 ? 1600 : 1600 * ratio)
         drawCanvasH = Math.round(ratio > 1 ? 1600 / ratio : 1600)
-        const canvasW = drawCanvasW + CANVAS_SPACE
-        const canvasH = drawCanvasH + CANVAS_SPACE
-        updateCanvas.setAttribute('width', `${canvasW}`)
-        updateCanvas.setAttribute('height', `${canvasH}`)
+        const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+        updateCanvas = document.querySelectorAll(`.shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIdx === 'undefined' ? -1 : subLayerIdx}`)[0] as HTMLCanvasElement
       } else {
+        setMark('upload', 1)
+        const img = new Image()
+        img.crossOrigin = 'anonynous'
+        img.src = imageUtils.getSrc(config, ['unsplash', 'pexles'].includes(config.srcObj.type) ? 1600 : 'larg') +
+          `${img.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
+        await new Promise<void>((resolve, reject) => {
+          img.onload = async () => {
+            const isSVG = await this.isSVG(img.src, config)
+            if (isSVG) {
+              await this.svgImageSizeFormatter(img, CANVAS_MAX_SIZE, () => {
+                img.onload = () => {
+                  resolve()
+                }
+                img.onerror = () => {
+                  const log = 'error: isSVG img loading error, src: ' + img.src
+                  logUtils.setLog(log)
+                  console.log(log)
+                }
+              })
+            } else {
+              resolve()
+            }
+          }
+          img.onerror = (e) => {
+            const log = 'error: img is svg check error, can not load img. ' + 'img.src: ' + img.src + 'error:' + e.toString()
+            logUtils.setLog(log)
+            console.log(log, e)
+            reject(e)
+          }
+        })
+        logUtils.setLog('phase: finish load max size img')
+
+        setMark('upload', 2)
         const { width, height, imgWidth, imgHeight } = config.styles
         drawCanvasW = Math.round(width / imgWidth * img.naturalWidth)
         drawCanvasH = Math.round(height / imgHeight * img.naturalHeight)
@@ -206,33 +218,32 @@ export default new class ImageShadowPanelUtils {
         const canvasH = Math.round(img.naturalHeight + CANVAS_SPACE)
         updateCanvas.setAttribute('width', `${canvasW}`)
         updateCanvas.setAttribute('height', `${canvasH}`)
-      }
-      params = { timeout: 0, drawCanvasW, drawCanvasH }
-      imageShadowUtils.drawingInit(updateCanvas, img, config, params)
 
-      switch (config.styles.shadow.currentEffect) {
-        case ShadowEffectType.shadow:
-        case ShadowEffectType.blur:
-        case ShadowEffectType.frame: {
-          await imageShadowUtils.drawShadow([updateCanvas], img, config, params)
-          break
+        params = { timeout: 0, drawCanvasW, drawCanvasH }
+        imageShadowUtils.drawingInit(updateCanvas, img, config, params)
+
+        switch (config.styles.shadow.currentEffect) {
+          case ShadowEffectType.shadow:
+          case ShadowEffectType.blur:
+          case ShadowEffectType.frame: {
+            await imageShadowUtils.drawShadow([updateCanvas], img, config, params)
+            break
+          }
+          case ShadowEffectType.imageMatched:
+            await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
+            break
+          case ShadowEffectType.floating:
+            break
+          case ShadowEffectType.none:
+            return
+          default:
+            logUtils.setLog('Error: effect type error: ' + config.styles.shadow.currentEffect)
+            generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
         }
-        case ShadowEffectType.imageMatched:
-          await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
-          break
-        case ShadowEffectType.floating: {
-          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, params)
-          break
-        }
-        case ShadowEffectType.none:
-          return
-        default:
-          logUtils.setLog('Error: effect type error: ' + config.styles.shadow.currentEffect)
-          generalUtils.assertUnreachable(config.styles.shadow.currentEffect)
+        logUtils.setLog('phase: finish drawing')
+        setMark('upload', 3)
       }
 
-      logUtils.setLog('phase: finish drawing')
-      setMark('upload', 3)
       const { right, left, top, bottom } = imageShadowUtils.getImgEdgeWidth(updateCanvas)
       const leftShadowThickness = ((updateCanvas.width - drawCanvasW) * 0.5 - left) / drawCanvasW
       const topShadowThickness = ((updateCanvas.height - drawCanvasH) * 0.5 - top) / drawCanvasH
@@ -264,14 +275,11 @@ export default new class ImageShadowPanelUtils {
           }
           const _width = config.styles.width / config.styles.scale
           const _height = config.styles.height / config.styles.scale
-          let newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
-          let newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
+          const newWidth = Math.ceil((updateCanvas.width - right - left) / drawCanvasW * _width)
+          const newHeight = Math.ceil((updateCanvas.height - top - bottom) / drawCanvasH * _height)
           let newX = newWidth * 0.5 - _width * (leftShadowThickness + 0.5)
           let newY = newHeight * 0.5 - _height * (topShadowThickness + 0.5)
-          if (isRect) {
-            const spread = config.styles.shadow.effects.frame?.spread || 0
-            newWidth = _width + 2 * spread * fieldRange.frame.spread.weighting * _width / drawCanvasW
-            newHeight = _height + 2 * spread * fieldRange.frame.spread.weighting * _height / drawCanvasH
+          if ([ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect) && !shadow.isTransparent) {
             newX = 0
             newY = 0
           }
@@ -351,9 +359,9 @@ export default new class ImageShadowPanelUtils {
     }
   }
 
-  async isSVG(img: HTMLImageElement, config: IImage) {
-    if (img.src.includes('https') && ['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
-      const res = await new Promise<Response>((resolve) => resolve(fetch(img.src, { method: 'HEAD' })))
+  async isSVG(src: string, config: IImage) {
+    if (src.includes('https') && ['public', 'public-logo', 'private', 'private-logo', 'background'].includes(config.srcObj.type)) {
+      const res = await new Promise<Response>((resolve) => resolve(fetch(src, { method: 'HEAD' })))
       return await res.headers.get('Content-Type') === 'image/svg+xml'
     } else return false
   }

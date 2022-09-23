@@ -119,19 +119,18 @@ class ImageShadowUtils {
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     const { canvasT, canvasMaxSize } = this
-    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow: { maxsize = 1600, middsize = 510 } } } = config
+    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow } } = config
+    const { maxsize = 1600, middsize = 510 } = shadow
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
     }
     const imgRatio = img.naturalWidth / img.naturalHeight
-    if (config.styles.shadow.currentEffect === ShadowEffectType.floating) {
-      const canvasW = Math.round((imgRatio > 1 ? 1600 : 1600 * imgRatio) + CANVAS_SPACE)
-      const canvasH = Math.round((imgRatio > 1 ? 1600 / imgRatio : 1600) + CANVAS_SPACE)
-      canvasMaxSize.setAttribute('width', canvasW.toString())
-      canvasMaxSize.setAttribute('height', canvasH.toString())
-    } else if (config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent) {
-      const ratio = width / height
+    const isStaticShadow = shadow.currentEffect === ShadowEffectType.floating ||
+      (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+
+    if (isStaticShadow) {
+      const ratio = shadow.currentEffect === ShadowEffectType.floating ? imgRatio : width / height
       const canvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE)
       const canvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE)
       canvasMaxSize.setAttribute('width', canvasW.toString())
@@ -445,8 +444,8 @@ class ImageShadowUtils {
       }
 
       setMark('shadow', 1)
-      const spreadF = currentEffect === ShadowEffectType.frame && !shadow.isTransparent
-        ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
+      const isStaticShadow = !shadow.isTransparent
+      const spreadF = isStaticShadow ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
       const _imageData = new ImageData(this.dilate(spread * spreadF), canvasT.width, canvasT.height)
       ctxT.putImageData(_imageData, 0, 0)
       setMark('shadow', 2)
@@ -823,6 +822,8 @@ class ImageShadowUtils {
     canvasTest.style.position = 'absolute'
     canvasTest.style.top = '0'
     canvasTest.style.zIndex = '10000'
+    canvasTest.style.width = (canvas.width / 4).toString() + 'px'
+    canvasTest.style.height = (canvas.height / 4).toString() + 'px'
   }
 }
 
