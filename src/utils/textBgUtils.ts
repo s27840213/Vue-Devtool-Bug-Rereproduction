@@ -116,12 +116,12 @@ class Gooey {
     this.controlPoints[0].push({
       top: new Point(first.x + first.width, first.y),
       bottom: new Point(first.x + first.width, first.y),
-      oldHeight: 0 // to-delete
+      oldHeight: first.height
     })
     this.controlPoints[1].push({
       top: new Point(first.x, first.y),
       bottom: new Point(first.x, first.y),
-      oldHeight: 0
+      oldHeight: first.height
     })
     rects.forEach((rect: DOMRect) => {
       this.controlPoints[0].push({
@@ -189,7 +189,7 @@ class Gooey {
   }
 
   // Return svg path
-  process(debug: number) {
+  process() {
     const bRadius = this.bRadius
     let path = null as unknown as Path
     let ps = this.controlPoints[0]
@@ -199,13 +199,7 @@ class Gooey {
       const prevMiddle = prev.bottom.middle(curr.top)
       const next = ps[i + 1]
       const nextMiddle = curr.bottom.middle(next.top)
-      const radius = debug === 0
-        ? curr.top.dist(curr.bottom) * bRadius * 0.005
-        : debug === 1 ? Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
-          : Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
-      // const radius = curr.top.dist(curr.bottom) * bRadius * 0.005
-      // const radius = Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
-      // const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
+      const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
       const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) *
         (prev.bottom.x < curr.top.x ? -1 : 1)
       const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) *
@@ -230,13 +224,7 @@ class Gooey {
       const prevMiddle = prev.bottom.middle(curr.top)
       const next = ps[i + 1]
       const nextMiddle = curr.bottom.middle(next.top)
-      const radius = debug === 0
-        ? curr.top.dist(curr.bottom) * bRadius * 0.005
-        : debug === 1 ? Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
-          : Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
-      // const radius = curr.top.dist(curr.bottom) * bRadius * 0.005
-      // const radius = Math.min(bRadius, curr.top.dist(curr.bottom) / 2)
-      // const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
+      const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
       const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) *
         (prev.bottom.x < curr.top.x ? -1 : 1)
       const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) *
@@ -477,11 +465,7 @@ class TextBg {
 
       const cps = new Gooey(textBg, rects)
       cps.preProcess()
-      const debug = (textBg as any).endpoint
-      const d = cps.process(
-        debug === 'triangle' ? 0
-          : debug === 'rounded' ? 1 : 2
-      )
+      const d = cps.process()
 
       return {
         attrs: { width, height, fill },
