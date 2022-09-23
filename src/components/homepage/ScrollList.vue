@@ -66,6 +66,7 @@ import themeUtils from '@/utils/themeUtils'
 import paymentUtils from '@/utils/paymentUtils'
 import { IAssetTemplate } from '@/interfaces/api'
 import templateCenterUtils from '@/utils/templateCenterUtils'
+import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   name: 'ScrollList',
@@ -171,7 +172,7 @@ export default Vue.extend({
     },
     templateUrl(item: IAssetTemplate): string {
       return this.$router.resolve({
-        name: 'Editor',
+        name: generalUtils.isTouchDevice() && this.theme === '7' ? 'MobileEditor' : 'Editor',
         query: {
           type: this.theme === '7' ? 'product-page-template' : 'new-design-template',
           design_id: this.theme === '7' ? item.group_id : item.match_cover.id,
@@ -255,7 +256,9 @@ export default Vue.extend({
       transition: all 0.2s ease-in-out;
       transform: translate(0, -5px);
     }
-    img:hover { box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15); }
+    img:hover {
+      box-shadow: 5px 5px 10px 2px rgba(48, 55, 66, 0.15);
+    }
   }
 }
 @media screen and (max-width: 768px) {
@@ -269,7 +272,8 @@ export default Vue.extend({
       height: 84px;
     }
   }
-  .list-content__lefticon, .list-content__righticon {
+  .list-content__lefticon,
+  .list-content__righticon {
     display: none;
   }
 }

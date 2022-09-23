@@ -7,7 +7,8 @@ interface IMobileEditorState {
   currCardIndex: number,
   currActivePanel: string,
   currActiveSubPanel: string,
-  inBgSettingMode: boolean
+  inBgSettingMode: boolean,
+  showMobilePanel: boolean
 }
 
 const getDefaultState = (): IMobileEditorState => ({
@@ -17,7 +18,8 @@ const getDefaultState = (): IMobileEditorState => ({
   currCardIndex: 0,
   currActivePanel: 'none',
   currActiveSubPanel: 'none',
-  inBgSettingMode: false
+  inBgSettingMode: false,
+  showMobilePanel: false
 })
 
 const state = getDefaultState()
@@ -39,6 +41,9 @@ const getters: GetterTree<IMobileEditorState, unknown> = {
   },
   getInBgSettingMode(state: IMobileEditorState): boolean {
     return state.inBgSettingMode
+  },
+  getShowMobilePanel(state: IMobileEditorState): boolean {
+    return state.showMobilePanel
   }
 }
 
@@ -70,6 +75,9 @@ const mutations: MutationTree<IMobileEditorState> = {
   },
   SET_currActiveSubPanel(state: IMobileEditorState, subPanel: string) {
     state.currActiveSubPanel = subPanel
+  },
+  SET_showMobilePanel(state: IMobileEditorState, bool: boolean) {
+    state.showMobilePanel = bool
   }
 }
 

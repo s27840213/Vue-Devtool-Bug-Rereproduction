@@ -139,7 +139,7 @@ class GroupUtils {
         active: true
       })
       LayerUtils.updateLayerStyles(pageIndex, layerIndex, {
-        zindex: -1
+        zindex: 0
       })
       const tmpPageIndex = this.currSelectedInfo.pageIndex
       const tmpIndex = this.currSelectedInfo.index

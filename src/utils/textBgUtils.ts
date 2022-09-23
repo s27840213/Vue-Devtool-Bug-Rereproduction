@@ -2,11 +2,14 @@ import store from '@/store'
 import { IStyle, IText } from '@/interfaces/layer'
 import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect } from '@/interfaces/format'
 import LayerUtils from '@/utils/layerUtils'
-import textEffectUtils from '@/utils//textEffectUtils'
-import imageAdjustUtil from '@/utils//imageAdjustUtil'
-import generalUtils from '@/utils//generalUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import imageAdjustUtil from '@/utils/imageAdjustUtil'
+import tiptapUtils from '@/utils/tiptapUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
+import text from '@/store/text'
 
 class TextBg {
+  private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number>>
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -73,7 +76,13 @@ class TextBg {
         opacity: 100,
         color: '#F1D289'
       },
+      cloud: {
+        bRadius: 48,
+        opacity: 100,
+        color: '#F1D289'
+      },
       gooey: {
+        distance: 0,
         bRadius: 48,
         opacity: 100,
         color: '#F1D289'
@@ -81,70 +90,124 @@ class TextBg {
     }
   }
 
-  convertTextEffect(effect: ITextBgEffect) {
+  inlineSvg(svg: string) {
+    return svg.replace(/\n[ ]*/g, '').replace(/#/g, '%23')
+  }
+
+  convertTextEffect(styles: IStyle) {
+    const effect = styles.textBg as ITextBgEffect
     if (!isITextBox(effect)) return {}
 
     const opacity = effect.opacity * 0.01
+    const width = styles.width + (effect.bStroke + 20) * 2
+    const height = styles.height + (effect.bStroke + effect.pStroke) * 2
+    const innerWidth = styles.width + 20 * 2 + effect.bStroke
+    const innerHeight = styles.height + effect.pStroke * 2 + effect.bStroke
+    const innerRadius = Math.max(0, Math.min(effect.bRadius - effect.bStroke / 2, innerWidth / 2, innerHeight / 2))
+
     return {
-      borderWidth: `${effect.bStroke}px`,
-      borderStyle: 'solid',
-      borderColor: this.rgba(effect.bColor, opacity),
+      padding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`,
       borderRadius: `${effect.bRadius}px`,
-      padding: `${effect.pStroke}px 20px`,
-      backgroundColor: this.rgba(effect.pColor, opacity),
-      // Prevent BGcolor overflow to border
-      backgroundClip: 'padding-box',
-      // Only for Contorller
-      controllerPadding: `${effect.bStroke + effect.pStroke}px ${effect.bStroke + 20}px`
+      // How to prevent stroke and color mix, https://stackoverflow.com/a/69290621
+      svg: {
+        width,
+        height,
+        content: [{
+          tag: 'path',
+          attrs: {
+            style: `fill:${effect.pColor}; stroke:${effect.bColor}; opacity:${opacity}`,
+            'stroke-width': `${effect.bStroke}`,
+            d: `
+              m${effect.bStroke / 2} ${effect.bStroke / 2 + innerRadius}a${innerRadius} ${innerRadius} 0 01${innerRadius} -${innerRadius}
+              h${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01${innerRadius} ${innerRadius}
+              v${innerHeight - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} ${innerRadius}
+              h-${innerWidth - innerRadius * 2}a${innerRadius} ${innerRadius} 0 01-${innerRadius} -${innerRadius}z`
+          }
+        }]
+      }
     }
   }
 
-  convertTextSpanEffect(styles: IStyle): Record<string, unknown> {
-    const effect = styles.textBg as ITextBgEffect
-    const svgId = `svgFilter__${generalUtils.generateRandomString(5)}`
-    let color = ''
-    if (isITextUnderline(effect)) {
-      color = this.rgba(effect.color, effect.opacity * 0.01)
-    } else if (isITextGooey(effect)) {
-      color = this.rgba(effect.color, effect.opacity * 0.006 + 0.4)
-    }
+  convertTextSpanEffect(effect: ITextBgEffect): Record<string, unknown> {
+    if (!isITextUnderline(effect) && !isITextGooey(effect)) return {}
 
     if (isITextUnderline(effect)) {
-      let underlineSvg = ''
-      const capWidth = styles.height * 0.005 * effect.height
+      const { color } = effect
+      const borderWidth = Math.round(effect.height / 2)
+      let bgEndpoints = ''
+
       switch (effect.endpoint) {
         case 'triangle':
-          underlineSvg = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m${capWidth} 0h${styles.width - capWidth}l-${capWidth} ${capWidth * 2}h-${styles.width - capWidth}z'/>
-            </svg>")`.replace(/\n[ ]*/g, '')
+          bgEndpoints = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m${borderWidth + 1} 0h-1l-${borderWidth} ${borderWidth * 2}h${borderWidth + 1}z'/>
+            </svg>"), url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${borderWidth + 1}l-${borderWidth} ${borderWidth * 2}h-1z'/>
+            </svg>")`
           break
         case 'rounded':
-          underlineSvg = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m${capWidth} 0a1 1 0 000 ${capWidth * 2}h${styles.width - capWidth * 2}a1 1 0 000 -${capWidth * 2}z'/>
-            </svg>")`.replace(/\n[ ]*/g, '')
+          bgEndpoints = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m${borderWidth + 1} 0h-1a1 1 0 000 ${borderWidth * 2}h1z'/>
+            </svg>"), url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h1a1 1 0 010 ${borderWidth * 2}h-1z'/>
+            </svg>")`
           break
         case 'square':
-          underlineSvg = `url("data:image/svg+xml;utf8,
-            <svg fill='${color}' width='${styles.width}' height='${capWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
-              <path d='m0 0h${styles.width}v${capWidth * 2}h-${styles.width}z'/>
-            </svg>")`.replace(/\n[ ]*/g, '')
+          bgEndpoints = `url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
+            </svg>"), url("data:image/svg+xml;utf8,
+            <svg fill='${color}' width='${borderWidth + 1}' height='${borderWidth * 2}' xmlns='http://www.w3.org/2000/svg'>
+              <path d='m0 0h${borderWidth + 1}v${borderWidth * 2}h-${borderWidth + 1}z'/>
+            </svg>")`
           break
       }
 
       return {
-        boxDecorationBreak: 'clone',
-        backgroundRepeat: 'no-repeat',
-        backgroundImage: underlineSvg,
-        backgroundSize: '100%',
-        backgroundPositionY: `${100 - (effect.yOffset)}%`
+        duplicatedSpan: {
+          color: 'transparent',
+          opacity: effect.opacity * 0.01,
+          boxDecorationBreak: 'clone',
+          backgroundRepeat: 'no-repeat',
+          backgroundImage: `
+            linear-gradient(180deg, ${color}, ${color}),
+            ${this.inlineSvg(bgEndpoints)}`,
+          backgroundSize: `
+            calc(100% - ${borderWidth * 2}px) ${borderWidth * 2}px,
+            ${borderWidth + 1}px ${borderWidth * 2}px,
+            ${borderWidth + 1}px ${borderWidth * 2}px`,
+          backgroundPositionX: `${borderWidth}px, 0, 100%`,
+          backgroundPositionY: `${100 - (effect.yOffset)}%`
+        }
       }
-    } else if (isITextGooey(effect)) {
+    } else if (isITextGooey(effect) && effect.name === 'cloud') {
+      const color = this.rgba(effect.color, effect.opacity * 0.01)
       return {
         padding: '0 20px',
-        backgroundColor: color,
-        filter: `url(#${svgId})`,
+        boxDecorationBreak: 'clone',
+        borderRadius: `${effect.bRadius}px`,
+        backgroundColor: color
+      }
+    } else if (isITextGooey(effect) && effect.name === 'gooey') {
+      const { color } = effect
+      const svgId = `textBg_gooey_${effect.bRadius}`
+      return {
+        paddingTop: `${effect.distance}px`,
+        paddingBottom: `${effect.distance}px`,
+        textGooeyPaddingX: `${effect.distance + 20}px`, // For tiptap CSS var
+        '--textGooeyPaddingX': `${effect.distance + 20}px`,
+        boxDecorationBreak: 'clone',
+        duplicatedBody: {
+          filter: `url(#${svgId})`,
+          opacity: effect.opacity * 0.01
+        },
+        duplicatedSpan: {
+          color: 'transparent',
+          backgroundColor: color
+        },
         svgId: svgId,
         svgFilter: [
           imageAdjustUtil.createSvgFilter({
@@ -177,7 +240,53 @@ class TextBg {
     } else return {}
   }
 
-  setTextBg(effect: string, attrs?: Record<string, string | number>): void {
+  syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {
+    Object.assign(textBg, { name: textBg.name || effectName })
+    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
+    const newShareAttrs = { opacity: textBg.opacity }
+    const newEffect = { opacity: shareAttrs.opacity }
+    if (isITextBox(textBg)) {
+      if (['square-borderless', 'rounded-borderless',
+        'square-both', 'rounded-both'].includes(textBg.name)) {
+        Object.assign(newShareAttrs, { color: textBg.pColor })
+        Object.assign(newEffect, { pColor: shareAttrs.color })
+      }
+      if (['square-hollow', 'rounded-hollow',
+        'square-both', 'rounded-both'].includes(textBg.name)) {
+        Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
+        Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
+      }
+    } else {
+      Object.assign(newShareAttrs, { color: textBg.color })
+      Object.assign(newEffect, { color: shareAttrs.color })
+    }
+
+    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+    if (!effectName) {
+      Object.assign(shareAttrs, newShareAttrs)
+      localStorageUtils.set('textEffectSetting', 'textBgShare', shareAttrs)
+    } else {
+      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+      Object.assign(effect, newEffect)
+      localStorageUtils.set('textEffectSetting', effectName, effect)
+    }
+  }
+
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, { [this.currColorKey]: color })
+  }
+
+  resetCurrTextEffect() {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, this.effects[effectName])
+  }
+
+  setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
@@ -186,14 +295,21 @@ class TextBg {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
+      // Leave text editing mode to show some span text effect.
+      layers[idx].contentEditable = false
+
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
 
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
         if (layerTextBg && layerTextBg.name === effect) {
           Object.assign(textBg, layerTextBg, attrs)
+          localStorageUtils.set('textEffectSetting', effect, textBg)
+          this.syncShareAttrs(textBg, null)
         } else {
-          Object.assign(textBg, defaultAttrs, attrs, { name: effect })
+          this.syncShareAttrs(textBg, effect)
+          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
+          Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
         }
 
         store.commit('UPDATE_specLayerData', {
@@ -204,6 +320,9 @@ class TextBg {
         })
       }
     }
+
+    // Update content in tiptap and focus it if need.
+    tiptapUtils.updateHtml()
   }
 }
 

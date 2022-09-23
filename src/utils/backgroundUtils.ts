@@ -1,5 +1,5 @@
 import { IImage, IImageStyle } from '@/interfaces/layer'
-import { IPage } from '@/interfaces/page'
+import { IBackgroundImage, IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
 import assetUtils from './assetUtils'
@@ -18,7 +18,7 @@ class BackgroundUtils {
   }
 
   get hasBgImage(): boolean {
-    return this.backgroundImage.assetId !== 0
+    return this.backgroundImage.config.srcObj?.assetId !== ''
   }
 
   get currPage(): IPage {
@@ -44,8 +44,12 @@ class BackgroundUtils {
     return locked
   }
 
-  get backgroundImage(): any {
+  get backgroundImage(): IBackgroundImage {
     return this.currPage.backgroundImage
+  }
+
+  get backgroundImageControl(): boolean {
+    return this.backgroundImage.config.imgControl
   }
 
   get backgroundImgControl(): boolean {
@@ -112,6 +116,10 @@ class BackgroundUtils {
 
   setBgImageControl(props: { pageIndex: number, imgControl: boolean }) {
     store.commit('SET_backgroundImageControl', props)
+  }
+
+  setAllBackgroundImageControlDefault(): void {
+    store.commit('SET_allBackgroundImageControl', false)
   }
 
   detachBgImage() {

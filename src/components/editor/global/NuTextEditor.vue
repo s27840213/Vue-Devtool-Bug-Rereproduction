@@ -101,7 +101,7 @@ export default Vue.extend({
       }
     })
     tiptapUtils.on('focus', () => {
-      this.updateLayerProps({ isTyping: true })
+      // this.updateLayerProps({ isTyping: true })
     })
     tiptapUtils.on('blur', () => {
       this.updateLayerProps({ isTyping: false })
@@ -147,6 +147,14 @@ export default Vue.extend({
 .ProseMirror.non-selectable {
   white-space: pre-wrap;
   font-variant-ligatures: unset;
+  > p > span {
+    &:first-child {
+      padding-left: var(--textGooeyPaddingX) !important;
+    }
+    &:last-child {
+      padding-right: var(--textGooeyPaddingX) !important;
+    }
+  }
 }
 
 ::selection {

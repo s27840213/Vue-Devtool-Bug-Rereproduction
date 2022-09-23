@@ -129,6 +129,43 @@ export default Extension.create({
               }
             }
           },
+          filter: {
+            default: 'none'
+          },
+          backgroundColor: {
+            default: 'transparent'
+          },
+          padding: {
+            default: '0'
+          },
+          paddingTop: {
+            default: '0'
+          },
+          paddingBottom: {
+            default: '0'
+          },
+          // To set padding left right, use CSS rule in NuTextEditor.
+          textGooeyPaddingX: {
+            default: '0'
+          },
+          boxDecorationBreak: {
+            default: 'slice'
+          },
+          backgroundRepeat: {
+            default: 'repeat'
+          },
+          backgroundImage: {
+            default: 'none'
+          },
+          backgroundSize: {
+            default: 'auto'
+          },
+          backgroundPositionX: {
+            default: '0%'
+          },
+          backgroundPositionY: {
+            default: '0%'
+          },
           type: {
             default: 'public',
             parseHTML: element => {
@@ -401,10 +438,6 @@ export default Extension.create({
       },
       'Mod-x': () => {
         shortcutUtils.textCut()
-        return true
-      },
-      'Mod-v': () => {
-        shortcutUtils.textPaste()
         return true
       },
       'Mod--': () => {
