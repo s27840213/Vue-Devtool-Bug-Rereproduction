@@ -28,18 +28,20 @@
 <script lang="ts">
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
-import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
     src: String,
-    styles: Object
+    styles: Object,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   computed: {
     ...mapGetters({
-      contentScaleRatio: 'getContentScaleRatio'
     }),
     svgImageWidth(): number {
       const { imgWidth } = this.styles

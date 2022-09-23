@@ -7,7 +7,8 @@
       div(v-if="isAdjustImage" :style="frameStyles")
         nu-adjust-image(:src="src"
           @error="onError"
-          :styles="adjustImgStyles")
+          :styles="adjustImgStyles"
+          :contentScaleRatio="contentScaleRatio")
       img(v-else :src="src"
         draggable="false"
         :style="imgStyles()"
