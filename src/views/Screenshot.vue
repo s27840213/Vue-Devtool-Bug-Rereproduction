@@ -160,12 +160,16 @@ export default Vue.extend({
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
-            const { x, y, width, height } = this.clipObject(calcTmpProps(page.layers as any[]), page.width, page.height)
-            this.pageTranslate = { x: -x, y: -y }
-            this.pageScale = this.fitPageToScreen(width, height)
+            // const { x, y, width, height } = this.clipObject(calcTmpProps(page.layers as any[]), page.width, page.height)
+            // this.pageTranslate = { x: -x, y: -y }
+            // this.pageScale = this.fitPageToScreen(width, height)
             page.isAutoResizeNeeded = true
             pageUtils.setPages([page])
-            pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
+            // pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
+            this.JSONcontentSize = {
+              width: page.width,
+              height: page.height
+            }
             this.usingJSON = true
             break
           }
