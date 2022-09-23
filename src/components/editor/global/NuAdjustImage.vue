@@ -38,6 +38,9 @@ export default Vue.extend({
     styles: Object
   },
   computed: {
+    ...mapGetters({
+      contentScaleRatio: 'getContentScaleRatio'
+    }),
     svgImageWidth(): number {
       const { imgWidth } = this.styles
       return imgWidth
@@ -79,18 +82,18 @@ export default Vue.extend({
     style(): { [key: string]: string } {
       const { svgImageWidth, svgImageHeight } = this
       if (svgImageWidth >= svgImageHeight) {
-        return { width: `${svgImageWidth}px` }
+        return { width: `${svgImageWidth * this.contentScaleRatio}px` }
       }
-      return { height: `${svgImageHeight}px` }
+      return { height: `${svgImageHeight * this.contentScaleRatio}px` }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-  .nu-adjust-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+.nu-adjust-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 </style>

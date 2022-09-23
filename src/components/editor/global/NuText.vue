@@ -24,7 +24,7 @@
           :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
-      span(v-for="(span, sIndex) in spans"
+      span(v-for="(span, sIndex) in spans()"
         class="nu-text__span"
         :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
         :data-sindex="sIndex"
@@ -111,8 +111,8 @@ export default Vue.extend({
       getLayer: 'getLayer',
       getTextInfo: 'getTextInfo'
     }),
-    getLayerScale(): number {
-      return this.config.styles.scale
+    spanEffect(): Record<string, unknown> {
+      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
     isCurveText(): any {
       const { textShape } = this.config.styles
@@ -120,15 +120,6 @@ export default Vue.extend({
     },
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
-    },
-    spans(): ISpan[] {
-      return textShapeUtils.flattenSpans(this.config)
-    },
-    isAutoResizeNeeded(): boolean {
-      return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
-    },
-    spanEffect(): Record<string, unknown> {
-      return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
     // Use duplicated of text to do some text effect, define there difference css here.
     duplicatedText() {
@@ -183,13 +174,18 @@ export default Vue.extend({
         this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
       })
     },
+    spans(): ISpan[] {
+      return textShapeUtils.flattenSpans(this.config)
+    },
+    isAutoResizeNeeded(): boolean {
+      return LayerUtils.getPage(this.pageIndex).isAutoResizeNeeded
+    },
     styles(styles: any) {
       return tiptapUtils.textStylesRaw(styles)
     },
     bodyStyles() {
       const { editing, contentEditable } = this.config
-      const { isCurveText, isFlipped } = this
-      const opacity = editing ? (contentEditable ? ((isCurveText || isFlipped) ? 0.2 : 0) : 1) : 1
+      const opacity = editing ? (contentEditable ? ((this.isCurveText || this.isFlipped) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
@@ -224,7 +220,7 @@ export default Vue.extend({
       // console.log('resize')
 
       let widthLimit
-      if (this.isLoading && this.isAutoResizeNeeded) {
+      if (this.isLoading && this.isAutoResizeNeeded()) {
         widthLimit = textUtils.autoResize(config, this.initSize)
       } else {
         widthLimit = config.widthLimit

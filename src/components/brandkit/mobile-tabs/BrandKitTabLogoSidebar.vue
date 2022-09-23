@@ -7,7 +7,8 @@
         observer-sentinel(v-if="item.sentinel"
           target=".brand-kit-tab-logo"
           @callback="handleLoadMore(item)")
-        div(class="brand-kit-tab-logo__row")
+        div(class="brand-kit-tab-logo__row"
+            :style="settingmode ? ' margin-top: 11px; margin-right: 11px' : ''")
           template(v-for="logo in item.list")
             div(v-if="checkUploading(logo)"
               class="brand-kit-tab-logo__item pointer relative"
@@ -19,6 +20,7 @@
               :photo="addPerviewUrl(item.brandId, logo)"
               vendor="logo"
               :inLogoPanel="true"
+              :deletable="settingmode"
               :key="logo.id")
       template(#after)
         div(v-if="isLogosLoading" class="brand-kit-tab-logo-loading")
@@ -48,6 +50,10 @@ export default Vue.extend({
     maxheight: {
       default: window.innerHeight * 0.9,
       type: Number
+    },
+    settingmode: {
+      default: false,
+      type: Boolean
     }
   },
   mounted() {

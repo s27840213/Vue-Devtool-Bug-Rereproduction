@@ -146,8 +146,6 @@ if (process.env.NODE_ENV !== 'production') {
   requireAll(req)
 }
 
-requireAll(req)
-
 // add temporarily for testing
 if (window.location.href.indexOf('logout') > -1) {
   localStorage.setItem('token', '')

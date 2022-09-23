@@ -6,12 +6,13 @@ import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import generalUtils from '@/utils/generalUtils'
+import shortcutUtils from './shortcutUtils'
 
 class TiptapUtils {
   event: any
@@ -40,6 +41,18 @@ class TiptapUtils {
         },
         handleScrollToSelection: () => {
           return this.editor?.storage.nuTextStyle.pasting
+        },
+        handlePaste: (view, event: ClipboardEvent, slice) => {
+          if (!event.clipboardData) return false
+          const items = event.clipboardData.items
+          for (let i = items.length - 1; i >= 0; i--) {
+            if (items[i].kind === 'string' && items[i].type === 'text/plain') {
+              items[i].getAsString(str => {
+                shortcutUtils.textPasteWith(str)
+              })
+            }
+          }
+          return true
         }
       },
       parseOptions: {
@@ -418,17 +431,21 @@ class TiptapUtils {
     }
   }
 
+  getParagraphs(): IParagraph[] | undefined {
+    const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
+    if (currLayer.type === 'text') {
+      return (currLayer as IText).paragraphs
+    } else if (subLayerIdx !== -1) {
+      return (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
+    }
+  }
+
   updateHtml(paragraphs?: IParagraph[]) {
     if (this.editor) {
       if (!paragraphs) {
-        const { subLayerIdx, getCurrLayer: currLayer } = layerUtils
-        if (currLayer.type === 'text') {
-          paragraphs = (currLayer as IText).paragraphs
-        } else if (subLayerIdx !== -1) {
-          paragraphs = (currLayer as IGroup).layers[subLayerIdx].paragraphs as IParagraph[]
-        } else {
-          return
-        }
+        const temp = this.getParagraphs()
+        if (temp === undefined) return
+        paragraphs = temp
       }
       this.editor.chain().setContent(this.toJSON(paragraphs)).selectPrevious().run()
     }

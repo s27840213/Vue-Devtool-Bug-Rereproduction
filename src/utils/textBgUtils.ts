@@ -273,6 +273,7 @@ class Gooey {
 }
 
 class TextBg {
+  private currColorKey = ''
   effects = {} as Record<string, Record<string, string | number>>
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -557,7 +558,7 @@ class TextBg {
     } else return null
   }
 
-  syncShareAttrs(textBg: ITextBgEffect, effectName: string|null) {
+  syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
     if (textBg.name === 'none') return
     Object.assign(textBg, { name: textBg.name || effectName })
     const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
@@ -588,6 +589,15 @@ class TextBg {
       Object.assign(effect, newEffect)
       localStorageUtils.set('textEffectSetting', effectName, effect)
     }
+  }
+
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, { [this.currColorKey]: color })
   }
 
   resetCurrTextEffect() {

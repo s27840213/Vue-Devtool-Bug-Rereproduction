@@ -10,6 +10,7 @@ import { ITextEffect } from '@/interfaces/format'
 class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
+  private currColorKey = ''
   effects = {} as { [key: string]: any }
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -278,6 +279,15 @@ class Controller {
       Object.assign(effect, newEffect)
       localStorageUtils.set('textEffectSetting', effectName, effect)
     }
+  }
+
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = this.getCurrentLayer().styles.textEffect.name
+    this.setTextEffect(effectName, { [this.currColorKey]: color })
   }
 
   resetCurrTextEffect() {

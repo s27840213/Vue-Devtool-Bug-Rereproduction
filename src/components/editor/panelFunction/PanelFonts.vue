@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="panel-fonts")
-    div(v-if="!noTitle" class="panel-fonts__title")
-      span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+  div(:class="['panel-fonts', isMobile ? 'panel-fonts-mobile' : 'panel-fonts-pc']")
+    div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
+      span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(
         v-if="!isMobile"
         class="panel-fonts__close pointer"
@@ -14,6 +14,7 @@
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
+    font-tag(v-if="!hasSearch" @search="handleSearch")
     category-list(:list="list"
       @loadMore="handleLoadMore")
       template(v-if="pending" #after)
@@ -47,7 +48,7 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import MappingUtils from '@/utils/mappingUtils'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import FileUtils from '@/utils/fileUtils'
 import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
@@ -59,13 +60,15 @@ import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
+import FontTag from '@/components/font/FontTag.vue'
 
 export default Vue.extend({
   components: {
     SearchBar,
     CategoryList,
     CategoryFontItem,
-    CategoryListFont
+    CategoryListFont,
+    FontTag
   },
   props: {
     noTitle: {
@@ -76,7 +79,8 @@ export default Vue.extend({
   },
   data() {
     return {
-      FileUtils
+      FileUtils,
+      hasSearch: false
     }
   },
   mounted() {
@@ -86,6 +90,7 @@ export default Vue.extend({
     }
   },
   destroyed() {
+    this.setShowMore(false)
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
@@ -239,12 +244,16 @@ export default Vue.extend({
       'fetchFonts',
       'fetchMoreFonts'
     ]),
+    ...mapMutations('fontTag', {
+      setShowMore: 'SET_SHOW_MORE'
+    }),
     mappingIcons(type: string) {
       return MappingUtils.mappingIconSet(type)
     },
     closeFontsPanel() {
       this.resetContent()
       this.$emit('closeFontsPanel')
+      this.setShowMore(false)
     },
     handleLoadMore(moreType: string | undefined) {
       if (moreType === 'asset') {
@@ -255,6 +264,12 @@ export default Vue.extend({
       keyword ? this.getMoreContent() : this.getMoreCategory()
     },
     handleSearch(keyword: string) {
+      if (keyword) {
+        this.hasSearch = true
+        this.setShowMore(false)
+      } else {
+        this.hasSearch = false
+      }
       this.resetContent()
       keyword ? this.getTagContent({ keyword }) : this.getRecently()
     },
@@ -270,13 +285,26 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel-fonts {
-  @include size(100%, calc(100vh - 100px));
+  &-mobile {
+    @include size(100%, calc(100% + 20px));
+  }
+  &-pc {
+    @include size(100%, calc(100vh + 100px));
+  }
   display: flex;
   flex-direction: column;
   &__title {
     text-align: center;
     position: relative;
-    margin-bottom: 5px;
+    margin-bottom: -10px;
+    background: white;
+    width: 285px;
+    min-height: 50px;
+    top: -20px;
+    left: -20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   > div {
     margin-top: 15px;

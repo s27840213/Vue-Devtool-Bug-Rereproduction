@@ -24,7 +24,7 @@
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview" class="p-20")
+    div(v-if="!isShowPagePreview" :class="{'p-20': true, 'dim-background': showMore}")
       panel-bg-remove(v-if="showBgRemove")
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
@@ -50,7 +50,7 @@ import PanelTextEffectSetting from '@/components/editor/panelFunction/PanelTextE
 import PanelBgRemove from '@/components/editor/panelFunction/PanelBgRemove.vue'
 import PanelPhotoShadow from '@/components/editor/panelFunction/PanelPhotoShadow.vue'
 import DownloadBtn from '@/components/download/DownloadBtn.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import LayerUtils from '@/utils/layerUtils'
 import { IFrame, IGroup, IImage, IShape, IText } from '@/interfaces/layer'
 import popupUtils from '@/utils/popupUtils'
@@ -80,6 +80,7 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapState('fontTag', ['tags', 'showMore']),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -313,5 +314,8 @@ export default Vue.extend({
     position: relative;
     z-index: 20;
   }
+}
+.dim-background {
+  background: #a3a4aa;
 }
 </style>

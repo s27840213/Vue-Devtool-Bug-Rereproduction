@@ -7,10 +7,6 @@
         :value="pagesName"
         @change="setPagesName"
         ref="pagesName")
-      svg-icon(:iconName="'pen'"
-        :iconWidth="'20px'"
-        :iconColor="'gray-2'"
-        class="upload-cloud ml-10")
     hr(class="panel-more__hr")
     div(class="panel-more__item" @click="save()")
       span(class="body-2 pointer") {{$t('NN0009')}}
@@ -23,8 +19,7 @@
     div(class="panel-more__item"
         @click="onLogoutClicked()")
         span(class="body-2 pointer") {{$tc('NN0167',2)}}
-    div(v-if="buildNumber"
-      class="body-2 panel-more__item")
+    div(class="body-2 panel-more__item" @click="gotoDesktop")
       span(class="text-gray-3") Version: {{buildNumber}}
 </template>
 
@@ -77,6 +72,9 @@ export default Vue.extend({
     setPagesName(event: Event) {
       const { value } = event.target as HTMLInputElement
       pageUtils.setPagesName(value)
+    },
+    gotoDesktop() { // TO-DELETE
+      this.$router.push(this.$router.currentRoute.fullPath.replace('mobile-editor', 'editor'))
     }
   }
 })

@@ -53,6 +53,7 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
+              l.id = GeneralUtils.generateRandomString(8)
             }
           })
         break
@@ -61,6 +62,7 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
+              l.id = GeneralUtils.generateRandomString(8)
             }
           })
         break
@@ -237,34 +239,38 @@ class ShortcutUtils {
     }
   }
 
+  textPasteWith(text: string) {
+    tiptapUtils.agent(editor => {
+      text = text.replace(/\r/g, '')
+      const spans = text.split('\n')
+      let chainedCommands = editor.chain().deleteSelection()
+      spans.forEach((line, index) => {
+        const spanText = `<span>${line === ''
+          ? '<br/>'
+          : line.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+          }</span>`
+        chainedCommands = chainedCommands.insertContent(spanText)
+        if (index !== spans.length - 1) {
+          chainedCommands = chainedCommands.enter()
+        }
+      })
+      editor.storage.nuTextStyle.pasting = true
+      chainedCommands.run()
+      editor.storage.nuTextStyle.pasting = false
+      Vue.nextTick(() => {
+        editor.commands.scrollIntoView()
+      })
+      LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
+    })
+  }
+
   textPaste() {
     navigator.clipboard.readText().then((text) => {
-      tiptapUtils.agent(editor => {
-        text = text.replace(/\r/g, '')
-        const spans = text.split('\n')
-        let chainedCommands = editor.chain().deleteSelection()
-        spans.forEach((line, index) => {
-          const spanText = `<span>${line === ''
-            ? '<br/>'
-            : line.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;')
-            }</span>`
-          chainedCommands = chainedCommands.insertContent(spanText)
-          if (index !== spans.length - 1) {
-            chainedCommands = chainedCommands.enter()
-          }
-        })
-        editor.storage.nuTextStyle.pasting = true
-        chainedCommands.run()
-        editor.storage.nuTextStyle.pasting = false
-        Vue.nextTick(() => {
-          editor.commands.scrollIntoView()
-        })
-        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
-      })
+      this.textPasteWith(text)
     })
   }
 

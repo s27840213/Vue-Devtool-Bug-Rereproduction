@@ -3,16 +3,12 @@
     div(class="pointer"
       @pointerdown="fontSizeStepping(-step)"
       @contextmenu.prevent) -
-    button(class="font-size-selector__range-input-button" @click="handleValueModal")
+    button(class="font-size-selector__range-input-button")
       input(class="body-2 text-gray-2 center record-selection" type="text" ref="input-fontSize"
-            @change="setSize" :value="fontSize")
+            @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
     div(class="pointer"
       @pointerdown="fontSizeStepping(step)"
       @contextmenu.prevent) +
-    value-selector(v-if="openValueSelector"
-                :valueArray="fontSelectValue"
-                class="font-size-selector__value-selector"
-                @update="handleValueUpdate")
 </template>
 
 <script lang="ts">
@@ -26,21 +22,16 @@ import textPropUtils, { fontSelectValue } from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
-import ValueSelector from '@/components/ValueSelector.vue'
 import vClickOutside from 'v-click-outside'
 
 export default Vue.extend({
-  components: {
-    ValueSelector
-  },
   props: {
   },
   data() {
     return {
-      openValueSelector: false,
       fontSelectValue,
       fieldRange: {
-        fontSize: { min: 6, max: 800 },
+        fontSize: { min: 1, max: 144 },
         lineHeight: { min: 0.5, max: 2.5 },
         fontSpacing: { min: -200, max: 800 },
         // fontSpacing: { min: -2, max: 8 },
@@ -79,22 +70,11 @@ export default Vue.extend({
       }
       return currLayer.styles.scale
     },
-    fontSize: {
-      get(): number | string {
-        if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
-          return '--'
-        }
-        return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
-      },
-      set(value: number): void {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-        tiptapUtils.applySpanStyle('size', value)
-        tiptapUtils.agent(editor => {
-          layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
-        })
-        textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-        textEffectUtils.refreshSize()
+    fontSize(): number | string {
+      if (this.props.fontSize === '--' || Number.isNaN(this.scale)) {
+        return '--'
       }
+      return Math.round((this.scale as number) * this.props.fontSize * 10) / 10
     },
     step(): number {
       // const config = LayerUtils.getCurrConfig
@@ -122,25 +102,9 @@ export default Vue.extend({
       else if (value > max) return max.toString()
       return value.toString()
     },
-    handleValueModal() {
-      this.openValueSelector = !this.openValueSelector
-      if (this.openValueSelector) {
-        const input = this.$refs['input-fontSize'] as HTMLInputElement
-        input.focus()
-        input.select()
-      }
-    },
-    handleValueUpdate(value: number) {
-      layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
-      tiptapUtils.spanStyleHandler('size', value)
-      tiptapUtils.forceUpdate(true)
-      textPropUtils.updateTextPropsState({ fontSize: value.toString() })
-      textEffectUtils.refreshSize()
-    },
     setSize(e: Event) {
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
-        layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
           tiptapUtils.applySpanStyle('size', value)

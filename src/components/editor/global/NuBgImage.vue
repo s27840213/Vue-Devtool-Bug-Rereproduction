@@ -37,7 +37,11 @@ export default Vue.extend({
   props: {
     image: Object,
     color: String,
-    pageIndex: Number
+    pageIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   data() {
     return {
@@ -120,6 +124,15 @@ export default Vue.extend({
       const { horizontalFlip, verticalFlip } = this.image.config.styles
       return cssConverter.convertFlipStyle(horizontalFlip, verticalFlip)
     },
+    imageSize(): { width: number, height: number, x: number, y: number } {
+      const { image } = this
+      return {
+        width: image.config.styles.imgWidth * this.contentScaleRatio,
+        height: image.config.styles.imgHeight * this.contentScaleRatio,
+        x: image.posX * this.contentScaleRatio,
+        y: image.posY * this.contentScaleRatio
+      }
+    },
     mainStyles(): any {
       const { image, color } = this
       return {
@@ -134,11 +147,11 @@ export default Vue.extend({
         .some(val => typeof val === 'number' && val !== 0)
     },
     frameStyles(): { [key: string]: string | number } {
-      const { image, flipStyles } = this
+      const { flipStyles } = this
       return {
-        width: `${image.config.styles.imgWidth}px`,
-        height: `${image.config.styles.imgHeight}px`,
-        transform: `translate(${image.posX}px, ${image.posY}px) ${flipStyles.transform}`
+        width: `${this.imageSize.width}px`,
+        height: `${this.imageSize.height}px`,
+        transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${flipStyles.transform}`
       }
     },
     adjustImgStyles(): { [key: string]: string | number } {
@@ -153,10 +166,10 @@ export default Vue.extend({
       const { image } = this
       return {
         backgroundImage: `url(${this.src})`,
-        width: `${image.config.styles.imgWidth}px`,
-        height: `${image.config.styles.imgHeight}px`,
-        backgroundSize: `${image.config.styles.imgWidth}px ${image.config.styles.imgHeight}px`,
-        backgroundPosition: image.posX === -1 ? 'center center' : `${image.posX}px ${image.posY}px`,
+        width: `${this.imageSize.width}px`,
+        height: `${this.imageSize.height}px`,
+        backgroundSize: `${this.imageSize.width}px ${this.imageSize.height}px`,
+        backgroundPosition: this.imageSize.x === -1 ? 'center center' : `${this.imageSize.x}px ${this.imageSize.y}px`,
         ...this.flipStyles
       }
     },
@@ -232,9 +245,9 @@ export default Vue.extend({
     },
     stylesConverter(): { [key: string]: string } {
       return {
-        width: `${this.image.config.styles.imgWidth}px`,
-        height: `${this.image.config.styles.imgHeight}px`,
-        transform: `translate(${this.image.posX}px, ${this.image.posY}px) ${this.flipStyles.transform}`
+        width: `${this.imageSize.width}px`,
+        height: `${this.imageSize.height}px`,
+        transform: `translate(${this.imageSize.x}px, ${this.imageSize.y}px) ${this.flipStyles.transform}`
       }
     },
     setInBgSettingMode() {
