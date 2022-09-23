@@ -73,12 +73,14 @@ class ConstantData {
         ]
       }, {
         label: i18n.t('NN0668'),
-        content: [
-          ...[5].map((id) => themeItem(id)), {
-            label: '電商 Banner',
-            url: 'https://blog.vivipic.com/tw/ec-banner/'
-          },
-          ...[7].map((id) => themeItem(id))
+        content: [{
+          label: '電商商品圖',
+          url: 'https://blog.vivipic.com/tw/ecimage/'
+        }, {
+          label: '電商 Banner',
+          url: 'https://blog.vivipic.com/tw/ec-banner/'
+        },
+        ...[7].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0669'),
