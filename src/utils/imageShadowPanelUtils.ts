@@ -78,8 +78,8 @@ export default new class ImageShadowPanelUtils {
             .every(([k, v]) => {
               return (config.styles as any)[k] === v
             })
-          )
         )
+      )
 
       const isSameColor = shadow.currentEffect === ShadowEffectType.frame
         ? shadow.effects.frameColor === shadow.srcState.effects.frameColor : shadow.effects.color === shadow.srcState.effects.color
