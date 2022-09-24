@@ -45,42 +45,43 @@
               :locked="false"
               @share="handleShareImage")
     div(v-else class="panel-bg__color-tab")
-      div
-        div(class="panel-bg__color-row")
-          div(class="text-left py-5 text-white") {{$t('NN0024')}}
-          div(class="panel-bg__colors")
-            div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
-            div(v-if="newBgColor !== ''"
-              class="panel-bg__color"
-              :style="colorStyles(newBgColor)")
-            div(v-for="color in recentlyColors"
-              class="panel-bg__color"
-              v-press="() => handleShareColor(color)"
-              :style="colorStyles(color)"
-              @click="setBgColor(color)")
-        div(class="panel-bg__color-row")
-          div(class="text-left py-5 text-white") {{$t('NN0089')}}
-          div(class="panel-bg__colors")
-            div(v-for="color in defaultBgColor"
-              class="panel-bg__color"
-              v-press="() => handleShareColor(color)"
-              :style="colorStyles(color)"
-              @click="setBgColor(color)")
-      div(v-if="currActivePanel !== 'color-picker'" class="panel-bg__color-controller")
-        div(class="panel-bg__color-controller__header")
-          div(class="panel-bg__color-controller__opacity-title") {{ $t('NN0030') }}
-          div(class="panel-bg__color-controller__opacity-value")
-            input(type="number" v-model.number="opacity")
-        div(class="panel-bg__color-controller__slider-container")
-          input(class="panel-bg__color-controller__slider"
-                :style="progressStyles()"
-                type="range"
-                min="0"
-                max="100"
-                v-model.number="opacity")
-        div(class="panel-bg__color-controller__hint")
-          p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
-          p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
+      div(class="panel-bg__color-tab-wrapper" :style="colorTabWrapperStyles()")
+        div(class="panel-bg__color-area")
+          div(class="panel-bg__color-row")
+            div(class="text-left py-5 text-white") {{$t('NN0024')}}
+            div(class="panel-bg__colors")
+              div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
+              div(v-if="newBgColor !== ''"
+                class="panel-bg__color"
+                :style="colorStyles(newBgColor)")
+              div(v-for="color in recentlyColors"
+                class="panel-bg__color"
+                v-press="() => handleShareColor(color)"
+                :style="colorStyles(color)"
+                @click="setBgColor(color)")
+          div(class="panel-bg__color-row")
+            div(class="text-left py-5 text-white") {{$t('NN0089')}}
+            div(class="panel-bg__colors")
+              div(v-for="color in defaultBgColor"
+                class="panel-bg__color"
+                v-press="() => handleShareColor(color)"
+                :style="colorStyles(color)"
+                @click="setBgColor(color)")
+        div(class="panel-bg__color-controller")
+          div(class="panel-bg__color-controller__header")
+            div(class="panel-bg__color-controller__opacity-title") {{ $t('NN0030') }}
+            div(class="panel-bg__color-controller__opacity-value")
+              input(type="number" v-model.number="opacity")
+          div(class="panel-bg__color-controller__slider-container")
+            input(class="panel-bg__color-controller__slider"
+                  :style="progressStyles()"
+                  type="range"
+                  min="0"
+                  max="100"
+                  v-model.number="opacity")
+          div(class="panel-bg__color-controller__hint")
+            p(class="panel-bg__color-controller__hint-text") {{ $t('STK0002') }}
+            p(class="panel-bg__color-controller__hint-text") {{ $t('STK0003') }}
     div(v-if="isInBgShare" class="panel-bg__share")
       div(class="panel-bg__share__screen" :style="shareBgSizeStyles()")
         div(class="panel-bg__share__screen-inner" :style="shareBgStyles()")
@@ -302,6 +303,11 @@ export default Vue.extend({
         '--progress': `${this.opacity}%`
       }
     },
+    colorTabWrapperStyles() {
+      return {
+        height: `${window.innerHeight - 176}px`
+      }
+    },
     shareBgSizeStyles() {
       const screenWidth = window.innerWidth
       const screenHeight = window.innerHeight
@@ -455,12 +461,20 @@ export default Vue.extend({
     text-align: left;
   }
   &__color-tab {
-    display: grid;
-    grid-template-rows: 1fr auto;
     height: 100%;
+    overflow: hidden;
+  }
+  &__color-tab-wrapper {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr;
+  }
+  &__color-area {
+    overflow-y: scroll;
+    @include no-scrollbar;
   }
   &__color-row {
-    height: 50vw;
+    padding-bottom: 26px;
   }
   &__colors {
     display: grid;
@@ -499,7 +513,8 @@ export default Vue.extend({
     margin-top: 24px;
   }
   &__color-controller {
-    height: 190px;
+    padding-top: 13px;
+    height: 203px;
     &__header {
       display: flex;
       align-items: center;
