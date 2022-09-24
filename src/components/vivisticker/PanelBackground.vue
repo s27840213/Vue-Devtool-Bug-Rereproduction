@@ -48,7 +48,12 @@
       div(class="panel-bg__color-tab-wrapper" :style="colorTabWrapperStyles()")
         div(class="panel-bg__color-area")
           div(class="panel-bg__color-row")
-            div(class="text-left py-5 text-white") {{$t('NN0024')}}
+            div(class="panel-bg__color-row-header py-5 text-white")
+              div(class="panel-bg__color-row-left")
+                div(v-if="showAllRecentlyBgColors" class="panel-bg__color-row-back" @click.prevent.stop="handleShowAllRecentlyBgColors(false)")
+                  svg-icon(iconName="vivisticker_back" iconColor="white" iconWidth="24px")
+                div(class="panel-bg__color-row-title") {{$t('NN0024')}}
+              div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row-more" @click.prevent.stop="handleShowAllRecentlyBgColors(true)") {{$t('NN0082')}}
             div(class="panel-bg__colors")
               div(class="panel-bg__color add-color" @click="handleOpenColorPicker")
               div(v-if="newBgColor !== ''"
@@ -59,8 +64,8 @@
                 v-press="() => handleShareColor(color)"
                 :style="colorStyles(color)"
                 @click="setBgColor(color)")
-          div(class="panel-bg__color-row")
-            div(class="text-left py-5 text-white") {{$t('NN0089')}}
+          div(v-if="!showAllRecentlyBgColors" class="panel-bg__color-row")
+            div(class="panel-bg__color-row-title text-left py-5 text-white") {{$t('NN0089')}}
             div(class="panel-bg__colors")
               div(v-for="color in defaultBgColor"
                 class="panel-bg__color"
@@ -133,7 +138,8 @@ export default Vue.extend({
       openColorPicker: false,
       scrollTop: 0,
       currActiveTabIndex: 0,
-      opacity: 100
+      opacity: 100,
+      showAllRecentlyBgColors: false
     }
   },
   watch: {
@@ -192,7 +198,7 @@ export default Vue.extend({
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
     },
     recentlyColors(): string[] {
-      return this.allRecentlyColors.slice(0, 20)
+      return this.showAllRecentlyBgColors ? this.allRecentlyColors : this.allRecentlyColors.slice(0, 20)
     },
     listCategories(): any[] {
       const { keyword, categories } = this
@@ -447,6 +453,9 @@ export default Vue.extend({
     },
     handleNewBgColor(color: string) {
       this.setNewBgColor(color)
+    },
+    handleShowAllRecentlyBgColors(bool: boolean) {
+      this.showAllRecentlyBgColors = bool
     }
   }
 })
@@ -506,6 +515,31 @@ export default Vue.extend({
   }
   &__color-row {
     padding-bottom: 26px;
+  }
+  &__color-row-header {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__color-row-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  &__color-row-back {
+    @include size(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  &__color-row-title {
+    @include body-MD;
+  }
+  &__color-row-more {
+    @include body-SM;
+    &:active {
+      color: setColor(black-5);
+    }
   }
   &__colors {
     display: grid;
