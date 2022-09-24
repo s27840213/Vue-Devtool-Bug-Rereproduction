@@ -35,7 +35,7 @@ export default function (this: any) {
   const actions: ActionTree<IListModuleState, unknown> = {
     // For panel template, object, bg, text, only get recently used.
     // For others, get recently used and categoryies.
-    getRecently: async ({ commit, state }, { writeBack = true, key }) => {
+    getRecently: async ({ commit, state }, { writeBack = true, key, keyword }) => {
       const { theme } = state
       const locale = localeUtils.currLocale()
       commit(SET_STATE, { pending: true, categories: [], locale }) // Reset categories
@@ -57,6 +57,9 @@ export default function (this: any) {
         if (writeBack) {
           commit('SET_RECENTLY', data.data)
           if (key) {
+            if (keyword) {
+              commit('SET_STATE', { keyword })
+            }
             vivistickerUtils.listAsset(key)
           }
         } else return data.data

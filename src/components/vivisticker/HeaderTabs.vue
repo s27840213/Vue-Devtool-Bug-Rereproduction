@@ -149,6 +149,7 @@ export default Vue.extend({
     }),
     ...mapMutations({
       setIsInCategory: 'vivisticker/SET_isInCategory',
+      setShowAllRecently: 'vivisticker/SET_showAllRecently',
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
@@ -161,6 +162,7 @@ export default Vue.extend({
     },
     clearCategory() {
       this.setIsInCategory({ tab: this.currActiveTab, bool: false })
+      this.setShowAllRecently({ tab: this.currActiveTab, bool: false })
       switch (this.currActiveTab) {
         case 'object':
           this.resetObjects()

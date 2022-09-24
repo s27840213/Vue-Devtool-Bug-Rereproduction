@@ -83,7 +83,8 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio',
       getLayersNum: 'getLayersNum',
       isInEditor: 'vivisticker/getIsInEditor',
-      isTabInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
     }),
     ...mapState('textStock', [
       'categories',
@@ -95,6 +96,9 @@ export default Vue.extend({
     ]),
     isInCategory(): boolean {
       return this.isTabInCategory('text')
+    },
+    showAllRecently(): boolean {
+      return this.isTabShowAllRecently('text')
     },
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
@@ -124,6 +128,23 @@ export default Vue.extend({
           title: category.title
         }))
     },
+    listRecently(): any[] {
+      const { categories } = this
+      const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
+      const result = new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-text-item',
+            list: rowItems,
+            size: 90,
+            title: ''
+          }
+        })
+      return result
+    },
     listResult(): any[] {
       const { keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
@@ -146,11 +167,14 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
       return this.listCategories
         .concat(this.listResult)
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length && !this.showAllRecently ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
     }
   },
   mounted() {
@@ -176,6 +200,7 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
+      'getRecently',
       'getRecAndCate',
       'getMoreContent'
     ]),
@@ -193,9 +218,15 @@ export default Vue.extend({
     handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        if (keyword === `${this.$t('NN0024')}`) {
+          this.getRecently({ key: 'textStock', keyword })
+          vivistickerUtils.setShowAllRecently('text', true)
+        } else {
+          this.getContent({ keyword, locale })
+        }
         vivistickerUtils.setIsInCategory('text', true)
       } else {
+        vivistickerUtils.setShowAllRecently('text', false)
         this.getRecAndCate('textStock').then(() => { this.getContent() })
       }
     },

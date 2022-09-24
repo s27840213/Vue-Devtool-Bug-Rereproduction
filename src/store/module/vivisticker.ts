@@ -8,6 +8,7 @@ interface IViviStickerState {
   userInfo: IUserInfo,
   currActiveTab: string,
   isInCategoryDict: {[key: string]: boolean},
+  showAllRecentlyDict: {[key: string]: boolean},
   isInBgShare: boolean,
   shareItem: IAsset | undefined,
   shareColor: string,
@@ -29,6 +30,11 @@ const getDefaultState = (): IViviStickerState => ({
   userInfo: vivistickerUtils.getDefaultUserInfo(),
   currActiveTab: 'object',
   isInCategoryDict: {
+    object: false,
+    background: false,
+    text: false
+  },
+  showAllRecentlyDict: {
     object: false,
     background: false,
     text: false
@@ -55,6 +61,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
     return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
+  },
+  getShowAllRecently(state: IViviStickerState): (tab: string) => boolean {
+    return (tab: string): boolean => state.showAllRecentlyDict[tab] ?? false
   },
   getIsInBgShare(state: IViviStickerState): boolean {
     return state.isInBgShare
@@ -97,6 +106,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isInCategory(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
     state.isInCategoryDict[updateInfo.tab] = updateInfo.bool
+  },
+  SET_showAllRecently(state: IViviStickerState, updateInfo: { tab: string, bool: boolean }) {
+    state.showAllRecentlyDict[updateInfo.tab] = updateInfo.bool
   },
   SET_isInBgShare(state: IViviStickerState, bool: boolean) {
     state.isInBgShare = bool

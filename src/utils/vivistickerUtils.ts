@@ -116,6 +116,10 @@ class ViviStickerUtils {
     store.commit('vivisticker/SET_isInCategory', { tab, bool })
   }
 
+  setShowAllRecently(tab: string, bool: boolean) {
+    store.commit('vivisticker/SET_showAllRecently', { tab, bool })
+  }
+
   debugMode() {
     this.inDebugMode = true
   }

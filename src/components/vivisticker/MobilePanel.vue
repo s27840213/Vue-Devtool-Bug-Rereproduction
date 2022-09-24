@@ -470,8 +470,9 @@ export default Vue.extend({
       if (this.insertTheme && this.isTextInCategory) {
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
+          this.setShowAllRecently({ tab: 'text', bool: false })
           this.resetTexts()
-          this.refetchTexts()
+          this.refetchTexts('textStock')
           this.refetchTextContent()
         }
       }
@@ -571,7 +572,8 @@ export default Vue.extend({
   methods: {
     ...mapMutations({
       setCurrActiveSubPanel: 'mobileEditor/SET_currActiveSubPanel',
-      setIsInCategory: 'vivisticker/SET_isInCategory'
+      setIsInCategory: 'vivisticker/SET_isInCategory',
+      setShowAllRecently: 'vivisticker/SET_showAllRecently'
     }),
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',

@@ -166,6 +166,7 @@ export default Vue.extend({
       defaultBgColor: 'color/getDefaultViviStickerBgColors',
       getBackgroundColor: 'getBackgroundColor',
       isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
       isInBgShare: 'vivisticker/getIsInBgShare',
       shareItem: 'vivisticker/getShareItem',
       shareColor: 'vivisticker/getShareColor',
@@ -180,6 +181,9 @@ export default Vue.extend({
     },
     isInCategory(): boolean {
       return this.isTabInCategory('background')
+    },
+    showAllRecently(): boolean {
+      return this.isTabShowAllRecently('background')
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
@@ -203,6 +207,23 @@ export default Vue.extend({
           title: category.title
         }))
     },
+    listRecently(): any[] {
+      const { categories } = this
+      const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
+      const result = new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-background-item',
+            list: rowItems,
+            size: this.itemWidth + 32,
+            title: ''
+          }
+        })
+      return result
+    },
     listResult(): any[] {
       const { keyword } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
@@ -225,6 +246,9 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
       const list = generalUtils.deepCopy(
         this.showImageTab ? this.listCategories
           .concat(this.listResult) : []
@@ -243,7 +267,7 @@ export default Vue.extend({
       return backgroundColor || ''
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0004', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length && !this.showAllRecently ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0004', 1) })}` : ''
     },
     showImageTab(): boolean {
       return this.currActiveTabIndex === 0
@@ -282,6 +306,7 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
+      'getRecently',
       'getRecAndCate',
       'getMoreContent'
     ]),
@@ -361,9 +386,15 @@ export default Vue.extend({
     handleCategorySearch(keyword: string, locale = '') {
       this.resetContent()
       if (keyword) {
-        this.getContent({ keyword, locale })
+        if (keyword === `${this.$t('NN0024')}`) {
+          this.getRecently({ key: 'background', keyword })
+          vivistickerUtils.setShowAllRecently('background', true)
+        } else {
+          this.getContent({ keyword, locale })
+        }
         vivistickerUtils.setIsInCategory('background', true)
       } else {
+        vivistickerUtils.setShowAllRecently('background', false)
         this.getRecAndCate('background')
       }
     },

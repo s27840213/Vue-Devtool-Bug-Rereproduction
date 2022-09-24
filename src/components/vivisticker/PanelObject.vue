@@ -47,7 +47,6 @@ import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
 import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import constantData from '@/utils/constantData'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
@@ -67,7 +66,8 @@ export default Vue.extend({
   computed: {
     ...mapGetters({
       isAdmin: 'user/isAdmin',
-      isTabInCategory: 'vivisticker/getIsInCategory'
+      isTabInCategory: 'vivisticker/getIsInCategory',
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
     }),
     ...mapState('objects', [
       'categories',
@@ -77,6 +77,9 @@ export default Vue.extend({
     ]),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
+    },
+    showAllRecently(): boolean {
+      return this.isTabShowAllRecently('object')
     },
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
@@ -93,6 +96,23 @@ export default Vue.extend({
           list: category.list,
           title: category.title
         }))
+    },
+    listRecently(): any[] {
+      const { categories } = this
+      const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
+      const result = new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, idx * 3 + 3)
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-object-item',
+            list: rowItems,
+            size: 90,
+            title: ''
+          }
+        })
+      return result
     },
     listResult(): any[] {
       const { keyword } = this
@@ -115,6 +135,9 @@ export default Vue.extend({
       return result
     },
     list(): any[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
       const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
       if (this.listResult.length === 0 && list.length !== 0) {
         list[list.length - 1].sentinel = true
@@ -122,7 +145,7 @@ export default Vue.extend({
       return list
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0003', 1) })}` : ''
+      return this.keyword && !this.pending && !this.listResult.length && !this.showAllRecently ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0003', 1) })}` : ''
     }
   },
   mounted() {
@@ -154,6 +177,7 @@ export default Vue.extend({
       'resetContent',
       'getContent',
       'getTagContent',
+      'getRecently',
       'getRecAndCate',
       'getMoreContent'
     ]),
@@ -170,9 +194,15 @@ export default Vue.extend({
       this.resetContent()
       if (keyword) {
         this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
-        this.getContent({ keyword, locale })
+        if (keyword === `${this.$t('NN0024')}`) {
+          this.getRecently({ key: 'objects', keyword })
+          vivistickerUtils.setShowAllRecently('object', true)
+        } else {
+          this.getContent({ keyword, locale })
+        }
         vivistickerUtils.setIsInCategory('object', true)
       } else {
+        vivistickerUtils.setShowAllRecently('object', false)
         this.getRecAndCate('objects')
       }
     },
