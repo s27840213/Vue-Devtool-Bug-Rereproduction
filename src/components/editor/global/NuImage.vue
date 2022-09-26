@@ -861,7 +861,7 @@ export default Vue.extend({
       return `0 0 ${this.svgImageWidth()} ${this.svgImageHeight()}`
     },
     cssFilterElms(): any[] {
-      const { adjustImgStyles: { adjust, width, height } } = this.adjustImgStyles()
+      const { adjust, width, height } = this.adjustImgStyles()
       // @TODO: only for halation now
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []
