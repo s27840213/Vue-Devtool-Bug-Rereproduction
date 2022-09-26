@@ -182,9 +182,9 @@ export default Vue.extend({
       const elms = []
       if (adjust.halation) {
         const position = {
-          width: width / 2,
-          x: width / 2,
-          y: height / 2
+          width: width / 2 * this.contentScaleRatio,
+          x: width / 2 * this.contentScaleRatio,
+          y: height / 2 * this.contentScaleRatio
         }
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
