@@ -375,24 +375,26 @@ export default Vue.extend({
 
       return {
         transform: `translate(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px)` + `rotate(${this.config.styles.rotate}deg)` +
-          `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})`,
+          `scaleX(${horizontalFlip ? -1 : 1})` + `scaleY(${verticalFlip ? -1 : 1})` + `translateZ(${this.config.styles.zindex}px)`,
         width: `${this.config.styles.width * this.contentScaleRatio}px`,
         height: `${this.config.styles.height * this.contentScaleRatio}px`,
         'pointer-events': 'none'
       }
     },
     wrapperStyles() {
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale * this.contentScaleRatio
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
-        ...this.sizeStyle(),
+        // ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
+          const { styles: { width, height }, clipPath } = this.config
           if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${this.config.styles.width}v${this.config.styles.height}h${-this.config.styles.width}z")` }
+            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path("${this.config.clipPath}")` }
+            return { clipPath: `path("${clipPath}")` }
           }
         })())
       }
@@ -401,7 +403,7 @@ export default Vue.extend({
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `translateZ(${this.config.styles.zindex}px)`,
+        // transform: `translateZ(${this.config.styles.zindex}px)`,
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -409,11 +411,15 @@ export default Vue.extend({
       const { isFrameImg } = this.config
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
-        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
+        width = `${this.config.styles.initWidth}px`
+        height = `${this.config.styles.initHeight}px`
+        // width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
+        // height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
       } else {
-        width = `${this.config.styles.width * this.contentScaleRatio}px`
-        height = `${this.config.styles.height * this.contentScaleRatio}px`
+        width = `${this.config.styles.width}px`
+        height = `${this.config.styles.height}px`
+        // width = `${this.config.styles.width * this.contentScaleRatio}px`
+        // height = `${this.config.styles.height * this.contentScaleRatio}px`
       }
       return { width, height }
     },
