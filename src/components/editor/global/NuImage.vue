@@ -220,7 +220,7 @@ export default Vue.extend({
           return
         }
         if (typeof this.subLayerIndex !== 'undefined') {
-          this.handleDimensionUpdate(this.parentLayerDimension(), 0)
+          this.handleDimensionUpdate(this.parentLayerDimension, 0)
         } else {
           this.perviewAsLoading()
         }
@@ -271,7 +271,7 @@ export default Vue.extend({
         }
       }
     },
-    'shadow.srcObj': {
+    'config.styles.shadow.srcObj': {
       handler: function (val) {
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
@@ -337,6 +337,18 @@ export default Vue.extend({
         }
       })()
       return isCurrShadowEffectApplied && isHandling
+    },
+    getImgDimension(): number {
+      const { srcObj } = this.config
+      const { imgWidth, imgHeight } = this.config.styles
+      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
+    },
+    parentLayerDimension(): number {
+      const { width, height } = this.config.parentLayerStyles || {}
+      const { imgWidth, imgHeight } = this.config.styles
+      const imgRatio = imgWidth / imgHeight
+      const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
+      return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
     }
   },
   methods: {
@@ -511,9 +523,9 @@ export default Vue.extend({
         }
         preImg.onload = () => {
           const nextImg = new Image()
-          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension(), 'next')))
+          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'next')))
         }
-        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension(), 'pre')))
+        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
@@ -962,11 +974,6 @@ export default Vue.extend({
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    getImgDimension(): number {
-      const { srcObj } = this.config
-      const { imgWidth, imgHeight } = this.config.styles
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
-    },
     getPreviewSize(): number {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return ImageUtils
@@ -1022,18 +1029,11 @@ export default Vue.extend({
     // uploadingImagePreviewSrc(): string {
     //   return this.config.previewSrc
     // },
-    parentLayerDimension(): number {
-      const { width, height } = this.config.parentLayerStyles || {}
-      const { imgWidth, imgHeight } = this.config.styles
-      const imgRatio = imgWidth / imgHeight
-      const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
-      return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
-    },
     shadowSrc(): string {
       if (!this.shadow || !this.shadow().srcObj) {
         return ''
       }
-      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension()))
+      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
     },
     id(): ILayerIdentifier {
       return {
