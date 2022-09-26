@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     //- Svg BG for text effex gooey.
-    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG")
+    svg(v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -45,6 +45,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -66,7 +67,7 @@ export default Vue.extend({
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
       isLoading: true,
-      svgBG: null as Record<string, unknown> | null
+      svgBG: {} as Record<string, unknown> | null
     }
   },
   created() {
@@ -96,7 +97,12 @@ export default Vue.extend({
     // }
     this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
+    testUtils.start(this.config.id, false)
     this.drawSvgBG()
+    const ro = new ResizeObserver(() => {
+      testUtils.log(this.config.id, 'render done')
+    })
+    ro.observe(this.$refs.svg as any)
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -212,6 +218,7 @@ export default Vue.extend({
     //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     // },
     resizeCallback() {
+      testUtils.log(this.config.id, 'font cb start')
       // for (const entry of entries) {
       //   console.log(JSON.stringify(entry.contentRect))
       // }
@@ -251,6 +258,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
+      testUtils.log(this.config.id, 'font cb done')
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList

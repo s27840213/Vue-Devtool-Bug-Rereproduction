@@ -6,6 +6,7 @@ import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
+import testUtils from '@/utils/testUtils'
 
 // For text effect gooey
 class Point {
@@ -363,8 +364,9 @@ class TextBg {
   }
 
   drawSvgBg(config: IText, bodyHtml: Element[]) {
+    testUtils.log((config as any).id, 'draw svg start')
     const textBg = config.styles.textBg
-    if (textBg.name === 'none') return null
+    if (textBg.name === 'none') return {}
     const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRect[][]
 
@@ -467,6 +469,7 @@ class TextBg {
       const cps = new Gooey(textBg, rects)
       cps.preProcess()
       const d = cps.process()
+      testUtils.log((config as any).id, 'draw svg done')
 
       return {
         attrs: { width, height, fill },
@@ -555,7 +558,7 @@ class TextBg {
         }]
         // .concat(path.toCircle() as any) // Show control point
       }
-    } else return null
+    } else return {}
   }
 
   syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
