@@ -25,7 +25,7 @@ export default Vue.extend({
     host(): string {
       const host = window.location.host
       const subdomain = host.match(/(.+).vivipic.com/)
-      if (host === 'vivipic.com') return ''
+      if (host === 'test.vivipic.com') return ''
       else if (host === 'localhost:8080') return 'local'
       else if (subdomain) return subdomain[1]
       else return host
