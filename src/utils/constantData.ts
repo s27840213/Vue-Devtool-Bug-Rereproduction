@@ -354,14 +354,14 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
-      }, {
-        key: 'funky3d',
-        label: i18n.tc('NN0728'),
-        options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
-      }, {
-        key: 'bold3d',
-        label: i18n.tc('NN0729'),
-        options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      // }, {
+      //   key: 'funky3d',
+      //   label: i18n.tc('NN0728'),
+      //   options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
+      // }, {
+      //   key: 'bold3d',
+      //   label: i18n.tc('NN0729'),
+      //   options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
@@ -375,50 +375,50 @@ class ConstantData {
         label: i18n.t('NN0118'),
         options: toOptions(['bend'])
       }])
-    }, {
-      name: 'bg',
-      label: i18n.tc('NN0719'),
-      effects2d: arrTo2darr([{
-        key: 'none',
-        label: i18n.t('NN0111'),
-        options: toOptions([])
-      }, {
-        key: 'square-borderless',
-        label: i18n.tc('NN0720'),
-        options: toOptions(['opacity', 'pStroke', 'pColor'])
-      }, {
-        key: 'rounded-borderless',
-        label: i18n.tc('NN0721'),
-        options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
-      }, {
-        key: 'square-hollow',
-        label: i18n.tc('NN0722'),
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
-      }, {
-        key: 'rounded-hollow',
-        label: i18n.tc('NN0723'),
-        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
-      }, {
-        key: 'square-both',
-        label: i18n.tc('NN0724'),
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-      }, {
-        key: 'rounded-both',
-        label: i18n.tc('NN0725'),
-        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-      }, {
-        key: 'cloud',
-        label: i18n.tc('NN0741'),
-        options: toOptions(['bRadius', 'opacity', 'color'])
-      }, {
-        key: 'gooey',
-        label: i18n.tc('NN0726'),
-        options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
-      }, {
-        key: 'underline',
-        label: i18n.tc('NN0727'),
-        options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
-      }])
+    // }, {
+    //   name: 'bg',
+    //   label: i18n.tc('NN0719'),
+    //   effects2d: arrTo2darr([{
+    //     key: 'none',
+    //     label: i18n.t('NN0111'),
+    //     options: toOptions([])
+    //   }, {
+    //     key: 'square-borderless',
+    //     label: i18n.tc('NN0720'),
+    //     options: toOptions(['opacity', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'rounded-borderless',
+    //     label: i18n.tc('NN0721'),
+    //     options: toOptions(['opacity', 'bRadius', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'square-hollow',
+    //     label: i18n.tc('NN0722'),
+    //     options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
+    //   }, {
+    //     key: 'rounded-hollow',
+    //     label: i18n.tc('NN0723'),
+    //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+    //   }, {
+    //     key: 'square-both',
+    //     label: i18n.tc('NN0724'),
+    //     options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'rounded-both',
+    //     label: i18n.tc('NN0725'),
+    //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+    //   }, {
+    //     key: 'cloud',
+    //     label: i18n.tc('NN0741'),
+    //     options: toOptions(['bRadius', 'opacity', 'color'])
+    //   }, {
+    //     key: 'gooey',
+    //     label: i18n.tc('NN0726'),
+    //     options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
+    //   }, {
+    //     key: 'underline',
+    //     label: i18n.tc('NN0727'),
+    //     options: toOptions(['endpoint', 'height', 'yOffset', 'opacity', 'color'])
+    //   }])
     }]
     return categories as IEffectCategory[]
   }

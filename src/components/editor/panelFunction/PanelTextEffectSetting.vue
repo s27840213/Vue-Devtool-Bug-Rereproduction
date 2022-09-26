@@ -208,7 +208,8 @@ export default Vue.extend({
   &-tabs {
     @include caption-MD;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    // grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     column-gap: 2.5px;
     height: 36px;
     > span {
