@@ -1,19 +1,30 @@
 <template lang="pug">
-  div(class="nu-layer" :style="styles" ref="body"
+  div(class="nu-layer" :style="layerStyles()" ref="body"
       @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
-    div(class="layer-scale" ref="scale"
-        :style="scaleStyles()")
-      nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl")
-        component(:is="`nu-${config.type}`"
-          class="transition-none"
-          :config="config"
-          :imgControl="imgControl"
-          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-          v-bind="$attrs")
-    div(v-if="showSpinner" class="nu-layer__inProcess")
+    div(class="layer-translate posAbs"
+        :style="translateStyles()")
+      div(class="layer-scale posAbs" ref="scale"
+          :style="scaleStyles()")
+        //- Svg BG for text effex box.
+        svg(v-if="svgBG()" :width="svgBG().width" :height="svgBG().height"
+            class="nu-layer__BG")
+          component(v-for="(elm, idx) in svgBG().content"
+                    :key="`svgFilter${idx}`"
+                    :is="elm.tag"
+                    v-bind="elm.attrs")
+        nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+          component(:is="`nu-${config.type}`"
+            class="transition-none"
+            :config="config"
+            :imgControl="imgControl"
+            :contentScaleRatio="contentScaleRatio"
+            :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+            :scaleRatio="scaleRatio"
+            v-bind="$attrs")
+    div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
       //-   :iconName="'spiner'"
@@ -22,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import Vue, { PropType } from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
@@ -32,6 +43,11 @@ import textBgUtils from '@/utils/textBgUtils'
 import layerUtils from '@/utils/layerUtils'
 import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
+import { mapGetters } from 'vuex'
+import pageUtils from '@/utils/pageUtils'
+import { ICurrSelectedInfo } from '@/interfaces/editor'
+import { ILayerIdentifier } from '@/interfaces/layer'
+import { IUploadShadowImg } from '@/store/module/shadow'
 
 export default Vue.extend({
   components: {
@@ -42,26 +58,70 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number,
     subLayerIndex: Number,
-    flip: Object,
-    imgControl: Boolean
+    imgControl: Boolean,
+    inGroup: {
+      type: Boolean,
+      default: false
+    },
+    inFrame: {
+      type: Boolean,
+      default: false
+    },
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
+    /**
+     * @Note Vuex Props
+    //  */
+    // currSelectedInfo: Object as PropType<ICurrSelectedInfo>,
+    // scaleRatio: Number,
+    // getCurrFunctionPanelType: Number,
+    // isUploadingShadowImg: Boolean,
+    // isHandling: Boolean,
+    // isShowPagePanel: Boolean,
+    // imgSizeMap: Array as PropType<Array<{ [key: string]: string | number }>>,
+    // userId: String,
+    // verUni: String,
+    // uploadId: Object as PropType<ILayerIdentifier>,
+    // handleId: Object as PropType<ILayerIdentifier>,
+    // uploadShadowImgs: Array as PropType<Array<IUploadShadowImg>>
   },
   data() {
     return {
       LayerType
     }
   },
-  mounted() {
-    if (this.config.type === 'shape') {
-      const scaleLayer = this.$refs.scale as HTMLElement
-      if (scaleLayer) {
-        scaleLayer.classList.add('shape')
-      }
-    }
-  },
   computed: {
-    styles(): any {
+    ...mapGetters({
+      currSelectedInfo: 'getCurrSelectedInfo',
+      scaleRatio: 'getPageScaleRatio',
+      getCurrFunctionPanelType: 'getCurrFunctionPanelType',
+      isUploadingShadowImg: 'shadow/isUploading',
+      isHandling: 'shadow/isHandling',
+      isShowPagePanel: 'page/getShowPagePanel'
+    })
+  },
+  methods: {
+    onDrop(e: DragEvent) {
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())
+      e.stopPropagation()
+    },
+    onDropClipper(e: DragEvent) {
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos(), this.config.path, this.config.styles)
+      e.stopPropagation()
+    },
+    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
+    },
+    hasSelectedLayer(): boolean {
+      return this.currSelectedInfo.layers.length > 0
+    },
+    layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.inFrame ? 1 : this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -70,7 +130,7 @@ export default Vue.extend({
       switch (this.config.type) {
         case LayerType.text: {
           const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
-          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles.textBg)
+          const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
             textEffectStyles,
@@ -91,27 +151,21 @@ export default Vue.extend({
       }
       return styles
     },
+    svgBG() {
+      const textBg = textBgUtils.convertTextEffect(this.config.styles)
+      return textBg.svg
+    },
     getLayerPos(): { x: number, y: number } {
       return {
         x: this.config.styles.x,
         y: this.config.styles.y
       }
     },
-    getLayerX(): number {
-      return this.config.styles.x
+    pageScaleRatio(): number {
+      return pageUtils.scaleRatio / 100
     },
-    getLayerY(): number {
-      return this.config.styles.y
-    },
-    getCos(): number {
-      return MathUtils.cos(this.config.styles.rotate)
-    },
-    hasShadowSrc(): boolean {
-      if (this.config.type === LayerType.image) {
-        return this.config.styles.shadow && this.config.styles.shadow.srcObj && this.config.styles.shadow.srcObj.type
-      } else {
-        return false
-      }
+    compensationRatio(): number {
+      return Math.max(1, this.pageScaleRatio())
     },
     showSpinner(): boolean {
       const { config } = this
@@ -120,71 +174,30 @@ export default Vue.extend({
       const isHandleShadow = config.inProcess === 'imgShadow' && !hasShadowSrc
       const isHandleBgRemove = config.inProcess === 'bgRemove'
       return isHandleBgRemove || isHandleShadow
-    }
-  },
-  methods: {
-    // styles() {
-    //   const styles = Object.assign(
-    //     CssConveter.convertDefaultStyle(this.config.styles),
-    //     {
-    //       // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
-    //       'pointer-events': 'none'
-    //     }
-    //   )
-    //   switch (this.config.type) {
-    //     case LayerType.text: {
-    //       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
-    //       Object.assign(
-    //         styles,
-    //         textEffectStyles,
-    //         {
-    //           background: 'rgba(0, 0, 255, 0)',
-    //           willChange: 'text-shadow',
-    //           '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-    //         }
-    //       )
-    //       break
-    //     }
-    //   }
-    //   return styles
-    // },
-    scaleStyles() {
-      let { width, height } = this.config.styles
-      const { scale, scaleX, scaleY, zindex, shadow } = this.config.styles
+    },
+    translateStyles(): { [index: string]: string } {
+      const { zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
-      width /= (isImgType ? 1 : scale)
-      height /= isImgType ? 1 : scale
-
-      const transform = isImgType ? 'none' : `translateZ(0) scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
-      // if (type === LayerType.image && shadow.currentEffect === 'shadow') {
-      //   transform = `scale(${scale}) scaleX(${scaleX}) scaleY(${scaleY})`
-      // }
-
+      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.compensationRatio())}) translateZ(0)`
       /**
-       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
-       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
-       */
-      const styles = {
-        width: this.config.type === 'shape' ? '' : `${width}px`,
-        height: this.config.type === 'shape' ? '' : `${height}px`,
+      * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
+      * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
+      */
+      return {
         transform,
         'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
+    },
+    scaleStyles(): { [index: string]: string } {
+      const { scale, scaleX, scaleY } = this.config.styles
+      const { type } = this.config
+      const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
+
+      const styles = {
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+      }
       return styles
-    },
-    onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-      e.stopPropagation()
-    },
-    onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
-      e.stopPropagation()
-    },
-    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
-      layerUtils.updateLayerProps(pageIndex, layerIndex, {
-        shown
-      })
     }
   }
 })
@@ -204,6 +217,10 @@ export default Vue.extend({
   transform-style: preserve-3d;
   &:focus {
     background-color: rgba(168, 218, 220, 1);
+  }
+  &__BG {
+    position: absolute;
+    left: 0;
   }
   &__inProcess {
     width: 100%;
@@ -225,7 +242,7 @@ export default Vue.extend({
   border-radius: 100px/50px;
 }
 
-.shape {
+.posAbs {
   position: absolute;
   transform-origin: top left;
   top: 0;

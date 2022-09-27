@@ -18,7 +18,7 @@
                   :ref="`page-${index}`"
                   :key="`page-${index}`"
                   :pageIndex="index"
-                  :editorView="editorView"
+                  :overflowContainer="editorView"
                   :style="{'z-index': `${getPageZIndex(index)}`}"
                   :config="page" :index="index" :isAnyBackgroundImageControl="isBackgroundImageControl"
                   @stepChange="handleStepChange")
@@ -272,7 +272,7 @@ export default Vue.extend({
       if (this.hasCopiedFormat) {
         formatUtils.clearCopiedFormat()
       }
-      if (this.isTyping || this.getInInGestureMode) return
+      if (this.getInInGestureMode) return
       if (imageUtils.isImgControl()) {
         ControlUtils.updateLayerProps(this.getMiddlemostPageIndex, this.lastSelectedLayerIndex, { imgControl: false })
       }

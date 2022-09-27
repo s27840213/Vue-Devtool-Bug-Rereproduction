@@ -53,6 +53,7 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
+              l.id = GeneralUtils.generateRandomString(8)
             }
           })
         break
@@ -61,6 +62,7 @@ class ShortcutUtils {
           .forEach(l => {
             if (l.type === 'shape') {
               l.className = ShapeUtils.classGenerator()
+              l.id = GeneralUtils.generateRandomString(8)
             }
           })
         break
@@ -126,21 +128,21 @@ class ShortcutUtils {
     /**
      * @todo change middlemost to currFocusPageindex
      */
-    const middlemostPageIndex = store.getters.getMiddlemostPageIndex
+    const currActivePageIndex = pageUtils.currActivePageIndex
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
-    if (store.getters.getCurrSelectedIndex >= 0 && middlemostPageIndex === store.getters.getCurrSelectedPageIndex) {
+    if (store.getters.getCurrSelectedIndex >= 0 && currActivePageIndex === store.getters.getCurrSelectedPageIndex) {
       const tmpIndex = store.getters.getCurrSelectedIndex
       const tmpLayers = store.getters.getCurrSelectedLayers
       const tmpLayersNum = isTmp ? tmpLayers.length : 1
       GroupUtils.deselect()
       if (isTmp) {
-        store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
+        store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
       } else {
-        store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
+        store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
-      ZindexUtils.reassignZindex(middlemostPageIndex)
+      ZindexUtils.reassignZindex(currActivePageIndex)
     } else {
       const { currFocusPageIndex } = pageUtils
       if (store.getters.getCurrSelectedIndex >= 0) {
@@ -164,21 +166,21 @@ class ShortcutUtils {
     const { getCurrLayer: currLayer } = LayerUtils
     const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer))
 
-    const middlemostPageIndex = store.getters.getMiddlemostPageIndex
+    const currActivePageIndex = pageUtils.currActivePageIndex
     const isTmp: boolean = currLayer.type === 'tmp'
-    if (store.getters.getCurrSelectedIndex >= 0 && middlemostPageIndex === store.getters.getCurrSelectedPageIndex) {
+    if (store.getters.getCurrSelectedIndex >= 0 && currActivePageIndex === store.getters.getCurrSelectedPageIndex) {
       const tmpIndex = store.getters.getCurrSelectedIndex
       const tmpLayers = store.getters.getCurrSelectedLayers
       const tmpLayersNum = isTmp ? tmpLayers.length : 1
       GroupUtils.deselect()
       if (isTmp) {
-        store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(newLayer.layers))
+        store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(newLayer.layers))
       } else {
-        store.commit('ADD_layersToPos', { pageIndex: middlemostPageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(middlemostPageIndex, tmpIndex + tmpLayersNum, [newLayer])
+        store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [newLayer], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, [newLayer])
       }
-      ZindexUtils.reassignZindex(middlemostPageIndex)
+      ZindexUtils.reassignZindex(currActivePageIndex)
     } else {
       const currFocusPageIndex = store.getters.currFocusPageIndex
       if (store.getters.getCurrSelectedIndex >= 0) {
@@ -237,34 +239,38 @@ class ShortcutUtils {
     }
   }
 
+  textPasteWith(text: string) {
+    tiptapUtils.agent(editor => {
+      text = text.replace(/\r/g, '')
+      const spans = text.split('\n')
+      let chainedCommands = editor.chain().deleteSelection()
+      spans.forEach((line, index) => {
+        const spanText = `<span>${line === ''
+          ? '<br/>'
+          : line.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+          }</span>`
+        chainedCommands = chainedCommands.insertContent(spanText)
+        if (index !== spans.length - 1) {
+          chainedCommands = chainedCommands.enter()
+        }
+      })
+      editor.storage.nuTextStyle.pasting = true
+      chainedCommands.run()
+      editor.storage.nuTextStyle.pasting = false
+      Vue.nextTick(() => {
+        editor.commands.scrollIntoView()
+      })
+      LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
+    })
+  }
+
   textPaste() {
     navigator.clipboard.readText().then((text) => {
-      tiptapUtils.agent(editor => {
-        text = text.replace(/\r/g, '')
-        const spans = text.split('\n')
-        let chainedCommands = editor.chain().deleteSelection()
-        spans.forEach((line, index) => {
-          const spanText = `<span>${line === ''
-            ? '<br/>'
-            : line.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;')
-            }</span>`
-          chainedCommands = chainedCommands.insertContent(spanText)
-          if (index !== spans.length - 1) {
-            chainedCommands = chainedCommands.enter()
-          }
-        })
-        editor.storage.nuTextStyle.pasting = true
-        chainedCommands.run()
-        editor.storage.nuTextStyle.pasting = false
-        Vue.nextTick(() => {
-          editor.commands.scrollIntoView()
-        })
-        LayerUtils.updatecCurrTypeLayerProp({ isEdited: true })
-      })
+      this.textPasteWith(text)
     })
   }
 

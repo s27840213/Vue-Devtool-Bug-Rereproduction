@@ -73,12 +73,14 @@ class ConstantData {
         ]
       }, {
         label: i18n.t('NN0668'),
-        content: [
-          ...[5].map((id) => themeItem(id)), {
-            label: '電商 Banner',
-            url: 'https://blog.vivipic.com/tw/ec-banner/'
-          },
-          ...[7].map((id) => themeItem(id))
+        content: [{
+          label: '電商商品圖',
+          url: 'https://blog.vivipic.com/tw/ecimage/'
+        }, {
+          label: '電商 Banner',
+          url: 'https://blog.vivipic.com/tw/ec-banner/'
+        },
+        ...[7].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0669'),
@@ -359,7 +361,7 @@ class ConstantData {
       // }, {
       //   key: 'bold3d',
       //   label: i18n.tc('NN0729'),
-      //   options: toOptions(['distance', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      //   options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
@@ -405,9 +407,13 @@ class ConstantData {
     //     label: i18n.tc('NN0725'),
     //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
     //   }, {
+    //     key: 'cloud',
+    //     label: i18n.tc('NN0741'),
+    //     options: toOptions(['bRadius', 'opacity', 'color'])
+    //   }, {
     //     key: 'gooey',
     //     label: i18n.tc('NN0726'),
-    //     options: toOptions(['bRadius', 'opacity', 'color'])
+    //     options: toOptions(['distance', 'bRadius', 'opacity', 'color'])
     //   }, {
     //     key: 'underline',
     //     label: i18n.tc('NN0727'),

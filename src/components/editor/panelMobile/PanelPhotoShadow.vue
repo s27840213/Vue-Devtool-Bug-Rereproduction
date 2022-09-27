@@ -33,7 +33,7 @@
 import Vue from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import imageShadowUtils, { fieldRange, shadowPropI18nMap } from '@/utils/imageShadowUtils'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { ShadowEffectType } from '@/interfaces/imgShadow'
 import { IImage, IImageStyle } from '@/interfaces/layer'
 import layerUtils from '@/utils/layerUtils'
@@ -49,16 +49,18 @@ export default Vue.extend({
     return {
       imageShadowPanelUtils,
       shadowPropI18nMap,
-      fieldRange
+      fieldRange,
+      handleColor: false
     }
   },
   mounted() {
     imageShadowPanelUtils.mount()
   },
-  beforeDestroy() {
-    imageShadowPanelUtils.handleShadowUpload()
-  },
+  // beforeDestroy() {
+  //   imageShadowPanelUtils.handleShadowUpload()
+  // },
   computed: {
+    // ...mapState('mobileEditor', { mobilePanel: 'currActivePanel' }),
     ...mapGetters({
       currSelectedInfo: 'getCurrSelectedInfo',
       currSelectedIndex: 'getCurrSelectedIndex',
@@ -100,6 +102,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapMutations({
+      setCurrActivePanel: 'mobileEditor/SET_currActivePanel'
+    }),
     getFieldValue(field: string): number | boolean {
       return (this.currentStyle.shadow.effects as any)[this.currentEffect][field]
     },
@@ -114,6 +119,7 @@ export default Vue.extend({
     },
     handleColorModal() {
       if (generalUtils.isTouchDevice()) {
+        this.handleColor = true
         this.$emit('openExtraColorModal', ColorEventType.photoShadow, MobileColorPanelType.palette)
       }
       // TODO
@@ -193,7 +199,7 @@ export default Vue.extend({
   }
 
   &__attrs {
-    transition: max-height 1s ease-out;
+    // transition: max-height 1s ease-out;
     display: flex;
     flex-direction: column;
     row-gap: 5px;

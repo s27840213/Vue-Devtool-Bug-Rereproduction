@@ -15,7 +15,7 @@
       :step="step"
       v-ratio-change
       type="range"
-      @mouseup="handleChangeStop")
+      @pointerup="handleChangeStop")
 </template>
 
 <script lang="ts">
@@ -31,7 +31,7 @@ export default Vue.extend({
     title: String,
     name: String,
     value: {
-      type: Number,
+      type: [Number, String],
       required: true
     },
     min: {
@@ -56,7 +56,7 @@ export default Vue.extend({
   },
   computed: {
     propsVal: {
-      get(): number {
+      get(): number | string {
         return this.value
       },
       set(val: number): void {

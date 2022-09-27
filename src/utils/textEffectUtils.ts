@@ -4,10 +4,13 @@ import CssConverter from '@/utils/cssConverter'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
+import localStorageUtils from '@/utils/localStorageUtils'
+import { ITextEffect } from '@/interfaces/format'
 
 class Controller {
   private shadowScale = 0.2
   private strokeScale = 0.1
+  private currColorKey = ''
   effects = {} as { [key: string]: any }
   constructor() {
     this.effects = this.getDefaultEffects()
@@ -16,33 +19,33 @@ class Controller {
   getDefaultEffects() {
     return {
       none: {},
-      shadow: {
+      shadow: { // 陰影
         distance: 50,
         angle: 45,
         blur: 20,
         opacity: 60,
         color: ''
-      }, // 陰影
-      lift: {
+      },
+      lift: { // 模糊陰影
         spread: 50
-      }, // 模糊陰影
-      hollow: {
+      },
+      hollow: { // 外框
         stroke: 17,
         color: ''
-      }, // 空心
-      splice: {
+      },
+      splice: { // 外框分離
         distance: 50,
         angle: 45,
         stroke: 17,
         color: ''
-      }, // 出竅
-      echo: {
+      },
+      echo: { // 雙重陰影
         distance: 50,
         angle: 45,
         color: ''
-      }, // 雙重陰影
+      },
       funky3d: {
-        distance: 40,
+        distance: 10,
         distanceInverse: 0,
         angle: 45,
         opacity: 100,
@@ -50,6 +53,7 @@ class Controller {
       },
       bold3d: {
         distance: 40,
+        angle: 0,
         opacity: 100,
         textStrokeColor: '#000000',
         shadowStrokeColor: '#FDA830',
@@ -206,32 +210,26 @@ class Controller {
           effect.angle,
           colorWithOpacity
         )
-      case 'bold3d':
+      case 'bold3d': {
+        const { x, y } = mathUtils.getRotatedPoint(angle, { x: 0, y: 0 }, { x: effect.distance * 0.2, y: 0 })
         return {
           webkitTextStroke: `1px ${this.convertColor2rgba(effect.textStrokeColor, effectOpacity)}`,
-          // Modify CSS rule directly will cause performance issue in Safari, use CSS var instead.
-          '--transform': `translateX(${effect.distance * 0.1}px)`,
-          '---webkit-text-stroke': `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`,
-          '--color': colorWithOpacity,
-          extraCss: {
-            before: `
-              content: attr(data-text);
-              position: absolute;
-              left: 0;
-              z-index: -1;
-              width: 100%;
-              transform: var(--transform);
-              -webkit-text-stroke: var(---webkit-text-stroke);
-              color: var(--color);
-            `
+          duplicatedBody: {
+            top: `${y}px`,
+            left: `${x}px`,
+            webkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
+          },
+          duplicatedSpan: {
+            color: colorWithOpacity
           }
         }
+      }
       default:
         return { textShadow: 'none' }
     }
   }
 
-  updateTextEffect(pageIndex: number, layerIndex: number, attrs = {}) {
+  updateTextEffect(pageIndex: number, layerIndex: number) {
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
     const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
     for (const idx in layers) {
@@ -261,6 +259,41 @@ class Controller {
     }
   }
 
+  syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
+    Object.assign(textShadow, { name: textShadow.name || effectName })
+    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
+    const newShareAttrs = { }
+    const newEffect = { }
+    if (['funky3d', 'bold3d'].includes(textShadow.name)) {
+      Object.assign(newShareAttrs, { color: textShadow.color })
+      Object.assign(newEffect, { color: shareAttrs.color })
+    }
+
+    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+    if (!effectName) {
+      Object.assign(shareAttrs, newShareAttrs)
+      localStorageUtils.set('textEffectSetting', 'textShadowShare', shareAttrs)
+    } else {
+      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+      Object.assign(effect, newEffect)
+      localStorageUtils.set('textEffectSetting', effectName, effect)
+    }
+  }
+
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = this.getCurrentLayer().styles.textEffect.name
+    this.setTextEffect(effectName, { [this.currColorKey]: color })
+  }
+
+  resetCurrTextEffect() {
+    const effectName = this.getCurrentLayer().styles.textEffect.name
+    this.setTextEffect(effectName, this.effects[effectName])
+  }
+
   setTextEffect(effect: string, attrs = {} as any): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
@@ -270,13 +303,20 @@ class Controller {
 
     for (const idx in layers) {
       if (subLayerIndex !== -1 && +idx !== subLayerIndex) continue
+      // Leave text editing mode to show some span text effect.
+      layers[idx].contentEditable = false
+
       const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
       if (type === 'text') {
         const textEffect = {} as any
         if (layerTextEffect && (layerTextEffect as any).name === effect) {
           Object.assign(textEffect, layerTextEffect, attrs)
+          localStorageUtils.set('textEffectSetting', effect, textEffect)
+          this.syncShareAttrs(textEffect, null)
         } else {
-          Object.assign(textEffect, defaultAttrs, attrs, { name: effect })
+          this.syncShareAttrs(textEffect, effect)
+          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
+          Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
         }
         const mainColor = this.getLayerMainColor(paragraphs)
         const mainFontSize = this.getLayerFontSize(paragraphs)

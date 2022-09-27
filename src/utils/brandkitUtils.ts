@@ -1,6 +1,6 @@
 import i18n from '@/i18n'
 import { IUserFontContentData, IUserLogoContentData } from '@/interfaces/api'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IBrandTextStyleSetting, IDeletingItem } from '@/interfaces/brandkit'
 import store from '@/store'
 import { STANDARD_TEXT_FONT } from './assetUtils'
 import generalUtils from './generalUtils'
@@ -32,7 +32,8 @@ class BrandKitUtils {
   // to-delete
   get isBrandkitAvailable(): boolean {
     // return store.getters['user/isAdmin']
-    return true // for testing private assets
+    // return true // for testing private assets
+    return !generalUtils.isTouchDevice()
   }
 
   createTestingDefaultBrand(): IBrand {
@@ -256,8 +257,8 @@ class BrandKitUtils {
     store.dispatch('brandkit/setBrandName', { brand, newName })
   }
 
-  addNewBrand() {
-    store.dispatch('brandkit/createBrand')
+  addNewBrand(name?: string) {
+    store.dispatch('brandkit/createBrand', name)
   }
 
   copyBrand(brand: IBrand) {
@@ -455,6 +456,11 @@ class BrandKitUtils {
     }
   }
 
+  getLogoByAssetIndex(assetIndex: number): IBrandLogo | undefined {
+    return (store.getters['brandkit/getLogos'](store.getters['brandkit/getCurrentBrandId']) as IBrandLogo[])
+      .find(logo => logo.asset_index === assetIndex)
+  }
+
   duplicateEnd(colors: IBrandColor[]): IBrandColor {
     return {
       ...(colors[colors.length - 1] ?? this.createDefaultColor()),
@@ -571,6 +577,20 @@ class BrandKitUtils {
       createTime: font.create_time,
       updateTime: font.update_time
     }
+  }
+
+  setMobileDeleteItemFromPhoto(assetIndex: number) {
+    const logo = this.getLogoByAssetIndex(assetIndex)
+    if (!logo) return console.log(`logo with assetIndex: ${assetIndex} is not found`)
+    this.setMobileDeleteItem({
+      type: 'logo',
+      content: logo
+    })
+  }
+
+  setMobileDeleteItem(item: IDeletingItem) {
+    store.commit('brandkit/SET_mobileDeleteBuffer', item)
+    store.commit('brandkit/SET_isMobileConfirmOpen', true)
   }
 }
 

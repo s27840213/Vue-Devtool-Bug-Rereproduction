@@ -349,10 +349,11 @@ class StepsUtils {
     }
   }
 
-  updateHead(pageIndex: number, layerIndex: number, props: any) {
+  updateHead(pageIndex: number, layerIndex: number, props: any, subLayerIdx = -1) {
     if (this.currStep < 0) return
     const pages = this.steps[this.currStep].pages
-    const layer = pages[pageIndex]?.layers?.[layerIndex]
+    const layer = subLayerIdx === -1
+      ? pages[pageIndex]?.layers?.[layerIndex] : (pages[pageIndex]?.layers?.[layerIndex] as IGroup)?.layers[subLayerIdx]
     if (!layer) return
     for (const [key, value] of Object.entries(props)) {
       layer[key] = value

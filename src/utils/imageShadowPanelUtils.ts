@@ -63,28 +63,39 @@ export default new class ImageShadowPanelUtils {
       return false
     } else {
       const currentEffect = shadow.currentEffect
-      return currentEffect !== ShadowEffectType.none &&
-        shadow.currentEffect === shadow.srcState.effect &&
-        shadow.effects.color === shadow.srcState.effects.color &&
-        Object.entries(shadow.effects[currentEffect] as IShadowEffect | IBlurEffect | IFloatingEffect | IImageMatchedEffect)
-          .every(([k, v]) => {
-            return (shadow.srcState as any).effects[currentEffect][k] === v
-          }) &&
-        ((!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched) ||
-          (
-            shadow.srcState.layerState && Object.entries(shadow.srcState.layerState)
-              .every(([k, v]) => {
-                return (config.styles as any)[k] === v
-              })
-          )
-        ) &&
-        (shadow.currentEffect !== ShadowEffectType.imageMatched ||
-          (
-            shadow.srcState.layerSrcObj.type === config.srcObj.type &&
-            shadow.srcState.layerSrcObj.userId === config.srcObj.userId &&
-            shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
-          )
+      if (currentEffect === ShadowEffectType.none) {
+        return false
+      }
+
+      const isSameAttrs = Object.entries(shadow.effects[currentEffect] as IShadowEffect | IBlurEffect | IFloatingEffect | IImageMatchedEffect)
+        .every(([k, v]) => {
+          return (shadow.srcState as any).effects[currentEffect][k] === v
+        })
+
+      const isSameLayerProps = ((!shadow.isTransparent && shadow.currentEffect !== ShadowEffectType.imageMatched) ||
+        (
+          shadow.srcState.layerState && Object.entries(shadow.srcState.layerState)
+            .every(([k, v]) => {
+              return (config.styles as any)[k] === v
+            })
         )
+      )
+
+      const isSameColor = shadow.currentEffect === ShadowEffectType.frame
+        ? shadow.effects.frameColor === shadow.srcState.effects.frameColor : shadow.effects.color === shadow.srcState.effects.color
+
+      const isSameImgMatchedSrc = shadow.currentEffect !== ShadowEffectType.imageMatched ||
+        (
+          shadow.srcState.layerSrcObj.type === config.srcObj.type &&
+          shadow.srcState.layerSrcObj.userId === config.srcObj.userId &&
+          shadow.srcState.layerSrcObj.assetId === config.srcObj.assetId
+        )
+
+      return shadow.currentEffect === shadow.srcState.effect &&
+        isSameAttrs &&
+        isSameLayerProps &&
+        isSameColor &&
+        isSameImgMatchedSrc
     }
   }
 

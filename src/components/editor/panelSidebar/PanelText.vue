@@ -51,8 +51,10 @@
             category-text-item(class="panel-text__item"
               :item="item")
       template(v-slot:category-text-item="{ list, title }")
-        div(class="panel-text__items")
+        div(class="panel-text__items"
+          :style="{gridTemplateColumns: `repeat(${amountInRow}, 1fr)`}")
           div(v-if="title"
+            :style="{gridColumn: `1 / ${amountInRow+1}`}"
             class="panel-text__header") {{ title }}
           category-text-item(v-for="item in list"
             class="panel-text__item"
@@ -143,13 +145,16 @@ export default Vue.extend({
           title: category.title
         }))
     },
+    amountInRow():number {
+      return generalUtils.isTouchDevice() ? 3 : 2
+    },
     listResult(): any[] {
-      const { keyword } = this
+      const { keyword, amountInRow } = this
       const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 2))
+      const result = new Array(Math.ceil(list.length / amountInRow))
         .fill('')
         .map((_, idx) => {
-          const rowItems = list.slice(idx * 2, idx * 2 + 2)
+          const rowItems = list.slice(idx * amountInRow, (idx + 1) * amountInRow)
           const title = !keyword && !idx ? `${this.$t('NN0340')}` : ''
           return {
             id: `result_${rowItems.map(item => item.id).join('_')}`,
@@ -324,11 +329,11 @@ export default Vue.extend({
   }
   &__items {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    // grid-template-columns: repeat(2, 1fr); // Move to inline style
     column-gap: 10px;
   }
   &__header {
-    grid-column: 1 / 3;
+    // grid-column: 1 / 4; // Move to inline style
     line-height: 26px;
     color: #ffffff;
     padding: 10px 0;

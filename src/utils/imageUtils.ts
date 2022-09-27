@@ -12,6 +12,7 @@ import { AxiosPromise } from 'axios'
 import { IShadowAsset } from '@/store/module/shadow'
 import generalUtils from './generalUtils'
 import { findIndex } from 'lodash'
+import editorUtils from './editorUtils'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
@@ -293,6 +294,9 @@ class ImageUtils {
         }
       }
     }
+    // if (editorUtils.currActivePanel === 'crop') {
+    //   editorUtils.setCloseMobilePanelFlag(true)
+    // }
   }
 
   initLayerSize: ISize = {

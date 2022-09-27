@@ -10,13 +10,12 @@
     //-   div(class="coordinate__val coordinate__height")
     //-     span {{coordinateHeight}}px
     router-view
-    div(class="popup-area")
+    div(v-if="!isTouchDevice" class="popup-area")
       popup
       res-info(v-show="currSelectedResInfo.type"
         :info="currSelectedResInfo"
         @blur.native="setCurrSelectedResInfo()"
         tabindex="0")
-      hint
     div(class="modal-container"
         v-if="isModalOpen")
       modal-card
@@ -40,7 +39,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 import vClickOutside from 'v-click-outside'
 import Popup from '@/components/popup/Popup.vue'
 import { Chrome } from 'vue-color'
@@ -49,7 +48,7 @@ import ModalCard from '@/components/modal/ModalCard.vue'
 import popupUtils from './utils/popupUtils'
 import localeUtils from './utils/localeUtils'
 import networkUtils from './utils/networkUtils'
-import { STANDARD_TEXT_FONT } from '@/utils/assetUtils'
+import generalUtils from './utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -65,7 +64,8 @@ export default Vue.extend({
     return {
       coordinate: null as unknown as HTMLElement,
       coordinateWidth: 0,
-      coordinateHeight: 0
+      coordinateHeight: 0,
+      isTouchDevice: generalUtils.isTouchDevice()
     }
   },
   beforeMount() {

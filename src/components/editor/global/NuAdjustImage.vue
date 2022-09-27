@@ -28,16 +28,21 @@
 <script lang="ts">
 import GeneralUtils from '@/utils/generalUtils'
 import ImageAdjustUtil from '@/utils/imageAdjustUtil'
-import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 export default Vue.extend({
   props: {
     src: String,
-    styles: Object
+    styles: Object,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   computed: {
+    ...mapGetters({
+    }),
     svgImageWidth(): number {
       const { imgWidth } = this.styles
       return imgWidth
@@ -79,18 +84,18 @@ export default Vue.extend({
     style(): { [key: string]: string } {
       const { svgImageWidth, svgImageHeight } = this
       if (svgImageWidth >= svgImageHeight) {
-        return { width: `${svgImageWidth}px` }
+        return { width: `${svgImageWidth * this.contentScaleRatio}px` }
       }
-      return { height: `${svgImageHeight}px` }
+      return { height: `${svgImageHeight * this.contentScaleRatio}px` }
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-  .nu-adjust-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+.nu-adjust-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 </style>

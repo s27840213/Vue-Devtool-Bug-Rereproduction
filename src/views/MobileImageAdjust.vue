@@ -332,6 +332,7 @@ export default Vue.extend({
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
           if (index >= 0) {
+            console.log(index)
             // case 1: one clip in one frame layer, index = clip index
             return frameUtils.updateFrameLayerStyles(
               pageUtils.currFocusPageIndex,

@@ -28,7 +28,7 @@
           div(v-if="isSelected"
             class="design-item__checkbox-checked"
             @click.stop="emitDeselect")
-            svg-icon(iconName="check-large"
+            svg-icon(iconName="done"
                     iconWidth="10px"
                     iconHeight="8px"
                     iconColor="white")
