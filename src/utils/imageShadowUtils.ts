@@ -183,7 +183,7 @@ class ImageShadowUtils {
         ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
       }
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
-      this.dilate = getDilate(imageData, isRect, undefined, !timeout ? maxsize / middsize : 1)
+      this.dilate = getDilate(imageData, isRect, undefined, isStaticShadow ? 1 : !timeout ? maxsize / middsize : 1)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
     if (params && params.timeout !== 0) {
