@@ -40,8 +40,12 @@ export default Vue.extend({
       if (this.locked) {
         return this.$notify({ group: 'copy', text: '🔒背景已被鎖定，請解鎖後再進行操作' })
       }
-      const panelPreviewSrc = this.src || this.fallbackSrc || imageUtils.getSrc({ srcObj: { type: 'background', assetId: this.item.id, userId: '' } }, 'prev', this.item.ver)
       const img = this.$refs.img as HTMLImageElement
+      if (!img) {
+        console.error('img in background category is null')
+        return
+      }
+      const panelPreviewSrc = img.src
       const imgSrcSize = {
         width: img.naturalWidth,
         height: img.naturalHeight

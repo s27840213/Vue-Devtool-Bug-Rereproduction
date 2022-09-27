@@ -75,7 +75,10 @@ export default Vue.extend({
       const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
-        this.src = ImageUtils.getSrc(this.image.config)
+        const src = ImageUtils.getSrc(this.image.config)
+        ImageUtils.imgLoadHandler(src, () => {
+          this.src = src
+        })
       }
     }
 
@@ -213,7 +216,10 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+            ImageUtils.imgLoadHandler(src, () => {
+              this.src = src
+            })
           })
         } catch (error) {
         }
@@ -253,20 +259,6 @@ export default Vue.extend({
           reject(new Error('cannot load the current image'))
         })
       })
-      // const img = new Image()
-      // return new Promise<void>((resolve, reject) => {
-      //   img.onload = () => {
-      //     /** If after onload the img, the config.srcObj is the same, set the src. */
-      //     if (ImageUtils.getSrc(this.image.config) === src) {
-      //       this.src = src
-      //     }
-      //     resolve()
-      //   }
-      //   img.onerror = () => {
-      //     reject(new Error('cannot load the current image'))
-      //   }
-      //   img.src = src
-      // })
     },
     stylesConverter(): { [key: string]: string } {
       return {
@@ -306,14 +298,6 @@ export default Vue.extend({
         img.onload = () => resolve()
         img.onerror = () => {
           reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          fetch(img.src)
-            .then(res => {
-              // const { status, statusText } = res
-              // this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-            })
-            .catch((e) => {
-              // this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-            })
         }
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(this.image.config.srcObj, val, preLoadType)))
       })

@@ -54,7 +54,8 @@ export interface IEditorState {
     },
     isTransparent?: boolean,
     isPreview: boolean,
-    previewSrc?: string
+    previewSrc?: string,
+    panelPreviewSrc?: string
   },
   asset: {
     [key: string]: IAsset
