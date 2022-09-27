@@ -268,7 +268,7 @@ export default new class ImageShadowPanelUtils {
           await imageShadowUtils.drawImageMatchedShadow([updateCanvas], img, config, params)
           break
         case ShadowEffectType.floating:
-          await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, params)
+          // await imageShadowUtils.drawFloatingShadow([updateCanvas], img, config, params)
           break
         case ShadowEffectType.none:
           return

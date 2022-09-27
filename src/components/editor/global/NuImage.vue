@@ -16,7 +16,7 @@
         draggable="false"
         :src="shadowSrc"
         @error="onError"
-        @load="onLoad")
+        @load="onLoadShadow")
     div(class="img-wrapper"
       :style="imgWrapperstyle")
       div(class='nu-image__picture'
@@ -568,6 +568,14 @@ export default Vue.extend({
     },
     onLoad() {
       this.isOnError = false
+    },
+    onLoadShadow() {
+      this.isOnError = false
+      const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
+      if (!shadowImg.width || !shadowImg.height) {
+        imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
+        imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo)
+      }
     },
     logImgError(error: unknown, ...infos: Array<string>) {
       if (this.src.indexOf('data:image/png;base64') !== 0) return
