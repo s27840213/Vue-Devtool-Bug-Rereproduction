@@ -79,7 +79,7 @@ class PageUtils {
     // the scale of background will be null
     pageData.backgroundImage && (pageData.backgroundImage.config.styles.scale = 1)
 
-    const defaultPage = {
+    const defaultPage: IPage = {
       width: 1080,
       height: 1080,
       backgroundColor: '#ffffff',
@@ -213,7 +213,7 @@ class PageUtils {
       json.name = oriPageName
       pagesTmp[index] = json
       store.commit('SET_pageToPos', {
-        newPage: json,
+        newPage: this.newPage(json),
         pos: index
       })
     }
