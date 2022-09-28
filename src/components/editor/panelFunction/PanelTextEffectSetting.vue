@@ -14,7 +14,7 @@
             :iconName="`text-${currCategory.name}-${effect.key}`"
             @click.native="onEffectClick(effect.key)"
             class="text-effect-setting__effect pointer"
-            :class="{'text-effect-setting__effect--selected': currentStyle[currCategory.name].name === effect.key }"
+            :class="{'selected': currentStyle[currCategory.name].name === effect.key }"
             iconWidth="60px"
             iconColor="white"
             v-hint="effect.label")
@@ -26,11 +26,13 @@
               class="text-effect-setting-options__field")
             div(class="text-effect-setting-options__field--name") {{option.label}}
             //- Effect type select
-            template(v-if="option.type === 'select'")
-              options(class="text-effect-setting-options__field--options"
-                      :value="currentStyle[currCategory.name][option.key]"
-                      @input="(v)=>handleSelectInput(option.key, v)"
-                      :options="option.selectOptions")
+            div(v-if="option.type === 'select'"
+                class="text-effect-setting-options__field--select")
+              svg-icon(v-for="sel in option.select"
+                :iconName="`${option.key}-${sel.key}`"
+                iconWidth="24px"
+                :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
+                @click.native="handleSelectInput(option.key, sel.key)")
             //- Effect type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting-options__field--number"
@@ -59,7 +61,7 @@
           div(class="text-effect-setting-options__field")
             span
             span(class="text-effect-setting-options__field--reset"
-                @click="resetTextEffect()") Reset
+                @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -69,11 +71,10 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import ColorPicker from '@/components/ColorPicker.vue'
-import Options from '@/components/global/Options.vue'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType } from '@/store/types'
 import stepsUtils from '@/utils/stepsUtils'
-import TextPropUtils from '@/utils/textPropUtils'
+import textPropUtils from '@/utils/textPropUtils'
 import constantData, { IEffect, IEffectCategory, IEffectOption } from '@/utils/constantData'
 import { ITextBgEffect, ITextEffect, ITextShape } from '@/interfaces/format'
 import localStorageUtils from '@/utils/localStorageUtils'
@@ -81,8 +82,7 @@ import _ from 'lodash'
 
 export default Vue.extend({
   components: {
-    ColorPicker,
-    Options
+    ColorPicker
   },
   directives: {
     clickOutside: vClickOutside.directive
@@ -150,12 +150,14 @@ export default Vue.extend({
           break
         case 'bg':
           textBgUtils.setTextBg(effectName, Object.assign({}, effect))
-          textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
-          TextPropUtils.updateTextPropsState()
+          if (this.currentStyle.shape.name !== 'none') {
+            textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
+            textPropUtils.updateTextPropsState()
+          }
           break
         case 'shape':
           textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
-          TextPropUtils.updateTextPropsState()
+          textPropUtils.updateTextPropsState()
           textBgUtils.setTextBg('none') // Bg & shape are exclusive.
           break
       }
@@ -225,7 +227,7 @@ export default Vue.extend({
   &__effects {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    column-gap: 16px;
+    column-gap: 7.5px;
     width: 212px;
   }
   &__effect {
@@ -233,10 +235,10 @@ export default Vue.extend({
     margin-top: 10px;
     border-radius: 3px;
     border: 2px solid transparent;
-    &:not(&--selected):hover {
+    &:not(.selected):hover {
       border-color: setColor(blue-1, 0.5);
     }
-    &--selected {
+    &.selected {
       border-color: setColor(blue-1);
     }
   }
@@ -270,6 +272,15 @@ export default Vue.extend({
       height: 25px;
       border: 1px solid setColor(gray-4);;
       border-radius: 3px;
+    }
+    &--select {
+      svg + svg {
+        margin-left: 8px
+      }
+      &>svg.selected {
+        box-sizing: border-box;
+        border: 1px solid setColor(blue-1);;
+      }
     }
     &--range {
       grid-column: 1/3;

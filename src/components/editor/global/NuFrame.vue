@@ -1,16 +1,15 @@
 <template lang="pug">
   div(class="nu-frame"
-      :style="styles")
-    div(v-if="shadowSrc" class="shadow__wrapper" :style="shadowWrapperStyles")
+      :style="styles()")
+    div(v-if="shadowSrc()" class="shadow__wrapper" :style="shadowWrapperStyles")
       img(class="shadow__img"
         draggable="false"
-        :src="shadowSrc")
+        :src="shadowSrc()")
     nu-layer(v-for="(layer,index) in layers"
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
-      :flip="flip"
       :inFrame="true"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
@@ -117,12 +116,6 @@ export default Vue.extend({
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio'
     }),
-    flip() {
-      return {
-        horizontalFlip: this.config.styles.horizontalFlip,
-        verticalFlip: this.config.styles.verticalFlip
-      }
-    },
     layers() {
       const config = this.config as IFrame
       let layers: Array<IImage | IShape> = []
@@ -141,6 +134,23 @@ export default Vue.extend({
       }
       return layers
     },
+    shadowWrapperStyles() {
+      const shadow = this.config.styles.shadow
+      if (shadow && shadow.srcObj?.type) {
+        const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
+        const { horizontalFlip, verticalFlip, scale } = this.config.styles
+        const x = (horizontalFlip ? -imgX : imgX) * scale * this.contentScaleRatio
+        const y = (verticalFlip ? -imgY : imgY) * scale * this.contentScaleRatio
+        return {
+          width: (imgWidth * scale * this.contentScaleRatio).toString() + 'px',
+          height: (imgHeight * scale * this.contentScaleRatio).toString() + 'px',
+          transform: `translate(${x}px, ${y}px)`
+        }
+      }
+      return {}
+    }
+  },
+  methods: {
     styles() {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
@@ -157,21 +167,6 @@ export default Vue.extend({
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
       }
       return ''
-    },
-    shadowWrapperStyles() {
-      const shadow = this.config.styles.shadow
-      if (shadow && shadow.srcObj?.type) {
-        const { imgWidth, imgHeight, imgX, imgY } = shadow.styles
-        const { horizontalFlip, verticalFlip, scale } = this.config.styles
-        const x = (horizontalFlip ? -imgX : imgX) * scale * this.contentScaleRatio
-        const y = (verticalFlip ? -imgY : imgY) * scale * this.contentScaleRatio
-        return {
-          width: (imgWidth * scale * this.contentScaleRatio).toString() + 'px',
-          height: (imgHeight * scale * this.contentScaleRatio).toString() + 'px',
-          transform: `translate(${x}px, ${y}px)`
-        }
-      }
-      return {}
     }
   }
 })

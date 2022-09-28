@@ -1164,7 +1164,7 @@ class TextUtils {
     }
   }
 
-  async untilFontLoadedForPage(page: IPage): Promise<any> {
+  async untilFontLoadedForPage(page: IPage): Promise<void> {
     const textLayers: IText[] = []
     for (const layer of page.layers) {
       if (layer.type === 'text') {
@@ -1176,14 +1176,14 @@ class TextUtils {
         textLayers.push(...((layer as IGroup).layers.filter(l => l.type === 'text') as IText[]))
       }
     }
-    return Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs)))
+    await Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs)))
   }
 
-  async untilFontLoaded(paragraphs: IParagraph[]): Promise<any> {
-    return Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
+  async untilFontLoaded(paragraphs: IParagraph[]): Promise<void> {
+    await Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
   }
 
-  async untilFontLoadedForP(paragraph: IParagraph): Promise<any> {
+  async untilFontLoadedForP(paragraph: IParagraph): Promise<void> {
     const fontList = cssConverter.getFontFamily(paragraph.styles.font as string).split(',')
     await Promise.all([
       (async (): Promise<void> => {
@@ -1195,7 +1195,7 @@ class TextUtils {
       ...fontList.slice(1).map(fontListItem => store.dispatch('text/checkFontLoaded', fontListItem))
     ]) // wait until the css files of fonts are loaded
     const allCharacters = paragraph.spans.flatMap(s => s.text.split(''))
-    return Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
+    await Promise.all(allCharacters.map(c => this.untilFontLoadedForChar(c, fontList)))
   }
 
   async untilFontLoadedForChar(char: string, fontList: string[]): Promise<void> {
@@ -1213,7 +1213,10 @@ class TextUtils {
     const recordId = GeneralUtils.generateRandomString(12)
     this.toRecordId = recordId
     this.setIsFontLoading(true)
-    this.untilFontLoaded(paragraphs).then(() => {
+    const finalCallBack = (isError: boolean | void) => {
+      if (isError) {
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+      }
       if (callback) {
         callback()
       }
@@ -1222,6 +1225,17 @@ class TextUtils {
         stepsUtils.record()
         this.setIsFontLoading(false)
       }
+    }
+    Promise.race([
+      this.untilFontLoaded(paragraphs),
+      new Promise<boolean>(resolve => {
+        setTimeout(() => {
+          resolve(true)
+        }, 40000)
+      })
+    ]).then(finalCallBack).catch((error) => {
+      console.log(error)
+      finalCallBack(true)
     })
   }
 
@@ -1229,11 +1243,10 @@ class TextUtils {
     const recordId = GeneralUtils.generateRandomString(12)
     this.toRecordId = recordId
     this.setIsFontLoading(true)
-    Promise.all(
-      group.layers
-        .filter(l => l.type === 'text')
-        .map(l => this.untilFontLoaded((l as IText).paragraphs))
-    ).then(() => {
+    const finalCallBack = (isError: boolean | void[]) => {
+      if (isError) {
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+      }
       if (callback) {
         callback()
       }
@@ -1242,6 +1255,21 @@ class TextUtils {
         stepsUtils.record()
         this.setIsFontLoading(false)
       }
+    }
+    Promise.race([
+      Promise.all(
+        group.layers
+          .filter(l => l.type === 'text')
+          .map(l => this.untilFontLoaded((l as IText).paragraphs))
+      ),
+      new Promise<boolean>(resolve => {
+        setTimeout(() => {
+          resolve(true)
+        }, 40000)
+      })
+    ]).then(finalCallBack).catch((error) => {
+      console.log(error)
+      finalCallBack(true)
     })
   }
 }

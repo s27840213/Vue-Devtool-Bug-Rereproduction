@@ -6,11 +6,12 @@ import TextStyle from '@tiptap/extension-text-style'
 import NuTextStyle from '@/utils/nuTextStyle'
 import cssConveter from '@/utils/cssConverter'
 import layerUtils from '@/utils/layerUtils'
-import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IParagraph, IParagraphStyle, ISpan, ISpanStyle, IText } from '@/interfaces/layer'
 import { EventEmitter } from 'events'
 import textPropUtils from '@/utils/textPropUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import textBgUtils from '@/utils/textBgUtils'
+import generalUtils from '@/utils/generalUtils'
 import shortcutUtils from './shortcutUtils'
 
 class TiptapUtils {
@@ -136,20 +137,13 @@ class TiptapUtils {
         }
         pObj.attrs = attrs
         if (p.spans.length > 1 || p.spans[0].text !== '') {
-          pObj.content = p.spans.map(s => {
-            // To prevent safari tiptap space issue, we need to replace space with
-            // other char. There are five char can work, choose other if something happens.
-            // const newText = s.text
-            // const newText = s.text.replace(' ', '\u2006')
-            const newText = s.text.replace(' ', '\u2009')
-            // const newText = s.text.replace(' ', '\u200A') // 髮寬空格 能用但是寬度非常窄
-            // const newText = s.text.replace(' ', '\u202F')
-            // const newText = s.text.replace(' ', '\u205F')
+          const spans = this.splitLastWhiteSpaces(p.spans)
+          pObj.content = spans.map(s => {
             const layerStyles = textEffectUtils.getCurrentLayer().styles
             const textBg = textBgUtils.convertTextSpanEffect(layerStyles.textBg)
             return {
               type: 'text',
-              text: newText,
+              text: s.text,
               marks: [{
                 type: 'textStyle',
                 attrs: Object.assign(this.makeSpanStyle(s.styles), textBg)
@@ -159,6 +153,22 @@ class TiptapUtils {
         }
         return pObj
       })
+    }
+  }
+
+  splitLastWhiteSpaces(spans: ISpan[]): ISpan[] {
+    const lastSpan = spans[spans.length - 1]
+    if (!lastSpan.text.endsWith(' ')) return spans
+    const copiedSpans = generalUtils.deepCopy(spans)
+    const lastWhiteSpaces = lastSpan.text.match(/ +$/)?.[0] ?? ''
+    const prevText = lastSpan.text.substring(0, lastSpan.text.length - lastWhiteSpaces.length)
+    if (prevText === '') {
+      copiedSpans[copiedSpans.length - 1].styles.pre = true
+      return copiedSpans
+    } else {
+      copiedSpans[copiedSpans.length - 1].text = prevText
+      copiedSpans.push({ text: lastWhiteSpaces, styles: { ...lastSpan.styles, pre: true } })
+      return copiedSpans
     }
   }
 
@@ -252,9 +262,6 @@ class TiptapUtils {
           if (sStyles.size > largestSize) largestSize = sStyles.size
           spans.push({ text: span.text, styles: sStyles })
         }
-        if (span.text.includes(' ')) {
-          isSetContentRequired = true
-        }
       }
       if (spans.length === 0) {
         if (paragraph.attrs.spanStyle) {
@@ -285,6 +292,10 @@ class TiptapUtils {
           isSetContentRequired = true
         }
         if (paragraph.attrs.spanStyle) {
+          isSetContentRequired = true
+        }
+        const lastSpanText = spans[spans.length - 1].text
+        if (lastSpanText.endsWith(' ') && !lastSpanText.match(/^ +$/)) {
           isSetContentRequired = true
         }
         result.push({ spans, styles: pStyles })

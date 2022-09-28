@@ -105,6 +105,7 @@
         lazy-load(
             target=".editor-view"
             :minHeight="config.width * (scaleRatio / 100)"
+            :maxHeight="config.width * (scaleRatio / 100)"
             :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")
@@ -174,7 +175,6 @@
       div(class='pages-wrapper'
         :class="`nu-page-${pageIndex}`"
         :style="wrapperStyles()")
-    div(class="layer-num") {{config.layers.length}}
 </template>
 
 <script lang="ts">
@@ -416,9 +416,9 @@ export default Vue.extend({
       const { width, height } = this.config
       const { posX, posY } = this.config.backgroundImage
       const position = {
-        width: width / 2,
-        x: -posX + width / 2,
-        y: -posY + height / 2
+        width: width / 2 * this.contentScaleRatio,
+        x: (-posX + width / 2) * this.contentScaleRatio,
+        y: (-posY + height / 2) * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },

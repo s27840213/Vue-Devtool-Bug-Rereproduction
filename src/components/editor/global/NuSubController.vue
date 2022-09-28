@@ -16,7 +16,7 @@
               :style="frameClipStyles()")
           template(v-if="config.type === 'text' && config.active")
             div(class="text text__wrapper" :style="textWrapperStyle()" draggable="false")
-              nu-text-editor(:initText="textHtml" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
+              nu-text-editor(:initText="textHtml()" :id="`text-sub-${primaryLayerIndex}-${layerIndex}`"
                 :style="textBodyStyle()"
                 :pageIndex="pageIndex"
                 :layerIndex="primaryLayerIndex"
@@ -140,69 +140,21 @@ export default Vue.extend({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       controllerHidden: 'vivisticker/getControllerHidden'
     }),
-    isTouchDevice(): boolean {
-      return GeneralUtils.isTouchDevice()
-    },
-    getLayerPos(): ICoordinate {
-      return {
-        x: this.config.styles.x,
-        y: this.config.styles.y
-      }
-    },
-    getLayerType(): string {
-      return this.config.type
-    },
-    getControlPoints(): IControlPoints {
-      return this.config.controlPoints
-    },
-    isActive(): boolean {
-      return this.config.active
-    },
     isControllerShown(): boolean {
-      return this.isActive && !this.controllerHidden
-    },
-    isLocked(): boolean {
-      return this.config.locked
+      return this.config?.active && !this.controllerHidden
     },
     isTextEditing(): boolean {
       return !this.isControlling && this.isControllerShown
-    },
-    getLayerWidth(): number {
-      return this.config.styles.width
-    },
-    getLayerHeight(): number {
-      return this.config.styles.height
-    },
-    getLayerRotate(): number {
-      return this.config.styles.rotate
-    },
-    getLayerScale(): number {
-      return this.config.styles.scale
-    },
-    textHtml(): any {
-      return tiptapUtils.toJSON(this.config.paragraphs)
-    },
-    contentEditable(): boolean {
-      return this.config.contentEditable
-    },
-    isCurveText(): any {
-      return this.checkIfCurve(this.config)
-    },
-    primaryScale(): number {
-      return this.primaryLayer.styles.scale
-    },
-    isDraggedPanelPhoto(): boolean {
-      return this.currDraggedPhoto.srcObj.type !== ''
     }
   },
   watch: {
     scaleRatio() {
       this.controlPoints = ControlUtils.getControlPoints(4, 25)
     },
-    isActive(val) {
+    'config.active'(val) {
       if (!val) {
         this.setLastSelectedLayerIndex(this.primaryLayerIndex)
-        if (this.getLayerType === 'text') {
+        if (this.config.type === 'text') {
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
             editing: false,
             isTyping: false,
@@ -227,19 +179,19 @@ export default Vue.extend({
       TextUtils.updateSelection(TextUtils.getNullSel(), TextUtils.getNullSel())
     },
     isTextEditing(editing) {
-      if (this.getLayerType === 'text') {
+      if (this.config.type === 'text') {
         LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing })
       }
     },
     isComposing(val) {
       if (!val) {
         this.layerSizeBuff = this.config.styles.writingMode.includes('vertical')
-          ? this.getLayerWidth : this.getLayerHeight
+          ? this.config.styles.width : this.config.styles.height
       } else {
         this.layerSizeBuff = -1
       }
     },
-    contentEditable(newVal) {
+    'config.contentEditable'(newVal) {
       if (this.config.type !== 'text') return
       if (this.config.active) {
         if (!newVal || !this.config.isEdited) {
@@ -254,7 +206,7 @@ export default Vue.extend({
   },
   destroyed() {
     // the condition indicates the primaryLayer transform from group-layer to tmp-layer
-    if (this.getLayerType === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
+    if (this.config.type === 'text' && this.primaryLayer && this.primaryLayer.id === this.parentId) {
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { editing: false })
       LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { isTyping: false })
     }
@@ -265,25 +217,31 @@ export default Vue.extend({
       setIsLayerDropdownsOpened: 'SET_isLayerDropdownsOpened',
       setCurrDraggedPhoto: 'SET_currDraggedPhoto'
     }),
+    isDraggedPanelPhoto(): boolean {
+      return this.currDraggedPhoto.srcObj.type !== ''
+    },
+    textHtml(): any {
+      return tiptapUtils.toJSON(this.config.paragraphs)
+    },
     frameClipStyles() {
       return {
         fill: '#00000000',
         stroke: this.isControllerShown ? (this.config.isFrameImg ? '#F10994' : '#7190CC') : 'none',
-        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryScale * (100 / this.scaleRatio)}px`
+        strokeWidth: `${(this.config.isFrameImg ? 3 : 7) / this.primaryLayer.styles.scale * (100 / this.scaleRatio)}px`
       }
     },
     textScaleStyle() {
       return {
         position: 'absolute',
-        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
+        transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`
       }
     },
     textWrapperStyle() {
       return {
-        width: `${this.getLayerWidth / this.getLayerScale}px`,
-        height: `${this.getLayerHeight / this.getLayerScale}px`,
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
         opacity: `${this.config.styles.opacity / 100}`,
-        transform: `scaleX(${this.getLayerScale * this.contentScaleRatio}) scaleY(${this.getLayerScale * this.contentScaleRatio})`,
+        transform: `scaleX(${this.config.styles.scale * this.contentScaleRatio}) scaleY(${this.config.styles.scale * this.contentScaleRatio})`,
         textAlign: this.config.styles.align,
         writingMode: this.config.styles.writingMode
       }
@@ -291,29 +249,29 @@ export default Vue.extend({
     textBodyStyle() {
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
-        width: `${this.getLayerWidth / this.getLayerScale}px`,
-        height: `${this.getLayerHeight / this.getLayerScale}px`,
-        userSelect: this.contentEditable ? 'text' : 'none',
-        opacity: (this.isTextEditing && this.contentEditable) ? 1 : 0
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
+        userSelect: this.config.contentEditable ? 'text' : 'none',
+        opacity: (this.isTextEditing && this.config.contentEditable) ? 1 : 0
       }
     },
     textStyles(styles: any) {
       const textStyles = CssConveter.convertFontStyle(styles)
       Object.assign(textStyles, {
-        'caret-color': this.contentEditable && !this.isControlling ? '' : '#00000000'
+        'caret-color': this.config.contentEditable && !this.isControlling ? '' : '#00000000'
       })
       return textStyles
     },
     groupControllerStyle() {
       return {
-        width: `${this.config.styles.width / this.getLayerScale}px`,
-        height: `${this.config.styles.height / this.getLayerScale}px`,
+        width: `${this.config.styles.width / this.config.styles.scale}px`,
+        height: `${this.config.styles.height / this.config.styles.scale}px`,
         position: 'absolute',
-        transform: `scaleX(${this.getLayerScale}) scaleY(${this.getLayerScale})`
+        transform: `scaleX(${this.config.styles.scale}) scaleY(${this.config.styles.scale})`
       }
     },
     disableTouchEvent(e: TouchEvent) {
-      if (this.isTouchDevice) {
+      if (GeneralUtils.isTouchDevice()) {
         e.preventDefault()
         e.stopPropagation()
       }
@@ -332,7 +290,7 @@ export default Vue.extend({
               /**
                * This is the dbl-click callback block
                */
-              if (this.getLayerType === LayerType.image) {
+              if (this.config.type === LayerType.image) {
                 switch (this.type) {
                   case LayerType.group:
                     LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
@@ -371,10 +329,10 @@ export default Vue.extend({
         }
         return
       }
-      if (this.getLayerType === 'text') {
+      if (this.config.type === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x
         this.posDiff.y = this.primaryLayer.styles.y
-        if (this.isControllerShown && this.contentEditable) return
+        if (this.isControllerShown && this.config.contentEditable) return
         else if (!this.isControllerShown) {
           this.isControlling = true
           LayerUtils.updateSubLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { contentEditable: false })
@@ -388,7 +346,7 @@ export default Vue.extend({
     },
     onMouseup(e: PointerEvent) {
       e.stopPropagation()
-      if (this.getLayerType === 'text') {
+      if (this.config.type === 'text') {
         this.posDiff.x = this.primaryLayer.styles.x - this.posDiff.x
         this.posDiff.y = this.primaryLayer.styles.y - this.posDiff.y
         if (Math.round(this.posDiff.x) !== 0 || Math.round(this.posDiff.y) !== 0) {
@@ -410,12 +368,12 @@ export default Vue.extend({
 
       if (this.type === 'frame' && horizontalFlip) {
         const layerCenterline = this.primaryLayer.styles.width / 2
-        const subLayerCenterline = this.getLayerPos.x + this.getLayerWidth / 2
+        const subLayerCenterline = this.config.styles.x + this.config.styles.width / 2
         x += (layerCenterline - subLayerCenterline) * 2
       }
       if (this.type === 'frame' && verticalFlip) {
         const layerCenterline = this.primaryLayer.styles.height / 2
-        const subLayerCenterline = this.getLayerPos.y + this.getLayerHeight / 2
+        const subLayerCenterline = this.config.styles.y + this.config.styles.height / 2
         y += (layerCenterline - subLayerCenterline) * 2
       }
 
@@ -428,17 +386,22 @@ export default Vue.extend({
       }
     },
     wrapperStyles() {
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      let scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      if (this.type === 'frame') {
+        scale *= this.contentScaleRatio
+      }
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
+          const { styles: { width, height }, clipPath } = this.config
           if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${this.getLayerWidth}v${this.getLayerHeight}h${-this.getLayerWidth}z")` }
+            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path("${this.config.clipPath}")` }
+            return { clipPath: `path("${clipPath}")` }
           }
         })())
       }
@@ -455,8 +418,8 @@ export default Vue.extend({
       const { isFrameImg } = this.config
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
-        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
+        width = `${this.config.styles.initWidth}px`
+        height = `${this.config.styles.initHeight}px`
       } else {
         width = `${this.config.styles.width * this.contentScaleRatio}px`
         height = `${this.config.styles.height * this.contentScaleRatio}px`
@@ -464,12 +427,12 @@ export default Vue.extend({
       return { width, height }
     },
     outlineStyles() {
-      const outlineColor = this.isLocked ? '#EB5757' : '#7190CC'
+      const outlineColor = this.config.locked ? '#EB5757' : '#7190CC'
       if (this.isControllerShown && LayerUtils.getCurrLayer.type !== 'frame') {
         if (this.isControlling) {
-          return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px dashed ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px dashed ${outlineColor}`
         } else {
-          return `${2 * (100 / this.scaleRatio) / this.primaryScale * this.contentScaleRatio}px solid ${outlineColor}`
+          return `${2 * (100 / this.scaleRatio) / this.primaryLayer.styles.scale * this.contentScaleRatio}px solid ${outlineColor}`
         }
       } else {
         return 'none'
@@ -538,13 +501,13 @@ export default Vue.extend({
       body.addEventListener('drop', this.onDrop)
       switch (this.type) {
         case 'frame':
-          if (this.getLayerType === 'image') {
+          if (this.config.type === 'image') {
             this.onFrameDragEnter(e)
             body.addEventListener('dragleave', this.onFrameDragLeave)
           }
           return
         case 'group':
-          if (this.getLayerType === 'image') {
+          if (this.config.type === 'image') {
             const shadow = (this.config as IImage).styles.shadow
             const shadowEffectNeedRedraw = shadow.isTransparent || shadow.currentEffect === ShadowEffectType.imageMatched
             const hasShadowSrc = shadow && shadow.srcObj && shadow.srcObj.type && shadow.srcObj.type !== 'upload'
@@ -564,14 +527,14 @@ export default Vue.extend({
       body.removeEventListener('drop', this.onDrop)
       switch (this.type) {
         case 'frame':
-          if (this.getLayerType === 'image') {
+          if (this.config.type === 'image') {
             this.onFrameDragLeave(e)
             body.removeEventListener('dragleave', this.onFrameDragLeave)
           }
           return
         case 'group':
-          // if (this.getLayerType === 'image' && !this.isUploadImgShadow) {
-          if (this.getLayerType === 'image') {
+          // if (this.config.type === 'image' && !this.isUploadImgShadow) {
+          if (this.config.type === 'image') {
             this.dragUtils.onImageDragLeave(e, this.pageIndex)
             body.removeEventListener('dragleave', this.onDragLeave)
           }
@@ -590,13 +553,13 @@ export default Vue.extend({
       } else {
         switch (this.type) {
           case 'frame':
-            if (this.getLayerType === 'image') {
+            if (this.config.type === 'image') {
               body.removeEventListener('dragleave', this.onFrameDragLeave)
               this.onFrameDrop(e)
             }
             return
           case 'group':
-            if (this.getLayerType === 'image') {
+            if (this.config.type === 'image') {
               if (!this.isHandleShadow) {
                 groupUtils.deselect()
                 groupUtils.select(this.pageIndex, [this.primaryLayerIndex])
@@ -632,7 +595,7 @@ export default Vue.extend({
       const { primaryLayer } = this
       if (!primaryLayer.locked) {
         e.stopPropagation()
-        if (this.isDraggedPanelPhoto && !this.currDraggedPhoto.isPreview) {
+        if (this.isDraggedPanelPhoto() && !this.currDraggedPhoto.isPreview) {
           const clips = GeneralUtils.deepCopy(primaryLayer.clips) as Array<IImage>
           const clip = clips[this.layerIndex]
 
@@ -666,7 +629,7 @@ export default Vue.extend({
     onFrameDragLeave(e: DragEvent) {
       e.stopPropagation()
       const primaryLayer = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex) as IFrame
-      if (this.isDraggedPanelPhoto && !primaryLayer.locked) {
+      if (this.isDraggedPanelPhoto() && !primaryLayer.locked) {
         FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
       }
@@ -693,13 +656,13 @@ export default Vue.extend({
       })
     },
     onFrameMouseEnter(e: MouseEvent) {
-      if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
+      if (this.config.type !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
       if (LayerUtils.layerIndex !== this.layerIndex && imageUtils.isImgControl()) {
         return
       }
-      if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto) {
+      if (LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).locked && !this.isDraggedPanelPhoto()) {
         return
       }
       if ((LayerUtils.getCurrLayer as IImage).id === this.uploadId.layerId) {
@@ -751,8 +714,8 @@ export default Vue.extend({
       }
     },
     onFrameMouseLeave(e: MouseEvent) {
-      if (this.isDraggedPanelPhoto) return
-      if (this.getLayerType !== LayerType.image || this.type !== LayerType.frame) {
+      if (this.isDraggedPanelPhoto()) return
+      if (this.config.type !== LayerType.image || this.type !== LayerType.frame) {
         return
       }
       e.stopPropagation()
@@ -773,7 +736,7 @@ export default Vue.extend({
       body.removeEventListener(GeneralUtils.isTouchDevice() ? 'pointerup' : 'mouseup', this.onFrameMouseUp)
     },
     onFrameMouseUp(e: MouseEvent) {
-      if (this.isDraggedPanelPhoto) return
+      if (this.isDraggedPanelPhoto()) return
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image) {
         LayerUtils.deleteLayer(LayerUtils.pageIndex, LayerUtils.layerIndex)

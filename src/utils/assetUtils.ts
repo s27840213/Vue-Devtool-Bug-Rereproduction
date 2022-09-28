@@ -66,6 +66,7 @@ class AssetUtils {
       9: 'svg',
       10: 'svg',
       11: 'svg',
+      14: 'svg',
       15: 'svg'
     } as { [key: number]: string }
     return typeStrMap[type]
@@ -124,7 +125,6 @@ class AssetUtils {
         store.commit('SET_assetJson', { [id]: asset })
         return Promise.resolve(asset)
       }
-      case 14:
       case 15:
         return Promise.resolve(asset)
       default: {
@@ -159,6 +159,7 @@ class AssetUtils {
     const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
+
     json = await this.updateBackground(generalUtils.deepCopy(json))
     pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
@@ -459,7 +460,7 @@ class AssetUtils {
     }
   }
 
-  addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}) {
+  addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
@@ -498,7 +499,17 @@ class AssetUtils {
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
-      styles: {
+      styles: categoryType === 14 ? {
+        x,
+        y,
+        width: photoWidth,
+        height: photoHeight,
+        initWidth: photoWidth,
+        initHeight: photoHeight,
+        imgWidth: photoWidth,
+        imgHeight: photoHeight,
+        ...styles
+      } : {
         ...styles,
         x,
         y,
@@ -632,8 +643,15 @@ class AssetUtils {
           key = 'objects'
           break
         case 14: {
-          const { srcObj, styles } = asset.jsonData as IImage
-          this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles })
+          switch ((asset.jsonData as any).type) {
+            case 'image': {
+              const { srcObj, styles } = asset.jsonData as IImage
+              this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles }, 14)
+              break
+            }
+            case 'group':
+              this.addText({ ...asset.jsonData, designId: item.id }, attrs)
+          }
           break
         }
         case 15: {

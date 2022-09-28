@@ -1,12 +1,19 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
-    div(v-for="text in duplicatedText" class="nu-text__body"
+    //- Svg BG for text effex gooey.
+    svg(v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+      component(v-for="(elm, idx) in svgBG.content"
+                :key="`textSvgBg${idx}`"
+                :is="elm.tag"
+                v-bind="elm.attrs")
+    div(v-for="text, idx in duplicatedText" class="nu-text__body" ref="body"
         :style="Object.assign(bodyStyles(), text.extraBody)")
-      nu-curve-text(v-if="isCurveText()"
+      nu-curve-text(v-if="isCurveText"
         :config="config"
         :layerIndex="layerIndex"
         :pageIndex="pageIndex"
-        :subLayerIndex="subLayerIndex")
+        :subLayerIndex="subLayerIndex"
+        :isDuplicated="idx !== duplicatedText.length-1")
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
@@ -17,24 +24,13 @@
           :key="span.id"
           :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
-    div(v-if="!isCurveText()" class="nu-text__observee")
+    div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans()"
         class="nu-text__span"
         :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
         :data-sindex="sIndex"
         :key="sIndex",
         :style="styles(span.styles, sIndex)") {{ span.text }}
-    //- Svg filter for text effect gooey.
-    svg(v-if="spanEffect.svgFilter")
-      filter(:id="spanEffect.svgId")
-        component(v-for="(elm, idx) in spanEffect.svgFilter"
-                  :key="`svgFilter${idx}`"
-                  :is="elm.tag"
-                  v-bind="elm.attrs")
-          component(v-for="child in elm.child"
-                    :key="child.tag"
-                    :is="child.tag"
-                    v-bind="child.attrs")
 </template>
 
 <script lang="ts">
@@ -45,14 +41,13 @@ import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
-import TextPropUtils from '@/utils/textPropUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textShapeUtils from '@/utils/textShapeUtils'
-import textEffectUtils from '@/utils/textEffectUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
-import { isITextGooey } from '@/interfaces/format'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
+import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -73,7 +68,8 @@ export default Vue.extend({
         height: this.config.styles.height,
         widthLimit: this.config.widthLimit === -1 ? -1 : dimension
       },
-      isLoading: true
+      isLoading: true,
+      svgBG: {} as Record<string, unknown> | null
     }
   },
   created() {
@@ -100,14 +96,22 @@ export default Vue.extend({
     // if (LayerUtils.getCurrLayer.type === 'tmp') {
     //   return
     // }
-
-    this.resizeObserver = new (window as any).ResizeObserver(this.resizeCallback)
+    this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
+    testUtils.start(this.config.id, false)
+    this.drawSvgBG()
+    const ro = new ResizeObserver(() => {
+      testUtils.log(this.config.id, 'render done')
+    })
+    ro.observe(this.$refs.svg as any)
   },
   computed: {
     ...mapState('text', ['fontStore']),
     ...mapState('user', ['verUni']),
-    ...mapGetters('text', ['getDefaultFontsList']),
+    ...mapGetters({
+      getDefaultFontsList: 'text/getDefaultFontsList',
+      pageScaleRatio: 'getPageScaleRatio'
+    }),
     ...mapGetters({
       scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -115,21 +119,22 @@ export default Vue.extend({
       getTextInfo: 'getTextInfo'
     }),
     spanEffect(): Record<string, unknown> {
-      // May cause performance issue
-      if (isITextGooey(this.config.styles.textBg)) {
-        textUtils.updateTextLayerSizeByShape(
-          this.pageIndex,
-          this.layerIndex,
-          this.subLayerIndex ?? -1
-        )
-      }
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
     },
+    isCurveText(): any {
+      const { textShape } = this.config.styles
+      return textShape && textShape.name === 'curve'
+    },
+    isFlipped(): boolean {
+      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    },
+    // Use duplicated of text to do some text effect, define there difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
         top: '0px',
         width: '100%',
+        height: '100%',
         opacity: 1
       }
       const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
@@ -138,14 +143,14 @@ export default Vue.extend({
         extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),
         extraSpan: textShadow.duplicatedSpan
       }
-      const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
-      const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
-      const textBgSpanCss = {
-        extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
-        extraSpan: textBgSpan.duplicatedSpan
-      }
+      // const textBgSpan = textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
+      // const duplicatedTextBgSpan = textBgSpan.duplicatedBody || textBgSpan.duplicatedSpan
+      // const textBgSpanCss = {
+      //   extraBody: Object.assign(duplicatedBodyBasicCss, textBgSpan.duplicatedBody),
+      //   extraSpan: textBgSpan.duplicatedSpan
+      // }
       return [
-        ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
+        // ...(duplicatedTextBgSpan ? [textBgSpanCss] : []),
         ...(duplicatedTextShadow ? [textShadowCss] : []),
         {} // Original text, don't have extra css
       ]
@@ -159,16 +164,23 @@ export default Vue.extend({
           this.resizeObserver.disconnect()
           this.observeAllSpans()
         }
+        this.drawSvgBG()
+      }
+    },
+    'config.styles': {
+      deep: true,
+      handler() {
+        this.drawSvgBG()
       }
     }
   },
   methods: {
-    isCurveText(): any {
-      const { textShape } = this.config.styles
-      return textShape && textShape.name === 'curve'
-    },
-    isFlipped(): boolean {
-      return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
+    drawSvgBG() {
+      this.$nextTick(() => {
+        const targetLayer = this.getLayer(this.pageIndex, this.layerIndex)
+        const groupScaleRatio = this.subLayerIndex !== undefined ? targetLayer.styles.scale : 1
+        this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
+      })
     },
     spans(): ISpan[] {
       return textShapeUtils.flattenSpans(this.config)
@@ -181,7 +193,7 @@ export default Vue.extend({
     },
     bodyStyles() {
       const { editing, contentEditable } = this.config
-      const opacity = editing ? (contentEditable ? ((this.isCurveText() || this.isFlipped()) ? 0.2 : 0) : 1) : 1
+      const opacity = editing ? (contentEditable ? ((this.isCurveText || this.isFlipped) ? 0.2 : 0) : 1) : 1
       const isVertical = this.config.styles.writingMode.includes('vertical')
       return {
         width: isVertical ? 'auto' : '',
@@ -207,6 +219,7 @@ export default Vue.extend({
     //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     // },
     resizeCallback() {
+      testUtils.log(this.config.id, 'font cb start')
       // for (const entry of entries) {
       //   console.log(JSON.stringify(entry.contentRect))
       // }
@@ -245,6 +258,8 @@ export default Vue.extend({
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
+      this.drawSvgBG()
+      testUtils.log(this.config.id, 'font cb done')
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
@@ -261,6 +276,12 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   position: relative;
+  &__BG {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: visible;
+  }
   &__body {
     outline: none;
     padding: 0;
@@ -272,13 +293,7 @@ export default Vue.extend({
   &__span {
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    // line-break: anywhere;
-    &:first-child {
-      padding-left: var(--textGooeyPaddingX);
-    }
-    &:last-child {
-      padding-right: var(--textGooeyPaddingX);
-    }
+    position: relative;
   }
   &__observee {
     position: absolute;

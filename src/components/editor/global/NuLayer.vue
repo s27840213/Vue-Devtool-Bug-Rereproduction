@@ -1,20 +1,13 @@
 <template lang="pug">
-  div(class="nu-layer" :style="layerStyles" ref="body"
+  div(class="nu-layer" :style="layerStyles()" ref="body"
       @drop="config.type !== 'image' ? onDrop($event) : onDropClipper($event)"
       @dragover.prevent
       @dragleave.prevent
       @dragenter.prevent)
     div(class="layer-translate posAbs"
-        :style="translateStyles")
+        :style="translateStyles()")
       div(class="layer-scale posAbs" ref="scale"
-          :style="scaleStyles")
-        //- Svg BG for text effex box.
-        svg(v-if="svgBG" :width="svgBG.width" :height="svgBG.height"
-            class="nu-layer__BG")
-          component(v-for="(elm, idx) in svgBG.content"
-                    :key="`svgFilter${idx}`"
-                    :is="elm.tag"
-                    v-bind="elm.attrs")
+          :style="scaleStyles()")
         nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
@@ -24,7 +17,7 @@
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :scaleRatio="scaleRatio"
             v-bind="$attrs")
-    div(v-if="showSpinner" class="nu-layer__inProcess")
+    div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
       //- svg-icon(class="spiner"
       //-   :iconName="'spiner'"
@@ -58,7 +51,6 @@ export default Vue.extend({
     pageIndex: Number,
     layerIndex: Number,
     subLayerIndex: Number,
-    flip: Object,
     imgControl: Boolean,
     inGroup: {
       type: Boolean,
@@ -101,13 +93,28 @@ export default Vue.extend({
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
       isShowPagePanel: 'page/getShowPagePanel'
-    }),
+    })
+  },
+  methods: {
+    onDrop(e: DragEvent) {
+      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos())
+      e.stopPropagation()
+    },
+    onDropClipper(e: DragEvent) {
+      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos(), this.config.path, this.config.styles)
+      e.stopPropagation()
+    },
+    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
+      layerUtils.updateLayerProps(pageIndex, layerIndex, {
+        shown
+      })
+    },
     hasSelectedLayer(): boolean {
       return this.currSelectedInfo.layers.length > 0
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer, this.inFrame ? 1 : this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.inFrame ? 1 : this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -137,34 +144,17 @@ export default Vue.extend({
       }
       return styles
     },
-    svgBG() {
-      const textBg = textBgUtils.convertTextEffect(this.config.styles)
-      return textBg.svg
-    },
     getLayerPos(): { x: number, y: number } {
       return {
         x: this.config.styles.x,
         y: this.config.styles.y
       }
     },
-    getLayerX(): number {
-      return this.config.styles.x
-    },
-    getLayerY(): number {
-      return this.config.styles.y
-    },
-    getCos(): number {
-      return MathUtils.cos(this.config.styles.rotate)
-    },
-    hasShadowSrc(): boolean {
-      if (this.config.type === LayerType.image) {
-        return this.config.styles.shadow && this.config.styles.shadow.srcObj && this.config.styles.shadow.srcObj.type
-      } else {
-        return false
-      }
-    },
     pageScaleRatio(): number {
       return pageUtils.scaleRatio / 100
+    },
+    compensationRatio(): number {
+      return Math.max(1, this.pageScaleRatio())
     },
     showSpinner(): boolean {
       const { config } = this
@@ -178,7 +168,7 @@ export default Vue.extend({
       const { zindex } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
-      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio)})` : `scale(${1 / (this.pageScaleRatio)}) translateZ(0)`
+      const transform = isImgType ? `scale(${1 / (this.pageScaleRatio())})` : `scale(${1 / (this.compensationRatio())}) translateZ(0)`
       /**
       * If layer type is group, we need to set its transform-style to flat, or its order will be affect by the inner layer.
       * And if type is tmp and its zindex value is larger than 0 (default is 0, isn't 0 means its value has been reassigned before), we need to set it to flat too.
@@ -194,49 +184,9 @@ export default Vue.extend({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.pageScaleRatio}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
       }
       return styles
-    }
-  },
-  methods: {
-    // styles() {
-    //   const styles = Object.assign(
-    //     CssConveter.convertDefaultStyle(this.config.styles),
-    //     {
-    //       // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
-    //       'pointer-events': 'none'
-    //     }
-    //   )
-    //   switch (this.config.type) {
-    //     case LayerType.text: {
-    //       const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect || {})
-    //       Object.assign(
-    //         styles,
-    //         textEffectStyles,
-    //         {
-    //           background: 'rgba(0, 0, 255, 0)',
-    //           willChange: 'text-shadow',
-    //           '--base-stroke': `${textEffectStyles.webkitTextStroke?.split('px')[0] ?? 0}px`
-    //         }
-    //       )
-    //       break
-    //     }
-    //   }
-    //   return styles
-    // },
-    onDrop(e: DragEvent) {
-      MouseUtils.onDrop(e, this.pageIndex, this.getLayerPos)
-      e.stopPropagation()
-    },
-    onDropClipper(e: DragEvent) {
-      MouseUtils.onDropClipper(e, this.pageIndex, this.layerIndex, this.getLayerPos, this.config.path, this.config.styles)
-      e.stopPropagation()
-    },
-    toggleHighlighter(evt: MouseEvent, pageIndex: number, layerIndex: number, shown: boolean) {
-      layerUtils.updateLayerProps(pageIndex, layerIndex, {
-        shown
-      })
     }
   }
 })

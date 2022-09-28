@@ -30,9 +30,7 @@ class Controller {
     const contentScaleRatio = editorUtils.contentScaleRatio
     const scaleRatio = store.getters.getPageScaleRatio
     const isMobile = generalUtils.isTouchDevice()
-    const scalerSize = isMobile ? 12 * contentScaleRatio : 8 * contentScaleRatio
-    resizerLong *= contentScaleRatio
-    resizerShort *= contentScaleRatio
+    const scalerSize = isMobile ? 12 : 8
 
     const getScalers = (scalerSize: number, cursors?: Array<number | string>) => [
       {
@@ -42,7 +40,7 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '0',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
+          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           borderRadius: '50%'
         },
         scalerSize
@@ -52,7 +50,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
+          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '0',
           borderRadius: '50%'
@@ -64,7 +62,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio})`,
+          transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           bottom: '0',
           borderRadius: '50%'
@@ -76,7 +74,7 @@ class Controller {
         styles: {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio})`,
+          transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           left: '0',
           bottom: '0',
           borderRadius: '50%'
@@ -98,13 +96,13 @@ class Controller {
           height: `${scalerSize}px`,
           left: '0',
           top: '50%',
-          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio})`,
+          transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           borderRadius: '50%'
         },
         {
           width: `${scalerSize}px`,
           height: `${scalerSize}px`,
-          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio})`,
+          transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '50%',
           borderRadius: '50%'
@@ -118,7 +116,7 @@ class Controller {
             height: `${resizerLong}px`,
             width: `${resizerShort}px`,
             left: '0',
-            transform: 'translate(-50%, -50%)'
+            transform: `translate(-50%, -50%) scale(${contentScaleRatio})`
           }
         },
         {
@@ -128,7 +126,7 @@ class Controller {
             height: `${resizerLong}px`,
             width: `${resizerShort}px`,
             right: '0',
-            transform: 'translate(50%, -50%)'
+            transform: `translate(50%, -50%) scale(${contentScaleRatio})`
           }
         },
         {
@@ -138,7 +136,7 @@ class Controller {
             width: `${resizerLong}px`,
             height: `${resizerShort}px`,
             bottom: '0',
-            transform: 'translate(-50%, 50%)'
+            transform: `translate(-50%, 50%) scale(${contentScaleRatio})`
           }
         },
         {
@@ -148,7 +146,7 @@ class Controller {
             width: `${resizerLong}px`,
             height: `${resizerShort}px`,
             top: '0',
-            transform: 'translate(-50%, -50%)'
+            transform: `translate(-50%, -50%) scale(${contentScaleRatio})`
           }
         }
       ],

@@ -17,7 +17,7 @@
             :key="`${currCategory.name}-${effect.key}`"
             class="panel-text-effect__option pointer")
           svg-icon(:iconName="`text-${currCategory.name}-${effect.key}`"
-                  @click.native="onEffectClick(currCategory.name, effect.key)"
+                  @click.native="onEffectClick(effect.key)"
                   class="panel-text-effect__option-icon"
                   :class="{ 'panel-text-effect__option-icon--selected': currentStyle[currCategory.name].name === effect.key }"
                   iconWidth="60px"
@@ -27,19 +27,33 @@
       div(class="w-full panel-text-effect__form")
         div(v-for="option in currEffect.options"
             class="panel-text-effect__field")
+          //- Effect type select
+          div(v-if="option.type === 'select'"
+              class="panel-text-effect__select")
+            div(v-for="sel in option.select"
+                :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }")
+              svg-icon(:iconName="`${option.key}-${sel.key}`"
+                iconWidth="24px"
+                @click.native="handleSelectInput(option.key, sel.key)")
+              span {{sel.label}}
+          //- Effect type range
           mobile-slider(v-if="option.type === 'range'"
             :title="option.label"
             :name="option.key"
             :value="currentStyle[currCategory.name][option.key]"
             :max="option.max"
             :min="option.min"
-            @update="(e)=>handleRangeInput(e, currCategory.name, option)")
+            @update="(e)=>handleRangeInput(e, option)")
+          //- Effect type color
           div(v-if="option.type === 'color'"
             class="panel-text-effect__color")
             div(class="panel-text-effect__color-name") {{option.label}}
             div(class="panel-text-effect__color-slip"
                 :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
                 @click="openColorPanel(option.key)")
+        //- div(class="text-effect-setting-options__field")
+        span(class="panel-text-effect__reset label-mid"
+            @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -100,6 +114,9 @@ export default Vue.extend({
     pushHistory(type: string) {
       this.$emit('pushHistory', type)
     },
+    recordChange() {
+      stepsUtils.record()
+    },
     openColorPanel(key: string) {
       if (this.currCategory.name === 'shadow') {
         this.$emit('openExtraColorModal', ColorEventType.textEffect, MobileColorPanelType.palette)
@@ -109,47 +126,52 @@ export default Vue.extend({
         textBgUtils.setColorKey(key)
       }
     },
-    onEffectClick(category: string, effectName: string): void {
-      switch (category) {
+    setEffect(options:{
+      effectName?: string,
+      effect?: Record<string, string|number|boolean>
+    }) {
+      let { effectName, effect } = options
+      if (!effectName) {
+        effectName = this.currEffect.key || 'none'
+      }
+
+      switch (this.currCategory.name) {
         case 'shadow':
-          textEffectUtils.setTextEffect(effectName, { ver: 'v1' })
+          textEffectUtils.setTextEffect(effectName,
+            Object.assign({}, effect, { ver: 'v1' }))
           break
         case 'bg':
-          textBgUtils.setTextBg(effectName)
-          textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
-          textPropUtils.updateTextPropsState()
+          textBgUtils.setTextBg(effectName, Object.assign({}, effect))
+          if (this.currentStyle.shape.name !== 'none') {
+            textShapeUtils.setTextShape('none') // Bg & shape are exclusive.
+            textPropUtils.updateTextPropsState()
+          }
           break
         case 'shape':
-          textShapeUtils.setTextShape(effectName)
+          textShapeUtils.setTextShape(effectName, Object.assign({}, effect))
           textPropUtils.updateTextPropsState()
           textBgUtils.setTextBg('none') // Bg & shape are exclusive.
           break
       }
+    },
+    resetTextEffect() {
+      const target = this.currCategory.name === 'shadow' ? textEffectUtils
+        : this.currCategory.name === 'shape' ? textShapeUtils : textBgUtils
+      target.resetCurrTextEffect()
+    },
+    onEffectClick(effectName: string): void {
+      this.setEffect({ effectName })
       this.recordChange()
     },
-    recordChange() {
-      stepsUtils.record()
+    handleSelectInput(key: string, newVal: string) {
+      this.setEffect({ effect: { [key]: newVal } })
     },
-    getEffectName(category: 'shadow' | 'bg' | 'shape') {
-      return this.currentStyle[category].name || 'none'
-    },
-    handleRangeInput(value: number, category: string, option: IEffectOption) {
+    handleRangeInput(value: number, option: IEffectOption) {
       const [max, min] = [option.max as number, option.min as number]
       const newVal = {
         [option.key]: value > max ? max : (value < min ? min : value)
       }
-
-      switch (category) {
-        case 'shadow':
-          textEffectUtils.setTextEffect(this.getEffectName('shadow'), newVal)
-          break
-        case 'bg':
-          textBgUtils.setTextBg(this.getEffectName('bg'), newVal)
-          break
-        case 'shape':
-          textShapeUtils.setTextShape(this.getEffectName('shape'), newVal)
-          break
-      }
+      this.setEffect({ effect: newVal })
     }
   }
 })
@@ -196,6 +218,30 @@ export default Vue.extend({
     padding-bottom: 12px;
   }
 
+  &__select {
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 18px;
+    padding: 10px;
+    > div {
+      @include btn-SM;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      height: 42px;
+      border-radius: 5px;
+      color: setColor(gray-2);
+      background-color: setColor(gray-5);
+      &.selected {
+        border: 2px solid #4EABE6;
+      }
+      > svg {
+        margin-right: 8px;
+      }
+    }
+  }
+
   &__color {
     flex: 1;
     display: flex;
@@ -211,6 +257,11 @@ export default Vue.extend({
       box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.2);
       margin-right: 10px;
     }
+  }
+
+  &__reset {
+    margin-top: 5px;
+    color: setColor(blue-1);
   }
 }
 </style>

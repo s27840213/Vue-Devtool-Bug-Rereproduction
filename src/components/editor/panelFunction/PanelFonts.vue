@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="panel-fonts")
+  div(:class="['panel-fonts', isMobile ? 'panel-fonts-mobile' : 'panel-fonts-pc']")
     div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
       span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(

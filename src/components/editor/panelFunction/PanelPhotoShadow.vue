@@ -72,7 +72,7 @@
           class="photo-effect-setting__field")
           div(class="photo-effect-setting__field-name") {{$t('NN0017')}}
           div(class="photo-effect-setting__value-input"
-            :style="{ backgroundColor: currentStyle.shadow.effects.color || '#000000' }"
+            :style="{ backgroundColor: currentEffect === 'frame' ? currentStyle.shadow.effects.frameColor : currentStyle.shadow.effects.color || '#000000' }"
             @click="handleColorModal")
         div(class="photo-effect-setting__reset")
           button(@click="reset()") {{ 'Reset' }}
@@ -166,9 +166,19 @@ export default Vue.extend({
       const alreadySetEffect = effectName === ShadowEffectType.none || Object.keys((this.currentStyle.shadow as any).effects[effectName]).length
       if (!alreadySetEffect) {
         const data = imageShadowUtils.getLocalEffectAttrs(effectName) || (imageShadowUtils.getDefaultEffect(effectName) as any)[effectName]
-        imageShadowUtils.setEffect(effectName, { [effectName]: data })
+        const color = imageShadowUtils.getLocalEffectColor(effectName) || '#000000'
+        if (effectName === ShadowEffectType.frame) {
+          imageShadowUtils.setEffect(effectName, { [effectName]: data, frameColor: color })
+        } else {
+          imageShadowUtils.setEffect(effectName, { [effectName]: data, color })
+        }
       } else {
-        imageShadowUtils.setEffect(effectName, {})
+        if (effectName === ShadowEffectType.frame) {
+          const color = this.currentStyle.shadow.effects.frameColor || this.currentStyle.shadow.effects.color || '#000000'
+          imageShadowUtils.setEffect(effectName, { frameColor: color })
+        } else {
+          imageShadowUtils.setEffect(effectName, {})
+        }
       }
     },
     handleEffectUpdate(event: Event): void {

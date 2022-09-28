@@ -70,7 +70,6 @@ export const logMark = function (type: 'shadow' | 'imageMatched' | 'floating' | 
   measures.forEach(measureItem => {
     const log = `${measureItem.name}\n-> ${measureItem.duration.toFixed(2)} ms`
     logUtils.setLog(log)
-    // console.log(log)
   })
   performance.clearMeasures()
 }
@@ -91,10 +90,6 @@ class ImageShadowUtils {
    */
   private canvasT = document.createElement('canvas')
   /**
-   * canvasP used to draw the input image as a input img for canvasT
-   */
-  private canvasP = document.createElement('canvas')
-  /**
    * canvasMaxSize used to handle/draw the parametera as blur or offset...,
    * as a parameter unified canvas for different size of image.
    */
@@ -112,16 +107,6 @@ class ImageShadowUtils {
     options?: DrawParams
   } | null
 
-  private dataBuff = {
-    spread: -1,
-    radius: -1,
-    size: -1,
-    thinkness: -1,
-    effect: ShadowEffectType.none as ShadowEffectType,
-    layerIdentifier: '' as string,
-    data: {} as ImageData
-  }
-
   private _inUploadProcess = false
   private dilate = undefined as ((r: number) => Uint8ClampedArray) | undefined
 
@@ -130,10 +115,6 @@ class ImageShadowUtils {
 
   setUploadProcess(val: boolean) {
     this._inUploadProcess = val
-  }
-
-  getHandlerId(): string {
-    return this?.handlerId || ''
   }
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
@@ -186,19 +167,6 @@ class ImageShadowUtils {
       const y = (canvas.height - drawCanvasH) * 0.5
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
       ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
-
-      // Show test canvas
-      // const canvasTest = document.createElement('canvas')
-      // canvasTest.setAttribute('width', canvasT.width.toString())
-      // canvasTest.setAttribute('height', canvasT.height.toString())
-      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
-      // ctxText.drawImage(canvasT, 0, 0)
-      // document.body.appendChild(canvasTest)
-      // setTimeout(() => document.body.removeChild(canvasTest), 10000)
-      // canvasTest.style.position = 'absolute'
-      // canvasTest.style.top = '0'
-      // canvasTest.style.zIndex = '10000'
-
       const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
       const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
       this.dilate = getDilate(imageData, isRect, undefined, !timeout ? maxsize / middsize : 1)
@@ -272,39 +240,26 @@ class ImageShadowUtils {
       layerInfo = this.layerData?.options?.layerInfo
     }
 
-    // const mappingScale = maxsize / middsize
-    // const mappingScale = _imgWidth > _imgHeight
-    // ? maxsize / drawCanvasW
-    // : maxsize / drawCanvasH
-
     const ratio = _imgWidth / _imgHeight
-    // const maxCanvasDrawH = (ratio > 1 ? maxsize / ratio : maxsize) * layerHeight / _imgHeight
     const maxCanvasDrawH = ratio > 1 ? 1600 / ratio : 1600
     const ellipseX = canvasMaxSize.width * 0.5
     const ellipseY = ((canvasMaxSize.height - maxCanvasDrawH) * 0.5 + maxCanvasDrawH)
-    // const ellipseY = ((canvas.height - drawCanvasH) * 0.5 + drawCanvasH) * mappingScale
-    // const canvasMaxW = canvasMaxSize.width
 
     if (layerInfo && timeout) {
       this.setIsProcess(layerInfo, true)
     }
 
-    const xFactor = 1
-    const yFactor = 1
-    // const xFactor = layerWidth / _imgWidth
-    // const yFactor = layerHeight / _imgHeight
-    const offsetX = x * fieldRange.floating.x.weighting * xFactor
-    const offsetY = y * fieldRange.floating.y.weighting * yFactor
+    const offsetX = x * fieldRange.floating.x.weighting
+    const offsetY = y * fieldRange.floating.y.weighting
 
-    const shadowWidth = maxsize * (ratio > 1 ? 1 : ratio) * (size * 0.01) * 0.5 * xFactor
-    // const shadowWidth = (ratio > 1 ? 1 : ratio) * (size * 0.01) * 0.5 * xFactor
-    const shadowHeight = FLOATING_SHADOW_SIZE * (thinkness * 0.01) * yFactor
+    const shadowWidth = maxsize * (ratio > 1 ? 1 : ratio) * (size * 0.01) * 0.5
+    const shadowHeight = FLOATING_SHADOW_SIZE * (thinkness * 0.01)
     ctxMaxSize.clearRect(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     ctxMaxSize.ellipse(offsetX + ellipseX, offsetY + ellipseY, shadowWidth, shadowHeight, 0, 0, Math.PI * 2 + 20)
     ctxMaxSize.fill()
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('floating', 1)
-    const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * fieldRange.floating.radius.weighting), handlerId)
+    const bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * fieldRange.floating.radius.weighting))
     setMark('floating', 2)
 
     ctxMaxSize.putImageData(bluredData, 0, 0)
@@ -375,7 +330,7 @@ class ImageShadowUtils {
     const { styles } = config
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = styles
-    const { effects, currentEffect, maxsize = 1600 } = shadow
+    const { effects, currentEffect } = shadow
     const { distance, angle, radius, opacity, size } = (effects as any)[currentEffect] as IImageMatchedEffect
 
     const scaleRatio = img.naturalWidth / _imgWidth
@@ -406,7 +361,7 @@ class ImageShadowUtils {
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('imageMatched', 1)
     const start = Date.now()
-    const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1, handlerId)
+    const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1)
     console.log('image-matched blur handling time: ', Date.now() - start)
     setMark('imageMatched', 2)
     const xFactor = layerWidth / _imgWidth
@@ -414,16 +369,6 @@ class ImageShadowUtils {
     const offsetX = distance && distance > 0 ? distance * mathUtils.cos(angle) * fieldRange.imageMatched.distance.weighting : 0
     const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.imageMatched.distance.weighting : 0
     ctxMaxSize.putImageData(bluredData, offsetX * xFactor, offsetY * yFactor)
-    // const canvasTest = document.createElement('canvas')
-    // canvasTest.setAttribute('width', canvasMaxSize.width.toString())
-    // canvasTest.setAttribute('height', canvasMaxSize.height.toString())
-    // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
-    // ctxText.drawImage(canvasMaxSize, 0, 0)
-    // document.body.appendChild(canvasTest)
-    // setTimeout(() => document.body.removeChild(canvasTest), 10000)
-    // canvasTest.style.position = 'absolute'
-    // canvasTest.style.top = '-300px'
-    // canvasTest.style.zIndex = '10000'
 
     ctxT.clearRect(0, 0, canvas.width, canvas.height)
     ctxT.globalAlpha = opacity * 0.01
@@ -448,7 +393,7 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
-    const { effects, currentEffect, maxsize = 1600, middsize = 510 } = shadow
+    const { effects, currentEffect } = shadow
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
@@ -491,19 +436,15 @@ class ImageShadowUtils {
       }
 
       setMark('shadow', 1)
-      const start1 = Date.now()
-      // const _imageData = new ImageData(this.dilate(spread), canvasT.width, canvasT.height)
       const _imageData = new ImageData(this.dilate(spread * Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)), canvasT.width, canvasT.height)
       ctxT.putImageData(_imageData, 0, 0)
-      console.log('1: handle spread time: ', Date.now() - start1)
       setMark('shadow', 2)
 
       ctxMax.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
       const imageData = ctxMax.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
-      const start2 = Date.now()
       let bluredData
       if (radius > 0) {
-        bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5), handlerId)
+        bluredData = imageDataAChannel(imageData, canvasMaxSize.width, canvasMaxSize.height, Math.ceil(radius * 1.5))
       } else {
         bluredData = imageData
       }
@@ -511,28 +452,14 @@ class ImageShadowUtils {
       const offsetY = distance && distance > 0 ? distance * mathUtils.sin(angle) * fieldRange.shadow.distance.weighting : 0
       ctxMax.putImageData(bluredData, offsetX, offsetY)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-      console.log('2: handle blur time: ', Date.now() - start2)
 
-      // Show test canvas
-      // const canvasTest = document.createElement('canvas')
-      // canvasTest.setAttribute('width', canvasMaxSize.width.toString())
-      // canvasTest.setAttribute('height', canvasMaxSize.height.toString())
-      // const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
-      // ctxText.drawImage(canvasMaxSize, 0, 0)
-      // document.body.appendChild(canvasTest)
-      // setTimeout(() => document.body.removeChild(canvasTest), 10000)
-      // canvasTest.style.position = 'absolute'
-      // canvasTest.style.top = '0'
-      // canvasTest.style.zIndex = '10000'
-
-      // ctxT.putImageData(bluredData, offsetX, offsetY)
       ctxT.drawImage(canvasMaxSize, 0, 0, canvasMaxSize.width, canvasMaxSize.height, 0, 0, canvasT.width, canvasT.height)
 
       setMark('shadow', 3)
 
       ctxT.globalCompositeOperation = 'source-in'
       ctxT.globalAlpha = opacity * 0.01
-      ctxT.fillStyle = effects.color
+      ctxT.fillStyle = currentEffect === ShadowEffectType.frame ? effects.frameColor || effects.color : effects.color
       ctxT.fillRect(0, 0, canvasT.width, canvasT.height)
       ctxT.globalAlpha = 1
       ctxT.globalCompositeOperation = 'source-over'
@@ -575,12 +502,22 @@ class ImageShadowUtils {
     const { currentEffect, effects } = config.styles.shadow
     if (currentEffect !== ShadowEffectType.none) {
       localStorage.setItem(currentEffect, JSON.stringify(effects[currentEffect]))
+      if (currentEffect === ShadowEffectType.frame) {
+        localStorage.setItem('shadow-color-frame', effects.frameColor || effects.color)
+      } else {
+        localStorage.setItem('shadow-color', effects.color)
+      }
     }
   }
 
   getLocalEffectAttrs(effectName: ShadowEffectType) {
     const data = localStorage.getItem(effectName)
     return data && Object.keys(JSON.parse(data)).length ? JSON.parse(data) : null
+  }
+
+  getLocalEffectColor(effectName: ShadowEffectType) {
+    const key = effectName === ShadowEffectType.frame ? 'shadow-color-frame' : 'shadow-color'
+    return localStorage.getItem(key) || ''
   }
 
   isTransparentBg(target: HTMLCanvasElement | HTMLImageElement): boolean {
@@ -720,33 +657,6 @@ class ImageShadowUtils {
     return { top, right, bottom, left }
   }
 
-  getOptimizeWin(n: number) {
-    const window = new Array(2 * n + 1)
-    for (let i = 0; i < window.length; i++) {
-      window[i] = new Array(2 * n + 1)
-    }
-    const write = (m: number, n: number, val: number) => {
-      for (let i = m; i <= 2 * n - m; i++) {
-        for (let j = m; j <= 2 * n - m; j++) {
-          window[i][j] = val
-        }
-      }
-    }
-    for (let m = 0; m < n; m++) {
-      if (m % 2 === 0) {
-        write(m, n, 1)
-      } else {
-        write(m, n, 0)
-      }
-    }
-    window[n][n] = n % 2 === 0 ? 1 : 0
-    return window
-  }
-
-  convertToAlpha(percent: number): string {
-    return Math.floor(percent / 100 * 255).toString(16).toUpperCase()
-  }
-
   getDefaultEffect(effectName: ShadowEffectType): Partial<IShadowEffects> {
     let effect = {} as unknown
     switch (effectName) {
@@ -883,6 +793,19 @@ class ImageShadowUtils {
 
   addUploadImg(data: IUploadShadowImg) {
     store.commit('shadow/ADD_UPLOAD_IMG', data)
+  }
+
+  TEST_showtTestCanvas(canvas: HTMLCanvasElement) {
+    const canvasTest = document.createElement('canvas')
+    canvasTest.setAttribute('width', canvas.width.toString())
+    canvasTest.setAttribute('height', canvas.height.toString())
+    const ctxText = canvasTest.getContext('2d') as CanvasRenderingContext2D
+    ctxText.drawImage(canvas, 0, 0)
+    document.body.appendChild(canvasTest)
+    setTimeout(() => document.body.removeChild(canvasTest), 10000)
+    canvasTest.style.position = 'absolute'
+    canvasTest.style.top = '0'
+    canvasTest.style.zIndex = '10000'
   }
 }
 

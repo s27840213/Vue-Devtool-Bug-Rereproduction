@@ -18,7 +18,7 @@ export interface IEffectOption {
   type: 'range' | 'color' | 'select'
   min?: number
   max?: number
-  selectOptions: {value: string, label: string}[]
+  select?: {key: string, label: string}[]
 }
 export interface IEffect {
   key: string
@@ -73,12 +73,14 @@ class ConstantData {
         ]
       }, {
         label: i18n.t('NN0668'),
-        content: [
-          ...[5].map((id) => themeItem(id)), {
-            label: '電商 Banner',
-            url: 'https://blog.vivipic.com/tw/ec-banner/'
-          },
-          ...[7].map((id) => themeItem(id))
+        content: [{
+          label: '電商商品圖',
+          url: 'https://blog.vivipic.com/tw/ecimage/'
+        }, {
+          label: '電商 Banner',
+          url: 'https://blog.vivipic.com/tw/ec-banner/'
+        },
+        ...[7].map((id) => themeItem(id))
         ]
       }, {
         label: i18n.t('NN0669'),
@@ -135,6 +137,9 @@ class ConstantData {
         content: [{
           label: 'ポラロイドフレーム',
           url: 'https://blog.vivipic.com/jp/free-polaroid-frame-templates-2/'
+        }, {
+          label: '招待状',
+          url: 'https://blog.vivipic.com/jp/invitation/'
         }]
       }]
     }
@@ -292,14 +297,14 @@ class ConstantData {
         switch (name) {
           case 'endpoint':
             option.type = 'select'
-            option.selectOptions = [{
-              value: 'triangle',
+            option.select = [{
+              key: 'triangle',
               label: i18n.tc('NN0730')
             }, {
-              value: 'rounded',
+              key: 'rounded',
               label: i18n.tc('NN0731')
             }, {
-              value: 'square',
+              key: 'square',
               label: i18n.tc('NN0732')
             }]
             break
@@ -349,14 +354,14 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
-      }, {
-        key: 'funky3d',
-        label: i18n.tc('NN0728'),
-        options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
-      }, {
-        key: 'bold3d',
-        label: i18n.tc('NN0729'),
-        options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      // }, {
+      //   key: 'funky3d',
+      //   label: i18n.tc('NN0728'),
+      //   options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
+      // }, {
+      //   key: 'bold3d',
+      //   label: i18n.tc('NN0729'),
+      //   options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',
@@ -401,10 +406,6 @@ class ConstantData {
     //     key: 'rounded-both',
     //     label: i18n.tc('NN0725'),
     //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-    //   }, {
-    //     key: 'cloud',
-    //     label: i18n.tc('NN0741'),
-    //     options: toOptions(['bRadius', 'opacity', 'color'])
     //   }, {
     //     key: 'gooey',
     //     label: i18n.tc('NN0726'),

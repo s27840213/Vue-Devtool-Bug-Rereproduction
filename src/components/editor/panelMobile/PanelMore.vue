@@ -7,10 +7,6 @@
         :value="pagesName"
         @change="setPagesName"
         ref="pagesName")
-      svg-icon(:iconName="'pen'"
-        :iconWidth="'20px'"
-        :iconColor="'gray-2'"
-        class="upload-cloud ml-10")
     hr(class="panel-more__hr")
     div(class="panel-more__item" @click="save()")
       span(class="body-2 pointer") {{$t('NN0009')}}
