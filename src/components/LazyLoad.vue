@@ -2,8 +2,7 @@
   div(class="lazy-load"
       :style="styles"
       ref="observer")
-    transition(name="fade-in")
-      slot(v-if="shoudBeRendered")
+    slot(v-if="shoudBeRendered")
 </template>
 
 <script lang="ts">
@@ -79,7 +78,7 @@ export default Vue.extend({
                 this.handleLoaded()
               })
             },
-            this.handleUnrender ? 200 : 0
+            this.handleUnrender ? 0 : 0
           )
 
           // this.renderTimer = setTimeout(
