@@ -470,6 +470,7 @@ class TextBg {
       cps.preProcess()
       const d = cps.process()
       testUtils.log((config as any).id, 'draw svg done')
+      console.log('svg path:', d)
 
       return {
         attrs: { width, height, fill },
