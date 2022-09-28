@@ -416,9 +416,9 @@ export default Vue.extend({
       const { width, height } = this.config
       const { posX, posY } = this.config.backgroundImage
       const position = {
-        width: width / 2,
-        x: -posX + width / 2,
-        y: -posY + height / 2
+        width: width / 2 * this.contentScaleRatio,
+        x: (-posX + width / 2) * this.contentScaleRatio,
+        y: (-posY + height / 2) * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },

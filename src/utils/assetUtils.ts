@@ -9,7 +9,7 @@ import ShapeUtils from './shapeUtils'
 import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
@@ -94,6 +94,7 @@ class AssetUtils {
       9: 'objects',
       10: 'objects',
       11: 'objects',
+      14: 'objects',
       15: 'objects'
     } as { [key: number]: string }
     return typeModuleMap[type]
@@ -157,6 +158,7 @@ class AssetUtils {
     const { pageIndex, width, height } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     // const targetPage: IPage = this.getPage(targetPageIndex)
+
     json = await this.updateBackground(generalUtils.deepCopy(json))
     pageUtils.setAutoResizeNeededForPage(json, true)
     const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
@@ -321,11 +323,11 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
-    const { pageIndex, styles = {}, ver } = attrs
+  addBackground(url: string, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {}, ver, panelPreviewSrc, imgSrcSize } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
-    const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
+    const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
     const { width, height, posX, posY } = ImageUtils.adaptToSize({
       width: srcWidth,
@@ -352,7 +354,8 @@ class AssetUtils {
         assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
       },
-      ver
+      ver,
+      panelPreviewSrc
     })
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
@@ -456,6 +459,15 @@ class AssetUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
+    if (!styles) {
+      console.error('addImage no styles')
+      return
+    }
+
+    const { width = photoWidth, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
+
+    const scaleRatio = photoWidth / width
+
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
     let srcObj
@@ -481,22 +493,24 @@ class AssetUtils {
     }) as Array<IImage>
 
     // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
-    const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
-    const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
+    const x = imageLayers.length === 0 ? (this.pageSize.width / 2 - photoWidth / 2) : (imageLayers[imageLayers.length - 1].styles.x + 20)
+    const y = imageLayers.length === 0 ? (this.pageSize.height / 2 - photoHeight / 2) : (imageLayers[imageLayers.length - 1].styles.y + 20)
 
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
       styles: categoryType === 14 ? {
+        ...styles,
         x,
         y,
         width: photoWidth,
         height: photoHeight,
         initWidth: photoWidth,
         initHeight: photoHeight,
-        imgWidth: photoWidth,
-        imgHeight: photoHeight,
-        ...styles
+        imgWidth: imgWidth * scaleRatio,
+        imgHeight: imgHeight * scaleRatio,
+        imgX: imgX * scaleRatio,
+        imgY: imgY * scaleRatio
       } : {
         ...styles,
         x,
@@ -590,20 +604,30 @@ class AssetUtils {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       const asset = await this.get(item) as IAsset
+      // const data = await ImageUtils.getImageSize(ImageUtils.getSrc({
+      //   srcObj: {
+      //     type: 'background',
+      //     assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
+      //     userId: ''
+      //   }
+      // }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
       switch (asset.type) {
-        case 1:
-          this.addBackground(
-            asset.urls.prev,
-            { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver },
-            await ImageUtils.getImageSize(ImageUtils.getSrc({
+        case 1: {
+          if (!attrs.imgSrcSize?.width || !attrs.imgSrcSize.height) {
+            attrs.imgSrcSize = await ImageUtils.getImageSize(ImageUtils.getSrc({
               srcObj: {
                 type: 'background',
                 assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
                 userId: ''
               }
             }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
+          }
+          this.addBackground(
+            asset.urls.prev,
+            { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver }
           )
           break
+        }
         case 5:
         case 9:
           this.addSvg({ ...asset.jsonData, designId: item.id, db: 'svg' }, attrs)
@@ -628,7 +652,7 @@ class AssetUtils {
           switch ((asset.jsonData as any).type) {
             case 'image': {
               const { srcObj, styles } = asset.jsonData as IImage
-              this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles }, 14)
+              this.addImage(srcObj, styles.width / styles.height, { styles }, 14)
               break
             }
             case 'group':

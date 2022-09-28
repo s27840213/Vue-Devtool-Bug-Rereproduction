@@ -1,24 +1,34 @@
 import Vue from 'vue'
 
 class TestUtils {
-  timer: Record<string, number>
+  timer: Record<string, {
+    start: number
+    notify: boolean
+  }>
+
   constructor() {
     this.timer = {}
   }
 
-  start(key: string) {
-    this.timer[key] = (new Date()).getTime()
-    console.log(key + 'start')
+  start(key: string, notify = true) {
+    this.timer[key] = {
+      start: (new Date()).getTime(),
+      notify
+    }
+    console.log(`${key}: start`)
   }
 
-  end(key: string) {
-    const duration = (new Date()).getTime() - this.timer[key]
-    const result = `${key}, ${duration}`
+  log(key: string, msg: string) {
+    const timer = this.timer[key]
+    const duration = (new Date()).getTime() - timer.start
+    const result = `${key}: ${msg}, ${duration}`
     console.log(result)
-    Vue.notify({
-      group: 'copy',
-      text: result
-    })
+    if (timer.notify) {
+      Vue.notify({
+        group: 'copy',
+        text: result
+      })
+    }
   }
 }
 

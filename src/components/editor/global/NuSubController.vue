@@ -382,17 +382,22 @@ export default Vue.extend({
       }
     },
     wrapperStyles() {
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      let scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      if (this.type === 'frame') {
+        scale *= this.contentScaleRatio
+      }
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
+          const { styles: { width, height }, clipPath } = this.config
           if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${this.config.styles.width}v${this.config.styles.height}h${-this.config.styles.width}z")` }
+            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path("${this.config.clipPath}")` }
+            return { clipPath: `path("${clipPath}")` }
           }
         })())
       }
@@ -409,8 +414,8 @@ export default Vue.extend({
       const { isFrameImg } = this.config
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
-        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
+        width = `${this.config.styles.initWidth}px`
+        height = `${this.config.styles.initHeight}px`
       } else {
         width = `${this.config.styles.width * this.contentScaleRatio}px`
         height = `${this.config.styles.height * this.contentScaleRatio}px`

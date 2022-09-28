@@ -544,7 +544,7 @@ export default Vue.extend({
     },
     isModal(target: HTMLElement): boolean {
       if (!target || target.id === 'app') return false
-      else if (target.className.includes('modal')) return true
+      else if (target.className && target.className.includes('modal')) return true
       return this.isModal(target.parentNode as HTMLElement)
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {

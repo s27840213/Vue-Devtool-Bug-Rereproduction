@@ -3,7 +3,7 @@
     :id="`nu-image-${config.id}`"
     :style="containerStyles()"
     draggable="false")
-    div(v-if="showCanvas()"
+    div(v-if="showCanvas"
       class="shadow__canvas-wrapper"
       :style="canvasWrapperStyle()")
       canvas(ref="canvas" :class="`shadow__canvas_${pageIndex}_${layerIndex}_${typeof subLayerIndex === 'undefined' ? -1 : subLayerIndex}`")
@@ -213,21 +213,22 @@ export default Vue.extend({
     parentLayerDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     },
-    srcObj: {
+    'config.srcObj': {
       handler: function () {
         this.shadowBuff.canvasShadowImg = undefined
         if (this.forRender) {
           return
         }
         if (typeof this.subLayerIndex !== 'undefined') {
-          this.handleDimensionUpdate(this.parentLayerDimension(), 0)
+          this.handleDimensionUpdate(this.parentLayerDimension, 0)
         } else {
-          this.perviewAsLoading()
+          console.log('in watch hook')
+          this.previewAsLoading()
         }
       },
       deep: true
     },
-    shadowEffects: {
+    'config.styles.shadow.effects': {
       handler(val) {
         if (!this.forRender && this.$refs.canvas && !this.isUploadingShadowImg && this.currentShadowEffect() !== ShadowEffectType.none) {
           this.updateShadowEffect(val)
@@ -235,7 +236,7 @@ export default Vue.extend({
       },
       deep: true
     },
-    currentShadowEffect() {
+    'config.styles.shadow.currentEffect'() {
       if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
         return
       }
@@ -271,7 +272,7 @@ export default Vue.extend({
         }
       }
     },
-    'shadow.srcObj': {
+    'config.styles.shadow.srcObj': {
       handler: function (val) {
         if (!this.config.isFrameImg && val.type === '' && !this.config.forRender) {
           imageShadowUtils.setEffect(this.shadow().currentEffect, {}, this.layerInfo())
@@ -321,6 +322,34 @@ export default Vue.extend({
     filterId(): string {
       const randomId = generalUtils.generateRandomString(5)
       return `filter__${randomId}`
+    },
+    showCanvas(): boolean {
+      const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
+      if (typeof pageIndex === 'undefined') {
+        return false
+      }
+      const isCurrShadowEffectApplied = this.currentShadowEffect() !== ShadowEffectType.none
+      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex).id && (() => {
+        if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
+          const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
+          return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId
+        } else {
+          return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
+        }
+      })()
+      return isCurrShadowEffectApplied && isHandling
+    },
+    getImgDimension(): number {
+      const { srcObj } = this.config
+      const { imgWidth, imgHeight } = this.config.styles
+      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
+    },
+    parentLayerDimension(): number {
+      const { width, height } = this.config.parentLayerStyles || {}
+      const { imgWidth, imgHeight } = this.config.styles
+      const imgRatio = imgWidth / imgHeight
+      const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
+      return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
     }
   },
   methods: {
@@ -389,39 +418,49 @@ export default Vue.extend({
       console.warn(log)
       logUtils.setLog(log)
     },
-    async perviewAsLoading() {
+    async previewAsLoading() {
       if (this.config.previewSrc) {
         return
       }
-      /**
-       *  First put a preview to this.src, then start to load the right-sized-image.
-       *  As loading finished, if the right-sized-image is still need, put it to the image src to replace preview, otherwise doing nothing.
-       **/
-      return new Promise<void>((resolve, reject) => {
-        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize())
-        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
-        const img = new Image()
-        img.onload = () => {
-          // If after onload the img, the config.srcObj is the same, set the src.
-          if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
-            this.src = src
+      let isPrimaryImgLoaded = false
+      const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
+      const panelPreviewSrc = this.config.panelPreviewSrc
+      if (panelPreviewSrc) {
+        ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = panelPreviewSrc
           }
-          resolve()
-        }
-        img.onerror = (error) => {
+        })
+      } else {
+        const previewSrc = ImageUtils.getSrc(this.config, this.getPreviewSize())
+        ImageUtils.imgLoadHandler(previewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = previewSrc
+          }
+        })
+      }
+
+      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+      return new Promise<void>((resolve, reject) => {
+        ImageUtils.imgLoadHandler(src, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+            isPrimaryImgLoaded = true
+            this.src = src
+            resolve()
+          }
+        }, () => {
           reject(new Error(`cannot load the current image, src: ${this.src}`))
-          fetch(img.src)
+          fetch(src)
             .then(res => {
               const { status, statusText } = res
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+              this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
             })
             .catch((e) => {
-              if (img.src.indexOf('data:image/png;base64') !== 0) {
-                this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+              if (src.indexOf('data:image/png;base64') !== 0) {
+                this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
               }
             })
-        }
-        img.src = src
+        })
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
@@ -442,7 +481,13 @@ export default Vue.extend({
             this.preLoadImg('next', currSize)
           }
         })
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+        const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+        const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
+        ImageUtils.imgLoadHandler(currUrl, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+            this.src = currUrl
+          }
+        })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
@@ -466,7 +511,7 @@ export default Vue.extend({
     async handleInitLoad() {
       const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
-        await this.perviewAsLoading()
+        await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
           if (type === 'pexels') {
@@ -495,9 +540,9 @@ export default Vue.extend({
         }
         preImg.onload = () => {
           const nextImg = new Image()
-          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension(), 'next')))
+          nextImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'next')))
         }
-        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension(), 'pre')))
+        preImg.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, ImageUtils.getSrcSize(this.config.srcObj, this.getImgDimension, 'pre')))
       } else {
         this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
       }
@@ -839,7 +884,7 @@ export default Vue.extend({
     containerStyles(): any {
       const { width, height } = this.scaledConfig()
       const { inheritStyle = {} } = this
-      return this.showCanvas() ? {
+      return this.showCanvas ? {
         width: `${width}px`,
         height: `${height}px`
         // ...inheritStyle
@@ -861,15 +906,15 @@ export default Vue.extend({
       return `0 0 ${this.svgImageWidth()} ${this.svgImageHeight()}`
     },
     cssFilterElms(): any[] {
-      const { adjustImgStyles: { adjust, width, height } } = this.adjustImgStyles()
+      const { adjust, width, height } = this.adjustImgStyles()
       // @TODO: only for halation now
       if (Number.isNaN(adjust.halation) || !adjust.halation) {
         return []
       }
       const position = {
-        width: width / 2,
-        x: width / 2,
-        y: height / 2
+        width: width / 2 * this._contentScaleRatio(),
+        x: width / 2 * this._contentScaleRatio(),
+        y: height / 2 * this._contentScaleRatio()
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
@@ -946,11 +991,6 @@ export default Vue.extend({
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },
-    getImgDimension(): number {
-      const { srcObj } = this.config
-      const { imgWidth, imgHeight } = this.config.styles
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
-    },
     getPreviewSize(): number {
       const sizeMap = this.imgSizeMap as Array<{ [key: string]: number | string }>
       return ImageUtils
@@ -963,22 +1003,6 @@ export default Vue.extend({
     },
     hasHalation(): boolean {
       return this.config.styles.adjust.halation
-    },
-    showCanvas(): boolean {
-      const { pageIndex, layerIndex, subLayerIndex, config, handleId } = this
-      if (typeof pageIndex === 'undefined') {
-        return false
-      }
-      const isCurrShadowEffectApplied = this.currentShadowEffect() !== ShadowEffectType.none
-      const isHandling = handleId?.pageId === pageUtils.getPage(pageIndex).id && (() => {
-        if (subLayerIndex !== -1 && typeof subLayerIndex !== 'undefined') {
-          const primaryLayer = layerUtils.getLayer(pageIndex, layerIndex) as IGroup
-          return primaryLayer.id === handleId.layerId && primaryLayer.layers[subLayerIndex].id === handleId.subLayerId
-        } else {
-          return layerUtils.getLayer(pageIndex, layerIndex).id === handleId.layerId
-        }
-      })()
-      return isCurrShadowEffectApplied && isHandling
     },
     srcObj(): any {
       return (this.config as IImage).srcObj
@@ -1022,18 +1046,11 @@ export default Vue.extend({
     // uploadingImagePreviewSrc(): string {
     //   return this.config.previewSrc
     // },
-    parentLayerDimension(): number {
-      const { width, height } = this.config.parentLayerStyles || {}
-      const { imgWidth, imgHeight } = this.config.styles
-      const imgRatio = imgWidth / imgHeight
-      const maxSize = imgRatio > 1 ? height * imgRatio : width / imgRatio
-      return ImageUtils.getSrcSize(this.config.srcObj, maxSize * (this.scaleRatio / 100))
-    },
     shadowSrc(): string {
       if (!this.shadow || !this.shadow().srcObj) {
         return ''
       }
-      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension()))
+      return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
     },
     id(): ILayerIdentifier {
       return {

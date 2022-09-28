@@ -16,6 +16,21 @@ import editorUtils from './editorUtils'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
+  imgLoadHandler(src: string, cb: () => void, error?: () => void) {
+    const image = new Image()
+    image.src = src
+    if (image.complete) {
+      cb()
+    } else {
+      image.onload = cb
+      error && (image.onerror = error)
+    }
+  }
+
+  getImgIdentifier(srcObj: SrcObj, ...attrs: Array<string>): string {
+    return [srcObj.type, srcObj.userId, srcObj.assetId, ...attrs].join(',')
+  }
+
   isImgControl(pageIndex: number = LayerUtils.pageIndex): boolean {
     if (pageIndex === LayerUtils.pageIndex && LayerUtils.getCurrLayer) {
       const currLayer = LayerUtils.getCurrLayer
@@ -118,7 +133,7 @@ class ImageUtils {
     if (sizeMap?.length) {
       let i = 0
       if (typeof dimension === 'number') {
-        while (dimension < sizeMap[i].size && i < sizeMap.length - 1) {
+        while (dimension <= sizeMap[i].size && i < sizeMap.length - 1) {
           i++
         }
         i = Math.max(i - 1, 0)

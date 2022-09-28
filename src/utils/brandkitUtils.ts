@@ -32,7 +32,8 @@ class BrandKitUtils {
   // to-delete
   get isBrandkitAvailable(): boolean {
     // return store.getters['user/isAdmin']
-    return true // for testing private assets
+    // return true // for testing private assets
+    return !generalUtils.isTouchDevice()
   }
 
   createTestingDefaultBrand(): IBrand {

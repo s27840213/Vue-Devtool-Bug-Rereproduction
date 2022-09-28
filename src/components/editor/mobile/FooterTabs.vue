@@ -32,6 +32,7 @@ import mappingUtils from '@/utils/mappingUtils'
 import backgroundUtils from '@/utils/backgroundUtils'
 import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
+import brandkitUtils from '@/utils/brandkitUtils'
 
 export default Vue.extend({
   components: {
@@ -60,7 +61,7 @@ export default Vue.extend({
         { icon: 'bg', text: `${this.$tc('NN0004', 2)}`, panelType: 'background' },
         { icon: 'text', text: `${this.$tc('NN0005', 2)}`, panelType: 'text' },
         { icon: 'upload', text: `${this.$tc('NN0006', 2)}`, panelType: 'file' },
-        { icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }
+        ...brandkitUtils.isBrandkitAvailable ? [{ icon: 'brand', text: `${this.$t('NN0497')}`, panelType: 'brand' }] : []
       ] as Array<IFooterTab>
     }
   },
