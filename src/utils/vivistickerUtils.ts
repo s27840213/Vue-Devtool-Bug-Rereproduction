@@ -215,6 +215,8 @@ class ViviStickerUtils {
     }
     if (Object.values(this.loadingFlags).length !== 0 && !Object.values(this.loadingFlags).some(f => !f) && this.loadingCallback) {
       this.loadingCallback()
+      this.loadingFlags = {}
+      this.loadingCallback = undefined
     }
   }
 
