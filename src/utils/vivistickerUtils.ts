@@ -24,7 +24,6 @@ const STANDALONE_USER_INFO: IUserInfo = {
 
 class ViviStickerUtils {
   appLoadedSent = false
-  inDebugMode = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
   callbackMap = {} as {[key: string]: () => void}
@@ -70,14 +69,14 @@ class ViviStickerUtils {
     }
   }
 
-  sendDoneLoading(width: number, height: number, options: string) {
+  sendDoneLoading(width: number, height: number, options: string, needCrop = false) {
     console.log(width, height, options)
-    this.sendToIOS('DONE_LOADING', { width, height, options })
+    this.sendToIOS('DONE_LOADING', { width, height, options, needCrop })
   }
 
   sendScreenshotUrl(query: string, action = 'copy') {
     this.sendToIOS('SCREENSHOT', { params: query, action })
-    if (this.inDebugMode) {
+    if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
       console.log(url)
       window.open(url, '_blank')
@@ -118,10 +117,6 @@ class ViviStickerUtils {
 
   setShowAllRecently(tab: string, bool: boolean) {
     store.commit('vivisticker/SET_showAllRecently', { tab, bool })
-  }
-
-  debugMode() {
-    this.inDebugMode = true
   }
 
   getAssetInitiator(asset: IAsset): () => Promise<any> {

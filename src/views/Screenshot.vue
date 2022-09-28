@@ -60,6 +60,7 @@ export default Vue.extend({
   },
   created() {
     window.fetchDesign = this.fetchDesign
+    window.resizePage = this.resizePage
   },
   computed: {
     ...mapGetters({
@@ -160,12 +161,8 @@ export default Vue.extend({
             vivistickerUtils.initLoadingFlags(page, () => {
               this.onload()
             })
-            // const { x, y, width, height } = this.clipObject(calcTmpProps(page.layers as any[]), page.width, page.height)
-            // this.pageTranslate = { x: -x, y: -y }
-            // this.pageScale = this.fitPageToScreen(width, height)
             page.isAutoResizeNeeded = true
             pageUtils.setPages([page])
-            // pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
             this.JSONcontentSize = {
               width: page.width,
               height: page.height
@@ -213,22 +210,13 @@ export default Vue.extend({
     onload() {
       console.log('loaded')
       if (this.mode === ScreenShotMode.PAGE) {
-        vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options)
+        vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, true)
       } else {
         const element = this.$refs.target
         const target = (element as Vue).$el ? (element as Vue).$el : (element as HTMLElement)
         const { width, height } = target.getBoundingClientRect()
         vivistickerUtils.sendDoneLoading(width, height, this.options)
       }
-    },
-    clipObject({ x, y, width, height }: { x: number, y: number, width: number, height: number }, pageWidth: number, pageHeight: number): {
-      x: number, y: number, width: number, height: number
-    } {
-      const x_ = Math.max(x, 0)
-      const y_ = Math.max(y, 0)
-      const width_ = Math.min(pageWidth - x_, Math.min(width + x, width))
-      const height_ = Math.min(pageHeight - y_, Math.min(height + y, height))
-      return { x: x_, y: y_, width: width_, height: height_ }
     },
     fitPageToScreen(width: number, height: number): number {
       const screenWidth = window.innerWidth
@@ -248,6 +236,18 @@ export default Vue.extend({
         }
         return screenWidth / width
       }
+    },
+    resizePage(data: { x: number, y: number, width: number, height: number, options: string }) {
+      const { x, y, width, height, options } = data
+      this.options = options
+      this.pageTranslate = { x: -x, y: -y }
+      const page = pageUtils.getPage(0)
+      this.pageScale = this.fitPageToScreen(width, height)
+      pageUtils.resizePage({ width: page.width * this.pageScale, height: page.height * this.pageScale })
+      setTimeout(() => {
+        console.log('resized')
+        vivistickerUtils.sendDoneLoading(this.JSONcontentSize.width, this.JSONcontentSize.height, this.options, false)
+      }, 100)
     }
   }
 })
