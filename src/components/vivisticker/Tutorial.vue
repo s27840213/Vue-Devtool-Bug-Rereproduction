@@ -37,6 +37,7 @@ import Vue from 'vue'
 import AnyTouch, { AnyTouchEvent } from 'any-touch'
 import { mapMutations } from 'vuex'
 import vivistickerUtils from '@/utils/vivistickerUtils'
+import i18n from '@/i18n'
 
 export default Vue.extend({
   data() {
@@ -46,22 +47,22 @@ export default Vue.extend({
         {
           title: `${this.$t('NN0746')}`,
           description: `${this.$t('NN0750')}`,
-          video: 'https://template.vivipic.com/static/video/us-01-copy_paste.mp4'
+          video: `https://template.vivipic.com/static/video/${i18n.locale}-01-copy_paste.mp4`
         },
         {
           title: `${this.$t('NN0747')}`,
           description: `${this.$t('NN0751')}`,
-          video: 'https://template.vivipic.com/static/video/us-02-text.mp4'
+          video: `https://template.vivipic.com/static/video/${i18n.locale}-02-text.mp4`
         },
         {
           title: `${this.$t('NN0748')}`,
           description: `${this.$t('NN0752')}`,
-          video: 'https://template.vivipic.com/static/video/us-03-objects.mp4'
+          video: `https://template.vivipic.com/static/video/${i18n.locale}-03-objects.mp4`
         },
         {
           title: `${this.$t('NN0749')}`,
           description: `${this.$t('NN0753')}`,
-          video: 'https://template.vivipic.com/static/video/us-04-background.mp4'
+          video: `https://template.vivipic.com/static/video/${i18n.locale}-04-background.mp4`
         }
       ],
       basicWidth: window.innerWidth
@@ -83,6 +84,7 @@ export default Vue.extend({
     this.$on('hook:destroyed', () => {
       mainAt.destroy()
     })
+    console.log('locale', i18n.locale)
   },
   methods: {
     ...mapMutations({
