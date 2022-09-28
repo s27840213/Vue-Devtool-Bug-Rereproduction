@@ -18,7 +18,7 @@ export interface IEffectOption {
   type: 'range' | 'color' | 'select'
   min?: number
   max?: number
-  selectOptions: {value: string, label: string}[]
+  select?: {key: string, label: string}[]
 }
 export interface IEffect {
   key: string
@@ -297,14 +297,14 @@ class ConstantData {
         switch (name) {
           case 'endpoint':
             option.type = 'select'
-            option.selectOptions = [{
-              value: 'triangle',
+            option.select = [{
+              key: 'triangle',
               label: i18n.tc('NN0730')
             }, {
-              value: 'rounded',
+              key: 'rounded',
               label: i18n.tc('NN0731')
             }, {
-              value: 'square',
+              key: 'square',
               label: i18n.tc('NN0732')
             }]
             break
@@ -406,10 +406,6 @@ class ConstantData {
     //     key: 'rounded-both',
     //     label: i18n.tc('NN0725'),
     //     options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
-    //   }, {
-    //     key: 'cloud',
-    //     label: i18n.tc('NN0741'),
-    //     options: toOptions(['bRadius', 'opacity', 'color'])
     //   }, {
     //     key: 'gooey',
     //     label: i18n.tc('NN0726'),

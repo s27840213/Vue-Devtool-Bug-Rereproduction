@@ -162,9 +162,6 @@ export default Vue.extend({
       this.$nextTick(() => {
         this.cardHeight = this.editorView?.clientHeight
       })
-    },
-    showMobilePanel(newVal) {
-      console.log(newVal)
     }
   },
 

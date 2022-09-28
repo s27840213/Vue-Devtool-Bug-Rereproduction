@@ -8,13 +8,6 @@
         :style="translateStyles()")
       div(class="layer-scale posAbs" ref="scale"
           :style="scaleStyles()")
-        //- Svg BG for text effex box.
-        svg(v-if="svgBG()" :width="svgBG().width" :height="svgBG().height"
-            class="nu-layer__BG")
-          component(v-for="(elm, idx) in svgBG().content"
-                    :key="`svgFilter${idx}`"
-                    :is="elm.tag"
-                    v-bind="elm.attrs")
         nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
@@ -150,10 +143,6 @@ export default Vue.extend({
         }
       }
       return styles
-    },
-    svgBG() {
-      const textBg = textBgUtils.convertTextEffect(this.config.styles)
-      return textBg.svg
     },
     getLayerPos(): { x: number, y: number } {
       return {
