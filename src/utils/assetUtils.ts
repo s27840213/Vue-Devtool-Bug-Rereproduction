@@ -324,11 +324,11 @@ class AssetUtils {
     stepsUtils.record()
   }
 
-  addBackground(url: string, attrs: IAssetProps = {}, imageSize: { width: number, height: number }) {
-    const { pageIndex, styles = {}, ver } = attrs
+  addBackground(url: string, attrs: IAssetProps = {}) {
+    const { pageIndex, styles = {}, ver, panelPreviewSrc, imgSrcSize } = attrs
     const targetPageIndex = pageIndex ?? pageUtils.currFocusPageIndex
     const { width: assetWidth = 0, height: assetHeight = 0 } = styles
-    const { width: srcWidth = 0, height: srcHeight = 0 } = imageSize
+    const { width: srcWidth = 0, height: srcHeight = 0 } = imgSrcSize || { width: 0, height: 0 }
     const page = store.getters.getPage(targetPageIndex)
     const { width, height, posX, posY } = ImageUtils.adaptToSize({
       width: srcWidth,
@@ -355,7 +355,8 @@ class AssetUtils {
         assetId: ImageUtils.getAssetId(url, 'background'),
         userId: ''
       },
-      ver
+      ver,
+      panelPreviewSrc
     })
     store.commit('SET_backgroundImage', {
       pageIndex: targetPageIndex,
@@ -622,20 +623,30 @@ class AssetUtils {
     try {
       store.commit('SET_mobileSidebarPanelOpen', false)
       const asset = await this.get(item) as IAsset
+      // const data = await ImageUtils.getImageSize(ImageUtils.getSrc({
+      //   srcObj: {
+      //     type: 'background',
+      //     assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
+      //     userId: ''
+      //   }
+      // }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
       switch (asset.type) {
-        case 1:
-          this.addBackground(
-            asset.urls.prev,
-            { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver },
-            await ImageUtils.getImageSize(ImageUtils.getSrc({
+        case 1: {
+          if (!attrs.imgSrcSize?.width || !attrs.imgSrcSize.height) {
+            attrs.imgSrcSize = await ImageUtils.getImageSize(ImageUtils.getSrc({
               srcObj: {
                 type: 'background',
                 assetId: ImageUtils.getAssetId(asset.urls.prev, 'background'),
                 userId: ''
               }
             }, 'prev', attrs.ver), asset.width ?? 0, asset.height ?? 0)
+          }
+          this.addBackground(
+            asset.urls.prev,
+            { ...attrs, styles: { width: asset.width, height: asset.height }, ver: item.ver }
           )
           break
+        }
         case 5:
         case 9:
           this.addSvg({ ...asset.jsonData, designId: item.id, db: 'svg' }, attrs)

@@ -222,7 +222,8 @@ export default Vue.extend({
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
         } else {
-          this.perviewAsLoading()
+          console.log('in watch hook')
+          this.previewAsLoading()
         }
       },
       deep: true
@@ -417,39 +418,49 @@ export default Vue.extend({
       console.warn(log)
       logUtils.setLog(log)
     },
-    async perviewAsLoading() {
+    async previewAsLoading() {
       if (this.config.previewSrc) {
         return
       }
-      /**
-       *  First put a preview to this.src, then start to load the right-sized-image.
-       *  As loading finished, if the right-sized-image is still need, put it to the image src to replace preview, otherwise doing nothing.
-       **/
-      return new Promise<void>((resolve, reject) => {
-        this.src = ImageUtils.getSrc(this.config, this.getPreviewSize())
-        const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
-        const img = new Image()
-        img.onload = () => {
-          // If after onload the img, the config.srcObj is the same, set the src.
-          if (ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config)) === src) {
-            this.src = src
+      let isPrimaryImgLoaded = false
+      const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
+      const panelPreviewSrc = this.config.panelPreviewSrc
+      if (panelPreviewSrc) {
+        ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = panelPreviewSrc
           }
-          resolve()
-        }
-        img.onerror = (error) => {
+        })
+      } else {
+        const previewSrc = ImageUtils.getSrc(this.config, this.getPreviewSize())
+        ImageUtils.imgLoadHandler(previewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = previewSrc
+          }
+        })
+      }
+
+      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+      return new Promise<void>((resolve, reject) => {
+        ImageUtils.imgLoadHandler(src, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+            isPrimaryImgLoaded = true
+            this.src = src
+            resolve()
+          }
+        }, () => {
           reject(new Error(`cannot load the current image, src: ${this.src}`))
-          fetch(img.src)
+          fetch(src)
             .then(res => {
               const { status, statusText } = res
-              this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
+              this.logImgError('img loading error, img src:', src, 'fetch result: ' + status + statusText)
             })
             .catch((e) => {
-              if (img.src.indexOf('data:image/png;base64') !== 0) {
-                this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
+              if (src.indexOf('data:image/png;base64') !== 0) {
+                this.logImgError('img loading error, img src:', src, 'fetch result: ' + e)
               }
             })
-        }
-        img.src = src
+        })
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
@@ -470,7 +481,13 @@ export default Vue.extend({
             this.preLoadImg('next', currSize)
           }
         })
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+        const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
+        const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
+        ImageUtils.imgLoadHandler(currUrl, () => {
+          if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
+            this.src = currUrl
+          }
+        })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
@@ -494,7 +511,7 @@ export default Vue.extend({
     async handleInitLoad() {
       const { type } = this.config.srcObj
       if (this.userId !== 'backendRendering') {
-        await this.perviewAsLoading()
+        await this.previewAsLoading()
         const preImg = new Image()
         preImg.onerror = (error) => {
           if (type === 'pexels') {

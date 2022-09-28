@@ -17,6 +17,7 @@
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
     img(:src="previewSrc",
+      ref='img'
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
@@ -152,11 +153,19 @@ export default Vue.extend({
           brandId: imageUtils.getBrandId(src, type)
         }
 
+        const img = this.$refs.img as HTMLImageElement
+        if (!img) {
+          console.error('img in gallery photo is null')
+          return
+        }
+        const panelPreviewSrc = img.src
+
         new DragUtils().itemDragStart(e, 'image', { type: 'image', srcObj }, {
           width: photoWidth,
           height: photoHeight,
           offsetX: 10,
-          offsetY: 15
+          offsetY: 15,
+          panelPreviewSrc
         })
 
         const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)
@@ -174,7 +183,8 @@ export default Vue.extend({
           },
           styles: { width: photoWidth, height: photoHeight },
           isPreview: this.isUploading,
-          previewsrc: this.previewSrc
+          previewsrc: this.previewSrc,
+          panelPreviewSrc
         })
       }
     },
