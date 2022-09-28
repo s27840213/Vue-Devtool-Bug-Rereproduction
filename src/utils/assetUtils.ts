@@ -454,7 +454,7 @@ class AssetUtils {
 
   addImage(url: string | SrcObj, photoAspectRatio: number, attrs: IAssetProps = {}, categoryType = -1) {
     store.commit('SET_mobileSidebarPanelOpen', false)
-    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
+    const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles, panelPreviewSrc } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
 
@@ -535,6 +535,7 @@ class AssetUtils {
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
+      panelPreviewSrc,
       styles: {
         ...styles,
         x,

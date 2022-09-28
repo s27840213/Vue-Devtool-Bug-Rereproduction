@@ -139,14 +139,16 @@ export default Vue.extend({
         const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
         img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
         img.onload = () => {
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-          canvas.setAttribute('width', img.naturalWidth.toString())
-          canvas.setAttribute('height', img.naturalHeight.toString())
-          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
-          imageShadowUtils.updateEffectProps(this.layerInfo(), {
-            isTransparent: imageShadowUtils.isTransparentBg(canvas)
-          })
+          if (!this.hasDestroyed) {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+            canvas.setAttribute('width', img.naturalWidth.toString())
+            canvas.setAttribute('height', img.naturalHeight.toString())
+            ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+            imageShadowUtils.updateEffectProps(this.layerInfo(), {
+              isTransparent: imageShadowUtils.isTransparentBg(canvas)
+            })
+          }
         }
       }
     }
@@ -193,8 +195,12 @@ export default Vue.extend({
       eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
+  destroyed() {
+    this.hasDestroyed = true
+  },
   data() {
     return {
+      hasDestroyed: false,
       isOnError: false,
       src: '',
       shadowBuff: {
@@ -219,12 +225,13 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
+        this.previewAsLoading()
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
-        } else {
-          console.log('in watch hook')
-          this.previewAsLoading()
         }
+        // else {
+        //   this.previewAsLoading()
+        // }
       },
       deep: true
     },
