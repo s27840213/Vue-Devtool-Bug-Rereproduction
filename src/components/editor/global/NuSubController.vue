@@ -407,10 +407,12 @@ export default Vue.extend({
       }
     },
     styles() {
+      const { isFrameImg } = this.config
+
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `translateZ(${this.config.styles.zindex}px)`,
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.config.styles.zindex}px)`,
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -418,8 +420,8 @@ export default Vue.extend({
       const { isFrameImg } = this.config
       let width, height
       if (this.type === 'frame' && !isFrameImg) {
-        width = `${this.config.styles.initWidth}px`
-        height = `${this.config.styles.initHeight}px`
+        width = `${this.config.styles.initWidth * this.contentScaleRatio}px`
+        height = `${this.config.styles.initHeight * this.contentScaleRatio}px`
       } else {
         width = `${this.config.styles.width * this.contentScaleRatio}px`
         height = `${this.config.styles.height * this.contentScaleRatio}px`
@@ -771,6 +773,7 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
+    transform-origin: top left;
   }
 
   &__lock-icon {

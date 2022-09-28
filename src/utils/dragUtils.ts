@@ -18,7 +18,7 @@ class DragUtils {
    * @param attrs offsetX/offsetY for dragImg's offset, width/height for dropped layer size
    */
   itemDragStart(e: DragEvent, type: string, payload: Partial<IImage | IShape>, attrs: { [key: string]: string | number } = {}) {
-    let { offsetX = 10, offsetY = 15, width, height } = attrs
+    let { offsetX = 10, offsetY = 15, width, height, panelPreviewSrc = '' } = attrs
     const scaleRatio = store.getters.getPageScaleRatio
     const { width: rowWidth, height: rowHeight, x, y } = (e.target as Element).getBoundingClientRect()
 
@@ -45,6 +45,7 @@ class DragUtils {
         width,
         height
       },
+      panelPreviewSrc,
       ...payload
     }
     const dataTransfer = e.dataTransfer as DataTransfer
@@ -163,7 +164,8 @@ class DragUtils {
     srcObj: SrcObj
     shadow: {
       srcObj: SrcObj
-    }
+    },
+    panelPreviewSrc?: string
   } = {
       layerId: '',
       subLayerId: '',
@@ -176,7 +178,7 @@ class DragUtils {
 
   onImageDragEnter(e: DragEvent, pageIndex: number, config: IImage) {
     const DragSrcObj = store.state.currDraggedPhoto.srcObj
-    const previewSrc = store.state.currDraggedPhoto.previewSrc || ''
+    const panelPreviewSrc = store.state.currDraggedPhoto.panelPreviewSrc
     const { layerId, subLayerId } = this.imgBuff
     if (store.state.currDraggedPhoto.srcObj.type) {
       const { imgWidth, imgHeight } = config.styles
@@ -201,10 +203,11 @@ class DragUtils {
           srcObj: {
             ...config.styles.shadow.srcObj
           }
-        }
+        },
+        panelPreviewSrc: config.panelPreviewSrc
       })
       const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageUtils.getPage(pageIndex).id, layerId, subLayerId)
-      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: DragSrcObj }, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj: DragSrcObj, panelPreviewSrc }, subLayerIdx)
       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       const isFloatingEffect = config.styles.shadow.currentEffect === ShadowEffectType.floating
       if (!isFloatingEffect && (config.styles.shadow.isTransparent || config.styles.shadow.currentEffect === ShadowEffectType.imageMatched)) {
@@ -218,10 +221,10 @@ class DragUtils {
   }
 
   onImageDragLeave(e: DragEvent, pageIndex: number) {
-    const { layerId, subLayerId, styles, srcObj, shadow } = this.imgBuff
+    const { layerId, subLayerId, styles, srcObj, shadow, panelPreviewSrc } = this.imgBuff
     const { layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageUtils.getPage(pageIndex).id, layerId, subLayerId)
     if (store.state.currDraggedPhoto.srcObj.type && srcObj.type) {
-      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+      layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj, panelPreviewSrc }, subLayerIdx)
       layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
       imageShadowUtils.updateShadowSrc({
         pageIndex,
