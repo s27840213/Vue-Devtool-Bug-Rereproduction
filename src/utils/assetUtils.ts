@@ -9,7 +9,7 @@ import ShapeUtils from './shapeUtils'
 import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
@@ -96,6 +96,7 @@ class AssetUtils {
       9: 'objects',
       10: 'objects',
       11: 'objects',
+      14: 'objects',
       15: 'objects'
     } as { [key: number]: string }
     return typeModuleMap[type]
@@ -468,6 +469,15 @@ class AssetUtils {
     const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
     const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
+    if (!styles) {
+      console.error('addImage no styles')
+      return
+    }
+
+    const { width = photoWidth, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
+
+    const scaleRatio = photoWidth / width
+
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
     let srcObj
@@ -493,22 +503,24 @@ class AssetUtils {
     }) as Array<IImage>
 
     // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
-    const x = imageLayers.length === 0 ? this.pageSize.width / 2 - photoWidth / 2 : imageLayers[imageLayers.length - 1].styles.x + 20
-    const y = imageLayers.length === 0 ? this.pageSize.height / 2 - photoHeight / 2 : imageLayers[imageLayers.length - 1].styles.y + 20
+    const x = imageLayers.length === 0 ? (this.pageSize.width / 2 - photoWidth / 2) : (imageLayers[imageLayers.length - 1].styles.x + 20)
+    const y = imageLayers.length === 0 ? (this.pageSize.height / 2 - photoHeight / 2) : (imageLayers[imageLayers.length - 1].styles.y + 20)
 
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
       styles: categoryType === 14 ? {
+        ...styles,
         x,
         y,
         width: photoWidth,
         height: photoHeight,
         initWidth: photoWidth,
         initHeight: photoHeight,
-        imgWidth: photoWidth,
-        imgHeight: photoHeight,
-        ...styles
+        imgWidth: imgWidth * scaleRatio,
+        imgHeight: imgHeight * scaleRatio,
+        imgX: imgX * scaleRatio,
+        imgY: imgY * scaleRatio
       } : {
         ...styles,
         x,
@@ -646,7 +658,7 @@ class AssetUtils {
           switch ((asset.jsonData as any).type) {
             case 'image': {
               const { srcObj, styles } = asset.jsonData as IImage
-              this.addImage(srcObj, styles.imgWidth / styles.imgHeight, { styles }, 14)
+              this.addImage(srcObj, styles.width / styles.height, { styles }, 14)
               break
             }
             case 'group':
