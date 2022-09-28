@@ -22,6 +22,8 @@ import pageUtils from '@/utils/pageUtils'
 import { calcTmpProps } from '@/utils/groupUtils'
 import { IPage } from '@/interfaces/page'
 import shapeUtils from '@/utils/shapeUtils'
+import mathUtils from '@/utils/mathUtils'
+import { IImageStyle } from '@/interfaces/layer'
 
 declare let window: CustomWindow
 
@@ -143,6 +145,45 @@ export default Vue.extend({
                 initHeight: photoHeight,
                 imgWidth: photoWidth,
                 imgHeight: photoHeight
+              }
+            })
+            break
+          }
+          case 'svgImage2': {
+            const json = await (await fetch(`https://template.vivipic.com/svg/${id}/config.json?ver=${ver}`)).json()
+            const { srcObj, styles } = json
+
+            const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding(json)
+            const xDiff = (boundingWidth - styles.width) / 2
+            const yDiff = (boundingHeight - styles.height) / 2
+
+            const pageAspectRatio = window.innerWidth / window.innerHeight
+            const photoAspectRatio = boundingWidth / boundingHeight
+            const photoWidth = photoAspectRatio > pageAspectRatio ? window.innerWidth : window.innerHeight * photoAspectRatio
+            const photoHeight = photoAspectRatio > pageAspectRatio ? window.innerWidth / photoAspectRatio : window.innerHeight
+
+            const { imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
+
+            const scaleRatio = photoWidth / boundingWidth
+
+            vivistickerUtils.initLoadingFlagsForOneLayer(() => {
+              this.onload()
+            })
+
+            this.config = layerFactary.newImage({
+              srcObj,
+              styles: {
+                ...styles,
+                x: xDiff * scaleRatio,
+                y: yDiff * scaleRatio,
+                width: styles.width * scaleRatio,
+                height: styles.height * scaleRatio,
+                initWidth: styles.width * scaleRatio,
+                initHeight: styles.height * scaleRatio,
+                imgWidth: imgWidth * scaleRatio,
+                imgHeight: imgHeight * scaleRatio,
+                imgX: imgX * scaleRatio,
+                imgY: imgY * scaleRatio
               }
             })
             break

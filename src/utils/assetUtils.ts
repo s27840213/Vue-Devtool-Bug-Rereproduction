@@ -659,10 +659,12 @@ class AssetUtils {
             case 'image': {
               const { srcObj, styles } = asset.jsonData as IImage
               this.addImage(srcObj, styles.width / styles.height, { styles }, 14)
+              key = 'objects'
               break
             }
             case 'group':
               this.addText({ ...asset.jsonData, designId: item.id }, attrs)
+              key = 'textStock'
           }
           break
         }
