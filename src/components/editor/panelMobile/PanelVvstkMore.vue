@@ -11,12 +11,12 @@
                       iconColor="gray-2")
           div(class="panel-vvstk-more__option-title") {{ option.text }}
       div(class="horizontal-rule")
-      div(class="panel-vvstk-more__option version")
+      div(class="panel-vvstk-more__option version" @click.prevent.stop="handleDebugMode")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(iconName="vivisticker__version"
                     iconWidth="24px"
                     iconColor="gray-3")
-        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}` }}
+        span(class="panel-vvstk-more__option-title version") {{ `${$t('NN0743')} : v. ${appVersion} ${buildNumber}${domain}` }}
     template(v-if="lastHistory === 'locale'")
       div(class="panel-vvstk-more__options")
         div(v-for="option in localeOptions"
@@ -46,6 +46,9 @@ type OptionConfig = {
 export default Vue.extend({
   data() {
     return {
+      debugModeTimer: -1,
+      debugModeCounter: 0,
+      domain: window.location.hostname !== 'sticker.vivipic.com' ? `- ${window.location.hostname.replace('.vivipic.com', '')}` : ''
     }
   },
   props: {
@@ -158,6 +161,27 @@ export default Vue.extend({
       vivistickerUtils.updateLocale(locale).then(() => {
         location.reload()
       })
+    },
+    handleDebugMode() {
+      console.log(this.debugModeCounter)
+      if (this.debugModeTimer) {
+        clearTimeout(this.debugModeTimer)
+      }
+      this.debugModeCounter++
+      if (this.debugModeCounter === 7) {
+        this.switchDomain()
+      }
+      this.debugModeTimer = setTimeout(() => {
+        this.debugModeCounter = 0
+      }, 1000)
+    },
+    switchDomain() {
+      const host = window.location.hostname
+      if (host === 'stickertest.vivipic.com') {
+        vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain: 'sticker' })
+      } else {
+        vivistickerUtils.sendToIOS('SWITCH_DOMAIN', { domain: 'stickertest' })
+      }
     }
   }
 })
