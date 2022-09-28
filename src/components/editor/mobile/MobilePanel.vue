@@ -256,8 +256,7 @@ export default Vue.extend({
           backgroundColor: this.whiteTheme ? 'white' : '#2C2F43',
           maxHeight: this.fixSize || this.extraFixSizeCondition
             ? 'initial'
-            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px',
-          paddingBottom: 0
+            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
           // height: this.fixSize || this.extraFixSizeCondition
           //   ? 'initial'
           //   : this.panelHeight + 'px'
