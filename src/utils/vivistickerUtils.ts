@@ -303,7 +303,6 @@ class ViviStickerUtils {
   }
 
   updateInfoDone(data: { flag: string, msg?: string }) {
-    console.log(data)
     if (data.flag !== '0') {
       console.log(data.msg)
       this.errorMessageMap.locale = data.msg ?? ''
@@ -317,7 +316,6 @@ class ViviStickerUtils {
   }
 
   listAssetResult(data: { key: string, assets: any[] }) {
-    console.log(data)
     assetUtils.setRecentlyUsed(data.key, data.assets)
     vivistickerUtils.handleCallback(`list-asset-${data.key}`)
   }
