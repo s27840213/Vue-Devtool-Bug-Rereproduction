@@ -54,7 +54,7 @@ class Controller {
       const localAttrs = localStorageUtils.get('textEffectSetting', shape)
       Object.assign(styles.textShape, defaultAttrs, localAttrs, attrs, { name: shape })
     }
-    if (shape === 'none' && styleTextShape.name && styleTextShape.name !== 'none') {
+    if (shape === 'none') {
       const { bend } = styleTextShape as any
       const textHW = TextUtils.getTextHW(layer, -1)
       Object.assign(styles, {
@@ -63,7 +63,7 @@ class Controller {
         y: +bend < 0 ? y + height - textHW.height : y
       })
       props.widthLimit = -1
-    } else if (shape === 'curve') { // curve
+    } else { // curve
       const { bend } = styles.textShape as any
       Object.assign(styles, this.getCurveTextProps(layer, +bend))
       props.widthLimit = -1
@@ -95,9 +95,6 @@ class Controller {
 
     if (subLayerIndex === -1 || targetLayer.type === 'text') {
       for (const idx in layers) {
-        // Leave text editing mode to show some span text effect.
-        layers[idx].contentEditable = false
-
         const { type } = layers[idx] as IText
         if (type === 'text') {
           const heightOri = layers[idx].styles.height
