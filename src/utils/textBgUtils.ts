@@ -364,7 +364,7 @@ class TextBg {
   }
 
   drawSvgBg(config: IText, bodyHtml: Element[]) {
-    testUtils.log((config as any).id, 'draw svg start')
+    // testUtils.log((config as any).id, 'draw svg start')
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return {}
     const vertical = config.styles.writingMode === 'vertical-lr'
@@ -469,7 +469,7 @@ class TextBg {
       const cps = new Gooey(textBg, rects)
       cps.preProcess()
       const d = cps.process()
-      testUtils.log((config as any).id, 'draw svg done')
+      // testUtils.log((config as any).id, 'draw svg done')
 
       return {
         attrs: { width, height, fill },

@@ -98,12 +98,12 @@ export default Vue.extend({
     // }
     this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
-    testUtils.start(this.config.id, false)
+    // testUtils.start(this.config.id, false)
     this.drawSvgBG()
-    const ro = new ResizeObserver(() => {
-      testUtils.log(this.config.id, 'render done')
-    })
-    ro.observe(this.$refs.svg as any)
+    // const ro = new ResizeObserver(() => {
+    //   testUtils.log(this.config.id, 'render done')
+    // })
+    // ro.observe(this.$refs.svg as any)
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -219,7 +219,7 @@ export default Vue.extend({
     //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
     // },
     resizeCallback() {
-      testUtils.log(this.config.id, 'font cb start')
+      // testUtils.log(this.config.id, 'font cb start')
       // for (const entry of entries) {
       //   console.log(JSON.stringify(entry.contentRect))
       // }
@@ -259,7 +259,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-      testUtils.log(this.config.id, 'font cb done')
+      // testUtils.log(this.config.id, 'font cb done')
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
