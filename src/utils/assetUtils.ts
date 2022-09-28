@@ -9,7 +9,7 @@ import ShapeUtils from './shapeUtils'
 import LayerUtils from './layerUtils'
 import LayerFactary from './layerFactary'
 import ImageUtils from './imageUtils'
-import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IText, ITmp } from '@/interfaces/layer'
+import { IGroup, IImage, IImageStyle, IShape, ISpanStyle, IStyle, IText, ITmp } from '@/interfaces/layer'
 import TextUtils from './textUtils'
 import ControlUtils from './controlUtils'
 import listApi from '@/apis/list'
@@ -23,6 +23,7 @@ import editorUtils from './editorUtils'
 import errorHandleUtils from './errorHandleUtils'
 import generalUtils from './generalUtils'
 import { SrcObj } from '@/interfaces/gallery'
+import mathUtils from './mathUtils'
 
 export const STANDARD_TEXT_FONT: { [key: string]: string } = {
   tw: 'OOcHgnEpk9RHYBOiWllz',
@@ -455,17 +456,52 @@ class AssetUtils {
     const { pageIndex, isPreview, assetId: previewAssetId, assetIndex, styles } = attrs
     const resizeRatio = RESIZE_RATIO_IMAGE
     const pageAspectRatio = this.pageSize.width / this.pageSize.height
-    const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
-    const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
 
-    if (!styles) {
-      console.error('addImage no styles')
-      return
+    let newStyles = {
+      width: 0,
+      height: 0,
+      initWidth: 0,
+      initHeight: 0,
+      imgWidth: 0,
+      imgHeight: 0
+    } as {
+      width: number, height: number, initWidth: number, initHeight: number, imgWidth: number, imgHeight: number, imgX?: number, imgY?: number
     }
 
-    const { width = photoWidth, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
+    if (styles && categoryType === 14) {
+      const { width: boundingWidth, height: boundingHeight } = mathUtils.getBounding({ styles: styles as IStyle })
+      photoAspectRatio = boundingWidth / boundingHeight
 
-    const scaleRatio = photoWidth / width
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+
+      const { width = photoWidth, height = photoHeight, imgWidth = photoWidth, imgHeight = photoHeight, imgX = 0, imgY = 0 } = styles as IImageStyle
+
+      const scaleRatio = photoWidth / boundingWidth
+
+      newStyles = {
+        width: width * scaleRatio,
+        height: height * scaleRatio,
+        initWidth: width * scaleRatio,
+        initHeight: height * scaleRatio,
+        imgWidth: imgWidth * scaleRatio,
+        imgHeight: imgHeight * scaleRatio,
+        imgX: imgX * scaleRatio,
+        imgY: imgY * scaleRatio
+      }
+    } else {
+      const photoWidth = photoAspectRatio > pageAspectRatio ? this.pageSize.width * resizeRatio : (this.pageSize.height * resizeRatio) * photoAspectRatio
+      const photoHeight = photoAspectRatio > pageAspectRatio ? (this.pageSize.width * resizeRatio) / photoAspectRatio : this.pageSize.height * resizeRatio
+
+      newStyles = {
+        width: photoWidth,
+        height: photoHeight,
+        initWidth: photoWidth,
+        initHeight: photoHeight,
+        imgWidth: photoWidth,
+        imgHeight: photoHeight
+      }
+    }
 
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
 
@@ -492,34 +528,17 @@ class AssetUtils {
     }) as Array<IImage>
 
     // if so, add the image layer to the x/y pos of target layer with an constant offset(20)
-    const x = imageLayers.length === 0 ? (this.pageSize.width / 2 - photoWidth / 2) : (imageLayers[imageLayers.length - 1].styles.x + 20)
-    const y = imageLayers.length === 0 ? (this.pageSize.height / 2 - photoHeight / 2) : (imageLayers[imageLayers.length - 1].styles.y + 20)
+    const x = imageLayers.length === 0 ? (this.pageSize.width / 2 - newStyles.width / 2) : (imageLayers[imageLayers.length - 1].styles.x + 20)
+    const y = imageLayers.length === 0 ? (this.pageSize.height / 2 - newStyles.height / 2) : (imageLayers[imageLayers.length - 1].styles.y + 20)
 
     const config = {
       ...(isPreview && { previewSrc: url }),
       srcObj,
-      styles: categoryType === 14 ? {
+      styles: {
         ...styles,
         x,
         y,
-        width: photoWidth,
-        height: photoHeight,
-        initWidth: photoWidth,
-        initHeight: photoHeight,
-        imgWidth: imgWidth * scaleRatio,
-        imgHeight: imgHeight * scaleRatio,
-        imgX: imgX * scaleRatio,
-        imgY: imgY * scaleRatio
-      } : {
-        ...styles,
-        x,
-        y,
-        width: photoWidth,
-        height: photoHeight,
-        initWidth: photoWidth,
-        initHeight: photoHeight,
-        imgWidth: photoWidth,
-        imgHeight: photoHeight
+        ...newStyles
       }
     }
     const index = LayerUtils.getObjectInsertionLayerIndex(this.getPage(targePageIndex).layers, config) + 1
