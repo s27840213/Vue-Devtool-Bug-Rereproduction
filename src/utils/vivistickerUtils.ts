@@ -97,6 +97,8 @@ class ViviStickerUtils {
       case 11:
       case 10:
         return `type=svg&id=${item.id}&ver=${item.ver}`
+      case 14:
+        return `type=svgImage2&id=${item.id}&ver=${item.ver}`
       case 15:
         return `type=svgImage&id=${item.id}&ver=${item.ver}&width=${item.width}&height=${item.height}`
       case 1:
@@ -133,7 +135,7 @@ class ViviStickerUtils {
 
   getAssetCallback(asset: IAsset): (jsonData: any) => void {
     return (jsonData: any) => {
-      if ([5, 11].includes(asset.type)) {
+      if ([5, 11, 10].includes(asset.type)) {
         if (jsonData.color && jsonData.color.length > 0) {
           eventUtils.emit(PanelEvent.switchTab, 'color', { currColorEvent: ColorEventType.shape })
         } else {
