@@ -1,59 +1,59 @@
 <template lang="pug">
   div(class="panel-text-effect")
     //- To choose effect category: shadow, shape and bg.
-    div(v-if="inInitialState" class="panel-text-effect__options flex-evenly")
+    div(v-if="state === 'categories'" class="panel-text-effect__categories flex-evenly")
       div(v-for="category in textEffects"
-          class="panel-text-effect__option pointer")
-        svg-icon(class="panel-text-effect__option-icon"
-                :iconName="`text-${category.name}-none`"
+          class="panel-text-effect__category pointer")
+        svg-icon(:iconName="`text-${category.name}-none`"
                 iconWidth="60px"
                 iconColor="gray-5"
                 @click.native="pushHistory(category.name)")
         span(class="body-3") {{category.label}}
     //- To choose effect, ex: hollow, splice or echo.
-    template(v-else)
-      div(class="panel-text-effect__options")
-        div(v-for="effect in effectList"
-            :key="`${currCategory.name}-${effect.key}`"
-            class="panel-text-effect__option pointer")
-          svg-icon(:iconName="`text-${currCategory.name}-${effect.key}`"
-                  @click.native="onEffectClick(effect.key)"
-                  class="panel-text-effect__option-icon"
-                  :class="{ 'panel-text-effect__option-icon--selected': currentStyle[currCategory.name].name === effect.key }"
-                  iconWidth="60px"
-                  iconColor="gray-5")
-          span(class="body-3") {{effect.label}}
-      //- Effect option UI.
-      div(class="w-full panel-text-effect__form")
-        div(v-for="option in currEffect.options"
-            class="panel-text-effect__field")
-          //- Effect type select
-          div(v-if="option.type === 'select'"
-              class="panel-text-effect__select")
-            div(v-for="sel in option.select"
-                :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }")
-              svg-icon(:iconName="`${option.key}-${sel.key}`"
-                iconWidth="24px"
-                @click.native="handleSelectInput(option.key, sel.key)")
-              span {{sel.label}}
-          //- Effect type range
-          mobile-slider(v-if="option.type === 'range'"
-            :title="option.label"
-            :name="option.key"
-            :value="currentStyle[currCategory.name][option.key]"
-            :max="option.max"
-            :min="option.min"
-            @update="(e)=>handleRangeInput(e, option)")
-          //- Effect type color
-          div(v-if="option.type === 'color'"
-            class="panel-text-effect__color")
-            div(class="panel-text-effect__color-name") {{option.label}}
-            div(class="panel-text-effect__color-slip"
-                :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
-                @click="openColorPanel(option.key)")
-        //- div(class="text-effect-setting-options__field")
-        span(class="panel-text-effect__reset label-mid"
-            @click="resetTextEffect()") {{$t('NN0754')}}
+    div(v-if="state === 'effects'"
+        class="panel-text-effect__effects")
+      div(v-for="effect in effectList"
+          :key="`${currCategory.name}-${effect.key}`"
+          :class="{ 'selected': currEffect.key === effect.key }"
+          @click="onEffectClick(effect.key)")
+        svg-icon(:iconName="`text-${currCategory.name}-${effect.key}`"
+                class="panel-text-effect__effects--icon"
+                iconWidth="100%" iconColor="gray-5")
+        div(v-if="currEffect.key === effect.key && effect.key !== 'none'"
+            class="panel-text-effect__effects--more")
+          svg-icon(iconName="adjust" iconWidth="20px" iconColor="white")
+    //- To set effect optoin, ex: distance, color.
+    div(v-if="state === 'options'"
+        class="w-full panel-text-effect__form")
+      span(class="panel-text-effect__name") {{currEffect.label}}
+      div(v-for="option in currEffect.options"
+          class="panel-text-effect__field")
+        //- Option type select
+        div(v-if="option.type === 'select'"
+            class="panel-text-effect__select")
+          div(v-for="sel in option.select"
+              :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
+              @click="handleSelectInput(option.key, sel.key)")
+            svg-icon(:iconName="`${option.key}-${sel.key}`"
+              iconWidth="24px")
+            span {{sel.label}}
+        //- Option type range
+        mobile-slider(v-if="option.type === 'range'"
+          :title="option.label"
+          :name="option.key"
+          :value="currentStyle[currCategory.name][option.key]"
+          :max="option.max"
+          :min="option.min"
+          @update="(e)=>handleRangeInput(e, option)")
+        //- Option type color
+        div(v-if="option.type === 'color'"
+          class="panel-text-effect__color")
+          div {{option.label}}
+          div(class="panel-text-effect__color-slip"
+              :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
+              @click="openColorPanel(option.key)")
+      span(class="panel-text-effect__reset label-mid"
+          @click="resetTextEffect()") {{$t('NN0754')}}
 </template>
 
 <script lang="ts">
@@ -86,12 +86,14 @@ export default Vue.extend({
   },
   computed: {
     currCategory(): IEffectCategory {
-      return _.find(this.textEffects, ['name', this.panelHistory[this.historySize - 1]])
+      return _.find(this.textEffects, ['name', _.nth(this.panelHistory, -1)])
     },
-    effectList(): IEffect[] {
+    effectList(): IEffect[] | null {
+      if (!this.currCategory) return null
       return _.flatten(this.currCategory.effects2d)
     },
-    currEffect(): IEffect {
+    currEffect(): IEffect | null {
+      if (!this.currCategory) return null
       return _.find(this.effectList, ['key',
         this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name])
     },
@@ -106,8 +108,10 @@ export default Vue.extend({
     historySize(): number {
       return this.panelHistory.length
     },
-    inInitialState(): boolean {
-      return this.historySize === 0
+    state(): string {
+      return this.historySize === 0 ? 'categories'
+        : this.historySize === 1 ? 'effects'
+          : 'options'
     }
   },
   methods: {
@@ -132,7 +136,7 @@ export default Vue.extend({
     }) {
       let { effectName, effect } = options
       if (!effectName) {
-        effectName = this.currEffect.key || 'none'
+        effectName = this.currEffect?.key || 'none'
       }
 
       switch (this.currCategory.name) {
@@ -160,8 +164,12 @@ export default Vue.extend({
       target.resetCurrTextEffect()
     },
     onEffectClick(effectName: string): void {
-      this.setEffect({ effectName })
-      this.recordChange()
+      if (effectName !== this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name) {
+        this.setEffect({ effectName })
+        this.recordChange()
+      } else if (effectName !== 'none') {
+        this.pushHistory(this.currCategory.name)
+      }
     },
     handleSelectInput(key: string, newVal: string) {
       this.setEffect({ effect: { [key]: newVal } })
@@ -185,30 +193,52 @@ export default Vue.extend({
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: 1fr;
 
-  &__options {
+  &__categories {
+    @include no-scrollbar;
     width: 100%;
     display: flex;
     border-radius: 5px;
     overflow-x: scroll;
-    @include no-scrollbar;
     padding-top: 2px;
     padding-bottom: 20px;
   }
 
-  &__option {
+  &__category {
     margin: 0 8px;
     width: 60px;
     box-sizing: border-box;
   }
 
-  &__option-icon {
-    border-radius: 5px;
-    border: 2px solid transparent;
-    box-sizing: border-box;
-
-    &--selected {
-      border-color: setColor(blue-1);
+  &__effects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    column-gap: 16px;
+    > div {
+      display: flex;
+      position: relative;
+      margin: 2px auto 16px auto;
+      width: 56px;
+      height: 56px;
+      border-radius: 5px;
+      &.selected {
+        margin-top: 0;
+        border: 2px solid setColor(blue-1);
+      }
     }
+    &--more {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(71, 74, 87, 0.6);
+      backdrop-filter: blur(2px);
+    }
+  }
+
+  &__name {
+    margin-bottom: 20px;
   }
 
   &__form {
