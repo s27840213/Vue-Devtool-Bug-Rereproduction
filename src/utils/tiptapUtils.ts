@@ -250,6 +250,10 @@ class TiptapUtils {
         if (span.marks && span.marks.length > 0) {
           const sStyles = this.makeSpanStyle(span.marks[0].attrs)
           if (sStyles.size > largestSize) largestSize = sStyles.size
+          if (sStyles.pre && !span.text.match(/^ +$/)) {
+            sStyles.pre = undefined
+            isSetContentRequired = true
+          }
           spans.push({ text: span.text, styles: sStyles })
         } else {
           isSetContentRequired = true
@@ -260,6 +264,10 @@ class TiptapUtils {
             sStyles = this.generateSpanStyle(defaultStyle)
           }
           if (sStyles.size > largestSize) largestSize = sStyles.size
+          if (sStyles.pre && !span.text.match(/^ +$/)) {
+            sStyles.pre = undefined
+            isSetContentRequired = true
+          }
           spans.push({ text: span.text, styles: sStyles })
         }
       }
