@@ -50,8 +50,7 @@ class AssetUtils {
   get getPages() { return store.getters.getPages }
 
   get(item: IListServiceContentDataItem): Promise<IAsset> {
-    const asset = this.getAsset(item.id)
-    return (asset && asset.ver === item.ver) ? Promise.resolve(generalUtils.deepCopy(asset)) : this.fetch(item)
+    return this.fetch(item)
   }
 
   // used for api category
@@ -226,18 +225,26 @@ class AssetUtils {
     const svgAspectRatio = width / height
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
+    const scaleRatio = width > 0 ? svgWidth / width : svgHeight / height
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
+    const newScale = json.size[0] * scaleRatio
     const quadrant = ShapeUtils.getLineQuadrant(json.point)
-    const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, json.size[0], svgWidth, svgHeight)
+    const { point, realWidth, realHeight } = ShapeUtils.computePointForDimensions(quadrant, newScale, svgWidth, svgHeight)
     json.point = point
+    const targetPos = {
+      x: currentPage.width / 2 - realWidth / 2,
+      y: currentPage.height / 2 - realHeight / 2
+    }
+    const trans = ShapeUtils.getTranslateCompensationForLineWidth(point, targetPos, json.size[0], newScale)
     json.className = ShapeUtils.classGenerator()
 
     const config = {
       ...json,
+      size: [newScale],
       styles: {
-        x: currentPage.width / 2 - realWidth / 2,
-        y: currentPage.height / 2 - realHeight / 2,
+        x: trans.x,
+        y: trans.y,
         width: realWidth,
         height: realHeight,
         initWidth: realWidth,
@@ -258,20 +265,21 @@ class AssetUtils {
   async addBasicShape(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
-    const { vSize = [] } = json
+    const { vSize }: { vSize: number[] } = json
     const currentPage = this.getPage(targePageIndex)
     const resizeRatio = RESIZE_RATIO_SVG
     const pageAspectRatio = currentPage.width / currentPage.height
-    const svgAspectRatio = vSize ? ((vSize as number[])[0] / (vSize as number[])[1]) : 1
+    const svgAspectRatio = vSize[0] / vSize[1]
     const svgWidth = svgAspectRatio > pageAspectRatio ? currentPage.width * resizeRatio : (currentPage.height * resizeRatio) * svgAspectRatio
     const svgHeight = svgAspectRatio > pageAspectRatio ? (currentPage.width * resizeRatio) / svgAspectRatio : currentPage.height * resizeRatio
+    const scaleRatio = svgWidth / vSize[0]
     json.ratio = 1
     await ShapeUtils.addComputableInfo(json)
     json.className = ShapeUtils.classGenerator()
     const config = {
       ...json,
       vSize: [svgWidth, svgHeight],
-      size: [json.size[0], ControlUtils.getCorRadValue(
+      size: [json.size[0] * scaleRatio, ControlUtils.getCorRadValue(
         [svgWidth, svgHeight],
         ControlUtils.getCorRadPercentage(json.vSize, json.size, json.shapeType),
         json.shapeType
