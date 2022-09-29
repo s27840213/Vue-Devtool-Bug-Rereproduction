@@ -139,14 +139,16 @@ export default Vue.extend({
         const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
         img.src = ImageUtils.getSrc(this.config, size) + `${this.src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
         img.onload = () => {
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-          canvas.setAttribute('width', img.naturalWidth.toString())
-          canvas.setAttribute('height', img.naturalHeight.toString())
-          ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
-          imageShadowUtils.updateEffectProps(this.layerInfo(), {
-            isTransparent: imageShadowUtils.isTransparentBg(canvas)
-          })
+          if (!this.hasDestroyed) {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+            canvas.setAttribute('width', img.naturalWidth.toString())
+            canvas.setAttribute('height', img.naturalHeight.toString())
+            ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, 0, 0, canvas.width, canvas.height)
+            imageShadowUtils.updateEffectProps(this.layerInfo(), {
+              isTransparent: imageShadowUtils.isTransparentBg(canvas)
+            })
+          }
         }
       }
     }
@@ -193,8 +195,12 @@ export default Vue.extend({
       eventUtils.off(ImageEvent.redrawCanvasShadow + this.config.id)
     }
   },
+  destroyed() {
+    this.hasDestroyed = true
+  },
   data() {
     return {
+      hasDestroyed: false,
       isOnError: false,
       src: '',
       shadowBuff: {
@@ -219,11 +225,9 @@ export default Vue.extend({
         if (this.forRender) {
           return
         }
+        this.previewAsLoading()
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
-        } else {
-          console.log('in watch hook')
-          this.previewAsLoading()
         }
       },
       deep: true
@@ -440,7 +444,10 @@ export default Vue.extend({
         })
       }
 
-      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       return new Promise<void>((resolve, reject) => {
         ImageUtils.imgLoadHandler(src, () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -464,28 +471,24 @@ export default Vue.extend({
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
-      const imgElement = this.$refs.img as HTMLImageElement
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
       const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
       const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-
-        imgElement && (imgElement.onload = async () => {
-          if (newVal > oldVal) {
-            await this.preLoadImg('next', currSize)
-            this.preLoadImg('pre', currSize)
-          } else {
-            await this.preLoadImg('pre', currSize)
-            this.preLoadImg('next', currSize)
-          }
-        })
         const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
         const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
-        ImageUtils.imgLoadHandler(currUrl, () => {
+        ImageUtils.imgLoadHandler(currUrl, async () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
+            if (newVal > oldVal) {
+              await this.preLoadImg('next', currSize)
+              this.preLoadImg('pre', currSize)
+            } else {
+              await this.preLoadImg('pre', currSize)
+              this.preLoadImg('next', currSize)
+            }
           }
         })
       }
