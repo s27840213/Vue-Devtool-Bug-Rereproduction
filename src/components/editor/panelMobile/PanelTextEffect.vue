@@ -48,7 +48,7 @@
         //- Option type color
         div(v-if="option.type === 'color'"
           class="panel-text-effect__color")
-          div(class="panel-text-effect__color-name") {{option.label}}
+          div {{option.label}}
           div(class="panel-text-effect__color-slip"
               :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
               @click="openColorPanel(option.key)")

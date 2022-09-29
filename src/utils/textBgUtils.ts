@@ -398,6 +398,8 @@ class TextBg {
       if (rect) acc.push(...rect)
       return acc
     }, [])
+    console.log('body', bodyRect.x, bodyRect.y, bodyRect.width, bodyRect.height)
+    if (rects[0]) { console.log('rects', rects[0].x, rects[0].y, rects[0].width, rects[0].height) }
 
     // If is vertical text, exchange its coordinate.
     if (vertical) {
@@ -527,9 +529,23 @@ class TextBg {
       }
     } else if (isITextBox(textBg)) {
       const opacity = textBg.opacity * 0.01
-      const boxWidth = (width + 20 * 2 + textBg.bStroke)
-      const boxHeight = (height + textBg.pStroke * 2 + textBg.bStroke)
+      let boxWidth = (width + textBg.bStroke)
+      let boxHeight = (height + textBg.bStroke)
+      let top = -textBg.bStroke
+      let left = -textBg.bStroke
       const boxRadius = Math.max(0, Math.min((textBg.bRadius - textBg.bStroke / 2), boxWidth / 2, boxHeight / 2))
+
+      if (vertical) {
+        boxWidth += textBg.pStroke * 2
+        boxHeight += 20 * 2
+        top -= 20
+        left -= textBg.pStroke
+      } else {
+        boxWidth += 20 * 2
+        boxHeight += textBg.pStroke * 2
+        top -= textBg.pStroke
+        left -= 20
+      }
 
       const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
       path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
@@ -544,8 +560,8 @@ class TextBg {
         attrs: {
           width: boxWidth + textBg.bStroke,
           height: boxHeight + textBg.bStroke,
-          style: `left: ${-textBg.bStroke - 20}px;
-            top: ${-textBg.bStroke - textBg.pStroke}px;
+          style: `left: ${left}px;
+            top: ${top}px;
             border-radius: ${textBg.bRadius}px;
             overflow: hidden`
         },
