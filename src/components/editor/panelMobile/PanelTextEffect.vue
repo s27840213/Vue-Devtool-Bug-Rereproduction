@@ -209,16 +209,6 @@ export default Vue.extend({
     box-sizing: border-box;
   }
 
-  &__option-icon {
-    border-radius: 5px;
-    border: 2px solid transparent;
-    box-sizing: border-box;
-
-    &--selected {
-      border-color: setColor(black-5);
-    }
-  }
-
   &__effects {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
@@ -230,9 +220,9 @@ export default Vue.extend({
       width: 56px;
       height: 56px;
       border-radius: 5px;
+      border: 2px solid transparent;
       &.selected {
-        margin-top: 0;
-        border: 2px solid setColor(blue-1);
+        border-color: setColor(black-5);
       }
     }
     &--more {
@@ -273,8 +263,9 @@ export default Vue.extend({
       border-radius: 5px;
       color: setColor(gray-2);
       background-color: setColor(gray-5);
+      border: 2px solid transparent;
       &.selected {
-        border: 2px solid #4EABE6;
+        border-color: setColor(black-5);
       }
       > svg {
         margin-right: 8px;
@@ -301,7 +292,7 @@ export default Vue.extend({
 
   &__reset {
     margin-top: 5px;
-    color: setColor(blue-1);
+    color: setColor(black-3);
   }
 }
 </style>
