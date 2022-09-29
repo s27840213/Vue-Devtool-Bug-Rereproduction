@@ -393,19 +393,19 @@ class ConstantData {
       }, {
         key: 'square-hollow',
         label: i18n.tc('NN0722'),
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke'])
+        options: toOptions(['opacity', 'bStroke', 'pStroke', 'bColor'])
       }, {
         key: 'rounded-hollow',
         label: i18n.tc('NN0723'),
-        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke'])
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStroke', 'bColor'])
       }, {
         key: 'square-both',
         label: i18n.tc('NN0724'),
-        options: toOptions(['opacity', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+        options: toOptions(['opacity', 'bStroke', 'pStroke', 'bColor', 'pColor'])
       }, {
         key: 'rounded-both',
         label: i18n.tc('NN0725'),
-        options: toOptions(['opacity', 'bRadius', 'bStroke', 'bColor', 'pStroke', 'pColor'])
+        options: toOptions(['opacity', 'bRadius', 'bStroke', 'pStroke', 'bColor', 'pColor'])
       }, {
         key: 'gooey',
         label: i18n.tc('NN0726'),
