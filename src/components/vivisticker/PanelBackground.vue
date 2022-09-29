@@ -61,6 +61,7 @@
                 :style="colorStyles(newBgColor)")
               div(v-for="color in recentlyColors"
                 class="panel-bg__color"
+                :key="color"
                 v-press="() => handleShareColor(color)"
                 :style="colorStyles(color)"
                 @click="setBgColor(color)")
@@ -69,6 +70,7 @@
             div(class="panel-bg__colors")
               div(v-for="color in defaultBgColor"
                 class="panel-bg__color"
+                :key="color"
                 v-press="() => handleShareColor(color)"
                 :style="colorStyles(color)"
                 @click="setBgColor(color)")
