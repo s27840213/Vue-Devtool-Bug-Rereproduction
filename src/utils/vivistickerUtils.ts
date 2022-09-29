@@ -111,7 +111,8 @@ class ViviStickerUtils {
 
   createUrlForJSON(): string {
     const page = pageUtils.getPage(0)
-    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page)))}`
+    // since in iOS this value is put in '' enclosed string, ' needs to be escaped.
+    return `type=json&id=${encodeURIComponent(JSON.stringify(uploadUtils.getSinglePageJson(page))).replace(/'/g, '\\\'')}`
   }
 
   setIsInCategory(tab: string, bool: boolean) {
