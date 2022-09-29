@@ -11,7 +11,7 @@
                       iconColor="gray-2")
           div(class="panel-vvstk-more__option-title") {{ option.text }}
       div(class="horizontal-rule")
-      div(class="panel-vvstk-more__option version" @click.prevent.stop="handleDebugMode")
+      div(class="panel-vvstk-more__option version" @pointerdown.prevent="handleDebugMode")
         div(class="panel-vvstk-more__option-icon")
           svg-icon(iconName="vivisticker__version"
                     iconWidth="24px"
