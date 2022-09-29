@@ -264,7 +264,7 @@ export default Vue.extend({
       color: setColor(gray-2);
       background-color: setColor(gray-5);
       &.selected {
-        border: 2px solid #4EABE6;
+        border: 2px solid setColor(blue-1);;
       }
       > svg {
         margin-right: 8px;

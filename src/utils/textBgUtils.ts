@@ -6,7 +6,6 @@ import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
-import testUtils from '@/utils/testUtils'
 
 // For text effect gooey
 class Point {
@@ -364,7 +363,6 @@ class TextBg {
   }
 
   drawSvgBg(config: IText, bodyHtml: Element[]) {
-    testUtils.log((config as any).id, 'draw svg start')
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return {}
     const vertical = config.styles.writingMode === 'vertical-lr'
@@ -398,8 +396,6 @@ class TextBg {
       if (rect) acc.push(...rect)
       return acc
     }, [])
-    console.log('body', bodyRect.x, bodyRect.y, bodyRect.width, bodyRect.height)
-    if (rects[0]) { console.log('rects', rects[0].x, rects[0].y, rects[0].width, rects[0].height) }
 
     // If is vertical text, exchange its coordinate.
     if (vertical) {
@@ -471,8 +467,6 @@ class TextBg {
       const cps = new Gooey(textBg, rects)
       cps.preProcess()
       const d = cps.process()
-      testUtils.log((config as any).id, 'draw svg done')
-      console.log('svg path:', d)
 
       return {
         attrs: { width, height, fill },
