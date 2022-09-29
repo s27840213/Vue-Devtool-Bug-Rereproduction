@@ -36,7 +36,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
@@ -60,7 +60,6 @@ export default Vue.extend({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
-      uid: generalUtils.generateRandomString(6),
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
@@ -98,25 +97,18 @@ export default Vue.extend({
     // }
     this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
-    testUtils.start(this.config.id, false)
+    // testUtils.start(this.config.id, false)
     this.drawSvgBG()
-    const ro = new ResizeObserver(() => {
-      testUtils.log(this.config.id, 'render done')
-    })
-    ro.observe(this.$refs.svg as any)
+    // const ro = new ResizeObserver(() => {
+    //   testUtils.log(this.config.id, 'render done')
+    // })
+    // ro.observe(this.$refs.svg as any)
   },
   computed: {
-    ...mapState('text', ['fontStore']),
-    ...mapState('user', ['verUni']),
     ...mapGetters({
       getDefaultFontsList: 'text/getDefaultFontsList',
-      pageScaleRatio: 'getPageScaleRatio'
-    }),
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
-      getTextInfo: 'getTextInfo'
+      getLayer: 'getLayer'
     }),
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
@@ -128,7 +120,7 @@ export default Vue.extend({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
-    // Use duplicated of text to do some text effect, define there difference css here.
+    // Use duplicated of text to do some text effect, define their difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
@@ -207,19 +199,8 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode
       }
     },
-    // getFontUrl(spanStyles: ISpanStyle): string {
-    //   switch (spanStyles.type) {
-    //     case 'public':
-    //       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    //     case 'private':
-    //       return ''
-    //     case 'URL':
-    //       return 'url("' + spanStyles.fontUrl + '")'
-    //   }
-    //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    // },
     resizeCallback() {
-      testUtils.log(this.config.id, 'font cb start')
+      // testUtils.log(this.config.id, 'font cb start')
       // for (const entry of entries) {
       //   console.log(JSON.stringify(entry.contentRect))
       // }
@@ -259,7 +240,7 @@ export default Vue.extend({
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-      testUtils.log(this.config.id, 'font cb done')
+      // testUtils.log(this.config.id, 'font cb done')
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
