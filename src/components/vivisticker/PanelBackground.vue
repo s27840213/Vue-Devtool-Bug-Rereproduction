@@ -370,7 +370,7 @@ export default Vue.extend({
       return `#${this.paddingStringFor2(R)}${this.paddingStringFor2(G)}${this.paddingStringFor2(B)}`
     },
     getColorWithOpacity(color: string): string {
-      const opstr = this.paddingStringFor2(this.opacity.toString(16)).toUpperCase()
+      const opstr = this.paddingStringFor2(Math.round(this.opacity * 255 / 100).toString(16)).toUpperCase()
       return color + opstr
     },
     combineColors(a: number, b: number): number {
