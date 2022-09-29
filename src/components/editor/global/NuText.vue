@@ -36,7 +36,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
@@ -59,7 +59,6 @@ export default Vue.extend({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
-      uid: generalUtils.generateRandomString(6),
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
@@ -106,17 +105,10 @@ export default Vue.extend({
     // ro.observe(this.$refs.svg as any)
   },
   computed: {
-    ...mapState('text', ['fontStore']),
-    ...mapState('user', ['verUni']),
     ...mapGetters({
       getDefaultFontsList: 'text/getDefaultFontsList',
-      pageScaleRatio: 'getPageScaleRatio'
-    }),
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
-      getTextInfo: 'getTextInfo'
+      getLayer: 'getLayer'
     }),
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
@@ -128,7 +120,7 @@ export default Vue.extend({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
-    // Use duplicated of text to do some text effect, define there difference css here.
+    // Use duplicated of text to do some text effect, define their difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
@@ -207,17 +199,6 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode
       }
     },
-    // getFontUrl(spanStyles: ISpanStyle): string {
-    //   switch (spanStyles.type) {
-    //     case 'public':
-    //       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    //     case 'private':
-    //       return ''
-    //     case 'URL':
-    //       return 'url("' + spanStyles.fontUrl + '")'
-    //   }
-    //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    // },
     resizeCallback() {
       // testUtils.log(this.config.id, 'font cb start')
       // for (const entry of entries) {
