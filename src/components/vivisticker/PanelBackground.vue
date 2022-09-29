@@ -356,7 +356,7 @@ export default Vue.extend({
       }
     },
     setBgColor(color: string) {
-      vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color))
+      vivistickerUtils.sendScreenshotUrl(this.getColorUrl(color, false))
       vivistickerUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
       this.addRecentlyBgColor(color)
     },
@@ -382,8 +382,12 @@ export default Vue.extend({
       }
       return str
     },
-    getColorUrl(color: string) {
-      return `type=backgroundColor&id=${this.getColorWithOpacity(color).substring(1)}`
+    getColorUrl(color: string, premix: boolean) {
+      if (premix) {
+        return `type=backgroundColor&id=${this.getColorOverlappingWhite(color).substring(1)}`
+      } else {
+        return `type=backgroundColor&id=${this.getColorWithOpacity(color).substring(1)}`
+      }
     },
     async handleSearch(keyword: string) {
       this.resetContent()
@@ -430,7 +434,7 @@ export default Vue.extend({
     },
     handleSave() {
       vivistickerUtils.sendScreenshotUrl(
-        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
+        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, false),
         'download'
       )
       if (this.shareItem) {
@@ -442,7 +446,7 @@ export default Vue.extend({
     },
     handleStory() {
       vivistickerUtils.sendScreenshotUrl(
-        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor),
+        this.shareItem ? vivistickerUtils.createUrl(this.shareItem) : this.getColorUrl(this.shareColor, true),
         'IGStory'
       )
       if (this.shareItem) {
