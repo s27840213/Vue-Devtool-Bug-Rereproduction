@@ -326,7 +326,7 @@ export default Vue.extend({
     }),
     colorStyles(color: string) {
       return {
-        backgroundColor: this.getColorWithOpacity(color)
+        backgroundColor: this.getColorOverlappingWhite(color)
       }
     },
     progressStyles() {
@@ -352,7 +352,7 @@ export default Vue.extend({
       return this.shareItem ? {
         backgroundImage: `url(https://template.vivipic.com/background/${this.shareItem.id}/larg?ver=${this.shareItem.ver}})`
       } : {
-        backgroundColor: `${this.getColorWithOpacity(this.shareColor)}`
+        backgroundColor: `${this.getColorOverlappingWhite(this.shareColor)}`
       }
     },
     setBgColor(color: string) {
@@ -360,7 +360,7 @@ export default Vue.extend({
       vivistickerUtils.addAsset('backgroundColor', { id: color.replace('#', '') })
       this.addRecentlyBgColor(color)
     },
-    getColorWithOpacity(color: string): string {
+    getColorOverlappingWhite(color: string): string {
       const R1 = parseInt(color.substring(1, 3), 16)
       const G1 = parseInt(color.substring(3, 5), 16)
       const B1 = parseInt(color.substring(5, 7), 16)
@@ -368,6 +368,10 @@ export default Vue.extend({
       const G = this.combineColors(G1, 255).toString(16)
       const B = this.combineColors(B1, 255).toString(16)
       return `#${this.paddingStringFor2(R)}${this.paddingStringFor2(G)}${this.paddingStringFor2(B)}`
+    },
+    getColorWithOpacity(color: string): string {
+      const opstr = this.paddingStringFor2(this.opacity.toString(16)).toUpperCase()
+      return color + opstr
     },
     combineColors(a: number, b: number): number {
       return Math.round(b + (a - b) * this.opacity / 100)
