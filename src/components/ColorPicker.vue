@@ -1,6 +1,17 @@
 <template lang="pug">
   div(class="color-picker" ref="colorPicker"
       :style="{'box-shadow': isMobile ? 'none' : '0 0 2px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3)'}")
+    div(v-if="isTouchDevice")
+      div(class="color-picker__mobile__hex")
+        span(class="body-1") Hex
+        div(class="color-picker__mobile__input")
+          div(:style="{'background-color': convertedHex}")
+          input(
+            ref="input"
+            type="text"
+            spellcheck="false"
+            v-model="color"
+            maxlength="7")
     chrome-picker(
       class="color-picker__picker"
       :value="convertedHex"
@@ -12,10 +23,9 @@
       :isMobile="isMobile"
       :fullWidth="isMobile"
       :aspectRatio="aspectRatio")
-    div(:class="{'px-10': !isTouchDevice}")
+    div(v-if="!isTouchDevice" class="px-10")
       div(class="color-picker__hex")
-        svg-icon(v-if="!isTouchDevice"
-          class="pointer"
+        svg-icon(class="pointer"
           iconName="eye-dropper"
           :iconWidth="'20px'"
           :iconColor="'gray-2'"
@@ -185,6 +195,19 @@ export default Vue.extend({
     justify-content: space-between;
     align-items: center;
   }
+  &__mobile__hex {
+    @include body-MD;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    color: setColor(gray-2);
+    margin-bottom: 14px;
+    & > span {
+      font-family: Poppins;
+    }
+  }
   &__input {
     width: 120px;
     display: grid;
@@ -200,6 +223,31 @@ export default Vue.extend({
       margin-right: 12px;
     }
     > input {
+    }
+  }
+  &__mobile__input {
+    width: 137px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid setColor(gray-4);
+    border-radius: 4px;
+    box-sizing: border-box;
+    > div {
+      border: 1px solid setColor(gray-4);
+      border-radius: 3px;
+      width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    > input {
+      @include body-MD;
+      padding: 0;
+      color: setColor(gray-2);
+      font-family: Poppins;
     }
   }
 
