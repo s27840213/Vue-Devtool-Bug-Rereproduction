@@ -229,9 +229,6 @@ export default Vue.extend({
         if (typeof this.subLayerIndex !== 'undefined') {
           this.handleDimensionUpdate(this.parentLayerDimension, 0)
         }
-        // else {
-        //   this.previewAsLoading()
-        // }
       },
       deep: true
     },
@@ -447,7 +444,10 @@ export default Vue.extend({
         })
       }
 
-      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config))
+      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
+      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       return new Promise<void>((resolve, reject) => {
         ImageUtils.imgLoadHandler(src, () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
@@ -471,28 +471,24 @@ export default Vue.extend({
       })
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
-      const imgElement = this.$refs.img as HTMLImageElement
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
       const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
       const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
-
-        imgElement && (imgElement.onload = async () => {
-          if (newVal > oldVal) {
-            await this.preLoadImg('next', currSize)
-            this.preLoadImg('pre', currSize)
-          } else {
-            await this.preLoadImg('pre', currSize)
-            this.preLoadImg('next', currSize)
-          }
-        })
         const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
         const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
-        ImageUtils.imgLoadHandler(currUrl, () => {
+        ImageUtils.imgLoadHandler(currUrl, async () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
+            if (newVal > oldVal) {
+              await this.preLoadImg('next', currSize)
+              this.preLoadImg('pre', currSize)
+            } else {
+              await this.preLoadImg('pre', currSize)
+              this.preLoadImg('next', currSize)
+            }
           }
         })
       }
