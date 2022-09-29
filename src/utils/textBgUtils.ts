@@ -527,8 +527,6 @@ class TextBg {
       let boxHeight = (height + textBg.bStroke)
       let top = -textBg.bStroke
       let left = -textBg.bStroke
-      const boxRadius = Math.max(0, Math.min((textBg.bRadius - textBg.bStroke / 2), boxWidth / 2, boxHeight / 2))
-
       if (vertical) {
         boxWidth += textBg.pStroke * 2
         boxHeight += 20 * 2
@@ -540,6 +538,7 @@ class TextBg {
         top -= textBg.pStroke
         left -= 20
       }
+      const boxRadius = Math.max(0, Math.min((textBg.bRadius - textBg.bStroke / 2), boxWidth / 2, boxHeight / 2))
 
       const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
       path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
