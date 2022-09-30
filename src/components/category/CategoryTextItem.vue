@@ -36,8 +36,8 @@ export default Vue.extend({
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: generalUtils.isTouchDevice()
-          ? (window.innerWidth - 54) / 3
-          : 145
+          ? (window.innerWidth - 54) / 3 - 10 // ([window width] - [padding and gap]) / 3 - [item margin]
+          : 135
       }
       return {
         objectFit: 'contain',
