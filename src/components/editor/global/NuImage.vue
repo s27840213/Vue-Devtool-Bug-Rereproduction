@@ -967,7 +967,11 @@ export default Vue.extend({
       }
     },
     imgStyles(): any {
-      const { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig()
+      let { imgX, imgY, imgHeight, imgWidth } = this.scaledConfig()
+      if (this.isBgImgControl) {
+        imgX = 0
+        imgY = 0
+      }
       return {
         transform: `translate(${imgX}px, ${imgY}px)`,
         width: `${imgWidth}px`,
@@ -1050,7 +1054,7 @@ export default Vue.extend({
     //   return this.config.previewSrc
     // },
     shadowSrc(): string {
-      if (!this.shadow || !this.shadow().srcObj) {
+      if (!this.shadow() || !this.shadow().srcObj) {
         return ''
       }
       return ImageUtils.getSrc(this.shadow().srcObj, ImageUtils.getSrcSize(this.shadow().srcObj, this.getImgDimension))
