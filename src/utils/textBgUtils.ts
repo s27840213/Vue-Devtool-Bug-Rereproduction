@@ -290,53 +290,53 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 0, // unadjustable
         bColor: 'transparent', // unadjustable
-        pStrokeX: 20, // unadjustable in all effects in all effects
-        pStrokeY: 20,
+        pStrokeX: 13, // unadjustable in all effects in all effects
+        pStrokeY: 5,
         pColor: '#F1D289'
       },
       'rounded-borderless': {
         opacity: 100,
         bStroke: 0, // unadjustable
-        bRadius: 35,
+        bRadius: 10,
         bColor: 'transparent', // unadjustable
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 20,
+        pStrokeX: 13, // unadjustable in all effects
+        pStrokeY: 5,
         pColor: '#F1D289'
       },
       'square-hollow': {
         opacity: 100,
-        bStroke: 8,
+        bStroke: 3,
         bRadius: 0, // unadjustable
         bColor: '#F1D289',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10, // unadjustable
+        pStrokeX: 13, // unadjustable in all effects
+        pStrokeY: 5,
         pColor: 'transparent' // unadjustable
       },
       'rounded-hollow': {
         opacity: 100,
-        bStroke: 8,
-        bRadius: 35,
+        bStroke: 3,
+        bRadius: 10,
         bColor: '#F1D289',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10, // unadjustable
+        pStrokeX: 13, // unadjustable in all effects
+        pStrokeY: 5,
         pColor: 'transparent' // unadjustable
       },
       'square-both': {
         opacity: 100,
-        bStroke: 8,
+        bStroke: 3,
         bRadius: 0, // unadjustable
         bColor: '#979B9B',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10,
+        pStrokeX: 13, // unadjustable in all effects
+        pStrokeY: 5,
         pColor: '#F1D289'
       },
       'rounded-both': {
         opacity: 100,
-        bStroke: 8,
-        bRadius: 35,
+        bStroke: 3,
+        bRadius: 10,
         bColor: '#979B9B',
-        pStrokeX: 20, // unadjustable in all effects
-        pStrokeY: 10,
+        pStrokeX: 13, // unadjustable in all effects
+        pStrokeY: 5,
         pColor: '#F1D289'
       },
       underline: {
@@ -347,8 +347,8 @@ class TextBg {
         color: '#F1D289'
       },
       gooey: {
-        distance: 20,
-        bRadius: 40,
+        distance: 10,
+        bRadius: 15,
         opacity: 100,
         color: '#F1D289'
       }
