@@ -290,7 +290,8 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 0, // unadjustable
         bColor: 'transparent', // unadjustable
-        pStroke: 20,
+        pStrokeX: 20, // unadjustable in all effects in all effects
+        pStrokeY: 20,
         pColor: '#F1D289'
       },
       'rounded-borderless': {
@@ -298,7 +299,8 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 35,
         bColor: 'transparent', // unadjustable
-        pStroke: 20,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 20,
         pColor: '#F1D289'
       },
       'square-hollow': {
@@ -306,7 +308,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 0, // unadjustable
         bColor: '#F1D289',
-        pStroke: 10, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10, // unadjustable
         pColor: 'transparent' // unadjustable
       },
       'rounded-hollow': {
@@ -314,7 +317,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 35,
         bColor: '#F1D289',
-        pStroke: 10, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10, // unadjustable
         pColor: 'transparent' // unadjustable
       },
       'square-both': {
@@ -322,7 +326,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 0, // unadjustable
         bColor: '#979B9B',
-        pStroke: 10,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10,
         pColor: '#F1D289'
       },
       'rounded-both': {
@@ -330,7 +335,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 35,
         bColor: '#979B9B',
-        pStroke: 10,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10,
         pColor: '#F1D289'
       },
       underline: {
@@ -528,15 +534,15 @@ class TextBg {
       let top = -textBg.bStroke
       let left = -textBg.bStroke
       if (vertical) {
-        boxWidth += textBg.pStroke * 2
-        boxHeight += 20 * 2
-        top -= 20
-        left -= textBg.pStroke
+        boxWidth += textBg.pStrokeY * 2
+        boxHeight += textBg.pStrokeX * 2
+        top -= textBg.pStrokeX
+        left -= textBg.pStrokeY
       } else {
-        boxWidth += 20 * 2
-        boxHeight += textBg.pStroke * 2
-        top -= textBg.pStroke
-        left -= 20
+        boxWidth += textBg.pStrokeX * 2
+        boxHeight += textBg.pStrokeY * 2
+        top -= textBg.pStrokeY
+        left -= textBg.pStrokeX
       }
       const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 

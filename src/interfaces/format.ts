@@ -22,7 +22,8 @@ export interface ITextBox {
   bStroke: number
   bRadius: number
   bColor: string
-  pStroke: number
+  pStrokeX: number
+  pStrokeY: number
   pColor: string
 }
 
