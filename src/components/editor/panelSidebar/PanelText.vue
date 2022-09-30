@@ -138,7 +138,7 @@ export default Vue.extend({
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
-          size: 201,
+          size: 140,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
@@ -161,7 +161,7 @@ export default Vue.extend({
             type: 'category-text-item',
             list: rowItems,
             title,
-            size: title ? (155 + 46) : 155
+            size: title ? (90 + 46) : 90
           }
         })
       if (result.length) {
@@ -321,9 +321,9 @@ export default Vue.extend({
     transform: translateY(-50%);
   }
   &__item {
-    width: 145px;
-    height: 145px;
-    margin: 0 auto;
+    width: 80px;
+    height: 80px;
+    margin: 0 5px;
     object-fit: contain;
     vertical-align: middle;
   }
