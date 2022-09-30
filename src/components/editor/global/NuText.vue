@@ -80,6 +80,7 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
+    // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
     if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
       textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
         setTimeout(() => {
