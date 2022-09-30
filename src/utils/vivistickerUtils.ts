@@ -19,7 +19,7 @@ import localeUtils from './localeUtils'
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.0',
   locale: 'us',
-  isFirstOpen: true
+  isFirstOpen: false
 }
 
 class ViviStickerUtils {

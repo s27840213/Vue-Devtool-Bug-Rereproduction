@@ -120,9 +120,9 @@ export default Vue.extend({
       if (keyword) { return [] }
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
-        .map(category => ({
+        .map((category, index) => ({
           size: 140,
-          id: `rows_${category.list.map(item => item.id).join('_')}`,
+          id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
           list: category.list,
           title: category.title
@@ -237,7 +237,7 @@ export default Vue.extend({
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
         size: 21,
         color: '#FFFFFF',
-        weight: 'bold'
+        weight: 'normal'
       })
     },
     handleAddText() {
