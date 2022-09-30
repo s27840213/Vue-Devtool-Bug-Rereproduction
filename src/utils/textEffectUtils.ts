@@ -45,14 +45,14 @@ class Controller {
         color: ''
       },
       funky3d: {
-        distance: 10,
+        distance: 3,
         distanceInverse: 0,
         angle: 45,
         opacity: 100,
         color: '#F1D289'
       },
       bold3d: {
-        distance: 40,
+        distance: 10,
         angle: 0,
         opacity: 100,
         textStrokeColor: '#000000',
