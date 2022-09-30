@@ -724,11 +724,13 @@ export default Vue.extend({
             }
           }
           break
-        case '':
-          console.log('handle shadowInit: __', this.isHandling)
-          if (!this.isHandling && !this.isProcessing) {
-            imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
-          }
+        // case '':
+        //   console.log('handle shadowInit: __', this.isHandling)
+        //   setTimeout(() => {
+        //     if (!this.isHandling && !this.isProcessing) {
+        //       imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+        //     }
+        //   })
       }
     },
     handleUploadShadowImg() {

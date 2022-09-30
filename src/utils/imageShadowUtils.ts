@@ -204,14 +204,24 @@ class ImageShadowUtils {
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
-      this.setHandleId()
-      this.setProcessId()
-      this.setUploadId()
+      // this.setHandleId()
+      // this.setProcessId()
+      // this.setUploadId()
       if (params.layerInfo) {
         this.setIsProcess(params.layerInfo, false)
       }
       return
     }
+
+    if (params.layerInfo) {
+      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
+      const pageId = layerUtils.getPage(pageIndex).id
+      const layer = layerUtils.getLayer(pageIndex, layerIndex)
+      const layerId = layer.id as string
+      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
+      // this.setHandleId({ pageId, layerId, subLayerId })
+    }
+
     const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
@@ -311,14 +321,24 @@ class ImageShadowUtils {
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
-      this.setHandleId()
-      this.setProcessId()
-      this.setUploadId()
+      // this.setHandleId()
+      // this.setProcessId()
+      // this.setUploadId()
       if (params.layerInfo) {
         this.setIsProcess(params.layerInfo, false)
       }
       return
     }
+
+    if (params.layerInfo) {
+      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
+      const pageId = layerUtils.getPage(pageIndex).id
+      const layer = layerUtils.getLayer(pageIndex, layerIndex)
+      const layerId = layer.id as string
+      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
+      // this.setHandleId({ pageId, layerId, subLayerId })
+    }
+
     const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
@@ -422,9 +442,9 @@ class ImageShadowUtils {
         console.log(log)
         logUtils.setLog(log)
       }
-      this.setHandleId()
-      this.setProcessId()
-      this.setUploadId()
+      // this.setHandleId()
+      // this.setProcessId()
+      // this.setUploadId()
       if (params.layerInfo) {
         this.setIsProcess(params.layerInfo, false)
       }
@@ -432,6 +452,15 @@ class ImageShadowUtils {
     }
     if (timeout && store.getters['shadow/isUploading']) {
       return
+    }
+
+    if (params.layerInfo) {
+      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
+      const pageId = layerUtils.getPage(pageIndex).id
+      const layer = layerUtils.getLayer(pageIndex, layerIndex)
+      const layerId = layer.id as string
+      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
+      // this.setHandleId({ pageId, layerId, subLayerId })
     }
 
     const handler = () => {
@@ -821,6 +850,7 @@ class ImageShadowUtils {
   }
 
   setHandleId(id?: ILayerIdentifier) {
+    console.warn('set handle id', id?.pageId)
     if (!id) {
       id = { pageId: '', layerId: '', subLayerId: '' }
     }

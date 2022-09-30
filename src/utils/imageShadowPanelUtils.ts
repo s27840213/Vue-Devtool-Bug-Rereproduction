@@ -112,7 +112,8 @@ export default new class ImageShadowPanelUtils {
   async _handleShadowUpload(_layerData?: any, forceUpload = false) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
     // const layerData = _layerData ?? imageShadowUtils.layerData ?? (() => {
-    const layerData = (() => {
+    console.warn('_handleShadowUpload')
+    let layerData = (() => {
       const handleId = (store.state as any).shadow.handleId
       if (handleId) {
         const { pageId, layerId, subLayerId } = handleId
@@ -140,7 +141,7 @@ export default new class ImageShadowPanelUtils {
         }
       }
     })()
-    console.log(generalUtils.deepCopy(layerData), generalUtils.deepCopy(_layerData ?? imageShadowUtils.layerData))
+    layerData = layerData ?? _layerData ?? imageShadowUtils.layerData
     logUtils.setLog('phase: start upload shadow')
     setMark('upload', 0)
     if (layerData) {
