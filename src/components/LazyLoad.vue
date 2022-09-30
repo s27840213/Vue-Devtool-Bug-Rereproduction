@@ -79,7 +79,7 @@ export default Vue.extend({
                 this.handleLoaded()
               })
             },
-            this.handleUnrender ? 200 : 0
+            this.handleUnrender ? 150 : 0
           )
 
           // this.renderTimer = setTimeout(

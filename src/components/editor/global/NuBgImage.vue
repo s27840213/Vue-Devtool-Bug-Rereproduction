@@ -57,7 +57,7 @@ export default Vue.extend({
         if (this.isColorBackground) {
           this.src = ''
         } else {
-          this.perviewAsLoading()
+          this.previewAsLoading()
         }
       }
     },
@@ -68,18 +68,22 @@ export default Vue.extend({
   async created() {
     const { srcObj } = this
     if (!srcObj || !srcObj.type) return
+    console.log('in create hook')
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {
       const editorImg = this.getEditorViewImages
       if (!editorImg(assetId)) {
         await this.updateImages({ assetSet: new Set<string>([assetId]) })
-        this.src = ImageUtils.getSrc(this.image.config)
+        const src = ImageUtils.getSrc(this.image.config)
+        ImageUtils.imgLoadHandler(src, () => {
+          this.src = src
+        })
       }
     }
 
     if (this.userId !== 'backendRendering') {
-      this.perviewAsLoading()
+      this.previewAsLoading()
       const nextImg = new Image()
       nextImg.onerror = () => {
         if (srcObj.type === 'pexels') {
@@ -182,9 +186,9 @@ export default Vue.extend({
       const elms = []
       if (adjust.halation) {
         const position = {
-          width: width / 2,
-          x: width / 2,
-          y: height / 2
+          width: width / 2 * this.contentScaleRatio,
+          x: width / 2 * this.contentScaleRatio,
+          y: height / 2 * this.contentScaleRatio
         }
         elms.push(...imageAdjustUtil.getHalation(adjust.halation, position))
       }
@@ -212,7 +216,10 @@ export default Vue.extend({
       if (updater !== undefined) {
         try {
           updater().then(() => {
-            this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+            const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config))
+            ImageUtils.imgLoadHandler(src, () => {
+              this.src = src
+            })
           })
         } catch (error) {
         }
@@ -221,27 +228,36 @@ export default Vue.extend({
     imgStyles(): Partial<IImage> {
       return this.stylesConverter()
     },
-    async perviewAsLoading() {
-      return new Promise<void>((resolve, reject) => {
-        const config = this.image.config as IImage
-        if (config.previewSrc) {
-          this.src = config.previewSrc
-        } else if (config.srcObj.type === 'background') {
-          this.src = ImageUtils.getSrc(this.image.config, 'prev', this.image.config.ver)
-        }
-        const img = new Image()
-        const src = ImageUtils.getSrc(this.image.config)
-        img.onload = () => {
-          /** If after onload the img, the config.srcObj is the same, set the src. */
-          if (ImageUtils.getSrc(this.image.config) === src) {
-            this.src = src
+    async previewAsLoading() {
+      let isPrimaryImgLoaded = false
+      const config = this.image.config as IImage
+      const urlId = ImageUtils.getImgIdentifier(this.image.config.srcObj)
+      if (config.previewSrc) {
+        const previewSrc = config.previewSrc
+        ImageUtils.imgLoadHandler(previewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = previewSrc
           }
-          resolve()
-        }
-        img.onerror = () => {
+        })
+      } else if (config.srcObj.type === 'background') {
+        const panelPreviewSrc = this.image.config.panelPreviewSrc
+        ImageUtils.imgLoadHandler(panelPreviewSrc, () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId && !isPrimaryImgLoaded) {
+            this.src = panelPreviewSrc
+          }
+        })
+      }
+      const src = ImageUtils.getSrc(this.image.config)
+      return new Promise<void>((resolve, reject) => {
+        ImageUtils.imgLoadHandler(src, () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+            isPrimaryImgLoaded = true
+            this.src = src
+            resolve()
+          }
+        }, () => {
           reject(new Error('cannot load the current image'))
-        }
-        img.src = src
+        })
       })
     },
     stylesConverter(): { [key: string]: string } {
@@ -255,18 +271,21 @@ export default Vue.extend({
       editorUtils.setInBgSettingMode(true)
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
-      const imgElement = this.$refs.body as HTMLImageElement
-      if (this.image.config.previewSrc === undefined && imgElement) {
-        imgElement.onload = async () => {
-          if (newVal > oldVal) {
-            await this.preLoadImg('next', newVal)
-            this.preLoadImg('pre', newVal)
-          } else {
-            await this.preLoadImg('pre', newVal)
-            this.preLoadImg('next', newVal)
+      if (this.image.config.previewSrc === undefined) {
+        const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, newVal))
+        const urlId = ImageUtils.getImgIdentifier(this.image.config.srcObj)
+        ImageUtils.imgLoadHandler(currUrl, async () => {
+          if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
+            this.src = currUrl
+            if (newVal > oldVal) {
+              await this.preLoadImg('next', newVal)
+              this.preLoadImg('pre', newVal)
+            } else {
+              await this.preLoadImg('pre', newVal)
+              this.preLoadImg('next', newVal)
+            }
           }
-        }
-        this.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, newVal))
+        })
       }
     },
     async preLoadImg(preLoadType: 'pre' | 'next', val: number) {
@@ -275,14 +294,6 @@ export default Vue.extend({
         img.onload = () => resolve()
         img.onerror = () => {
           reject(new Error(`cannot preLoad the ${preLoadType}-image`))
-          // fetch(img.src)
-          //   .then(res => {
-          //     const { status, statusText } = res
-          //     this.logImgError(error, 'img src:', img.src, 'fetch result: ' + status + statusText)
-          //   })
-          //   .catch((e) => {
-          //     this.logImgError(error, 'img src:', img.src, 'fetch result: ' + e)
-          //   })
         }
         img.src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, ImageUtils.getSrcSize(this.image.config.srcObj, val, preLoadType)))
       })

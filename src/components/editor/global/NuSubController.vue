@@ -104,7 +104,8 @@ export default Vue.extend({
       parentId: '',
       imgBuff: {} as {
         styles: { [key: string]: number | boolean },
-        srcObj: { type: string, assetId: string | number, userId: string }
+        srcObj: { type: string, assetId: string | number, userId: string },
+        panelPreviewSrc: ''
       },
       dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false,
@@ -382,26 +383,33 @@ export default Vue.extend({
       }
     },
     wrapperStyles() {
-      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      let scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+      if (this.type === 'frame') {
+        scale *= this.contentScaleRatio
+      }
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
         outline: this.outlineStyles(),
         ...this.sizeStyle(),
         ...(this.type === 'frame' && (() => {
+          const { styles: { width, height }, clipPath } = this.config
           if (this.config.isFrameImg) {
-            return { clipPath: `path("M0,0h${this.config.styles.width}v${this.config.styles.height}h${-this.config.styles.width}z")` }
+            return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path("${this.config.clipPath}")` }
+            return { clipPath: `path("${clipPath}")` }
           }
         })())
       }
     },
     styles() {
+      const { isFrameImg } = this.config
+
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `translateZ(${this.config.styles.zindex}px)`,
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.config.styles.zindex}px)`,
         ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
       }
     },
@@ -557,22 +565,12 @@ export default Vue.extend({
                 LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { active: true }, this.layerIndex)
                 eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
               } else {
-                // const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
-                // const shadowEffectNeedRedraw = this.config.styles.shadow.isTransparent || this.config.styles.shadow.currentEffect === ShadowEffectType.imageMatched
-                // if (shadowEffectNeedRedraw) {
-                //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
-                //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
-                // }
                 const replacedImg = new Image()
                 replacedImg.crossOrigin = 'anonynous'
                 replacedImg.onload = () => {
                   const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
                   const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.primaryLayerIndex, subLayerIdx: this.layerIndex }
                   imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-                  // if (isTransparent) {
-                  //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
-                  //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
-                  // }
                 }
                 const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
                 replacedImg.src = imageUtils.getSrc(this.config, size)
@@ -594,6 +592,7 @@ export default Vue.extend({
             srcObj: {
               ...clips[this.layerIndex].srcObj
             },
+            panelPreviewSrc: clips[this.layerIndex].panelPreviewSrc,
             styles: {
               imgX: clip.styles.imgX,
               imgY: clip.styles.imgY,
@@ -603,6 +602,8 @@ export default Vue.extend({
             }
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
+          console.log(this.currDraggedPhoto.panelPreviewSrc)
+          FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { panelPreviewSrc: this.currDraggedPhoto.panelPreviewSrc })
 
           Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)
           const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
@@ -623,6 +624,7 @@ export default Vue.extend({
       if (this.isDraggedPanelPhoto() && !primaryLayer.locked) {
         FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.srcObj)
         FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.imgBuff.styles)
+        FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { panelPreviewSrc: this.imgBuff.panelPreviewSrc })
       }
     },
     onFrameDrop(e: DragEvent) {
@@ -662,7 +664,7 @@ export default Vue.extend({
       e.stopPropagation()
       const currLayer = LayerUtils.getCurrLayer as IImage
       if (currLayer && currLayer.type === LayerType.image && this.isMoving && (currLayer as IImage).previewSrc === undefined) {
-        const { srcObj } = this.config
+        const { srcObj, panelPreviewSrc } = this.config
         const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
         const clip = clips[this.layerIndex]
 
@@ -670,6 +672,7 @@ export default Vue.extend({
           srcObj: {
             ...srcObj
           },
+          panelPreviewSrc,
           styles: {
             imgX: clip.styles.imgX,
             imgY: clip.styles.imgY,
@@ -682,7 +685,8 @@ export default Vue.extend({
         })
 
         FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
-          srcObj: { ...currLayer.srcObj }
+          srcObj: { ...currLayer.srcObj },
+          ...((currLayer as IImage).panelPreviewSrc && { panelPreviewSrc: (currLayer as IImage).panelPreviewSrc as string })
         })
         LayerUtils.updateLayerStyles(LayerUtils.pageIndex, LayerUtils.layerIndex, { opacity: 35 })
         LayerUtils.updateLayerProps(LayerUtils.pageIndex, LayerUtils.layerIndex, { isHoveringFrame: true })
@@ -762,6 +766,7 @@ export default Vue.extend({
     align-items: center;
     position: absolute;
     box-sizing: border-box;
+    transform-origin: top left;
   }
 
   &__lock-icon {

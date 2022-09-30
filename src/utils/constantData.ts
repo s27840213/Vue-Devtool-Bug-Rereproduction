@@ -354,14 +354,14 @@ class ConstantData {
         key: 'echo',
         label: i18n.t('NN0116'),
         options: toOptions(['distance', 'angle', 'color'])
-      }, {
-        key: 'funky3d',
-        label: i18n.tc('NN0728'),
-        options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
-      }, {
-        key: 'bold3d',
-        label: i18n.tc('NN0729'),
-        options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
+      // }, {
+      //   key: 'funky3d',
+      //   label: i18n.tc('NN0728'),
+      //   options: toOptions(['distance', 'distanceInverse', 'angle', 'opacity', 'color'])
+      // }, {
+      //   key: 'bold3d',
+      //   label: i18n.tc('NN0729'),
+      //   options: toOptions(['distance', 'angle', 'opacity', 'textStrokeColor', 'shadowStrokeColor', 'color'])
       }])
     }, {
       name: 'shape',

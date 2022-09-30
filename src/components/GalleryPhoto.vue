@@ -17,6 +17,7 @@
       :iconColor="'gray-2'"
       :iconWidth="'20px'")
     img(:src="previewSrc",
+      ref='img'
       draggable="true",
       class="gallery-photo__img pointer"
       @dragstart="dragStart($event, photo)"
@@ -114,6 +115,14 @@ export default Vue.extend({
     },
     showMoreBtn(): boolean {
       return !this.inFilePanel && !this.inLogoPanel && !generalUtils.isTouchDevice()
+    },
+    panelPreviewSrc(): string {
+      const img = this.$refs.img as HTMLImageElement
+      if (!img) {
+        console.error('img in gallery photo is null')
+        return ''
+      }
+      return img.src
     }
   },
   methods: {
@@ -156,7 +165,8 @@ export default Vue.extend({
           width: photoWidth,
           height: photoHeight,
           offsetX: 10,
-          offsetY: 15
+          offsetY: 15,
+          panelPreviewSrc: this.panelPreviewSrc
         })
 
         const previewSize = imageUtils.getSignificantDimension(this.photo.preview.width, this.photo.preview.height)
@@ -174,7 +184,8 @@ export default Vue.extend({
           },
           styles: { width: photoWidth, height: photoHeight },
           isPreview: this.isUploading,
-          previewsrc: this.previewSrc
+          previewsrc: this.previewSrc,
+          panelPreviewSrc: this.panelPreviewSrc
         })
       }
     },
@@ -230,9 +241,13 @@ export default Vue.extend({
       if (isPrimaryLayerFrame) {
         frameUtils.updateFrameLayerStyles(pageIndex, layerIndex, Math.max(subLayerIdx, 0), styles)
         frameUtils.updateFrameClipSrc(pageIndex, layerIndex, Math.max(subLayerIdx, 0), srcObj)
+        frameUtils.updateFrameLayerProps(pageIndex, layerIndex, Math.max(subLayerIdx, 0), { panelPreviewSrc: this.panelPreviewSrc })
       } else {
         layerUtils.updateLayerStyles(pageIndex, layerIndex, styles, subLayerIdx)
-        layerUtils.updateLayerProps(pageIndex, layerIndex, { srcObj }, subLayerIdx)
+        layerUtils.updateLayerProps(pageIndex, layerIndex, {
+          srcObj,
+          panelPreviewSrc: this.panelPreviewSrc
+        }, subLayerIdx)
       }
       this.setCloseMobilePanelFlag(true)
       stepsUtils.record()
@@ -252,6 +267,7 @@ export default Vue.extend({
         photoAspectRatio,
         {
           pageIndex: pageUtils.currFocusPageIndex,
+          panelPreviewSrc: this.panelPreviewSrc,
           ...((this.inFilePanel || this.inLogoPanel) && !photo.id && { assetIndex: photo.assetIndex }),
           ...((this.inFilePanel || this.inLogoPanel) && photo.id && { assetId: photo.id }),
           // The following props is used for preview image during polling process

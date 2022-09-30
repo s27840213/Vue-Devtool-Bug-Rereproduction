@@ -85,7 +85,8 @@ const getDefaultState = (): IEditorState => ({
       height: 0
     },
     isTransparent: false,
-    isPreview: false
+    isPreview: false,
+    panelPreviewSrc: ''
   },
   currSubSelectedInfo: {
     index: -1,
@@ -110,7 +111,7 @@ const getDefaultState = (): IEditorState => ({
   isLargeDesktop: false,
   isGlobalLoading: false,
   useMobileEditor: false,
-  defaultContentScaleRatio: 0.4
+  defaultContentScaleRatio: 0.6
 })
 
 const state = getDefaultState()
@@ -438,7 +439,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string, isTransparent: boolean }) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string, isTransparent: boolean, panelPreviewSrc?: string }) {
     if (photo.srcObj) {
       state.currDraggedPhoto.srcObj = {
         ...state.currDraggedPhoto.srcObj,
@@ -459,6 +460,9 @@ const mutations: MutationTree<IEditorState> = {
     }
     if (typeof photo.isTransparent !== 'undefined') {
       state.currDraggedPhoto.isTransparent = photo.isTransparent
+    }
+    if (photo.panelPreviewSrc) {
+      state.currDraggedPhoto.panelPreviewSrc = photo.panelPreviewSrc
     }
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
