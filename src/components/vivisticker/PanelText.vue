@@ -297,7 +297,7 @@ export default Vue.extend({
   &__item {
     width: 80px;
     height: 80px;
-    margin: 0 auto;
+    margin: 0 5px;
     object-fit: contain;
     vertical-align: middle;
   }

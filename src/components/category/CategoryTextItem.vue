@@ -33,8 +33,8 @@ export default Vue.extend({
     itemStyle(): any {
       const { width } = this.item.preview || {
         width: generalUtils.isTouchDevice()
-          ? (window.innerWidth - 68) / 3
-          : 145
+          ? (window.innerWidth - 68) / 3 - 10
+          : 135
       }
       return {
         objectFit: 'contain',
