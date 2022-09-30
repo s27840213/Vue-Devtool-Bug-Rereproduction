@@ -237,7 +237,7 @@ export default Vue.extend({
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
         size: 21,
         color: '#FFFFFF',
-        weight: 'bold'
+        weight: 'normal'
       })
     },
     handleAddText() {
