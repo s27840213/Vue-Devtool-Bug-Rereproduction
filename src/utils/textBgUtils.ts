@@ -538,7 +538,7 @@ class TextBg {
         top -= textBg.pStroke
         left -= 20
       }
-      const boxRadius = Math.max(0, Math.min((textBg.bRadius - textBg.bStroke / 2), boxWidth / 2, boxHeight / 2))
+      const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
       const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
       path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
@@ -555,7 +555,7 @@ class TextBg {
           height: boxHeight + textBg.bStroke,
           style: `left: ${left}px;
             top: ${top}px;
-            border-radius: ${textBg.bRadius}px;
+            border-radius: ${boxRadius}px;
             overflow: hidden`
         },
         content: [{
