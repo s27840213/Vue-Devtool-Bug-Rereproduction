@@ -47,7 +47,6 @@ import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -72,7 +71,6 @@ export default Vue.extend({
     }
   },
   created() {
-    // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
   destroyed() {
@@ -92,17 +90,9 @@ export default Vue.extend({
     //   TextPropUtils.updateTextPropsState()
     // }
 
-    // if (LayerUtils.getCurrLayer.type === 'tmp') {
-    //   return
-    // }
     this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
-    // testUtils.start(this.config.id, false)
-    this.drawSvgBG()
-    // const ro = new ResizeObserver(() => {
-    //   testUtils.log(this.config.id, 'render done')
-    // })
-    // ro.observe(this.$refs.svg as any)
+    this.drawSvgBG() // Check if needed
   },
   computed: {
     ...mapGetters({
@@ -156,7 +146,7 @@ export default Vue.extend({
           this.resizeObserver.disconnect()
           this.observeAllSpans()
         }
-        this.drawSvgBG()
+        this.drawSvgBG() // Check if needed
       }
     },
     'config.styles': {
@@ -169,8 +159,6 @@ export default Vue.extend({
   methods: {
     drawSvgBG() {
       this.$nextTick(() => {
-        const targetLayer = this.getLayer(this.pageIndex, this.layerIndex)
-        const groupScaleRatio = this.subLayerIndex !== undefined ? targetLayer.styles.scale : 1
         this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
       })
     },
@@ -200,10 +188,6 @@ export default Vue.extend({
       }
     },
     resizeCallback() {
-      // testUtils.log(this.config.id, 'font cb start')
-      // for (const entry of entries) {
-      //   console.log(JSON.stringify(entry.contentRect))
-      // }
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
@@ -233,14 +217,12 @@ export default Vue.extend({
         // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        // if (group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-      // testUtils.log(this.config.id, 'font cb done')
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
