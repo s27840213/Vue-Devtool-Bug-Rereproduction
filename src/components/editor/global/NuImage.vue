@@ -574,8 +574,7 @@ export default Vue.extend({
     onLoadShadow() {
       this.isOnError = false
       const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
-      if (!shadowImg.width || !shadowImg.height) {
-        console.log('onloadShadow')
+      if (!this.forRender && (!shadowImg.width || !shadowImg.height)) {
         imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
         imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo)
       }
