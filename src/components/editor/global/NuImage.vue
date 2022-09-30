@@ -210,7 +210,8 @@ export default Vue.extend({
       },
       deep: true
     },
-    currentShadowEffect() {
+    currentShadowEffect(val) {
+      console.warn('change', val)
       if (this.forRender || this.shadow.srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
         return
       }
@@ -277,7 +278,8 @@ export default Vue.extend({
       getCurrFunctionPanelType: 'getCurrFunctionPanelType',
       isUploadingShadowImg: 'shadow/isUploading',
       isHandling: 'shadow/isHandling',
-      isShowPagePanel: 'page/getShowPagePanel'
+      isShowPagePanel: 'page/getShowPagePanel',
+      isProcessing: 'shadow/isProcessing'
     }),
     ...mapState('user', ['imgSizeMap', 'userId', 'verUni']),
     ...mapState('shadow', ['uploadId', 'handleId', 'uploadShadowImgs']),
@@ -573,6 +575,7 @@ export default Vue.extend({
       this.isOnError = false
       const shadowImg = this.$refs['shadow-img'] as HTMLImageElement
       if (!shadowImg.width || !shadowImg.height) {
+        console.log('onloadShadow')
         imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
         imageShadowUtils.setEffect(ShadowEffectType.none, {}, this.layerInfo)
       }
@@ -713,13 +716,20 @@ export default Vue.extend({
           break
         case 'upload':
           if (shadow.srcObj.assetId) {
+            console.log('handle shadowInit: upload')
             this.handleUploadShadowImg()
           } else {
-            imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+            console.log('handle shadowInit: upload')
+            if (!this.isHandling && !this.isProcessing) {
+              imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+            }
           }
           break
         case '':
-          imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+          console.log('handle shadowInit: __', this.isHandling)
+          if (!this.isHandling && !this.isProcessing) {
+            imageShadowUtils.updateEffectState(this.layerInfo, ShadowEffectType.none)
+          }
       }
     },
     handleUploadShadowImg() {
@@ -749,7 +759,7 @@ export default Vue.extend({
       const hasShadowSrc = this.shadow.srcObj.type && this.shadow.srcObj.type !== 'upload' && this.shadow.srcObj.assetId
       if (currentEffect !== ShadowEffectType.none) {
         const { id } = this
-        imageShadowUtils.setHandleId(id)
+        // imageShadowUtils.setHandleId(id)
         imageShadowUtils.setProcessId(id)
         !hasShadowSrc && imageShadowUtils.setIsProcess(layerInfo, true)
       }
@@ -804,7 +814,6 @@ export default Vue.extend({
         case ShadowEffectType.none:
           imageShadowUtils.updateShadowSrc(this.layerInfo, { type: '', assetId: '', userId: '' })
           imageShadowUtils.setProcessId()
-          // imageShadowUtils.setHandleId()
           imageShadowUtils.clearLayerData()
           return
       }
@@ -859,7 +868,12 @@ export default Vue.extend({
         drawCanvasW: _drawCanvasW,
         drawCanvasH: _drawCanvasH,
         layerInfo,
-        cb: this.clearShadowSrc
+        cb: () => {
+          if (!imageShadowPanelUtils.checkIfSameEffect(this.config)) {
+            this.clearShadowSrc()
+          }
+          console.log('finish')
+        }
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)
       switch (currentEffect) {

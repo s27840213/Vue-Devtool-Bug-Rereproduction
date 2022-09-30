@@ -95,7 +95,6 @@ class ImageShadowUtils {
    */
   private canvasMaxSize = document.createElement('canvas')
   private _draw = undefined as number | undefined
-  private handlerId = ''
 
   private _layerData = null as {
     config: IImage,
@@ -156,11 +155,11 @@ class ImageShadowUtils {
         layerId: primarylayerId || config.id || '',
         subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
       })
-      this.setHandleId({
-        pageId: pageUtils.currFocusPage.id,
-        layerId: primarylayerId || config.id || '',
-        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-      })
+      // this.setHandleId({
+      //   pageId: pageUtils.currFocusPage.id,
+      //   layerId: primarylayerId || config.id || '',
+      //   subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      // })
     }
     if ([ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
       const ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
@@ -205,24 +204,23 @@ class ImageShadowUtils {
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
+      this.setHandleId()
+      this.setProcessId()
+      this.setUploadId()
       return
     }
     const { timeout = DRAWING_TIMEOUT } = params
-    const handlerId = generalUtils.generateRandomString(6)
-    if (!store.getters['shadow/isUploading'] || !params.timeout) {
-      this.handlerId = handlerId
-    }
     if (timeout) {
       clearTimeout(this._draw)
       this._draw = setTimeout(() => {
-        this.floatingHandler(canvas_s, img, config, handlerId, params)
+        this.floatingHandler(canvas_s, img, config, params)
       }, timeout)
     } else {
-      await this.floatingHandler(canvas_s, img, config, handlerId, params)
+      await this.floatingHandler(canvas_s, img, config, params)
     }
   }
 
-  floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     logUtils.setLog('canvas drawing: floatingHandler start:')
     const canvas = canvas_s[0] || undefined
     setMark('floating', 0)
@@ -309,6 +307,9 @@ class ImageShadowUtils {
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
+      this.setHandleId()
+      this.setProcessId()
+      this.setUploadId()
       return
     }
     const { timeout = DRAWING_TIMEOUT } = params
@@ -413,10 +414,17 @@ class ImageShadowUtils {
         console.log(log)
         logUtils.setLog(log)
       }
+      this.setHandleId()
+      this.setProcessId()
+      this.setUploadId()
       return
     }
-    const handlerId = generalUtils.generateRandomString(6)
+    if (timeout && store.getters['shadow/isUploading']) {
+      return
+    }
+
     const handler = () => {
+      console.log('start handle')
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
       const { canvasT, canvasMaxSize } = this
@@ -488,15 +496,16 @@ class ImageShadowUtils {
       logMark('shadow')
     }
 
-    if (!store.getters['shadow/isUploading'] || !params.timeout) {
-      this.handlerId = handlerId
-    }
     if (timeout) {
       clearTimeout(this._draw)
       this._draw = setTimeout(handler, timeout)
     } else {
       handler()
     }
+  }
+
+  clearHandler() {
+    clearTimeout(this._draw)
   }
 
   async asyncProcessing(cb: () => void, disable = false) {

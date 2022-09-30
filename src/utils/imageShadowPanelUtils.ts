@@ -111,7 +111,8 @@ export default new class ImageShadowPanelUtils {
 
   async _handleShadowUpload(_layerData?: any, forceUpload = false) {
     colorUtils.event.off(ColorEventType.photoShadow, (color: string) => this.handleColorUpdate(color))
-    const layerData = _layerData ?? imageShadowUtils.layerData ?? (() => {
+    // const layerData = _layerData ?? imageShadowUtils.layerData ?? (() => {
+    const layerData = (() => {
       const handleId = (store.state as any).shadow.handleId
       if (handleId) {
         const { pageId, layerId, subLayerId } = handleId
@@ -138,23 +139,13 @@ export default new class ImageShadowPanelUtils {
     logUtils.setLog('phase: start upload shadow')
     setMark('upload', 0)
     if (layerData) {
+      imageShadowUtils.clearHandler()
       const { config: _config, primarylayerId, pageId } = layerData
       const config = generalUtils.deepCopy(_config) as IImage
       const layerId = primarylayerId || config.id || ''
       const subLayerId = primarylayerId ? config.id : ''
       const shadow = config.styles.shadow
       const { pageIndex: _pageIndex, layerIndex: _layerIndex, subLayerIdx: _subLayerIdx } = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
-
-      if (shadow.currentEffect === ShadowEffectType.none) {
-        imageShadowUtils.clearLayerData()
-        imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
-        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
-        imageShadowUtils.setUploadProcess(false)
-        return
-      } else {
-        imageShadowUtils.setUploadProcess(true)
-        imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
-      }
 
       if (!forceUpload && config.styles.shadow.srcState && this.checkIfSameEffect(config)) {
         /**
@@ -166,12 +157,26 @@ export default new class ImageShadowPanelUtils {
           layerIndex: _layerIndex,
           subLayerIdx: _subLayerIdx
         }
+        imageShadowUtils.clearLayerData()
         imageShadowUtils.updateShadowSrc(layerInfo, shadowSrcObj)
         imageShadowUtils.setUploadProcess(false)
+        imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
         imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
         imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        console.log('the config is same')
         return
       }
+
+      console.log(shadow.currentEffect)
+      if (shadow.currentEffect === ShadowEffectType.none) {
+        imageShadowUtils.clearLayerData()
+        imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
+        imageShadowUtils.setUploadProcess(false)
+        return
+      }
+
       if (primarylayerId) {
         this.setIsUploading(pageId, primarylayerId, config.id as string, true)
       } else {
@@ -189,6 +194,8 @@ export default new class ImageShadowPanelUtils {
         pageIndex: _pageIndex
       })
 
+      imageShadowUtils.setUploadProcess(true)
+      imageShadowUtils.setHandleId({ pageId, layerId, subLayerId })
       imageShadowUtils.setUploadId({
         pageId: pageId,
         layerId: primarylayerId || config.id || '',
@@ -254,7 +261,7 @@ export default new class ImageShadowPanelUtils {
         updateCanvas.setAttribute('height', `${canvasH}`)
       }
 
-      params = { timeout: 0, drawCanvasW, drawCanvasH }
+      params = { timeout: 0, drawCanvasW, drawCanvasH, cb: () => { console.log('upload finish') } }
       imageShadowUtils.drawingInit(updateCanvas, img, config, params)
 
       switch (config.styles.shadow.currentEffect) {
@@ -382,6 +389,7 @@ export default new class ImageShadowPanelUtils {
             imageShadowUtils.clearLayerData()
             imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+            imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
             imageShadowUtils.setUploadProcess(false)
             console.warn('shadow upload finish')
           })
@@ -390,7 +398,10 @@ export default new class ImageShadowPanelUtils {
     } else {
       logUtils.setLog('layerData is undefined')
       console.log('layerData is undefined')
+      imageShadowUtils.clearLayerData()
       imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+      imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })
+      imageShadowUtils.setProcessId({ pageId: '', layerId: '', subLayerId: '' })
     }
   }
 
