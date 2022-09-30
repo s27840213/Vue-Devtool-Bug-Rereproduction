@@ -200,13 +200,16 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
-        logUtils.setLog('Error: drawFloatingShadow with wrong effect type:' + config.styles.shadow.currentEffect)
+        logUtils.setLog('Exception: drawFloatingShadow with wrong effect type:' + config.styles.shadow.currentEffect)
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
       this.setHandleId()
       this.setProcessId()
       this.setUploadId()
+      if (params.layerInfo) {
+        this.setIsProcess(params.layerInfo, false)
+      }
       return
     }
     const { timeout = DRAWING_TIMEOUT } = params
@@ -300,16 +303,20 @@ class ImageShadowUtils {
   }
 
   drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    console.warn('draw imageMAtched')
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
-        logUtils.setLog('Error: drawImageMatchedShadow with wrong effect type:' + config.styles.shadow.currentEffect)
+        logUtils.setLog('Exception: drawImageMatchedShadow with wrong effect type:' + config.styles.shadow.currentEffect)
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
       this.setHandleId()
       this.setProcessId()
       this.setUploadId()
+      if (params.layerInfo) {
+        this.setIsProcess(params.layerInfo, false)
+      }
       return
     }
     const { timeout = DRAWING_TIMEOUT } = params
@@ -399,6 +406,7 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
+    console.warn('draw shadow')
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
@@ -406,7 +414,7 @@ class ImageShadowUtils {
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
-        const log = 'Error: drawShadow with wrong effect type:' + currentEffect
+        const log = 'Exception: drawShadow with wrong effect type:' + currentEffect
         console.log(log)
         logUtils.setLog(log)
       } else {
@@ -417,6 +425,9 @@ class ImageShadowUtils {
       this.setHandleId()
       this.setProcessId()
       this.setUploadId()
+      if (params.layerInfo) {
+        this.setIsProcess(params.layerInfo, false)
+      }
       return
     }
     if (timeout && store.getters['shadow/isUploading']) {

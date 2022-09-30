@@ -128,14 +128,19 @@ export default new class ImageShadowPanelUtils {
         } else {
           const { pageIndex, layerIndex } = layerUtils.getLayerInfoById(pageId, layerId)
           const config = layerUtils.getLayer(pageIndex, layerIndex)
-          return {
-            pageId,
-            parimarylayerId: '',
-            config
+          if (pageId) {
+            return {
+              pageId,
+              parimarylayerId: '',
+              config
+            }
+          } else {
+            return undefined
           }
         }
       }
     })()
+    console.log(generalUtils.deepCopy(layerData), generalUtils.deepCopy(_layerData ?? imageShadowUtils.layerData))
     logUtils.setLog('phase: start upload shadow')
     setMark('upload', 0)
     if (layerData) {
@@ -167,7 +172,6 @@ export default new class ImageShadowPanelUtils {
         return
       }
 
-      console.log(shadow.currentEffect)
       if (shadow.currentEffect === ShadowEffectType.none) {
         imageShadowUtils.clearLayerData()
         imageShadowUtils.setUploadId({ pageId: '', layerId: '', subLayerId: '' })

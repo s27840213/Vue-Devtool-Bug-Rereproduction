@@ -869,10 +869,8 @@ export default Vue.extend({
         drawCanvasH: _drawCanvasH,
         layerInfo,
         cb: () => {
-          if (!imageShadowPanelUtils.checkIfSameEffect(this.config)) {
-            this.clearShadowSrc()
-          }
-          console.log('finish')
+          this.clearShadowSrc()
+          console.log('finish', currentEffect)
         }
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)
