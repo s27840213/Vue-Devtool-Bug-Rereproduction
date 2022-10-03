@@ -22,7 +22,7 @@
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
+          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans()"
@@ -30,7 +30,7 @@
         :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
         :data-sindex="sIndex"
         :key="sIndex",
-        :style="styles(span.styles, sIndex)") {{ span.text }}
+        :style="styles(span.styles)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -185,6 +185,12 @@ export default Vue.extend({
       return {
         writingMode: this.config.styles.writingMode
       }
+    },
+    spanStyle(spans: any, sIndex: number) {
+      const span = spans[sIndex]
+      return Object.assign(tiptapUtils.textStylesRaw(span.styles),
+        sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
+      )
     },
     pStyle(styles: any) {
       return _.omit(tiptapUtils.textStylesRaw(styles), [
