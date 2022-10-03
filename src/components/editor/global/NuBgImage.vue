@@ -271,23 +271,19 @@ export default Vue.extend({
       editorUtils.setInBgSettingMode(true)
     },
     handleDimensionUpdate(newVal: number, oldVal: number) {
-      console.warn('handle dimension')
-      const imgElement = this.$refs.body as HTMLImageElement
-      if (this.image.config.previewSrc === undefined && imgElement) {
-        imgElement.onload = async () => {
-          if (newVal > oldVal) {
-            await this.preLoadImg('next', newVal)
-            this.preLoadImg('pre', newVal)
-          } else {
-            await this.preLoadImg('pre', newVal)
-            this.preLoadImg('next', newVal)
-          }
-        }
+      if (this.image.config.previewSrc === undefined) {
         const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.image.config, newVal))
         const urlId = ImageUtils.getImgIdentifier(this.image.config.srcObj)
-        ImageUtils.imgLoadHandler(currUrl, () => {
+        ImageUtils.imgLoadHandler(currUrl, async () => {
           if (ImageUtils.getImgIdentifier(this.image.config.srcObj) === urlId) {
             this.src = currUrl
+            if (newVal > oldVal) {
+              await this.preLoadImg('next', newVal)
+              this.preLoadImg('pre', newVal)
+            } else {
+              await this.preLoadImg('pre', newVal)
+              this.preLoadImg('next', newVal)
+            }
           }
         })
       }

@@ -25,7 +25,7 @@
               :key="option.key"
               class="text-effect-setting-options__field")
             div(class="text-effect-setting-options__field--name") {{option.label}}
-            //- Effect type select
+            //- Option type select
             div(v-if="option.type === 'select'"
                 class="text-effect-setting-options__field--select")
               svg-icon(v-for="sel in option.select"
@@ -33,7 +33,7 @@
                 iconWidth="24px"
                 :class="{'selected': currentStyle[currCategory.name].endpoint === sel.key }"
                 @click.native="handleSelectInput(option.key, sel.key)")
-            //- Effect type range
+            //- Option type range
             template(v-if="option.type === 'range'")
               input(class="text-effect-setting-options__field--number"
                 :value="currentStyle[currCategory.name][option.key]"
@@ -53,7 +53,7 @@
                 @mouseup="handleRangeMouseup()"
                 v-ratio-change
                 type="range")
-            //- Effect type color
+            //- Option type color
             template(v-if="option.type === 'color'")
               div(class="text-effect-setting-options__field--btn"
                 :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
@@ -210,8 +210,7 @@ export default Vue.extend({
   &-tabs {
     @include caption-MD;
     display: grid;
-    // grid-template-columns: repeat(3, 1fr);
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     column-gap: 2.5px;
     height: 36px;
     > span {

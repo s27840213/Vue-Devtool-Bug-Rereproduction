@@ -1,13 +1,13 @@
 <template lang="pug">
-div(class="preview")
-  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0")
+div(class="preview" :style="containStyles")
+  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0" :contentScaleRatio="contentScaleRatio")
   span(v-if="host" class="preview__host") {{host}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
@@ -19,6 +19,9 @@ export default Vue.extend({
     return {}
   },
   computed: {
+    ...mapState({
+      contentScaleRatio: 'defaultContentScaleRatio'
+    }),
     ...mapGetters({
       pages: 'getPages'
     }),
@@ -29,6 +32,11 @@ export default Vue.extend({
       else if (host === 'localhost:8080') return 'local'
       else if (subdomain) return subdomain[1]
       else return host
+    },
+    containStyles(): any {
+      return {
+        transform: `scale(${1 / this.contentScaleRatio})`
+      }
     }
   },
   mounted() {

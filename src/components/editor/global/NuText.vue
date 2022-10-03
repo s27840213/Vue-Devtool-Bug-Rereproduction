@@ -36,7 +36,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { IGroup, ISpan, IText } from '@/interfaces/layer'
-import { mapState, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import textUtils from '@/utils/textUtils'
 import NuCurveText from '@/components/editor/global/NuCurveText.vue'
 import LayerUtils from '@/utils/layerUtils'
@@ -46,7 +46,6 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
-import testUtils from '@/utils/testUtils'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -59,7 +58,6 @@ export default Vue.extend({
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
     return {
-      uid: generalUtils.generateRandomString(6),
       isDestroyed: false,
       resizeObserver: undefined as ResizeObserver | undefined,
       initSize: {
@@ -72,7 +70,6 @@ export default Vue.extend({
     }
   },
   created() {
-    // textUtils.loadAllFonts(this.config, 1)
     textUtils.loadAllFonts(this.config)
   },
   destroyed() {
@@ -81,42 +78,25 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-      textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
-        setTimeout(() => {
-          this.resizeCallback()
+    // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
+    textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+      setTimeout(() => {
+        this.resizeCallback()
+        if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
           this.isLoading = false
-        }, 500) // for the delay between font loading and dom rendering
-      })
-    }
-    // if (this.currSelectedInfo.layers >= 1) {
-    //   TextPropUtils.updateTextPropsState()
-    // }
+        }
+      }, 500) // for the delay between font loading and dom rendering
+    })
 
-    // if (LayerUtils.getCurrLayer.type === 'tmp') {
-    //   return
-    // }
     this.resizeObserver = new ResizeObserver(this.resizeCallback)
     this.observeAllSpans()
-    testUtils.start(this.config.id, false)
-    this.drawSvgBG()
-    const ro = new ResizeObserver(() => {
-      testUtils.log(this.config.id, 'render done')
-    })
-    ro.observe(this.$refs.svg as any)
+    this.drawSvgBG() // Check if needed
   },
   computed: {
-    ...mapState('text', ['fontStore']),
-    ...mapState('user', ['verUni']),
     ...mapGetters({
       getDefaultFontsList: 'text/getDefaultFontsList',
-      pageScaleRatio: 'getPageScaleRatio'
-    }),
-    ...mapGetters({
-      scaleRatio: 'getPageScaleRatio',
       currSelectedInfo: 'getCurrSelectedInfo',
-      getLayer: 'getLayer',
-      getTextInfo: 'getTextInfo'
+      getLayer: 'getLayer'
     }),
     spanEffect(): Record<string, unknown> {
       return textBgUtils.convertTextSpanEffect(this.config.styles.textBg)
@@ -128,7 +108,7 @@ export default Vue.extend({
     isFlipped(): boolean {
       return this.config.styles.horizontalFlip || this.config.styles.verticalFlip
     },
-    // Use duplicated of text to do some text effect, define there difference css here.
+    // Use duplicated of text to do some text effect, define their difference css here.
     duplicatedText() {
       const duplicatedBodyBasicCss = {
         position: 'absolute',
@@ -164,7 +144,7 @@ export default Vue.extend({
           this.resizeObserver.disconnect()
           this.observeAllSpans()
         }
-        this.drawSvgBG()
+        this.drawSvgBG() // Check if needed
       }
     },
     'config.styles': {
@@ -177,8 +157,6 @@ export default Vue.extend({
   methods: {
     drawSvgBG() {
       this.$nextTick(() => {
-        const targetLayer = this.getLayer(this.pageIndex, this.layerIndex)
-        const groupScaleRatio = this.subLayerIndex !== undefined ? targetLayer.styles.scale : 1
         this.svgBG = textBgUtils.drawSvgBg(this.config, this.$refs.body as Element[])
       })
     },
@@ -207,22 +185,7 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode
       }
     },
-    // getFontUrl(spanStyles: ISpanStyle): string {
-    //   switch (spanStyles.type) {
-    //     case 'public':
-    //       return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    //     case 'private':
-    //       return ''
-    //     case 'URL':
-    //       return 'url("' + spanStyles.fontUrl + '")'
-    //   }
-    //   return `url("https://template.vivipic.com/font/${spanStyles.font}/font")`
-    // },
     resizeCallback() {
-      testUtils.log(this.config.id, 'font cb start')
-      // for (const entry of entries) {
-      //   console.log(JSON.stringify(entry.contentRect))
-      // }
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
 
@@ -252,14 +215,12 @@ export default Vue.extend({
         // console.log(this.layerIndex, this.subLayerIndex, textHW.width, textHW.height, widthLimit)
         const group = this.getLayer(this.pageIndex, this.layerIndex) as IGroup
         if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        // if (group.layers[this.subLayerIndex].type !== 'text') return
         LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, { width: textHW.width, height: textHW.height })
         LayerUtils.updateSubLayerProps(this.pageIndex, this.layerIndex, this.subLayerIndex, { widthLimit })
         const { width, height } = calcTmpProps(group.layers, group.styles.scale)
         LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, { width, height })
       }
       this.drawSvgBG()
-      testUtils.log(this.config.id, 'font cb done')
     },
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList

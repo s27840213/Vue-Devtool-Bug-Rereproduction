@@ -6,7 +6,6 @@ import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import _ from 'lodash'
-import testUtils from '@/utils/testUtils'
 
 // For text effect gooey
 class Point {
@@ -291,7 +290,8 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 0, // unadjustable
         bColor: 'transparent', // unadjustable
-        pStroke: 20,
+        pStrokeX: 20, // unadjustable in all effects in all effects
+        pStrokeY: 20,
         pColor: '#F1D289'
       },
       'rounded-borderless': {
@@ -299,7 +299,8 @@ class TextBg {
         bStroke: 0, // unadjustable
         bRadius: 35,
         bColor: 'transparent', // unadjustable
-        pStroke: 20,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 20,
         pColor: '#F1D289'
       },
       'square-hollow': {
@@ -307,7 +308,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 0, // unadjustable
         bColor: '#F1D289',
-        pStroke: 10, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10, // unadjustable
         pColor: 'transparent' // unadjustable
       },
       'rounded-hollow': {
@@ -315,7 +317,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 35,
         bColor: '#F1D289',
-        pStroke: 10, // unadjustable
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10, // unadjustable
         pColor: 'transparent' // unadjustable
       },
       'square-both': {
@@ -323,7 +326,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 0, // unadjustable
         bColor: '#979B9B',
-        pStroke: 10,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10,
         pColor: '#F1D289'
       },
       'rounded-both': {
@@ -331,7 +335,8 @@ class TextBg {
         bStroke: 8,
         bRadius: 35,
         bColor: '#979B9B',
-        pStroke: 10,
+        pStrokeX: 20, // unadjustable in all effects
+        pStrokeY: 10,
         pColor: '#F1D289'
       },
       underline: {
@@ -364,7 +369,6 @@ class TextBg {
   }
 
   drawSvgBg(config: IText, bodyHtml: Element[]) {
-    testUtils.log((config as any).id, 'draw svg start')
     const textBg = config.styles.textBg
     if (textBg.name === 'none') return {}
     const vertical = config.styles.writingMode === 'vertical-lr'
@@ -469,7 +473,6 @@ class TextBg {
       const cps = new Gooey(textBg, rects)
       cps.preProcess()
       const d = cps.process()
-      testUtils.log((config as any).id, 'draw svg done')
 
       return {
         attrs: { width, height, fill },
@@ -526,9 +529,22 @@ class TextBg {
       }
     } else if (isITextBox(textBg)) {
       const opacity = textBg.opacity * 0.01
-      const boxWidth = (width + 20 * 2 + textBg.bStroke)
-      const boxHeight = (height + textBg.pStroke * 2 + textBg.bStroke)
-      const boxRadius = Math.max(0, Math.min((textBg.bRadius - textBg.bStroke / 2), boxWidth / 2, boxHeight / 2))
+      let boxWidth = (width + textBg.bStroke)
+      let boxHeight = (height + textBg.bStroke)
+      let top = -textBg.bStroke
+      let left = -textBg.bStroke
+      if (vertical) {
+        boxWidth += textBg.pStrokeY * 2
+        boxHeight += textBg.pStrokeX * 2
+        top -= textBg.pStrokeX
+        left -= textBg.pStrokeY
+      } else {
+        boxWidth += textBg.pStrokeX * 2
+        boxHeight += textBg.pStrokeY * 2
+        top -= textBg.pStrokeY
+        left -= textBg.pStrokeX
+      }
+      const boxRadius = Math.min(boxWidth / 2, boxHeight / 2) * textBg.bRadius * 0.01
 
       const path = new Path(new Point(textBg.bStroke / 2, textBg.bStroke / 2 + boxRadius))
       path.a(boxRadius, boxRadius, 1, boxRadius, -boxRadius)
@@ -543,9 +559,9 @@ class TextBg {
         attrs: {
           width: boxWidth + textBg.bStroke,
           height: boxHeight + textBg.bStroke,
-          style: `left: ${-textBg.bStroke - 20}px;
-            top: ${-textBg.bStroke - textBg.pStroke}px;
-            border-radius: ${textBg.bRadius}px;
+          style: `left: ${left}px;
+            top: ${top}px;
+            border-radius: ${boxRadius}px;
             overflow: hidden`
         },
         content: [{
