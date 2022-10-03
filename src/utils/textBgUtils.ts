@@ -5,6 +5,7 @@ import { isITextBox, isITextGooey, isITextUnderline, ITextBgEffect, ITextGooey }
 import LayerUtils from '@/utils/layerUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
+import mathUtils from '@/utils/mathUtils'
 import _ from 'lodash'
 
 // For text effect gooey
@@ -37,6 +38,9 @@ class Point {
   toString() {
     return `${this.x} ${this.y}`
   }
+}
+function obj2Point(p: {x: number, y: number}) {
+  return new Point(p.x, p.y)
 }
 
 // For text effect gooey
@@ -200,22 +204,38 @@ class Gooey {
       const next = ps[i + 1]
       const nextMiddle = curr.bottom.middle(next.top)
       const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
-      const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) *
-        (prev.bottom.x < curr.top.x ? -1 : 1)
-      const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) *
-        (curr.bottom.x < next.top.x ? 1 : -1)
+      const dirTop = (prev.bottom.x < curr.top.x ? -1 : 1)
+      const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) * dirTop
 
       if (i === 1) {
         path = new Path(prevMiddle)
       }
+
       const curveTopStart = curr.top.add({ x: radiusTop, y: 0 })
       const curveTopEnd = curr.top.add({ x: 0, y: radius })
+      let curveTopStartMiddle = curr.top.middle(curveTopStart)
+      const curveTopEndMiddle = curr.top.middle(curveTopEnd)
+      let angle = Math.abs(Math.atan(radiusTop / radius) * (180 / Math.PI))
+      curveTopStartMiddle = obj2Point(mathUtils.getRotatedPoint(
+        (angle * 2 - 90) * dirTop,
+        curveTopStart, curveTopStartMiddle
+      ))
       path.L(curveTopStart)
-      path.C(curr.top.middle(curveTopStart), curr.top.middle(curveTopEnd), curveTopEnd)
+      path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
+
+      const dirBottom = (curr.bottom.x < next.top.x ? 1 : -1)
+      const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) * dirBottom
       const curveBottomStart = curr.bottom.add({ x: 0, y: -radius })
       const curveBottomEnd = curr.bottom.add({ x: radiusBottom, y: 0 })
+      const curveBottomStartMiddle = curr.bottom.middle(curveBottomStart)
+      let curveBottomEndMiddle = curr.bottom.middle(curveBottomEnd)
+      angle = Math.abs(Math.atan(radiusBottom / radius) * (180 / Math.PI))
+      curveBottomEndMiddle = obj2Point(mathUtils.getRotatedPoint(
+        (90 - angle * 2) * dirBottom,
+        curveBottomEnd, curveBottomEndMiddle
+      ))
       path.L(curveBottomStart)
-      path.C(curr.bottom.middle(curveBottomStart), curr.bottom.middle(curveBottomEnd), curveBottomEnd)
+      path.C(curveBottomStartMiddle, curveBottomEndMiddle, curveBottomEnd)
     }
     ps = this.controlPoints[1]
     for (let i = ps.length - 2; i > 0; i--) {
@@ -225,19 +245,34 @@ class Gooey {
       const next = ps[i + 1]
       const nextMiddle = curr.bottom.middle(next.top)
       const radius = Math.min(curr.oldHeight * bRadius * 0.005, curr.top.dist(curr.bottom) / 2)
-      const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) *
-        (prev.bottom.x < curr.top.x ? -1 : 1)
-      const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) *
-        (curr.bottom.x < next.top.x ? 1 : -1)
+      const dirBottom = (curr.bottom.x < next.top.x ? 1 : -1)
+      const radiusBottom = Math.min(radius, curr.bottom.dist(nextMiddle)) * dirBottom
 
       const curveBottomStart = curr.bottom.add({ x: radiusBottom, y: 0 })
       const curveBottomEnd = curr.bottom.add({ x: 0, y: -radius })
+      let curveBottomStartMiddle = curr.bottom.middle(curveBottomStart)
+      const curveBottomEndMiddle = curr.bottom.middle(curveBottomEnd)
+      let angle = Math.abs(Math.atan(radiusBottom / radius) * (180 / Math.PI))
+      curveBottomStartMiddle = obj2Point(mathUtils.getRotatedPoint(
+        (90 - angle * 2) * dirBottom,
+        curveBottomStart, curveBottomStartMiddle
+      ))
       path.L(curveBottomStart)
-      path.C(curr.bottom.middle(curveBottomStart), curr.bottom.middle(curveBottomEnd), curveBottomEnd)
+      path.C(curveBottomStartMiddle, curveBottomEndMiddle, curveBottomEnd)
+
+      const dirTop = (prev.bottom.x < curr.top.x ? -1 : 1)
+      const radiusTop = Math.min(radius, curr.top.dist(prevMiddle)) * dirTop
       const curveTopStart = curr.top.add({ x: 0, y: radius })
       const curveTopEnd = curr.top.add({ x: radiusTop, y: 0 })
+      const curveTopStartMiddle = curr.top.middle(curveTopStart)
+      let curveTopEndMiddle = curr.top.middle(curveTopEnd)
+      angle = Math.abs(Math.atan(radiusTop / radius) * (180 / Math.PI))
+      curveTopEndMiddle = obj2Point(mathUtils.getRotatedPoint(
+        (angle * 2 - 90) * dirTop,
+        curveTopEnd, curveTopEndMiddle
+      ))
       path.L(curveTopStart)
-      path.C(curr.top.middle(curveTopStart), curr.top.middle(curveTopEnd), curveTopEnd)
+      path.C(curveTopStartMiddle, curveTopEndMiddle, curveTopEnd)
     }
 
     return path.result()
@@ -370,7 +405,7 @@ class TextBg {
 
   drawSvgBg(config: IText, bodyHtml: Element[]) {
     const textBg = config.styles.textBg
-    if (textBg.name === 'none') return {}
+    if (textBg.name === 'none') return null
     const vertical = config.styles.writingMode === 'vertical-lr'
     const rawRects = [] as DOMRect[][]
 
@@ -574,7 +609,7 @@ class TextBg {
         }]
         // .concat(path.toCircle() as any) // Show control point
       }
-    } else return {}
+    } else return null
   }
 
   syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {

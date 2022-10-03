@@ -586,7 +586,7 @@ class TextUtils {
     content.paragraphs.forEach(pData => {
       const p = document.createElement('p')
       let fontSize = 0
-      pData.spans.forEach(spanData => {
+      pData.spans.forEach((spanData, index) => {
         const span = document.createElement('span')
         span.textContent = spanData.text
 
@@ -599,7 +599,9 @@ class TextUtils {
             })
           })
         const textBgSpanEffect = textBgUtils.convertTextSpanEffect(content.styles.textBg)
-        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>)
+        const additionalStyle = Object.assign({}, spanStyleObject, textBgSpanEffect as Record<string, string>,
+          index === pData.spans.length - 1 && spanData.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
+        )
         Object.assign(span.style, additionalStyle)
         // Set CSS var to span
         for (const [key, value] of Object.entries(additionalStyle)) {
