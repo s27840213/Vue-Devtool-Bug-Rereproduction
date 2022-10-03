@@ -124,7 +124,7 @@ export default Vue.extend({
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
             backgroundColor: this.isDuringCopy ? 'transparent' : this.editorBg,
-            ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f' } : {})
+            ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f', borderRadius: '0' } : {})
           }
         case 'scale':
           return {
