@@ -47,7 +47,7 @@
                 draggable="false"
                 @error="onError"
                 @load="onLoad")
-        img(v-else ref="img"
+        img(v-else-if="src" ref="img"
           :style="flipStyles()"
           :class="{'nu-image__picture': true, 'layer-flip': flippedAnimation() }"
           :src="finalSrc"
