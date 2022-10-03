@@ -347,7 +347,7 @@ class PageUtils {
 
   isOutOfBound(pageIndex: number) {
     return generalUtils.isTouchDevice() && !this.isDetailPage ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
-      : pageIndex <= (this.topBound - 2) || pageIndex >= (this.bottomBound + 2)
+      : pageIndex <= (this.topBound - 4) || pageIndex >= (this.bottomBound + 4)
   }
 
   // Algorithm: Binary Search

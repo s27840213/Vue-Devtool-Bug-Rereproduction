@@ -2,8 +2,7 @@
   div(class="lazy-load"
       :style="styles"
       ref="observer")
-    transition(name="fade-in")
-      slot(v-if="shoudBeRendered")
+    slot(v-if="shoudBeRendered")
 </template>
 
 <script lang="ts">
