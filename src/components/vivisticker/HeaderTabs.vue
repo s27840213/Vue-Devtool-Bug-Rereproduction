@@ -190,7 +190,8 @@ export default Vue.extend({
       vivistickerUtils.endEditing()
     },
     handleCopy() {
-      vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+      // vivistickerUtils.sendScreenshotUrl(vivistickerUtils.createUrlForJSON())
+      vivistickerUtils.copyEditor()
     },
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')

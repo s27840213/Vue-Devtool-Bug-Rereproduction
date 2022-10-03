@@ -18,7 +18,8 @@ interface IViviStickerState {
   isStandaloneMode: boolean,
   showTutorial: boolean,
   recentlyBgColors: string[],
-  newBgColor: string
+  newBgColor: string,
+  isDuringCopy: boolean
 }
 
 const EDITOR_BGS = [
@@ -48,7 +49,8 @@ const getDefaultState = (): IViviStickerState => ({
   isStandaloneMode: false,
   showTutorial: false,
   recentlyBgColors: [],
-  newBgColor: ''
+  newBgColor: '',
+  isDuringCopy: false
 })
 
 const state = getDefaultState()
@@ -97,6 +99,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getNewBgColor(state: IViviStickerState): string {
     return state.newBgColor
+  },
+  getIsDuringCopy(state: IViviStickerState): boolean {
+    return state.isDuringCopy
   }
 }
 
@@ -139,6 +144,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_newBgColor(state: IViviStickerState, newBgColor: string) {
     state.newBgColor = newBgColor
+  },
+  SET_isDuringCopy(state: IViviStickerState, isDuringCopy: boolean) {
+    state.isDuringCopy = isDuringCopy
   },
   UPDATE_addRecentlyBgColor(state: IViviStickerState, recentlyBgColor: string) {
     let recently = state.recentlyBgColors

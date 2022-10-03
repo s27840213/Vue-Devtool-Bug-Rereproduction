@@ -1,6 +1,6 @@
 <template lang="pug">
-  div(class="vivisticker")
-    div(class="vivisticker__top")
+  div(class="vivisticker" :style="copyingStyles()")
+    div(class="vivisticker__top" :style="copyingStyles()")
       header-tabs(:style="headerStyles()")
       div(class="vivisticker__content"
           @pointerdown="outerClick")
@@ -64,6 +64,7 @@ export default Vue.extend({
     textUtils.loadDefaultFonts()
     window.updateInfoDone = vivistickerUtils.updateInfoDone
     window.listAssetResult = vivistickerUtils.listAssetResult
+    window.copyDone = vivistickerUtils.copyDone
     if (this.userInfo.isFirstOpen) {
       this.setShowTutorial(true)
     }
@@ -123,7 +124,8 @@ export default Vue.extend({
       isInEditor: 'vivisticker/getIsInEditor',
       isInBgShare: 'vivisticker/getIsInBgShare',
       showTutorial: 'vivisticker/getShowTutorial',
-      userInfo: 'vivisticker/getUserInfo'
+      userInfo: 'vivisticker/getUserInfo',
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
@@ -183,6 +185,9 @@ export default Vue.extend({
       return {
         transform: `translateY(${this.contentEditable ? this.headerOffset : 0}px)`
       }
+    },
+    copyingStyles() {
+      return this.isDuringCopy ? { background: 'transparent' } : {}
     },
     handleSwitchTab(panelType: string, props?: IFooterTabProps) {
       if (this.isInEditor) {

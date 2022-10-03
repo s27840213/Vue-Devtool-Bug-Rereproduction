@@ -1,6 +1,7 @@
 import { IAsset } from '@/interfaces/module'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
+import Vue from 'vue'
 import assetUtils from './assetUtils'
 import groupUtils from './groupUtils'
 import pageUtils from './pageUtils'
@@ -28,9 +29,14 @@ class ViviStickerUtils {
   loadingCallback = undefined as (() => void) | undefined
   callbackMap = {} as {[key: string]: () => void}
   errorMessageMap = {} as {[key: string]: string}
+  editorStateBuffer = {} as {[key: string]: any}
 
   get editorType(): string {
     return store.getters['vivisticker/getEditorType']
+  }
+
+  get controllerHidden(): boolean {
+    return store.getters['vivisticker/getControllerHidden']
   }
 
   get isStandaloneMode(): boolean {
@@ -259,6 +265,33 @@ class ViviStickerUtils {
     }
   }
 
+  copyEditor() {
+    Vue.nextTick(() => {
+      this.preCopyEditor()
+      Vue.nextTick(() => {
+        this.sendCopyEditor().then(() => {
+          this.postCopyEditor()
+        })
+      })
+    })
+  }
+
+  preCopyEditor() {
+    this.editorStateBuffer = {
+      controllerHidden: this.controllerHidden
+    }
+    this.hideController()
+    store.commit('vivisticker/SET_isDuringCopy', true)
+  }
+
+  postCopyEditor() {
+    if (!this.editorStateBuffer.controllerHidden) {
+      this.showController()
+    }
+    store.commit('vivisticker/SET_isDuringCopy', false)
+    this.editorStateBuffer = {}
+  }
+
   commitNewBgColor() {
     const newBgColor = store.getters['vivisticker/getNewBgColor']
     this.addAsset('backgroundColor', { id: newBgColor.replace('#', '') })
@@ -327,6 +360,28 @@ class ViviStickerUtils {
   addAsset(key: string, asset: any) {
     if (this.isStandaloneMode) return
     this.sendToIOS('ADD_ASSET', { key, asset })
+  }
+
+  async sendCopyEditor(): Promise<void> {
+    if (this.isStandaloneMode) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return
+    }
+    const editorEle = document.querySelector('#vvstk-editor') as HTMLElement
+    const { width, height, x, y } = editorEle.getBoundingClientRect()
+    await this.callIOSAsAPI('SCREENSHOT', {
+      params: '',
+      action: 'editorCopy',
+      width,
+      height,
+      x,
+      y,
+      bgColor: store.getters['vivisticker/getEditorBg']
+    }, 'copy-editor')
+  }
+
+  copyDone() {
+    vivistickerUtils.handleCallback('copy-editor')
   }
 }
 

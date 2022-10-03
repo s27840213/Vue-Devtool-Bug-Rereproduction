@@ -1,8 +1,8 @@
 <template lang="pug">
-  div(class="vvstk-editor")
+  div(class="vvstk-editor" :style="copyingStyles()")
     div(class="vvstk-editor__pseudo-page" :style="styles('page')")
       div(class="vvstk-editor__scale-container" :style="styles('scale')")
-        page-content(:config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio")
+        page-content(id="vvstk-editor" :config="config" :pageIndex="pageIndex" :noBg="true" :contentScaleRatio="contentScaleRatio")
         div(class="page-control" :style="styles('control')")
           template(v-for="(layer, index) in config.layers")
             nu-controller(v-if="layer.type !== 'image' || !layer.imgControl"
@@ -55,7 +55,8 @@ export default Vue.extend({
       getLayer: 'getLayer',
       editorBg: 'vivisticker/getEditorBg',
       imgControlPageIdx: 'imgControl/imgControlPageIdx',
-      contentScaleRatio: 'getContentScaleRatio'
+      contentScaleRatio: 'getContentScaleRatio',
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     config(): IPage {
       return this.pages[this.pageIndex]
@@ -112,16 +113,6 @@ export default Vue.extend({
   methods: {
     styles(type: string) {
       switch (type) {
-        case 'content':
-          return {
-            width: `${this.config.width}px`,
-            height: `${this.config.height}px`,
-            backgroundColor: this.config.backgroundColor,
-            backgroundImage: `url(${imageUtils.getSrc(this.config.backgroundImage.config)})`,
-            backgroundPosition: this.config.backgroundImage.posX === -1 ? 'center center'
-              : `${this.config.backgroundImage.posX}px ${this.config.backgroundImage.posY}px`,
-            backgroundSize: `${this.config.backgroundImage.config.styles.imgWidth}px ${this.config.backgroundImage.config.styles.imgHeight}px`
-          }
         case 'control':
           return {
             width: `${this.config.width}px`,
@@ -132,13 +123,17 @@ export default Vue.extend({
           return {
             width: `${this.config.width}px`,
             height: `${this.config.height}px`,
-            backgroundColor: this.editorBg
+            backgroundColor: this.isDuringCopy ? 'transparent' : this.editorBg,
+            ...(this.isDuringCopy ? { boxShadow: '0 0 0 2000px #1f1f1f' } : {})
           }
         case 'scale':
           return {
             transform: `scale(${1 / this.contentScaleRatio})`
           }
       }
+    },
+    copyingStyles() {
+      return this.isDuringCopy ? { background: 'transparent' } : {}
     },
     getClosestSnaplines() {
       this.closestSnaplines.v = [...this.snapUtils.closestSnaplines.v.map((snapline: ISnapline) => snapline.pos)]
