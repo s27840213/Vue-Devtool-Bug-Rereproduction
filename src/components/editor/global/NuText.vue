@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     //- Svg BG for text effex gooey.
-    svg(v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
