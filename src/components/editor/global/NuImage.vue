@@ -245,7 +245,6 @@ export default Vue.extend({
       deep: true
     },
     'config.styles.shadow.currentEffect'(val) {
-      console.warn('change', val)
       if (this.forRender || this.shadow().srcObj.type === 'upload' || this.getCurrFunctionPanelType !== FunctionPanelType.photoShadow) {
         return
       }
@@ -729,7 +728,7 @@ export default Vue.extend({
         layerInfo: layerInfo(),
         cb: () => {
           this.clearShadowSrc()
-          console.log('finish', currentEffect)
+          // console.log('finish', currentEffect)
         }
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)

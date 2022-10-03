@@ -313,7 +313,6 @@ class ImageShadowUtils {
   }
 
   drawImageMatchedShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
-    console.warn('draw imageMAtched')
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
@@ -321,9 +320,6 @@ class ImageShadowUtils {
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
-      // this.setHandleId()
-      // this.setProcessId()
-      // this.setUploadId()
       if (params.layerInfo) {
         this.setIsProcess(params.layerInfo, false)
       }
@@ -426,7 +422,6 @@ class ImageShadowUtils {
   }
 
   drawShadow(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
-    console.warn('draw shadow')
     const canvas = canvas_s[0] || undefined
     const { timeout = DRAWING_TIMEOUT, cb } = params
     const { width: layerWidth, height: layerHeight, imgWidth: _imgWidth, imgHeight: _imgHeight, shadow, imgX: _imgX, imgY: _imgY } = config.styles
@@ -464,7 +459,6 @@ class ImageShadowUtils {
     }
 
     const handler = () => {
-      console.log('start handle')
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
       const { canvasT, canvasMaxSize } = this
@@ -850,7 +844,7 @@ class ImageShadowUtils {
   }
 
   setHandleId(id?: ILayerIdentifier) {
-    console.warn('set handle id', id?.pageId)
+    // console.warn('set handle id', id?.pageId)
     if (!id) {
       id = { pageId: '', layerId: '', subLayerId: '' }
     }
