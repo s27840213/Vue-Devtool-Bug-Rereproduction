@@ -37,6 +37,24 @@ class ListService {
     })
   }
 
+  getInfoList(type: string, designIds: string[]) {
+    const searchParams = {
+      token: '1',
+      type,
+      design_ids: designIds.join(','),
+      locale: localeUtils.currLocale(),
+      cache: 'true',
+      platform: window.location.host,
+      app: 1
+    }
+
+    return axios.request<IListServiceResponse>({
+      url: '/list-design',
+      method: 'GET',
+      params: searchParams
+    })
+  }
+
   // For list factories
   getSvg(params: IListServiceParams) {
     params.type = 'svg'

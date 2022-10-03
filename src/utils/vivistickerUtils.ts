@@ -16,11 +16,20 @@ import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
 import { IUserInfo } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
+import listApis from '@/apis/list'
+import { IListServiceContentDataItem } from '@/interfaces/api'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.0',
   locale: 'us',
   isFirstOpen: false
+}
+
+const MODULE_TYPE_MAPPING: {[key: string]: string} = {
+  objects: 'svg',
+  textStock: 'text',
+  background: 'background',
+  font: 'font'
 }
 
 class ViviStickerUtils {
@@ -353,8 +362,36 @@ class ViviStickerUtils {
   }
 
   listAssetResult(data: { key: string, assets: any[] }) {
-    assetUtils.setRecentlyUsed(data.key, data.assets)
-    vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+    if (!['color', 'backgroundColor'].includes(data.key)) {
+      const designIds = data.assets.map(asset => asset.id)
+      listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
+        const updateList = response.data.data.content[0].list
+        vivistickerUtils.updateAssetContent(data.assets, updateList)
+        assetUtils.setRecentlyUsed(data.key, data.assets)
+        vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+      })
+    } else {
+      assetUtils.setRecentlyUsed(data.key, data.assets)
+      vivistickerUtils.handleCallback(`list-asset-${data.key}`)
+    }
+  }
+
+  updateAssetContent(targetList: any[], updateList: IListServiceContentDataItem[]) {
+    let targetIndex = 0
+    let updateIndex = 0
+    while (updateIndex < updateList.length) {
+      if (targetList[targetIndex].id === updateList[updateIndex].id) {
+        Object.assign(targetList[targetIndex], updateList[updateIndex])
+        targetIndex++
+        updateIndex++
+      } else {
+        targetIndex++
+        if (targetIndex === targetList.length) {
+          targetIndex = 0
+          updateIndex++
+        }
+      }
+    }
   }
 
   addAsset(key: string, asset: any) {
