@@ -17,7 +17,7 @@
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
-        :style="styles(p.styles)")
+        :style="pStyle(p.styles)")
         span(v-for="(span, sIndex) in p.spans"
           class="nu-text__span"
           :data-sindex="sIndex"
@@ -46,6 +46,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -184,6 +185,11 @@ export default Vue.extend({
       return {
         writingMode: this.config.styles.writingMode
       }
+    },
+    pStyle(styles: any) {
+      return _.omit(tiptapUtils.textStylesRaw(styles), [
+        'text-decoration-line', '-webkit-text-decoration-line'
+      ])
     },
     resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
