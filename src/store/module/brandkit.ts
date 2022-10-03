@@ -1,6 +1,6 @@
 import store from '@/store'
 import { GetterTree, ActionTree, MutationTree } from 'vuex'
-import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle } from '@/interfaces/brandkit'
+import { IBrand, IBrandColor, IBrandColorPalette, IBrandFont, IBrandLogo, IBrandTextStyle, IDeletingItem } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import brandkitApi from '@/apis/brandkit'
 import Vue from 'vue'
@@ -29,6 +29,8 @@ interface IBrandKitState {
   palettesPageIndex: number,
   fontsPageIndex: number,
   isSettingsOpen: boolean,
+  isMobileConfirmOpen: boolean,
+  mobileDeleteBuffer: undefined | IDeletingItem,
   editorViewLogos: Record<string, Record<string, string>>,
 }
 
@@ -52,6 +54,8 @@ const getDefaultState = (): IBrandKitState => ({
   palettesPageIndex: 0,
   fontsPageIndex: 0,
   isSettingsOpen: false,
+  isMobileConfirmOpen: false,
+  mobileDeleteBuffer: undefined,
   editorViewLogos: {}
 })
 
@@ -130,6 +134,12 @@ const getters: GetterTree<IBrandKitState, unknown> = {
   },
   getIsSettingsOpen(state: IBrandKitState): boolean {
     return state.isSettingsOpen
+  },
+  getIsMobileConfirmOpen(state: IBrandKitState): boolean {
+    return state.isMobileConfirmOpen
+  },
+  getMobileDeleteBuffer(state: IBrandKitState): undefined | IDeletingItem {
+    return state.mobileDeleteBuffer
   },
   getEditorViewLogos: (state: IBrandKitState) => (assetId: string | undefined = undefined) => {
     return assetId ? state.editorViewLogos[assetId] : state.editorViewLogos
@@ -276,12 +286,16 @@ const actions: ActionTree<IBrandKitState, unknown> = {
       brand.name = oldName
     }, errorShower)
   },
-  async createBrand({ commit }) {
+  async createBrand({ commit }, name?: string) {
     const brand = brandkitUtils.createDefaultBrand()
+    if (name) {
+      brand.name = name
+    }
     brandkitApi.updateBrandsWrapper({
       type: 'brand',
       update_type: 'create',
-      src: brand.id
+      src: brand.id,
+      target: brand.name
     }, () => {
       commit('UPDATE_addBrand', brand)
       commit('SET_currentBrand', brand)
@@ -626,6 +640,12 @@ const mutations: MutationTree<IBrandKitState> = {
   },
   SET_isSettingsOpen(state: IBrandKitState, isSettingsOpen: boolean) {
     state.isSettingsOpen = isSettingsOpen
+  },
+  SET_isMobileConfirmOpen(state: IBrandKitState, isMobileConfirmOpen: boolean) {
+    state.isMobileConfirmOpen = isMobileConfirmOpen
+  },
+  SET_mobileDeleteBuffer(state: IBrandKitState, mobileDeleteBuffer: undefined | IDeletingItem) {
+    state.mobileDeleteBuffer = mobileDeleteBuffer
   },
   SET_editorViewLogos(state: IBrandKitState, editorViewLogos: Record<string, Record<string, string>>) {
     state.editorViewLogos = editorViewLogos

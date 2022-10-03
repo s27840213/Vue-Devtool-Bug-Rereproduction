@@ -58,7 +58,7 @@ const fontProps: string[] = ['font', 'weight', 'align', 'lineHeight', 'fontSpaci
 ]
 
 class CssConveter {
-  convertTransformStyle(x: number, y: number, zindex: number, rotate: number): { transform: string } {
+  convertTransformStyle(x: number, y: number, zindex: number, rotate: number, cancel3D = false, contentScaleRatio = 1): { transform: string } {
     //  The scale feature only applied on "layer-scale" as a child-container of the layer
 
     // if (scale !== 0 && scale !== undefined) {
@@ -70,8 +70,9 @@ class CssConveter {
     // if (scaleY !== 0 && scaleY !== undefined) {
     //   tmpArr.push(`scaleY(${scaleY})`)
     // }
+
     return {
-      transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`
+      transform: cancel3D ? `translate(${x * contentScaleRatio}px, ${y * contentScaleRatio}px) rotate(${rotate}deg)` : `translate3d(${x * contentScaleRatio}px, ${y * contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`
     }
   }
 
@@ -90,6 +91,9 @@ class CssConveter {
         result[styleMap[prop]] = typeof sourceStyles[prop] === 'number' ? `${sourceStyles[prop]}em` : `${sourceStyles[prop]}`
       } else if (prop === 'lineHeight') {
         result[styleMap[prop]] = `${sourceStyles[prop]}`
+      } else if (['boxDecorationBreak'].includes(prop)) { // For webkit CSS
+        result[styleMap[prop]] = `${sourceStyles[prop]}`
+        result[`-webkit-${styleMap[prop]}`] = `${sourceStyles[prop]}`
       } else if (prop === 'font') {
         result[styleMap[prop]] = this.getFontFamily(sourceStyles[prop] as string)
       } else if (typeof sourceStyles[prop] !== 'undefined') {
@@ -103,13 +107,14 @@ class CssConveter {
     return (font + ',').concat(store.getters['text/getDefaultFonts'])
   }
 
-  convertDefaultStyle(sourceStyles: IStyle | ITextStyle): { [key: string]: string } {
+  convertDefaultStyle(sourceStyles: IStyle | ITextStyle, cancel3D = false, contentScaleRatio = 1): { [key: string]: string } {
     const result: { [key: string]: string } = {}
+
     Object.assign(result,
-      { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width}px` : 'initial' },
-      { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height}px` : 'initial' },
+      { width: typeof sourceStyles.width === 'number' ? `${sourceStyles.width * contentScaleRatio}px` : 'initial' },
+      { height: typeof sourceStyles.height === 'number' ? `${sourceStyles.height * contentScaleRatio}px` : 'initial' },
       { opacity: `${sourceStyles.opacity / 100}` },
-      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate))
+      this.convertTransformStyle(sourceStyles.x, sourceStyles.y, sourceStyles.zindex, sourceStyles.rotate, cancel3D, contentScaleRatio))
     return result
   }
 
@@ -140,7 +145,7 @@ class CssConveter {
   //   return this.getKeyByValue(styleMap, propInCss)
   // }
 
-  convertTextShadow (x:number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
+  convertTextShadow(x: number, y: number, color: string, blur?: number): Partial<CSSStyleDeclaration> {
     return {
       textShadow: `${color} ${x}px ${y}px ${blur || 0}px`
     }

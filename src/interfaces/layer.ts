@@ -99,6 +99,7 @@ export interface IText extends ILayer<ITextStyle> {
   isBody?: boolean,
   editing: boolean,
   isEdited: boolean,
+  isTyping: boolean
   contentEditable: boolean
   selection: ITiptapSelection,
 }
@@ -135,12 +136,14 @@ export interface IImage extends ILayer<IImageStyle> {
   clipPath: string,
   isClipper: boolean,
   isFrame?: boolean,
+  isFrameImg?: boolean,
   imgControl: boolean,
   inProcess: LayerProcessType,
   trace?: number,
   isUploading?: boolean,
   parentLayerStyles?: IStyle
-  isHoveringFrame?: boolean
+  isHoveringFrame?: boolean,
+  panelPreviewSrc?: string
 }
 
 export interface IFrameStyle extends IStyle {

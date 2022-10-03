@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="brand-kit-tab" :class="`${theme}-theme`")
+  div(class="brand-kit-tab" :class="`${theme}-theme`" :style="gridStyles()")
     div(class="brand-kit-tab__header"
       :class="`${theme}-theme`")
       div(v-for="tab in tabs" class="brand-kit-tab__tab-block pointer"
@@ -9,9 +9,14 @@
           :class="`${theme}-theme`")
           span(class="brand-kit-tab__tab-name-text"
             :class="`${theme}-theme`") {{ $t(tabNames[tab]) }}
+    div(v-if="notNullBrand && isThemeMobile && settingmode"
+        class="brand-kit-tab__action"
+        :style="marginStyles()"
+        @click.stop.prevent="tabActions[selectedTab].action") {{ tabActions[selectedTab].text }}
     div(v-if="notNullBrand" class="brand-kit-tab__content" :class="`${theme}-theme`")
       component(:is="`brand-kit-tab-${selectedTab}${isThemeEditorLike ? '-sidebar' : ''}${isThemeMobile ? '-mobile' : ''}`"
                 :maxheight="maxheight"
+                :settingmode="settingmode"
                 @deleteItem="handleDeleteItem")
     div(v-else class="brand-kit-tab__content brand-kit-tab__disconnect" :style="minHeightStyles()")
       div
@@ -50,6 +55,10 @@ export default Vue.extend({
     maxheight: {
       default: window.innerHeight * 0.9,
       type: Number
+    },
+    settingmode: {
+      default: false,
+      type: Boolean
     }
   },
   components: {
@@ -70,7 +79,24 @@ export default Vue.extend({
     const tabs = brandkitUtils.getTabKeys()
     return {
       tabs,
-      tabNames: brandkitUtils.getTabNames(this.theme)
+      tabNames: brandkitUtils.getTabNames(this.theme),
+      tabActions: {
+        logo: {
+          text: this.$t('NN0014'),
+          action: () => { console.log('logo') },
+          margin: 24
+        },
+        color: {
+          text: this.$t('NN0404'),
+          action: () => { console.log('color') },
+          margin: 16
+        },
+        text: {
+          text: this.$t('NN0712'),
+          action: () => { console.log('text') },
+          margin: 16
+        }
+      }
     }
   },
   computed: {
@@ -92,6 +118,14 @@ export default Vue.extend({
     ...mapMutations('brandkit', {
       setSelectedTab: 'SET_selectedTab'
     }),
+    gridStyles() {
+      return (this.theme === 'mobile-editor' && this.settingmode) ? {
+        gridTemplateRows: `auto ${42 + this.tabActions[this.selectedTab as 'logo' | 'color' | 'text'].margin}px minmax(0, 1fr)`
+      } : {}
+    },
+    marginStyles() {
+      return { marginBottom: `${this.tabActions[this.selectedTab as 'logo' | 'color' | 'text'].margin}px` }
+    },
     minHeightStyles() {
       return this.theme === 'mobile-editor' ? { minHeight: `${this.maxheight}px` } : {}
     },
@@ -128,6 +162,7 @@ export default Vue.extend({
     }
     &.mobile-editor-theme {
       height: 40px;
+      margin-bottom: 24px;
       justify-content: space-evenly;
     }
   }
@@ -181,13 +216,23 @@ export default Vue.extend({
       }
     }
   }
+  &__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    @include text-H6;
+    color: white;
+    background: setColor(blue-1);
+    border-radius: 5px;
+  }
   &__content {
     margin-top: 30px;
     &.editor-theme {
       height: calc(100% - 150px);
     }
     &.mobile-editor-theme {
-      margin-top: 24px;
+      margin-top: 0;
       overflow-y: auto;
       @include no-scrollbar;
     }

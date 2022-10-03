@@ -6,7 +6,6 @@
 
 <script lang="ts">
 import { ShadowEffectType } from '@/interfaces/imgShadow'
-import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
 import Vue from 'vue'
@@ -16,21 +15,25 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    imgControl: Boolean
+    imgControl: Boolean,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   data() {
     return {
     }
   },
   computed: {
+  },
+  methods: {
     shapeWidth(): number {
       return (this.config.vSize?.[0] ?? 0) + (this.config.pDiff?.[0])
     },
     shapeHeight(): number {
       return (this.config.vSize?.[1] ?? 0) + (this.config.pDiff?.[1])
-    }
-  },
-  methods: {
+    },
     styles() {
       const { type, imgControl } = this.config
       const { horizontalFlip, verticalFlip } = this.config.styles
@@ -46,17 +49,17 @@ export default Vue.extend({
           } else {
             // clipPath = layerPath
           }
-          width = `${width}px`
-          height = `${height}px`
+          width = `${width * this.contentScaleRatio}px`
+          height = `${height * this.contentScaleRatio}px`
           break
         case 'shape':
-          width = `${this.shapeWidth}px`
-          height = `${this.shapeHeight}px`
+          width = `${this.shapeWidth()}px`
+          height = `${this.shapeHeight()}px`
           break
         case 'frame':
           if (frameUtils.isImageFrame(this.config)) {
-            width = `${width}px`
-            height = `${height}px`
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
           } else {
             width = `${width / scale}px`
             height = `${height / scale}px`

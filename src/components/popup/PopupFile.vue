@@ -40,8 +40,7 @@ div(class="popup-file")
   div(class="popup-file__item"
       @click="onLogoutClicked()")
       span {{$tc('NN0167',2)}}
-  div(v-if="buildNumber"
-    class="popup-file__item")
+  div(class="popup-file__item" @click="gotoMobile()")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
     div(class="popup-file__item" @click="testSignup()")
@@ -164,6 +163,9 @@ export default Vue.extend({
     onLogoutClicked() {
       localStorage.setItem('token', '')
       window.location.href = '/'
+    },
+    gotoMobile() { // TO-DELETE
+      window.location.href = this.$router.currentRoute.fullPath.replace('editor', 'mobile-editor')
     }
   }
 })

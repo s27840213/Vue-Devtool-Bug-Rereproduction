@@ -162,11 +162,11 @@ class MouseUtils {
     })
   }
 
-  clipperHandler(l: IImage, clipPath: string, clipperStyles: IStyle): IImage {
+  clipperHandler(_layer: IImage, clipPath: string, clipperStyles: IStyle): IImage {
     /**
      * If the clipper is already clipped an image, setting the initial size as the layer size.
      */
-    const layer = generalUtils.deepCopy(l) as IImage
+    const layer = generalUtils.deepCopy(_layer) as IImage
     if (typeof clipperStyles.imgX !== 'undefined') {
       clipperStyles.initWidth = clipperStyles.width / clipperStyles.scale
       clipperStyles.initHeight = clipperStyles.height / clipperStyles.scale

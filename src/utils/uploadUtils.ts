@@ -1201,7 +1201,9 @@ class UploadUtils {
                 logUtils.setLog(`Successfully get asset design (pageNum: ${json.pages.length})`)
                 themeUtils.refreshTemplateState()
 
-                pageUtils.fitPage()
+                Vue.nextTick(() => {
+                  pageUtils.fitPage()
+                })
                 break
               }
               case GetDesignType.NEW_DESIGN_TEMPLATE: {

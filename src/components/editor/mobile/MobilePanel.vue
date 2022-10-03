@@ -97,6 +97,7 @@ import colorUtils from '@/utils/colorUtils'
 import { ICurrSelectedInfo, IFooterTabProps } from '@/interfaces/editor'
 import editorUtils from '@/utils/editorUtils'
 import pageUtils from '@/utils/pageUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   name: 'mobile-panel',
@@ -155,7 +156,13 @@ export default Vue.extend({
       extraColorEvent: ColorEventType.text,
       isDraggingPanel: false,
       currSubColorEvent: '',
-      innerTab: ''
+      innerTab: '',
+      fitPage: _.debounce(() => {
+        this.$nextTick(() => {
+          pageUtils.fitPage()
+        })
+      }, 100),
+      resizeObserver: null as unknown as ResizeObserver
     }
   },
   computed: {
@@ -166,7 +173,8 @@ export default Vue.extend({
       inMultiSelectionMode: 'mobileEditor/getInMultiSelectionMode',
       currSelectedInfo: 'getCurrSelectedInfo',
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
-      currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel'
+      currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
+      showMobilePanel: 'mobileEditor/getShowMobilePanel'
     }),
     backgroundImgControl(): boolean {
       return pageUtils.currFocusPage.backgroundImage.config?.imgControl ?? false
@@ -296,7 +304,8 @@ export default Vue.extend({
         case 'download': {
           return {
             is: 'popup-download',
-            hideContainer: true
+            hideContainer: true,
+            pageIndex: pageUtils.currFocusPageIndex
           }
         }
         case 'text-effect': {
@@ -316,17 +325,20 @@ export default Vue.extend({
           })
         }
         case 'brand-list': {
+          const brandDefaultVal = Object.assign(defaultVal, {
+            panelHistory: this.panelHistory
+          })
           if (editorUtils.currActivePanel === 'text') {
-            return Object.assign(defaultVal, {
+            return Object.assign(brandDefaultVal, {
               defaultOption: true
             })
           }
           if (editorUtils.currActivePanel === 'brand') {
-            return Object.assign(defaultVal, {
+            return Object.assign(brandDefaultVal, {
               hasAddBrand: true
             })
           }
-          return defaultVal
+          return brandDefaultVal
         }
         case 'brand': {
           return Object.assign(defaultVal, {
@@ -380,6 +392,16 @@ export default Vue.extend({
             }
           }
         }
+        case 'brand-list': {
+          return {
+            pushHistory: (history: string) => {
+              this.panelHistory.push(history)
+            },
+            back: () => {
+              this.panelHistory.pop()
+            }
+          }
+        }
         default: {
           return {}
         }
@@ -393,23 +415,37 @@ export default Vue.extend({
       }
     },
     rightBtnName(): string {
-      if (this.panelHistory.length > 0 || ['crop', 'resize'].includes(this.currActivePanel)) {
-        return 'check-circle'
+      if ((this.panelHistory.length > 0 && this.currActivePanel !== 'brand-list') || ['crop', 'resize'].includes(this.currActivePanel)) {
+        return 'check-mobile-circle'
       } else {
         return 'close-circle'
       }
     },
     leftButtonAction(): (e: PointerEvent) => void {
+      const colorHandler = () => {
+        if (this.showExtraColorPanel || this.currActivePanel === 'color') {
+          if (this.panelHistory[this.panelHistory.length - 1] === 'color-picker') {
+            this.addRecentlyColors(colorUtils.currColor)
+          }
+        }
+      }
       if (this.showExtraColorPanel) {
         return () => {
+          colorHandler()
           this.showExtraColorPanel = false
           this.panelHistory.pop()
         }
       }
       if (this.panelHistory.length > 0) {
-        return () => { this.panelHistory.pop() }
+        return () => {
+          colorHandler()
+          this.panelHistory.pop()
+        }
       } else {
-        return () => { this.closeMobilePanel() }
+        return () => {
+          colorHandler()
+          this.closeMobilePanel()
+        }
       }
     },
     rightButtonAction(): () => void {
@@ -474,10 +510,20 @@ export default Vue.extend({
       // Use v-show to show MobilePanel will cause
       // mounted not triggered, use watch to reset height.
       this.panelHeight = this.initHeightPx()
+    },
+    showMobilePanel(newVal) {
+      if (!newVal) {
+        this.showExtraColorPanel = false
+      }
     }
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
+    this.resizeObserver = new (window as any).ResizeObserver(this.fitPage)
+    this.resizeObserver.observe(this.$refs.panel as Element)
+  },
+  beforeDestroy() {
+    this.resizeObserver && this.resizeObserver.disconnect()
   },
   methods: {
     ...mapMutations({
@@ -498,7 +544,7 @@ export default Vue.extend({
     },
     isModal(target: HTMLElement): boolean {
       if (!target || target.id === 'app') return false
-      else if (target.className.includes('modal')) return true
+      else if (target.className && target.className.includes('modal')) return true
       return this.isModal(target.parentNode as HTMLElement)
     },
     middleware(event: MouseEvent | TouchEvent | PointerEvent) {
@@ -544,14 +590,8 @@ export default Vue.extend({
         this.closeMobilePanel()
       } else if (this.panelHeight >= maxHeightPx * 0.75) {
         this.panelHeight = maxHeightPx
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
       } else {
         this.panelHeight = maxHeightPx * 0.5
-        this.$nextTick(() => {
-          pageUtils.fitPage()
-        })
       }
 
       eventUtils.removePointerEvent('pointermove', this.dragingPanel)
@@ -637,6 +677,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
     overflow-y: scroll;
+    overflow-x: hidden;
     @include no-scrollbar;
   }
 

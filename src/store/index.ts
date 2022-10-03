@@ -85,7 +85,8 @@ const getDefaultState = (): IEditorState => ({
       height: 0
     },
     isTransparent: false,
-    isPreview: false
+    isPreview: false,
+    panelPreviewSrc: ''
   },
   currSubSelectedInfo: {
     index: -1,
@@ -108,7 +109,9 @@ const getDefaultState = (): IEditorState => ({
   inGestureToolMode: false,
   isMobile: false,
   isLargeDesktop: false,
-  isGlobalLoading: false
+  isGlobalLoading: false,
+  useMobileEditor: false,
+  defaultContentScaleRatio: 0.6
 })
 
 const state = getDefaultState()
@@ -273,6 +276,12 @@ const getters: GetterTree<IEditorState, unknown> = {
   },
   getIsGlobalLoading(state: IEditorState) {
     return state.isGlobalLoading
+  },
+  getUseMobileEditor(state: IEditorState) {
+    return state.useMobileEditor
+  },
+  getContentScaleRatio(state: IEditorState) {
+    return state.defaultContentScaleRatio
   }
 }
 
@@ -291,18 +300,21 @@ const mutations: MutationTree<IEditorState> = {
     state.middlemostPageIndex = 0
     state.currActivePageIndex = -1
   },
+  SET_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
+    state.pages.splice(updateInfo.pos, 1, updateInfo.newPage)
+  },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
-    state.pages.splice(updateInfo.pos, 0, updateInfo.newPage)
+    state.pages = state.pages.slice(0, updateInfo.pos).concat(updateInfo.newPage, state.pages.slice(updateInfo.pos))
   },
   DELETE_page(state: IEditorState, pageIndex: number) {
-    state.pages.splice(pageIndex, 1)
-    console.log(state.currActivePageIndex, state.pages.length - 1)
-    console.log(Math.min(state.currActivePageIndex, state.pages.length - 1))
-    state.currActivePageIndex = Math.min(state.currActivePageIndex, state.pages.length - 1)
-    console.log(state.currActivePageIndex)
+    state.pages = state.pages.slice(0, pageIndex).concat(state.pages.slice(pageIndex + 1))
+    /**
+     * @Note the reason why I replace the splice method is bcz its low performance
+     */
+    //  state.pages.splice(pageIndex, 1)
   },
   SET_pagesName(state: IEditorState, name: string) {
     state.name = name
@@ -427,7 +439,7 @@ const mutations: MutationTree<IEditorState> = {
       }
     })
   },
-  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string, isTransparent: boolean }) {
+  SET_currDraggedPhoto(state: IEditorState, photo: { srcObj: SrcObj, styles: { width: number, height: number }, isPreview: boolean, previewSrc: string, isTransparent: boolean, panelPreviewSrc?: string }) {
     if (photo.srcObj) {
       state.currDraggedPhoto.srcObj = {
         ...state.currDraggedPhoto.srcObj,
@@ -448,6 +460,9 @@ const mutations: MutationTree<IEditorState> = {
     }
     if (typeof photo.isTransparent !== 'undefined') {
       state.currDraggedPhoto.isTransparent = photo.isTransparent
+    }
+    if (photo.panelPreviewSrc) {
+      state.currDraggedPhoto.panelPreviewSrc = photo.panelPreviewSrc
     }
   },
   SET_hasCopiedFormat(state: IEditorState, value: boolean) {
@@ -818,6 +833,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   SET_isGlobalLoading(state: IEditorState, bool: boolean) {
     state.isGlobalLoading = bool
+  },
+  SET_useMobileEditor(state: IEditorState, bool: boolean) {
+    state.useMobileEditor = bool
   },
   ...imgShadowMutations,
   ADD_subLayer

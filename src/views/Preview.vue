@@ -1,11 +1,13 @@
 <template lang="pug">
-  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0")
+div(class="preview" :style="containStyles")
+  page-content(v-if="pages.length > 0" :config="pages[0]" :pageIndex="0" :contentScaleRatio="contentScaleRatio")
+  span(v-if="host" class="preview__host") {{host}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import PageContent from '@/components/editor/page/PageContent.vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import uploadUtils from '@/utils/uploadUtils'
 
 export default Vue.extend({
@@ -17,9 +19,25 @@ export default Vue.extend({
     return {}
   },
   computed: {
+    ...mapState({
+      contentScaleRatio: 'defaultContentScaleRatio'
+    }),
     ...mapGetters({
       pages: 'getPages'
-    })
+    }),
+    host(): string {
+      const host = window.location.host
+      const subdomain = host.match(/(.+).vivipic.com/)
+      if (host === 'test.vivipic.com') return ''
+      else if (host === 'localhost:8080') return 'local'
+      else if (subdomain) return subdomain[1]
+      else return host
+    },
+    containStyles(): any {
+      return {
+        transform: `scale(${1 / this.contentScaleRatio})`
+      }
+    }
   },
   mounted() {
     const type = this.$router.currentRoute.query.type
@@ -31,3 +49,17 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.preview{
+  position: relative;
+  &__host {
+    @include body-LG;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: black;
+    background-color: setColor(white);
+  }
+}
+</style>

@@ -1,7 +1,7 @@
 <template lang="pug">
-  div(class="panel-fonts")
-    div(v-if="!noTitle" class="panel-fonts__title")
-      span(class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
+  div(:class="['panel-fonts', isMobile ? 'panel-fonts-mobile' : 'panel-fonts-pc']")
+    div(v-if="!noTitle && !isMobile" class="panel-fonts__title")
+      span(v-if="!isMobile" class="text-blue-1 label-lg") {{ capitalize($tc('NN0353', 2)) }}
       svg-icon(
         v-if="!isMobile"
         class="panel-fonts__close pointer"
@@ -285,7 +285,12 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .panel-fonts {
-  @include size(100%, calc(100vh - 100px));
+  &-mobile {
+    @include size(100%, calc(100% + 20px));
+  }
+  &-pc {
+    @include size(100%, calc(100vh + 100px));
+  }
   display: flex;
   flex-direction: column;
   &__title {

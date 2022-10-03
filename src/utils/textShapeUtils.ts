@@ -1,12 +1,13 @@
-import TextEffectUtils from '@/utils/textEffectUtils'
+import textEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
 import { ILayer, ISpan, IText } from '@/interfaces/layer'
 import store from '@/store'
-import generalUtils from './generalUtils'
-import layerUtils from './layerUtils'
-import tiptapUtils from './tiptapUtils'
-import mathUtils from './mathUtils'
+import generalUtils from '@/utils/generalUtils'
+import layerUtils from '@/utils/layerUtils'
+import tiptapUtils from '@/utils/tiptapUtils'
+import mathUtils from '@/utils/mathUtils'
 import { ICurveTextPostParams, ICurveTextPreParams } from '@/interfaces/text'
+import localStorageUtils from '@/utils/localStorageUtils'
 
 class Controller {
   shapes = {} as { [key: string]: any }
@@ -25,7 +26,7 @@ class Controller {
   }
 
   getSpecSubTextLayer(index: number): IText {
-    return TextEffectUtils.getSpecSubTextLayer(index)
+    return textEffectUtils.getSpecSubTextLayer(index)
   }
 
   getRadiusByBend(bend: number) {
@@ -48,8 +49,10 @@ class Controller {
     } as { [key: string]: any }
     if (styleTextShape && (styleTextShape as any).name === shape) {
       Object.assign(styles.textShape, styleTextShape, attrs)
+      localStorageUtils.set('textEffectSetting', shape, styles.textShape)
     } else {
-      Object.assign(styles.textShape, defaultAttrs, attrs, { name: shape })
+      const localAttrs = localStorageUtils.get('textEffectSetting', shape)
+      Object.assign(styles.textShape, defaultAttrs, localAttrs, attrs, { name: shape })
     }
     if (shape === 'none') {
       const { bend } = styleTextShape as any
@@ -77,6 +80,11 @@ class Controller {
 
   isCurvedText(styles: any): boolean {
     return styles.textShape?.name === 'curve'
+  }
+
+  resetCurrTextEffect() {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textShape.name
+    this.setTextShape(effectName, this.shapes[effectName])
   }
 
   setTextShape(shape: string, attrs?: any): void {

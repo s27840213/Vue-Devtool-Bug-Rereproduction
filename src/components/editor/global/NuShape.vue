@@ -3,12 +3,12 @@
     svg(:view-box.camel="viewBoxFormatter" :style="styles()")
       defs(v-if="config.category === 'E'" v-html="svgFormatter")
       defs
-        filter(v-if="config.category === 'C'" :id="className" v-html="filterFormatter")
-        clipPath(v-if="config.category === 'E'" :id="clipPathId")
-          use(:xlink:href="svgId")
+        filter(v-if="config.category === 'C'" :id="className()" v-html="filterFormatter")
+        clipPath(v-if="config.category === 'E'" :id="clipPathId()")
+          use(:xlink:href="svgId()")
       g(v-if="config.category === 'E'")
-        use(:xlink:href="svgId" :clip-path="'url(#' + clipPathId + ')'" :style="styleTextContent[0]")
-      g(v-else :filter="config.category === 'C' ? filterId : 'none'" v-html="svgFormatter")
+        use(:xlink:href="svgId()" :clip-path="'url(#' + clipPathId() + ')'" :style="styleTextContent[0]")
+      g(v-else :filter="config.category === 'C' ? filterId() : 'none'" v-html="svgFormatter")
 </template>
 
 <script lang="ts">
@@ -65,7 +65,7 @@ export default Vue.extend({
     'config.color': {
       handler: function (newVal) {
         if (this.config.color && this.config.color.length) {
-          const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
+          const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, newVal, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
           this.updateStyleNode(styleText)
         }
       },
@@ -74,7 +74,7 @@ export default Vue.extend({
     'config.pDiff': {
       handler: function (newVal) {
         if (this.config.category === 'C') {
-          const transText = shapeUtils.transFormatter(this.className, this.config.transArray ?? [], {
+          const transText = shapeUtils.transFormatter(this.className(), this.config.transArray ?? [], {
             cSize: this.config.cSize,
             pSize: this.config.pSize,
             pDiff: newVal
@@ -87,7 +87,7 @@ export default Vue.extend({
     'config.point': {
       handler: function (newVal) {
         if (this.config.category === 'D') {
-          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], this.config.size, newVal, this.config.markerWidth)
+          const transText = shapeUtils.markerTransFormatter(this.className(), this.config.markerTransArray ?? [], this.config.size, newVal, this.config.markerWidth)
           this.updateTransNode(transText)
 
           Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, this.config.size[0], this.config.styles))
@@ -98,44 +98,44 @@ export default Vue.extend({
     'config.size': {
       handler: function (newVal) {
         if (this.config.category === 'D') {
-          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], newVal, this.config.point, this.config.markerWidth)
+          const transText = shapeUtils.markerTransFormatter(this.className(), this.config.markerTransArray ?? [], newVal, this.config.point, this.config.markerWidth)
           this.updateTransNode(transText)
 
           Object.assign(this.config.styles, shapeUtils.updatedDimensions(this.config.point, newVal[0], this.config.styles))
         }
 
-        const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, newVal, this.config.dasharray, this.config.linecap, this.config.filled)
+        const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, newVal, this.config.dasharray, this.config.linecap, this.config.filled)
         this.updateStyleNode(styleText)
       },
       deep: true
     },
     'config.dasharray': {
       handler: function (newVal) {
-        const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, newVal, this.config.linecap, this.config.filled)
+        const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, newVal, this.config.linecap, this.config.filled)
         this.updateStyleNode(styleText)
       },
       deep: true
     },
     'config.linecap': {
       handler: function (newVal) {
-        const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, newVal, this.config.filled)
+        const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, newVal, this.config.filled)
         this.updateStyleNode(styleText)
       }
     },
     'config.filled': {
       handler: function (newVal) {
-        const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, newVal)
+        const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, newVal)
         this.updateStyleNode(styleText)
       }
     },
     'config.markerId': {
       handler: function (newVal) {
         if (this.config.category === 'D') {
-          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray ?? [], this.config.size, this.config.point, this.config.markerWidth)
+          const transText = shapeUtils.markerTransFormatter(this.className(), this.config.markerTransArray ?? [], this.config.size, this.config.point, this.config.markerWidth)
           this.updateTransNode(transText)
         }
 
-        const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
+        const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
         this.updateStyleNode(styleText)
       },
       deep: true
@@ -158,21 +158,6 @@ export default Vue.extend({
     }
   },
   computed: {
-    className(): string {
-      return this.config.className + this.pageIndex.toString()
-    },
-    filterId(): string {
-      if (this.config.category === 'C') {
-        return `url(#${this.className})`
-      }
-      return 'none'
-    },
-    svgId(): string {
-      return `#${this.className}SVG`
-    },
-    clipPathId(): string {
-      return `${this.className}C`
-    },
     viewBoxFormatter(): string {
       if (this.paramsReady) {
         if (this.config.category === 'D') {
@@ -187,7 +172,7 @@ export default Vue.extend({
       if (this.paramsReady) {
         const point = (this.config.category === 'D') ? shapeUtils.pointPreprocess(this.config.point, this.config.markerWidth, this.config.trimWidth, this.config.size[0], this.config.linecap, this.config.trimOffset) : this.config.point
         const svgParameters = (this.config.category === 'E') ? shapeUtils.svgParameters(this.config.shapeType, this.config.vSize, this.config.size) : []
-        return shapeUtils.svgFormatter(this.config.svg, this.className, this.styleTextContent, this.transTextContent, point, svgParameters, this.config.pDiff)
+        return shapeUtils.svgFormatter(this.config.svg, this.className(), this.styleTextContent, this.transTextContent, point, svgParameters, this.config.pDiff)
       } else {
         return ''
       }
@@ -267,9 +252,28 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   methods: {
+    className(): string {
+      return this.config.className + this.pageIndex.toString()
+    },
+    filterId(): string {
+      if (this.config.category === 'C') {
+        return `url(#${this.className()})`
+      }
+      return 'none'
+    },
+    svgId(): string {
+      return `#${this.className()}SVG`
+    },
+    clipPathId(): string {
+      return `${this.className()}C`
+    },
     styles() {
       if (this.paramsReady) {
         return {
@@ -312,7 +316,7 @@ export default Vue.extend({
               this.config.className = shapeUtils.classGenerator()
             }
           }
-          const transText = shapeUtils.transFormatter(this.className, this.config.transArray, {
+          const transText = shapeUtils.transFormatter(this.className(), this.config.transArray, {
             cSize: this.config.cSize,
             pSize: this.config.pSize,
             pDiff: this.config.pDiff
@@ -325,7 +329,7 @@ export default Vue.extend({
           if (!svg) {
             await shapeUtils.addComputableInfo(this.config)
           }
-          const transText = shapeUtils.markerTransFormatter(this.className, this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
+          const transText = shapeUtils.markerTransFormatter(this.className(), this.config.markerTransArray, this.config.size, this.config.point, this.config.markerWidth)
           this.updateTransNode(transText)
           break
         }
@@ -368,7 +372,7 @@ export default Vue.extend({
           layerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { color: shape.color })
         }
       }
-      const styleText = shapeUtils.styleFormatter(this.className, this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
+      const styleText = shapeUtils.styleFormatter(this.className(), this.config.styleArray, this.config.color, this.config.size, this.config.dasharray, this.config.linecap, this.config.filled)
       this.updateStyleNode(styleText)
       this.paramsReady = true
     },
