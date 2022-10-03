@@ -95,7 +95,6 @@ class ImageShadowUtils {
    */
   private canvasMaxSize = document.createElement('canvas')
   private _draw = undefined as number | undefined
-  private handlerId = ''
 
   private _layerData = null as {
     config: IImage,
@@ -119,19 +118,24 @@ class ImageShadowUtils {
 
   drawingInit(canvas: HTMLCanvasElement, img: HTMLImageElement, config: IImage, params: DrawParams) {
     const { canvasT, canvasMaxSize } = this
-    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow: { maxsize = 1600, middsize = 510 } } } = config
+    const { styles: { width, height, imgWidth, imgHeight, imgX, imgY, shadow } } = config
+    const { maxsize = 1600, middsize = 510 } = shadow
     if (canvasT.width !== canvas.width || canvasT.height !== canvas.height) {
       canvasT.setAttribute('width', `${canvas.width}`)
       canvasT.setAttribute('height', `${canvas.height}`)
     }
     const imgRatio = img.naturalWidth / img.naturalHeight
-    if (config.styles.shadow.currentEffect === ShadowEffectType.floating) {
-      const canvasW = Math.round((imgRatio > 1 ? 1600 : 1600 * imgRatio) + CANVAS_SPACE)
-      const canvasH = Math.round((imgRatio > 1 ? 1600 / imgRatio : 1600) + CANVAS_SPACE)
+    const isStaticShadow = shadow.currentEffect === ShadowEffectType.floating ||
+      (!shadow.isTransparent && [ShadowEffectType.shadow, ShadowEffectType.frame, ShadowEffectType.blur].includes(shadow.currentEffect))
+
+    if (isStaticShadow) {
+      const ratio = shadow.currentEffect === ShadowEffectType.floating ? imgRatio : width / height
+      const canvasW = Math.round((ratio > 1 ? 1600 : 1600 * ratio) + CANVAS_SPACE)
+      const canvasH = Math.round((ratio > 1 ? 1600 / ratio : 1600) + CANVAS_SPACE)
       canvasMaxSize.setAttribute('width', canvasW.toString())
       canvasMaxSize.setAttribute('height', canvasH.toString())
+      /** only handle the max-size-canvas calculation while in preview state */
     } else if (params.timeout !== 0) {
-      // only handle the max-size-canvas calculation while in preview state
       const imgRatio = img.naturalWidth / img.naturalHeight
       const canvasW = Math.round((imgRatio > 1 ? maxsize : maxsize * imgRatio) + CANVAS_SPACE)
       const canvasH = Math.round((imgRatio > 1 ? maxsize / imgRatio : maxsize) + CANVAS_SPACE)
@@ -151,25 +155,34 @@ class ImageShadowUtils {
         layerId: primarylayerId || config.id || '',
         subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
       })
-      this.setHandleId({
-        pageId: pageUtils.currFocusPage.id,
-        layerId: primarylayerId || config.id || '',
-        subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
-      })
+      // this.setHandleId({
+      //   pageId: pageUtils.currFocusPage.id,
+      //   layerId: primarylayerId || config.id || '',
+      //   subLayerId: layerInfo.subLayerIdx !== -1 ? config.id || '' : ''
+      // })
     }
     if ([ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(config.styles.shadow.currentEffect)) {
       const ctxT = this.canvasT.getContext('2d') as CanvasRenderingContext2D
       const { drawCanvasW, drawCanvasH, timeout = DRAWING_TIMEOUT } = params
-      const drawImgWidth = width / imgWidth * img.naturalWidth
-      const drawImgHeight = height / imgHeight * img.naturalHeight
-      const scaleRatio = img.naturalWidth / imgWidth
-      const x = (canvas.width - drawCanvasW) * 0.5
-      const y = (canvas.height - drawCanvasH) * 0.5
-      ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
-      ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
-      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
       const isRect = config.styles.shadow.currentEffect === ShadowEffectType.frame && !config.styles.shadow.isTransparent
-      this.dilate = getDilate(imageData, isRect, undefined, !timeout ? maxsize / middsize : 1)
+      if (isRect) {
+        const drawImgWidth = img.naturalWidth
+        const drawImgHeight = img.naturalHeight
+        const x = (canvas.width - drawCanvasW) * 0.5
+        const y = (canvas.height - drawCanvasH) * 0.5
+        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+        ctxT.drawImage(img, 0, 0, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      } else {
+        const drawImgWidth = width / imgWidth * img.naturalWidth
+        const drawImgHeight = height / imgHeight * img.naturalHeight
+        const scaleRatio = img.naturalWidth / imgWidth
+        const x = (canvas.width - drawCanvasW) * 0.5
+        const y = (canvas.height - drawCanvasH) * 0.5
+        ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
+        ctxT.drawImage(img, -imgX * scaleRatio, -imgY * scaleRatio, drawImgWidth, drawImgHeight, x, y, drawCanvasW, drawCanvasH)
+      }
+      const imageData = ctxT.getImageData(0, 0, canvasT.width, canvasT.height)
+      this.dilate = getDilate(imageData, isRect, undefined, isStaticShadow ? 1 : !timeout ? maxsize / middsize : 1)
       ctxT.clearRect(0, 0, canvasT.width, canvasT.height)
     }
     if (params && params.timeout !== 0) {
@@ -187,28 +200,40 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.floating].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
-        logUtils.setLog('Error: drawFloatingShadow with wrong effect type:' + config.styles.shadow.currentEffect)
+        logUtils.setLog('Exception: drawFloatingShadow with wrong effect type:' + config.styles.shadow.currentEffect)
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
+      // this.setHandleId()
+      // this.setProcessId()
+      // this.setUploadId()
+      if (params.layerInfo) {
+        this.setIsProcess(params.layerInfo, false)
+      }
       return
     }
-    const { timeout = DRAWING_TIMEOUT } = params
-    const handlerId = generalUtils.generateRandomString(6)
-    if (!store.getters['shadow/isUploading'] || !params.timeout) {
-      this.handlerId = handlerId
+
+    if (params.layerInfo) {
+      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
+      const pageId = layerUtils.getPage(pageIndex).id
+      const layer = layerUtils.getLayer(pageIndex, layerIndex)
+      const layerId = layer.id as string
+      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
+      // this.setHandleId({ pageId, layerId, subLayerId })
     }
+
+    const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
       this._draw = setTimeout(() => {
-        this.floatingHandler(canvas_s, img, config, handlerId, params)
+        this.floatingHandler(canvas_s, img, config, params)
       }, timeout)
     } else {
-      await this.floatingHandler(canvas_s, img, config, handlerId, params)
+      await this.floatingHandler(canvas_s, img, config, params)
     }
   }
 
-  floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  floatingHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     logUtils.setLog('canvas drawing: floatingHandler start:')
     const canvas = canvas_s[0] || undefined
     setMark('floating', 0)
@@ -291,28 +316,37 @@ class ImageShadowUtils {
     const canvas = canvas_s[0] || undefined
     if (!canvas || ![ShadowEffectType.imageMatched].includes(config.styles.shadow.currentEffect)) {
       if (canvas) {
-        logUtils.setLog('Error: drawImageMatchedShadow with wrong effect type:' + config.styles.shadow.currentEffect)
+        logUtils.setLog('Exception: drawImageMatchedShadow with wrong effect type:' + config.styles.shadow.currentEffect)
       } else {
         logUtils.setLog('Error: input canvas is undefined')
       }
+      if (params.layerInfo) {
+        this.setIsProcess(params.layerInfo, false)
+      }
       return
     }
-    const { timeout = DRAWING_TIMEOUT } = params
-    const handlerId = generalUtils.generateRandomString(6)
-    if (!store.getters['shadow/isUploading'] || !params.timeout) {
-      this.handlerId = handlerId
+
+    if (params.layerInfo) {
+      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
+      const pageId = layerUtils.getPage(pageIndex).id
+      const layer = layerUtils.getLayer(pageIndex, layerIndex)
+      const layerId = layer.id as string
+      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
+      // this.setHandleId({ pageId, layerId, subLayerId })
     }
+
+    const { timeout = DRAWING_TIMEOUT } = params
     if (timeout) {
       clearTimeout(this._draw)
       this._draw = setTimeout(() => {
-        this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
+        this.imageMathcedHandler(canvas_s, img, config, params)
       }, timeout)
     } else {
-      this.imageMathcedHandler(canvas_s, img, config, handlerId, params)
+      this.imageMathcedHandler(canvas_s, img, config, params)
     }
   }
 
-  imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, handlerId: string, params: DrawParams) {
+  imageMathcedHandler(canvas_s: HTMLCanvasElement[], img: HTMLImageElement, config: IImage, params: DrawParams) {
     logUtils.setLog('canvas drawing: drawImageMatchedShadow start:')
     const canvas = canvas_s[0] || undefined
     setMark('imageMatched', 0)
@@ -360,9 +394,7 @@ class ImageShadowUtils {
     ctxMaxSize.drawImage(canvasT, 0, 0, canvasT.width, canvasT.height, 0, 0, canvasMaxSize.width, canvasMaxSize.height)
     const imageData = ctxMaxSize.getImageData(0, 0, canvasMaxSize.width, canvasMaxSize.height)
     setMark('imageMatched', 1)
-    const start = Date.now()
     const bluredData = imageDataRGBA(imageData, 0, 0, canvasMaxSize.width, canvasMaxSize.height, Math.floor(radius * fieldRange.imageMatched.radius.weighting) + 1)
-    console.log('image-matched blur handling time: ', Date.now() - start)
     setMark('imageMatched', 2)
     const xFactor = layerWidth / _imgWidth
     const yFactor = layerHeight / _imgHeight
@@ -397,7 +429,7 @@ class ImageShadowUtils {
     const { distance, angle, radius, spread, opacity } = (effects as any)[currentEffect] as IShadowEffect | IBlurEffect | IFrameEffect
     if (!canvas || ![ShadowEffectType.shadow, ShadowEffectType.blur, ShadowEffectType.frame].includes(currentEffect)) {
       if (canvas) {
-        const log = 'Error: drawShadow with wrong effect type:' + currentEffect
+        const log = 'Exception: drawShadow with wrong effect type:' + currentEffect
         console.log(log)
         logUtils.setLog(log)
       } else {
@@ -405,9 +437,27 @@ class ImageShadowUtils {
         console.log(log)
         logUtils.setLog(log)
       }
+      // this.setHandleId()
+      // this.setProcessId()
+      // this.setUploadId()
+      if (params.layerInfo) {
+        this.setIsProcess(params.layerInfo, false)
+      }
       return
     }
-    const handlerId = generalUtils.generateRandomString(6)
+    if (timeout && store.getters['shadow/isUploading']) {
+      return
+    }
+
+    if (params.layerInfo) {
+      const { pageIndex, layerIndex, subLayerIdx } = params.layerInfo
+      const pageId = layerUtils.getPage(pageIndex).id
+      const layer = layerUtils.getLayer(pageIndex, layerIndex)
+      const layerId = layer.id as string
+      const subLayerId = (subLayerIdx === -1 || typeof subLayerIdx === 'undefined') ? layerId : (layer as IGroup).layers[subLayerIdx as number].id
+      // this.setHandleId({ pageId, layerId, subLayerId })
+    }
+
     const handler = () => {
       logUtils.setLog('canvas drawing: draw shadow start:')
       setMark('shadow', 0)
@@ -436,7 +486,9 @@ class ImageShadowUtils {
       }
 
       setMark('shadow', 1)
-      const _imageData = new ImageData(this.dilate(spread * Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)), canvasT.width, canvasT.height)
+      const isStaticShadow = !shadow.isTransparent
+      const spreadF = isStaticShadow ? fieldRange.frame.spread.weighting : Math.min(layerWidth / _imgWidth, layerHeight / _imgHeight)
+      const _imageData = new ImageData(this.dilate(spread * spreadF), canvasT.width, canvasT.height)
       ctxT.putImageData(_imageData, 0, 0)
       setMark('shadow', 2)
 
@@ -478,15 +530,16 @@ class ImageShadowUtils {
       logMark('shadow')
     }
 
-    if (!store.getters['shadow/isUploading'] || !params.timeout) {
-      this.handlerId = handlerId
-    }
     if (timeout) {
       clearTimeout(this._draw)
       this._draw = setTimeout(handler, timeout)
     } else {
       handler()
     }
+  }
+
+  clearHandler() {
+    clearTimeout(this._draw)
   }
 
   async asyncProcessing(cb: () => void, disable = false) {
@@ -572,6 +625,8 @@ class ImageShadowUtils {
       const { shadow } = layer.styles
       const { effects } = shadow
       const layerInfo = { pageIndex, layerIndex, subLayerIdx }
+
+      this.updateShadowOld(layerInfo)
 
       if (layer.styles.scale !== 1) {
         let { imgWidth, imgHeight, imgX, imgY } = layer.styles.shadow.styles
@@ -759,6 +814,10 @@ class ImageShadowUtils {
     })
   }
 
+  updateShadowOld(layerInfo: ILayerInfo) {
+    store.commit('SET_old', layerInfo)
+  }
+
   setShadowSrcState(layerInfo: ILayerInfo, attrs: {
     effect: ShadowEffectType,
     effects: IShadowEffects,
@@ -785,6 +844,7 @@ class ImageShadowUtils {
   }
 
   setHandleId(id?: ILayerIdentifier) {
+    // console.warn('set handle id', id?.pageId)
     if (!id) {
       id = { pageId: '', layerId: '', subLayerId: '' }
     }
@@ -806,6 +866,8 @@ class ImageShadowUtils {
     canvasTest.style.position = 'absolute'
     canvasTest.style.top = '0'
     canvasTest.style.zIndex = '10000'
+    canvasTest.style.width = (canvas.width / 4).toString() + 'px'
+    canvasTest.style.height = (canvas.height / 4).toString() + 'px'
   }
 }
 
@@ -873,7 +935,7 @@ export const fieldRange = {
     opacity: { max: 100, min: 0, weighting: 0.01 }
   },
   frame: {
-    spread: { max: 30, min: 0, weighting: 0.72 },
+    spread: { max: 30, min: 0, weighting: 2 },
     opacity: { max: 100, min: 0, weighting: 0.01 },
     radius: { max: 100, min: 0, weighting: 2 }
   },

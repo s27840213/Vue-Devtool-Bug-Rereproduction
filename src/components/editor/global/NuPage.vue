@@ -275,7 +275,7 @@ export default Vue.extend({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
-            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
       }

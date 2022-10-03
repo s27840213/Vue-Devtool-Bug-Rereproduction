@@ -187,8 +187,8 @@ export default Vue.extend({
         const isLayerNeedRedraw = shadow.currentEffect === ShadowEffectType.imageMatched || shadow.isTransparent
         const isShadowPanelOpen = this.currFunctionPanelType === FunctionPanelType.photoShadow
         if (btn.name === 'shadow') {
-          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
-          // return !isCurrLayerHanlingShadow || (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
+          return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow || this.isHandleShadow
+          // return (isCurrLayerHanlingShadow && !isShadowPanelOpen) || this.isUploadImgShadow
         } else if (['remove-bg', 'crop'].includes(btn.name) && (isLayerNeedRedraw && this.isHandleShadow)) {
           return true
         }
