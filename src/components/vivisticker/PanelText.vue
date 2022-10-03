@@ -124,7 +124,7 @@ export default Vue.extend({
           size: 140,
           id: `rows_${index}_${category.list.map(item => item.id).join('_')}`,
           type: 'category-list-rows',
-          list: category.list,
+          list: category.is_recent ? category.list.slice(0, 10) : category.list,
           title: category.title
         }))
     },
