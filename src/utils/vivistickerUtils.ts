@@ -274,6 +274,12 @@ class ViviStickerUtils {
     }
   }
 
+  checkVersion(targetVersion: string) {
+    const [targetMain, targetSub] = targetVersion.split('.')
+    const [currMain, currSub] = store.getters['vivisticker/getUserInfo'].appVer.split('.')
+    return parseInt(currMain) > parseInt(targetMain) || (parseInt(currMain) === parseInt(targetMain) && parseInt(currSub) >= parseInt(targetSub))
+  }
+
   copyEditor() {
     Vue.nextTick(() => {
       this.preCopyEditor()
