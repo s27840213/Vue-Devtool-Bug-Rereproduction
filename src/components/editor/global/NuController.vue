@@ -9,6 +9,15 @@
                 iconColor="gray-2")
       div(class="nu-controller__object-hint__text")
         span {{ Math.round(hintAngle) % 360 }}
+    div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
+        class="nu-controller__ctrl-points"
+        :style="Object.assign(contentStyles('control-point-rotate'), {'pointer-events': 'none', outline: 'none'})")
+      div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters(controlPoints.cornerRotaters) : []"
+          class="control-point__corner-rotate scaler"
+          :key="`corner-rotate-${index}`"
+          :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+          @pointerdown.stop="rotateStart"
+          @touchstart="disableTouchEvent")
     div(class="nu-controller__content"
         ref="body"
         :layer-index="`${layerIndex}`"
@@ -1518,7 +1527,7 @@ export default Vue.extend({
       this.$emit('setFocus')
     },
     rotateStart(event: MouseEvent | PointerEvent) {
-      this.setCursorStyle('move')
+      this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
       this.isRotating = true
       this.isControlling = true
 
@@ -1649,7 +1658,7 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
-    cursorStyles(index: number | string, rotateAngle: number) {
+    cursorStyles(index: number | string, rotateAngle: number, type = 'cursors') {
       if (this.isControlling) return { cursor: 'initial' }
       if (typeof index === 'number') {
         switch (this.getLayerType()) {
@@ -1659,9 +1668,15 @@ export default Vue.extend({
           case 'shape':
             if (this.config.scaleType === 3) index += 4
         }
-        const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
-          : (index + Math.ceil(rotateAngle / 45) + 8) % 8
-        return { cursor: this.controlPoints.cursors[cursorIndex] }
+        if (type === 'cornerRotaters') {
+          const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 90)) % 4
+            : (index + Math.ceil(rotateAngle / 90) + 4) % 4
+          return { cursor: this.controlPoints.cornerRotaters[cursorIndex].cursor }
+        } else {
+          const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
+            : (index + Math.ceil(rotateAngle / 45) + 8) % 8
+          return { cursor: this.controlPoints.cursors[cursorIndex] }
+        }
       } else {
         return { cursor: index }
       }
