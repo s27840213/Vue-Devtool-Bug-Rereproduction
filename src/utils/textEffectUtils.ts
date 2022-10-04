@@ -220,7 +220,8 @@ class Controller {
             webkitTextStroke: `1px ${this.convertColor2rgba(effect.shadowStrokeColor, effectOpacity)}`
           },
           duplicatedSpan: {
-            color: colorWithOpacity
+            color: colorWithOpacity,
+            'text-decoration-color': colorWithOpacity // Have to be dash-case, because camelcase cannot overwrite dash-case created from cssConverter.convertFontStyle.
           }
         }
       }
