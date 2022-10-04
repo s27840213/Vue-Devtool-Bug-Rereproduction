@@ -175,7 +175,8 @@ export default Vue.extend({
       inBgSettingMode: 'mobileEditor/getInBgSettingMode',
       currActiveSubPanel: 'mobileEditor/getCurrActiveSubPanel',
       showMobilePanel: 'mobileEditor/getShowMobilePanel',
-      isInCategory: 'vivisticker/getIsInCategory'
+      isInCategory: 'vivisticker/getIsInCategory',
+      isDuringCopy: 'vivisticker/getIsDuringCopy'
     }),
     isTextInCategory(): boolean {
       return this.isInCategory('text')
@@ -264,14 +265,14 @@ export default Vue.extend({
         {
           'row-gap': (this.hideDynamicComp || this.currActivePanel === 'vvstk-more') ? '0px' : '10px',
           backgroundColor: this.whiteTheme ? 'white' : '#1F1F1F',
-          maxHeight: this.fixSize || this.extraFixSizeCondition
-            ? 'initial'
-            : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px',
-          minHeight: (this.minHalfSize && !this.isDraggingPanel) ? this.draggedPanelHeight + 'px' : 'unset'
-          // height: this.fixSize || this.extraFixSizeCondition
-          //   ? 'initial'
-          //   : this.panelHeight + 'px'
-        }
+          maxHeight: this.isDuringCopy ? '0' : (
+            this.fixSize || this.extraFixSizeCondition
+              ? 'initial'
+              : this.isDraggingPanel ? this.panelHeight + 'px' : this.panelHeight + 'px'
+          ),
+          minHeight: (this.minHalfSize && !this.isDraggingPanel && !this.isDuringCopy) ? this.draggedPanelHeight + 'px' : 'unset'
+        },
+        this.isDuringCopy ? { padding: '0' } : {}
       )
     },
     innerTabs(): Record<string, string[]> {
