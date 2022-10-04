@@ -6,8 +6,11 @@
 
 <script lang="ts">
 import { ShadowEffectType } from '@/interfaces/imgShadow'
+import { IFrame, IImage, IText } from '@/interfaces/layer'
+import { LayerType } from '@/store/types'
 import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
+import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -15,6 +18,7 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
+    subLayerIndex: Number,
     imgControl: Boolean,
     contentScaleRatio: {
       default: 1,
@@ -26,6 +30,13 @@ export default Vue.extend({
     }
   },
   computed: {
+    primaryLayer(): unknown | undefined {
+      if (this.subLayerIndex !== -1 && typeof this.subLayerIndex !== 'undefined') {
+        return layerUtils.getLayer(this.pageIndex, this.layerIndex)
+      } else {
+        return undefined
+      }
+    }
   },
   methods: {
     shapeWidth(): number {
@@ -46,11 +57,14 @@ export default Vue.extend({
         case 'image':
           if (this.config.isFrame) {
             clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
-          } else {
-            // clipPath = layerPath
           }
-          width = `${width * this.contentScaleRatio}px`
-          height = `${height * this.contentScaleRatio}px`
+          if (this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
+            width = `${width}px`
+            height = `${height}px`
+          } else {
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
+          }
           break
         case 'shape':
           width = `${this.shapeWidth()}px`
