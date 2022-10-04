@@ -21,7 +21,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
-  appVer: '1.0',
+  appVer: '1.3',
   locale: 'us',
   isFirstOpen: false
 }
@@ -292,9 +292,11 @@ class ViviStickerUtils {
         })
       })
     }
-    if (store.getters['text/isFontLoading']) {
+    if (store.getters['text/getIsFontLoading']) {
       this.sendToIOS('SHOW_LOADING', this.getEmptyMessage())
-      textUtils.untilFontLoadedForPage(pageUtils.getPage(0)).then(executor)
+      textUtils.untilFontLoadedForPage(pageUtils.getPage(0)).then(() => {
+        setTimeout(executor, 200) // in case the render slightly delays after font loading
+      })
     } else {
       executor()
     }

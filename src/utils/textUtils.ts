@@ -1194,7 +1194,7 @@ class TextUtils {
         }, 40000)
       })
     ])
-    if (isError) {
+    if (isError === true) {
       console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
     }
     if (toSetFlag && this.toSetFlagId === setFlagId) {
@@ -1217,7 +1217,7 @@ class TextUtils {
         }, 40000)
       })
     ])
-    if (isError) {
+    if (isError === true) {
       console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
     }
     if (toSetFlag && this.toSetFlagId === setFlagId) {
@@ -1257,7 +1257,7 @@ class TextUtils {
     this.toSetFlagId = recordId
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void) => {
-      if (isError) {
+      if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (callback) {
@@ -1290,7 +1290,7 @@ class TextUtils {
     this.toSetFlagId = recordId
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void[]) => {
-      if (isError) {
+      if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (callback) {

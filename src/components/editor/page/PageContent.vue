@@ -208,16 +208,9 @@ export default Vue.extend({
       }
     },
     async handleFontLoading() {
-      if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-        textUtils.untilFontLoadedForPage(this.config, true).then(() => {
-          setTimeout(() => {
-            this.updatePageProps({
-              pageIndex: this.pageIndex,
-              props: { isAutoResizeNeeded: false }
-            })
-          }, 500) // for the delay between font loading and dom rendering
-        })
-      }
+      textUtils.untilFontLoadedForPage(this.config, true).then(() => {
+        console.log('all font loaded')
+      })
     }
   }
 })
