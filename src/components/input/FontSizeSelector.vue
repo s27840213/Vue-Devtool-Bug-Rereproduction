@@ -131,7 +131,7 @@ export default Vue.extend({
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
+          tiptapUtils.applySpanStyle('size', parseFloat(value))
           tiptapUtils.agent(editor => {
             layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
           })
