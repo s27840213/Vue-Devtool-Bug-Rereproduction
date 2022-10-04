@@ -18,6 +18,7 @@ import { IUserInfo } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
+import textUtils from './textUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.0',
@@ -281,14 +282,22 @@ class ViviStickerUtils {
   }
 
   copyEditor() {
-    Vue.nextTick(() => {
-      this.preCopyEditor()
+    const executor = () => {
       Vue.nextTick(() => {
-        this.sendCopyEditor().then(() => {
-          this.postCopyEditor()
+        this.preCopyEditor()
+        Vue.nextTick(() => {
+          this.sendCopyEditor().then(() => {
+            this.postCopyEditor()
+          })
         })
       })
-    })
+    }
+    if (store.getters['text/isFontLoading']) {
+      this.sendToIOS('SHOW_LOADING', this.getEmptyMessage())
+      textUtils.untilFontLoadedForPage(pageUtils.getPage(0)).then(executor)
+    } else {
+      executor()
+    }
   }
 
   preCopyEditor() {
