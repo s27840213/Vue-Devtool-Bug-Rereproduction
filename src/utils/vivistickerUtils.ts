@@ -102,7 +102,7 @@ class ViviStickerUtils {
 
   sendAppLoaded() {
     if (!this.appLoadedSent) {
-      this.sendToIOS('APP_LOADED', this.getEmptyMessage())
+      this.sendToIOS('APP_LOADED', { hideReviewRequest: false })
       this.appLoadedSent = true
     }
   }
