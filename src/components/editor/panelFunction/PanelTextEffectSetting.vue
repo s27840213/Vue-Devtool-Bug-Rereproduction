@@ -40,8 +40,7 @@
                 :name="option.key"
                 :max="option.max"
                 :min="option.min"
-                @change="(e)=>handleRangeInput(e, option)"
-                @blur="recordChange"
+                @change="(e)=>{handleRangeInput(e, option);recordChange()}"
                 type="number")
               input(class="text-effect-setting-options__field--range input__slider--range"
                 :value="currentStyle[currCategory.name][option.key]"
@@ -170,9 +169,11 @@ export default Vue.extend({
       const target = this.currTab === 'shadow' ? textEffectUtils
         : this.currTab === 'shape' ? textShapeUtils : textBgUtils
       target.resetCurrTextEffect()
+      this.recordChange()
     },
     handleSelectInput(key: string, newVal: string) {
       this.setEffect({ effect: { [key]: newVal } })
+      this.recordChange()
     },
     handleRangeInput(event: Event, option: IEffectOption) {
       const name = (event.target as HTMLInputElement).name

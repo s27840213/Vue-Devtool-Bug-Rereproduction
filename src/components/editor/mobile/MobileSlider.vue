@@ -16,7 +16,8 @@
       :step="step"
       v-ratio-change
       type="range"
-      @pointerup="handleChangeStop")
+      @pointerdown="$emit('pointerdown', $event)"
+      @pointerup="$emit('pointerup', $event); handleChangeStop();")
 </template>
 
 <script lang="ts">

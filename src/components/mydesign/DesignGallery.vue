@@ -143,6 +143,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 .design-gallery {
+  padding-bottom: 20px;
   &__header {
     display: flex;
     align-items: center;

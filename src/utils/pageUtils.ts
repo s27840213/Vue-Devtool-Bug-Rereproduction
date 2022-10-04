@@ -44,6 +44,10 @@ class PageUtils {
     return store.getters.getCurrActivePageIndex
   }
 
+  get currHoveredPageIndex(): number {
+    return store.getters.getCurrHoveredPageIndex
+  }
+
   get currFocusPageIndex() {
     return store.getters.getCurrFocusPageIndex
   }
@@ -344,7 +348,7 @@ class PageUtils {
 
   isOutOfBound(pageIndex: number) {
     return generalUtils.isTouchDevice() && !this.isDetailPage ? (pageIndex <= this.currCardIndex - 2 || pageIndex >= this.currCardIndex + 2)
-      : pageIndex <= this.topBound || pageIndex >= this.bottomBound
+      : pageIndex <= (this.topBound - 2) || pageIndex >= (this.bottomBound + 2)
   }
 
   // Algorithm: Binary Search

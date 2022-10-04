@@ -104,6 +104,7 @@
           tabindex="0")
         lazy-load(
             target=".editor-view"
+            :rootMargin="'500px 0px 500px 0px'"
             :minHeight="config.width * (scaleRatio / 100)"
             :maxHeight="config.width * (scaleRatio / 100)"
             :threshold="[0,1]")
@@ -274,7 +275,7 @@ export default Vue.extend({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
-            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
       }

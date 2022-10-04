@@ -44,7 +44,9 @@
           :value="currentStyle[currCategory.name][option.key]"
           :max="option.max"
           :min="option.min"
-          @update="(e)=>handleRangeInput(e, option)")
+          @update="(e)=>handleRangeInput(e, option)"
+          @pointerdown="shapeFocus(true)"
+          @pointerup="shapeFocus(false)")
         //- Option type color
         div(v-if="option.type === 'color'"
           class="panel-text-effect__color")
@@ -162,6 +164,7 @@ export default Vue.extend({
       const target = this.currCategory.name === 'shadow' ? textEffectUtils
         : this.currCategory.name === 'shape' ? textShapeUtils : textBgUtils
       target.resetCurrTextEffect()
+      this.recordChange()
     },
     onEffectClick(effectName: string): void {
       if (effectName !== this.currentStyle[this.currCategory.name as 'shadow' | 'bg' | 'shape'].name) {
@@ -173,6 +176,7 @@ export default Vue.extend({
     },
     handleSelectInput(key: string, newVal: string) {
       this.setEffect({ effect: { [key]: newVal } })
+      this.recordChange()
     },
     handleRangeInput(value: number, option: IEffectOption) {
       const [max, min] = [option.max as number, option.min as number]
@@ -180,6 +184,11 @@ export default Vue.extend({
         [option.key]: value > max ? max : (value < min ? min : value)
       }
       this.setEffect({ effect: newVal })
+    },
+    shapeFocus(focus: boolean) {
+      if (this.currCategory.name === 'shape') {
+        this.setEffect({ effect: { focus } })
+      }
     }
   }
 })

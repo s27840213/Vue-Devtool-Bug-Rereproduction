@@ -209,7 +209,7 @@ export default Vue.extend({
     },
     async handleFontLoading() {
       if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
-        textUtils.untilFontLoadedForPage(this.config).then(() => {
+        textUtils.untilFontLoadedForPage(this.config, true).then(() => {
           setTimeout(() => {
             this.updatePageProps({
               pageIndex: this.pageIndex,
