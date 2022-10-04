@@ -129,7 +129,7 @@ class ShortcutUtils {
      * @todo change middlemost to currFocusPageindex
      */
     const { currFocusPageIndex, currHoveredPageIndex } = pageUtils
-    const targetPageIndex = currHoveredPageIndex > 0 ? currHoveredPageIndex : currFocusPageIndex
+    const targetPageIndex = currHoveredPageIndex >= 0 ? currHoveredPageIndex : currFocusPageIndex
 
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
     if (store.getters.getCurrSelectedIndex >= 0 && targetPageIndex === store.getters.getCurrSelectedPageIndex) {
