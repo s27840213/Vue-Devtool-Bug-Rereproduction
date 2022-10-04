@@ -8,7 +8,9 @@
         :style="translateStyles()")
       div(class="layer-scale posAbs" ref="scale"
           :style="scaleStyles()")
-        nu-clipper(:config="config" :layerIndex="layerIndex" :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
+        nu-clipper(:config="config"
+          :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
+          :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :config="config"
