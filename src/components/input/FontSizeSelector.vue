@@ -118,6 +118,7 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
+      value = Math.round(value / this.scale * 10) / 10
       tiptapUtils.spanStyleHandler('size', value)
       tiptapUtils.forceUpdate(true)
       textPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -127,6 +128,7 @@ export default Vue.extend({
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        const finalValue = Math.round(parseFloat(value) / this.scale * 10) / 10
         window.requestAnimationFrame(() => {
           // TODO: need to deal with diff scales in group
           // if (this.props.fontSize === '--') {
