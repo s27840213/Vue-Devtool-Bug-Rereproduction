@@ -1048,6 +1048,7 @@ class TextPropUtils {
           l.type === 'text' && this.propAppliedAllText(LayerUtils.layerIndex, idx, 'size', step)
           l.type === 'text' && TextUtils.updateGroupLayerSizeByShape(LayerUtils.pageIndex, this.layerIndex, idx)
         })
+      this.updateTextPropsState()
     }
   }
 
@@ -1059,9 +1060,17 @@ class TextPropUtils {
       const targetLayer = primaryLayer.layers[subLayerIndex] as IText
       const paragraphs = GeneralUtils.deepCopy(targetLayer.paragraphs) as Array<IParagraph>
       paragraphs.forEach(p => {
-        Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
+        if (prop === 'size') {
+          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) += payload)
+        } else {
+          Object.prototype.hasOwnProperty.call(p.styles, prop) && typeof p.styles[prop] === 'number' && ((p.styles[prop] as number) = payload)
+        }
         p.spans.forEach(s => {
-          Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          if (prop === 'size') {
+            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) += payload)
+          } else {
+            Object.prototype.hasOwnProperty.call(s.styles, prop) && typeof s.styles[prop] === 'number' && ((s.styles[prop] as number) = payload)
+          }
         })
       })
       LayerUtils.updateSubLayerProps(LayerUtils.pageIndex, layerIndex, subLayerIndex, { paragraphs })
