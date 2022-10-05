@@ -373,7 +373,7 @@ export default Vue.extend({
       return this.config.backgroundImage.config.imgControl
     },
     isAnyLayerActive(): boolean {
-      return this.currSelectedIndex
+      return this.currSelectedIndex !== -1
     },
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
