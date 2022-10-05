@@ -383,7 +383,7 @@ class ViviStickerUtils {
       const designIds = data.assets.map(asset => asset.id)
       listApis.getInfoList(MODULE_TYPE_MAPPING[data.key], designIds).then((response) => {
         const updateList = response.data.data.content[0].list
-        vivistickerUtils.updateAssetContent(data.assets, updateList)
+        data.assets = vivistickerUtils.updateAssetContent(data.assets, updateList)
         assetUtils.setRecentlyUsed(data.key, data.assets)
         vivistickerUtils.handleCallback(`list-asset-${data.key}`)
       })
@@ -393,12 +393,18 @@ class ViviStickerUtils {
     }
   }
 
-  updateAssetContent(targetList: any[], updateList: IListServiceContentDataItem[]) {
+  updateAssetContent(targetList: any[], updateList: IListServiceContentDataItem[]): any[] {
     let targetIndex = 0
     let updateIndex = 0
+    const resList = []
     while (updateIndex < updateList.length) {
-      if (targetList[targetIndex].id === updateList[updateIndex].id) {
-        Object.assign(targetList[targetIndex], updateList[updateIndex])
+      const targetItem = targetList[targetIndex]
+      const updateItem = updateList[updateIndex]
+      if (targetItem.id === updateItem.id) {
+        if (updateItem.valid === 1 || updateItem.valid === undefined) {
+          delete updateItem.valid
+          resList.push(Object.assign(targetItem, updateItem))
+        }
         targetIndex++
         updateIndex++
       } else {
@@ -409,6 +415,7 @@ class ViviStickerUtils {
         }
       }
     }
+    return resList
   }
 
   addAsset(key: string, asset: any) {

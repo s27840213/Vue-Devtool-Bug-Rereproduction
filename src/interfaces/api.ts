@@ -145,7 +145,8 @@ export interface IListServiceContentDataItem {
   user_id?: string,
   asset_index?: number,
   asset_id?: string,
-  src?: string
+  src?: string,
+  valid?: number
 }
 
 export interface IListServiceContentData {
