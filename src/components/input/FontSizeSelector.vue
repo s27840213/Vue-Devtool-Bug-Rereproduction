@@ -3,13 +3,15 @@
     div(class="font-size-selector__number")
       div(class="pointer"
         @pointerdown="fontSizeStepping(-step)"
-        @contextmenu.prevent) -
+        @contextmenu.prevent)
+        svg-icon(iconName="minus-small" iconWidth="24px" iconColor="gray-2")
       button(class="font-size-selector__range-input-button")
         input(class="text-gray-2 center record-selection" type="text" ref="input-fontSize"
               @change="setSize" :value="fontSize" :disabled="fontSize === '--'")
       div(class="pointer"
         @pointerdown="fontSizeStepping(step)"
-        @contextmenu.prevent) +
+        @contextmenu.prevent)
+        svg-icon(iconName="plus-small" iconWidth="24px" iconColor="gray-2")
 </template>
 
 <script lang="ts">
@@ -190,7 +192,6 @@ export default Vue.extend({
     display: flex;
     align-items: center;
     > div {
-      width: 58px;
       height: 100%;
       display: flex;
       align-items: center;
@@ -199,10 +200,12 @@ export default Vue.extend({
       color: setColor(gray-2);
 
       &:nth-child(1) {
+        width: 36px;
         border-right: 1px solid setColor(gray-4);
       }
 
       &:nth-child(3) {
+        width: 36px;
         border-left: 1px solid setColor(gray-4);
       }
     }

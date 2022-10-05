@@ -694,6 +694,7 @@ export default Vue.extend({
     &__button-text {
       @include body-XS;
       color: white;
+      white-space: nowrap;
     }
   }
 }
