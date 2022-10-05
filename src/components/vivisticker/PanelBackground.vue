@@ -681,6 +681,11 @@ export default Vue.extend({
       display: flex;
       gap: 70px;
     }
+    &__button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     &__button-icon {
       @include size(40px);
       border-radius: 5px;
