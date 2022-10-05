@@ -16,7 +16,7 @@
           class="control-point__corner-rotate scaler"
           :key="`corner-rotate-${index}`"
           :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-          @pointerdown.stop="rotateStart"
+          @pointerdown.stop="rotateStart($event, index)"
           @touchstart="disableTouchEvent")
     div(class="nu-controller__content"
         ref="body"
@@ -240,7 +240,8 @@ export default Vue.extend({
       isMoved: false,
       isDoingGestureAction: false,
       dblTabsFlag: false,
-      isPointerDownFromSubController: false
+      isPointerDownFromSubController: false,
+      initCornerRotate: -1
     }
   },
   mounted() {
@@ -1526,8 +1527,27 @@ export default Vue.extend({
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
     },
-    rotateStart(event: MouseEvent | PointerEvent) {
+    rotateStart(event: MouseEvent | PointerEvent, index = -1) {
       this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
+      // console.warn(index)
+      // let rotateAngle = this.getLayerRotate()
+      // if (rotateAngle > 180) {
+      //   rotateAngle = rotateAngle - 360
+      // }
+      // let cursorIndex = index * 2
+      // if (rotateAngle >= 22.5) {
+      //   cursorIndex++
+      //   cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+      // } else if (rotateAngle <= -22.5) {
+      //   cursorIndex--
+      //   cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+      //   if (cursorIndex < 0) {
+      //     cursorIndex = 8 + cursorIndex
+      //   }
+      // }
+      // console.log(cursorIndex)
+      // this.initCornerRotate = cursorIndex
+      this.initCornerRotate = index * 2
       this.isRotating = true
       this.isControlling = true
 
@@ -1567,7 +1587,8 @@ export default Vue.extend({
 
       let angle = Math.round(Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI)
       if (angle) {
-        if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
+        const ACrosB = vectB.y * vectA.x - vectB.x * vectA.y
+        if (ACrosB < 0) {
           angle *= -1
         }
         angle += this.initialRotate % 360
@@ -1577,13 +1598,35 @@ export default Vue.extend({
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
         this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
         this.hintAngle = angle
-
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
+
+        if (this.initCornerRotate !== -1) {
+          let rotateAngle = angle
+          if (rotateAngle > 180) {
+            rotateAngle = rotateAngle - 360
+          }
+          let cursorIndex = this.initCornerRotate
+          if (rotateAngle >= 22.5) {
+            cursorIndex++
+            cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+            if (cursorIndex > 7) {
+              cursorIndex = cursorIndex - 8
+            }
+          } else if (rotateAngle <= -22.5) {
+            cursorIndex--
+            cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+            if (cursorIndex < 0) {
+              cursorIndex = 8 + cursorIndex
+            }
+          }
+          this.setCursorStyle(ControlUtils.getCornerRataterMap[cursorIndex])
+        }
       }
     },
     rotateEnd() {
       this.isRotating = false
       this.isControlling = false
+      this.initCornerRotate = -1
       StepsUtils.record()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.rotating)
@@ -1669,9 +1712,27 @@ export default Vue.extend({
             if (this.config.scaleType === 3) index += 4
         }
         if (type === 'cornerRotaters') {
-          const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 90)) % 4
-            : (index + Math.ceil(rotateAngle / 90) + 4) % 4
-          return { cursor: this.controlPoints.cornerRotaters[cursorIndex].cursor }
+          index = index * 2
+          if (rotateAngle > 180) {
+            rotateAngle = rotateAngle - 360
+          }
+          let cursorIndex = index
+          if (rotateAngle >= 22.5) {
+            cursorIndex++
+            cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+            if (cursorIndex > 7) {
+              cursorIndex = cursorIndex - 8
+            }
+          } else if (rotateAngle <= -22.5) {
+            cursorIndex--
+            cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+            if (cursorIndex < 0) {
+              cursorIndex = 8 + cursorIndex
+            }
+          }
+          // const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
+          //   : (index + Math.ceil(rotateAngle / 45) + 8) % 8
+          return { cursor: ControlUtils.getCornerRataterMap[cursorIndex] }
         } else {
           const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
             : (index + Math.ceil(rotateAngle / 45) + 8) % 8
