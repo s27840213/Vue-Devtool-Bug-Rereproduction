@@ -161,6 +161,9 @@ class TextPropUtils {
         if (pStyle.decoration === 'underline') {
           pStyle.decoration = 'none'
         }
+        if (typeof pStyle.size === 'string') {
+          pStyle.size = parseFloat(pStyle.size)
+        }
         p.spanStyle = tiptapUtils.textStyles(pStyle)
       }
       const paragraphStyles = p.styles
@@ -177,6 +180,9 @@ class TextPropUtils {
         span.styles.userId = paragraphStyles.userId as string
         span.styles.assetId = paragraphStyles.assetId as string
         span.styles.fontUrl = paragraphStyles.fontUrl as string
+        if (typeof span.styles.size === 'string') {
+          span.styles.size = parseFloat(span.styles.size)
+        }
       }
     })
   }
