@@ -602,7 +602,6 @@ export default Vue.extend({
             }
           })
           FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, this.currDraggedPhoto.srcObj)
-          console.log(this.currDraggedPhoto.panelPreviewSrc)
           FrameUtils.updateFrameLayerProps(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { panelPreviewSrc: this.currDraggedPhoto.panelPreviewSrc })
 
           Object.assign(clip.srcObj, this.currDraggedPhoto.srcObj)

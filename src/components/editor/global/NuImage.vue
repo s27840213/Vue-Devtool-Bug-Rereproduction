@@ -457,7 +457,7 @@ export default Vue.extend({
         })
       }
 
-      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
+      const scale = this.config.isFrameImg || this.forRender ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
       const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
