@@ -1730,8 +1730,6 @@ export default Vue.extend({
               cursorIndex = 8 + cursorIndex
             }
           }
-          // const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
-          //   : (index + Math.ceil(rotateAngle / 45) + 8) % 8
           return { cursor: ControlUtils.getCornerRataterMap[cursorIndex] }
         } else {
           const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
@@ -1796,10 +1794,6 @@ export default Vue.extend({
               const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
               const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
               imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-              // if (isTransparent) {
-              //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
-              //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
-              // }
             }
             const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
             const src = ImageUtils.getSrc(this.config, size)

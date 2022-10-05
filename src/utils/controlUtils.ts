@@ -54,8 +54,7 @@ class Controller {
           left: '0',
           top: '0',
           transform: `translate3d(-50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
-          borderRadius: '50%',
-          background: 'red'
+          borderRadius: '50%'
         },
         scalerSize
       },
@@ -67,8 +66,7 @@ class Controller {
           transform: `translate3d(50%,-50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           top: '0',
-          borderRadius: '50%',
-          background: 'red'
+          borderRadius: '50%'
         },
         scalerSize
       },
@@ -80,8 +78,7 @@ class Controller {
           transform: `translate3d(50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           right: '0',
           bottom: '0',
-          borderRadius: '50%',
-          background: 'red'
+          borderRadius: '50%'
         },
         scalerSize
       },
@@ -93,8 +90,7 @@ class Controller {
           transform: `translate3d(-50%,50%,0) scale(${100 / scaleRatio * contentScaleRatio})`,
           left: '0',
           bottom: '0',
-          borderRadius: '50%',
-          background: 'red'
+          borderRadius: '50%'
         },
         scalerSize
       }
