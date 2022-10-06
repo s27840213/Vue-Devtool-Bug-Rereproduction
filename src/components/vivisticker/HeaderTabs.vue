@@ -93,8 +93,8 @@ export default Vue.extend({
         ]
       } else {
         return [
-          { icon: 'vivisticker_logo', logo: true, width: 20 },
-          { icon: 'vivisticker_title', logo: true, width: 100, height: 18 }
+          { icon: 'vivisticker_logo', logo: true, width: 20, action: this.handleOpenIG },
+          { icon: 'vivisticker_title', logo: true, width: 100, height: 18, action: this.handleOpenIG }
         ]
       }
     },
@@ -199,6 +199,18 @@ export default Vue.extend({
     handleMore() {
       editorUtils.setCurrActivePanel('vvstk-more')
       editorUtils.setShowMobilePanel(true)
+    },
+    handleOpenIG() {
+      let url = 'https://www.instagram.com/vivisticker/'
+      switch (this.$i18n.locale) {
+        case 'tw':
+          url = 'https://www.instagram.com/vivistickertw/'
+          break
+        case 'jp':
+          url = 'https://www.instagram.com/vivistickerjp/'
+          break
+      }
+      window.open(url, '_blank')
     }
   }
 })
