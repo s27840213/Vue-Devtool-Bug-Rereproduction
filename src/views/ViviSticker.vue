@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="vivisticker" :style="copyingStyles()")
     div(class="vivisticker__top" :style="copyingStyles()")
-      header-tabs(:style="headerStyles()")
+      header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
       div(class="vivisticker__content"
           @pointerdown="outerClick")
         vvstk-editor(v-show="isInEditor")

@@ -212,6 +212,9 @@ export default Vue.extend({
         'order', 'font-size', 'font-format',
         'font-spacing', 'download', 'more', 'object-adjust', 'brand-list', 'vvstk-more'].includes(this.currActivePanel)
     },
+    trueWholeSize(): boolean {
+      return ['text'].includes(this.currActivePanel)
+    },
     extraFixSizeCondition(): boolean {
       switch (this.currActivePanel) {
         case 'color': {
@@ -609,10 +612,10 @@ export default Vue.extend({
     },
     initHeightPx() {
       // 40 = HeaderTabs height
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * (this.halfSizeInInitState ? 0.5 : 1.0)
+      return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * (this.halfSizeInInitState ? 0.5 : 1.0)
     },
     maxHeightPx() {
-      return ((this.$el.parentElement as HTMLElement).clientHeight - 40) * 1.0
+      return ((this.$el.parentElement as HTMLElement).clientHeight - (this.trueWholeSize ? 0 : 40)) * 1.0
     },
     getMaxHeightPx(): number {
       return parseFloat((this.$el as HTMLElement).style.maxHeight.split('px')[0])
