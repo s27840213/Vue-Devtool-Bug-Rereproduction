@@ -552,7 +552,8 @@ export default Vue.extend({
          * @Todo - find the reason why this been set to certain value istead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
-        return 0
+        // return 0
+        return (this.layerIndex + 1) * 1000
       } else if (this.getLayerType() === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
@@ -1547,6 +1548,12 @@ export default Vue.extend({
       // }
       // console.log(cursorIndex)
       // this.initCornerRotate = cursorIndex
+      const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      if (tooShort || tooNarrow) {
+        index = 2
+      }
       this.initCornerRotate = index * 2
       this.isRotating = true
       this.isControlling = true
@@ -1712,6 +1719,12 @@ export default Vue.extend({
             if (this.config.scaleType === 3) index += 4
         }
         if (type === 'cornerRotaters') {
+          const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+          const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+          const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+          if (tooShort || tooNarrow) {
+            index = 2
+          }
           index = index * 2
           if (rotateAngle > 180) {
             rotateAngle = rotateAngle - 360
