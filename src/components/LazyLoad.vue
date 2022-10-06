@@ -2,7 +2,8 @@
   div(class="lazy-load"
       :style="styles"
       ref="observer")
-    slot(v-if="shoudBeRendered")
+    transition(name="fade-in")
+      slot(v-if="shoudBeRendered")
 </template>
 
 <script lang="ts">
@@ -46,7 +47,8 @@ export default Vue.extend({
       unrenderTimer: -1,
       renderTimer: -1,
       unrenderEventId: '',
-      renderEventId: ''
+      renderEventId: '',
+      loadedFlag: false
     }
   },
   mounted() {
