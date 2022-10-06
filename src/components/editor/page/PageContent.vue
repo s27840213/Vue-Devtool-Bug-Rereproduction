@@ -25,7 +25,7 @@ div(class="overflow-container"
       //-     target=".editor-view"
       //-     :threshold="[0,1]")
       nu-layer(
-        v-for="(layer,index) in config.layers"
+        v-for="(layer,index) in layerFilter"
         :key="layer.id"
         :class="!layer.locked ? `nu-layer--p${pageIndex}` : ''"
         :data-index="`${index}`"
@@ -45,7 +45,8 @@ div(class="overflow-container"
         :verUni="verUni"
         :uploadId="uploadId"
         :handleId="handleId"
-        :uploadShadowImgs="uploadShadowImgs")
+        :uploadShadowImgs="uploadShadowImgs"
+        :isPagePreview="true")
     template(v-else)
       div(class='pages-loading')
 </template>
@@ -56,7 +57,7 @@ import groupUtils from '@/utils/groupUtils'
 import pageUtils from '@/utils/pageUtils'
 import popupUtils from '@/utils/popupUtils'
 import uploadUtils from '@/utils/uploadUtils'
-import { SidebarPanelType } from '@/store/types'
+import { LayerType, SidebarPanelType } from '@/store/types'
 import NuBgImage from '@/components/editor/global/NuBgImage.vue'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
@@ -66,6 +67,7 @@ import textUtils from '@/utils/textUtils'
 import editorUtils from '@/utils/editorUtils'
 import generalUtils from '@/utils/generalUtils'
 import LazyLoad from '@/components/LazyLoad.vue'
+import { ILayer } from '@/interfaces/layer'
 
 export default Vue.extend({
   components: {
@@ -130,6 +132,13 @@ export default Vue.extend({
         height: `${this.config.height * this.contentScaleRatio}px`,
         transformStyle: 'preserve-3d'
       }
+    },
+    layerFilter(): any {
+      return this.config.layers.filter((layer: ILayer) => {
+        // return layer.type !== LayerType.text && layer.type !== LayerType.shape
+        // return layer.type !== LayerType.text
+        return layer
+      })
     }
   },
   mounted() {

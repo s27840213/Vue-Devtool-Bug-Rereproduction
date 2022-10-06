@@ -5,7 +5,7 @@
       :threshold="[0,1]"
       :minHeight="contentWidth"
       @loaded="handleLoaded")
-    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle")
+    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle()")
     div(v-else class="page-preview-page"
       :style="styles2()"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
@@ -236,11 +236,13 @@ export default Vue.extend({
       }
     },
     handleLoaded() {
+      this.$emit('loaded')
       this.$nextTick(() => {
         const contentRef = (this.$refs.content as HTMLElement)
         this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
       })
     },
+    // computed -> methods
     pageWidth(): number {
       return this.config.width
     },

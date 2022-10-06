@@ -54,7 +54,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    isPagePreview: {
+      default: false,
+      type: Boolean
+    }
   },
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width

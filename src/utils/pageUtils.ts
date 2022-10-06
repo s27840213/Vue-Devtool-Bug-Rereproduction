@@ -1,6 +1,6 @@
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 import { IBgRemoveInfo } from '@/interfaces/image'
-import { IImage, IImageStyle } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle } from '@/interfaces/layer'
 import { IPage } from '@/interfaces/page'
 import store from '@/store'
 import Vue from 'vue'
@@ -11,6 +11,8 @@ import generalUtils from './generalUtils'
 import layerFactary from './layerFactary'
 import resizeUtils from './resizeUtils'
 import { throttle } from 'lodash'
+import groupUtils from './groupUtils'
+import { LayerType } from '@/store/types'
 
 class PageUtils {
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
@@ -82,7 +84,16 @@ class PageUtils {
     // @TODO The temporarily fetched json has some issue
     // the scale of background will be null
     pageData.backgroundImage && (pageData.backgroundImage.config.styles.scale = 1)
-
+    if (pageData.layers) {
+      pageData.layers.forEach(l => {
+        l.id = generalUtils.generateRandomString(8)
+        if (l.type === LayerType.frame) {
+          (l as IFrame).clips.forEach(c => (c.id = generalUtils.generateRandomString(8)))
+        } else if (l.type === LayerType.group) {
+          (l as IGroup).layers.forEach(l => (l.id = generalUtils.generateRandomString(8)))
+        }
+      })
+    }
     const defaultPage: IPage = {
       width: 1080,
       height: 1080,
@@ -128,6 +139,34 @@ class PageUtils {
 
   addPage(newPage: IPage) {
     store.commit('ADD_page', newPage)
+  }
+
+  addPages(newPages: Array<IPage>) {
+    store.commit('ADD_pages', newPages)
+  }
+
+  duplicatePage1(times: number) {
+    groupUtils.deselect()
+    const page = generalUtils.deepCopy(this.getPage(0)) as IPage
+
+    const arr = new Array(times).fill({}).map(() => {
+      return this.newPage(page)
+    })
+
+    this.setPages(arr)
+  }
+
+  clearAllPagesContent() {
+    const arr = new Array(this.pageNum).fill(this.newPage({}))
+
+    this.setPages(arr)
+  }
+
+  addTwentyPages() {
+    const arr = new Array(20).fill(this.newPage({}))
+
+    console.log(arr)
+    this.addPages(arr)
   }
 
   addPageToPos(newPage: IPage, pos: number) {
