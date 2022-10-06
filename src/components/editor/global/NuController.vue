@@ -1601,17 +1601,18 @@ export default Vue.extend({
         angle += this.initialRotate % 360
         angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
 
+        let rotateAngle = angle
+        if (rotateAngle > 180) {
+          rotateAngle = rotateAngle - 360
+        }
+
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
         this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
-        this.hintAngle = angle
+        this.hintAngle = rotateAngle
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
 
         if (this.initCornerRotate !== -1) {
-          let rotateAngle = angle
-          if (rotateAngle > 180) {
-            rotateAngle = rotateAngle - 360
-          }
           let cursorIndex = this.initCornerRotate
           if (rotateAngle >= 22.5) {
             cursorIndex++
@@ -1711,13 +1712,6 @@ export default Vue.extend({
     cursorStyles(index: number | string, rotateAngle: number, type = 'cursors') {
       if (this.isControlling) return { cursor: 'initial' }
       if (typeof index === 'number') {
-        switch (this.getLayerType()) {
-          case 'text':
-            if (this.config.styles.writingMode.includes('vertical')) index += 4
-            break
-          case 'shape':
-            if (this.config.scaleType === 3) index += 4
-        }
         if (type === 'cornerRotaters') {
           const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
           const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
@@ -1745,6 +1739,13 @@ export default Vue.extend({
           }
           return { cursor: ControlUtils.getCornerRataterMap[cursorIndex] }
         } else {
+          switch (this.getLayerType()) {
+            case 'text':
+              if (this.config.styles.writingMode.includes('vertical')) index += 4
+              break
+            case 'shape':
+              if (this.config.scaleType === 3) index += 4
+          }
           const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
             : (index + Math.ceil(rotateAngle / 45) + 8) % 8
           return { cursor: this.controlPoints.cursors[cursorIndex] }
