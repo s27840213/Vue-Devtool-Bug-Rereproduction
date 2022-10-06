@@ -6,9 +6,7 @@ interface IRect {
 }
 
 const getManhanttan = function (imageData: ImageData, region?: IRect, scale = 1) {
-  const start = Date.now()
   const { mapX, mapY } = manhattan(imageData, region)
-  console.warn('handle manhanttan calculation: ', Date.now() - start)
   const { data: pixels, width, height } = imageData
   const trasition_r = 1
   const _trasition_r = 1 / trasition_r
@@ -38,9 +36,7 @@ const getManhanttan = function (imageData: ImageData, region?: IRect, scale = 1)
 }
 
 const getRect = function (imageData: ImageData, region?: IRect, scale = 1) {
-  const start = Date.now()
   const map = rect(imageData, region)
-  console.warn('handle manhanttan-rect calculation: ', Date.now() - start)
   const { data: pixels, width, height } = imageData
 
   return (r: number): Uint8ClampedArray => {

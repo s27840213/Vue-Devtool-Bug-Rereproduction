@@ -275,7 +275,7 @@ export default Vue.extend({
           if (target) {
             const layerInfo = layerUtils.getLayerInfoById(pageId, layerId, subLayerId)
             imageShadowUtils.updateShadowSrc(layerInfo, target.styles.shadow.srcObj)
-            imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
+            // imageShadowUtils.setHandleId({ pageId: '', layerId: '', subLayerId: '' })
           }
         }
       }
@@ -373,9 +373,8 @@ export default Vue.extend({
       return this.config.backgroundImage.config.imgControl
     },
     isAnyLayerActive(): boolean {
-      return (this.config as IPage).layers.some(l => l.active)
+      return this.currSelectedIndex !== -1
     },
-
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
     },

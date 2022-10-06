@@ -1986,21 +1986,6 @@ export default Vue.extend({
     },
     frameLayerMapper(_config: any) {
       const config = generalUtils.deepCopy(_config)
-      // if (FrameUtils.isImageFrame(this.config)) {
-      //   const { x, y, width, height, scale } = config.styles
-      //   return Object.assign(config, {
-      //     styles: {
-      //       ...config.styles,
-      //       ...mathUtils.multipy(this.getLayerScale(), {
-      //         x,
-      //         y,
-      //         width,
-      //         height,
-      //         scale
-      //       })
-      //     }
-      //   })
-      // }
       const { x, y, width, height, scale } = config.styles
       return Object.assign(config, {
         styles: {

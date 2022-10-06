@@ -44,6 +44,10 @@ class PageUtils {
     return store.getters.getCurrActivePageIndex
   }
 
+  get currHoveredPageIndex(): number {
+    return store.getters.getCurrHoveredPageIndex
+  }
+
   get currFocusPageIndex() {
     return store.getters.getCurrFocusPageIndex
   }

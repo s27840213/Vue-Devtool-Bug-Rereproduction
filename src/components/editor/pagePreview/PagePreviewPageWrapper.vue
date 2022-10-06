@@ -1,10 +1,11 @@
 <template lang="pug">
   lazy-load(
-      target=".mobile-editor__page-preview"
+      class="transition"
+      :target="lazyLoadTarget"
       :threshold="[0,1]"
       :minHeight="contentWidth"
       @loaded="handleLoaded")
-    div(v-if="!allPageMode" :style="loadingStyle()")
+    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle")
     div(v-else class="page-preview-page"
       :style="styles2()"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
@@ -81,7 +82,7 @@ export default Vue.extend({
       default: true,
       type: Boolean
     },
-    target: {
+    lazyLoadTarget: {
       type: String,
       default: '.mobile-editor__page-preview'
     }
@@ -121,7 +122,9 @@ export default Vue.extend({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       getPage: 'getPage',
       isDragged: 'page/getIsDragged',
-      allPageMode: 'mobileEditor/getMobileAllPageMode'
+      allPageMode: 'mobileEditor/getMobileAllPageMode',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      showPagePanel: 'page/getShowPagePanel'
     })
   },
   methods: {
@@ -289,7 +292,6 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   position: relative;
-  transition: 0.25s ease-in-out;
   max-width: 100%;
   &-content {
     position: relative;
@@ -394,5 +396,9 @@ export default Vue.extend({
   color: setColor(blue-1);
   box-sizing: border-box;
   background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
+}
+
+.transition {
+  transition: 0.25s ease-in-out;
 }
 </style>
