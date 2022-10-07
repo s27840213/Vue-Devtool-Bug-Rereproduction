@@ -133,7 +133,7 @@ export function hex2Rgb(hex: string): number[] {
   return splited.map((color) => parseInt(color, 16))
 }
 
-export function rbg2xyz(sRGB: string): number[] {
+export function rgb2xyz(sRGB: string): number[] {
   const [r, g, b] = hex2Rgb(sRGB)
     .map(c => c / 255)
     .map(c => c > 0.04045 ? Math.pow((c + 0.055) / 1.055, 2.4) : c / 12.92)
@@ -164,7 +164,7 @@ export function xyz2lab(xyz: number[]): number[] {
 }
 
 export function rgb2lab(sRGB: string): number[] {
-  return xyz2lab(rgb2lab(sRGB))
+  return xyz2lab(rgb2xyz(sRGB))
 }
 
 export function lab2xyz(lab: number[]): number[] {
@@ -172,9 +172,10 @@ export function lab2xyz(lab: number[]): number[] {
     return c > 0.008856 ? Math.pow(c, 3) : (c - 16 / 116) / 7.787
   }
   const [l, a, b] = lab
-  const y = f((l + 16) / 116) * refX
-  const x = f(a / 500 + y) * refY
+  let y = (l + 16) / 116
+  const x = f(a / 500 + y) * refX
   const z = f(y - b / 200) * refZ
+  y = f(y) * refY
   return [x, y, z]
 }
 

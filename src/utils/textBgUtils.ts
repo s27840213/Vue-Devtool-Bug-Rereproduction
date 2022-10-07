@@ -7,6 +7,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import mathUtils from '@/utils/mathUtils'
 import _ from 'lodash'
+import { lab2rgb, rgb2lab } from './colorUtils'
 
 // For text effect gooey
 class Point {
@@ -495,7 +496,11 @@ class TextBg {
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance
-      const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
+      // const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
+      let fill = textEffectUtils.getLayerMainColor(config.paragraphs)
+      const lab = rgb2lab(fill)
+      lab[0] = lab[0] <= 50 ? lab[0] + 40 : lab[0] - 40
+      fill = lab2rgb(lab)
 
       // Add padding.
       rects.forEach((rect: DOMRect) => {
@@ -590,6 +595,11 @@ class TextBg {
       path.h(-(boxWidth - boxRadius * 2))
       path.a(boxRadius, boxRadius, 1, -boxRadius, -boxRadius)
 
+      let fill = textEffectUtils.getLayerMainColor(config.paragraphs)
+      const lab = rgb2lab(fill)
+      lab[0] = 100 - lab[0]
+      fill = lab2rgb(lab)
+
       return {
         attrs: {
           width: boxWidth + textBg.bStroke,
@@ -602,7 +612,7 @@ class TextBg {
         content: [{
           tag: 'path',
           attrs: {
-            style: `fill:${textBg.pColor}; stroke:${textBg.bColor}; opacity:${opacity}`,
+            style: `fill:${fill}; stroke:${textBg.bColor}; opacity:${opacity}`,
             'stroke-width': textBg.bStroke,
             d: path.result()
           }
