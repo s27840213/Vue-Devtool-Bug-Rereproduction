@@ -10,7 +10,8 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
-      :inFrame="true"
+      :isFrame="true"
+      :inImageFrame="inImageFrame()"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
       :config="layer")
@@ -167,6 +168,9 @@ export default Vue.extend({
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
       }
       return ''
+    },
+    inImageFrame() {
+      return this.config.clips.length === 1 && this.config.clips[0].isFrameImg
     }
   }
 })
