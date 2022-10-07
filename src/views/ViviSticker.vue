@@ -1,6 +1,6 @@
 <template lang="pug">
   div(class="vivisticker" :style="copyingStyles()")
-    div(class="vivisticker__top" :style="copyingStyles()")
+    div(class="vivisticker__top" :style="topStyles()")
       header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
       div(class="vivisticker__content"
           @pointerdown="outerClick")
@@ -188,6 +188,12 @@ export default Vue.extend({
     },
     copyingStyles() {
       return this.isDuringCopy ? { background: 'transparent' } : {}
+    },
+    topStyles() {
+      return {
+        ...this.isDuringCopy ? { background: 'transparent' } : {},
+        gridTemplateRows: this.currActivePanel === 'text' ? '1fr auto' : 'auto 1fr auto'
+      }
     },
     handleSwitchTab(panelType: string, props?: IFooterTabProps) {
       if (this.isInEditor) {
