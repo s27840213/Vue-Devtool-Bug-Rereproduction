@@ -44,7 +44,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 
@@ -85,7 +85,7 @@ export default Vue.extend({
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
-    listCategories(): any[] {
+    listCategories(): ICategoryItem[] {
       const { categories } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
@@ -96,25 +96,25 @@ export default Vue.extend({
           title: category.title
         }))
     },
-    listResult(): any[] { // Don't show all result in PanelObject
-      // return this.processListResult(this.rawContent.list, false)
+    listResult(): ICategoryItem[] { // Don't show all result in PanelObject
+      // return this.processListResult(this.rawContent.list)
       return []
     },
-    searchResult(): any[] {
-      const list = this.processListResult(this.rawSearchResult.list, true)
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    mainContent(): any[] {
+    mainContent(): ICategoryItem[] {
       const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    categoryListArray(): any[] {
+    categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
         show: this.keyword,
@@ -193,13 +193,13 @@ export default Vue.extend({
       generalUtils.copyText(this.panelParams)
       this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
       const links = this.mainContent.map((it) => {
-        return it.list.map((it: Record<string, string>) => {
+        return it.list.map((it) => {
           return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
         }).join('\n')
       }).join('\n')
       generalUtils.downloadTextFile(`${this.keywordLabel}.txt`, links)
     },
-    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean) {
+    processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
       return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {

@@ -59,7 +59,7 @@ import ColorPicker from '@/components/ColorPicker.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
@@ -113,7 +113,7 @@ export default Vue.extend({
     currBackgroundColor(): string {
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
     },
-    defaultBackgroundColors(): any[] {
+    defaultBackgroundColors(): Partial<ICategoryItem>[] {
       const key = 'default-background-colors'
       return [{
         id: key,
@@ -121,7 +121,7 @@ export default Vue.extend({
         size: generalUtils.isTouchDevice() ? window.innerWidth / 2 : 157
       }]
     },
-    listCategories(): any[] {
+    listCategories(): ICategoryItem[] {
       const { categories } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
@@ -132,24 +132,24 @@ export default Vue.extend({
           title: category.title
         }))
     },
-    listResult(): any[] {
+    listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
     },
-    searchResult(): any[] {
+    searchResult(): ICategoryItem[] {
       const list = this.processListResult(this.rawSearchResult.list, true)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    mainContent(): any[] {
+    mainContent(): ICategoryItem[] {
       const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    categoryListArray(): any[] {
+    categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
         show: this.keyword && this.showImageTab,
@@ -282,7 +282,7 @@ export default Vue.extend({
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
     },
-    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean) {
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       return new Array(Math.ceil(list.length / 2))
         .fill('')
         .map((_, idx) => {
