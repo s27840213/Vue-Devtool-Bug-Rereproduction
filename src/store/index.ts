@@ -363,7 +363,7 @@ const mutations: MutationTree<IEditorState> = {
     state.currFunctionPanelType = type
   },
   SET_pageScaleRatio(state: IEditorState, ratio: number) {
-    state.pageScaleRatio = ratio
+    state.pageScaleRatio = 100
   },
   SET_isSettingScaleRatio(state: IEditorState, isSettingScaleRatio: boolean) {
     state.isSettingScaleRatio = isSettingScaleRatio
