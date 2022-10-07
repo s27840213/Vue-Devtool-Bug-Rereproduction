@@ -214,7 +214,6 @@ export default Vue.extend({
   },
   watch: {
     getImgDimension(newVal, oldVal) {
-      console.log(newVal, this.forRender)
       this.handleDimensionUpdate(newVal, oldVal)
     },
     parentLayerDimension(newVal, oldVal) {
@@ -500,8 +499,6 @@ export default Vue.extend({
         if (type === 'background') return
         const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
         const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
-        console.log(currUrl)
-        console.log((this.scaleRatio / 100), scale)
         ImageUtils.imgLoadHandler(currUrl, async () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
@@ -877,19 +874,12 @@ export default Vue.extend({
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
       }
-      // const { primaryLayer } = this
-      // if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
-      //   layerInfo.subLayerIdx--
-      // }
       return layerInfo
     },
     isInFrame(): boolean {
       return this.primaryLayerType() === 'frame'
     },
     _contentScaleRatio(): number {
-      // if ((this.imgControl || this.forRender) && this.primaryLayer && ['frame', 'group'].includes(this.primaryLayer.type)) {
-      //   return 1
-      // }
       return this.config.isFrameImg || !this.isInFrame() || this.imgControl || this.forRender ? this.contentScaleRatio : 1
     },
     scaledConfig(): { [index: string]: string | number } {
