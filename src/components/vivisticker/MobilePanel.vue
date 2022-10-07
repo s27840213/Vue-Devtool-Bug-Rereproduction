@@ -798,7 +798,7 @@ export default Vue.extend({
     position: absolute;
     touch-action: manipulation;
     top: 2px;
-    padding: 10px 20px;
+    padding: 10px 20px 20px 20px;
     border-radius: 5px;
     > div {
       background-color: setColor(gray-4);
