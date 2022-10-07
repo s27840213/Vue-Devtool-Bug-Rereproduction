@@ -47,7 +47,8 @@ export default Vue.extend({
       unrenderTimer: -1,
       renderTimer: -1,
       unrenderEventId: '',
-      renderEventId: ''
+      renderEventId: '',
+      loadedFlag: false
     }
   },
   mounted() {

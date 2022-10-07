@@ -32,7 +32,7 @@ import pageUtils from '@/utils/pageUtils'
 import { getDocumentColor } from '@/utils/colorUtils'
 import generalUtils from '@/utils/generalUtils'
 import { Itheme } from '@/interfaces/theme'
-import unsplash from '@/store/module/photo'
+import unsplash from '@/store/module/unsplash'
 import uploadUtils from '@/utils/uploadUtils'
 import imgShadowMutations from '@/store/utils/imgShadow'
 import file from '@/store/module/file'
@@ -305,6 +305,9 @@ const mutations: MutationTree<IEditorState> = {
   },
   ADD_page(state: IEditorState, newPage: IPage) {
     state.pages.push(newPage)
+  },
+  ADD_pages(state: IEditorState, newPages: Array<IPage>) {
+    state.pages = [...state.pages, ...newPages]
   },
   ADD_pageToPos(state: IEditorState, updateInfo: { newPage: IPage, pos: number }) {
     state.pages = state.pages.slice(0, updateInfo.pos).concat(updateInfo.newPage, state.pages.slice(updateInfo.pos))
