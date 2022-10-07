@@ -67,7 +67,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
@@ -214,6 +214,7 @@ export default Vue.extend({
   },
   watch: {
     getImgDimension(newVal, oldVal) {
+      console.log(newVal, this.forRender)
       this.handleDimensionUpdate(newVal, oldVal)
     },
     parentLayerDimension(newVal, oldVal) {
@@ -264,7 +265,14 @@ export default Vue.extend({
     },
     'config.imgControl'(val) {
       if (val) {
-        this.setImgConfig(this.layerInfo())
+        const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
+        const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
+        const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
+        const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
+        if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
+          this.setImgConfig(this.layerInfo())
+        }
       } else {
         this.setImgConfig(undefined)
         this.handleDimensionUpdate()
@@ -485,13 +493,15 @@ export default Vue.extend({
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
+      const scale = this.config.isFrameImg || this.config.isFrame ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
       const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
         const currUrl = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
         const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
+        console.log(currUrl)
+        console.log((this.scaleRatio / 100), scale)
         ImageUtils.imgLoadHandler(currUrl, async () => {
           if (ImageUtils.getImgIdentifier(this.config.srcObj) === urlId) {
             this.src = currUrl
@@ -867,16 +877,19 @@ export default Vue.extend({
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
       }
-      const { primaryLayer } = this
-      if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
-        layerInfo.subLayerIdx--
-      }
+      // const { primaryLayer } = this
+      // if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
+      //   layerInfo.subLayerIdx--
+      // }
       return layerInfo
     },
     isInFrame(): boolean {
       return this.primaryLayerType() === 'frame'
     },
     _contentScaleRatio(): number {
+      // if ((this.imgControl || this.forRender) && this.primaryLayer && ['frame', 'group'].includes(this.primaryLayer.type)) {
+      //   return 1
+      // }
       return this.config.isFrameImg || !this.isInFrame() || this.imgControl || this.forRender ? this.contentScaleRatio : 1
     },
     scaledConfig(): { [index: string]: string | number } {

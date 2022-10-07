@@ -9,7 +9,7 @@
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
-      :subLayerIndex="index"
+      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :inFrame="true"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
@@ -133,6 +133,10 @@ export default Vue.extend({
         layers = layers.concat(config.blendLayers)
       }
       return layers
+    },
+    layerIdxOffset(): number {
+      const { config } = this
+      return config.decoration && config.decoration.svg && !config.clips[0].isFrameImg ? 1 : 0
     },
     shadowWrapperStyles() {
       const shadow = this.config.styles.shadow
