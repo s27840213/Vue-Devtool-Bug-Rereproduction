@@ -13,6 +13,7 @@ import textEffectUtils from '@/utils/textEffectUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import generalUtils from '@/utils/generalUtils'
 import shortcutUtils from './shortcutUtils'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 class TiptapUtils {
   event: any
@@ -98,17 +99,6 @@ class TiptapUtils {
     this.event.emit('update', toRecord)
   }
 
-  isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
-  componentToHex = (c: number) => c.toString(16).length === 1 ? '0' + c.toString(16).toUpperCase() : c.toString(16).toUpperCase()
-  rgbToHex = (rgb: string) => {
-    const rgbArr = rgb.match(/\d+/g)
-    if (rgbArr && rgbArr.length === 3) {
-      return '#' + this.componentToHex(parseInt(rgbArr[0])) + this.componentToHex(parseInt(rgbArr[1])) + this.componentToHex(parseInt(rgbArr[2]))
-    } else {
-      return rgb
-    }
-  }
-
   textStylesRaw(styles: any): {[key: string]: any} {
     const textStyles = cssConveter.convertFontStyle(styles)
     return Object.assign(textStyles, {
@@ -185,7 +175,7 @@ class TiptapUtils {
       size: Math.round(parseFloat(spanStyle.fontSize.split('px')[0]) / 1.333333 * 100) / 100,
       decoration: spanStyle.textDecorationLine ? spanStyle.textDecorationLine : spanStyle.getPropertyValue('-webkit-text-decoration-line'),
       style: spanStyle.fontStyle,
-      color: this.isValidHexColor(spanStyle.color) ? spanStyle.color : this.rgbToHex(spanStyle.color),
+      color: checkAndConvertToHex(spanStyle.color),
       ...fontProps
     } as ISpanStyle
   }

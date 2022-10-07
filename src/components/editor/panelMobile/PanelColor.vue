@@ -28,7 +28,7 @@
 import Vue, { PropType } from 'vue'
 import MobileSlider from '@/components/editor/mobile/MobileSlider.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { checkAndConvertToHex } from '@/utils/colorUtils'
 import stepsUtils from '@/utils/stepsUtils'
 import { mapGetters, mapState } from 'vuex'
 import layerUtils from '@/utils/layerUtils'
@@ -145,7 +145,7 @@ export default Vue.extend({
       switch (this.currEvent) {
         case ColorEventType.text: {
           if (newColor === this.props.color) return
-          const hex = tiptapUtils.isValidHexColor(newColor) ? newColor : tiptapUtils.rgbToHex(newColor)
+          const hex = checkAndConvertToHex(newColor)
           tiptapUtils.spanStyleHandler('color', hex)
           break
         }

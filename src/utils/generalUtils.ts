@@ -107,11 +107,6 @@ class GeneralUtils {
     return value.match(/[+-]?\d+(\.\d+)?/)
   }
 
-  isValidHexColor(value: string) {
-    value = value.toUpperCase()
-    return value.match(/^#[0-9A-F]{6}$/)
-  }
-
   boundValue(value: number, min: number, max: number): string {
     if (value < min) return min.toString()
     else if (value > max) return max.toString()

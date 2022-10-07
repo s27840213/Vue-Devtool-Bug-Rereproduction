@@ -16,6 +16,7 @@ import _ from 'lodash'
 import cssConverter from './cssConverter'
 import stepsUtils from './stepsUtils'
 import textBgUtils from './textBgUtils'
+import { checkAndConvertToHex } from '@/utils/colorUtils'
 
 class TextUtils {
   get currSelectedInfo() { return store.getters.getCurrSelectedInfo }
@@ -443,7 +444,7 @@ class TextUtils {
             : Math.round(parseFloat(this.getCurrTextProps?.fontSize ?? '0') / (LayerUtils.getCurrLayer as IText).styles.scale),
           decoration: spanEl.style.textDecorationLine,
           style: spanEl.style.fontStyle,
-          color: this.isValidHexColor(spanEl.style.color) ? spanEl.style.color : this.rgbToHex(spanEl.style.color)
+          color: checkAndConvertToHex(spanEl.style.color)
         } as ISpanStyle
 
         if (TextPropUtils.isSameSpanStyles(spanStyle, spanStyleBuff)) {
@@ -471,17 +472,6 @@ class TextUtils {
       }
     })
     return paragraphs
-  }
-
-  private isValidHexColor = (value: string): boolean => value.match(/^#[0-9A-F]{6}$/) !== null
-  private componentToHex = (c: number) => c.toString(16).length === 1 ? '0' + c.toString(16).toUpperCase() : c.toString(16).toUpperCase()
-  private rgbToHex = (rgb: string) => {
-    const rgbArr = rgb.match(/\d+/g)
-    if (rgbArr && rgbArr.length === 3) {
-      return '#' + this.componentToHex(parseInt(rgbArr[0])) + this.componentToHex(parseInt(rgbArr[1])) + this.componentToHex(parseInt(rgbArr[2]))
-    } else {
-      return rgb
-    }
   }
 
   newPropsHandler(paragraphs: IParagraph[]): IParagraph[] {
