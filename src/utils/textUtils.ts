@@ -25,6 +25,7 @@ class TextUtils {
   get isFontLoading(): boolean { return (store.state as any).text.isFontLoading }
 
   toRecordId: string
+  toSetFlagId: string
   fieldRange: {
     fontSize: { min: number, max: number }
     lineHeight: { min: number, max: number }
@@ -34,6 +35,7 @@ class TextUtils {
 
   constructor() {
     this.toRecordId = ''
+    this.toSetFlagId = ''
     this.fieldRange = {
       fontSize: { min: 6, max: 800 },
       lineHeight: { min: 0.5, max: 2.5 },
@@ -1156,7 +1158,12 @@ class TextUtils {
     }
   }
 
-  async untilFontLoadedForPage(page: IPage): Promise<void> {
+  async untilFontLoadedForPage(page: IPage, toSetFlag = false): Promise<void> {
+    const setFlagId = GeneralUtils.generateRandomString(12)
+    if (toSetFlag) {
+      this.toSetFlagId = setFlagId
+      this.setIsFontLoading(true)
+    }
     const textLayers: IText[] = []
     for (const layer of page.layers) {
       if (layer.type === 'text') {
@@ -1168,11 +1175,44 @@ class TextUtils {
         textLayers.push(...((layer as IGroup).layers.filter(l => l.type === 'text') as IText[]))
       }
     }
-    await Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs)))
+
+    const isError = await Promise.race([
+      Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs))),
+      new Promise<boolean>(resolve => {
+        setTimeout(() => {
+          resolve(true)
+        }, 40000)
+      })
+    ])
+    if (isError === true) {
+      console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+    }
+    if (toSetFlag && this.toSetFlagId === setFlagId) {
+      this.setIsFontLoading(false)
+    }
   }
 
-  async untilFontLoaded(paragraphs: IParagraph[]): Promise<void> {
-    await Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p)))
+  async untilFontLoaded(paragraphs: IParagraph[], toSetFlag = false): Promise<void> {
+    const setFlagId = GeneralUtils.generateRandomString(12)
+    if (toSetFlag) {
+      this.toSetFlagId = setFlagId
+      this.setIsFontLoading(true)
+    }
+
+    const isError = await Promise.race([
+      Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p))),
+      new Promise<boolean>(resolve => {
+        setTimeout(() => {
+          resolve(true)
+        }, 40000)
+      })
+    ])
+    if (isError === true) {
+      console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+    }
+    if (toSetFlag && this.toSetFlagId === setFlagId) {
+      this.setIsFontLoading(false)
+    }
   }
 
   async untilFontLoadedForP(paragraph: IParagraph): Promise<void> {
@@ -1204,9 +1244,10 @@ class TextUtils {
   waitFontLoadingAndRecord(paragraphs: IParagraph[], callback: (() => void) | undefined = undefined) {
     const recordId = GeneralUtils.generateRandomString(12)
     this.toRecordId = recordId
+    this.toSetFlagId = recordId
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void) => {
-      if (isError) {
+      if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (callback) {
@@ -1215,6 +1256,8 @@ class TextUtils {
       if (this.toRecordId === recordId) {
         // console.log('record')
         stepsUtils.record()
+      }
+      if (this.toSetFlagId === recordId) {
         this.setIsFontLoading(false)
       }
     }
@@ -1234,9 +1277,10 @@ class TextUtils {
   waitGroupFontLoadingAndRecord(group: IGroup, callback: (() => void) | undefined = undefined) {
     const recordId = GeneralUtils.generateRandomString(12)
     this.toRecordId = recordId
+    this.toSetFlagId = recordId
     this.setIsFontLoading(true)
     const finalCallBack = (isError: boolean | void[]) => {
-      if (isError) {
+      if (isError === true) {
         console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
       }
       if (callback) {
@@ -1245,6 +1289,8 @@ class TextUtils {
       if (this.toRecordId === recordId) {
         // console.log('record')
         stepsUtils.record()
+      }
+      if (this.toSetFlagId === recordId) {
         this.setIsFontLoading(false)
       }
     }

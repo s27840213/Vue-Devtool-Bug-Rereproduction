@@ -64,7 +64,10 @@ export default Vue.extend({
       return this.layerInfo.pageIndex
     },
     layerIndex(): number {
-      return this.layerInfo.layerIndex
+      return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.subLayerIdx : this.layerInfo.layerIndex
+    },
+    primaryLayerIndex(): number {
+      return this.layerInfo.subLayerIdx !== -1 ? this.layerInfo.layerIndex : -1
     }
   }
 })

@@ -2,7 +2,7 @@
   div(v-if="logos.length === 0 && !isLogosLoading" class="hint")
     no-items-hint(type="logo")
   div(v-else class="brand-kit-tab-logo")
-    recycle-scroller(:items="rows")
+    recycle-scroller(class="brand-kit-tab-logo__content" :items="rows")
       template(v-slot="{ item }")
         observer-sentinel(v-if="item.sentinel"
           target=".brand-kit-tab-logo"
@@ -150,6 +150,9 @@ export default Vue.extend({
   box-sizing: border-box;
   @include push-scrollbar10;
   @include hide-scrollbar;
+  &__content {
+    height: 100%;
+  }
   &__row {
     display: flex;
     justify-content: space-between;

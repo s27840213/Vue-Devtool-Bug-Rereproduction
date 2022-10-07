@@ -17,6 +17,8 @@ import pageUtils from './pageUtils'
 import { ICurrSelectedInfo } from '@/interfaces/editor'
 
 class ShortcutUtils {
+  copySourcePageIndex: number
+
   get currSelectedInfo(): ICurrSelectedInfo { return store.getters.getCurrSelectedInfo }
 
   get currSelectedPageIndex() {
@@ -35,9 +37,25 @@ class ShortcutUtils {
   //   this.target = target
   // }
 
-  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp, offset = 10) {
-    layer.styles.x += offset
-    layer.styles.y += offset
+  constructor() {
+    this.copySourcePageIndex = -1
+  }
+
+  private regenerateLayerInfo(layer: IText | IShape | IImage | IGroup | ITmp, props: { toCenter?: boolean, offset?: number, targetPageIndex?: number }) {
+    const { toCenter = false, offset = 10, targetPageIndex } = props
+
+    if (toCenter && targetPageIndex !== undefined) {
+      const targetPage = pageUtils.getPage(targetPageIndex)
+      const { x, y, width, height } = layer.styles
+      const posX = (targetPage.width / 2) - (width / 2)
+      const posY = (targetPage.height / 2) - (height / 2)
+      layer.styles.x = posX
+      layer.styles.y = posY
+    } else {
+      layer.styles.x += offset
+      layer.styles.y += offset
+    }
+
     layer.id = GeneralUtils.generateRandomString(8)
     layer.shown = false
 
@@ -104,6 +122,7 @@ class ShortcutUtils {
   copy() {
     if (store.getters.getCurrSelectedIndex >= 0 && !LayerUtils.getTmpLayer().locked) {
       navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex))))
+      this.copySourcePageIndex = store.getters.getCurrSelectedPageIndex
       // store.commit('SET_clipboard', GeneralUtils.deepCopy(store.getters.getLayer(store.getters.getCurrSelectedPageIndex, store.getters.getCurrSelectedIndex)))
     } else {
       console.warn('You did\'t select any unlocked layer')
@@ -122,40 +141,42 @@ class ShortcutUtils {
       return
     }
 
+    const { currFocusPageIndex, currHoveredPageIndex } = pageUtils
+    const targetPageIndex = currHoveredPageIndex >= 0 ? currHoveredPageIndex : currFocusPageIndex
+
     const clipboardInfo = [JSON.parse(text)].map((layer: IText | IShape | IImage | IGroup | ITmp) => {
-      return this.regenerateLayerInfo(layer)
+      return this.regenerateLayerInfo(layer, { toCenter: targetPageIndex !== this.copySourcePageIndex, targetPageIndex })
     })
-    /**
-     * @todo change middlemost to currFocusPageindex
-     */
-    const currActivePageIndex = pageUtils.currActivePageIndex
+
     const isTmp: boolean = clipboardInfo[0].type === 'tmp'
-    if (store.getters.getCurrSelectedIndex >= 0 && currActivePageIndex === store.getters.getCurrSelectedPageIndex) {
+    if (store.getters.getCurrSelectedIndex >= 0 && targetPageIndex === store.getters.getCurrSelectedPageIndex) {
       const tmpIndex = store.getters.getCurrSelectedIndex
       const tmpLayers = store.getters.getCurrSelectedLayers
       const tmpLayersNum = isTmp ? tmpLayers.length : 1
       GroupUtils.deselect()
       if (isTmp) {
-        store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
+        store.commit('ADD_layersToPos', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, GeneralUtils.deepCopy(clipboardInfo[0].layers))
       } else {
-        store.commit('ADD_layersToPos', { pageIndex: currActivePageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
-        GroupUtils.set(currActivePageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
+        store.commit('ADD_layersToPos', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)], pos: tmpIndex + tmpLayersNum })
+        GroupUtils.set(targetPageIndex, tmpIndex + tmpLayersNum, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
-      ZindexUtils.reassignZindex(currActivePageIndex)
+      ZindexUtils.reassignZindex(targetPageIndex)
     } else {
-      const { currFocusPageIndex } = pageUtils
       if (store.getters.getCurrSelectedIndex >= 0) {
         GroupUtils.deselect()
       }
       if (isTmp) {
-        store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
+        store.commit('ADD_newLayers', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
+        GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, GeneralUtils.deepCopy(clipboardInfo[0].layers))
       } else {
-        store.commit('ADD_newLayers', { pageIndex: currFocusPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
-        GroupUtils.set(currFocusPageIndex, store.getters.getLayersNum(currFocusPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
+        store.commit('ADD_newLayers', { pageIndex: targetPageIndex, layers: [...GeneralUtils.deepCopy(clipboardInfo)] })
+        GroupUtils.set(targetPageIndex, store.getters.getLayersNum(targetPageIndex) - 1, [...GeneralUtils.deepCopy(clipboardInfo)])
       }
-      ZindexUtils.reassignZindex(currFocusPageIndex)
+      ZindexUtils.reassignZindex(targetPageIndex)
+    }
+    if (targetPageIndex === this.copySourcePageIndex) {
+      navigator.clipboard.writeText(JSON.stringify(GeneralUtils.deepCopy(store.getters.getLayer(this.copySourcePageIndex, store.getters.getCurrSelectedIndex))))
     }
     Vue.nextTick(() => {
       StepsUtils.record()
@@ -164,7 +185,7 @@ class ShortcutUtils {
 
   duplicate() {
     const { getCurrLayer: currLayer } = LayerUtils
-    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer))
+    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(currLayer), {})
 
     const currActivePageIndex = pageUtils.currActivePageIndex
     const isTmp: boolean = currLayer.type === 'tmp'
@@ -199,7 +220,7 @@ class ShortcutUtils {
   }
 
   altDuplicate(targetPageIndex: number, targetLayerIndex: number, config: ILayer) {
-    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config), 0)
+    const newLayer = this.regenerateLayerInfo(GeneralUtils.deepCopy(config), { offset: 0 })
     newLayer.active = false
 
     const isTmp: boolean = config.type === 'tmp'

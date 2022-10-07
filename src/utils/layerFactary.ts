@@ -70,7 +70,8 @@ class LayerFactary {
               }, {})
           },
           srcObj: { type: '', assetId: '', userId: '' },
-          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 }
+          styles: { imgWidth: 0, imgHeight: 0, imgX: 0, imgY: 0 },
+          old: {}
         }
       }
     }

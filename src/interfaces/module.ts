@@ -6,17 +6,19 @@ import { IMarker } from '@/interfaces/shape'
 export interface IListModuleState {
   content: Partial<IListServiceContentData>
   categories: IListServiceContentData[]
+  searchResult: Partial<IListServiceContentData>
   keyword: string
   theme: string
   page: number
   nextCategory: number
   nextPage: number | undefined
+  nextSearch: number
   perPage: number
   pending: boolean
-  host: string
-  data: string
-  preview: string
-  preview2?: string
+  // host: string
+  // data: string
+  // preview: string
+  // preview2?: string
   locale: string
   error: string,
   sum?: number

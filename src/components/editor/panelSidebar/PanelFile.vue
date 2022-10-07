@@ -6,7 +6,7 @@
     btn(class="full-width mb-20" :type="'primary-mid'"
         @click.native="uploadImage()") {{$t('NN0014')}}
     image-gallery(
-      ref="gallery"
+      ref="mainContent"
       :myfile="myfileImages"
       vendor="myfile"
       :inFilePanel="true"
@@ -36,13 +36,11 @@
 import Vue from 'vue'
 import SearchBar from '@/components/SearchBar.vue'
 import uploadUtils from '@/utils/uploadUtils'
-import GalleryUtils from '@/utils/galleryUtils'
 import GalleryPhoto from '@/components/GalleryPhoto.vue'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import modalUtils from '@/utils/modalUtils'
 import networkUtils from '@/utils/networkUtils'
 import ImageGallery from '@/components/image-gallery/ImageGallery.vue'
-import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   components: {
@@ -52,7 +50,10 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0
+      scrollTop: {
+        mainContent: 0
+        // searchResult: 0
+      }
     }
   },
   computed: {
@@ -68,20 +69,14 @@ export default Vue.extend({
     }
   },
   mounted() {
-    (this.$refs.gallery as any).myfileUpdate()
+    (this.$refs.mainContent as any).myfileUpdate()
   },
-  watch: {
-    myfileImages(curr, prev) {
-      if (curr.length && !prev.length && this.$refs.gallery) {
-        const myfileImages = (this.$refs.gallery as Vue).$el.children[0]
-        myfileImages.addEventListener('scroll', (event: Event) => {
-          this.scrollTop = (event.target as HTMLElement).scrollTop
-        })
-      }
-      if (!curr.length && prev.length) {
-        this.scrollTop = 0
-      }
-    }
+  activated() {
+    (this.$refs.mainContent as Vue).$el.children[0].scrollTop = this.scrollTop.mainContent;
+    (this.$refs.mainContent as Vue).$el.children[0].addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+  },
+  deactivated() {
+    (this.$refs.mainContent as Vue).$el.children[0].removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
   },
   methods: {
     ...mapActions({
@@ -102,6 +97,9 @@ export default Vue.extend({
       } else {
         modalUtils.setModalInfo(`${this.$t('NN0350')}`, [])
       }
+    },
+    handleScrollTop(event: Event, key: 'mainContent'/* |'searchResult' */) {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     onDrop(evt: DragEvent) {
       const dt = evt.dataTransfer

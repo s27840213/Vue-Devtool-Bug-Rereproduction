@@ -9,7 +9,7 @@
           @error="onError"
           :styles="adjustImgStyles"
           :contentScaleRatio="contentScaleRatio")
-      img(v-else :src="src"
+      img(v-else-if="src" :src="src"
         draggable="false"
         :style="imgStyles()"
         class="body"
