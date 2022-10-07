@@ -72,7 +72,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import AssetUtils from '@/utils/assetUtils'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
 import textUtils from '@/utils/textUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
@@ -135,8 +135,8 @@ export default Vue.extend({
         text: this.$t('NN0013')
       }]
     },
-    listCategories(): any[] {
-      const { keyword, categories } = this
+    listCategories(): ICategoryItem[] {
+      const { categories } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
           size: 140,
@@ -149,24 +149,24 @@ export default Vue.extend({
     amountInRow():number {
       return generalUtils.isTouchDevice() ? 3 : 2
     },
-    listResult(): any[] {
+    listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
     },
-    searchResult(): any[] {
+    searchResult(): ICategoryItem[] {
       const list = this.processListResult(this.rawSearchResult.list, true)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    mainContent(): any[] {
+    mainContent(): ICategoryItem[] {
       const list = this.listCategories.concat(this.listResult)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    categoryListArray(): any[] {
+    categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
         show: this.keyword,
@@ -231,7 +231,7 @@ export default Vue.extend({
       setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
     getTextStyle(type: string): IBrandTextStyle {
-      return (this.textStyleSetting as any)[`${type}Style`]
+      return (this.textStyleSetting)[`${type}Style` as 'headingStyle'|'subheadingStyle'|'bodyStyle']
     },
     getFontStyles(type: string): { [key: string]: string } {
       const textStyle = this.getTextStyle(type)
@@ -305,7 +305,7 @@ export default Vue.extend({
       }
       return styles
     },
-    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean) {
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       const { amountInRow } = this
       return new Array(Math.ceil(list.length / amountInRow))
         .fill('')
