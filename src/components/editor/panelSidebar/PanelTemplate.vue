@@ -8,10 +8,12 @@
         iconName="close"
         iconWidth="24px"
         @click.native="handleClosePrompt")
+    //- Group template UI
     panel-group-template(v-if="currentGroup"
-      :showId="showTemplateId"
+      :showId="inAdminMode"
       :groupItem="currentGroup"
       @close="currentGroup = null")
+    //- Search bar and themes
     div
       div(class="panel-template__search")
         search-bar(class="mb-15"
@@ -32,27 +34,23 @@
           @change="handleTheme"
           @close="showTheme = false")
       div(v-if="showTheme" class="panel-template__wrap")
+    //- Search result empty msg
     div(v-if="theme && emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    div(v-if="showTemplateId && keyword && !pending && !emptyResultMessage"
+    //- Search result counter (only for admin)
+    div(v-if="inAdminMode && keyword && !pending && !emptyResultMessage"
       class="text-white text-left pb-10")
       span {{sum}} {{sum === 1 ? 'item' : 'items'}} in total (not work for category search)
-    category-list(ref="list"
-      :list="list"
-      @loadMore="handleLoadMore")
-      template(v-if="!theme || pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
+    //- Search result and main content
+    category-list(v-for="item in categoryListArray"
+                  v-show="item.show" :ref="item.key" :key="item.key"
+                  :list="item.content" @loadMore="handleLoadMore")
       template(v-slot:category-list-rows="{ list, title }")
-        category-list-rows(v-if="!keyword"
-          :list="list"
-          :title="title"
+        category-list-rows(:list="list" :title="title"
           @action="handleCategorySearch")
           template(v-slot:preview="{ item }")
             component(class="panel-template__item"
               :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-              :showId="showTemplateId"
+              :showId="inAdminMode"
               :item="item"
               @click="handleShowGroup")
       template(v-slot:category-template-item="{ list, title }")
@@ -61,15 +59,22 @@
           component(v-for="item in list"
             class="panel-template__item"
             :is="item.content_ids && item.content_ids.length > 1 ? 'category-group-template-item' : 'category-template-item'"
-            :showId="showTemplateId"
+            :showId="inAdminMode"
             :item="item"
             :key="item.group_id"
             @click="handleShowGroup")
-    div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
-      class="text-white text-left")
-      span {{resultTooLess[0]}}
-      span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooLess[1]}}
-      span {{resultTooLess[2]}}
+      template(#after)
+        //- Loading icon
+        div(v-if="!theme || pending" class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+        //- Search result too few msg
+        div(v-if="keyword && theme && !pending && resultGroupCounter<=3 && !allThemesChecked"
+            class="text-white text-left")
+          span {{resultTooFew[0]}}
+          span(class="set-all-templatebtn-btn pointer" @click="setAllTemplate") {{resultTooFew[1]}}
+          span {{resultTooFew[2]}}
 </template>
 
 <script lang="ts">
@@ -106,7 +111,10 @@ export default Vue.extend({
       showPrompt: false,
       showTheme: false,
       currentGroup: null as IListServiceContentDataItem | null,
-      scrollTop: 0
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      }
     }
   },
   mounted() {
@@ -132,33 +140,28 @@ export default Vue.extend({
     // panelInit for PanelTemplate at themeUtils.fetchTemplateContent
   },
   computed: {
-    ...mapState(
-      'templates',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword',
-        'theme',
-        'sum'
-      ]
-    ),
+    ...mapState('templates', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      pending: 'pending',
+      keyword: 'keyword',
+      theme: 'theme',
+      sum: 'sum'
+    }),
     ...mapState('user', ['userId', 'role', 'adminMode']),
     ...mapState(['themes']),
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
-    showTemplateId(): boolean {
+    inAdminMode(): boolean {
       return (this.role === 0) && this.adminMode
     },
     itemHeight(): number {
-      return generalUtils.getListRowItemSize() + (this.showTemplateId ? 34 : 10)
+      return generalUtils.getListRowItemSize() + (this.inAdminMode ? 34 : 10)
     },
     listCategories(): any[] {
-      const { keyword, categories, itemHeight } = this
-      if (keyword) { return [] }
+      const { categories, itemHeight } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
           size: itemHeight + 46,
@@ -169,52 +172,47 @@ export default Vue.extend({
         }))
     },
     listResult(): any[] {
-      const { keyword, theme } = this
-      let galleryUtils = null
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
-        // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 200, 10)
-      } else {
-        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
-      }
-      const idContainerHeight = this.showTemplateId ? 24 : 0
-      const result = galleryUtils
-        .generate(list.map((template: any) => ({
-          ...template,
-          width: template.match_cover.width,
-          height: template.match_cover.height
-        })))
-        .map((templates, idx) => {
-          const title = !keyword && !idx ? `${this.$t('NN0083')}` : ''
-          const height = idContainerHeight + templates[0].preview.height
-          return {
-            id: `result_${templates.map(item => item.id).join('_')}`,
-            type: 'category-template-item',
-            list: templates,
-            title: !keyword && !idx ? `${this.$t('NN0083')}` : '',
-            // 上下margin 10px, 如果有title則再加上title的高度46px
-            size: title ? (height + 56) : height + 10
-          }
-        })
-      if (result.length) {
-        Object.assign(result[result.length - 1], { sentinel: true })
-      }
-      return result
+      return this.processListResult(this.rawContent.list, false)
     },
-    resultGroupCounter(): number {
-      return this.content.list?.length || 0
-    },
-    list(): any[] {
-      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
-      if (this.listResult.length === 0 && list.length !== 0) {
-        list[list.length - 1].sentinel = true
+    searchResult(): any[] {
+      const list = this.processListResult(this.rawSearchResult.list, true)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
+    mainContent(): any[] {
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    categoryListArray(): any[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
+    },
+    resultGroupCounter(): number {
+      return this.rawSearchResult.list?.length || 0
+    },
     emptyResultMessage(): string {
-      const { keyword, pending, listResult } = this
-      return !pending && !this.list.length ? (keyword ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0001', 1) })}` : `${i18n.t('NN0394', { target: i18n.tc('NN0001', 1) })}`) : ''
+      const { keyword, pending } = this
+      if (pending || !keyword || this.searchResult.length > 0) return ''
+      return keyword
+        ? `${i18n.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.tc('NN0001', 1)
+        })}`
+        : `${i18n.t('NN0394', {
+          target: i18n.tc('NN0001', 1)
+        })}`
     },
     currPageThemeIds(): number[] {
       const pageSize = themeUtils.getFocusPageSize()
@@ -222,7 +220,7 @@ export default Vue.extend({
         .getThemesBySize(pageSize.width, pageSize.height)
         .map(theme => theme.id)
     },
-    resultTooLess(): string[] {
+    resultTooFew(): string[] {
       return (i18n.t('NN0398') as string).split('<html>')
     },
     allThemesChecked(): boolean {
@@ -231,11 +229,14 @@ export default Vue.extend({
     }
   },
   activated() {
-    this.$refs.list.$el.scrollTop = this.scrollTop
-    this.$refs.list.$el.addEventListener('scroll', this.handleScrollTop)
+    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
+    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    this.$refs.list.$el.removeEventListener('scroll', this.handleScrollTop)
+    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     currPageThemeIds(curr: number[] = []) {
@@ -247,37 +248,39 @@ export default Vue.extend({
       } else {
         this.showPrompt = false
       }
+    },
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+        })
+      }
     }
   },
   methods: {
-    ...mapActions('templates',
-      [
-        'resetContent',
-        'getContent',
-        'getTagContent',
-        'getRecAndCate',
-        'getMoreContent',
-        'getSum'
-      ]
+    ...mapActions('templates', [
+      'getContent',
+      'getTagContent',
+      'getMoreContent',
+      'resetSearch',
+      'getSum'
+    ]
     ),
     ...mapMutations('templates', {
       _setTemplateState: 'SET_STATE'
     }),
-    async handleSearch(keyword?: string) {
-      this.resetContent()
+    handleSearch(keyword?: string) {
+      this.resetSearch()
       if (keyword) {
         this.getTagContent({ keyword })
-        this.getSum({ keyword })
-      } else {
-        this.getRecAndCate()
+        if (this.inAdminMode) this.getSum({ keyword })
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
-      this.resetContent()
+      this.resetSearch()
       if (keyword) {
         this.getContent({ keyword, locale })
-      } else {
-        this.getRecAndCate()
       }
     },
     handleLoadMore() {
@@ -312,8 +315,8 @@ export default Vue.extend({
       this.showPrompt = false
       sessionStorage[`${userId}_theme_prompt`] = 'hidden'
     },
-    handleScrollTop(event: Event) {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     onAdvancedClicked() {
       this.showTheme = !this.showTheme
@@ -328,6 +331,36 @@ export default Vue.extend({
       return {
         maxHeight: `${this.$refs.panel.clientHeight - 80}px`
       }
+    },
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean) {
+      const { theme } = this
+      let galleryUtils = null
+      if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
+        // 判斷如果版型為IG限時動態(3) or 電商詳情頁(7), 最小高度則為200px
+        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 200, 10)
+      } else {
+        galleryUtils = new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 30 : 300, 140, 10)
+      }
+      const idContainerHeight = this.inAdminMode ? 24 : 0
+      const result = galleryUtils
+        .generate(list.map((template: any) => ({
+          ...template,
+          width: template.match_cover.width,
+          height: template.match_cover.height
+        })))
+        .map((templates, idx) => {
+          const title = !isSearch && !idx ? `${this.$t('NN0083')}` : ''
+          const height = idContainerHeight + templates[0].preview.height
+          return {
+            id: `result_${templates.map(item => item.id).join('_')}`,
+            type: 'category-template-item',
+            list: templates,
+            title,
+            // 上下margin 10px, 如果有title則再加上title的高度46px
+            size: title ? (height + 56) : height + 10
+          }
+        })
+      return result
     }
   }
 })
