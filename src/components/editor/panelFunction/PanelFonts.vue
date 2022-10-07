@@ -53,7 +53,7 @@ import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, ICategoryList } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
 import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
@@ -123,10 +123,10 @@ export default Vue.extend({
     isBrandkitAvailable(): boolean {
       return brandkitUtils.isBrandkitAvailable
     },
-    listCategories(): any[] {
+    listCategories(): ICategoryItem[] {
       const { hasNextPage } = this
-      const { categories, keyword } = this
-      let result = [] as any[]
+      const { categories } = this
+      let result = [] as ICategoryItem[]
       categories.forEach((category: IListServiceContentData) => {
         if (category.list.length) {
           result = result.concat([
@@ -147,7 +147,7 @@ export default Vue.extend({
                 assetId: font.src === 'admin' ? font.asset_id : font.asset_index?.toString()
               }]
             }))
-          ])
+          ] as ICategoryItem[])
         }
         if (category.is_recent === 1 && this.isBrandkitAvailable) {
           result = result.concat(this.listAssets)
@@ -158,7 +158,7 @@ export default Vue.extend({
       }
       return result
     },
-    listResult(): any[] {
+    listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
     },
     listAssets(): any[] {
@@ -197,21 +197,21 @@ export default Vue.extend({
       }
       return result
     },
-    searchResult(): any[] {
+    searchResult(): ICategoryItem[] {
       const list = this.processListResult(this.rawSearchResult.list, true)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: this.hasNextPage })
       }
       return list
     },
-    mainContent(): any[] {
+    mainContent(): ICategoryItem[] {
       const list = this.listCategories.concat(this.listResult)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: this.hasNextPage })
       }
       return list
     },
-    categoryListArray(): any[] {
+    categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
         show: this.keyword,
@@ -276,7 +276,7 @@ export default Vue.extend({
     capitalize(str: string): string {
       return generalUtils.capitalize(str)
     },
-    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean) {
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
       return new Array(list.length)
         .fill('')
         .map((_, idx) => {

@@ -81,7 +81,7 @@
 import Vue from 'vue'
 import i18n from '@/i18n'
 import { mapActions, mapState, mapMutations } from 'vuex'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IAssetTemplate, ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
@@ -160,7 +160,7 @@ export default Vue.extend({
     itemHeight(): number {
       return generalUtils.getListRowItemSize() + (this.inAdminMode ? 34 : 10)
     },
-    listCategories(): any[] {
+    listCategories(): ICategoryItem[] {
       const { categories, itemHeight } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
@@ -171,24 +171,24 @@ export default Vue.extend({
           title: category.title
         }))
     },
-    listResult(): any[] {
+    listResult(): ICategoryItem[] {
       return this.processListResult(this.rawContent.list, false)
     },
-    searchResult(): any[] {
+    searchResult(): ICategoryItem[] {
       const list = this.processListResult(this.rawSearchResult.list, true)
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    mainContent(): any[] {
+    mainContent(): ICategoryItem[] {
       const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
       if (list.length !== 0) {
         Object.assign(list[list.length - 1], { sentinel: true })
       }
       return list
     },
-    categoryListArray(): any[] {
+    categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
         show: this.keyword,
@@ -332,7 +332,7 @@ export default Vue.extend({
         maxHeight: `${this.$refs.panel.clientHeight - 80}px`
       }
     },
-    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean) {
+    processListResult(list = [] as IAssetTemplate[], isSearch: boolean): ICategoryItem[] {
       const { theme } = this
       let galleryUtils = null
       if (this.isSubsetOf(['3', '7', '13'], theme.split(','))) {
@@ -343,7 +343,7 @@ export default Vue.extend({
       }
       const idContainerHeight = this.inAdminMode ? 24 : 0
       const result = galleryUtils
-        .generate(list.map((template: any) => ({
+        .generate(list.map((template: IAssetTemplate) => ({
           ...template,
           width: template.match_cover.width,
           height: template.match_cover.height
@@ -354,7 +354,7 @@ export default Vue.extend({
           return {
             id: `result_${templates.map(item => item.id).join('_')}`,
             type: 'category-template-item',
-            list: templates,
+            list: templates as IListServiceContentDataItem[],
             title,
             // 上下margin 10px, 如果有title則再加上title的高度46px
             size: title ? (height + 56) : height + 10
