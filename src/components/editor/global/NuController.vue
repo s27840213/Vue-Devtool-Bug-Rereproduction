@@ -786,7 +786,6 @@ export default Vue.extend({
           }
 
           /**
-           * @NeedCodeReview - with Steve or TingAn
            * The cotentEditable updated timing will be move to the moveEnd instead of moveStart
            * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
            */

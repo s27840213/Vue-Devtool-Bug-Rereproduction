@@ -18,6 +18,7 @@
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :scaleRatio="scaleRatio"
+            :isPagePreview="isPagePreview"
             v-bind="$attrs")
     div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
@@ -32,7 +33,6 @@ import Vue, { PropType } from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
-import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -40,9 +40,6 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
 import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ILayerIdentifier } from '@/interfaces/layer'
-import { IUploadShadowImg } from '@/store/module/shadow'
 
 export default Vue.extend({
   components: {
@@ -65,6 +62,10 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    isPagePreview: {
+      default: false,
+      type: Boolean
     }
     /**
      * @Note Vuex Props

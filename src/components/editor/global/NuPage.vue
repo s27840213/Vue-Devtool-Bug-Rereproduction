@@ -104,7 +104,7 @@
           tabindex="0")
         lazy-load(
             target=".editor-view"
-            :rootMargin="'500px 0px 500px 0px'"
+            :rootMargin="'1500px 0px 1500px 0px'"
             :minHeight="config.width * (scaleRatio / 100)"
             :maxHeight="config.width * (scaleRatio / 100)"
             :threshold="[0,1]")

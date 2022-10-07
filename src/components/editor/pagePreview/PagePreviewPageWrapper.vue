@@ -5,13 +5,13 @@
       :threshold="[0,1]"
       :minHeight="contentWidth"
       @loaded="handleLoaded")
-    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle")
+    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle()")
     div(v-else class="page-preview-page"
-      :style="styles2"
+      :style="styles2()"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
       ref="pagePreview")
       div(class="page-preview-page-content pointer"
-          :style="styles"
+          :style="styles()"
           @click="clickPage"
           @dblclick="dbclickPage()"
           draggable="true",
@@ -22,15 +22,15 @@
           ref="content")
         page-content(
           class="click-disabled"
-          :style="contentScaleStyles"
+          :style="contentScaleStyles()"
           :config="config"
           :pageIndex="index"
-          :contentScaleRatio="scaleRatio"
+          :contentScaleRatio="scaleRatio()"
           :handleSequentially="true"
           :isPagePreview="true")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
-          :style="hightlighterStyles")
+          :style="hightlighterStyles()")
         div(v-if="isMouseOver && showMoreBtn"
           class="page-preview-page-content-more"
           @click="toggleMenu()")
@@ -125,49 +125,7 @@ export default Vue.extend({
       allPageMode: 'mobileEditor/getMobileAllPageMode',
       isShowPagePreview: 'page/getIsShowPagePreview',
       showPagePanel: 'page/getShowPagePanel'
-    }),
-    pageWidth(): number {
-      return this.config.width
-    },
-    pageHeight(): number {
-      return this.config.height
-    },
-    scaleRatio(): number {
-      return this.contentWidth / this.pageWidth
-    },
-    contentScaleStyles(): { [index: string]: string } {
-      return {
-        // transform: `scale(${this.scaleRatio})`
-      }
-    },
-    styles(): { [index: string]: string } {
-      return {
-        height: `${this.pageHeight * this.scaleRatio}px`
-      }
-    },
-    styles2(): { [index: string]: string } {
-      if (this.type === 'panel' &&
-        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
-        return {
-          'z-index': '-1'
-        }
-      } else {
-        return {
-        }
-      }
-    },
-    hightlighterStyles(): { [index: string]: string } {
-      return {
-        width: `${this.contentWidth + 20}px`,
-        height: `${this.pageHeight * this.scaleRatio + 20}px`
-      }
-    },
-    loadingStyle(): { [index: string]: string } {
-      return {
-        width: '100%',
-        height: '100%'
-      }
-    }
+    })
   },
   methods: {
     ...mapMutations({
@@ -278,10 +236,54 @@ export default Vue.extend({
       }
     },
     handleLoaded() {
+      this.$emit('loaded')
       this.$nextTick(() => {
         const contentRef = (this.$refs.content as HTMLElement)
         this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
       })
+    },
+    // computed -> methods
+    pageWidth(): number {
+      return this.config.width
+    },
+    pageHeight(): number {
+      return this.config.height
+    },
+    scaleRatio(): number {
+      return this.contentWidth / this.pageWidth()
+    },
+    contentScaleStyles(): { [index: string]: string } {
+      return {
+        // transform: `scale(${this.scaleRatio()})`
+      }
+    },
+    styles(): { [index: string]: string } {
+      return {
+        height: `${this.pageHeight() * this.scaleRatio()}px`
+      }
+    },
+    styles2(): { [index: string]: string } {
+      if (this.type === 'panel' &&
+        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
+        return {
+          'z-index': '-1'
+        }
+      } else {
+        return {
+        }
+      }
+    },
+    hightlighterStyles(): { [index: string]: string } {
+      return {
+        width: `${this.contentWidth + 20}px`,
+        height: `${this.pageHeight() * this.scaleRatio() + 20}px`
+      }
+    },
+    loadingStyle(): { [index: string]: string } {
+      return {
+        width: '100%',
+        height: '100%'
+      }
     }
   }
 })

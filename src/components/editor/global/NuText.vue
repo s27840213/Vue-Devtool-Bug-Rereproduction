@@ -54,7 +54,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    isPagePreview: {
+      default: false,
+      type: Boolean
+    }
   },
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
@@ -237,7 +241,9 @@ export default Vue.extend({
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
       spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
+        setTimeout(() => {
+          this.resizeObserver && this.resizeObserver.observe(span as Element)
+        }, 1)
       })
     }
   }
