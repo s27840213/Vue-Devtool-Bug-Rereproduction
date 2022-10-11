@@ -142,15 +142,13 @@ class Controller {
     switch (color) {
       case 'fontColor':
         return fontColor
-      case 'fontColorL+-40/BC/00': {
+      case 'fontColorL+-40/BC/00':
         if (fontColor === '#000000') return '#BCBCBC'
         if (fontColor === '#FFFFFF') return '#000000'
         return fontColorL40
-      }
-      case 'fontColorL+-40/F1D289': {
+      case 'fontColorL+-40/F1D289':
         if (['#000000', '#FFFFFF'].includes(fontColor)) return '#F1D289'
         return fontColorL40
-      }
       default:
         return color
     }

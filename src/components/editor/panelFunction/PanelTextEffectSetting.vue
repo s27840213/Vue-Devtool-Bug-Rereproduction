@@ -4,8 +4,7 @@
     div(class="text-effect-setting-tabs")
       span(v-for="category in textEffects"
           :selected="currTab===category.name"
-          @click="switchTab(category.name)"
-          v-tooltip="category.label") {{category.label}}
+          @click="switchTab(category.name)") {{category.label}}
     div(class="action-bar")
       template(v-for="effects1d in currCategory.effects2d")
         //- To choose effect, ex: hollow, splice or echo.
