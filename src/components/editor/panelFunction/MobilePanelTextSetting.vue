@@ -293,7 +293,6 @@ export default Vue.extend({
             tiptapUtils.applySpanStyle('color', checkAndConvertToHex(color))
           }
       }
-      textEffectUtils.refreshColor()
       StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },

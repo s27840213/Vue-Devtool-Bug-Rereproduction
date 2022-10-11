@@ -56,7 +56,7 @@
             //- Option type color
             template(v-if="option.type === 'color'")
               div(class="text-effect-setting-options__field--btn"
-                :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
+                :style="colorParser(currentStyle[currCategory.name][option.key])"
                 @click="handleColorModal(currCategory.name, option.key)")
           div(class="text-effect-setting-options__field")
             span
@@ -199,6 +199,9 @@ export default Vue.extend({
     handleColorUpdate(color: string): void {
       const key = this.colorTarget.key
       this.setEffect({ effect: { [key]: color } })
+    },
+    colorParser(color: string) {
+      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
     },
     recordChange() {
       stepsUtils.record()

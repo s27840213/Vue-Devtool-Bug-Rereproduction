@@ -118,7 +118,7 @@ export default Vue.extend({
         height: '100%',
         opacity: 1
       }
-      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textShadow = textEffectUtils.convertTextEffect(this.config)
       const duplicatedTextShadow = textShadow.duplicatedBody || textShadow.duplicatedSpan
       const textShadowCss = {
         extraBody: Object.assign(duplicatedBodyBasicCss, textShadow.duplicatedBody),

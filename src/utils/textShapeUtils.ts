@@ -1,6 +1,6 @@
 import textEffectUtils from '@/utils/textEffectUtils'
 import TextUtils from '@/utils/textUtils'
-import { ILayer, ISpan, IText } from '@/interfaces/layer'
+import { ISpan, IText } from '@/interfaces/layer'
 import store from '@/store'
 import generalUtils from '@/utils/generalUtils'
 import layerUtils from '@/utils/layerUtils'

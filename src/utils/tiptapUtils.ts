@@ -389,7 +389,6 @@ class TiptapUtils {
           this.applySpanStyle(updateKey, updateValue)
         }
     }
-    textEffectUtils.refreshColor()
     textPropUtils.updateTextPropsState(item)
   }
 
