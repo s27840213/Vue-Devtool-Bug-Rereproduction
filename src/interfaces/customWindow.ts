@@ -4,5 +4,6 @@ export interface CustomWindow extends Window {
     updateInfoDone: any,
     listAssetResult: any,
     resizePage: any,
-    copyDone: any
+    copyDone: any,
+    getStateResult: any
 }

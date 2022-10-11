@@ -19,6 +19,7 @@ import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
 import textUtils from './textUtils'
+import themeUtils from './themeUtils'
 
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.3',
@@ -421,6 +422,16 @@ class ViviStickerUtils {
   addAsset(key: string, asset: any) {
     if (this.isStandaloneMode) return
     this.sendToIOS('ADD_ASSET', { key, asset })
+    this.sendToIOS('SET_STATE', { key, asset })
+  }
+
+  async getState(key: string) {
+    await this.callIOSAsAPI('GET_STATE', { key }, 'getState', 2000)
+  }
+
+  getStateResult(data: { key: string, value: string }) {
+    console.log(data.value)
+    vivistickerUtils.handleCallback('getState')
   }
 
   async sendCopyEditor(): Promise<void> {
