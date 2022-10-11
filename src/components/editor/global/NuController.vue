@@ -533,8 +533,7 @@ export default Vue.extend({
       }
       if (type === 'control-point') {
         zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType() === LayerType.tmp ? 10000 : 100)
-      }
-      if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
+      } else if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
         zindex = (this.layerIndex + 1) * 1000
       } else if (isFrame) {
         zindex = (this.layerIndex + 1) * 1000
@@ -789,7 +788,6 @@ export default Vue.extend({
           }
 
           /**
-           * @NeedCodeReview - with Steve or TingAn
            * The cotentEditable updated timing will be move to the moveEnd instead of moveStart
            * bcz if we set it to true when moveStart and we want to move the layer instead of editing the text, it will still make the mobile keyboard show up
            */

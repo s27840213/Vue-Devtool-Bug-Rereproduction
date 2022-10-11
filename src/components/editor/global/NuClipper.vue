@@ -58,7 +58,7 @@ export default Vue.extend({
           if (this.config.isFrame) {
             clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
           }
-          if (this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
+          if (!this.config.isFrameImg && this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
             width = `${width}px`
             height = `${height}px`
           } else {

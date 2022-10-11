@@ -38,6 +38,7 @@
           page-preview
     tour-guide(v-if="showEditorGuide")
     popup-brand-settings(v-if="isBrandSettingsOpen")
+    popup-update-design(v-if="isUpdateDesignOpen")
 </template>
 
 <script lang="ts">
@@ -52,6 +53,7 @@ import ScaleRatioEditor from '@/components/editor/ScaleRatioEditor.vue'
 import PagePreview from '@/components/editor/PagePreview.vue'
 import TourGuide from '@/components/editor/TourGuide.vue'
 import PopupBrandSettings from '@/components/popup/PopupBrandSettings.vue'
+import PopupUpdateDesign from '@/components/popup/PopupUpdateDesign.vue'
 import { mapGetters, mapMutations, mapState, mapActions } from 'vuex'
 import { FunctionPanelType, SidebarPanelType } from '@/store/types'
 import store from '@/store'
@@ -73,7 +75,8 @@ export default Vue.extend({
     ColorPanel,
     PagePreview,
     TourGuide,
-    PopupBrandSettings
+    PopupBrandSettings,
+    PopupUpdateDesign
   },
   data() {
     return {
@@ -123,7 +126,8 @@ export default Vue.extend({
       inBgRemoveMode: 'bgRemove/getInBgRemoveMode'
     }),
     ...mapGetters('user', {
-      token: 'getToken'
+      token: 'getToken',
+      isUpdateDesignOpen: 'getIsUpdateDesignOpen'
     }),
     ...mapGetters('brandkit', {
       isBrandSettingsOpen: 'getIsSettingsOpen'

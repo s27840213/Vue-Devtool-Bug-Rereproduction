@@ -4,11 +4,13 @@ class QueueUtils {
   eventIds: Array<string>
   eventMap: Map<string, () => Promise<void | number>>
   isHandlingAsyncTask: boolean
+  batchNum: number
 
   constructor() {
     this.eventIds = []
     this.eventMap = new Map()
     this.isHandlingAsyncTask = false
+    this.batchNum = 1
   }
 
   push(id: string, callback: () => Promise<void | number>) {
@@ -16,8 +18,13 @@ class QueueUtils {
     this.eventIds.push(id)
 
     if (!this.isHandlingAsyncTask) {
-      this.isHandlingAsyncTask = true
-      this.handleAsyncTask()
+      if (this.eventIds.length >= this.batchNum) {
+        this.handleAsyncTask()
+      } else {
+        setTimeout(() => {
+          this.handleAsyncTask()
+        }, 10)
+      }
     }
   }
 
@@ -32,13 +39,30 @@ class QueueUtils {
       this.isHandlingAsyncTask = false
       return
     }
-    const targetId = this.eventIds.shift() as string
-    const targetFunc = this.eventMap.get(targetId)
-    typeof targetFunc === 'function' && targetFunc().then(() => {
-      // setTimeout(() => {
-      this.eventMap.delete(targetId)
+
+    this.isHandlingAsyncTask = true
+
+    const promiseArray: Array<Promise<void | number>> = []
+    const targetIds: Array<string> = []
+    for (let i = 0; i < this.batchNum; i++) {
+      const targetId = this.eventIds.shift() as string
+
+      if (targetId !== undefined) {
+        targetIds.push(targetId)
+        const targetFunc = this.eventMap.get(targetId)
+        if (typeof targetFunc === 'function') {
+          promiseArray.push(targetFunc())
+        }
+      } else {
+        break
+      }
+    }
+
+    Promise.all(promiseArray).then(() => {
+      targetIds.forEach((id) => {
+        this.eventMap.delete(id)
+      })
       this.handleAsyncTask()
-      // }, 100)
     })
   }
 }

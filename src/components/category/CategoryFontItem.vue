@@ -38,9 +38,9 @@ import generalUtils from '@/utils/generalUtils'
 
 export default Vue.extend({
   props: {
-    host: String,
-    preview: String,
-    preview2: String,
+    // host: String,
+    // preview: String,
+    // preview2: String,
     item: Object,
     textStyleType: String
   },

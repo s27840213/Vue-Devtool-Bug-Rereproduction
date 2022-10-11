@@ -67,7 +67,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
@@ -265,7 +265,14 @@ export default Vue.extend({
     },
     'config.imgControl'(val) {
       if (val) {
-        this.setImgConfig(this.layerInfo())
+        const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
+        const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
+        const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
+        const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
+        if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
+          this.setImgConfig(this.layerInfo())
+        }
       } else {
         this.setImgConfig(undefined)
         this.handleDimensionUpdate()
@@ -870,10 +877,6 @@ export default Vue.extend({
         pageIndex: this.pageIndex,
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
-      }
-      const { primaryLayer } = this
-      if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
-        layerInfo.subLayerIdx--
       }
       return layerInfo
     },

@@ -108,7 +108,6 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
           image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
         }
-        image.styles.adjust.blur = 0
         return groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
       }
     }
