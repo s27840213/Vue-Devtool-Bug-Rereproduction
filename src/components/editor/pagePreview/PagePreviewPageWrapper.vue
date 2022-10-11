@@ -1,16 +1,17 @@
 <template lang="pug">
   lazy-load(
-      target=".mobile-editor__page-preview"
+      class="transition"
+      :target="lazyLoadTarget"
       :threshold="[0,1]"
       :minHeight="contentWidth"
       @loaded="handleLoaded")
-    div(v-if="!allPageMode" :style="loadingStyle")
+    div(v-if="!allPageMode && !isShowPagePreview && !showPagePanel" :style="loadingStyle()")
     div(v-else class="page-preview-page"
-      :style="styles2"
+      :style="styles2()"
       :class="`${type === 'full' ? 'full-height' : ''} page-preview_${index}`"
       ref="pagePreview")
       div(class="page-preview-page-content pointer"
-          :style="styles"
+          :style="styles()"
           @click="clickPage"
           @dblclick="dbclickPage()"
           draggable="true",
@@ -21,15 +22,15 @@
           ref="content")
         page-content(
           class="click-disabled"
-          :style="contentScaleStyles"
+          :style="contentScaleStyles()"
           :config="config"
           :pageIndex="index"
-          :contentScaleRatio="scaleRatio"
+          :contentScaleRatio="scaleRatio()"
           :handleSequentially="true"
           :isPagePreview="true")
         div(class="page-preview-page__highlighter"
           :class="{'focused': currFocusPageIndex === index}"
-          :style="hightlighterStyles")
+          :style="hightlighterStyles()")
         div(v-if="isMouseOver && showMoreBtn"
           class="page-preview-page-content-more"
           @click="toggleMenu()")
@@ -81,7 +82,7 @@ export default Vue.extend({
       default: true,
       type: Boolean
     },
-    target: {
+    lazyLoadTarget: {
       type: String,
       default: '.mobile-editor__page-preview'
     }
@@ -121,50 +122,10 @@ export default Vue.extend({
       currFocusPageIndex: 'getCurrFocusPageIndex',
       getPage: 'getPage',
       isDragged: 'page/getIsDragged',
-      allPageMode: 'mobileEditor/getMobileAllPageMode'
-    }),
-    pageWidth(): number {
-      return this.config.width
-    },
-    pageHeight(): number {
-      return this.config.height
-    },
-    scaleRatio(): number {
-      return this.contentWidth / this.pageWidth
-    },
-    contentScaleStyles(): { [index: string]: string } {
-      return {
-        // transform: `scale(${this.scaleRatio})`
-      }
-    },
-    styles(): { [index: string]: string } {
-      return {
-        height: `${this.pageHeight * this.scaleRatio}px`
-      }
-    },
-    styles2(): { [index: string]: string } {
-      if (this.type === 'panel' &&
-        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
-        return {
-          'z-index': '-1'
-        }
-      } else {
-        return {
-        }
-      }
-    },
-    hightlighterStyles(): { [index: string]: string } {
-      return {
-        width: `${this.contentWidth + 20}px`,
-        height: `${this.pageHeight * this.scaleRatio + 20}px`
-      }
-    },
-    loadingStyle(): { [index: string]: string } {
-      return {
-        width: '100%',
-        height: '100%'
-      }
-    }
+      allPageMode: 'mobileEditor/getMobileAllPageMode',
+      isShowPagePreview: 'page/getIsShowPagePreview',
+      showPagePanel: 'page/getShowPagePanel'
+    })
   },
   methods: {
     ...mapMutations({
@@ -275,10 +236,54 @@ export default Vue.extend({
       }
     },
     handleLoaded() {
+      this.$emit('loaded')
       this.$nextTick(() => {
         const contentRef = (this.$refs.content as HTMLElement)
         this.contentWidth = contentRef ? (this.$refs.content as HTMLElement).offsetWidth : 0
       })
+    },
+    // computed -> methods
+    pageWidth(): number {
+      return this.config.width
+    },
+    pageHeight(): number {
+      return this.config.height
+    },
+    scaleRatio(): number {
+      return this.contentWidth / this.pageWidth()
+    },
+    contentScaleStyles(): { [index: string]: string } {
+      return {
+        // transform: `scale(${this.scaleRatio()})`
+      }
+    },
+    styles(): { [index: string]: string } {
+      return {
+        height: `${this.pageHeight() * this.scaleRatio()}px`
+      }
+    },
+    styles2(): { [index: string]: string } {
+      if (this.type === 'panel' &&
+        this.isDragged && this.index !== pageUtils.currFocusPageIndex) {
+        return {
+          'z-index': '-1'
+        }
+      } else {
+        return {
+        }
+      }
+    },
+    hightlighterStyles(): { [index: string]: string } {
+      return {
+        width: `${this.contentWidth + 20}px`,
+        height: `${this.pageHeight() * this.scaleRatio() + 20}px`
+      }
+    },
+    loadingStyle(): { [index: string]: string } {
+      return {
+        width: '100%',
+        height: '100%'
+      }
     }
   }
 })
@@ -289,7 +294,6 @@ export default Vue.extend({
   flex-direction: column;
   justify-content: center;
   position: relative;
-  transition: 0.25s ease-in-out;
   max-width: 100%;
   &-content {
     position: relative;
@@ -394,5 +398,9 @@ export default Vue.extend({
   color: setColor(blue-1);
   box-sizing: border-box;
   background: linear-gradient(90deg, rgba(#59c3e1, 0.3), rgba(#50a2d8, 0.3));
+}
+
+.transition {
+  transition: 0.25s ease-in-out;
 }
 </style>

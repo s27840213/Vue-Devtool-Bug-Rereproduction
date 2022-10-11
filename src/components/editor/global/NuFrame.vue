@@ -9,8 +9,9 @@
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :inFrame="true"
+      :isFrame="true"
+      :inImageFrame="inImageFrame()"
+      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
       :config="layer")
@@ -134,6 +135,10 @@ export default Vue.extend({
       }
       return layers
     },
+    layerIdxOffset(): number {
+      const { config } = this
+      return config.decoration && config.decoration.svg && !config.clips[0].isFrameImg ? 1 : 0
+    },
     shadowWrapperStyles() {
       const shadow = this.config.styles.shadow
       if (shadow && shadow.srcObj?.type) {
@@ -167,6 +172,9 @@ export default Vue.extend({
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
       }
       return ''
+    },
+    inImageFrame() {
+      return this.config.clips.length === 1 && this.config.clips[0].isFrameImg
     }
   }
 })

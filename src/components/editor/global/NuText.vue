@@ -1,7 +1,7 @@
 <template lang="pug">
   div(class="nu-text" :style="wrapperStyles()")
     //- Svg BG for text effex gooey.
-    svg(v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
+    svg(v-if="svgBG" v-bind="svgBG.attrs" class="nu-text__BG" ref="svg")
       component(v-for="(elm, idx) in svgBG.content"
                 :key="`textSvgBg${idx}`"
                 :is="elm.tag"
@@ -17,12 +17,12 @@
       p(v-else
         v-for="(p, pIndex) in config.paragraphs" class="nu-text__p"
         :key="p.id"
-        :style="styles(p.styles)")
+        :style="pStyle(p.styles)")
         span(v-for="(span, sIndex) in p.spans"
           class="nu-text__span"
           :data-sindex="sIndex"
           :key="span.id"
-          :style="Object.assign(styles(span.styles), spanEffect, text.extraSpan)") {{ span.text }}
+          :style="Object.assign(spanStyle(p.spans, sIndex), spanEffect, text.extraSpan)") {{ span.text }}
           br(v-if="!span.text && p.spans.length === 1")
     div(v-if="!isCurveText" class="nu-text__observee")
       span(v-for="(span, sIndex) in spans()"
@@ -30,7 +30,7 @@
         :class="`nu-text__span-p${pageIndex}l${layerIndex}s${subLayerIndex ? subLayerIndex : -1}`"
         :data-sindex="sIndex"
         :key="sIndex",
-        :style="styles(span.styles, sIndex)") {{ span.text }}
+        :style="styles(span.styles)") {{ span.text }}
 </template>
 
 <script lang="ts">
@@ -46,6 +46,7 @@ import textShapeUtils from '@/utils/textShapeUtils'
 import generalUtils from '@/utils/generalUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
+import _ from 'lodash'
 
 export default Vue.extend({
   components: { NuCurveText },
@@ -53,7 +54,11 @@ export default Vue.extend({
     config: Object,
     pageIndex: Number,
     layerIndex: Number,
-    subLayerIndex: Number
+    subLayerIndex: Number,
+    isPagePreview: {
+      default: false,
+      type: Boolean
+    }
   },
   data() {
     const dimension = this.config.styles.writingMode.includes('vertical') ? this.config.styles.height : this.config.styles.width
@@ -79,7 +84,7 @@ export default Vue.extend({
   },
   mounted() {
     // To solve the issues: https://www.notion.so/vivipic/8cbe77d393224c67a43de473cd9e8a24
-    textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+    textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
       setTimeout(() => {
         this.resizeCallback()
         if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
@@ -185,6 +190,17 @@ export default Vue.extend({
         writingMode: this.config.styles.writingMode
       }
     },
+    spanStyle(spans: any, sIndex: number) {
+      const span = spans[sIndex]
+      return Object.assign(tiptapUtils.textStylesRaw(span.styles),
+        sIndex === spans.length - 1 && span.text.match(/^ +$/) ? { whiteSpace: 'pre' } : {}
+      )
+    },
+    pStyle(styles: any) {
+      return _.omit(tiptapUtils.textStylesRaw(styles), [
+        'text-decoration-line', '-webkit-text-decoration-line'
+      ])
+    },
     resizeCallback() {
       const config = generalUtils.deepCopy(this.config) as IText
       if (this.isDestroyed || textShapeUtils.isCurvedText(config.styles)) return
@@ -225,7 +241,9 @@ export default Vue.extend({
     observeAllSpans() {
       const spans = document.querySelectorAll(`.nu-text__span-p${this.pageIndex}l${this.layerIndex}s${this.subLayerIndex ? this.subLayerIndex : -1}`) as NodeList
       spans.forEach(span => {
-        this.resizeObserver && this.resizeObserver.observe(span as Element)
+        setTimeout(() => {
+          this.resizeObserver && this.resizeObserver.observe(span as Element)
+        }, 1)
       })
     }
   }

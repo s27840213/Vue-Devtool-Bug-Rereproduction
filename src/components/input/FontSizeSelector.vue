@@ -10,6 +10,7 @@
       @pointerdown="fontSizeStepping(step)"
       @contextmenu.prevent) +
     value-selector(v-if="openValueSelector"
+                v-click-outside="handleValueModal"
                 :valueArray="fontSelectValue"
                 class="font-size-selector__value-selector"
                 @update="handleValueUpdate")
@@ -121,6 +122,7 @@ export default Vue.extend({
     },
     handleValueUpdate(value: number) {
       // layerUtils.initialLayerScale(pageUtils.currFocusPageIndex, this.layerIndex)
+      value = Math.round(value / this.scale * 10) / 10
       tiptapUtils.spanStyleHandler('size', value)
       tiptapUtils.forceUpdate(true)
       textPropUtils.updateTextPropsState({ fontSize: value.toString() })
@@ -130,12 +132,13 @@ export default Vue.extend({
       let { value } = e.target as HTMLInputElement
       if (this.isValidFloat(value)) {
         value = this.boundValue(parseFloat(value), this.fieldRange.fontSize.min, this.fieldRange.fontSize.max)
+        const finalValue = Math.round(parseFloat(value) / this.scale * 10) / 10
         window.requestAnimationFrame(() => {
-          tiptapUtils.applySpanStyle('size', value)
+          tiptapUtils.applySpanStyle('size', finalValue)
           tiptapUtils.agent(editor => {
             layerUtils.updateLayerProps(pageUtils.currFocusPageIndex, this.layerIndex, { paragraphs: tiptapUtils.toIParagraph(editor.getJSON()).paragraphs })
           })
-          textPropUtils.updateTextPropsState({ fontSize: value })
+          textPropUtils.updateTextPropsState({ fontSize: finalValue.toString() })
           textEffectUtils.refreshSize()
         })
       }

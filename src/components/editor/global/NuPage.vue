@@ -104,7 +104,7 @@
           tabindex="0")
         lazy-load(
             target=".editor-view"
-            :rootMargin="'500px 0px 500px 0px'"
+            :rootMargin="'1500px 0px 1500px 0px'"
             :minHeight="config.width * (scaleRatio / 100)"
             :maxHeight="config.width * (scaleRatio / 100)"
             :threshold="[0,1]")
@@ -373,9 +373,8 @@ export default Vue.extend({
       return this.config.backgroundImage.config.imgControl
     },
     isAnyLayerActive(): boolean {
-      return (this.config as IPage).layers.some(l => l.active)
+      return this.currSelectedIndex !== -1
     },
-
     guidelines(): { [index: string]: Array<number> } {
       return (this.config as IPage).guidelines
     },

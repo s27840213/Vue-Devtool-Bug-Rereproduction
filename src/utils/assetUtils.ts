@@ -177,6 +177,30 @@ class AssetUtils {
     }
   }
 
+  async addTemplateToAllPages(json: any, attrs: IAssetProps = {}, recordStep = true) {
+    const { width, height } = attrs
+    const pageNum = pageUtils.pageNum
+    // const targetPage: IPage = this.getPage(targetPageIndex)
+
+    for (let i = 0; i < pageNum; i++) {
+      json = await this.updateBackground(generalUtils.deepCopy(json))
+      pageUtils.setAutoResizeNeededForPage(json, true)
+      const newLayer = LayerFactary.newTemplate(TemplateUtils.updateTemplate(json))
+      pageUtils.updateSpecPage(i, newLayer)
+      if (width && height) {
+        resizeUtils.resizePage(i, newLayer, { width, height })
+        store.commit('UPDATE_pageProps', {
+          pageIndex: i,
+          props: { width, height }
+        })
+      }
+    }
+
+    if (recordStep) {
+      stepsUtils.record()
+    }
+  }
+
   addSvg(json: any, attrs: IAssetProps = {}) {
     const { pageIndex, styles = {} } = attrs
     const targePageIndex = pageIndex ?? pageUtils.currFocusPageIndex
@@ -655,6 +679,7 @@ class AssetUtils {
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
           this.addTemplate(asset.jsonData, attrs)
+          // this.addTemplateToAllPages(asset.jsonData, attrs)
           break
         case 7:
           this.addText({ ...asset.jsonData, designId: item.id }, attrs)
