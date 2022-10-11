@@ -678,7 +678,8 @@ class AssetUtils {
           break
         case 6:
           gtmUtils.trackTemplateDownload(item.id)
-          this.addTemplateToAllPages(asset.jsonData, attrs)
+          this.addTemplate(asset.jsonData, attrs)
+          // this.addTemplateToAllPages(asset.jsonData, attrs)
           break
         case 7:
           this.addText({ ...asset.jsonData, designId: item.id }, attrs)
