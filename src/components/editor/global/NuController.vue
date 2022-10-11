@@ -9,15 +9,6 @@
                 iconColor="gray-2")
       div(class="nu-controller__object-hint__text")
         span {{ Math.round(hintAngle) % 360 }}
-    //- div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
-    //-     class="nu-controller__ctrl-points"
-    //-     :style="Object.assign(contentStyles('control-point-rotate'), {'pointer-events': 'none', outline: 'none'})")
-    //-   div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters(controlPoints.cornerRotaters) : []"
-    //-       class="control-point__corner-rotate scaler"
-    //-       :key="`corner-rotate-${index}`"
-    //-       :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-    //-       @pointerdown.stop="rotateStart($event, index)"
-    //-       @touchstart="disableTouchEvent")
     div(class="nu-controller__content"
         ref="body"
         :layer-index="`${layerIndex}`"
@@ -85,13 +76,13 @@
     div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
-      div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters : []"
+      div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
           class="control-point__corner-rotate scaler"
           :key="`corner-rotate-${index}`"
           :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
           @pointerdown.stop="rotateStart($event, index)"
           @touchstart="disableTouchEvent")
-      div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaterbaffles : []"
+      div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaterbaffles) : []"
           class="control-point__corner-rotate baffle"
           :key="`corner-rotate-baffle-${index}`"
           :style="Object.assign(cornerRotater.styles, { transform: '' })"
@@ -213,8 +204,8 @@ export default Vue.extend({
   },
   created() {
     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
-    this.cornerRotaters = this.getCornerRotaters(generalUtils.deepCopy(this.controlPoints.cornerRotaters))
-    this.cornerRotaterbaffles = this.getCornerRotaters(generalUtils.deepCopy(this.controlPoints.cornerRotaters))
+    this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
+    this.cornerRotaterbaffles = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
   },
   data() {
     return {
