@@ -186,12 +186,14 @@ export default Vue.extend({
       }
     },
     scaleStyles(): { [index: string]: string } {
+      const { zindex } = this.config.styles
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.isFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.isFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles
     }
