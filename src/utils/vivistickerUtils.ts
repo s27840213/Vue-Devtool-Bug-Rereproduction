@@ -422,7 +422,7 @@ class ViviStickerUtils {
   addAsset(key: string, asset: any) {
     if (this.isStandaloneMode) return
     this.sendToIOS('ADD_ASSET', { key, asset })
-    this.sendToIOS('SET_STATE', { key, asset })
+    this.sendToIOS('SET_STATE', { key, value: asset })
   }
 
   async getState(key: string) {
