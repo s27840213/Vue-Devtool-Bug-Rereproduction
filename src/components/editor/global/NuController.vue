@@ -74,8 +74,8 @@
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
           @click.native="MappingUtils.mappingIconAction('lock')")
     div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
-        class="nu-controller__ctrl-points"
-        :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+          class="nu-controller__ctrl-points"
+          :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -530,8 +530,7 @@ export default Vue.extend({
       }
       if (type === 'control-point') {
         zindex = (this.layerIndex + 1) * (isFrame || isGroup || this.getLayerType() === LayerType.tmp ? 10000 : 100)
-      }
-      if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
+      } else if (isGroup && (this.config as IGroup).layers.some(l => l.type === LayerType.image && l.imgControl)) {
         zindex = (this.layerIndex + 1) * 1000
       } else if (isFrame) {
         zindex = (this.layerIndex + 1) * 1000
