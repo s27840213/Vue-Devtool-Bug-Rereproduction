@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import store from '@/store'
 import { IPage } from '@/interfaces/page'
 import pageUtils from './pageUtils'
+import { clamp } from 'lodash'
 
 const STOP_POSTFIX = '_st'
 
@@ -169,7 +170,7 @@ export function rgb2lab(sRGB: string): number[] {
 
 export function lab2xyz(lab: number[]): number[] {
   function f(c: number) {
-    return c > 0.008856 ? Math.pow(c, 3) : (c - 16 / 116) / 7.787
+    return Math.pow(c, 3) > 0.008856 ? Math.pow(c, 3) : (c - 16 / 116) / 7.787
   }
   const [l, a, b] = lab
   let y = (l + 16) / 116
@@ -189,6 +190,7 @@ export function xyz2rgb(xyz: number[]): string {
   ]
   rgb = rgb.map(c => c > 0.0031308 ? 1.055 * (Math.pow(c, 1 / 2.4)) - 0.055 : 12.92 * c)
     .map(c => c * 255)
+    .map(c => clamp(c, 0, 255))
   return rgb2hex(`rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`)
 }
 
