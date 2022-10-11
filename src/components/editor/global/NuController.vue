@@ -9,15 +9,15 @@
                 iconColor="gray-2")
       div(class="nu-controller__object-hint__text")
         span {{ Math.round(hintAngle) % 360 }}
-    div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
-        class="nu-controller__ctrl-points"
-        :style="Object.assign(contentStyles('control-point-rotate'), {'pointer-events': 'none', outline: 'none'})")
-      div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters(controlPoints.cornerRotaters) : []"
-          class="control-point__corner-rotate scaler"
-          :key="`corner-rotate-${index}`"
-          :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
-          @pointerdown.stop="rotateStart($event, index)"
-          @touchstart="disableTouchEvent")
+    //- div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
+    //-     class="nu-controller__ctrl-points"
+    //-     :style="Object.assign(contentStyles('control-point-rotate'), {'pointer-events': 'none', outline: 'none'})")
+    //-   div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters(controlPoints.cornerRotaters) : []"
+    //-       class="control-point__corner-rotate scaler"
+    //-       :key="`corner-rotate-${index}`"
+    //-       :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+    //-       @pointerdown.stop="rotateStart($event, index)"
+    //-       @touchstart="disableTouchEvent")
     div(class="nu-controller__content"
         ref="body"
         :layer-index="`${layerIndex}`"
@@ -83,6 +83,20 @@
         svg-icon(:iconName="'lock'" :iconWidth="`${20}px`" :iconColor="'red'"
           @click.native="MappingUtils.mappingIconAction('lock')")
     div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
+        class="nu-controller__ctrl-points"
+        :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+      div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters : []"
+          class="control-point__corner-rotate scaler"
+          :key="`corner-rotate-${index}`"
+          :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+          @pointerdown.stop="rotateStart($event, index)"
+          @touchstart="disableTouchEvent")
+      div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaterbaffles : []"
+          class="control-point__corner-rotate baffle"
+          :key="`corner-rotate-baffle-${index}`"
+          :style="Object.assign(cornerRotater.styles, { transform: '' })"
+          @pointerdown="moveStart")
+    div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
           class="nu-controller__ctrl-points"
           :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
@@ -92,12 +106,6 @@
             :style="Object.assign(end, {'cursor': 'pointer'})"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
-        //- div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters(controlPoints.cornerRotaters) : []"
-        //-     class="control-point__corner-rotate scaler"
-        //-     :key="`corner-rotate-${index}`"
-        //-     :style="Object.assign(cornerRotater.styles, cursorStyles(cornerRotater.cursor, getLayerRotate()))"
-        //-     @pointerdown.stop="rotateStart"
-        //-     @touchstart="disableTouchEvent")
         div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
@@ -205,6 +213,8 @@ export default Vue.extend({
   },
   created() {
     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
+    this.cornerRotaters = this.getCornerRotaters(generalUtils.deepCopy(this.controlPoints.cornerRotaters))
+    this.cornerRotaterbaffles = this.getCornerRotaters(generalUtils.deepCopy(this.controlPoints.cornerRotaters))
   },
   data() {
     return {
@@ -241,7 +251,9 @@ export default Vue.extend({
       isDoingGestureAction: false,
       dblTabsFlag: false,
       isPointerDownFromSubController: false,
-      initCornerRotate: -1
+      initCornerRotate: -1,
+      cornerRotaters: undefined,
+      cornerRotaterbaffles: undefined
     }
   },
   mounted() {
@@ -469,7 +481,7 @@ export default Vue.extend({
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
-    cornerRotaters(scalers: any) {
+    getCornerRotaters(scalers: any) {
       const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
@@ -551,8 +563,7 @@ export default Vue.extend({
          * @Todo - find the reason why this been set to certain value istead of 0
          * set to 0 will make the layer below the empty area of tmp layer selectable
          */
-        // return 0
-        return (this.layerIndex + 1) * 1000
+        return 0
       } else if (this.getLayerType() === 'text' && this.isActive) {
         zindex = (this.layerIndex + 1) * 99
       }
@@ -2281,6 +2292,10 @@ export default Vue.extend({
     pointer-events: auto;
     position: absolute;
   }
+}
+
+.baffle {
+  cursor: default;
 }
 
 .text {
