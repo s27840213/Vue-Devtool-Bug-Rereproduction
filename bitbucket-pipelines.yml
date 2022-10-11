@@ -732,36 +732,6 @@ pipelines:
           #       - yarn serve & npx wait-on http://localhost:8080
           #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
       - step:
-          name: "deploy test"
-          deployment: stickertest
-          trigger: manual
-          script:
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKERTEST
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKERTEST
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=* --include=index.html"
-            - pipe: atlassian/aws-s3-deploy:1.1.0
-              variables:
-                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
-                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
-                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
-                S3_BUCKET: $AWS_BUCKET_STICKERTEST
-                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
-                EXTRA_ARGS: "--exclude=*.js.map"
-                DELETE_FLAG: "true"
-      - step:
           name: "deploy prod"
           deployment: stickerproduction
           trigger: manual
@@ -792,3 +762,60 @@ pipelines:
                 EXTRA_ARGS: "--exclude=*.js.map"
                 DELETE_FLAG: "true"
             - curl -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" -H "X-Auth-Email:$CF_MAIL" -H "X-Auth-Key:$CF_KEY" -H "Content-Type:application/json" --data '{"purge_everything":true}'
+    app/vivisticker-develop:
+      - parallel:
+          - step:
+              name: "Verify build environment"
+              script: #show node and yarn version
+                - node -v
+                - yarn -v
+          - step:
+              name: "Start build with node module cache"
+              size: 2x
+              caches: #set caches for node modules to speed up building
+                - node
+              script:
+                - yarn install
+                - yarn build
+              artifacts: #single asterisk (*) to match files in folder, double asterisk (**) to match files and folders in folder
+                - dist/**
+          # - step:
+          #     name: 'Run E2E Tests'
+          #     caches:
+          #       - node
+          #     image: cypress/browsers:node14.17.0-chrome88-ff89
+          #     script:
+          #       - npx cypress install
+          #       - yarn install
+          #       - yarn serve & npx wait-on http://localhost:8080
+          #       - npx cypress run --record --browser chrome --key $CYPRESS_RECORD_KEY || true
+      - step:
+          name: "deploy test"
+          deployment: stickertest
+          trigger: manual
+          script:
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                S3_BUCKET: $AWS_BUCKET_STICKERTEST
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=index.html --exclude=*.js.map"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                S3_BUCKET: $AWS_BUCKET_STICKERTEST
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=* --include=index.html"
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_STICKER
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_STICKER
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION_STICKER
+                S3_BUCKET: $AWS_BUCKET_STICKERTEST
+                LOCAL_PATH: "dist" #should be the same as the output folder (artifacts)
+                EXTRA_ARGS: "--exclude=*.js.map"
+                DELETE_FLAG: "true"
