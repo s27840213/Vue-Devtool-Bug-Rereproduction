@@ -48,7 +48,7 @@ import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, IC
 import uploadUtils from '@/utils/uploadUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import FontTag from '@/components/font/FontTag.vue'
+import FontTag from '@/components/global/Tags.vue'
 
 export default Vue.extend({
   components: {
