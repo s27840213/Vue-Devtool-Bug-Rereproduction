@@ -9,7 +9,7 @@
       div(v-if="!showMore" class="font-tag__more-wrapper")
         div(class="font-tag__tag-wrapper pointer"
           @click="onClickMore")
-          div(class="font-tag__tag") {{ 'more...' }}
+          div(class="font-tag__tag") {{ `${$t('NN0082')}...` }}
     template(v-else)
       div(class="font-tag__container-mobile")
         div(class="font-tag__flex-container-mobile")
