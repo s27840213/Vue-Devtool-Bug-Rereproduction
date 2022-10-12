@@ -85,7 +85,7 @@
       div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaterbaffles) : []"
           class="control-point__corner-rotate baffle"
           :key="`corner-rotate-baffle-${index}`"
-          :style="Object.assign(cornerRotater.styles, { transform: '' })"
+          :style="Object.assign(cornerRotater.styles, { transform: '', borderRadius: '' })"
           @pointerdown="moveStart")
     div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
           class="nu-controller__ctrl-points"
