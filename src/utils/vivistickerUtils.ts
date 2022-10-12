@@ -70,6 +70,10 @@ class ViviStickerUtils {
     STANDALONE_USER_INFO.locale = locale
   }
 
+  setCurrActiveTab(tab: string) {
+    store.commit('vivisticker/SET_currActiveTab', tab)
+  }
+
   sendToIOS(messageType: string, message: any) {
     console.log(messageType, message)
     try {
@@ -435,7 +439,7 @@ class ViviStickerUtils {
   }
 
   getStateResult(data: { key: string, value: string }) {
-    vivistickerUtils.handleCallback('getState', JSON.parse(data.value))
+    vivistickerUtils.handleCallback('getState', data.value ? JSON.parse(data.value) : undefined)
   }
 
   async sendCopyEditor(): Promise<void> {

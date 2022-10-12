@@ -99,29 +99,33 @@ const router = new VueRouter({
       component: {
         render(h) { return h('router-view') }
       },
-      beforeEnter(to, from, next) {
+      async beforeEnter(to, from, next) {
         if (logUtils.getLog()) {
           logUtils.uploadLog()
         }
         logUtils.setLog('App Start')
         window.loginResult = vivistickerUtils.loginResult
+        window.getStateResult = vivistickerUtils.getStateResult
         const urlParams = new URLSearchParams(window.location.search)
         const standalone = urlParams.get('standalone')
         if (standalone) {
           vivistickerUtils.enterStandaloneMode()
           vivistickerUtils.setDefaultLocale()
         }
-        vivistickerUtils.getUserInfo().then((userInfo: IUserInfo) => {
-          const locale = userInfo.locale
-          i18n.locale = locale
-          localStorage.setItem('locale', locale)
-          next()
-          if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
-            // Delete locale in url, will be ignore by prerender.
-            delete router.currentRoute.params.locale
-            router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
-          }
-        })
+        const userInfo = await vivistickerUtils.getUserInfo()
+        if (vivistickerUtils.checkVersion('1.5')) {
+          const recentPanel = await vivistickerUtils.getState('recentPanel')
+          vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+        }
+        const locale = userInfo.locale
+        i18n.locale = locale
+        localStorage.setItem('locale', locale)
+        next()
+        if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
+          // Delete locale in url, will be ignore by prerender.
+          delete router.currentRoute.params.locale
+          router.replace({ query: router.currentRoute.query, params: router.currentRoute.params })
+        }
       },
       children: routes
     }

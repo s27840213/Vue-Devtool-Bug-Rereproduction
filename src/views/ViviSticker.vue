@@ -65,7 +65,6 @@ export default Vue.extend({
     window.updateInfoDone = vivistickerUtils.updateInfoDone
     window.listAssetResult = vivistickerUtils.listAssetResult
     window.copyDone = vivistickerUtils.copyDone
-    window.getStateResult = vivistickerUtils.getStateResult
     if (this.userInfo.isFirstOpen) {
       this.setShowTutorial(true)
     }

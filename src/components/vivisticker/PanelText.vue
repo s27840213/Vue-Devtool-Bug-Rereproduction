@@ -251,8 +251,10 @@ export default Vue.extend({
       this.getMoreContent()
     },
     async addStandardText() {
-      const recentFont = await vivistickerUtils.getState('recentFont')
-      console.log(recentFont)
+      let recentFont
+      if (vivistickerUtils.checkVersion('1.5')) {
+        recentFont = await vivistickerUtils.getState('recentFont')
+      }
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
         size: 21,
         color: '#FFFFFF',
