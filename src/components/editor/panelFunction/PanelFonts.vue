@@ -14,7 +14,8 @@
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
-    font-tag(v-if="!keyword" @search="handleSearch")
+    font-tag(v-if="!keyword" :tags="tags"
+            @search="handleSearch" @showMore="setShowMore")
     //- Search result and main content
     category-list(v-for="item in categoryListArray"
                   v-show="item.show" :ref="item.key" :key="item.key"
@@ -59,7 +60,7 @@ import { IBrandFont } from '@/interfaces/brandkit'
 import brandkitUtils from '@/utils/brandkitUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import FontTag from '@/components/font/FontTag.vue'
+import FontTag from '@/components/global/Tags.vue'
 
 export default Vue.extend({
   components: {
@@ -86,6 +87,9 @@ export default Vue.extend({
     if (this.privateFonts.length === 0 && this.isBrandkitAvailable) {
       this.fetchFonts()
     }
+    if (this.tags.length === 0) {
+      this.addFontTags()
+    }
   },
   destroyed() {
     this.setShowMore(false)
@@ -99,6 +103,7 @@ export default Vue.extend({
       pending: 'pending',
       keyword: 'keyword'
     }),
+    ...mapState('fontTag', ['tags']),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('brandkit', {
@@ -232,6 +237,12 @@ export default Vue.extend({
     }
   },
   methods: {
+    ...mapActions('fontTag', {
+      addFontTags: 'ADD_FONT_TAGS'
+    }),
+    ...mapMutations('fontTag', {
+      setShowMore: 'SET_SHOW_MORE'
+    }),
     ...mapActions('font', [
       'resetContent',
       'getTagContent',
