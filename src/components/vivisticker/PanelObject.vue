@@ -110,8 +110,9 @@ export default Vue.extend({
         })
       return result
     },
-    listResult(): ICategoryItem[] {
-      return this.processListResult(this.rawContent.list)
+    listResult(): ICategoryItem[] { // Don't show all result in PanelObject
+      // return this.processListResult(this.rawContent.list)
+      return []
     },
     searchResult(): ICategoryItem[] {
       const list = this.processListResult(this.rawSearchResult.list)
