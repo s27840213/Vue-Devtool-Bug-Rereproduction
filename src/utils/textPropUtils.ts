@@ -340,8 +340,6 @@ class TextPropUtils {
     // }
     // TextUtils.updateSelection(start, end)
 
-    // Sync updating text effect if the color changed
-    // TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
     return config
   }
 
@@ -446,10 +444,8 @@ class TextPropUtils {
       }
       TextUtils.updateSelection(start, end)
     }
-    // sync updating text effect if the color changed
-    TextEffectUtils.updateTextEffect(this.pageIndex, this.layerIndex)
-    if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
 
+    if (!sel || isGroupLayer || propName === 'color') return { config, start, end }
     return { config, start, end }
   }
 
