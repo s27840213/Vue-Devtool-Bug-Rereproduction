@@ -86,7 +86,6 @@ export default Vue.extend({
       const { layerIndex, pageIndex, subLayerIdx } = layerUtils
       textPropUtils.applyPropsToAll('span,paragraph', { color }, layerIndex, subLayerIdx)
       tiptapUtils.updateHtml()
-      textEffectUtils.refreshColor()
       textPropUtils.updateTextPropsState({ color })
       return pageIndex
     },

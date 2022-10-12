@@ -1,6 +1,5 @@
 import apiUtils from '@/utils/apiUtils'
 import fontTagUtils from '@/utils/fontTagUtils'
-import generalUtils from '@/utils/generalUtils'
 import localeUtils from '@/utils/localeUtils'
 import { ActionTree, MutationTree } from 'vuex-map-fields'
 

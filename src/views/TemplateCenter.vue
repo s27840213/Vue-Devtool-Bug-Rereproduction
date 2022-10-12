@@ -326,7 +326,7 @@ export default Vue.extend({
       hashtags: 'categories'
     }),
     ...mapState('templates', {
-      templates: 'content'
+      templates: 'searchResult'
     }),
     ...mapGetters('templates', {
       hasNextPage: 'hasNextPage'

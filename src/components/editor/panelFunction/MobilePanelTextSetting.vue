@@ -108,7 +108,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -259,7 +259,7 @@ export default Vue.extend({
     },
     inputColor(input: Event) {
       const target = input.target as HTMLInputElement
-      if (GeneralUtils.isValidHexColor(target.value)) {
+      if (isValidHexColor(target.value)) {
         target.value = target.value.toUpperCase()
         this.handleColorUpdate(target.value)
       }
@@ -280,7 +280,7 @@ export default Vue.extend({
 
       switch (currLayer.type) {
         case 'text':
-          tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
+          tiptapUtils.applySpanStyle('color', checkAndConvertToHex(color))
           break
         case 'tmp':
         case 'group':
@@ -290,10 +290,9 @@ export default Vue.extend({
               tiptapUtils.updateHtml()
             }
           } else {
-            tiptapUtils.applySpanStyle('color', tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color))
+            tiptapUtils.applySpanStyle('color', checkAndConvertToHex(color))
           }
       }
-      textEffectUtils.refreshColor()
       StepsUtils.record()
       TextPropUtils.updateTextPropsState({ color })
     },
@@ -506,9 +505,9 @@ export default Vue.extend({
     isValidFloat(value: string) {
       return value.match(/[+-]?\d+(\.\d+)?/)
     },
-    isValidHexColor(value: string) {
-      return value.match(/^#[0-9A-F]{6}$/)
-    },
+    // isValidHexColor(value: string) {
+    //   return isValidHexColor(value)
+    // },
     boundValue(value: number, min: number, max: number): string {
       if (value < min) return min.toString()
       else if (value > max) return max.toString()

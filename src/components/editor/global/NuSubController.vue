@@ -410,7 +410,7 @@ export default Vue.extend({
         ...this.sizeStyle(),
         'pointer-events': 'initial',
         transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.config.styles.zindex}px)`,
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+        ...TextEffectUtils.convertTextEffect(this.config)
       }
     },
     sizeStyle() {
