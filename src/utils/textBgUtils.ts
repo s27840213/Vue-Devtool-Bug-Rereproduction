@@ -634,7 +634,7 @@ class TextBg {
     } else if (isITextGooey(effect) || isITextUnderline(effect)) {
       return ['color', effect.color]
     } else {
-      return ['color', (effect as unknown as {color:string}).color]
+      return ['color', (effect as unknown as {color:string}).color || '']
     }
   }
 
