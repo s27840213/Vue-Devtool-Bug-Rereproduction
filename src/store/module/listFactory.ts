@@ -133,7 +133,7 @@ export default function (this: any) {
     },
 
     // Only for template center.
-    getThemeContent: async ({ commit, state }, params = {}) => {
+    getThemeContent: async ({ commit }, params = {}) => {
       const { keyword, theme } = params
       const locale = localeUtils.currLocale()
       commit('SET_STATE', { pending: true, keyword, theme, locale, content: {} })

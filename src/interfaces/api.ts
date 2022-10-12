@@ -150,6 +150,7 @@ export interface IListServiceContentDataItem {
   src?: string,
   valid?: number
 }
+
 export interface ICategoryItem {
   id: string
   title?: string
