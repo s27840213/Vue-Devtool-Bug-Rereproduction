@@ -54,7 +54,7 @@ class Controller {
         color: 'fontColorL+-40/BC/00'
       },
       bold3d: { // 3D立體
-        distance: 40,
+        distance: 20,
         angle: 0,
         opacity: 100,
         textStrokeColor: 'fontColorL+-40/BC/00',

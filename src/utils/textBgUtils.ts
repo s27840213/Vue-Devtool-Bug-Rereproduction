@@ -616,9 +616,32 @@ class TextBg {
     } else return null
   }
 
+  setColorKey(key: string) {
+    this.currColorKey = key
+  }
+
+  setColor(color: string) {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, { [this.currColorKey]: color })
+  }
+
+  getEffectMainColor(effect: ITextBgEffect) {
+    if (isITextBox(effect) &&
+      ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
+      return ['bColor', effect.bColor]
+    } else if (isITextBox(effect)) { // Non-hollow text box
+      return ['pColor', effect.pColor]
+    } else if (isITextGooey(effect) || isITextUnderline(effect)) {
+      return ['color', effect.color]
+    } else {
+      return ['color', (effect as unknown as {color:string}).color]
+    }
+  }
+
   syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
-    if (textBg.name === 'none') return
     Object.assign(textBg, { name: textBg.name || effectName })
+    if (textBg.name === 'none') return
+
     const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
     const newShareAttrs = { opacity: textBg.opacity }
     const newEffect = { opacity: shareAttrs.opacity }
@@ -640,20 +663,6 @@ class TextBg {
     }
   }
 
-  setColorKey(key: string) {
-    this.currColorKey = key
-  }
-
-  setColor(color: string) {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    this.setTextBg(effectName, { [this.currColorKey]: color })
-  }
-
-  resetCurrTextEffect() {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    this.setTextBg(effectName, this.effects[effectName])
-  }
-
   setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): void {
     const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
     const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
@@ -667,14 +676,21 @@ class TextBg {
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
-        if (layerTextBg && layerTextBg.name === effect) {
+        if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
           this.syncShareAttrs(textBg, null)
-        } else {
+        } else { // Switch to other effect.
           this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
+
+          // Bring original effect color to new effect.
+          const oldColor = this.getEffectMainColor(layerTextBg)[1]
+          const newColorKey = this.getEffectMainColor(textBg)[0]
+          if (oldColor.startsWith('#')) {
+            Object.assign(textBg, { [newColorKey]: oldColor })
+          }
         }
 
         store.commit('UPDATE_specLayerData', {
@@ -685,6 +701,11 @@ class TextBg {
         })
       }
     }
+  }
+
+  resetCurrTextEffect() {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, this.effects[effectName])
   }
 }
 
