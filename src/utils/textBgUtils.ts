@@ -327,7 +327,7 @@ class TextBg {
         bColor: 'transparent', // unadjustable
         pStrokeX: 13, // unadjustable in all effects in all effects
         pStrokeY: 5,
-        pColor: '#F1D289'
+        pColor: 'fontColorL+-40/BC/00'
       },
       'rounded-borderless': {
         opacity: 100,
@@ -336,13 +336,13 @@ class TextBg {
         bColor: 'transparent', // unadjustable
         pStrokeX: 13, // unadjustable in all effects
         pStrokeY: 5,
-        pColor: '#F1D289'
+        pColor: 'fontColorL+-40/BC/00'
       },
       'square-hollow': {
         opacity: 100,
         bStroke: 3,
         bRadius: 0, // unadjustable
-        bColor: '#F1D289',
+        bColor: 'fontColorL+-40/BC/00',
         pStrokeX: 13, // unadjustable in all effects
         pStrokeY: 5,
         pColor: 'transparent' // unadjustable
@@ -351,7 +351,7 @@ class TextBg {
         opacity: 100,
         bStroke: 3,
         bRadius: 10,
-        bColor: '#F1D289',
+        bColor: 'fontColorL+-40/BC/00',
         pStrokeX: 13, // unadjustable in all effects
         pStrokeY: 5,
         pColor: 'transparent' // unadjustable
@@ -360,32 +360,32 @@ class TextBg {
         opacity: 100,
         bStroke: 3,
         bRadius: 0, // unadjustable
-        bColor: '#979B9B',
+        bColor: 'fontColor',
         pStrokeX: 13, // unadjustable in all effects
         pStrokeY: 5,
-        pColor: '#F1D289'
+        pColor: 'fontColorL+-40/BC/00'
       },
       'rounded-both': {
         opacity: 100,
         bStroke: 3,
         bRadius: 10,
-        bColor: '#979B9B',
+        bColor: 'fontColor',
         pStrokeX: 13, // unadjustable in all effects
         pStrokeY: 5,
-        pColor: '#F1D289'
+        pColor: 'fontColorL+-40/BC/00'
       },
       underline: {
         endpoint: 'rounded',
         height: 20,
         yOffset: 10,
         opacity: 100,
-        color: '#F1D289'
+        color: 'fontColorL+-40/F1D289'
       },
       gooey: {
         distance: 10,
         bRadius: 15,
         opacity: 100,
-        color: '#F1D289'
+        color: 'fontColorL+-40/BC/00'
       }
     }
   }
@@ -495,7 +495,8 @@ class TextBg {
 
     if (isITextGooey(textBg)) {
       const padding = textBg.distance
-      const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
+      const color = textEffectUtils.colorParser(textBg.color, config)
+      const fill = this.rgba(color, textBg.opacity * 0.01)
 
       // Add padding.
       rects.forEach((rect: DOMRect) => {
@@ -521,7 +522,8 @@ class TextBg {
         // .concat(cps.toCircle() as any) // Show control point
       }
     } else if (isITextUnderline(textBg)) {
-      const fill = this.rgba(textBg.color, textBg.opacity * 0.01)
+      const color = textEffectUtils.colorParser(textBg.color, config)
+      const fill = this.rgba(color, textBg.opacity * 0.01)
       const paths = [] as Record<string, unknown>[]
       rects.forEach(rect => {
         const capWidth = rect.height * 0.005 * textBg.height
@@ -563,6 +565,8 @@ class TextBg {
         content: paths
       }
     } else if (isITextBox(textBg)) {
+      const pColor = textEffectUtils.colorParser(textBg.pColor, config)
+      const bColor = textEffectUtils.colorParser(textBg.bColor, config)
       const opacity = textBg.opacity * 0.01
       let boxWidth = (width + textBg.bStroke)
       let boxHeight = (height + textBg.bStroke)
@@ -602,7 +606,7 @@ class TextBg {
         content: [{
           tag: 'path',
           attrs: {
-            style: `fill:${textBg.pColor}; stroke:${textBg.bColor}; opacity:${opacity}`,
+            style: `fill:${pColor}; stroke:${bColor}; opacity:${opacity}`,
             'stroke-width': textBg.bStroke,
             d: path.result()
           }
@@ -610,39 +614,6 @@ class TextBg {
         // .concat(path.toCircle() as any) // Show control point
       }
     } else return null
-  }
-
-  syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
-    if (textBg.name === 'none') return
-    Object.assign(textBg, { name: textBg.name || effectName })
-    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
-    const newShareAttrs = { opacity: textBg.opacity }
-    const newEffect = { opacity: shareAttrs.opacity }
-    if (isITextBox(textBg)) {
-      if (['square-borderless', 'rounded-borderless',
-        'square-both', 'rounded-both'].includes(textBg.name)) {
-        Object.assign(newShareAttrs, { color: textBg.pColor })
-        Object.assign(newEffect, { pColor: shareAttrs.color })
-      }
-      if (['square-hollow', 'rounded-hollow',
-        'square-both', 'rounded-both'].includes(textBg.name)) {
-        Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
-        Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
-      }
-    } else {
-      Object.assign(newShareAttrs, { color: textBg.color })
-      Object.assign(newEffect, { color: shareAttrs.color })
-    }
-
-    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
-    if (!effectName) {
-      Object.assign(shareAttrs, newShareAttrs)
-      localStorageUtils.set('textEffectSetting', 'textBgShare', shareAttrs)
-    } else {
-      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
-      Object.assign(effect, newEffect)
-      localStorageUtils.set('textEffectSetting', effectName, effect)
-    }
   }
 
   setColorKey(key: string) {
@@ -654,9 +625,42 @@ class TextBg {
     this.setTextBg(effectName, { [this.currColorKey]: color })
   }
 
-  resetCurrTextEffect() {
-    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
-    this.setTextBg(effectName, this.effects[effectName])
+  getEffectMainColor(effect: ITextBgEffect) {
+    if (isITextBox(effect) &&
+      ['square-hollow', 'rounded-hollow'].includes(effect.name)) {
+      return ['bColor', effect.bColor]
+    } else if (isITextBox(effect)) { // Non-hollow text box
+      return ['pColor', effect.pColor]
+    } else if (isITextGooey(effect) || isITextUnderline(effect)) {
+      return ['color', effect.color]
+    } else {
+      return ['color', (effect as unknown as {color:string}).color || '']
+    }
+  }
+
+  syncShareAttrs(textBg: ITextBgEffect, effectName: string | null) {
+    Object.assign(textBg, { name: textBg.name || effectName })
+    if (textBg.name === 'none') return
+
+    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textBgShare') ?? {}) as Record<string, string>
+    const newShareAttrs = { opacity: textBg.opacity }
+    const newEffect = { opacity: shareAttrs.opacity }
+    if (isITextBox(textBg) &&
+        ['square-hollow', 'rounded-hollow', 'square-both', 'rounded-both'].includes(textBg.name)) {
+      Object.assign(newShareAttrs, { bStroke: textBg.bStroke })
+      Object.assign(newEffect, { bStroke: shareAttrs.bStroke })
+    }
+
+    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+    if (!effectName) {
+      Object.assign(shareAttrs, newShareAttrs)
+      localStorageUtils.set('textEffectSetting', 'textBgShare', shareAttrs)
+    } else {
+      let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+      Object.assign(effect, newEffect)
+      effect = _.omit(effect, ['color', 'pColor', 'bColor'])
+      localStorageUtils.set('textEffectSetting', effectName, effect)
+    }
   }
 
   setTextBg(effect: string, attrs?: Record<string, string | number | boolean>): void {
@@ -672,14 +676,21 @@ class TextBg {
       const { type, styles: { textBg: layerTextBg } } = layers[idx] as IText
       if (type === 'text') {
         const textBg = {} as ITextBgEffect
-        if (layerTextBg && layerTextBg.name === effect) {
+        if (layerTextBg && layerTextBg.name === effect) { // Adjust effect option.
           Object.assign(textBg, layerTextBg, attrs)
           localStorageUtils.set('textEffectSetting', effect, textBg)
           this.syncShareAttrs(textBg, null)
-        } else {
+        } else { // Switch to other effect.
           this.syncShareAttrs(textBg, effect)
           const localAttrs = localStorageUtils.get('textEffectSetting', effect)
           Object.assign(textBg, defaultAttrs, localAttrs, attrs, { name: effect })
+
+          // Bring original effect color to new effect.
+          const oldColor = this.getEffectMainColor(layerTextBg)[1]
+          const newColorKey = this.getEffectMainColor(textBg)[0]
+          if (oldColor.startsWith('#')) {
+            Object.assign(textBg, { [newColorKey]: oldColor })
+          }
         }
 
         store.commit('UPDATE_specLayerData', {
@@ -690,6 +701,11 @@ class TextBg {
         })
       }
     }
+  }
+
+  resetCurrTextEffect() {
+    const effectName = textEffectUtils.getCurrentLayer().styles.textBg.name
+    this.setTextBg(effectName, this.effects[effectName])
   }
 }
 
