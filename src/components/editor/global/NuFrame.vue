@@ -159,9 +159,11 @@ export default Vue.extend({
     styles() {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
-        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale}px`,
-        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale}px`,
-        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
+        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
+        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial',
+        transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: isFrameImg ? '' : 'top left'
       }
     },
     shadowSrc() {

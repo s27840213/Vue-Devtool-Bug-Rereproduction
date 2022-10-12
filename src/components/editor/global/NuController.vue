@@ -36,6 +36,7 @@
               :primaryLayer="config"
               :config="getLayerType() === 'frame' && !FrameUtils.isImageFrame(config) ? frameLayerMapper(layer) : layer"
               :type="config.type"
+              :primaryLayerZindex="primaryLayerZindex()"
               :isMoved="isMoved"
               :contentScaleRatio="contentScaleRatio"
               @onSubDrop="onSubDrop"
@@ -251,7 +252,9 @@ export default Vue.extend({
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
     eventUtils.removePointerEvent('pointermove', this.moving)
-    this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
+    if (this.eventTarget) {
+      this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
+    }
     // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
@@ -523,6 +526,9 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(pageIndex, layerIndex, {
         shown
       })
+    },
+    primaryLayerZindex() {
+      return (this.config as ILayer).styles.zindex
     },
     zindex(type: string) {
       const isFrame = this.getLayerType() === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)

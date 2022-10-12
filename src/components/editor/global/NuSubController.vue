@@ -86,6 +86,10 @@ export default Vue.extend({
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    primaryLayerZindex: {
+      default: 0,
+      type: Number
     }
   },
   components: {
@@ -409,11 +413,11 @@ export default Vue.extend({
     },
     styles() {
       const { isFrameImg } = this.config
-
+      console.log(this.config.styles.zindex, this.primaryLayerZindex)
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.config.styles.zindex}px)`,
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.type === 'group' ? this.primaryLayerZindex : this.config.styles.zindex}px)`,
         ...TextEffectUtils.convertTextEffect(this.config)
       }
     },
