@@ -10,12 +10,12 @@
           :style="scaleStyles()")
         nu-clipper(:config="config"
           :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
-          :imgControl="imgControl" :contentScaleRatio="isFrame && !inImageFrame ? 1 : contentScaleRatio")
+          :imgControl="imgControl" :contentScaleRatio="contentScaleRatio")
           component(:is="`nu-${config.type}`"
             class="transition-none"
             :config="config"
             :imgControl="imgControl"
-            :contentScaleRatio="isFrame && !inImageFrame ? 1 : contentScaleRatio"
+            :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :scaleRatio="scaleRatio"
             :isPagePreview="isPagePreview"
@@ -64,10 +64,6 @@ export default Vue.extend({
       type: Number
     },
     isPagePreview: {
-      default: false,
-      type: Boolean
-    },
-    inImageFrame: {
       default: false,
       type: Boolean
     }
@@ -121,7 +117,7 @@ export default Vue.extend({
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.isFrame ? 1 : this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -192,7 +188,7 @@ export default Vue.extend({
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.isFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
         'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles
