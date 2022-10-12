@@ -69,7 +69,6 @@ export default Vue.extend({
     if (this.userInfo.isFirstOpen) {
       this.setShowTutorial(true)
     }
-    vivistickerUtils.getState('objects')
   },
   mounted() {
     /**

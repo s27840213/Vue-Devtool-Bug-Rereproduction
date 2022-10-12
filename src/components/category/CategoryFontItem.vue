@@ -35,6 +35,7 @@ import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   props: {
@@ -194,6 +195,8 @@ export default Vue.extend({
           face: this.item.id,
           ver: this.item.ver
         })
+
+        vivistickerUtils.setState('recentFont', updateItem)
 
         const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)

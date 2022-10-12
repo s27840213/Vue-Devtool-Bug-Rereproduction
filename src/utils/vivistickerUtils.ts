@@ -38,7 +38,7 @@ class ViviStickerUtils {
   appLoadedSent = false
   loadingFlags = {} as { [key: string]: boolean }
   loadingCallback = undefined as (() => void) | undefined
-  callbackMap = {} as {[key: string]: () => void}
+  callbackMap = {} as {[key: string]: (data?: any) => void}
   errorMessageMap = {} as {[key: string]: string}
   editorStateBuffer = {} as {[key: string]: any}
 
@@ -327,7 +327,7 @@ class ViviStickerUtils {
 
   async callIOSAsAPI(type: string, message: any, event: string, timeout = 5000) {
     this.sendToIOS(type, message)
-    await Promise.race([
+    const result = await Promise.race([
       new Promise<void>(resolve => {
         this.callbackMap[event] = resolve
       }),
@@ -338,11 +338,12 @@ class ViviStickerUtils {
       })
     ])
     delete this.callbackMap[event]
+    return result
   }
 
-  handleCallback(event: string) {
+  handleCallback(event: string, data?: any) {
     if (this.callbackMap[event]) {
-      this.callbackMap[event]()
+      this.callbackMap[event](data)
     }
   }
 
@@ -422,16 +423,19 @@ class ViviStickerUtils {
   addAsset(key: string, asset: any) {
     if (this.isStandaloneMode) return
     this.sendToIOS('ADD_ASSET', { key, asset })
-    this.sendToIOS('SET_STATE', { key, value: asset })
   }
 
-  async getState(key: string) {
-    await this.callIOSAsAPI('GET_STATE', { key }, 'getState', 2000)
+  setState(key: string, value: any) {
+    if (this.isStandaloneMode) return
+    this.sendToIOS('SET_STATE', { key, value })
+  }
+
+  async getState(key: string): Promise<any> {
+    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
   }
 
   getStateResult(data: { key: string, value: string }) {
-    console.log(data.value)
-    vivistickerUtils.handleCallback('getState')
+    vivistickerUtils.handleCallback('getState', JSON.parse(data.value))
   }
 
   async sendCopyEditor(): Promise<void> {
