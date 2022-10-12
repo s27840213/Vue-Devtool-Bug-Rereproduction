@@ -139,13 +139,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      resetObjects: 'objects/resetContent',
-      refetchObjects: 'objects/getRecAndCate',
-      resetBackgrounds: 'background/resetContent',
-      refetchBackgrounds: 'background/getRecAndCate',
-      resetTexts: 'textStock/resetContent',
-      refetchTexts: 'textStock/getRecAndCate',
-      refetchTextContent: 'textStock/getContent'
+      resetObjectsSearch: 'objects/resetSearch',
+      resetBackgroundsSearch: 'background/resetSearch',
+      resetTextsSearch: 'textStock/resetSearch'
     }),
     ...mapMutations({
       setIsInCategory: 'vivisticker/SET_isInCategory',
@@ -165,17 +161,13 @@ export default Vue.extend({
       this.setShowAllRecently({ tab: this.currActiveTab, bool: false })
       switch (this.currActiveTab) {
         case 'object':
-          this.resetObjects()
-          this.refetchObjects('objects')
+          this.resetObjectsSearch()
           break
         case 'background':
-          this.resetBackgrounds()
-          this.refetchBackgrounds('background')
+          this.resetBackgroundsSearch()
           break
         case 'text':
-          this.resetTexts()
-          this.refetchTexts('textStock')
-          this.refetchTextContent()
+          this.resetTextsSearch()
       }
     },
     clearBgShare() {
