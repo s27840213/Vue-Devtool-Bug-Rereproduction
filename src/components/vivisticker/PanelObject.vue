@@ -81,9 +81,6 @@ export default Vue.extend({
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
-    showSearchResult(): boolean {
-      return this.keyword && !this.showAllRecently
-    },
     listCategories(): ICategoryItem[] {
       const { categories } = this
       return (categories as IListServiceContentData[])
@@ -136,11 +133,11 @@ export default Vue.extend({
     categoryListArray(): ICategoryList[] {
       return [{
         content: this.searchResult,
-        show: this.showSearchResult,
+        show: this.keyword,
         key: 'searchResult'
       }, {
         content: this.mainContent,
-        show: !this.showSearchResult,
+        show: !this.keyword,
         key: 'mainContent'
       }]
     },
