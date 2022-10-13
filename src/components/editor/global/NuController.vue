@@ -37,6 +37,7 @@
               :primaryLayer="config"
               :config="getLayerType() === 'frame' && !FrameUtils.isImageFrame(config) ? frameLayerMapper(layer) : layer"
               :type="config.type"
+              :primaryLayerZindex="primaryLayerZindex()"
               :isMoved="isMoved"
               :contentScaleRatio="contentScaleRatio"
               @onSubDrop="onSubDrop"
@@ -242,9 +243,13 @@ export default Vue.extend({
       isDoingGestureAction: false,
       dblTabsFlag: false,
       isPointerDownFromSubController: false,
+<<<<<<< HEAD
       initCornerRotate: -1,
       cornerRotaters: undefined,
       cornerRotaterbaffles: undefined
+=======
+      eventTarget: null as unknown as HTMLElement
+>>>>>>> efcf7a107735bb84e070a71041a06dc745ff42bf
     }
   },
   mounted() {
@@ -253,7 +258,7 @@ export default Vue.extend({
       LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { editing: true })
     }
 
-    const body = (this.$refs.body as HTMLElement)
+    // const body = (this.$refs.body as HTMLElement)
 
     // const bodyAt = new AnyTouch(body)
     // //  销毁
@@ -264,6 +269,9 @@ export default Vue.extend({
   beforeDestroy() {
     eventUtils.removePointerEvent('pointerup', this.moveEnd)
     eventUtils.removePointerEvent('pointermove', this.moving)
+    if (this.eventTarget) {
+      this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
+    }
     // window.removeEventListener('scroll', this.scrollUpdate, { capture: true })
   },
   computed: {
@@ -532,6 +540,9 @@ export default Vue.extend({
         shown
       })
     },
+    primaryLayerZindex() {
+      return (this.config as ILayer).styles.zindex
+    },
     zindex(type: string) {
       const isFrame = this.getLayerType() === 'frame' && (this.config as IFrame).clips.some(img => img.imgControl)
       const isGroup = (this.getLayerType() === 'group') && LayerUtils.currSelectedInfo.index === this.layerIndex
@@ -563,7 +574,7 @@ export default Vue.extend({
     contentStyles(type: string) {
       const zindex = this.zindex(type)
       const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine(), this.config.size?.[0])
-      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
       const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
       return {
         transform: `translate3d(${x * this.contentScaleRatio}px, ${y * this.contentScaleRatio}px, ${zindex}px) rotate(${rotate}deg)`,
@@ -611,7 +622,7 @@ export default Vue.extend({
     //     return this.config.styles.zindex + 1
     //   })()
     //   const { x, y, width, height, rotate } = ControlUtils.getControllerStyleParameters(this.config.point, this.config.styles, this.isLine, this.config.size?.[0])
-    //   const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+    //   const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
     //   return {
     //     transform: `translate3d(${x}px, ${y}px, ${zindex}px) rotate(${rotate}deg)`,
     //     width: `${width}px`,
@@ -696,8 +707,8 @@ export default Vue.extend({
        * used for frame layer for entering detection
        * This is used for moving image to replace frame element
        */
-      const body = (event.target as HTMLElement)
-      body.releasePointerCapture((event as PointerEvent).pointerId)
+      this.eventTarget = (event.target as HTMLElement)
+      this.eventTarget.releasePointerCapture((event as PointerEvent).pointerId)
 
       if (this.isTouchDevice()) {
         if (!this.dblTabsFlag && this.isActive) {
@@ -716,9 +727,9 @@ export default Vue.extend({
               this.dblTabsFlag = true
             }
           }
-          body.addEventListener('pointerdown', doubleTap)
+          this.eventTarget.addEventListener('pointerdown', doubleTap)
           setTimeout(() => {
-            body.removeEventListener('pointerdown', doubleTap)
+            this.eventTarget.removeEventListener('pointerdown', doubleTap)
             this.dblTabsFlag = false
           }, interval)
         }
@@ -741,7 +752,7 @@ export default Vue.extend({
        * The exception is that we are in multi-selection mode
        */
       if (this.isTouchDevice() && !this.isActive && !this.isLocked() && !this.inMultiSelectionMode) {
-        body.addEventListener('touchstart', this.disableTouchEvent)
+        this.eventTarget.addEventListener('touchstart', this.disableTouchEvent)
         this.initialPos = MouseUtils.getMouseAbsPoint(event)
         eventUtils.addPointerEvent('pointerup', this.moveEnd)
         eventUtils.addPointerEvent('pointermove', this.moving)
@@ -931,8 +942,7 @@ export default Vue.extend({
     },
     moveEnd(e: MouseEvent | TouchEvent) {
       if (!this.isDoingGestureAction && !this.isActive) {
-        const body = (this.$refs.body as HTMLElement)
-        body.removeEventListener('touchstart', this.disableTouchEvent)
+        this.eventTarget.removeEventListener('touchstart', this.disableTouchEvent)
         GroupUtils.deselect()
         const targetIndex = this.config.styles.zindex - 1
         this.setLastSelectedLayerIndex(this.layerIndex)

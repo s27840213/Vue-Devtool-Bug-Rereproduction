@@ -260,13 +260,14 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('templates', [
+      'getRecAndCate',
       'getContent',
       'getTagContent',
       'getMoreContent',
       'resetSearch',
+      'resetContent',
       'getSum'
-    ]
-    ),
+    ]),
     ...mapMutations('templates', {
       _setTemplateState: 'SET_STATE'
     }),
@@ -297,7 +298,6 @@ export default Vue.extend({
       this.handleTheme(allTheme)
     },
     handleTheme(selected: { [key: string]: boolean }) {
-      const { keyword } = this
       const theme = Object
         .entries(selected)
         .reduce((prev, [id, checked]) => {
@@ -306,7 +306,8 @@ export default Vue.extend({
         }, [] as string[])
         .join(',')
       this._setTemplateState({ theme })
-      this.handleSearch(keyword)
+      this.resetContent()
+      this.getRecAndCate()
       this.showTheme = false
       this.showPrompt = false
     },

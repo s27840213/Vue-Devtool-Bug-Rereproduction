@@ -47,7 +47,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
@@ -85,6 +85,10 @@ export default Vue.extend({
     isMoved: Boolean,
     contentScaleRatio: {
       default: 1,
+      type: Number
+    },
+    primaryLayerZindex: {
+      default: 0,
       type: Number
     }
   },
@@ -142,6 +146,9 @@ export default Vue.extend({
     }),
     isTextEditing(): boolean {
       return !this.isControlling && this.config?.active
+    },
+    getPrimaryLayerSubLayerNum(): number {
+      return (this.primaryLayer as IGroup | ITmp).layers.length
     }
   },
   watch: {
@@ -405,12 +412,13 @@ export default Vue.extend({
     },
     styles() {
       const { isFrameImg } = this.config
+      const zindex = this.type === 'group' ? this.config?.active ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
 
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.config.styles.zindex}px)`,
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${zindex}px)`,
+        ...TextEffectUtils.convertTextEffect(this.config)
       }
     },
     sizeStyle() {

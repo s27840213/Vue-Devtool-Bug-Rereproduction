@@ -85,7 +85,7 @@ import GeneralUtils from '@/utils/generalUtils'
 import LayerUtils from '@/utils/layerUtils'
 import StepsUtils from '@/utils/stepsUtils'
 import { ColorEventType, FunctionPanelType, PopupSliderEventType } from '@/store/types'
-import colorUtils from '@/utils/colorUtils'
+import colorUtils, { checkAndConvertToHex, isValidHexColor } from '@/utils/colorUtils'
 import popupUtils from '@/utils/popupUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
@@ -276,7 +276,7 @@ export default Vue.extend({
     },
     inputColor(input: Event) {
       const target = input.target as HTMLInputElement
-      if (GeneralUtils.isValidHexColor(target.value)) {
+      if (isValidHexColor(target.value)) {
         target.value = target.value.toUpperCase()
         this.handleColorUpdate(target.value)
         StepsUtils.record()
@@ -294,7 +294,7 @@ export default Vue.extend({
     },
     handleColorUpdate(color: string) {
       if (color === this.props.color) return
-      const hex = tiptapUtils.isValidHexColor(color) ? color : tiptapUtils.rgbToHex(color)
+      const hex = checkAndConvertToHex(color)
       tiptapUtils.spanStyleHandler('color', hex)
     },
     handleValueModal() {
@@ -510,7 +510,7 @@ export default Vue.extend({
       return value.match(/[+-]?\d+(\.\d+)?/)
     },
     isValidHexColor(value: string) {
-      return value.match(/^#[0-9A-F]{6}$/)
+      return isValidHexColor(value)
     },
     boundValue(value: number, min: number, max: number): string {
       if (value < min) return min.toString()

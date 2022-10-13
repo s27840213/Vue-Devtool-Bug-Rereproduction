@@ -78,6 +78,7 @@ const mutations: MutationTree<IImgControlState> = {
 }
 
 const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: IImage): IImage {
+  image.styles.adjust.blur = 0
   switch (primaryLayer.type) {
     case LayerType.frame: {
       if (frameUtils.isImageFrame(primaryLayer as IFrame)) {
@@ -108,7 +109,8 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
           image.styles.imgX -= primaryLayer.styles.horizontalFlip ? translateX * 2 : 0
           image.styles.imgY -= primaryLayer.styles.verticalFlip ? translateY * 2 : 0
         }
-        return groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
+        const mappedImage = groupUtils.mapLayersToPage([image], primaryLayer as IGroup)[0] as IImage
+        return mappedImage
       }
     }
     case LayerType.group: {

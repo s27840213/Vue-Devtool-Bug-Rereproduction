@@ -50,6 +50,7 @@
     "stackblur-canvas": "^2.5.0",
     "svgo": "^2.8.0",
     "svgo-loader": "^3.0.1",
+    "svgpath": "^2.5.0",
     "tinycolor": "^0.0.1",
     "tiptap-commands": "^1.17.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
