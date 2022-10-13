@@ -4,8 +4,9 @@
       header-tabs(v-show="currActivePanel !== 'text'" :style="headerStyles()")
       div(class="vivisticker__content"
           @pointerdown="outerClick")
+        my-design(v-show="isInMyDesign")
         vvstk-editor(v-show="isInEditor")
-        main-menu(v-show="!isInEditor" @openColorPicker="handleOpenColorPicker")
+        main-menu(v-show="!isInEditor && !isInMyDesign" @openColorPicker="handleOpenColorPicker")
       transition(name="panel-up")
         mobile-panel(v-show="showMobilePanel"
           :currActivePanel="currActivePanel"
@@ -27,6 +28,7 @@ import MobilePanel from '@/components/vivisticker/MobilePanel.vue'
 import HeaderTabs from '@/components/vivisticker/HeaderTabs.vue'
 import FooterTabs from '@/components/vivisticker/FooterTabs.vue'
 import Tutorial from '@/components/vivisticker/Tutorial.vue'
+import MyDesign from '@/components/vivisticker/MyDesign.vue'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import stepsUtils from '@/utils/stepsUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -47,6 +49,7 @@ export default Vue.extend({
   components: {
     MainMenu,
     VvstkEditor,
+    MyDesign,
     MobilePanel,
     HeaderTabs,
     FooterTabs,
@@ -125,7 +128,8 @@ export default Vue.extend({
       isInBgShare: 'vivisticker/getIsInBgShare',
       showTutorial: 'vivisticker/getShowTutorial',
       userInfo: 'vivisticker/getUserInfo',
-      isDuringCopy: 'vivisticker/getIsDuringCopy'
+      isDuringCopy: 'vivisticker/getIsDuringCopy',
+      isInMyDesign: 'vivisticker/getIsInMyDesign'
     }),
     isLocked(): boolean {
       return layerUtils.getTmpLayer().locked
