@@ -163,7 +163,7 @@ export default Vue.extend({
       setShareColor: 'vivisticker/SET_shareColor',
       switchBg: 'vivisticker/UPDATE_switchBg',
       setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
-      setMyDesignTab: 'vivisticker/SET_MyDesignTab',
+      setMyDesignTab: 'vivisticker/SET_myDesignTab',
       setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
     }),
     handleTabAction(action?: () => void) {
@@ -221,7 +221,7 @@ export default Vue.extend({
     },
     handleMyDesign() {
       if (this.currActiveTab === 'background') {
-        this.setMyDesignTab('object')
+        this.setMyDesignTab('text')
       } else {
         this.setMyDesignTab(this.currActiveTab)
       }
@@ -229,6 +229,7 @@ export default Vue.extend({
     },
     leaveMyDesign() {
       this.setIsInMyDesign(false)
+      this.setIsInSelectionMode(false)
     },
     handleSelectDesign() {
       this.setIsInSelectionMode(!this.isInSelectionMode)

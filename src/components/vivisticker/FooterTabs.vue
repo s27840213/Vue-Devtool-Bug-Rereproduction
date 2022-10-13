@@ -29,8 +29,6 @@ import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
-import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 
 export default Vue.extend({
@@ -70,7 +68,8 @@ export default Vue.extend({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
-      editorType: 'vivisticker/getEditorType'
+      editorType: 'vivisticker/getEditorType',
+      isInMyDesign: 'vivisticker/getIsInMyDesign'
     }),
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
@@ -445,6 +444,7 @@ export default Vue.extend({
       }
 
       if (tab.panelType !== undefined) {
+        if (this.isInMyDesign) return
         if (this.isInEditor) {
           this.$emit('switchTab', tab.panelType, tab.props)
         } else {

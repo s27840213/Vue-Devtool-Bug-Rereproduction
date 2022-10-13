@@ -21,7 +21,7 @@ interface IViviStickerState {
   newBgColor: string,
   isDuringCopy: boolean,
   isInMyDesign: boolean,
-  MyDesignTab: string,
+  myDesignTab: string,
   isInSelectionMode: boolean
 }
 
@@ -55,7 +55,7 @@ const getDefaultState = (): IViviStickerState => ({
   newBgColor: '',
   isDuringCopy: false,
   isInMyDesign: false,
-  MyDesignTab: 'object',
+  myDesignTab: 'text',
   isInSelectionMode: false
 })
 
@@ -113,7 +113,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return state.isInMyDesign
   },
   getMyDesignTab(state: IViviStickerState): string {
-    return state.MyDesignTab
+    return state.myDesignTab
   },
   getIsInSelectionMode(state: IViviStickerState): boolean {
     return state.isInSelectionMode
@@ -166,8 +166,8 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_isInMyDesign(state: IViviStickerState, isInMyDesign: boolean) {
     state.isInMyDesign = isInMyDesign
   },
-  SET_MyDesignTab(state: IViviStickerState, MyDesignTab: string) {
-    state.MyDesignTab = MyDesignTab
+  SET_myDesignTab(state: IViviStickerState, myDesignTab: string) {
+    state.myDesignTab = myDesignTab
   },
   SET_isInSelectionMode(state: IViviStickerState, isInSelectionMode: boolean) {
     state.isInSelectionMode = isInSelectionMode

@@ -15,7 +15,7 @@
     footer-tabs(v-if="!isInBgShare" class="vivisticker__bottom"
       @switchTab="switchTab"
       @switchMainTab="switchMainTab"
-      :currTab="isInEditor ? currActivePanel : currActiveTab"
+      :currTab="isInMyDesign ? 'none' : (isInEditor ? currActivePanel : currActiveTab)"
       :inAllPagesMode="false")
     tutorial(v-if="showTutorial")
 </template>
