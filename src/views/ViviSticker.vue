@@ -265,7 +265,7 @@ export default Vue.extend({
 
   &__content {
     position: relative;
-    height: 100%;
+    // height: 100%;
     width: 100%;
     overflow: hidden;
     z-index: setZindex("editor-view");
