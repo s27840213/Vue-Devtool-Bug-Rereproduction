@@ -77,13 +77,13 @@
     div(v-if="isActive && !isControlling && !isLocked() && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
-      div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+      div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
           class="control-point__corner-rotate scaler"
           :key="`corner-rotate-${index}`"
           :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
           @pointerdown.stop="rotateStart($event, index)"
           @touchstart="disableTouchEvent")
-      div(v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaterbaffles) : []"
+      div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaterbaffles) : []"
           class="control-point__corner-rotate baffle"
           :key="`corner-rotate-baffle-${index}`"
           :style="Object.assign(cornerRotater.styles, { transform: '', borderRadius: '' })"
