@@ -1819,14 +1819,14 @@ export default Vue.extend({
             const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
             const src = ImageUtils.getSrc(this.config, size)
             replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            return
+            // return
           } else {
             eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
-        GroupUtils.deselect()
-        this.setLastSelectedLayerIndex(this.layerIndex)
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
+        // GroupUtils.deselect()
+        // this.setLastSelectedLayerIndex(this.layerIndex)
+        // GroupUtils.select(this.pageIndex, [this.layerIndex])
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
