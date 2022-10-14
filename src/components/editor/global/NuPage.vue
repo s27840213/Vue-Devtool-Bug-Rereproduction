@@ -483,7 +483,6 @@ export default Vue.extend({
       })
     },
     togglePageHighlighter(isHover: boolean): void {
-      console.log('toggle page hightlighter')
       this.pageIsHover = isHover
       this.setCurrHoveredPageIndex(isHover ? this.pageIndex : -1)
     },
