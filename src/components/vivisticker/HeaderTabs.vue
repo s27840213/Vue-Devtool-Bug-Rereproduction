@@ -143,7 +143,7 @@ export default Vue.extend({
         return []
       } else {
         return [
-          { icon: 'folder', width: 24, action: this.handleMyDesign },
+          // { icon: 'folder', width: 24, action: this.handleMyDesign },
           { icon: 'more', width: 24, action: this.handleMore }
         ]
       }
