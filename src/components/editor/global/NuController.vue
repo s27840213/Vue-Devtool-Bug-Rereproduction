@@ -243,13 +243,10 @@ export default Vue.extend({
       isDoingGestureAction: false,
       dblTabsFlag: false,
       isPointerDownFromSubController: false,
-<<<<<<< HEAD
       initCornerRotate: -1,
       cornerRotaters: undefined,
-      cornerRotaterbaffles: undefined
-=======
+      cornerRotaterbaffles: undefined,
       eventTarget: null as unknown as HTMLElement
->>>>>>> efcf7a107735bb84e070a71041a06dc745ff42bf
     }
   },
   mounted() {
