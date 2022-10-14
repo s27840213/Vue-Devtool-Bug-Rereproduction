@@ -267,10 +267,6 @@ export default Vue.extend({
 
         const currLayer = layerUtils.getCurrLayer
         if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
-          // if (!sel) {
-          //   Object.assign(start, TextUtils.selectAll(config).start)
-          //   Object.assign(end, TextUtils.selectAll(config).end)
-          // }
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
@@ -310,7 +306,6 @@ export default Vue.extend({
             json: ''
           }
         })
-        // StepsUtils.record()
         TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
