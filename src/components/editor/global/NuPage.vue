@@ -105,8 +105,8 @@
         lazy-load(
             target=".editor-view"
             :rootMargin="'1500px 0px 1500px 0px'"
-            :minHeight="config.width * (scaleRatio / 100)"
-            :maxHeight="config.width * (scaleRatio / 100)"
+            :minHeight="config.height * (scaleRatio / 100)"
+            :maxHeight="config.height * (scaleRatio / 100)"
             :threshold="[0,1]")
           div(class="scale-container relative"
               :style="scaleContainerStyles")
@@ -483,6 +483,7 @@ export default Vue.extend({
       })
     },
     togglePageHighlighter(isHover: boolean): void {
+      console.log('toggle page hightlighter')
       this.pageIsHover = isHover
       this.setCurrHoveredPageIndex(isHover ? this.pageIndex : -1)
     },
