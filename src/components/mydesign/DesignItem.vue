@@ -244,12 +244,13 @@ export default Vue.extend({
     },
     handleMouseEnter() {
       if (this.isTempDesign) return
+      const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
+      if (!thumbnailElement) return
       this.isMouseOver = true
       if (this.config.pageNum === 1) return
       this.waitTimer = setTimeout(() => {
         if (this.isMouseOver) {
           this.showCarousel = true
-          const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
           this.renderedWidth = thumbnailElement.width
           this.renderedHeight = thumbnailElement.height
           if (this.config.polling) {
