@@ -338,6 +338,7 @@ export default Vue.extend({
         this.config.thumbnail = this.previewPlaceholder
         this.pollingStep()
       } else {
+        if (this.isTempDesign) return
         this.pageImages = designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
         imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight, false).then((size) => {
           const { width, height, exists } = size
