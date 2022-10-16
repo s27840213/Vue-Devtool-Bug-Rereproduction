@@ -760,7 +760,7 @@ class TextUtils {
       this.asSubLayerSizeRefresh(pageIndex, layerIndex, subLayerIndex, textHW.height, heightOri, noPush)
       this.fixGroupCoordinates(pageIndex, layerIndex)
     } else {
-      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, noPush)
+      this.updateGroupLayerSize(pageIndex, layerIndex, subLayerIndex, false, noPush)
     }
   }
 
@@ -809,7 +809,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minX = Math.min(minX, l.styles.x)
+        minX = Math.min(minX, mathUtils.getBounding(l).x)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
@@ -827,7 +827,7 @@ class TextUtils {
     if (!group.layers) return
     group.layers
       .forEach(l => {
-        minY = Math.min(minY, l.styles.y)
+        minY = Math.min(minY, mathUtils.getBounding(l).y)
       })
     for (const [idx, layer] of Object.entries(group.layers)) {
       LayerUtils.updateSubLayerStyles(pageIndex, layerIndex, +idx, {
