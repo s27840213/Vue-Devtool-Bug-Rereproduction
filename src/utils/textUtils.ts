@@ -1175,20 +1175,26 @@ class TextUtils {
         textLayers.push(...((layer as IGroup).layers.filter(l => l.type === 'text') as IText[]))
       }
     }
-
-    const isError = await Promise.race([
-      Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs))),
-      new Promise<boolean>(resolve => {
-        setTimeout(() => {
-          resolve(true)
-        }, 40000)
-      })
-    ])
-    if (isError === true) {
-      console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
-    }
-    if (toSetFlag && this.toSetFlagId === setFlagId) {
-      this.setIsFontLoading(false)
+    let isError = false
+    try {
+      isError = await Promise.race([
+        Promise.all(textLayers.map(l => this.untilFontLoaded(l.paragraphs))),
+        new Promise<boolean>(resolve => {
+          setTimeout(() => {
+            resolve(true)
+          }, 40000)
+        })
+      ]) === true
+    } catch (error) {
+      console.log(error)
+      isError = true
+    } finally {
+      if (isError === true) {
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+      }
+      if (toSetFlag && this.toSetFlagId === setFlagId) {
+        this.setIsFontLoading(false)
+      }
     }
   }
 
@@ -1199,19 +1205,26 @@ class TextUtils {
       this.setIsFontLoading(true)
     }
 
-    const isError = await Promise.race([
-      Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p))),
-      new Promise<boolean>(resolve => {
-        setTimeout(() => {
-          resolve(true)
-        }, 40000)
-      })
-    ])
-    if (isError === true) {
-      console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
-    }
-    if (toSetFlag && this.toSetFlagId === setFlagId) {
-      this.setIsFontLoading(false)
+    let isError = false
+    try {
+      isError = await Promise.race([
+        Promise.all(paragraphs.map(p => this.untilFontLoadedForP(p))),
+        new Promise<boolean>(resolve => {
+          setTimeout(() => {
+            resolve(true)
+          }, 40000)
+        })
+      ]) === true
+    } catch (error) {
+      console.log(error)
+      isError = true
+    } finally {
+      if (isError === true) {
+        console.log('Font loading exceeds timeout 40s or error occurs, run callback anyways')
+      }
+      if (toSetFlag && this.toSetFlagId === setFlagId) {
+        this.setIsFontLoading(false)
+      }
     }
   }
 
