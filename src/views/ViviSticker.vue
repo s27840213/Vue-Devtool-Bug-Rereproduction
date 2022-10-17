@@ -227,6 +227,10 @@ export default Vue.extend({
     },
     switchMainTab(panelType: string) {
       this.setCurrActiveTab(panelType)
+      if (this.currActivePanel === 'color-picker') {
+        vivistickerUtils.setNewBgColor('')
+        this.switchTab('none')
+      }
     },
     outerClick() {
       if (this.isInEditor) {

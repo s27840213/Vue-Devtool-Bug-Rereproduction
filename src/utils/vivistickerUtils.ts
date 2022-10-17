@@ -323,8 +323,13 @@ class ViviStickerUtils {
     this.editorStateBuffer = {}
   }
 
+  setNewBgColor(color: string) {
+    store.commit('vivisticker/SET_newBgColor', color)
+  }
+
   commitNewBgColor() {
     const newBgColor = store.getters['vivisticker/getNewBgColor']
+    if (newBgColor === '') return
     this.addAsset('backgroundColor', { id: newBgColor.replace('#', '') })
     store.commit('vivisticker/UPDATE_addRecentlyBgColor', newBgColor)
   }

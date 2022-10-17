@@ -282,7 +282,10 @@ export default Vue.extend({
       this.opacity = Math.max(Math.min(newVal, 100), 0)
     },
     currActivePanel(newVal, oldVal) {
-      if (oldVal === 'color-picker' && newVal !== 'color-picker') {
+      if (oldVal === 'color-picker') {
+        if (newVal === 'none') {
+          vivistickerUtils.commitNewBgColor()
+        }
         this.setNewBgColor('')
       }
     },

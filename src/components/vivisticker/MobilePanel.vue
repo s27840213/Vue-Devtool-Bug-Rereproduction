@@ -475,9 +475,7 @@ export default Vue.extend({
         return () => {
           this.setIsInCategory({ tab: 'text', bool: false })
           this.setShowAllRecently({ tab: 'text', bool: false })
-          this.resetTexts()
-          this.refetchTexts('textStock')
-          this.refetchTextContent()
+          this.resetTextsSearch()
         }
       }
       if (this.showExtraColorPanel) {
@@ -485,6 +483,12 @@ export default Vue.extend({
           colorHandler()
           this.showExtraColorPanel = false
           this.panelHistory.pop()
+        }
+      }
+      if (this.currActivePanel === 'color-picker') {
+        return () => {
+          vivistickerUtils.setNewBgColor('')
+          this.closeMobilePanel()
         }
       }
       if (this.panelHistory.length > 0) {
@@ -582,9 +586,7 @@ export default Vue.extend({
     ...mapActions({
       initRecentlyColors: 'color/initRecentlyColors',
       addRecentlyColors: 'color/addRecentlyColors',
-      resetTexts: 'textStock/resetContent',
-      refetchTexts: 'textStock/getRecAndCate',
-      refetchTextContent: 'textStock/getContent'
+      resetTextsSearch: 'textStock/resetSearch'
     }),
     vcoConfig() {
       return {
