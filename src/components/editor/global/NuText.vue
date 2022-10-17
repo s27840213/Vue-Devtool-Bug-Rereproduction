@@ -90,11 +90,11 @@ export default Vue.extend({
         if (this.$route.name === 'Editor' || this.$route.name === 'MobileEditor') {
           this.isLoading = false
         }
-      }, 500) // for the delay between font loading and dom rendering
+      }, 100) // for the delay between font loading and dom rendering
     })
 
-    this.resizeObserver = new ResizeObserver(this.resizeCallback)
-    this.observeAllSpans()
+    // this.resizeObserver = new ResizeObserver(this.resizeCallback)
+    // this.observeAllSpans()
     this.drawSvgBG() // Check if needed
   },
   computed: {
@@ -143,19 +143,21 @@ export default Vue.extend({
   },
   watch: {
     'config.paragraphs': {
-      handler() {
+      handler(newVal) {
         this.isLoading = false
-        if (this.resizeObserver) {
-          this.resizeObserver.disconnect()
-          this.observeAllSpans()
-        }
-        this.drawSvgBG() // Check if needed
+        this.drawSvgBG()
+        textUtils.untilFontLoaded(newVal).then(() => {
+          this.drawSvgBG()
+        })
       }
     },
     'config.styles': {
       deep: true,
       handler() {
         this.drawSvgBG()
+        textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+          this.drawSvgBG() // Check if needs until
+        })
       }
     }
   },
