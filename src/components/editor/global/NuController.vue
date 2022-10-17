@@ -174,6 +174,7 @@ import i18n from '@/i18n'
 import editorUtils from '@/utils/editorUtils'
 import { AnyTouchEvent } from 'any-touch'
 import textBgUtils from '@/utils/textBgUtils'
+import fileUtils from '@/utils/fileUtils'
 
 const LAYER_SIZE_MIN = 10
 const MIN_THINKNESS = 5
@@ -954,8 +955,8 @@ export default Vue.extend({
           x: Math.abs(this.getLayerPos().x - this.initTranslate.x),
           y: Math.abs(this.getLayerPos().y - this.initTranslate.y)
         }
-        const hasActiualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
-        if (hasActiualMove) {
+        const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+        if (hasActualMove) {
           if (this.getLayerType() === 'text') {
             LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false })
           }
@@ -1022,7 +1023,7 @@ export default Vue.extend({
           }
         }
 
-        if (generalUtils.isTouchDevice() && !this.isPointerDownFromSubController && !hasActiualMove) {
+        if (generalUtils.isTouchDevice() && !this.isPointerDownFromSubController && !hasActualMove) {
           /**
            * This function is used for mobile-control, as one of the sub-controller is active
            * tap at the primary-controller should set the sub-controller to non-active

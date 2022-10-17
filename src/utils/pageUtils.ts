@@ -107,6 +107,27 @@ class PageUtils {
       },
       name: '',
       layers: [
+        layerFactary.newFrame({
+          styles: {
+            width: 800.81,
+            height: 1197.82
+          },
+          clips: [
+            {
+              clipPath: 'M800.79,397.01c-1.83,-219.57 -180.38,-397.01 -400.39,-397.01c-220.01,0 -398.55,177.44 -400.38,397.01h-0.02v800.81h800.81v-800.81z',
+              styles: {
+                x: 0,
+                y: 0,
+                width: 800.81,
+                height: 1197.82,
+                imgX: 0,
+                imgY: 0,
+                imgHeight: 1197.82,
+                imgWidth: 800.81
+              }
+            }
+          ]
+        } as any)
       ],
       documentColors: [],
       designId: '',

@@ -115,7 +115,7 @@ class LayerFactary {
         const imgConfig = {
           isFrame: true,
           clipPath: img.clipPath,
-          styles: img.styles,
+          styles: { ...img.styles },
           srcObj: img.srcObj ?? {
             type: 'frame',
             assetId: '',
