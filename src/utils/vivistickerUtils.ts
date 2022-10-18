@@ -290,11 +290,11 @@ class ViviStickerUtils {
     const executor = () => {
       Vue.nextTick(() => {
         this.preCopyEditor()
-        Vue.nextTick(() => {
+        setTimeout(() => {
           this.sendCopyEditor().then(() => {
             this.postCopyEditor()
           })
-        })
+        }, 500) // wait for soft keyboard to close
       })
     }
     if (store.getters['text/getIsFontLoading']) {
