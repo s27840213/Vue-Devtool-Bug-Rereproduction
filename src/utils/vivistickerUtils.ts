@@ -180,7 +180,6 @@ class ViviStickerUtils {
       isAutoResizeNeeded: true
     })])
     initiator().then((jsonData?: any) => {
-      console.log(jsonData)
       if (jsonData) {
         stepsUtils.reset()
         store.commit('vivisticker/SET_editorType', editorType)
