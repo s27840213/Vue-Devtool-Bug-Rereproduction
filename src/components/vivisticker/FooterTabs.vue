@@ -486,7 +486,7 @@ export default Vue.extend({
   overflow: hidden;
   background-color: setColor(black-1);
   &__container {
-    height: 53px;
+    height: 57px;
     overflow: scroll;
     display: grid;
     grid-template-rows: auto;
