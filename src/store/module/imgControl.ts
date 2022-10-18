@@ -6,18 +6,21 @@ import layerUtils from '@/utils/layerUtils'
 import groupUtils from '@/utils/groupUtils'
 import { ICalculatedGroupStyle } from '@/interfaces/group'
 import frameUtils from '@/utils/frameUtils'
+import stepsUtils from '@/utils/stepsUtils'
 
 const SET_CONFIG = 'SET_CONFIG' as const
 const UPDATE_CONFIG = 'UPDATE_CONFIG' as const
 
 interface IImgControlState {
-  image?: IImage,
+  image: IImage | undefined,
+  image_ori: IImage | undefined,
   primaryLayer?: IFrame | IGroup | IImage,
   layerInfo: ILayerInfo
 }
 
 const state: IImgControlState = {
   image: undefined,
+  image_ori: undefined,
   primaryLayer: undefined,
   layerInfo: {
     pageIndex: -1,
@@ -33,7 +36,14 @@ const getters: GetterTree<IImgControlState, IEditorState> = {
 }
 
 const mutations: MutationTree<IImgControlState> = {
-  [SET_CONFIG] (state, layerInfo?: ILayerInfo) {
+  [SET_CONFIG] (state, layerInfo?: ILayerInfo | 'reset') {
+    if (layerInfo === 'reset') {
+      state.image = undefined
+      state.image_ori = undefined
+      state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
+      return
+    }
+
     const { pageIndex = -1, layerIndex = -1, subLayerIdx = -1 } = layerInfo || {}
     if (pageIndex !== -1 && layerIndex !== -1) {
       state.primaryLayer = (layerUtils.getLayer(pageIndex, layerIndex) || undefined) as IFrame | IGroup | IImage | undefined
@@ -43,10 +53,12 @@ const mutations: MutationTree<IImgControlState> = {
         return
       }
     } else {
-      if (state.image) {
+      if (state.image && checkHasActualUpdate()) {
         handleImgLayerUpdate(state.layerInfo, state.image, state.primaryLayer)
+        stepsUtils.record()
       }
       state.image = undefined
+      state.image_ori = undefined
       state.layerInfo = { pageIndex: -1, layerIndex: -1, subLayerIdx: -1 }
       return
     }
@@ -63,7 +75,7 @@ const mutations: MutationTree<IImgControlState> = {
     }
 
     state.image = layerMapping(state.primaryLayer, generalUtils.deepCopy(layer)) as IImage
-    // state.image.imgControl = false
+    state.image_ori = generalUtils.deepCopy(state.image)
     state.layerInfo = { pageIndex, layerIndex, subLayerIdx }
   },
   [UPDATE_CONFIG] (state, styles: Partial<IImageStyle>) {
@@ -130,6 +142,17 @@ const layerMapping = function (primaryLayer: IGroup | IFrame | IImage, image: II
   return image
 }
 
+const checkHasActualUpdate = function (): boolean {
+  const { image, image_ori } = state
+  if (image && image_ori) {
+    return image.styles.imgX !== image_ori.styles.imgX ||
+      image.styles.imgY !== image_ori.styles.imgY ||
+      image.styles.imgWidth !== image_ori.styles.imgWidth ||
+      image.styles.imgHeight !== image_ori.styles.imgHeight
+  }
+  return false
+}
+
 const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage, _primaryLayer?: IGroup | IFrame | IImage) {
   const { layerIndex, pageIndex, subLayerIdx } = layerInfo
   const primaryLayer = _primaryLayer ?? layerUtils.getLayer(pageIndex, layerIndex)
@@ -168,7 +191,6 @@ const handleImgLayerUpdate = function (layerInfo: ILayerInfo, image: IImage, _pr
     }
     case LayerType.group: {
       const subLayer = groupUtils.mapLayersToTmp([image], primaryLayer.styles as ICalculatedGroupStyle)[0] as IImage
-      // const { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
       let { styles: { imgX, imgY, imgWidth, imgHeight } } = subLayer
       imgX /= primaryLayer.styles.scale
       imgY /= primaryLayer.styles.scale
