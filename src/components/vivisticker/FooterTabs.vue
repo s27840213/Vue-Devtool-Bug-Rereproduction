@@ -118,7 +118,7 @@ export default Vue.extend({
           }
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
-        { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
+        { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
