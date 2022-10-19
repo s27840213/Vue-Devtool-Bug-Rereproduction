@@ -100,7 +100,6 @@ class ViviStickerUtils {
     this.sendToIOS('SCREENSHOT', { params: query, action })
     if (this.isStandaloneMode) {
       const url = `${window.location.origin}/screenshot/?${query}`
-      console.log(url)
       window.open(url, '_blank')
     }
   }
@@ -185,7 +184,6 @@ class ViviStickerUtils {
       isAutoResizeNeeded: true
     })])
     initiator().then((jsonData?: any) => {
-      console.log(jsonData)
       if (jsonData) {
         stepsUtils.reset()
         store.commit('vivisticker/SET_editorType', editorType)
