@@ -76,6 +76,20 @@
     div(v-if="isControllerShown && !isControlling && !isLocked() && !isImgControl"
         class="nu-controller__ctrl-points"
         :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
+      div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaters) : []"
+          class="control-point__corner-rotate scaler"
+          :key="`corner-rotate-${index}`"
+          :style="Object.assign(cornerRotater.styles, cursorStyles(index, getLayerRotate(), 'cornerRotaters'))"
+          @pointerdown.stop="rotateStart($event, index)"
+          @touchstart="disableTouchEvent")
+      div(v-if="!isTouchDevice()" v-for="(cornerRotater, index) in (!isLine()) ? getCornerRotaters(cornerRotaterbaffles) : []"
+          class="control-point__corner-rotate baffle"
+          :key="`corner-rotate-baffle-${index}`"
+          :style="Object.assign(cornerRotater.styles, { transform: '', borderRadius: '' })"
+          @pointerdown="moveStart")
+    div(v-if="isControllerShown && !isControlling && !isLocked() && !isImgControl"
+          class="nu-controller__ctrl-points"
+          :style="Object.assign(contentStyles('control-point'), {'pointer-events': 'none', outline: 'none'})")
         div(v-for="(end, index) in isLine() ? controlPoints.lineEnds : []"
             class="control-point"
             :key="index"
@@ -83,12 +97,6 @@
             :style="Object.assign(end, {'cursor': 'pointer'})"
             @pointerdown.stop="lineEndMoveStart"
             @touchstart="disableTouchEvent")
-        //- div(v-for="(cornerRotater, index) in (!isLine()) ? cornerRotaters(controlPoints.cornerRotaters) : []"
-        //-     class="control-point__corner-rotate scaler"
-        //-     :key="`corner-rotate-${index}`"
-        //-     :style="Object.assign(cornerRotater.styles, cursorStyles(cornerRotater.cursor, getLayerRotate()))"
-        //-     @pointerdown.stop="rotateStart"
-        //-     @touchstart="disableTouchEvent")
         div(v-for="(scaler, index) in (!isLine()) ? scaler(controlPoints.scalers) : []"
             class="control-point scaler"
             :key="index"
@@ -196,6 +204,8 @@ export default Vue.extend({
   },
   created() {
     LayerUtils.updateLayerProps(this.pageIndex, this.layerIndex, { contentEditable: false, editing: false })
+    this.cornerRotaters = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
+    this.cornerRotaterbaffles = generalUtils.deepCopy(this.controlPoints.cornerRotaters)
   },
   data() {
     return {
@@ -232,6 +242,9 @@ export default Vue.extend({
       isDoingGestureAction: false,
       dblTabsFlag: false,
       isPointerDownFromSubController: false,
+      initCornerRotate: -1,
+      cornerRotaters: undefined,
+      cornerRotaterbaffles: undefined,
       eventTarget: null as unknown as HTMLElement
     }
   },
@@ -467,7 +480,7 @@ export default Vue.extend({
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
       return (tooShort || tooNarrow) ? scalers.slice(2, 3) : scalers
     },
-    cornerRotaters(scalers: any) {
+    getCornerRotaters(scalers: any) {
       const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
       const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
       const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
@@ -1525,8 +1538,33 @@ export default Vue.extend({
       window.removeEventListener('keydown', this.handleScaleOffset)
       this.$emit('setFocus')
     },
-    rotateStart(event: MouseEvent | PointerEvent) {
-      this.setCursorStyle('move')
+    rotateStart(event: MouseEvent | PointerEvent, index = -1) {
+      this.setCursorStyle((event.target as HTMLElement).style.cursor || 'move')
+      // console.warn(index)
+      // let rotateAngle = this.getLayerRotate()
+      // if (rotateAngle > 180) {
+      //   rotateAngle = rotateAngle - 360
+      // }
+      // let cursorIndex = index * 2
+      // if (rotateAngle >= 22.5) {
+      //   cursorIndex++
+      //   cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+      // } else if (rotateAngle <= -22.5) {
+      //   cursorIndex--
+      //   cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+      //   if (cursorIndex < 0) {
+      //     cursorIndex = 8 + cursorIndex
+      //   }
+      // }
+      // console.log(cursorIndex)
+      // this.initCornerRotate = cursorIndex
+      const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+      const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+      const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+      if (tooShort || tooNarrow) {
+        index = 2
+      }
+      this.initCornerRotate = index * 2
       this.isRotating = true
       this.isControlling = true
 
@@ -1566,23 +1604,47 @@ export default Vue.extend({
 
       let angle = Math.round(Math.acos(ADotB / (lineA * lineB)) * 180 / Math.PI)
       if (angle) {
-        if (vectA.y * vectB.x - vectA.x * vectB.y > 0) {
+        const ACrosB = vectB.y * vectA.x - vectB.x * vectA.y
+        if (ACrosB < 0) {
           angle *= -1
         }
         angle += this.initialRotate % 360
         angle = this.snapUtils.calAngleSnap((angle + 360) % 360, event.shiftKey)
 
+        let rotateAngle = angle
+        if (rotateAngle > 180) {
+          rotateAngle = rotateAngle - 360
+        }
+
         const mousePos = MouseUtils.getMouseRelPoint(event, this.$refs.self as HTMLElement)
         const mouseActualPos = mathUtils.getActualMoveOffset(mousePos.x, mousePos.y)
         this.hintTranslation = { x: mouseActualPos.offsetX - 35 * 100 / this.scaleRatio, y: mouseActualPos.offsetY + 35 * 100 / this.scaleRatio }
-        this.hintAngle = angle
-
+        this.hintAngle = rotateAngle
         ControlUtils.updateLayerRotate(this.pageIndex, this.layerIndex, angle)
+
+        if (this.initCornerRotate !== -1) {
+          let cursorIndex = this.initCornerRotate
+          if (rotateAngle >= 22.5) {
+            cursorIndex++
+            cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+            if (cursorIndex > 7) {
+              cursorIndex = cursorIndex - 8
+            }
+          } else if (rotateAngle <= -22.5) {
+            cursorIndex--
+            cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+            if (cursorIndex < 0) {
+              cursorIndex = 8 + cursorIndex
+            }
+          }
+          this.setCursorStyle(ControlUtils.getCornerRataterMap[cursorIndex])
+        }
       }
     },
     rotateEnd() {
       this.isRotating = false
       this.isControlling = false
+      this.initCornerRotate = -1
       StepsUtils.record()
       this.setCursorStyle('')
       eventUtils.removePointerEvent('pointermove', this.rotating)
@@ -1657,19 +1719,47 @@ export default Vue.extend({
       eventUtils.removePointerEvent('pointerup', this.lineRotateEnd)
       this.$emit('setFocus')
     },
-    cursorStyles(index: number | string, rotateAngle: number) {
+    cursorStyles(index: number | string, rotateAngle: number, type = 'cursors') {
       if (this.isControlling) return { cursor: 'initial' }
       if (typeof index === 'number') {
-        switch (this.getLayerType()) {
-          case 'text':
-            if (this.config.styles.writingMode.includes('vertical')) index += 4
-            break
-          case 'shape':
-            if (this.config.scaleType === 3) index += 4
+        if (type === 'cornerRotaters') {
+          const LIMIT = (this.getLayerType() === 'text') ? RESIZER_SHOWN_MIN : RESIZER_SHOWN_MIN / 2
+          const tooShort = this.getLayerHeight() * this.scaleRatio < LIMIT
+          const tooNarrow = this.getLayerWidth() * this.scaleRatio < LIMIT
+          if (tooShort || tooNarrow) {
+            index = 2
+          }
+          index = index * 2
+          if (rotateAngle > 180) {
+            rotateAngle = rotateAngle - 360
+          }
+          let cursorIndex = index
+          if (rotateAngle >= 22.5) {
+            cursorIndex++
+            cursorIndex += Math.floor((rotateAngle - 22.5) / 45)
+            if (cursorIndex > 7) {
+              cursorIndex = cursorIndex - 8
+            }
+          } else if (rotateAngle <= -22.5) {
+            cursorIndex--
+            cursorIndex -= Math.floor((-rotateAngle - 22.5) / 45)
+            if (cursorIndex < 0) {
+              cursorIndex = 8 + cursorIndex
+            }
+          }
+          return { cursor: ControlUtils.getCornerRataterMap[cursorIndex] }
+        } else {
+          switch (this.getLayerType()) {
+            case 'text':
+              if (this.config.styles.writingMode.includes('vertical')) index += 4
+              break
+            case 'shape':
+              if (this.config.scaleType === 3) index += 4
+          }
+          const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
+            : (index + Math.ceil(rotateAngle / 45) + 8) % 8
+          return { cursor: this.controlPoints.cursors[cursorIndex] }
         }
-        const cursorIndex = rotateAngle >= 0 ? (index + Math.floor(rotateAngle / 45)) % 8
-          : (index + Math.ceil(rotateAngle / 45) + 8) % 8
-        return { cursor: this.controlPoints.cursors[cursorIndex] }
       } else {
         return { cursor: index }
       }
@@ -1728,22 +1818,18 @@ export default Vue.extend({
               const isTransparent = imageShadowUtils.isTransparentBg(replacedImg)
               const layerInfo = { pageIndex: this.pageIndex, layerIndex: this.layerIndex }
               imageShadowUtils.updateEffectProps(layerInfo, { isTransparent })
-              // if (isTransparent) {
-              //   imageShadowUtils.updateShadowSrc(layerInfo, { type: '', userId: '', assetId: '' })
-              //   imageShadowUtils.updateEffectState(layerInfo, ShadowEffectType.none)
-              // }
             }
             const size = ['unsplash', 'pexels'].includes(this.config.srcObj.type) ? 150 : 'prev'
             const src = ImageUtils.getSrc(this.config, size)
             replacedImg.src = src + `${src.includes('?') ? '&' : '?'}ver=${generalUtils.generateRandomString(6)}`
-            return
+            // return
           } else {
             eventUtils.emit(ImageEvent.redrawCanvasShadow + this.config.id)
           }
         }
-        GroupUtils.deselect()
-        this.setLastSelectedLayerIndex(this.layerIndex)
-        GroupUtils.select(this.pageIndex, [this.layerIndex])
+        // GroupUtils.deselect()
+        // this.setLastSelectedLayerIndex(this.layerIndex)
+        // GroupUtils.select(this.pageIndex, [this.layerIndex])
       } else if (dt && dt.files.length !== 0) {
         const files = dt.files
         this.setCurrSidebarPanel(SidebarPanelType.file)
@@ -2227,6 +2313,10 @@ export default Vue.extend({
     pointer-events: auto;
     position: absolute;
   }
+}
+
+.baffle {
+  cursor: default;
 }
 
 .text {

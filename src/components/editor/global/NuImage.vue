@@ -217,9 +217,9 @@ export default Vue.extend({
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     },
-    parentLayerDimension(newVal, oldVal) {
-      this.handleDimensionUpdate(newVal, oldVal)
-    },
+    // parentLayerDimension(newVal, oldVal) {
+    //   this.handleDimensionUpdate(newVal, oldVal)
+    // },
     'config.srcObj': {
       handler: function () {
         this.shadowBuff.canvasShadowImg = undefined
@@ -227,9 +227,9 @@ export default Vue.extend({
           return
         }
         this.previewAsLoading()
-        if (typeof this.subLayerIndex !== 'undefined') {
-          this.handleDimensionUpdate(this.parentLayerDimension, 0)
-        }
+        // if (typeof this.subLayerIndex !== 'undefined') {
+        //   this.handleDimensionUpdate(this.parentLayerDimension, 0)
+        // }
       },
       deep: true
     },
@@ -359,7 +359,14 @@ export default Vue.extend({
     getImgDimension(): number {
       const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
+      let renderW = imgWidth
+      let renderH = imgHeight
+      if (!this.forRender && (this.config.parentLayerStyles || this.primaryLayer)) {
+        const { scale } = this.config.parentLayerStyles || this.primaryLayer.styles
+        renderW *= scale
+        renderH *= scale
+      }
+      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio / 100))
     },
     parentLayerDimension(): number {
       const { width, height } = this.config.parentLayerStyles || {}
@@ -468,9 +475,10 @@ export default Vue.extend({
         })
       }
 
-      const scale = (this.config.parentLayerStyles?.scale ?? 1)
-      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      // const scale = (this.config.parentLayerStyles?.scale ?? 1)
+      // const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      const currSize = this.getImgDimension
       const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       return new Promise<void>((resolve, reject) => {
         ImageUtils.imgLoadHandler(src, () => {
@@ -496,8 +504,9 @@ export default Vue.extend({
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
-      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      // const scale = this.isInFrame() ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
+      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      const currSize = this.getImgDimension
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
@@ -739,7 +748,6 @@ export default Vue.extend({
         layerInfo: layerInfo(),
         cb: () => {
           this.clearShadowSrc()
-          // console.log('finish', currentEffect)
         }
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)

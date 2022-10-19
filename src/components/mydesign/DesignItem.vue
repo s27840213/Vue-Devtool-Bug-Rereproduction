@@ -244,12 +244,13 @@ export default Vue.extend({
     },
     handleMouseEnter() {
       if (this.isTempDesign) return
+      const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
+      if (!thumbnailElement) return
       this.isMouseOver = true
       if (this.config.pageNum === 1) return
       this.waitTimer = setTimeout(() => {
         if (this.isMouseOver) {
           this.showCarousel = true
-          const thumbnailElement = this.$refs.thumbnail as HTMLImageElement
           this.renderedWidth = thumbnailElement.width
           this.renderedHeight = thumbnailElement.height
           if (this.config.polling) {
@@ -338,6 +339,7 @@ export default Vue.extend({
         this.config.thumbnail = this.previewPlaceholder
         this.pollingStep()
       } else {
+        if (this.isTempDesign) return
         this.pageImages = designUtils.getDesignPreviews(this.config.pageNum, this.config.id, 2, this.config.ver, this.config.signedUrl)
         imageUtils.getImageSize(this.configPreview, this.imgWidth, this.imgHeight, false).then((size) => {
           const { width, height, exists } = size
