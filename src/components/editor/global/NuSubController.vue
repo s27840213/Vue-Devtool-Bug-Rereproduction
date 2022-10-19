@@ -455,6 +455,18 @@ export default Vue.extend({
         TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
       })
     },
+    waitFontLoadingAndResize() {
+      const pageId = LayerUtils.getPage(this.pageIndex).id
+      const layerId = this.primaryLayer.id
+      const subLayerId = this.config.id
+      TextUtils.untilFontLoaded(this.config.paragraphs).then(() => {
+        setTimeout(() => {
+          const { pageIndex, layerIndex, subLayerIdx } = LayerUtils.getLayerInfoById(pageId, layerId, subLayerId)
+          if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')
+          TextUtils.updateTextLayerSizeByShape(pageIndex, layerIndex, subLayerIdx)
+        }, 100)
+      })
+    },
     checkIfCurve(config: IText): boolean {
       const { textShape } = config.styles
       return textShape && textShape.name === 'curve'
@@ -467,6 +479,8 @@ export default Vue.extend({
       this.calcSize(this.config)
       if (payload.toRecord) {
         this.waitFontLoadingAndRecord()
+      } else {
+        this.waitFontLoadingAndResize()
       }
       if (payload.isSetContentRequired && !tiptapUtils.editor?.view?.composing) {
         // if composing starts from empty line, isSetContentRequired will be true in the first typing.
