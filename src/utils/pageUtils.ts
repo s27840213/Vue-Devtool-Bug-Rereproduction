@@ -423,7 +423,12 @@ class PageUtils {
   }
 
   fitPage(scrollToTop = false) {
+    // In these mode, don't fitPage.
     if (editorUtils.mobileAllPageMode || this.isSwitchingToEditor) {
+      return
+    }
+    // If user zoom in page, don't fitPage.
+    if (pageUtils.mobileMinScaleRatio < pageUtils.scaleRatio) {
       return
     }
 

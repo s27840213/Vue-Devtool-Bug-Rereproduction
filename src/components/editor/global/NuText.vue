@@ -95,7 +95,7 @@ export default Vue.extend({
 
     // this.resizeObserver = new ResizeObserver(this.resizeCallback)
     // this.observeAllSpans()
-    this.drawSvgBG() // Check if needed
+    this.drawSvgBG()
   },
   computed: {
     ...mapGetters({
@@ -155,9 +155,6 @@ export default Vue.extend({
       deep: true,
       handler() {
         this.drawSvgBG()
-        textUtils.untilFontLoaded(this.config.paragraphs).then(() => {
-          this.drawSvgBG() // Check if needs until
-        })
       }
     }
   },

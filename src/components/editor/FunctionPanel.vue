@@ -24,7 +24,7 @@
         :squared="true"
         class="btn-file rounded full-height"
         @click.native="openFilePopup")
-    div(v-if="!isShowPagePreview" :class="{'p-20': true, 'dim-background': showMore}")
+    div(v-if="!isShowPagePreview && !isMoving" :class="{'p-20': true, 'dim-background': showMore}")
       panel-bg-remove(v-if="showBgRemove")
       panel-fonts(v-if="showFont" @closeFontsPanel="closeFontsPanel")
       panel-general(v-if="showGeneral")
@@ -81,6 +81,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState('fontTag', ['tags', 'showMore']),
+    ...mapState(['isMoving']),
     ...mapGetters({
       currSidebarPanel: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
