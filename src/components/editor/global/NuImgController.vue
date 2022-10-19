@@ -87,7 +87,7 @@ export default Vue.extend({
         ControlUtils.updateLayerProps(this.pageIndex, i, { imgControl: false })
       }
     }
-    this.setImgConfig(undefined)
+    // this.setImgConfig(undefined)
   },
   computed: {
     ...mapGetters({
@@ -321,10 +321,6 @@ export default Vue.extend({
       }
     },
     moveEnd(e: MouseEvent) {
-      const posDiff = {
-        x: Math.abs(e.clientX - this.initialPos.x),
-        y: Math.abs(e.clientY - this.initialPos.y)
-      }
       this.setCursorStyle('default')
       eventUtils.removePointerEvent('pointerup', this.moveEnd)
       eventUtils.removePointerEvent('pointermove', this.moving)
@@ -454,10 +450,6 @@ export default Vue.extend({
       })
     },
     scaleEnd(e: MouseEvent) {
-      const posDiff = {
-        x: Math.abs(e.clientX - this.initialPos.x),
-        y: Math.abs(e.clientY - this.initialPos.y)
-      }
       this.isControlling = false
       this.setCursorStyle('default')
 
