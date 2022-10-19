@@ -16,7 +16,7 @@ import TextShapeUtils from '@/utils/textShapeUtils'
 import { IGroup, ISpan } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import LayerUtils from '@/utils/layerUtils'
-import TextUtils from '@/utils/textUtils'
+import textUtils from '@/utils/textUtils'
 import textEffectUtils from '@/utils/textEffectUtils'
 
 export default Vue.extend({
@@ -41,8 +41,8 @@ export default Vue.extend({
   },
   created () {
     this.computeDimensions(this.spans())
-    // TextUtils.loadAllFonts(this.config, 1)
-    TextUtils.loadAllFonts(this.config)
+    // textUtils.loadAllFonts(this.config, 1)
+    textUtils.loadAllFonts(this.config)
   },
   destroyed() {
     this.isDestroyed = true
@@ -50,24 +50,29 @@ export default Vue.extend({
     this.resizeObserver = undefined
   },
   mounted() {
-    this.resizeObserver = new ResizeObserver(() => {
-      if (this.isDestroyed) return
+    // this.resizeObserver = new ResizeObserver(() => {
+    //   if (this.isDestroyed) return
 
-      // console.log('resize')
+    //   // console.log('resize')
 
-      if (typeof this.subLayerIndex === 'undefined') {
-        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
-      } else {
-        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
-        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
-        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
-        TextUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
-        TextUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
-      }
+    //   if (typeof this.subLayerIndex === 'undefined') {
+    //     LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+    //   } else {
+    //     const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+    //     if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+    //     LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+    //     textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+    //     textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+    //   }
 
-      this.computeDimensions(this.spans())
+    //   this.computeDimensions(this.spans())
+    // })
+    // this.observeAllSpans()
+    textUtils.untilFontLoaded(this.config.paragraphs, true).then(() => {
+      setTimeout(() => {
+        this.resizeCallback()
+      }, 100) // for the delay between font loading and dom rendering
     })
-    this.observeAllSpans()
   },
   computed: {
     ...mapState('text', ['fontStore']),
@@ -83,12 +88,11 @@ export default Vue.extend({
   },
   watch: {
     'config.paragraphs': {
-      handler() {
+      handler(newVal) {
         this.computeDimensions(this.spans())
-        if (this.resizeObserver) {
-          this.resizeObserver.disconnect()
-          this.observeAllSpans()
-        }
+        textUtils.untilFontLoaded(newVal).then(() => {
+          this.computeDimensions(this.spans())
+        })
       },
       deep: true
     }
@@ -169,6 +173,23 @@ export default Vue.extend({
       this.textWidth = textWidth
       this.textHeight = textHeight
       this.minHeight = minHeight
+    },
+    resizeCallback() {
+      if (this.isDestroyed) return
+
+      // console.log('resize')
+
+      if (typeof this.subLayerIndex === 'undefined') {
+        LayerUtils.updateLayerStyles(this.pageIndex, this.layerIndex, TextShapeUtils.getCurveTextProps(this.config))
+      } else {
+        const group = LayerUtils.getLayer(this.pageIndex, this.layerIndex) as IGroup
+        if (group.type !== 'group' || group.layers[this.subLayerIndex].type !== 'text') return
+        LayerUtils.updateSubLayerStyles(this.pageIndex, this.layerIndex, this.subLayerIndex, TextShapeUtils.getCurveTextProps(this.config))
+        textUtils.updateGroupLayerSize(this.pageIndex, this.layerIndex)
+        textUtils.fixGroupCoordinates(this.pageIndex, this.layerIndex)
+      }
+
+      this.computeDimensions(this.spans())
     }
   }
 })
