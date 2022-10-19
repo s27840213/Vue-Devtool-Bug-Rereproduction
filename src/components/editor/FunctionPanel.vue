@@ -99,11 +99,11 @@ export default Vue.extend({
       isFontLoading: 'text/getIsFontLoading'
     }),
     functionPanelStyles(): { [index: string]: string } {
-      return this.isShowPagePreview ? {
-        'pointer-events': 'none'
-      } : {
-        'pointer-events': 'auto'
+      const result = {
+        'overflow-y': this.showFont ? 'hidden' : 'auto',
+        'pointer-events': this.isShowPagePreview ? 'none' : 'auto'
       }
+      return result
     },
     isHandleShadow(): boolean {
       return this.isProcessImgShadow || this.isUploadImgShadow
@@ -306,7 +306,7 @@ export default Vue.extend({
   box-sizing: border-box;
   z-index: setZindex("function-panel");
   box-shadow: 1px 0 4px setColor(blue-1, 0.1);
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   &__topbar {
     height: 60px;

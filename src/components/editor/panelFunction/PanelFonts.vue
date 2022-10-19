@@ -341,7 +341,7 @@ export default Vue.extend({
   }
   &__close {
     position: absolute;
-    right: 5px;
+    right: 25px;
   }
   &__items {
     display: grid;
