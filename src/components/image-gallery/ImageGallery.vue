@@ -4,7 +4,6 @@
       :items="rows")
       template(v-slot="{ item }")
         observer-sentinel(v-if="item.sentinel"
-          target=".image-gallery__content"
           @callback="handleLoadMore(item)")
         div(class="flex flex-between")
           gallery-photo(v-for="photo in item.list"
@@ -24,16 +23,17 @@ import ObserverSentinel from '@/components/ObserverSentinel.vue'
 import { IPhotoItem } from '@/interfaces/api'
 import generalUtils from '@/utils/generalUtils'
 import { mapState } from 'vuex'
+import { GalleryImage } from '@/interfaces/gallery'
 
 export default Vue.extend({
   props: {
     vendor: String,
     images: {
-      type: Array as PropType<Array<IPhotoItem[]>>,
+      type: Array as PropType<GalleryImage[]>,
       default: () => []
     },
     myfile: {
-      type: Array as PropType<Array<IPhotoItem[]>>,
+      type: Array as PropType<IPhotoItem[]>,
       default: () => []
     },
     inFilePanel: {
@@ -59,7 +59,6 @@ export default Vue.extend({
     return {
       nextIndex: 0,
       rows: [] as any[],
-      prevLastRow: [],
       galleryUtils: new GalleryUtils(generalUtils.isTouchDevice() ? window.innerWidth - 34 : 300, 95, 5)
     }
   },
@@ -74,28 +73,18 @@ export default Vue.extend({
     myfile() {
       this.myfileUpdate()
     },
-    images(newImages: Array<IPhotoItem[]>) { // For panel unsplash and pexel
-      // Slice new images, arrange it and append to the end.
-      const { nextIndex, prevLastRow } = this
-      const latestImages = newImages.slice(nextIndex)
+    images(newImages: GalleryImage[]) { // For panel unsplash and pexel
       this.nextIndex = newImages.length
-      const rows = this.galleryUtils
-        .generate(prevLastRow.concat(latestImages as any))
+      this.rows = this.galleryUtils
+        .generate(newImages)
         .map((row, idx) => ({
           list: row,
-          id: `row_${nextIndex}_${idx}`,
+          id: `row_${idx}`,
           sentinel: false,
           size: row[0].preview.height + this.margin
         }))
-      if (rows.length > 1) {
-        const lastRow = rows.splice(-1)[0]
-        this.prevLastRow = (lastRow ? lastRow.list : []) as any
-      } else {
-        this.prevLastRow = []
-      }
-      if (rows.length) {
-        rows[0].sentinel = true
-        this.rows = this.rows.concat(rows as any)
+      if (this.rows.length) {
+        this.rows[Math.max(this.rows.length - 10, 0)].sentinel = true
       }
     }
   },

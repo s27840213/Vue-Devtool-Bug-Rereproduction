@@ -8,21 +8,12 @@
       vivisticker="dark"
       :color="{close: 'black-5', search: 'black-5'}"
       @search="handleSearch")
-    div(v-if="isAdmin" class="panel-objects-2html")
-      input(type="text" placeholder="項目網址" v-model="panelParams")
-      btn(@click.native="downloadAll") Download all
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    category-list(ref="list"
-      :list="list"
-      @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
+    category-list(v-for="item in categoryListArray"
+                  v-show="item.show" :ref="item.key" :key="item.key"
+                  :list="item.content" @loadMore="handleLoadMore")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
-          v-if="!keyword"
           :list="list"
           :title="title"
           @action="handleCategorySearch")
@@ -35,6 +26,11 @@
             class="panel-objects__item"
             :key="item.id"
             :item="item")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
 </template>
 
 <script lang="ts">
@@ -44,7 +40,7 @@ import SearchBar from '@/components/SearchBar.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryObjectItem from '@/components/category/CategoryObjectItem.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
@@ -58,23 +54,24 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0,
-      // For object2wphtml
-      panelParams: ''
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      }
     }
   },
   computed: {
     ...mapGetters({
-      isAdmin: 'user/isAdmin',
       isTabInCategory: 'vivisticker/getIsInCategory',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently'
     }),
-    ...mapState('objects', [
-      'categories',
-      'content',
-      'pending',
-      'keyword'
-    ]),
+    ...mapState('objects', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      pending: 'pending',
+      keyword: 'keyword'
+    }),
     isInCategory(): boolean {
       return this.isTabInCategory('object')
     },
@@ -84,9 +81,8 @@ export default Vue.extend({
     keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
-    listCategories(): any[] {
-      const { keyword, categories } = this
-      if (keyword) { return [] }
+    listCategories(): ICategoryItem[] {
+      const { categories } = this
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
@@ -97,7 +93,7 @@ export default Vue.extend({
           title: category.title
         }))
     },
-    listRecently(): any[] {
+    listRecently(): ICategoryItem[] {
       const { categories } = this
       const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
       const result = new Array(Math.ceil(list.length / 3))
@@ -114,11 +110,112 @@ export default Vue.extend({
         })
       return result
     },
-    listResult(): any[] {
-      const { keyword } = this
-      if (!keyword) { return [] }
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 3))
+    listResult(): ICategoryItem[] { // Don't show all result in PanelObject
+      // return this.processListResult(this.rawContent.list)
+      return []
+    },
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    mainContent(): ICategoryItem[] {
+      if (this.showAllRecently) {
+        return this.listRecently
+      }
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
+    },
+    emptyResultMessage(): string {
+      const { keyword, pending } = this
+      if (pending || !keyword || this.searchResult.length > 0 || this.showAllRecently) return ''
+      return `${i18n.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.tc('NN0003', 1)
+        })}`
+    }
+  },
+  mounted() {
+    generalUtils.panelInit('object',
+      this.handleSearch,
+      this.handleCategorySearch,
+      async () => {
+        await this.getRecAndCate('objects')
+      }
+    )
+  },
+  activated() {
+    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
+    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+  },
+  deactivated() {
+    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+  },
+  watch: {
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+        })
+      }
+    }
+  },
+  methods: {
+    ...mapActions('objects', [
+      'getContent',
+      'getTagContent',
+      'getRecently',
+      'getRecAndCate',
+      'getMoreContent',
+      'resetSearch'
+    ]),
+    handleSearch(keyword: string) {
+      this.resetSearch()
+      if (keyword) {
+        this.getTagContent({ keyword })
+      }
+    },
+    handleCategorySearch(keyword: string, locale = '') {
+      this.resetSearch()
+      if (keyword) {
+        if (keyword === `${this.$t('NN0024')}`) {
+          vivistickerUtils.setShowAllRecently('object', true)
+        } else {
+          this.getContent({ keyword, locale })
+        }
+        vivistickerUtils.setIsInCategory('object', true)
+      } else {
+        vivistickerUtils.setShowAllRecently('object', false)
+      }
+    },
+    handleLoadMore() {
+      this.getMoreContent()
+    },
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
+    },
+    processListResult(list = [] as IListServiceContentDataItem[]): ICategoryItem[] {
+      return new Array(Math.ceil(list.length / 3))
         .fill('')
         .map((_, idx) => {
           const rowItems = list.slice(idx * 3, idx * 3 + 3)
@@ -129,98 +226,6 @@ export default Vue.extend({
             size: 90
           }
         })
-      if (result.length) {
-        Object.assign(result[result.length - 1], { sentinel: true })
-      }
-      return result
-    },
-    list(): any[] {
-      if (this.showAllRecently) {
-        return this.listRecently
-      }
-      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
-      if (this.listResult.length === 0 && list.length !== 0) {
-        list[list.length - 1].sentinel = true
-      }
-      return list
-    },
-    emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length && !this.showAllRecently ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0003', 1) })}` : ''
-    }
-  },
-  mounted() {
-    (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
-    })
-
-    generalUtils.panelInit('object',
-      this.handleSearch,
-      this.handleCategorySearch,
-      async () => {
-        await this.getRecAndCate('objects')
-      }
-    )
-  },
-  activated() {
-    const el = (this.$refs.list as Vue).$el
-    el.scrollTop = this.scrollTop
-    el.addEventListener('scroll', this.handleScrollTop)
-  },
-  deactivated() {
-    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
-  },
-  destroyed() {
-    this.resetContent()
-  },
-  methods: {
-    ...mapActions('objects', [
-      'resetContent',
-      'getContent',
-      'getTagContent',
-      'getRecently',
-      'getRecAndCate',
-      'getMoreContent'
-    ]),
-    handleSearch(keyword: string) {
-      this.resetContent()
-      if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&search=${keyword.replace(/&/g, '%26')}&type=new-design-size&width=1080&height=1080&themeId=1`
-        this.getTagContent({ keyword })
-      } else {
-        this.getRecAndCate('objects')
-      }
-    },
-    handleCategorySearch(keyword: string, locale = '') {
-      this.resetContent()
-      if (keyword) {
-        this.panelParams = `http://vivipic.com/editor?panel=object&category=${keyword.replace(/&/g, '%26')}&category_locale=${i18n.locale}&type=new-design-size&width=1080&height=1080&themeId=1`
-        if (keyword === `${this.$t('NN0024')}`) {
-          this.getRecently({ key: 'objects', keyword })
-          vivistickerUtils.setShowAllRecently('object', true)
-        } else {
-          this.getContent({ keyword, locale })
-        }
-        vivistickerUtils.setIsInCategory('object', true)
-      } else {
-        vivistickerUtils.setShowAllRecently('object', false)
-        this.getRecAndCate('objects')
-      }
-    },
-    handleLoadMore() {
-      this.getMoreContent()
-    },
-    handleScrollTop(event: Event) {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
-    },
-    downloadAll() {
-      generalUtils.copyText(this.panelParams)
-      this.$notify({ group: 'copy', text: '已複製網址到剪貼簿' })
-      const links = this.list.map((it) => {
-        return it.list.map((it: Record<string, string>) => {
-          return `https://template.vivipic.com/svg/${it.id}/prev?ver=${it.ver}`
-        }).join('\n')
-      }).join('\n')
-      generalUtils.downloadTextFile(`${this.keywordLabel}.txt`, links)
     }
   }
 })

@@ -43,12 +43,14 @@ div(class="popup-file")
   div(class="popup-file__item" @click="gotoMobile()")
     span(class="text-gray-3") Version: {{buildNumber}}
   template(v-if="isAdmin")
-    div(class="popup-file__item" @click="testSignup()")
-      span SignUp
-    div(class="popup-file__item" @click="testSubscribe()")
-      span Subscribe
-    div(class="popup-file__item" @click="testTrial()")
-      span StartTrial
+    div(class="popup-file__item" @click="addTwentyPage()")
+      span AddTwentyPage
+    div(class="popup-file__item" @click="clearAllPagesContent()")
+      span clearAllPagesContent
+    div(class="popup-file__item" @click="clearAllPages()")
+      span clearAllPages
+    div(class="popup-file__item" @click="duplicatePageTwentyTimes()")
+      span duplicatePageTwentyTimes
   //- div(class="popup-file__item" @click="uploadTmpJson()")
   //-   span Upload Temp.json
   //- div(class="popup-file__item" @click="getTmpJson()")
@@ -66,6 +68,7 @@ import fileUtils from '@/utils/fileUtils'
 import Avatar from '@/components/Avatar.vue'
 import stepsUtils from '@/utils/stepsUtils'
 import gtmUtils from '@/utils/gtmUtils'
+import page from '@/store/module/page'
 
 export default Vue.extend({
   components: {
@@ -159,6 +162,19 @@ export default Vue.extend({
     testSignup() {
       gtmUtils.signUp('Vivipic')
       // fbPixelUtils.signUp()
+    },
+    addTwentyPage() {
+      console.log('add twenty page')
+      pageUtils.addTwentyPages()
+    },
+    clearAllPagesContent() {
+      pageUtils.clearAllPagesContent()
+    },
+    clearAllPages() {
+      pageUtils.setPages([pageUtils.newPage({})])
+    },
+    duplicatePageTwentyTimes() {
+      pageUtils.duplicatePage1(20)
     },
     onLogoutClicked() {
       localStorage.setItem('token', '')

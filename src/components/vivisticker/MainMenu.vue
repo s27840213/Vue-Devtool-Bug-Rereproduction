@@ -15,6 +15,7 @@ import PanelBackground from '@/components/vivisticker/PanelBackground.vue'
 import PanelText from '@/components/vivisticker/PanelText.vue'
 
 import { mapGetters } from 'vuex'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   name: 'main-menu',
@@ -27,6 +28,11 @@ export default Vue.extend({
     ...mapGetters({
       currActiveTab: 'vivisticker/getCurrActiveTab'
     })
+  },
+  watch: {
+    currActiveTab(newVal) {
+      vivistickerUtils.setState('recentPanel', { value: newVal })
+    }
   },
   methods: {
     handleOpenColorPicker() {

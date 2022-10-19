@@ -1,3 +1,5 @@
+import { RawImage } from '@/interfaces/gallery'
+
 /* eslint-disable camelcase */
 export interface IPhotoTag {
   title: string
@@ -132,9 +134,9 @@ export interface IGroupDesignInputParams {
 
 export interface IListServiceContentDataItem {
   id: string
-  type: number,
+  type: number
   ver: number
-  db?: 'svg' | 'text',
+  db?: 'svg' | 'text'
   width?: number
   height?: number
   title?: string
@@ -147,6 +149,20 @@ export interface IListServiceContentDataItem {
   asset_id?: string,
   src?: string,
   valid?: number
+}
+
+export interface ICategoryItem {
+  id: string
+  title?: string
+  size: number
+  type: string
+  list: IListServiceContentDataItem[]
+  sentinel?: boolean
+}
+export interface ICategoryList {
+  key: string
+  show: boolean
+  content: ICategoryItem[]
 }
 
 export interface IListServiceContentData {
@@ -421,6 +437,7 @@ export interface IAssetTemplate {
     theme_id: string
   }
   group_type: number
+  preview: RawImage
 }
 
 export interface IFbTrackingData {

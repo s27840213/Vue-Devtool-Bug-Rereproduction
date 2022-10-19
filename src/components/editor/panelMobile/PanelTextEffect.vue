@@ -52,7 +52,7 @@
           class="panel-text-effect__color")
           div {{option.label}}
           div(class="panel-text-effect__color-slip"
-              :style="{ backgroundColor: currentStyle[currCategory.name][option.key] }"
+              :style="colorParser(currentStyle[currCategory.name][option.key])"
               @click="openColorPanel(option.key)")
       span(class="panel-text-effect__reset label-mid"
           @click="resetTextEffect()") {{$t('NN0754')}}
@@ -189,6 +189,9 @@ export default Vue.extend({
       if (this.currCategory.name === 'shape') {
         this.setEffect({ effect: { focus } })
       }
+    },
+    colorParser(color: string) {
+      return { backgroundColor: textEffectUtils.colorParser(color, textEffectUtils.getCurrentLayer()) }
     }
   }
 })
@@ -283,6 +286,7 @@ export default Vue.extend({
   }
 
   &__color {
+    @include body-SM;
     flex: 1;
     display: flex;
     justify-content: space-between;

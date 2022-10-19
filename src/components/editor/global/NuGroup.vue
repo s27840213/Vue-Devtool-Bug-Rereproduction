@@ -6,6 +6,7 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
+      :contentScaleRatio="contentScaleRatio"
       :config="layer"
       :inGroup="true")
 </template>
@@ -17,13 +18,19 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
+        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        transform: `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: 'top left'
       }
     }
   }

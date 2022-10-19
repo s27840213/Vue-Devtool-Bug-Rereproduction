@@ -15,9 +15,12 @@
       vivisticker="white"
       @search="handleSearch")
     div(v-if="emptyResultMessage" class="text-gray-3") {{ emptyResultMessage }}
-    font-tag(v-if="!hasSearch" @search="handleSearch")
-    category-list(:list="list"
-      @loadMore="handleLoadMore")
+    font-tag(v-if="!keyword" :tags="tags"
+            @search="handleSearch" @showMore="setShowMore")
+    //- Search result and main content
+    category-list(v-for="item in categoryListArray"
+                  v-show="item.show" :ref="item.key" :key="item.key"
+                  :list="item.content" @loadMore="handleLoadMore")
       template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
@@ -27,9 +30,6 @@
         div(class="panel-fonts__category-title") {{ title }}
       template(v-slot:category-font-item="{ list }")
         category-font-item(v-for="item in list"
-          :host="host"
-          :preview="preview"
-          :preview2="preview2"
           :item="item"
           :textStyleType="textStyleType")
 </template>
@@ -44,12 +44,11 @@ import TextUtils from '@/utils/textUtils'
 import CategoryFontItem from '@/components/category/CategoryFontItem.vue'
 import CategoryListFont from '@/components/category/CategoryListFont.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { IListServiceContentData, IListServiceContentDataItem, ICategoryItem, ICategoryList } from '@/interfaces/api'
 import uploadUtils from '@/utils/uploadUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
-import FontTag from '@/components/font/FontTag.vue'
-import vivistickerUtils from '@/utils/vivistickerUtils'
+import FontTag from '@/components/global/Tags.vue'
 
 export default Vue.extend({
   components: {
@@ -68,27 +67,28 @@ export default Vue.extend({
   },
   data() {
     return {
-      FileUtils,
-      hasSearch: false
+      FileUtils
     }
   },
   mounted() {
     this.getRecently({ key: 'font' })
+    if (this.tags.length === 0) {
+      this.addFontTags()
+    }
   },
   destroyed() {
     this.setShowMore(false)
     TextUtils.setCurrTextInfo({ layerIndex: -1 })
   },
   computed: {
-    ...mapState('font', [
-      'categories',
-      'content',
-      'pending',
-      'host',
-      'preview',
-      'preview2',
-      'keyword'
-    ]),
+    ...mapState('font', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      pending: 'pending',
+      keyword: 'keyword'
+    }),
+    ...mapState('fontTag', ['tags']),
     ...mapState('text', ['sel', 'props', 'fontPreset']),
     ...mapGetters('font', ['hasNextPage']),
     ...mapGetters('user', {
@@ -106,37 +106,10 @@ export default Vue.extend({
     isMobile(): boolean {
       return generalUtils.isTouchDevice()
     },
-    listResult(): any[] {
-      const { hasNextPage, keyword } = this
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      if (!keyword) return []
-      const result = new Array(list.length)
-        .fill('')
-        .map((_, idx) => {
-          const rowItems = list.slice(idx, idx + 1)
-          return {
-            id: `${rowItems.map(item => item.id).join('_')}`,
-            size: 32,
-            type: 'category-font-item',
-            list: rowItems.map(item => ({
-              ...item,
-              fontType: 'public',
-              userId: item.user_id,
-              assetId: item.src === 'admin' ? item.asset_id : item.asset_index?.toString()
-            })),
-            sentinel: hasNextPage && idx === (list.length - 1)
-          }
-        })
-      if (result.length) {
-        result[result.length - 1].sentinel = hasNextPage
-      }
-      return result
-    },
-    listCategories(): any[] {
+    listCategories(): ICategoryItem[] {
       const { hasNextPage } = this
-      const { categories, keyword } = this
-      let result = [] as any[]
-      if (keyword) return result
+      const { categories } = this
+      let result = [] as ICategoryItem[]
       categories.forEach((category: IListServiceContentData) => {
         if (category.list.length) {
           result = result.concat([
@@ -157,7 +130,7 @@ export default Vue.extend({
                 assetId: font.src === 'admin' ? font.asset_id : font.asset_index?.toString()
               }]
             }))
-          ])
+          ] as ICategoryItem[])
         }
       })
       if (result.length) {
@@ -165,20 +138,57 @@ export default Vue.extend({
       }
       return result
     },
-    list(): any[] {
-      return this.listCategories.concat(this.listResult)
+    listResult(): ICategoryItem[] {
+      return this.processListResult(this.rawContent.list, false)
+    },
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list, true)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: this.hasNextPage })
+      }
+      return list
+    },
+    mainContent(): ICategoryItem[] {
+      const list = this.listCategories.concat(this.listResult)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: this.hasNextPage })
+      }
+      return list
+    },
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0353', 1) })}` : ''
+      const { keyword, pending } = this
+      if (pending || !keyword || this.searchResult.length > 0) return ''
+      return `${i18n.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.tc('NN0353', 1)
+        })}`
     }
   },
   methods: {
+    ...mapActions('fontTag', {
+      addFontTags: 'ADD_FONT_TAGS'
+    }),
+    ...mapMutations('fontTag', {
+      setShowMore: 'SET_SHOW_MORE'
+    }),
     ...mapActions('font', [
       'resetContent',
       'getTagContent',
       'getRecently',
       'getMoreContent',
-      'getMoreCategory'
+      'getMoreCategory',
+      'resetSearch'
     ]),
     ...mapMutations('fontTag', {
       setShowMore: 'SET_SHOW_MORE'
@@ -196,20 +206,36 @@ export default Vue.extend({
       keyword ? this.getMoreContent() : this.getMoreCategory()
     },
     handleSearch(keyword: string) {
+      this.resetSearch()
       if (keyword) {
-        this.hasSearch = true
         this.setShowMore(false)
-      } else {
-        this.hasSearch = false
+        this.getTagContent({ keyword })
       }
-      this.resetContent()
-      keyword ? this.getTagContent({ keyword }) : this.getRecently({ key: 'font' })
     },
     uploadFont() {
       uploadUtils.chooseAssets('font')
     },
     capitalize(str: string): string {
       return generalUtils.capitalize(str)
+    },
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      return new Array(list.length)
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx, idx + 1)
+          return {
+            id: `${rowItems.map(item => item.id).join('_')}`,
+            size: 32,
+            type: 'category-font-item',
+            list: rowItems.map(item => ({
+              ...item,
+              fontType: 'public',
+              userId: item.user_id,
+              assetId: item.src === 'admin' ? item.asset_id : item.asset_index?.toString()
+            })),
+            sentinel: false
+          }
+        })
     }
   }
 })

@@ -12,6 +12,7 @@ import cssConverter from '@/utils/cssConverter'
 import frameUtils from '@/utils/frameUtils'
 import layerUtils from '@/utils/layerUtils'
 import Vue from 'vue'
+import Svgpath from 'svgpath'
 
 export default Vue.extend({
   props: {
@@ -56,9 +57,10 @@ export default Vue.extend({
       switch (type) {
         case 'image':
           if (this.config.isFrame) {
-            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+            // clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${this.config.clipPath}')`
+            clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')`
           }
-          if (this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
+          if (!this.config.isImageFrame && this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
             width = `${width}px`
             height = `${height}px`
           } else {

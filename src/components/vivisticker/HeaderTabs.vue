@@ -20,6 +20,7 @@
                   :iconWidth="`${tab.width}px`"
                   :iconHeight="`${tab.height !== undefined ? tab.height : tab.width}px`"
                   :iconColor="tab.disabled ? 'gray-2' : 'white'")
+      div(v-if="isInMyDesign" class="header-bar__right-text" @click.stop.prevent="handleSelectDesign") {{ isInSelectionMode ? $t('NN0203') : $t('STK0007') }}
 </template>
 <script lang="ts">
 import editorUtils from '@/utils/editorUtils'
@@ -69,7 +70,9 @@ export default Vue.extend({
       isCurrentInCategory: 'vivisticker/getIsInCategory',
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
-      editorType: 'vivisticker/getEditorType'
+      editorType: 'vivisticker/getEditorType',
+      isInMyDesign: 'vivisticker/getIsInMyDesign',
+      isInSelectionMode: 'vivisticker/getIsInSelectionMode'
     }),
     isInCategory(): boolean {
       return this.isCurrentInCategory(this.currActiveTab)
@@ -78,7 +81,11 @@ export default Vue.extend({
       return imageUtils.isImgControl()
     },
     leftTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInMyDesign) {
+        return [
+          { icon: 'chevron-left', width: 24, action: this.leaveMyDesign }
+        ]
+      } else if (this.isInEditor) {
         return this.stepCount > 1 ? [
           { icon: 'undo', disabled: stepsUtils.isInFirstStep || this.isCropping, width: 24, action: shortcutUtils.undo },
           { icon: 'redo', disabled: stepsUtils.isInLastStep || this.isCropping, width: 24, action: shortcutUtils.redo }
@@ -110,7 +117,9 @@ export default Vue.extend({
       return ''
     },
     centerTitle(): string {
-      if (this.isInEditor) {
+      if (this.isInMyDesign) {
+        return `${this.$t('NN0080')}`
+      } else if (this.isInEditor) {
         return ''
       } else if (this.isInBgShare) {
         return `${this.$t('NN0214')}`
@@ -121,7 +130,9 @@ export default Vue.extend({
       }
     },
     rightTabs(): TabConfig[] {
-      if (this.isInEditor) {
+      if (this.isInMyDesign) {
+        return []
+      } else if (this.isInEditor) {
         return [
           { icon: 'bg', width: 24, action: this.handleSwitchBg },
           ...(this.editorType === 'text' ? [{ icon: 'trash', width: 24, action: shortcutUtils.del }] : []),
@@ -132,6 +143,7 @@ export default Vue.extend({
         return []
       } else {
         return [
+          // { icon: 'folder', width: 24, action: this.handleMyDesign },
           { icon: 'more', width: 24, action: this.handleMore }
         ]
       }
@@ -139,13 +151,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions({
-      resetObjects: 'objects/resetContent',
-      refetchObjects: 'objects/getRecAndCate',
-      resetBackgrounds: 'background/resetContent',
-      refetchBackgrounds: 'background/getRecAndCate',
-      resetTexts: 'textStock/resetContent',
-      refetchTexts: 'textStock/getRecAndCate',
-      refetchTextContent: 'textStock/getContent'
+      resetObjectsSearch: 'objects/resetSearch',
+      resetBackgroundsSearch: 'background/resetSearch',
+      resetTextsSearch: 'textStock/resetSearch'
     }),
     ...mapMutations({
       setIsInCategory: 'vivisticker/SET_isInCategory',
@@ -153,7 +161,10 @@ export default Vue.extend({
       setIsInBgShare: 'vivisticker/SET_isInBgShare',
       setShareItem: 'vivisticker/SET_shareItem',
       setShareColor: 'vivisticker/SET_shareColor',
-      switchBg: 'vivisticker/UPDATE_switchBg'
+      switchBg: 'vivisticker/UPDATE_switchBg',
+      setIsInMyDesign: 'vivisticker/SET_isInMyDesign',
+      setMyDesignTab: 'vivisticker/SET_myDesignTab',
+      setIsInSelectionMode: 'vivisticker/SET_isInSelectionMode'
     }),
     handleTabAction(action?: () => void) {
       if (action) {
@@ -165,17 +176,13 @@ export default Vue.extend({
       this.setShowAllRecently({ tab: this.currActiveTab, bool: false })
       switch (this.currActiveTab) {
         case 'object':
-          this.resetObjects()
-          this.refetchObjects('objects')
+          this.resetObjectsSearch()
           break
         case 'background':
-          this.resetBackgrounds()
-          this.refetchBackgrounds('background')
+          this.resetBackgroundsSearch()
           break
         case 'text':
-          this.resetTexts()
-          this.refetchTexts('textStock')
-          this.refetchTextContent()
+          this.resetTextsSearch()
       }
     },
     clearBgShare() {
@@ -211,6 +218,21 @@ export default Vue.extend({
           break
       }
       window.open(url, '_blank')
+    },
+    handleMyDesign() {
+      if (this.currActiveTab === 'background') {
+        this.setMyDesignTab('text')
+      } else {
+        this.setMyDesignTab(this.currActiveTab)
+      }
+      this.setIsInMyDesign(true)
+    },
+    leaveMyDesign() {
+      this.setIsInMyDesign(false)
+      this.setIsInSelectionMode(false)
+    },
+    handleSelectDesign() {
+      this.setIsInSelectionMode(!this.isInSelectionMode)
     }
   }
 })
@@ -266,6 +288,12 @@ export default Vue.extend({
     align-items: center;
     justify-content: center;
     gap: 12px;
+    &-text {
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 140%;
+    }
   }
 }
 </style>

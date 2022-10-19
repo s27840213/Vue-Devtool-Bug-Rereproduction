@@ -6,6 +6,8 @@ import generalUtils from '@/utils/generalUtils'
 import mathUtils from '@/utils/mathUtils'
 import localStorageUtils from '@/utils/localStorageUtils'
 import { ITextEffect } from '@/interfaces/format'
+import { lab2rgb, rgb2lab } from '@/utils/colorUtils'
+import _ from 'lodash'
 
 class Controller {
   private shadowScale = 0.2
@@ -24,40 +26,40 @@ class Controller {
         angle: 45,
         blur: 20,
         opacity: 60,
-        color: ''
+        color: 'fontColor'
       },
       lift: { // 模糊陰影
         spread: 50
       },
       hollow: { // 外框
         stroke: 17,
-        color: ''
+        color: 'fontColor'
       },
       splice: { // 外框分離
         distance: 50,
         angle: 45,
         stroke: 17,
-        color: ''
+        color: 'fontColor'
       },
       echo: { // 雙重陰影
         distance: 50,
         angle: 45,
-        color: ''
+        color: 'fontColor'
       },
-      funky3d: {
+      funky3d: { // 立體延伸
         distance: 3,
         distanceInverse: 0,
         angle: 45,
         opacity: 100,
-        color: '#F1D289'
+        color: 'fontColorL+-40/BC/00'
       },
-      bold3d: {
+      bold3d: { // 3D立體
         distance: 10,
         angle: 0,
         opacity: 100,
-        textStrokeColor: '#000000',
-        shadowStrokeColor: '#FDA830',
-        color: '#F1D289'
+        textStrokeColor: 'fontColorL+-40/BC/00',
+        shadowStrokeColor: 'fontColor',
+        color: 'fontColorL+-40/BC/00'
       }
     }
   }
@@ -131,6 +133,27 @@ class Controller {
     return `rgba(${hexList.map(x => parseInt(x, 16)).join(',')}, ${opacity})`
   }
 
+  colorParser(color: string, config: IText) {
+    const fontColor = this.getLayerMainColor(config.paragraphs)
+    const lab = rgb2lab(fontColor)
+    lab[0] = lab[0] <= 50 ? lab[0] + 40 : lab[0] - 40
+    const fontColorL40 = lab2rgb(lab)
+
+    switch (color) {
+      case 'fontColor':
+        return fontColor
+      case 'fontColorL+-40/BC/00':
+        if (fontColor === '#000000') return '#BCBCBC'
+        if (fontColor === '#FFFFFF') return '#000000'
+        return fontColorL40
+      case 'fontColorL+-40/F1D289':
+        if (['#000000', '#FFFFFF'].includes(fontColor)) return '#F1D289'
+        return fontColorL40
+      default:
+        return color
+    }
+  }
+
   funky3d(distance: number, distanceInverse: number, angle: number, color: string) {
     const shadow = []
     for (let d = -distanceInverse * 0.06; d < distance * 1.5; d += 0.5) {
@@ -140,8 +163,9 @@ class Controller {
     return { textShadow: shadow.join(',') }
   }
 
-  convertTextEffect(effect: any): Record<string, any> {
-    const { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, strokeColor, ver } = effect || {}
+  convertTextEffect(config: IText): Record<string, any> {
+    const effect = config.styles.textEffect as any
+    let { name, distance, angle, opacity, color, blur, spread, stroke, fontSize, ver } = effect || {}
     const unit = this.shadowScale * fontSize
     let strokeWidth = this.strokeScale * fontSize
     if (ver && ver === 'v1') {
@@ -153,6 +177,7 @@ class Controller {
     const effectSpreadBlur = spread * 1.6 * 0.01 * unit
     const effectOpacity = opacity * 0.01
     const effectStroke = Math.max(stroke, 0.1) * 0.01 + 0.1
+    color = this.colorParser(color, config)
     const colorWithOpacity = color ? this.convertColor2rgba(color, effectOpacity) : ''
 
     switch (name) {
@@ -176,7 +201,8 @@ class Controller {
           this.convertColor2rgba(color, 1),
           'transparent'
         )
-      case 'splice':
+      case 'splice': {
+        const strokeColor = this.colorParser('fontColor', config)
         return {
           ...CssConverter.convertTextShadow(
             effectShadowOffset * Math.cos(angle * Math.PI / 180),
@@ -190,6 +216,7 @@ class Controller {
             'transparent'
           )
         }
+      }
       case 'echo':
         return {
           textShadow: [0.5, 0.2]
@@ -230,57 +257,28 @@ class Controller {
     }
   }
 
-  updateTextEffect(pageIndex: number, layerIndex: number) {
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-    for (const idx in layers) {
-      const { type, styles: { textEffect }, paragraphs } = layers[idx] as IText
-      if (type === 'text') {
-        const mainColor = this.getLayerMainColor(paragraphs)
-        const mainFontSize = this.getLayerFontSize(paragraphs)
-        const effectName = (textEffect as any).name
-        if (effectName && effectName !== 'none') {
-          switch (effectName) {
-            case 'hollow':
-              Object.assign(textEffect, { color: mainColor })
-              break
-            case 'splice':
-              Object.assign(textEffect, { strokeColor: mainColor })
-              break
-          }
-          Object.assign(textEffect, { fontSize: mainFontSize })
-          store.commit('UPDATE_specLayerData', {
-            pageIndex,
-            layerIndex,
-            subLayerIndex: +idx,
-            styles: { textEffect }
-          })
-        }
-      }
-    }
-  }
+  // syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
+  //   if (textShadow.name === 'none') return
+  //   Object.assign(textShadow, { name: textShadow.name || effectName })
+  //   const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
+  //   const newShareAttrs = { }
+  //   const newEffect = { }
+  //   // if (['funky3d', 'bold3d'].includes(textShadow.name)) {
+  //   //   Object.assign(newShareAttrs, { color: textShadow.color })
+  //   //   Object.assign(newEffect, { color: shareAttrs.color })
+  //   // }
 
-  syncShareAttrs(textShadow: ITextEffect, effectName: string|null) {
-    if (textShadow.name === 'none') return
-    Object.assign(textShadow, { name: textShadow.name || effectName })
-    const shareAttrs = (localStorageUtils.get('textEffectSetting', 'textShadowShare') ?? {}) as Record<string, string>
-    const newShareAttrs = { }
-    const newEffect = { }
-    if (['funky3d', 'bold3d'].includes(textShadow.name)) {
-      Object.assign(newShareAttrs, { color: textShadow.color })
-      Object.assign(newEffect, { color: shareAttrs.color })
-    }
-
-    // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
-    if (!effectName) {
-      Object.assign(shareAttrs, newShareAttrs)
-      localStorageUtils.set('textEffectSetting', 'textShadowShare', shareAttrs)
-    } else {
-      const effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
-      Object.assign(effect, newEffect)
-      localStorageUtils.set('textEffectSetting', effectName, effect)
-    }
-  }
+  //   // If effectName is null, overwrite share attrs. Otherwise, read share attrs and set to effect.
+  //   if (!effectName) {
+  //     Object.assign(shareAttrs, newShareAttrs)
+  //     localStorageUtils.set('textEffectSetting', 'textShadowShare', shareAttrs)
+  //   } else {
+  //     let effect = (localStorageUtils.get('textEffectSetting', effectName) ?? {}) as Record<string, string>
+  //     Object.assign(effect, newEffect)
+  //     effect = _.omit(effect, ['color'])
+  //     localStorageUtils.set('textEffectSetting', effectName, effect)
+  //   }
+  // }
 
   setColorKey(key: string) {
     this.currColorKey = key
@@ -312,10 +310,11 @@ class Controller {
         if (layerTextEffect && (layerTextEffect as any).name === effect) {
           Object.assign(textEffect, layerTextEffect, attrs)
           localStorageUtils.set('textEffectSetting', effect, textEffect)
-          this.syncShareAttrs(textEffect, null)
+          // this.syncShareAttrs(textEffect, null)
         } else {
-          this.syncShareAttrs(textEffect, effect)
-          const localAttrs = localStorageUtils.get('textEffectSetting', effect)
+          // this.syncShareAttrs(textEffect, effect)
+          let localAttrs = localStorageUtils.get('textEffectSetting', effect)
+          localAttrs = _.omit(localAttrs, ['color'])
           Object.assign(textEffect, defaultAttrs, localAttrs, attrs, { name: effect })
         }
         const mainColor = this.getLayerMainColor(paragraphs)
@@ -331,37 +330,6 @@ class Controller {
           subLayerIndex: +idx,
           styles: { textEffect }
         })
-      }
-    }
-  }
-
-  refreshColor() {
-    const { index: layerIndex, pageIndex } = store.getters.getCurrSelectedInfo
-    const targetLayer = store.getters.getLayer(pageIndex, layerIndex)
-    const layers = targetLayer.layers ? targetLayer.layers : [targetLayer]
-
-    for (const idx in layers) {
-      const { type, styles: { textEffect: layerTextEffect }, paragraphs } = layers[idx] as IText
-      const textEffect = generalUtils.deepCopy(layerTextEffect)
-      if (type === 'text') {
-        const mainColor = this.getLayerMainColor(paragraphs)
-        const effectName = textEffect.name
-        if (effectName && effectName !== 'none') {
-          switch (effectName) {
-            case 'hollow':
-              Object.assign(textEffect, { color: mainColor })
-              break
-            case 'splice':
-              Object.assign(textEffect, { strokeColor: mainColor })
-              break
-          }
-          store.commit('UPDATE_specLayerData', {
-            pageIndex,
-            layerIndex,
-            subLayerIndex: +idx,
-            styles: { textEffect }
-          })
-        }
       }
     }
   }

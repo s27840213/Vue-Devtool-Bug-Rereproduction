@@ -383,7 +383,9 @@ class LayerFactary {
           return [this.newByLayerType(l) as IShape | IText | IImage]
         })
     }
-    group.layers.forEach(l => l.type === LayerType.image && (l.parentLayerStyles = group.styles))
+    group.layers.forEach(l => {
+      l.type === LayerType.image && (l.parentLayerStyles = group.styles)
+    })
     return group
   }
 

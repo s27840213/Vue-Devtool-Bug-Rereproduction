@@ -101,6 +101,9 @@ export default Vue.extend({
     PanelPhotoShadow
   },
   computed: {
+    ...mapState('imgControl', {
+      imageControlConfig: 'image'
+    }),
     ...mapGetters({
       currFunctionPanelType: 'getCurrFunctionPanelType',
       currSelectedInfo: 'getCurrSelectedInfo',
@@ -174,7 +177,8 @@ export default Vue.extend({
       setPrevScrollPos: 'bgRemove/SET_prevScrollPos',
       setIsProcessing: 'bgRemove/SET_isProcessing',
       setIdInfo: 'bgRemove/SET_idInfo',
-      recudeBgrmRemain: 'payment/REDUCE_bgrmRemain'
+      recudeBgrmRemain: 'payment/REDUCE_bgrmRemain',
+      updateImgCtrlConfig: 'imgControl/UPDATE_CONFIG'
     }),
     ...mapActions({
       removeBg: 'user/removeBg'
@@ -351,6 +355,20 @@ export default Vue.extend({
     handleAdjust(adjust: any) {
       const { types } = this.currSelectedInfo
       const { index, type } = this.currSubSelectedInfo
+      const newAdjust = { ...adjust }
+      if (this.imageControlConfig) {
+        this.updateImgCtrlConfig({ adjust: newAdjust })
+      }
+
+      if (layerUtils.getCurrLayer.type === 'frame' && (layerUtils.getCurrLayer as IFrame).clips[0].isFrameImg) {
+        frameUtils.updateFrameLayerStyles(
+          pageUtils.currFocusPageIndex,
+          this.currSelectedIndex,
+          0,
+          { adjust: newAdjust }
+        )
+      }
+
       if (types.has('frame') || (types.has('group') && type === 'frame')) {
         if (types.has('frame')) {
           if (index >= 0) {
@@ -359,14 +377,14 @@ export default Vue.extend({
               pageUtils.currFocusPageIndex,
               this.currSelectedIndex,
               index,
-              { adjust: { ...adjust } }
+              { adjust: newAdjust }
             )
           } else {
             // case 2: one frame layer w/o selected clip, index = -1
             return frameUtils.updateFrameLayerAllClipsStyles(
               pageUtils.currFocusPageIndex,
               this.currSelectedIndex,
-              { adjust: { ...adjust } }
+              { adjust: newAdjust }
             )
           }
         }
@@ -375,7 +393,7 @@ export default Vue.extend({
           pageUtils.currFocusPageIndex,
           this.currSelectedIndex,
           index,
-          { adjust: { ...adjust } }
+          { adjust: newAdjust }
         )
       }
       if (types.has('image') || types.has('group')) {
@@ -384,7 +402,7 @@ export default Vue.extend({
         // case 6: one image in a group layer, layerIndex = group layer index, subLayerIndex = sublayer index
         // case 7: whole group of images, layerIndex = group layer index, subLayerIndex = undefined
         return imageAdjustUtil.setAdjust({
-          adjust: { ...adjust },
+          adjust: newAdjust,
           pageIndex: pageUtils.currFocusPageIndex,
           layerIndex: this.currSelectedIndex,
           subLayerIndex: index >= 0 ? index : undefined

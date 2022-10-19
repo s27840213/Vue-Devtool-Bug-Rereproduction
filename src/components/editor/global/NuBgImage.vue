@@ -68,7 +68,6 @@ export default Vue.extend({
   async created() {
     const { srcObj } = this
     if (!srcObj || !srcObj.type) return
-    console.log('in create hook')
 
     const { assetId } = this.image.config.srcObj
     if (srcObj.type === 'private') {

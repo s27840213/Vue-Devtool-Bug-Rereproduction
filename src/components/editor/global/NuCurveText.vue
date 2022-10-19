@@ -75,7 +75,7 @@ export default Vue.extend({
       scaleRatio: 'getPageScaleRatio'
     }),
     duplicatedSpan(): Record<string, string> {
-      const textShadow = textEffectUtils.convertTextEffect(this.config.styles.textEffect)
+      const textShadow = textEffectUtils.convertTextEffect(this.config)
       return this.isDuplicated ? {
         ...textShadow.duplicatedSpan
       } : {}

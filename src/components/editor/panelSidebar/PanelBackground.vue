@@ -1,35 +1,32 @@
 <template lang="pug">
   div(class="panel-bg")
     tabs(:tabs="[$tc('NN0002', 2),$t('NN0017')]" @switchTab="switchTab")
+    //- Search bar
     search-bar(v-if="showImageTab" class="mb-15"
       :placeholder="$t('NN0092', {target: $tc('NN0004',1)})"
       clear
       :defaultKeyword="keywordLabel"
       @search="handleSearch")
+    //- Default BG color
+    div(v-if="showColorTab" ref="colorBlock")
+      div(class="text-left py-5 text-white") {{$t('NN0017')}}
+      div(class="panel-bg__colors")
+        div(class="panel-bg__color"
+          @click="handleColorModal(currBackgroundColor)")
+        div(v-for="color in defaultBgColor"
+          class="panel-bg__color"
+          :style="colorStyles(color)"
+          @click="setBgColor(color)")
+        div(class="panel-bg__color"
+          @click="setBgColor('#ffffff00')")
+    //- Search result empty msg
     div(v-if="emptyResultMessage" class="text-white text-left") {{ emptyResultMessage }}
-    category-list(ref="list"
-      :list="list"
-      @loadMore="handleLoadMore")
-      template(v-if="pending" #after)
-        div(class="text-center")
-          svg-icon(iconName="loading"
-            iconColor="white"
-            iconWidth="20px")
-      template(v-slot:default-background-colors)
-        div(ref="colorBlock")
-          div(class="text-left py-5 text-white") {{$t('NN0017')}}
-          div(class="panel-bg__colors")
-            div(class="panel-bg__color"
-              @click="handleColorModal(currBackgroundColor)")
-            div(v-for="color in defaultBgColor"
-              class="panel-bg__color"
-              :style="colorStyles(color)"
-              @click="setBgColor(color)")
-            div(class="panel-bg__color"
-              @click="setBgColor('#ffffff00')")
+    //- Search result and main content
+    category-list(v-for="item in categoryListArray"
+                  v-show="item.show" :ref="item.key" :key="item.key"
+                  :list="item.content" @loadMore="handleLoadMore")
       template(v-slot:category-list-rows="{ list, title }")
         category-list-rows(
-          v-if="!keyword"
           :list="list"
           :title="title"
           @action="handleCategorySearch")
@@ -46,18 +43,23 @@
             :key="item.id"
             :item="item"
             :locked="currentPageBackgroundLocked")
+      template(v-if="pending" #after)
+        div(class="text-center")
+          svg-icon(iconName="loading"
+            iconColor="white"
+            iconWidth="20px")
+
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { mapActions, mapState, mapGetters, mapMutations } from 'vuex'
-import vClickOutside from 'v-click-outside'
 import SearchBar from '@/components/SearchBar.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryBackgroundItem from '@/components/category/CategoryBackgroundItem.vue'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import stepsUtils from '@/utils/stepsUtils'
 import colorUtils from '@/utils/colorUtils'
 import { ColorEventType, MobileColorPanelType } from '@/store/types'
@@ -65,6 +67,7 @@ import pageUtils from '@/utils/pageUtils'
 import i18n from '@/i18n'
 import generalUtils from '@/utils/generalUtils'
 import Tabs from '@/components/Tabs.vue'
+
 export default Vue.extend({
   components: {
     SearchBar,
@@ -74,30 +77,26 @@ export default Vue.extend({
     CategoryBackgroundItem,
     Tabs
   },
-  directives: {
-    clickOutside: vClickOutside.directive
-  },
   data() {
     return {
       openColorPicker: false,
-      scrollTop: 0,
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      },
       currActiveTabIndex: 0
     }
   },
   computed: {
-    ...mapState(
-      'background',
-      [
-        'categories',
-        'content',
-        'pending',
-        'host',
-        'preview',
-        'keyword'
-      ]
-    ),
     ...mapState({
       isMobile: 'isMobile'
+    }),
+    ...mapState('background', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      pending: 'pending',
+      keyword: 'keyword'
     }),
     ...mapGetters({
       getPage: 'getPage',
@@ -114,9 +113,7 @@ export default Vue.extend({
     currBackgroundColor(): string {
       return this.getBackgroundColor(pageUtils.currFocusPageIndex)
     },
-    defaultBackgroundColors(): any[] {
-      const { keyword } = this
-      if (keyword) { return [] }
+    defaultBackgroundColors(): Partial<ICategoryItem>[] {
       const key = 'default-background-colors'
       return [{
         id: key,
@@ -124,9 +121,8 @@ export default Vue.extend({
         size: generalUtils.isTouchDevice() ? window.innerWidth / 2 : 157
       }]
     },
-    listCategories(): any[] {
-      const { keyword, categories } = this
-      if (keyword) { return [] }
+    listCategories(): ICategoryItem[] {
+      const { categories } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
           size: this.itemWidth + 10 + 46,
@@ -136,40 +132,33 @@ export default Vue.extend({
           title: category.title
         }))
     },
-    listResult(): any[] {
-      const { keyword } = this
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 2))
-        .fill('')
-        .map((_, idx) => {
-          const rowItems = list.slice(idx * 2, idx * 2 + 2)
-          const title: string = !keyword && !idx ? `${this.$t('NN0340')}` : ''
-          return {
-            id: `result_${rowItems.map(item => item.id).join('_')}`,
-            type: 'category-background-item',
-            list: rowItems,
-            size: title ? (this.itemWidth + 10 + 46) : this.itemWidth + 10,
-            title
-          }
-        })
-      if (result.length) {
-        Object.assign(result[result.length - 1], { sentinel: true })
-      }
-      return result
+    listResult(): ICategoryItem[] {
+      return this.processListResult(this.rawContent.list, false)
     },
-    list(): any[] {
-      const list = generalUtils.deepCopy(
-        this.showImageTab ? this.listCategories
-          .concat(this.listResult) : this.defaultBackgroundColors
-      )
-      /**
-       * @NeedCodeReview with Nathan
-       */
-      if (this.listResult.length === 0 && list.length !== 0) {
-        list[list.length - 1].sentinel = true
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list, true)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
       }
-
       return list
+    },
+    mainContent(): ICategoryItem[] {
+      const list = generalUtils.deepCopy(this.listCategories.concat(this.listResult))
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword && this.showImageTab,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword && this.showImageTab,
+        key: 'mainContent'
+      }]
     },
     currentPageColor(): string {
       const { backgroundColor } = this.getPage(pageUtils.currFocusPageIndex) || {}
@@ -180,16 +169,17 @@ export default Vue.extend({
       return backgroundImage && backgroundImage.config.locked
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0004', 1) })}` : ''
+      const { keyword, pending } = this
+      if (pending || !keyword || this.rawSearchResult.list.length > 0) return ''
+      return `${i18n.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.tc('NN0004', 1)
+        })}`
     },
-    showImageTab(): boolean {
-      return this.currActiveTabIndex === 0
-    }
+    showImageTab(): boolean { return this.currActiveTabIndex === 0 },
+    showColorTab(): boolean { return this.currActiveTabIndex === 1 }
   },
-  async mounted() {
-    (this.$refs.list as Vue).$el.addEventListener('scroll', (event: Event) => {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
-    })
+  mounted() {
     colorUtils.on(ColorEventType.background, (color: string) => {
       this.setBgColor(color)
     })
@@ -201,12 +191,14 @@ export default Vue.extend({
       this.getRecAndCate)
   },
   activated() {
-    const el = (this.$refs.list as Vue).$el
-    el.scrollTop = this.scrollTop
-    el.addEventListener('scroll', this.handleScrollTop)
+    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
+    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
+    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   beforeDestroy() {
     colorUtils.event.off(ColorEventType.background, (color: string) => {
@@ -214,16 +206,23 @@ export default Vue.extend({
     })
     colorUtils.offStop(ColorEventType.background, this.recordChange)
   },
-  destroyed() {
-    this.resetContent()
+  watch: {
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+        })
+      }
+    }
   },
   methods: {
     ...mapActions('background', [
-      'resetContent',
       'getContent',
       'getTagContent',
       'getRecAndCate',
-      'getMoreContent'
+      'getMoreContent',
+      'resetSearch'
     ]),
     ...mapMutations({
       _setBgColor: 'SET_backgroundColor',
@@ -250,20 +249,16 @@ export default Vue.extend({
         this.setCloseMobilePanelFlag(true)
       }
     },
-    async handleSearch(keyword: string) {
-      this.resetContent()
+    handleSearch(keyword: string) {
+      this.resetSearch()
       if (keyword) {
         this.getTagContent({ keyword })
-      } else {
-        this.getRecAndCate()
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
-      this.resetContent()
+      this.resetSearch()
       if (keyword) {
         this.getContent({ keyword, locale })
-      } else {
-        this.getRecAndCate()
       }
     },
     handleLoadMore() {
@@ -278,14 +273,29 @@ export default Vue.extend({
       colorUtils.setCurrColor(color)
       this.$emit('toggleColorPanel', true)
     },
-    handleScrollTop(event: Event) {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     recordChange() {
       this.$nextTick(() => stepsUtils.record())
     },
     switchTab(tabIndex: number) {
       this.currActiveTabIndex = tabIndex
+    },
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      return new Array(Math.ceil(list.length / 2))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 2, idx * 2 + 2)
+          const title: string = !isSearch && !idx ? `${this.$t('NN0340')}` : ''
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-background-item',
+            list: rowItems,
+            size: title ? (this.itemWidth + 10 + 46) : this.itemWidth + 10,
+            title
+          }
+        })
     }
   }
 })

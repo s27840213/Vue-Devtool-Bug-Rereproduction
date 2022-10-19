@@ -19,7 +19,10 @@ interface IViviStickerState {
   showTutorial: boolean,
   recentlyBgColors: string[],
   newBgColor: string,
-  isDuringCopy: boolean
+  isDuringCopy: boolean,
+  isInMyDesign: boolean,
+  myDesignTab: string,
+  isInSelectionMode: boolean
 }
 
 const EDITOR_BGS = [
@@ -50,7 +53,10 @@ const getDefaultState = (): IViviStickerState => ({
   showTutorial: false,
   recentlyBgColors: [],
   newBgColor: '',
-  isDuringCopy: false
+  isDuringCopy: false,
+  isInMyDesign: false,
+  myDesignTab: 'text',
+  isInSelectionMode: false
 })
 
 const state = getDefaultState()
@@ -59,7 +65,7 @@ const getters: GetterTree<IViviStickerState, unknown> = {
     return state.currActiveTab
   },
   getIsInEditor(state: IViviStickerState): boolean {
-    return state.editorType !== 'none'
+    return state.editorType !== 'none' && !state.isInMyDesign
   },
   getIsInCategory(state: IViviStickerState): (tab: string) => boolean {
     return (tab: string): boolean => state.isInCategoryDict[tab] ?? false
@@ -102,6 +108,15 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   },
   getIsDuringCopy(state: IViviStickerState): boolean {
     return state.isDuringCopy
+  },
+  getIsInMyDesign(state: IViviStickerState): boolean {
+    return state.isInMyDesign
+  },
+  getMyDesignTab(state: IViviStickerState): string {
+    return state.myDesignTab
+  },
+  getIsInSelectionMode(state: IViviStickerState): boolean {
+    return state.isInSelectionMode
   }
 }
 
@@ -147,6 +162,15 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_isDuringCopy(state: IViviStickerState, isDuringCopy: boolean) {
     state.isDuringCopy = isDuringCopy
+  },
+  SET_isInMyDesign(state: IViviStickerState, isInMyDesign: boolean) {
+    state.isInMyDesign = isInMyDesign
+  },
+  SET_myDesignTab(state: IViviStickerState, myDesignTab: string) {
+    state.myDesignTab = myDesignTab
+  },
+  SET_isInSelectionMode(state: IViviStickerState, isInSelectionMode: boolean) {
+    state.isInSelectionMode = isInSelectionMode
   },
   UPDATE_addRecentlyBgColor(state: IViviStickerState, recentlyBgColor: string) {
     let recently = state.recentlyBgColors

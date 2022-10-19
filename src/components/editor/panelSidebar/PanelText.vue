@@ -33,9 +33,9 @@
             :style="getFontStyles(config.type.toLowerCase())"
             :type="`text-${config.type.toLowerCase()}`"
             @click.native="handleAddText(config)") {{ config.text }}
-    category-list(ref="list"
-      :list="list"
-      @loadMore="handleLoadMore")
+    category-list(v-for="item in categoryListArray"
+                  v-show="item.show" :ref="item.key" :key="item.key"
+                  :list="item.content" @loadMore="handleLoadMore")
       template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
@@ -72,7 +72,7 @@ import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import BrandSelector from '@/components/brandkit/BrandSelector.vue'
 import AssetUtils from '@/utils/assetUtils'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import DragUtils from '@/utils/dragUtils'
 import textUtils from '@/utils/textUtils'
 import { IBrand, IBrandTextStyle, IBrandTextStyleSetting } from '@/interfaces/brandkit'
@@ -91,7 +91,10 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      }
     }
   },
   computed: {
@@ -101,14 +104,13 @@ export default Vue.extend({
       isDefaultSelected: 'brandkit/getIsDefaultSelected',
       currentBrand: 'brandkit/getCurrentBrand'
     }),
-    ...mapState('textStock', [
-      'categories',
-      'content',
-      'pending',
-      'host',
-      'preview',
-      'keyword'
-    ]),
+    ...mapState('textStock', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      pending: 'pending',
+      keyword: 'keyword'
+    }),
     keywordLabel():string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
@@ -133,9 +135,8 @@ export default Vue.extend({
         text: this.$t('NN0013')
       }]
     },
-    listCategories(): any[] {
-      const { keyword, categories } = this
-      if (keyword) { return [] }
+    listCategories(): ICategoryItem[] {
+      const { categories } = this
       return (categories as IListServiceContentData[])
         .map((category, index) => ({
           size: 140,
@@ -148,33 +149,41 @@ export default Vue.extend({
     amountInRow():number {
       return generalUtils.isTouchDevice() ? 3 : 2
     },
-    listResult(): any[] {
-      const { keyword, amountInRow } = this
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / amountInRow))
-        .fill('')
-        .map((_, idx) => {
-          const rowItems = list.slice(idx * amountInRow, (idx + 1) * amountInRow)
-          const title = !keyword && !idx ? `${this.$t('NN0340')}` : ''
-          return {
-            id: `result_${rowItems.map(item => item.id).join('_')}`,
-            type: 'category-text-item',
-            list: rowItems,
-            title,
-            size: title ? (90 + 46) : 90
-          }
-        })
-      if (result.length) {
-        Object.assign(result[result.length - 1], { sentinel: true })
-      }
-      return result
+    listResult(): ICategoryItem[] {
+      return this.processListResult(this.rawContent.list, false)
     },
-    list(): any[] {
-      return this.listCategories
-        .concat(this.listResult)
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list, true)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    mainContent(): ICategoryItem[] {
+      const list = this.listCategories.concat(this.listResult)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
+      const { keyword, pending } = this
+      if (pending || !keyword || this.searchResult.length > 0) return ''
+      return `${i18n.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.tc('NN0005', 1)
+        })}`
     }
   },
   async mounted() {
@@ -188,34 +197,41 @@ export default Vue.extend({
       })
   },
   activated() {
-    const el = (this.$refs.list as Vue).$el
-    el.scrollTop = this.scrollTop
-    el.addEventListener('scroll', this.handleScrollTop)
+    this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+    this.$refs.searchResult[0].$el.scrollTop = this.scrollTop.searchResult
+    this.$refs.mainContent[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
-  },
-  destroyed() {
-    this.resetContent()
+    this.$refs.mainContent[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    this.$refs.searchResult[0].$el.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   watch: {
     currentBrand() {
       textUtils.loadDefaultFonts(this.extractFonts)
+    },
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          this.$refs.mainContent[0].$el.scrollTop = this.scrollTop.mainContent
+        })
+      }
     }
   },
   methods: {
     ...mapActions('textStock', [
-      'resetContent',
       'getContent',
       'getTagContent',
       'getRecAndCate',
-      'getMoreContent'
+      'getMoreContent',
+      'resetSearch'
     ]),
     ...mapMutations({
       setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
     getTextStyle(type: string): IBrandTextStyle {
-      return (this.textStyleSetting as any)[`${type}Style`]
+      return (this.textStyleSetting)[`${type}Style` as 'headingStyle'|'subheadingStyle'|'bodyStyle']
     },
     getFontStyles(type: string): { [key: string]: string } {
       const textStyle = this.getTextStyle(type)
@@ -229,22 +245,16 @@ export default Vue.extend({
       res.fontFamily = textStyle.isDefault ? brandkitUtils.getDefaultFontId(this.$i18n.locale) : textStyle.fontId
       return res
     },
-    async handleSearch(keyword: string) {
-      this.resetContent()
+    handleSearch(keyword: string) {
+      this.resetSearch()
       if (keyword) {
         this.getTagContent({ keyword })
-      } else {
-        this.getRecAndCate()
-        this.getContent()
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
-      this.resetContent()
+      this.resetSearch()
       if (keyword) {
         this.getContent({ keyword, locale })
-      } else {
-        this.getRecAndCate()
-        this.getContent()
       }
     },
     handleLoadMore() {
@@ -259,8 +269,8 @@ export default Vue.extend({
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
     },
-    handleScrollTop(event: Event) {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
     },
     standardTextDrag(e: DragEvent, config: { type: string, text: string }) {
       const { type: textType, text } = config
@@ -294,6 +304,22 @@ export default Vue.extend({
         }
       }
       return styles
+    },
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      const { amountInRow } = this
+      return new Array(Math.ceil(list.length / amountInRow))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * amountInRow, (idx + 1) * amountInRow)
+          const title = !isSearch && !idx ? `${this.$t('NN0340')}` : ''
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-text-item',
+            list: rowItems,
+            title,
+            size: title ? (90 + 46) : 90
+          }
+        })
     }
   }
 })

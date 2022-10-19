@@ -6,6 +6,7 @@
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
       :subLayerIndex="index"
+      :contentScaleRatio="contentScaleRatio"
       :config="layer"
       :style="subLayerStyles(layer)")
 </template>
@@ -21,7 +22,11 @@ export default Vue.extend({
   props: {
     config: Object,
     pageIndex: Number,
-    layerIndex: Number
+    layerIndex: Number,
+    contentScaleRatio: {
+      default: 1,
+      type: Number
+    }
   },
   created() {
     for (const [idx, layer] of (this.config as ITmp).layers.entries()) {
@@ -39,8 +44,10 @@ export default Vue.extend({
   methods: {
     styles() {
       return {
-        width: `${this.config.styles.initWidth}px`,
-        height: `${this.config.styles.initHeight}px`
+        width: `${this.config.styles.initWidth * this.contentScaleRatio}px`,
+        height: `${this.config.styles.initHeight * this.contentScaleRatio}px`,
+        transform: `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: 'top left'
       }
     },
     subLayerStyles(layer: ILayer) {

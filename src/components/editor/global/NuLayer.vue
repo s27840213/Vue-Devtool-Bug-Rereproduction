@@ -18,6 +18,7 @@
             :contentScaleRatio="contentScaleRatio"
             :pageIndex="pageIndex" :layerIndex="layerIndex" :subLayerIndex="subLayerIndex"
             :scaleRatio="scaleRatio"
+            :isPagePreview="isPagePreview"
             v-bind="$attrs")
     div(v-if="showSpinner()" class="nu-layer__inProcess")
       square-loading
@@ -32,7 +33,6 @@ import Vue, { PropType } from 'vue'
 import { LayerType } from '@/store/types'
 import CssConveter from '@/utils/cssConverter'
 import MouseUtils from '@/utils/mouseUtils'
-import MathUtils from '@/utils/mathUtils'
 import TextEffectUtils from '@/utils/textEffectUtils'
 import textBgUtils from '@/utils/textBgUtils'
 import layerUtils from '@/utils/layerUtils'
@@ -40,9 +40,6 @@ import SquareLoading from '@/components/global/SqureLoading.vue'
 import frameUtils from '@/utils/frameUtils'
 import { mapGetters } from 'vuex'
 import pageUtils from '@/utils/pageUtils'
-import { ICurrSelectedInfo } from '@/interfaces/editor'
-import { ILayerIdentifier } from '@/interfaces/layer'
-import { IUploadShadowImg } from '@/store/module/shadow'
 
 export default Vue.extend({
   components: {
@@ -58,13 +55,17 @@ export default Vue.extend({
       type: Boolean,
       default: false
     },
-    inFrame: {
+    isFrame: {
       type: Boolean,
       default: false
     },
     contentScaleRatio: {
       default: 1,
       type: Number
+    },
+    isPagePreview: {
+      default: false,
+      type: Boolean
     }
     /**
      * @Note Vuex Props
@@ -116,7 +117,7 @@ export default Vue.extend({
     },
     layerStyles(): any {
       const styles = Object.assign(
-        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.inFrame ? 1 : this.contentScaleRatio),
+        CssConveter.convertDefaultStyle(this.config.styles, this.inGroup || !this.hasSelectedLayer(), this.contentScaleRatio),
         {
           // 'pointer-events': imageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
           'pointer-events': 'none'
@@ -124,7 +125,7 @@ export default Vue.extend({
       )
       switch (this.config.type) {
         case LayerType.text: {
-          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+          const textEffectStyles = TextEffectUtils.convertTextEffect(this.config)
           const textBgStyles = textBgUtils.convertTextEffect(this.config.styles)
           Object.assign(
             styles,
@@ -181,12 +182,14 @@ export default Vue.extend({
       }
     },
     scaleStyles(): { [index: string]: string } {
+      const { zindex } = this.config.styles
       const { scale, scaleX, scaleY } = this.config.styles
       const { type } = this.config
       const isImgType = type === LayerType.image || (type === LayerType.frame && frameUtils.isImageFrame(this.config))
 
       const styles = {
-        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.inFrame ? 1 : this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`
+        transform: isImgType ? `scale(${this.pageScaleRatio()})` : `scale(${scale * (this.contentScaleRatio)}) scale(${this.compensationRatio()}) scaleX(${scaleX}) scaleY(${scaleY})`,
+        'transform-style': type === 'group' || this.config.isFrame ? 'flat' : (type === 'tmp' && zindex > 0) ? 'flat' : 'preserve-3d'
       }
       return styles
     }

@@ -35,12 +35,13 @@ import { IGroup, IParagraph, IText } from '@/interfaces/layer'
 import tiptapUtils from '@/utils/tiptapUtils'
 import brandkitUtils from '@/utils/brandkitUtils'
 import generalUtils from '@/utils/generalUtils'
+import vivistickerUtils from '@/utils/vivistickerUtils'
 
 export default Vue.extend({
   props: {
-    host: String,
-    preview: String,
-    preview2: String,
+    // host: String,
+    // preview: String,
+    // preview2: String,
     item: Object,
     textStyleType: String
   },
@@ -195,6 +196,8 @@ export default Vue.extend({
           ver: this.item.ver
         })
 
+        vivistickerUtils.setState('recentFont', updateItem)
+
         const currLayerIndex = layerUtils.getCurrPage.layers
           .findIndex(l => l.id === id)
         const config = subLayerIdx === -1 ? layerUtils.getLayer(layerUtils.pageIndex, currLayerIndex) as IText
@@ -267,10 +270,6 @@ export default Vue.extend({
 
         const currLayer = layerUtils.getCurrLayer
         if ((!currLayer.active || currLayer.id !== id || (currLayer.type === 'group' && !(currLayer as IGroup).layers[subLayerIdx].active))) {
-          // if (!sel) {
-          //   Object.assign(start, TextUtils.selectAll(config).start)
-          //   Object.assign(end, TextUtils.selectAll(config).end)
-          // }
           const newConfig = TextPropUtils.spanParagraphPropertyHandler('fontFamily', updateItem, start, end, config as IText)
           this.updateLayerProps(currLayerIndex, subLayerIdx, { paragraphs: newConfig.paragraphs })
           if (currLayer.active) {
@@ -310,7 +309,6 @@ export default Vue.extend({
             json: ''
           }
         }, 'font')
-        // StepsUtils.record()
         TextUtils.waitFontLoadingAndRecord(config.paragraphs, () => {
           const { pageIndex, layerIndex, subLayerIdx } = layerUtils.getLayerInfoById(pageId, id as string, subLayerId)
           if (layerIndex === -1) return console.log('the layer to update size doesn\'t exist anymore.')

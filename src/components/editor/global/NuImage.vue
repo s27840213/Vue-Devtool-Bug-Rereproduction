@@ -67,7 +67,7 @@ import NuAdjustImage from './NuAdjustImage.vue'
 import ImageUtils from '@/utils/imageUtils'
 import layerUtils from '@/utils/layerUtils'
 import frameUtils from '@/utils/frameUtils'
-import { IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, ILayerIdentifier } from '@/interfaces/layer'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import generalUtils from '@/utils/generalUtils'
 import { IShadowEffects, IShadowProps, ShadowEffectType } from '@/interfaces/imgShadow'
@@ -217,9 +217,9 @@ export default Vue.extend({
     getImgDimension(newVal, oldVal) {
       this.handleDimensionUpdate(newVal, oldVal)
     },
-    parentLayerDimension(newVal, oldVal) {
-      this.handleDimensionUpdate(newVal, oldVal)
-    },
+    // parentLayerDimension(newVal, oldVal) {
+    //   this.handleDimensionUpdate(newVal, oldVal)
+    // },
     'config.srcObj': {
       handler: function () {
         this.shadowBuff.canvasShadowImg = undefined
@@ -227,9 +227,9 @@ export default Vue.extend({
           return
         }
         this.previewAsLoading()
-        if (typeof this.subLayerIndex !== 'undefined') {
-          this.handleDimensionUpdate(this.parentLayerDimension, 0)
-        }
+        // if (typeof this.subLayerIndex !== 'undefined') {
+        //   this.handleDimensionUpdate(this.parentLayerDimension, 0)
+        // }
       },
       deep: true
     },
@@ -265,7 +265,14 @@ export default Vue.extend({
     },
     'config.imgControl'(val) {
       if (val) {
-        this.setImgConfig(this.layerInfo())
+        const { pageIndex, layerIndex, subLayerIdx } = this.layerInfo()
+        const isSubLayer = typeof subLayerIdx !== 'undefined' && subLayerIdx !== -1
+        const currLayer = layerUtils.getLayer(pageIndex, layerIndex)
+        const isInFrame = isSubLayer && currLayer.type === LayerType.frame && (currLayer as IFrame).clips[subLayerIdx || 0].type === LayerType.image
+        const isInGroup = isSubLayer && currLayer.type === LayerType.group && (currLayer as IGroup).layers[subLayerIdx || 0].type === LayerType.image
+        if ((!isSubLayer && currLayer.type === LayerType.image) || isInFrame || isInGroup) {
+          this.setImgConfig(this.layerInfo())
+        }
       } else {
         this.setImgConfig(undefined)
         this.handleDimensionUpdate()
@@ -352,7 +359,14 @@ export default Vue.extend({
     getImgDimension(): number {
       const { srcObj } = this.config
       const { imgWidth, imgHeight } = this.config.styles
-      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(imgWidth, imgHeight) * (this.scaleRatio / 100))
+      let renderW = imgWidth
+      let renderH = imgHeight
+      if (!this.forRender && (this.config.parentLayerStyles || this.primaryLayer)) {
+        const { scale } = this.config.parentLayerStyles || this.primaryLayer.styles
+        renderW *= scale
+        renderH *= scale
+      }
+      return ImageUtils.getSrcSize(srcObj, ImageUtils.getSignificantDimension(renderW, renderH) * (this.scaleRatio / 100))
     },
     parentLayerDimension(): number {
       const { width, height } = this.config.parentLayerStyles || {}
@@ -465,9 +479,10 @@ export default Vue.extend({
         })
       }
 
-      const scale = this.config.isFrameImg || this.forRender ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
-      const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      // const scale = (this.config.parentLayerStyles?.scale ?? 1)
+      // const { srcObj, styles: { imgWidth, imgHeight } } = this.config
+      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      const currSize = this.getImgDimension
       const src = ImageUtils.appendOriginQuery(ImageUtils.getSrc(this.config, currSize))
       return new Promise<void>((resolve, reject) => {
         ImageUtils.imgLoadHandler(src, () => {
@@ -493,8 +508,9 @@ export default Vue.extend({
     },
     handleDimensionUpdate(newVal = 0, oldVal = 0) {
       const { srcObj, styles: { imgWidth, imgHeight } } = this.config
-      const scale = this.config.isFrameImg ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
-      const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      // const scale = this.isInFrame() ? 1 : (this.config.parentLayerStyles?.scale ?? 1)
+      // const currSize = ImageUtils.getSrcSize(srcObj, Math.max(imgWidth, imgHeight) * (this.scaleRatio / 100) * scale)
+      const currSize = this.getImgDimension
       if (!this.isOnError && this.config.previewSrc === undefined) {
         const { type } = this.config.srcObj
         if (type === 'background') return
@@ -736,7 +752,6 @@ export default Vue.extend({
         layerInfo: layerInfo(),
         cb: () => {
           this.clearShadowSrc()
-          // console.log('finish', currentEffect)
         }
       }
       imageShadowUtils.drawingInit(canvas, img, this.config, params)
@@ -875,27 +890,20 @@ export default Vue.extend({
         layerIndex: this.layerIndex,
         subLayerIdx: this.subLayerIndex
       }
-      const { primaryLayer } = this
-      if (primaryLayer && primaryLayer.type === LayerType.frame && primaryLayer.decoration) {
-        layerInfo.subLayerIdx--
-      }
       return layerInfo
     },
     isInFrame(): boolean {
       return this.primaryLayerType() === 'frame'
     },
-    _contentScaleRatio(): number {
-      return this.config.isFrameImg || !this.isInFrame() || this.imgControl || this.forRender ? this.contentScaleRatio : 1
-    },
     scaledConfig(): { [index: string]: string | number } {
       const { width, height, imgWidth, imgHeight, imgX, imgY } = this.config.styles as IImageStyle
       return {
-        width: width * this._contentScaleRatio(),
-        height: height * this._contentScaleRatio(),
-        imgWidth: imgWidth * this._contentScaleRatio(),
-        imgHeight: imgHeight * this._contentScaleRatio(),
-        imgX: imgX * this._contentScaleRatio(),
-        imgY: imgY * this._contentScaleRatio()
+        width: width * this.contentScaleRatio,
+        height: height * this.contentScaleRatio,
+        imgWidth: imgWidth * this.contentScaleRatio,
+        imgHeight: imgHeight * this.contentScaleRatio,
+        imgX: imgX * this.contentScaleRatio,
+        imgY: imgY * this.contentScaleRatio
       }
     },
     containerStyles(): any {
@@ -913,11 +921,11 @@ export default Vue.extend({
     },
     svgImageWidth(): number {
       const { imgWidth } = this.adjustImgStyles()
-      return imgWidth * this._contentScaleRatio()
+      return imgWidth * this.contentScaleRatio
     },
     svgImageHeight(): number {
       const { imgHeight } = this.adjustImgStyles()
-      return imgHeight * this._contentScaleRatio()
+      return imgHeight * this.contentScaleRatio
     },
     svgViewBox(): string {
       return `0 0 ${this.svgImageWidth()} ${this.svgImageHeight()}`
@@ -929,9 +937,9 @@ export default Vue.extend({
         return []
       }
       const position = {
-        width: width / 2 * this._contentScaleRatio(),
-        x: width / 2 * this._contentScaleRatio(),
-        y: height / 2 * this._contentScaleRatio()
+        width: width / 2 * this.contentScaleRatio,
+        x: width / 2 * this.contentScaleRatio,
+        y: height / 2 * this.contentScaleRatio
       }
       return imageAdjustUtil.getHalation(adjust.halation, position)
     },
@@ -964,8 +972,8 @@ export default Vue.extend({
       const { width, height } = this.shadowBuff.canvasSize
 
       return {
-        width: `${width * this._contentScaleRatio()}px`,
-        height: `${height * this._contentScaleRatio()}px`,
+        width: `${width * this.contentScaleRatio}px`,
+        height: `${height * this.contentScaleRatio}px`,
         // transform: `scale(${scale})`
         transform: `scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
@@ -1004,11 +1012,11 @@ export default Vue.extend({
       }
       const { imgWidth, imgHeight, imgX, imgY } = this.shadow().styles
       const { scale, horizontalFlip, verticalFlip } = this.config.styles
-      const xFactor = (horizontalFlip ? -1 : 1) * this._contentScaleRatio()
-      const yFactor = (verticalFlip ? -1 : 1) * this._contentScaleRatio()
+      const xFactor = (horizontalFlip ? -1 : 1) * this.contentScaleRatio
+      const yFactor = (verticalFlip ? -1 : 1) * this.contentScaleRatio
       return {
-        width: (imgWidth * this._contentScaleRatio()).toString() + 'px',
-        height: (imgHeight * this._contentScaleRatio()).toString() + 'px',
+        width: (imgWidth * this.contentScaleRatio).toString() + 'px',
+        height: (imgHeight * this.contentScaleRatio).toString() + 'px',
         transform: `translate(${xFactor * imgX * scale}px, ${yFactor * imgY * scale}px) scaleX(${horizontalFlip ? -1 : 1}) scaleY(${verticalFlip ? -1 : 1}) scale(${scale})`
       }
     },

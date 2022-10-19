@@ -29,8 +29,6 @@ import pageUtils from '@/utils/pageUtils'
 import tiptapUtils from '@/utils/tiptapUtils'
 import shapeUtils from '@/utils/shapeUtils'
 import mappingUtils from '@/utils/mappingUtils'
-import backgroundUtils from '@/utils/backgroundUtils'
-import editorUtils from '@/utils/editorUtils'
 import i18n from '@/i18n'
 
 export default Vue.extend({
@@ -70,7 +68,8 @@ export default Vue.extend({
       InBgRemoveLastStep: 'bgRemove/inLastStep',
       isHandleShadow: 'shadow/isHandling',
       isInEditor: 'vivisticker/getIsInEditor',
-      editorType: 'vivisticker/getEditorType'
+      editorType: 'vivisticker/getEditorType',
+      isInMyDesign: 'vivisticker/getIsInMyDesign'
     }),
     backgroundLocked(): boolean {
       const { locked } = pageUtils.currFocusPage.backgroundImage.config
@@ -120,7 +119,7 @@ export default Vue.extend({
           }
         },
         { icon: 'effect', text: `${this.$t('NN0491')}`, panelType: 'text-effect' },
-        { icon: 'spacing', text: `${this.$t('NN0109')}`, panelType: 'font-spacing' },
+        { icon: 'spacing', text: `${this.$t('NN0755')}`, panelType: 'font-spacing' },
         { icon: 'text-format', text: `${this.$t('NN0498')}`, panelType: 'font-format' }
         // { icon: 'copy-style', text: `${this.$t('NN0035')}`, panelType: 'text',hidden: true }
       ]
@@ -469,6 +468,7 @@ export default Vue.extend({
       }
 
       if (tab.panelType !== undefined) {
+        if (this.isInMyDesign) return
         if (this.isInEditor) {
           this.$emit('switchTab', tab.panelType, tab.props)
         } else {
@@ -510,13 +510,13 @@ export default Vue.extend({
   overflow: hidden;
   background-color: setColor(black-1);
   &__container {
-    height: 53px;
+    height: 57px;
     overflow: scroll;
     display: grid;
     grid-template-rows: auto;
     grid-auto-flow: column;
-    grid-auto-columns: 65px;
-    column-gap: 20px;
+    grid-auto-columns: 62px;
+    // column-gap: 20px;
     background-color: setColor(black-1);
     padding: 0 12px;
     @include no-scrollbar;

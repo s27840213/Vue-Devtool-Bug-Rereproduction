@@ -16,9 +16,9 @@
           @click="handleAddText")
         span {{ $t('STK0001') }}
         svg-icon(iconName="plus-square" iconWidth="22px" iconColor="white")
-    category-list(ref="list"
-      :list="list"
-      @loadMore="handleLoadMore")
+    category-list(v-for="item in categoryListArray"
+      v-show="item.show" :ref="item.key" :key="item.key"
+      :list="item.content" @loadMore="handleLoadMore")
       template(v-if="pending" #after)
         div(class="text-center")
           svg-icon(iconName="loading"
@@ -52,11 +52,8 @@ import CategoryList from '@/components/category/CategoryList.vue'
 import CategoryListRows from '@/components/category/CategoryListRows.vue'
 import CategoryTextItem from '@/components/category/CategoryTextItem.vue'
 import AssetUtils from '@/utils/assetUtils'
-import { IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
-import DragUtils from '@/utils/dragUtils'
-import textUtils from '@/utils/textUtils'
+import { ICategoryItem, ICategoryList, IListServiceContentData, IListServiceContentDataItem } from '@/interfaces/api'
 import VueI18n from 'vue-i18n'
-import tiptapUtils from '@/utils/tiptapUtils'
 import generalUtils from '@/utils/generalUtils'
 import vivistickerUtils from '@/utils/vivistickerUtils'
 
@@ -69,7 +66,10 @@ export default Vue.extend({
   },
   data() {
     return {
-      scrollTop: 0
+      scrollTop: {
+        mainContent: 0,
+        searchResult: 0
+      }
     }
   },
   props: {
@@ -86,21 +86,20 @@ export default Vue.extend({
       isTabInCategory: 'vivisticker/getIsInCategory',
       isTabShowAllRecently: 'vivisticker/getShowAllRecently'
     }),
-    ...mapState('textStock', [
-      'categories',
-      'content',
-      'pending',
-      'host',
-      'preview',
-      'keyword'
-    ]),
+    ...mapState('textStock', {
+      categories: 'categories',
+      rawContent: 'content',
+      rawSearchResult: 'searchResult',
+      pending: 'pending',
+      keyword: 'keyword'
+    }),
     isInCategory(): boolean {
       return this.isTabInCategory('text')
     },
     showAllRecently(): boolean {
       return this.isTabShowAllRecently('text')
     },
-    keywordLabel():string {
+    keywordLabel(): string {
       return this.keyword ? this.keyword.replace('tag::', '') : this.keyword
     },
     listDefaultText(): { type: string, text: VueI18n.TranslateResult }[] {
@@ -115,9 +114,8 @@ export default Vue.extend({
         text: this.$t('NN0013')
       }]
     },
-    listCategories(): any[] {
-      const { keyword, categories } = this
-      if (keyword) { return [] }
+    listCategories(): ICategoryItem[] {
+      const { categories } = this
       return (categories as IListServiceContentData[])
         .filter(category => category.list.length > 0)
         .map((category, index) => ({
@@ -128,7 +126,7 @@ export default Vue.extend({
           title: category.title
         }))
     },
-    listRecently(): any[] {
+    listRecently(): ICategoryItem[] {
       const { categories } = this
       const list = (categories as IListServiceContentData[]).find(category => category.is_recent)?.list ?? []
       const result = new Array(Math.ceil(list.length / 3))
@@ -145,36 +143,44 @@ export default Vue.extend({
         })
       return result
     },
-    listResult(): any[] {
-      const { keyword } = this
-      const { list = [] } = this.content as { list: IListServiceContentDataItem[] }
-      const result = new Array(Math.ceil(list.length / 3))
-        .fill('')
-        .map((_, idx) => {
-          const rowItems = list.slice(idx * 3, idx * 3 + 3)
-          const title = !keyword && !idx ? `${this.$t('NN0340')}` : ''
-          return {
-            id: `result_${rowItems.map(item => item.id).join('_')}`,
-            type: 'category-text-item',
-            list: rowItems,
-            title,
-            size: title ? (90 + 46) : 90
-          }
-        })
-      if (result.length) {
-        Object.assign(result[result.length - 1], { sentinel: true })
-      }
-      return result
+    listResult(): ICategoryItem[] {
+      return this.processListResult(this.rawContent.list, false)
     },
-    list(): any[] {
+    searchResult(): ICategoryItem[] {
+      const list = this.processListResult(this.rawSearchResult.list, true)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    mainContent(): ICategoryItem[] {
       if (this.showAllRecently) {
         return this.listRecently
       }
-      return this.listCategories
-        .concat(this.listResult)
+      const list = this.listCategories.concat(this.listResult)
+      if (list.length !== 0) {
+        Object.assign(list[list.length - 1], { sentinel: true })
+      }
+      return list
+    },
+    categoryListArray(): ICategoryList[] {
+      return [{
+        content: this.searchResult,
+        show: this.keyword,
+        key: 'searchResult'
+      }, {
+        content: this.mainContent,
+        show: !this.keyword,
+        key: 'mainContent'
+      }]
     },
     emptyResultMessage(): string {
-      return this.keyword && !this.pending && !this.listResult.length && !this.showAllRecently ? `${i18n.t('NN0393', { keyword: this.keywordLabel, target: i18n.tc('NN0005', 1) })}` : ''
+      const { keyword, pending } = this
+      if (pending || !keyword || this.searchResult.length > 0 || this.showAllRecently) return ''
+      return `${i18n.t('NN0393', {
+          keyword: this.keywordLabel,
+          target: i18n.tc('NN0005', 1)
+        })}`
     }
   },
   mounted() {
@@ -188,56 +194,72 @@ export default Vue.extend({
       })
   },
   activated() {
-    const el = (this.$refs.list as Vue).$el
-    el.scrollTop = this.scrollTop
-    el.addEventListener('scroll', this.handleScrollTop)
+    const mainContent = (this.$refs.mainContent as Vue[])[0].$el
+    const searchResult = (this.$refs.searchResult as Vue[])[0].$el
+    mainContent.scrollTop = this.scrollTop.mainContent
+    searchResult.scrollTop = this.scrollTop.searchResult
+    mainContent.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.addEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
   },
   deactivated() {
-    (this.$refs.list as Vue).$el.removeEventListener('scroll', this.handleScrollTop)
+    const mainContent = (this.$refs.mainContent as Vue[])[0].$el
+    const searchResult = (this.$refs.searchResult as Vue[])[0].$el
+    mainContent.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'mainContent'))
+    searchResult.removeEventListener('scroll', (e: Event) => this.handleScrollTop(e, 'searchResult'))
+  },
+  watch: {
+    keyword(newVal: string) {
+      if (!newVal) {
+        this.$nextTick(() => {
+          const mainContent = (this.$refs.mainContent as Vue[])[0].$el
+          // Will recover scrollTop if do search => switch to other panel => switch back => cancel search.
+          mainContent.scrollTop = this.scrollTop.mainContent
+        })
+      }
+    }
   },
   methods: {
     ...mapActions('textStock', [
-      'resetContent',
       'getContent',
       'getTagContent',
       'getRecently',
       'getRecAndCate',
-      'getMoreContent'
+      'getMoreContent',
+      'resetSearch'
     ]),
     ...mapMutations({
       setSettingsOpen: 'brandkit/SET_isSettingsOpen'
     }),
-    async handleSearch(keyword: string) {
-      this.resetContent()
+    handleSearch(keyword: string) {
+      this.resetSearch()
       if (keyword) {
         this.getTagContent({ keyword })
-      } else {
-        this.getRecAndCate('textStock').then(() => { this.getContent() })
       }
     },
     handleCategorySearch(keyword: string, locale = '') {
-      this.resetContent()
+      this.resetSearch()
       if (keyword) {
         if (keyword === `${this.$t('NN0024')}`) {
-          this.getRecently({ key: 'textStock', keyword })
           vivistickerUtils.setShowAllRecently('text', true)
         } else {
           this.getContent({ keyword, locale })
         }
         vivistickerUtils.setIsInCategory('text', true)
-      } else {
-        vivistickerUtils.setShowAllRecently('text', false)
-        this.getRecAndCate('textStock').then(() => { this.getContent() })
       }
     },
     handleLoadMore() {
       this.getMoreContent()
     },
     async addStandardText() {
+      let recentFont
+      if (vivistickerUtils.checkVersion('1.5')) {
+        recentFont = await vivistickerUtils.getState('recentFont')
+      }
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
         size: 21,
         color: '#FFFFFF',
-        weight: 'normal'
+        weight: 'normal',
+        ...(recentFont ?? {})
       })
     },
     handleAddText() {
@@ -258,8 +280,23 @@ export default Vue.extend({
     localeFont() {
       return AssetUtils.getFontMap()[i18n.locale]
     },
-    handleScrollTop(event: Event) {
-      this.scrollTop = (event.target as HTMLElement).scrollTop
+    handleScrollTop(event: Event, key: 'mainContent'|'searchResult') {
+      this.scrollTop[key] = (event.target as HTMLElement).scrollTop
+    },
+    processListResult(list = [] as IListServiceContentDataItem[], isSearch: boolean): ICategoryItem[] {
+      return new Array(Math.ceil(list.length / 3))
+        .fill('')
+        .map((_, idx) => {
+          const rowItems = list.slice(idx * 3, (idx + 1) * 3)
+          const title = !isSearch && !idx ? `${this.$t('NN0340')}` : ''
+          return {
+            id: `result_${rowItems.map(item => item.id).join('_')}`,
+            type: 'category-text-item',
+            list: rowItems,
+            title,
+            size: title ? (90 + 46) : 90
+          }
+        })
     }
   }
 })

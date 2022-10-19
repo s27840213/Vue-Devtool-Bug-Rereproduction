@@ -55,7 +55,7 @@ import MouseUtils from '@/utils/mouseUtils'
 import CssConveter from '@/utils/cssConverter'
 import ControlUtils from '@/utils/controlUtils'
 import { ICoordinate } from '@/interfaces/frame'
-import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText } from '@/interfaces/layer'
+import { IFrame, IGroup, IImage, IImageStyle, IParagraph, IText, ITmp } from '@/interfaces/layer'
 import { IControlPoints } from '@/interfaces/controller'
 import MappingUtils from '@/utils/mappingUtils'
 import TextUtils from '@/utils/textUtils'
@@ -94,6 +94,10 @@ export default Vue.extend({
     isMoved: Boolean,
     contentScaleRatio: {
       default: 1,
+      type: Number
+    },
+    primaryLayerZindex: {
+      default: 0,
       type: Number
     }
   },
@@ -140,14 +144,14 @@ export default Vue.extend({
       body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
     }
 
-    if (this.type === LayerType.frame && (this.primaryLayer as IFrame).clips.length === 1 && this.config.srcObj.type === 'frame') {
-      window.requestAnimationFrame(() => {
-        const input = this.$refs.fileInput as HTMLInputElement
-        if (input) {
-          input.click()
-        }
-      })
-    }
+    // if (this.type === LayerType.frame && (this.primaryLayer as IFrame).clips.length === 1 && this.config.srcObj.type === 'frame') {
+    //   window.requestAnimationFrame(() => {
+    //     const input = this.$refs.fileInput as HTMLInputElement
+    //     if (input) {
+    //       input.click()
+    //     }
+    //   })
+    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -168,6 +172,9 @@ export default Vue.extend({
     },
     isTextEditing(): boolean {
       return !this.isControlling && this.isControllerShown
+    },
+    getPrimaryLayerSubLayerNum(): number {
+      return (this.primaryLayer as IGroup | ITmp).layers.length
     }
   },
   watch: {
@@ -479,12 +486,13 @@ export default Vue.extend({
     },
     styles() {
       const { isFrameImg } = this.config
+      const zindex = this.type === 'group' ? this.isControllerShown ? this.getPrimaryLayerSubLayerNum : this.primaryLayerZindex : this.config.styles.zindex
 
       return {
         ...this.sizeStyle(),
         'pointer-events': 'initial',
-        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${this.config.styles.zindex}px)`,
-        ...TextEffectUtils.convertTextEffect(this.config.styles.textEffect)
+        transform: `${this.type === 'frame' && !isFrameImg ? `scale(${1 / this.contentScaleRatio})` : ''} translateZ(${zindex}px)`,
+        ...TextEffectUtils.convertTextEffect(this.config)
       }
     },
     sizeStyle() {

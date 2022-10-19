@@ -9,8 +9,9 @@
       :key="`layer-${index}`"
       :pageIndex="pageIndex"
       :layerIndex="layerIndex"
-      :subLayerIndex="index"
-      :inFrame="true"
+      :isFrame="true"
+      :inImageFrame="inImageFrame()"
+      :subLayerIndex="Math.max(index - layerIdxOffset, 0)"
       :contentScaleRatio="contentScaleRatio"
       :primaryLayer="config"
       :config="layer")
@@ -134,6 +135,10 @@ export default Vue.extend({
       }
       return layers
     },
+    layerIdxOffset(): number {
+      const { config } = this
+      return config.decoration && config.decoration.svg && !config.clips[0].isFrameImg ? 1 : 0
+    },
     shadowWrapperStyles() {
       const shadow = this.config.styles.shadow
       if (shadow && shadow.srcObj?.type) {
@@ -154,9 +159,11 @@ export default Vue.extend({
     styles() {
       const isFrameImg = this.config.clips.length === 1 && this.config.clips[0].isFrameImg
       return {
-        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale}px`,
-        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale}px`,
-        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial'
+        width: isFrameImg ? '' : `${this.config.styles.width / this.config.styles.scale * this.contentScaleRatio}px`,
+        height: isFrameImg ? '' : `${this.config.styles.height / this.config.styles.scale * this.contentScaleRatio}px`,
+        pointerEvents: ImageUtils.isImgControl(this.pageIndex) ? 'none' : 'initial',
+        transform: isFrameImg ? '' : `scale(${1 / this.contentScaleRatio})`,
+        transformOrigin: isFrameImg ? '' : 'top left'
       }
     },
     shadowSrc() {
@@ -167,6 +174,9 @@ export default Vue.extend({
         return ImageUtils.getSrc(shadow.srcObj, ImageUtils.getSrcSize(shadow.srcObj, size))
       }
       return ''
+    },
+    inImageFrame() {
+      return this.config.clips.length === 1 && this.config.clips[0].isFrameImg
     }
   }
 })
