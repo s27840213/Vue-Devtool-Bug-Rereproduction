@@ -551,7 +551,7 @@ class ViviStickerUtils {
     return design
   }
 
-  async initWithTempDesign(tempDesign: ITempDesign) {
+  initWithTempDesign(tempDesign: ITempDesign) {
     const {
       pages,
       lastSelectedLayerIndex,
