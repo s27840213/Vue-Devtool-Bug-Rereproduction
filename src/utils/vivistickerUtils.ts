@@ -34,6 +34,20 @@ const MODULE_TYPE_MAPPING: {[key: string]: string} = {
   font: 'font'
 }
 
+const ROUTER_CALLBACKS = [
+  'loginResult',
+  'getStateResult'
+]
+
+const VVSTK_CALLBACKS = [
+  'updateInfoDone',
+  'listAssetResult',
+  'copyDone',
+  'thumbDone',
+  'setStateDone',
+  'addAssetDone'
+]
+
 class ViviStickerUtils {
   appLoadedSent = false
   loadingFlags = {} as { [key: string]: boolean }
@@ -52,6 +66,18 @@ class ViviStickerUtils {
 
   get isStandaloneMode(): boolean {
     return store.getters['vivisticker/getIsStandaloneMode']
+  }
+
+  registerRouterCallbacks() {
+    for (const callbackName of ROUTER_CALLBACKS) {
+      (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
+    }
+  }
+
+  registerVvstkCallbacks() {
+    for (const callbackName of VVSTK_CALLBACKS) {
+      (window as any)[callbackName] = (vivistickerUtils as any)[callbackName]
+    }
   }
 
   getDefaultUserInfo(): IUserInfo {
@@ -442,14 +468,30 @@ class ViviStickerUtils {
     return resList
   }
 
-  addAsset(key: string, asset: any) {
+  async addAsset(key: string, asset: any) {
     if (this.isStandaloneMode) return
-    this.sendToIOS('ADD_ASSET', { key, asset })
+    if (this.checkVersion('1.9')) {
+      await this.callIOSAsAPI('ADD_ASSET', { key, asset }, 'addAsset')
+    } else {
+      this.sendToIOS('ADD_ASSET', { key, asset })
+    }
   }
 
-  setState(key: string, value: any) {
+  addAssetDone() {
+    vivistickerUtils.handleCallback('addAsset')
+  }
+
+  async setState(key: string, value: any) {
     if (this.isStandaloneMode) return
-    this.sendToIOS('SET_STATE', { key, value })
+    if (this.checkVersion('1.9')) {
+      await this.callIOSAsAPI('SET_STATE', { key, value }, 'setState')
+    } else {
+      this.sendToIOS('SET_STATE', { key, value })
+    }
+  }
+
+  setStateDone() {
+    vivistickerUtils.handleCallback('setState')
   }
 
   async getState(key: string): Promise<any> {
