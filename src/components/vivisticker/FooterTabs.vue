@@ -91,11 +91,12 @@ export default Vue.extend({
     },
     photoTabs(): Array<IFooterTab> {
       return [
-        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame || this.isSvgImage },
+        // { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isInFrame || this.isSvgImage },
+        { icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace', hidden: this.isSvgImage },
         { icon: 'crop', text: `${this.$t('NN0036')}`, panelType: 'crop', hidden: this.isSvgImage },
         // { icon: 'set-as-frame', text: `${this.$t(this.isInFrame ? 'NN0098' : 'NN0706')}` },
         // { icon: 'removed-bg', text: `${this.$t('NN0043')}`, panelType: 'background', hidden: true },
-        // { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
+        { icon: 'adjust', text: `${this.$t('NN0042')}`, panelType: 'adjust' },
         // { icon: 'effect', text: `${this.$t('NN0429')}`, panelType: 'photo-shadow', hidden: this.isInFrame },
         ...this.genearlLayerTabs
         // ...this.genearlLayerTabs,
@@ -164,6 +165,15 @@ export default Vue.extend({
         { icon: 'sliders', text: `${this.$t('NN0042')}`, panelType: 'object-adjust', hidden: !this.showShapeAdjust }
       ]
     },
+    frameTabs(): Array<IFooterTab> {
+      const currLayer = layerUtils.getCurrLayer as IFrame
+      const showReplace = currLayer.clips.length === 1 || currLayer.clips.some(i => i.active)
+      const result = [] as Array<IFooterTab>
+      if (showReplace) {
+        result.push({ icon: 'replace', text: `${this.$t('NN0490')}`, panelType: 'replace' })
+      }
+      return result
+    },
     genearlLayerTabs(): Array<IFooterTab> {
       // return [
       //   { icon: this.isGroup ? 'ungroup' : 'group', text: this.isGroup ? `${this.$t('NN0212')}` : `${this.$t('NN0029')}`, disabled: !this.isGroup && this.selectedLayerNum === 1 },
@@ -203,6 +213,8 @@ export default Vue.extend({
         return [...this.fontTabs, ...this.genearlLayerTabs]
       } else if (this.showShapeSetting) {
         return this.objectTabs.concat(this.genearlLayerTabs)
+      } else if (this.showSingleFrameTabs) {
+        return [...this.frameTabs, ...this.genearlLayerTabs]
       } else if (this.showGeneralTabs) {
         return [...this.genearlLayerTabs]
       } else if (!this.isInEditor) {
@@ -286,10 +298,16 @@ export default Vue.extend({
       return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
         this.selectedLayerNum !== 0
     },
+    showSingleFrameTabs(): boolean {
+      return !this.inBgRemoveMode && !this.isFontsPanelOpened &&
+        this.selectedLayerNum !== 0 && layerUtils.getCurrLayer.type === LayerType.frame &&
+        (layerUtils.getCurrLayer as IFrame).clips.length === 1
+    },
     showShapeSetting(): boolean {
       const { getCurrConfig } = layerUtils
       const stateCondition = !this.inBgRemoveMode && !this.isFontsPanelOpened && !this.isLocked
-      const typeConditon = (this.targetIs('shape') && this.singleTargetType()) || getCurrConfig.type === LayerType.frame
+      const typeConditon = (this.targetIs('shape') && this.singleTargetType()) ||
+        (getCurrConfig.type === LayerType.frame && (getCurrConfig as IFrame).clips.length !== 1)
       return stateCondition && typeConditon
     },
     layerType(): { [key: string]: string } {
@@ -355,6 +373,12 @@ export default Vue.extend({
   },
   methods: {
     handleTabAction(tab: IFooterTab) {
+      if (tab.icon !== 'crop') {
+        if (this.isCropping) {
+          imageUtils.setImgControlDefault()
+        }
+      }
+
       switch (tab.icon) {
         case 'crop': {
           if (this.selectedLayerNum > 0) {
@@ -433,13 +457,13 @@ export default Vue.extend({
           }
           break
         }
+        case 'replace': {
+          const { layerIndex, subLayerIdx } = layerUtils
+          const fileInput = document.getElementById(`input-${layerIndex}-${Math.max(subLayerIdx, 0)}`) as HTMLInputElement
+          return fileInput.click()
+        }
         default: {
           break
-        }
-      }
-      if (tab.icon !== 'crop') {
-        if (this.isCropping) {
-          imageUtils.setImgControlDefault()
         }
       }
 

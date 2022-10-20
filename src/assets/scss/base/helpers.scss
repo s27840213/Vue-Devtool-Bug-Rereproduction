@@ -55,67 +55,52 @@
 
 // padding and margin
 $spacer: 5;
-
 @for $i from 1 through 24 {
     $space: ($spacer * $i);
-
     .mt-#{$space} {
         margin-top: $space*1px;
     }
-
     .mr-#{$space} {
         margin-right: $space*1px;
     }
-
     .ml-#{$space} {
         margin-left: $space*1px;
     }
-
     .mb-#{$space} {
         margin-bottom: $space*1px;
     }
-
     .mx-#{$space} {
         margin-left: $space*1px;
         margin-right: $space*1px;
     }
-
     .my-#{$space} {
         margin-top: $space*1px;
         margin-bottom: $space*1px;
     }
-
     .m-#{$space} {
         margin: $space*1px;
     }
-
     // padding
     .pt-#{$space} {
         padding-top: $space*1px;
     }
-
     .pr-#{$space} {
         padding-right: $space*1px;
     }
-
     .pl-#{$space} {
         padding-left: $space*1px;
     }
-
     .pb-#{$space} {
         padding-bottom: $space*1px;
     }
-
     .px-#{$space} {
         padding-left: $space*1px;
         padding-right: $space*1px;
     }
-
     .py-#{$space} {
         padding-top: $space*1px;
         padding-bottom: $space*1px;
     }
-
     .p-#{$space} {
         padding: $space*1px;
     }
@@ -216,4 +201,8 @@ $spacer: 5;
 .visible-hidden {
     pointer-events: none;
     visibility: hidden;
+}
+
+.d-none {
+    display: none;
 }

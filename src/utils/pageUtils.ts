@@ -117,8 +117,7 @@ class PageUtils {
         posY: -1
       },
       name: '',
-      layers: [
-      ],
+      layers: [],
       documentColors: [],
       designId: '',
       id: generalUtils.generateRandomString(8),

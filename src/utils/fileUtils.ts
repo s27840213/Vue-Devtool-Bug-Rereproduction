@@ -41,6 +41,40 @@ class FileUtils {
     inputNode.click()
     inputNode.addEventListener('change', callback, false)
   }
+
+  getFileImageByByte (file: File): Promise<Blob> {
+    return new Promise((resolve) => {
+      const fileReader = new FileReader()
+      fileReader.onloadend = function fileReaderLoaded (e): void {
+        let type = ''
+        const bytes = (new Uint8Array(e.target?.result as ArrayBuffer))
+        const header = bytes
+          .subarray(0, 4)
+          .reduce((prev, curr) => `${prev}${curr.toString(16)}`, '')
+
+        switch (header) {
+          case '89504e47':
+            type = 'png'
+            break
+          case '47494638':
+            type = 'gif'
+            break
+          case 'ffd8ffe0':
+          case 'ffd8ffe1':
+          case 'ffd8ffe2':
+          case 'ffd8ffe3':
+          case 'ffd8ffe8':
+            type = 'jpeg'
+            break
+          default:
+            type = 'unknown'
+            break
+        }
+        resolve(new Blob([bytes], { type: `image/${type}` }))
+      }
+      fileReader.readAsArrayBuffer(file)
+    })
+  }
 }
 
 function handleFileSelect(evt: any) {

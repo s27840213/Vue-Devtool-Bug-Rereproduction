@@ -457,6 +457,10 @@ export default Vue.extend({
       if (this.config.previewSrc) {
         return
       }
+      if (this.config.srcObj.type === 'local') {
+        this.src = this.config.srcObj.assetId
+        return
+      }
       let isPrimaryImgLoaded = false
       const urlId = ImageUtils.getImgIdentifier(this.config.srcObj)
       const panelPreviewSrc = this.config.panelPreviewSrc

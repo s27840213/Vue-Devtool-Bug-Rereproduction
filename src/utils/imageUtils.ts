@@ -16,13 +16,13 @@ import editorUtils from './editorUtils'
 
 const FORCE_UPDATE_VER = '&ver=20220719'
 class ImageUtils {
-  imgLoadHandler(src: string, cb: () => void, error?: () => void) {
+  imgLoadHandler(src: string, cb: (img: HTMLImageElement) => void, error?: () => void) {
     const image = new Image()
     image.src = src
     if (image.complete) {
-      cb()
+      cb(image)
     } else {
-      image.onload = cb
+      image.onload = () => cb(image)
       error && (image.onerror = error)
     }
   }
@@ -116,6 +116,8 @@ class ImageUtils {
         }
         return ''
       }
+      case 'local':
+        return assetId as string
       case 'svg':
         return `https://template.vivipic.com/svg/${assetId}/${size || 'full'}?origin=true` + FORCE_UPDATE_VER + (ver ? `&ver=${ver}` : '')
       default:

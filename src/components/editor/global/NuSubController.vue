@@ -39,6 +39,14 @@
                 @keydown.native.meta.shift.90.exact.stop.self
                 @update="handleTextChange"
                 @compositionend="handleTextCompositionEnd")
+        input(
+          type="file"
+          accept="image/jpeg, image/png"
+          ref="fileInput"
+          class="d-none"
+          :id="`input-${primaryLayerIndex}-${layerIndex}`"
+          :multiple="false"
+          @change="onImgFileChange")
 </template>
 <script lang="ts">
 import Vue from 'vue'
@@ -72,6 +80,7 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
+import fileUtils from '@/utils/fileUtils'
 
 export default Vue.extend({
   props: {
@@ -113,7 +122,11 @@ export default Vue.extend({
       },
       dragUtils: new DragUtils(this.primaryLayer.id, this.config.id),
       isPrimaryActive: false,
-      dblTapFlag: false
+      dblTapFlag: false,
+      initTranslate: {
+        x: -1,
+        y: -1
+      }
     }
   },
   mounted() {
@@ -130,6 +143,15 @@ export default Vue.extend({
     if (this.type === LayerType.frame && this.config.type === LayerType.image) {
       body.addEventListener(GeneralUtils.isTouchDevice() ? 'pointerenter' : 'mouseenter', this.onFrameMouseEnter)
     }
+
+    // if (this.type === LayerType.frame && (this.primaryLayer as IFrame).clips.length === 1 && this.config.srcObj.type === 'frame') {
+    //   window.requestAnimationFrame(() => {
+    //     const input = this.$refs.fileInput as HTMLInputElement
+    //     if (input) {
+    //       input.click()
+    //     }
+    //   })
+    // }
   },
   computed: {
     ...mapState('text', ['sel', 'props', 'currTextInfo']),
@@ -287,18 +309,21 @@ export default Vue.extend({
     onPointerdown(e: PointerEvent) {
       if (e.button !== 0) return
       const body = this.$refs.body as HTMLElement
-      // body.addEventListener('touchstart', this.disableTouchEvent)
+
+      this.initTranslate.x = this.primaryLayer.styles.x
+      this.initTranslate.y = this.primaryLayer.styles.y
+
       if (GeneralUtils.isTouchDevice()) {
         if (!this.dblTapFlag && this.isControllerShown && this.config.type === 'image') {
           const touchtime = Date.now()
-          const interval = 500
+          const interval = 300
           const doubleTap = (e: PointerEvent) => {
             e.preventDefault()
             if (Date.now() - touchtime < interval && !this.dblTapFlag) {
               /**
                * This is the dbl-click callback block
                */
-              if (this.config.type === LayerType.image) {
+              if (this.config.type === LayerType.image && this.config.srcObj.type !== 'frame') {
                 switch (this.type) {
                   case LayerType.group:
                     LayerUtils.updateLayerProps(this.pageIndex, this.primaryLayerIndex, { imgControl: true }, this.layerIndex)
@@ -366,9 +391,54 @@ export default Vue.extend({
           }
         }
       }
+      const posDiff = {
+        x: Math.abs(this.primaryLayer.styles.x - this.initTranslate.x),
+        y: Math.abs(this.primaryLayer.styles.y - this.initTranslate.y)
+      }
+      const hasActualMove = Math.round(posDiff.x) !== 0 || Math.round(posDiff.y) !== 0
+      if (this.type === LayerType.frame && this.config.active && this.config.srcObj.type === 'frame' && !hasActualMove) {
+        const input = this.$refs.fileInput as HTMLInputElement
+        if (input) {
+          input.click()
+        }
+      }
       eventUtils.removePointerEvent('pointerup', this.onMouseup)
       this.isControlling = false
       this.onClickEvent(e)
+    },
+    onImgFileChange(e: Event) {
+      const target = e.target as HTMLInputElement
+      const [file] = target.files || []
+      fileUtils.getFileImageByByte(file)
+        .then(imageBlob => {
+          const src = window.URL.createObjectURL(imageBlob)
+          imageUtils.imgLoadHandler(src, (img: HTMLImageElement) => {
+            const clips = GeneralUtils.deepCopy(this.primaryLayer.clips) as Array<IImage>
+            const clip = clips[this.layerIndex]
+            const imgData = {
+              srcObj: {
+                type: 'local',
+                userId: '',
+                assetId: src
+              },
+              styles: {
+                width: img.width,
+                height: img.height
+              }
+            }
+            const { imgWidth, imgHeight, imgX, imgY } = MouseUtils
+              // .clipperHandler(imgData as unknown as IImage, this.config.clipPath, this.config.styles).styles
+              .clipperHandler(imgData as IImage, clip.clipPath, clip.styles).styles
+
+            FrameUtils.updateFrameLayerStyles(this.pageIndex, this.primaryLayerIndex, this.layerIndex, {
+              imgWidth,
+              imgHeight,
+              imgX,
+              imgY
+            })
+            FrameUtils.updateFrameClipSrc(this.pageIndex, this.primaryLayerIndex, this.layerIndex, { ...imgData.srcObj })
+          })
+        })
     },
     positionStyles() {
       const { horizontalFlip, verticalFlip } = this.primaryLayer.styles
