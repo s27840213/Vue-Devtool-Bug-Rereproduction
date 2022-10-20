@@ -84,7 +84,8 @@ export default Vue.extend({
       getLayersNum: 'getLayersNum',
       isInEditor: 'vivisticker/getIsInEditor',
       isTabInCategory: 'vivisticker/getIsInCategory',
-      isTabShowAllRecently: 'vivisticker/getShowAllRecently'
+      isTabShowAllRecently: 'vivisticker/getShowAllRecently',
+      editorBg: 'vivisticker/getEditorBg'
     }),
     ...mapState('textStock', {
       categories: 'categories',
@@ -255,9 +256,10 @@ export default Vue.extend({
       if (vivistickerUtils.checkVersion('1.5')) {
         recentFont = await vivistickerUtils.getState('recentFont')
       }
+      const color = vivistickerUtils.getContrastColor(this.editorBg)
       await AssetUtils.addStandardText('body', `${this.$t('NN0494')}`, i18n.locale, undefined, undefined, {
         size: 21,
-        color: '#FFFFFF',
+        color,
         weight: 'normal',
         ...(recentFont ?? {})
       })

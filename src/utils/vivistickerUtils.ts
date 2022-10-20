@@ -568,6 +568,10 @@ class ViviStickerUtils {
       groupUtils.setBySelectedInfo(currSelectedInfo, pages)
     }))
   }
+
+  getContrastColor(editorBg: string) {
+    return editorBg === '#F4F5F7' ? '#000000' : '#FFFFFF'
+  }
 }
 
 const vivistickerUtils = new ViviStickerUtils()
