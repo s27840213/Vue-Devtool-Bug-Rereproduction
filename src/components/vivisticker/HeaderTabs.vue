@@ -71,6 +71,7 @@ export default Vue.extend({
       currActiveTab: 'vivisticker/getCurrActiveTab',
       isInBgShare: 'vivisticker/getIsInBgShare',
       editorType: 'vivisticker/getEditorType',
+      editorBg: 'vivisticker/getEditorBg',
       isInMyDesign: 'vivisticker/getIsInMyDesign',
       isInSelectionMode: 'vivisticker/getIsInSelectionMode'
     }),
@@ -192,6 +193,7 @@ export default Vue.extend({
     },
     handleSwitchBg() {
       this.switchBg()
+      vivistickerUtils.sendToIOS('UPDATE_USER_INFO', { editorBg: this.editorBg })
     },
     handleEndEditing() {
       vivistickerUtils.endEditing()

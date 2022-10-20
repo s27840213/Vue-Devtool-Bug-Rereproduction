@@ -123,6 +123,10 @@ const router = new VueRouter({
         const locale = userInfo.locale
         i18n.locale = locale
         localStorage.setItem('locale', locale)
+        const editorBg = userInfo.editorBg
+        if (editorBg) {
+          store.commit('vivisticker/SET_editorBg', editorBg)
+        }
         next()
         if ((window as any).__PRERENDER_INJECTED === undefined && router.currentRoute.params.locale) {
           // Delete locale in url, will be ignore by prerender.

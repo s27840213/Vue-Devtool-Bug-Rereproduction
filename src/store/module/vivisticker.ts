@@ -145,6 +145,12 @@ const mutations: MutationTree<IViviStickerState> = {
   SET_editorBgIndex(state: IViviStickerState, editorBgIndex: number) {
     state.editorBgIndex = editorBgIndex
   },
+  SET_editorBg(state: IViviStickerState, editorBg: string) {
+    const index = EDITOR_BGS.findIndex(bg => bg === editorBg)
+    if (index >= 0) {
+      state.editorBgIndex = index
+    }
+  },
   SET_editorType(state: IViviStickerState, editorType: string) {
     state.editorType = editorType
   },

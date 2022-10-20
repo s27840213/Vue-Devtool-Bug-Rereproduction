@@ -24,7 +24,8 @@ import themeUtils from './themeUtils'
 const STANDALONE_USER_INFO: IUserInfo = {
   appVer: '1.3',
   locale: 'us',
-  isFirstOpen: false
+  isFirstOpen: false,
+  editorBg: ''
 }
 
 const MODULE_TYPE_MAPPING: {[key: string]: string} = {
