@@ -158,7 +158,6 @@ export default Vue.extend({
       currSubColorEvent: '',
       innerTab: '',
       fitPage: _.debounce(() => {
-        this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
         this.$nextTick(() => {
           pageUtils.fitPage()
         })
@@ -516,7 +515,10 @@ export default Vue.extend({
   },
   mounted() {
     this.panelHeight = this.initHeightPx()
-    this.resizeObserver = new ResizeObserver(this.fitPage)
+    this.resizeObserver = new ResizeObserver(() => {
+      this.$emit('panelHeight', (this.$refs.panel as HTMLElement).clientHeight)
+      this.fitPage()
+    })
     this.resizeObserver.observe(this.$refs.panel as Element)
   },
   beforeDestroy() {
