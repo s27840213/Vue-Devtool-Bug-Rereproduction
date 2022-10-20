@@ -14,7 +14,7 @@ import editorUtils from './editorUtils'
 import imageUtils from './imageUtils'
 import layerUtils from './layerUtils'
 import textPropUtils from './textPropUtils'
-import { IUserInfo } from '@/interfaces/vivisticker'
+import { ITempDesign, IUserInfo } from '@/interfaces/vivisticker'
 import localeUtils from './localeUtils'
 import listApis from '@/apis/list'
 import { IListServiceContentDataItem } from '@/interfaces/api'
@@ -156,6 +156,13 @@ class ViviStickerUtils {
     }
   }
 
+  getFetchDesignInitiator(initiator: () => void): () => Promise<any> {
+    return async () => {
+      initiator()
+      return true
+    }
+  }
+
   getAssetCallback(asset: IAsset): (jsonData: any) => void {
     return (jsonData: any) => {
       if ([5, 11, 10].includes(asset.type)) {
@@ -168,6 +175,12 @@ class ViviStickerUtils {
       if (asset.type === 7) {
         textPropUtils.updateTextPropsState()
       }
+    }
+  }
+
+  getFetchDesignCallback(callback: () => void): (jsonData: any) => void {
+    return (jsonData: any) => {
+      callback()
     }
   }
 
@@ -185,10 +198,10 @@ class ViviStickerUtils {
       isAutoResizeNeeded: true
     })])
     initiator().then((jsonData?: any) => {
-      console.log(jsonData)
       if (jsonData) {
         stepsUtils.reset()
         store.commit('vivisticker/SET_editorType', editorType)
+        this.saveDesign()
         callback(jsonData)
       }
     })
@@ -198,6 +211,7 @@ class ViviStickerUtils {
     groupUtils.deselect()
     pageUtils.setPages()
     this.showController()
+    this.setState('tempDesign', { design: 'none' })
     store.commit('vivisticker/SET_editorType', 'none')
   }
 
@@ -440,7 +454,7 @@ class ViviStickerUtils {
   }
 
   async getState(key: string): Promise<any> {
-    return await this.callIOSAsAPI('GET_STATE', { key }, 'getState')
+    return await vivistickerUtils.callIOSAsAPI('GET_STATE', { key }, 'getState')
   }
 
   getStateResult(data: { key: string, value: string }) {
@@ -467,6 +481,50 @@ class ViviStickerUtils {
 
   copyDone() {
     vivistickerUtils.handleCallback('copy-editor')
+  }
+
+  saveDesign() {
+    const pages = pageUtils.getPages
+    const lastSelectedLayerIndex = store.getters.getLastSelectedLayerIndex
+    const currSelectedInfo = store.getters.getCurrSelectedInfo
+    const editorType = store.getters['vivisticker/getEditorType']
+    const controllerHidden = store.getters['vivisticker/getControllerHidden']
+    const design = {
+      pages,
+      lastSelectedLayerIndex,
+      currSelectedInfo,
+      editorType,
+      controllerHidden
+    } as ITempDesign
+    this.setState('tempDesign', { design: JSON.stringify(design) })
+  }
+
+  async fetchDesign(): Promise<ITempDesign | undefined> {
+    const designData = await this.getState('tempDesign')
+    let design = designData?.design
+    if (design && design !== 'none') {
+      design = JSON.parse(design)
+    } else {
+      design = undefined
+    }
+    return design
+  }
+
+  async initWithTempDesign(tempDesign: ITempDesign) {
+    const {
+      pages,
+      lastSelectedLayerIndex,
+      currSelectedInfo,
+      editorType,
+      controllerHidden
+    } = tempDesign
+    this.startEditing(editorType, this.getFetchDesignInitiator(() => {
+      store.commit('SET_pages', pages)
+      store.commit('vivisticker/SET_controllerHidden', controllerHidden)
+    }), this.getFetchDesignCallback(() => {
+      store.commit('SET_lastSelectedLayerIndex', lastSelectedLayerIndex)
+      groupUtils.setBySelectedInfo(currSelectedInfo, pages)
+    }))
   }
 }
 

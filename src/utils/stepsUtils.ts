@@ -7,7 +7,6 @@ import Vue from 'vue'
 import { FunctionPanelType } from '@/store/types'
 import pageUtils from './pageUtils'
 import popupUtils from './popupUtils'
-import uploadUtils from './uploadUtils'
 import { IPage } from '@/interfaces/page'
 import { IFrame, IGroup, IImage, ILayer, IShape, IText, ITmp } from '@/interfaces/layer'
 import shapeUtils from './shapeUtils'
@@ -15,6 +14,7 @@ import { IListServiceContentDataItem } from '@/interfaces/api'
 import assetUtils from './assetUtils'
 import layerFactary from './layerFactary'
 import textUtils from './textUtils'
+import vivistickerUtils from './vivistickerUtils'
 
 class StepsUtils {
   steps: Array<IStep>
@@ -247,9 +247,7 @@ class StepsUtils {
       this.steps.push({ pages, lastSelectedLayerIndex, currSelectedInfo })
       this.currStep = this.steps.length - 1
       // Don't upload the design when initialize the steps
-      if (uploadUtils.isLogin) {
-        uploadUtils.uploadDesign()
-      }
+      vivistickerUtils.saveDesign()
     }
   }
 
@@ -264,26 +262,7 @@ class StepsUtils {
     const pages = await this.fillDataForLayersInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
-    if (pages[pageIndex]) {
-      const selectedLayer = pages[pageIndex].layers[index]
-      if (selectedLayer) {
-        if (selectedLayer.type === 'tmp') {
-          layers = (selectedLayer as ITmp).layers
-        } else {
-          layers = [selectedLayer]
-        }
-      } else {
-        layers = []
-      }
-    } else {
-      layers = []
-    }
-    GroupUtils.set(pageIndex, index, layers)
-    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
-      pageUtils.scrollIntoPage(pageIndex)
-    }
+    GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
     if (this.currStep > 0) {
       Vue.nextTick(() => {
         if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
@@ -292,9 +271,7 @@ class StepsUtils {
       })
     }
 
-    if (uploadUtils.isLogin) {
-      uploadUtils.uploadDesign()
-    }
+    vivistickerUtils.saveDesign()
   }
 
   delayedRecord(key: string, interval = 300) {
@@ -318,35 +295,14 @@ class StepsUtils {
     const pages = await this.fillDataForLayersInPages(GeneralUtils.deepCopy(this.steps[this.currStep].pages))
     store.commit('SET_pages', pages)
     store.commit('SET_lastSelectedLayerIndex', this.steps[this.currStep].lastSelectedLayerIndex)
-    const { pageIndex, index } = this.steps[this.currStep].currSelectedInfo
-    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
-    if (pages[pageIndex]) {
-      const selectedLayer = pages[pageIndex].layers[index]
-      if (selectedLayer) {
-        if (selectedLayer.type === 'tmp') {
-          layers = (selectedLayer as ITmp).layers
-        } else {
-          layers = [selectedLayer]
-        }
-      } else {
-        layers = []
-      }
-    } else {
-      layers = []
-    }
-    GroupUtils.set(pageIndex, index, layers)
-    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
-      pageUtils.scrollIntoPage(pageIndex)
-    }
+    GroupUtils.setBySelectedInfo(this.steps[this.currStep].currSelectedInfo, pages)
     Vue.nextTick(() => {
       if (store.state.currFunctionPanelType === FunctionPanelType.textSetting) {
         TextPropUtils.updateTextPropsState()
       }
     })
 
-    if (uploadUtils.isLogin) {
-      uploadUtils.uploadDesign()
-    }
+    vivistickerUtils.saveDesign()
   }
 
   updateHead(pageIndex: number, layerIndex: number, props: any, subLayerIdx = -1) {

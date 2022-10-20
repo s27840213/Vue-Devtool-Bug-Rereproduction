@@ -52,6 +52,14 @@ const routes: Array<RouteConfig> = [
     component: ViviSticker,
     beforeEnter: async (to, from, next) => {
       try {
+        if (vivistickerUtils.checkVersion('1.5')) {
+          const recentPanel = await vivistickerUtils.getState('recentPanel')
+          vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
+          const tempDesign = await vivistickerUtils.fetchDesign()
+          if (tempDesign) {
+            vivistickerUtils.initWithTempDesign(tempDesign)
+          }
+        }
         next()
       } catch (error) {
         console.log(error)
@@ -113,10 +121,6 @@ const router = new VueRouter({
           vivistickerUtils.setDefaultLocale()
         }
         const userInfo = await vivistickerUtils.getUserInfo()
-        if (vivistickerUtils.checkVersion('1.5')) {
-          const recentPanel = await vivistickerUtils.getState('recentPanel')
-          vivistickerUtils.setCurrActiveTab(recentPanel?.value ?? 'object')
-        }
         const locale = userInfo.locale
         i18n.locale = locale
         localStorage.setItem('locale', locale)

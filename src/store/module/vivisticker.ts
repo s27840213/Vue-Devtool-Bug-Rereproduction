@@ -82,6 +82,9 @@ const getters: GetterTree<IViviStickerState, unknown> = {
   getShareColor(state: IViviStickerState): string {
     return state.shareColor
   },
+  getEditorBgIndex(state: IViviStickerState): number {
+    return state.editorBgIndex
+  },
   getEditorBg(state: IViviStickerState): string {
     return EDITOR_BGS[state.editorBgIndex] ?? EDITOR_BGS[0]
   },
@@ -138,6 +141,9 @@ const mutations: MutationTree<IViviStickerState> = {
   },
   SET_shareColor(state: IViviStickerState, shareColor: string) {
     state.shareColor = shareColor
+  },
+  SET_editorBgIndex(state: IViviStickerState, editorBgIndex: number) {
+    state.editorBgIndex = editorBgIndex
   },
   SET_editorType(state: IViviStickerState, editorType: string) {
     state.editorType = editorType

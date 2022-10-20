@@ -17,6 +17,7 @@ import { LayerType } from '@/store/types'
 import editorUtils from './editorUtils'
 import backgroundUtils from './backgroundUtils'
 import vivistickerUtils from './vivistickerUtils'
+import { IPage } from '@/interfaces/page'
 
 export function calcTmpProps(layers: Array<IShape | IText | IImage | IGroup>, scale = 1): ICalculatedGroupStyle {
   let minX = Number.MAX_SAFE_INTEGER
@@ -363,6 +364,29 @@ class GroupUtils {
       types: this.calcType(currSelectedLayers),
       id: LayerUtils.getLayer(currSelectedPageIndex, currSelectedIndex).id || ''
     })
+  }
+
+  setBySelectedInfo(currSelectedInfo: ICurrSelectedInfo, pages: IPage[]) {
+    const { pageIndex, index } = currSelectedInfo
+    let layers: (IShape | IText | IImage | IGroup | IFrame)[]
+    if (pages[pageIndex]) {
+      const selectedLayer = pages[pageIndex].layers[index]
+      if (selectedLayer) {
+        if (selectedLayer.type === 'tmp') {
+          layers = (selectedLayer as ITmp).layers
+        } else {
+          layers = [selectedLayer]
+        }
+      } else {
+        layers = []
+      }
+    } else {
+      layers = []
+    }
+    this.set(pageIndex, index, layers)
+    if (pageIndex >= 0 && pageIndex !== pageUtils.currFocusPageIndex) {
+      pageUtils.scrollIntoPage(pageIndex)
+    }
   }
 
   updateTmpIndex() {
