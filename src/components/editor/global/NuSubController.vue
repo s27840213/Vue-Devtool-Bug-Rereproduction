@@ -73,6 +73,7 @@ import { ShadowEffectType } from '@/interfaces/imgShadow'
 import i18n from '@/i18n'
 import imageShadowUtils from '@/utils/imageShadowUtils'
 import pageUtils from '@/utils/pageUtils'
+import SvgPath from 'svgpath'
 
 export default Vue.extend({
   props: {
@@ -401,10 +402,8 @@ export default Vue.extend({
     },
     wrapperStyles() {
       // const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-      let scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
-      if (this.type === 'frame') {
-        scale *= this.contentScaleRatio
-      }
+      const scale = LayerUtils.getLayer(this.pageIndex, this.primaryLayerIndex).styles.scale
+
       return {
         transformOrigin: '0px 0px',
         transform: `scale(${this.type === 'frame' && !FrameUtils.isImageFrame(this.primaryLayer) ? scale : 1})`,
@@ -416,7 +415,7 @@ export default Vue.extend({
           if (this.config.isFrameImg) {
             return { clipPath: `path("M0,0h${width}v${height}h${-width}z")` }
           } else {
-            return { clipPath: `path("${clipPath}")` }
+            return { clipPath: `path('${new SvgPath(clipPath).scale(this.contentScaleRatio).toString()}')` }
           }
         })())
       }

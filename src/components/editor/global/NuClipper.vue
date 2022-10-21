@@ -62,8 +62,8 @@ export default Vue.extend({
             clipPath = imgControl || !this.config.clipPath ? layerPath : `path('${new Svgpath(this.config.clipPath).scale(this.contentScaleRatio).toString()}')`
           }
           if (!this.config.isImageFrame && this.primaryLayer && (this.primaryLayer as IFrame).type === LayerType.frame) {
-            width = `${width}px`
-            height = `${height}px`
+            width = `${width * this.contentScaleRatio}px`
+            height = `${height * this.contentScaleRatio}px`
           } else {
             width = `${width * this.contentScaleRatio}px`
             height = `${height * this.contentScaleRatio}px`
